@@ -1,6 +1,6 @@
-!  
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !> Fortran module of Gnssro NBAM (NCEP's Bending Angle Method)
 !> nonlinear operator
 
@@ -19,7 +19,7 @@ module ufo_gnssro_bndnbam_mod
   use gnssro_mod_grids,  only : get_coordinate_value
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
-  use ufo_utils_mod, only: cmp_strings 
+  use ufo_utils_mod, only: cmp_strings
   use ufo_constants_mod, only: zero, half, one, two, three, five, six, grav, rd, rv_over_rd
 
   implicit none
@@ -38,7 +38,7 @@ module ufo_gnssro_bndnbam_mod
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndnbam_setup(self, f_conf)
 
-use fckit_configuration_module, only: fckit_configuration 
+use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_gnssro_BndNBAM), intent(inout) :: self
 type(fckit_configuration), intent(in)   :: f_conf
@@ -82,7 +82,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   real(kind_real),  allocatable           :: toss_max(:),  max_obstoss(:)
   integer                                 :: sr_hgt_idx
   real(kind_real)                         :: gradRef, obsImpH, obsHgt, maxHgt
-  integer,          allocatable           :: LayerIdx(:) 
+  integer,          allocatable           :: LayerIdx(:)
   integer  :: SRcheckHeight,  ModelsigLevelcheck, SRcloseLayers
 
   write(err_msg,*) myname, ": begin"
@@ -130,20 +130,20 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     call ufo_geovals_get_var(geovals, var_zi,    gph)       ! geopotential height
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
-    call ufo_geovals_get_var(geovals, var_zi,    gph)      
+    call ufo_geovals_get_var(geovals, var_zi,    gph)
     write(err_msg,*) myname,': vertlayer has to be mass of full, '//new_line('a')// &
                             '  will use full layer anyway'
     call fckit_log%info(err_msg)
   end if
 
   nlev  = t%nval   ! number of model mass levels
-  nlev1 = prs%nval ! number of model pressure/height levels 
+  nlev1 = prs%nval ! number of model pressure/height levels
 
-  allocate(gesP(nlev1,nlocs)) 
-  allocate(gesZ(nlev1,nlocs)) 
-  allocate(gesT(nlev,nlocs)) 
+  allocate(gesP(nlev1,nlocs))
+  allocate(gesZ(nlev1,nlocs))
+  allocate(gesT(nlev,nlocs))
   allocate(gesTv(nlev,nlocs))
-  allocate(gesQ(nlev,nlocs)) 
+  allocate(gesQ(nlev,nlocs))
   allocate(gesZs(nlocs))
 
 ! copy geovals to local background arrays
@@ -177,10 +177,10 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   end if
        gesZs(:) = zs%vals(1,:)
 
-! if background t and q are on mass layers, 
+! if background t and q are on mass layers,
 !    while p and z are on interface layers, take the mean of t and q
 !       -- NBAM manner
-  if ( nlev1 /= nlev ) then  
+  if ( nlev1 /= nlev ) then
      do k = nlev, 2, -1
         gesQ(k,:) = half* (gesQ(k,:) + gesQ(k-1,:))
         gesTv(k,:) = half* (gesTv(k,:) + gesTv(k-1,:))
@@ -244,7 +244,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 ! define new integration grids
   do igrd = 0, ngrd-1
      grids(igrd+1) = igrd * ds
-  end do 
+  end do
 
 ! bending angle forward model starts
   allocate(geomz(nlev))    ! geometric height
@@ -305,8 +305,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       wf=max(zero,min(wf,one))
       temperature(iobs)=gesTv(wi,iobs)*(one-wf)+gesTv(wi2,iobs)*wf
       if (trim(self%roconf%output_diags) .eq. "true") then
-         humidity(iobs)= gesQ(wi,iobs)*(one-wf)+gesQ(wi2,iobs)*wf 
-         temp          = gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf 
+         humidity(iobs)= gesQ(wi,iobs)*(one-wf)+gesQ(wi2,iobs)*wf
+         temp          = gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
          geop          = gesZ(wi,iobs)*(one-wf)+gesZ(wi2,iobs)*wf
          pressure(iobs)= gesP(wi,iobs)/exp(two*grav*(geop-gesZ(wi,iobs))/(rd*(temperature(iobs)+gesTv(wi,iobs))))
          call compute_refractivity(temp, humidity(iobs), pressure(iobs),   &
@@ -314,7 +314,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       end if
 
 !     (2) super-refaction
-!     (2.1) GSI style super refraction check 
+!     (2.1) GSI style super refraction check
       if(cmp_strings(self%roconf%super_ref_qc, "NBAM")) then
 
         if (obsHgt <= SRcheckHeight) then
@@ -338,12 +338,12 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
            end do kloop
 
 !          relax to close-to-SR conditions, and check if obs is inside model SR layer
-           
+
            if (self%roconf%sr_steps > 1                 &
               .and. obsValue(iobs) >= 0.03) then
                kloop2: do k = nlevCheck, 1, -1
                   gradRef = 1000.0 * (ref(k+1)-ref(k))/(radius(k+1)-radius(k))
-                  if (abs(gradRef) >= half*crit_gradRefr & 
+                  if (abs(gradRef) >= half*crit_gradRefr &
                      .and. super(iobs) == 0                   &
                      .and. toss_max(irec) <= obsImpP(iobs) ) then
                       toss_max(irec)= max(toss_max(irec),obsImpP(iobs))
@@ -352,8 +352,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                       exit kloop2
                   end if
               end do kloop2
- 
-           end if   ! end if(self%roconf%sr_steps > 1 
+
+           end if   ! end if(self%roconf%sr_steps > 1
         end if ! obsHgt <= SRcheckHeight
 
 !    ROPP style super refraction check
@@ -437,17 +437,17 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
      end do rec_loop2
   end if  ! self%roconf%sr_steps > 1
- 
+
   deallocate(obsLat)
   deallocate(obsImpP)
   deallocate(obsLocR)
   deallocate(obsGeoid)
-  deallocate(gesP) 
-  deallocate(gesZ) 
-  deallocate(gesT) 
-  deallocate(gesTv) 
+  deallocate(gesP)
+  deallocate(gesZ)
+  deallocate(gesT)
+  deallocate(gesTv)
   deallocate(gesQ)
-  deallocate(gesZs) 
+  deallocate(gesZs)
   deallocate(ref)
   deallocate(refIndex)
   deallocate(refXrad)
@@ -468,7 +468,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
 ! putting virtual temeprature at obs location to obs space for BackgroundCheck RONBAM
   call obsspace_put_db(obss, "MetaData", "virtual_temperature", temperature)
-! putting super refraction flag to obs space 
+! putting super refraction flag to obs space
   call obsspace_put_db(obss, "ObsDiag",   "superRefractionFlag", super_refraction_flag)
 ! saving obs vertical model layer postion for later
   call obsspace_put_db(obss, "ObsDiag",   "modelLayerIndex", LayerIdx)
