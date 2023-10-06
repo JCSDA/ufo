@@ -8,6 +8,7 @@
 module ufo_oasim_mod
 
  use oasim_mod, only: oasim
+ use oasim_constants_mod, only: nlt
 
  use fckit_configuration_module, only: fckit_configuration
  use iso_c_binding
@@ -85,7 +86,7 @@ implicit none
     character(max_string) :: err_msg
 
     logical :: is_midnight 
-    integer :: km, day_of_year, nlt
+    integer :: km, day_of_year
     real(kind_real) :: dt
     type(ufo_geoval), pointer :: slp, wspd, ozone, wvapor, rh, cov, cldtau, clwp, cldre
     type(ufo_geoval), pointer :: ta_in, wa_in, asym, dh, cdet, pic, cdc, diatom, chloro, cyano
@@ -145,7 +146,6 @@ implicit none
     ! To Do change this part later to read form obs file
     is_midnight = .FALSE.
     km = 1  
-    nlt = size(ta_in%vals,dim=1) 
     day_of_year = 90
     cosz = cos(Solar_Z * pi/180)
     dt = 86400/2.0
@@ -154,6 +154,13 @@ implicit none
     allocate(cdomabsq(obss_nlocs,km))
     allocate(avgq(obss_nlocs,km))
     allocate(rlwnref(obss_nlocs,nvars))
+    
+    ! check if the aerosol variables are not 2D turn them to 2D, (nlt=33 bands (number of bands in oasim), nobs)
+    if (size(asym%vals,dim=1) == 1) then
+       asym%vals= reshape(spread(asym%vals,2,nlt),[nlt,obss_nlocs])
+       wa_in%vals=reshape(spread(wa_in%vals,2,nlt),[nlt,obss_nlocs])
+       ta_in%vals=reshape(spread(ta_in%vals,2,nlt),[nlt,obss_nlocs])
+    endif
 
     do iobs = 1, obss_nlocs
        ! check if the ocean thickness is positive (valid)
