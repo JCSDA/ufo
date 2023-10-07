@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_GNSSRO_QC_ACTIONS_ROOBSERRINFLATIONGEOSTMP_H_
-#define UFO_OPERATORS_GNSSRO_QC_ACTIONS_ROOBSERRINFLATIONGEOSTMP_H_
+#ifndef UFO_OPERATORS_GNSSRO_QC_ACTIONS_ROOBSERRINFLATIONGEOS_H_
+#define UFO_OPERATORS_GNSSRO_QC_ACTIONS_ROOBSERRINFLATIONGEOS_H_
 
 #include <string>
 #include <vector>
@@ -20,22 +20,22 @@ class ObsFilterData;
 
 // -----------------------------------------------------------------------------
 
-class ROobserrInflationGEOStmpParameters : public FilterActionParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ROobserrInflationGEOStmpParameters, FilterActionParametersBase);
+class ROobserrInflationGEOSParameters : public FilterActionParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ROobserrInflationGEOSParameters, FilterActionParametersBase);
 
   // No extra parameters needed
 };
 
 // -----------------------------------------------------------------------------
 
-class ROobserrInflationGEOStmp : public FilterActionBase {
+class ROobserrInflationGEOS : public FilterActionBase {
  public:
   /// The type of parameters accepted by the constructor of this action.
   /// This typedef is used by the FilterActionFactory.
-  typedef ROobserrInflationGEOStmpParameters Parameters_;
+  typedef ROobserrInflationGEOSParameters Parameters_;
 
-  explicit ROobserrInflationGEOStmp(const Parameters_ &);
-  ~ROobserrInflationGEOStmp() {}
+  explicit ROobserrInflationGEOS(const Parameters_ &);
+  ~ROobserrInflationGEOS() {}
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
              const ObsFilterData &, int,
@@ -51,4 +51,4 @@ class ROobserrInflationGEOStmp : public FilterActionBase {
 
 }  // namespace ufo
 
-#endif  // UFO_OPERATORS_GNSSRO_QC_ACTIONS_ROOBSERRINFLATIONGEOSTMP_H_
+#endif  // UFO_OPERATORS_GNSSRO_QC_ACTIONS_ROOBSERRINFLATIONGEOS_H_

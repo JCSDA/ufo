@@ -37,6 +37,7 @@ void ROobserrInflation::apply(const Variables & vars,
   const float missing = util::missingValue(missing);
   size_t nlocs = data.nlocs();
   ioda::ObsDataVector<int> layeridx(data.obsspace(), "modelLayerIndex", "ObsDiag");
+  ioda::ObsDataVector<int> recordidx(data.obsspace(), "RecordNumberIndex", "ObsDiag");
   const std::vector<size_t> & recordNumbers = data.obsspace().recnum();
 
   std::vector<int> rec_idx(nlocs);
@@ -53,8 +54,9 @@ void ROobserrInflation::apply(const Variables & vars,
   int irec = 1;
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
       if (jobs > 0 && recordNumbers[jobs] != recordNumbers[jobs-1]) irec = irec +1;
-      rec_idx[jobs] = irec;
+      rec_idx[jobs] = recordidx[0][jobs] - 1;
       layer_idx[jobs] = layeridx[0][jobs];
+
       if (flags[0][jobs] == 0)  super_obs_inlayer[layer_idx[jobs]][rec_idx[jobs]]++;
   }
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {

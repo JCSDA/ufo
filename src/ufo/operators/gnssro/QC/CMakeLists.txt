@@ -14,8 +14,8 @@ set (  qc_src_files
        BackgroundCheckRONBAM.cc
        actions/ROobserrInflation.cc
        actions/ROobserrInflation.h
-       actions/ROobserrInflationGEOStmp.cc
-       actions/ROobserrInflationGEOStmp.h
+       actions/ROobserrInflationGEOS.cc
+       actions/ROobserrInflationGEOS.h
 PARENT_SCOPE
 )
 

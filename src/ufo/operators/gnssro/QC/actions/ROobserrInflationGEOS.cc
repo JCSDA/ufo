@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/operators/gnssro/QC/actions/ROobserrInflationGEOStmp.h"
+#include "ufo/operators/gnssro/QC/actions/ROobserrInflationGEOS.h"
 #include <algorithm>
 #include <set>
 
@@ -19,21 +19,21 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-static FilterActionMaker<ROobserrInflationGEOStmp> makerInflateErr_("RONBAMErrInflate_GEOStmp");
+static FilterActionMaker<ROobserrInflationGEOS> makerInflateErr_("RONBAMErrInflate_GEOS");
 
 // -----------------------------------------------------------------------------
 
-ROobserrInflationGEOStmp::ROobserrInflationGEOStmp(const Parameters_ &)
+ROobserrInflationGEOS::ROobserrInflationGEOS(const Parameters_ &)
   : allvars_() {
 }
 // -----------------------------------------------------------------------------
 
-void ROobserrInflationGEOStmp::apply(const Variables & vars,
-                              const std::vector<std::vector<bool>> & flagged,
-                              const ObsFilterData & data,
-                              int filterQCflag,
-                              ioda::ObsDataVector<int> & flags,
-                              ioda::ObsDataVector<float> & obserr) const {
+void ROobserrInflationGEOS::apply(const Variables & vars,
+                            const std::vector<std::vector<bool>> & flagged,
+                            const ObsFilterData & data,
+                            int filterQCflag,
+                            ioda::ObsDataVector<int> & flags,
+                            ioda::ObsDataVector<float> & obserr) const {
   const float missing = util::missingValue(missing);
   size_t nlocs = data.nlocs();
   const std::vector<size_t> & recordNumbers = data.obsspace().recidx_all_recnums();

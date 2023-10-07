@@ -217,7 +217,7 @@ if (nlocs > 0 ) then
     write(err_msg,*) "record number is not consistent :", icount, nrecs
     call fckit_log%info(err_msg)
   end if
-  if(cmp_strings(self%roconf%GSI_version, "GEOStmp")) then
+  if(cmp_strings(self%roconf%GSI_version, "GEOS")) then
      ngrd = nint(61.0/63.0 * nlev + 18)
      ModelsigLevelcheck = one
   else

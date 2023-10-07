@@ -32,7 +32,7 @@ class GnssroBndNBAMOptionsParameters: public oops::Parameters {
   oops::Parameter<int> useCompress{"use_compress", 1, this};
   oops::Parameter<std::string> vertLayer{"vertlayer", "full", this};
   oops::Parameter<int> srSteps{"sr_steps", 2, this};
-// Set "super_ref_qc" as "NBAM_GEOStmp" for the NBAM used in GEOS GSI (July 2023).
+// Set "super_ref_qc" as "NBAM_GEOS" for the NBAM used in GEOS GSI (July 2023).
 // It should be "NBAM" in GEOS's configuration once it is adapted in GEOS.
   oops::Parameter<std::string> superRefQC{"super_ref_qc", "NBAM", this};
   oops::Parameter<std::string> outputDiags{"output_diags", "false", this};

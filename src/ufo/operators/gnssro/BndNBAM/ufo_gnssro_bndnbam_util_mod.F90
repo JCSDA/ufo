@@ -26,7 +26,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
            grids, ngrd, &
            nlev, nlevExt, nlevAdd, nlevCheck, &
            radius,ref,refIndex,refXrad, &
-           bendingAngle,super_refraction_flag)
+           bendingAngle,super_refraction_flag,top_layer_SR,super_ref_GEOS)
 ! -------------------------------------------------------------------------------
   character(len=*), parameter    :: myname  = "ufo_gnssro_bndnbam_simobs_single"
 
@@ -37,6 +37,8 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   integer, intent(in)            :: nlevAdd
   integer, intent(in)            :: nlevCheck
   integer, intent(in)            :: ngrd
+  integer, intent(in)            :: top_layer_SR
+  logical, intent(in)            :: super_ref_GEOS
   real(kind_real), intent(in)    :: obsLat, obsGeoid, obsLocR, obsImpP ! obsspace
   real(kind_real), intent(in)    :: grids(ngrd)
  
@@ -75,6 +77,11 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   grids_loop: do igrd =1,ngrd
     refXrad_s(igrd)=sqrt(grids(igrd)**2 + obsImpP**2) !x_s^2=s^2+a^2
     call get_coordinate_value(refXrad_s(igrd), sIndx,refXrad(1:nlevExt),nlevExt,"increasing")
+    if (top_layer_SR > 0 .and. sIndx < float(top_layer_SR+1)) then
+       call get_coordinate_value(refXrad_s(igrd), sIndx,refXrad((top_layer_SR+1):nlevExt),&
+            nlevExt-top_layer_SR-1,"increasing")
+       sIndx = sIndx+top_layer_SR
+    endif
     rnlevExt = float(nlevExt)
 
     if (sIndx > zero .and. sIndx < rnlevExt) then  !obs inside the new grid
@@ -95,9 +102,13 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
        endif
 
        derivRef_s(igrd)=dot_product(dw4,ref(indx-1:indx+2)) !derivative dN/dx_s
-       if (derivRef_s(igrd).gt.zero) then
-          super_refraction_flag = 3
-          return
+       if (super_ref_GEOS) then
+          derivRef_s(igrd)=max(zero,abs(derivRef_s(igrd)))
+       else
+          if (derivRef_s(igrd).gt.zero) then
+             super_refraction_flag = 3
+             return
+          end if
        end if
 
     else
@@ -111,7 +122,11 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
      bndIntgd     = ds*derivRef_s(igrd)/refXrad_s(igrd)
      bendingAngle = bendingAngle + two*bndIntgd
   end do
-  bendingAngle = (-1)* r1em6 * obsImpP * bendingAngle
+  if (super_ref_GEOS) then
+     bendingAngle=r1em6 * obsImpP * bendingAngle
+  else
+     bendingAngle = (-1)* r1em6 * obsImpP * bendingAngle
+  end if
 
 end subroutine ufo_gnssro_bndnbam_simobs_single
 ! ------------------------------------------------------------------------------
