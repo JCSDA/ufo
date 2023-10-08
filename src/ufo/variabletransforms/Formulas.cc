@@ -44,7 +44,7 @@ MethodFormulation resolveFormulations(const std::string& input, const std::strin
 
 /* -------------------------------------------------------------------------------------*/
 float SatVaporPres_fromTemp(float temp_K, MethodFormulation formulation) {
-  const float missingValueFloat = util::missingValue(1.0f);
+  const float missingValueFloat = util::missingValue<float>();
   const float t0c = static_cast<float>(ufo::Constants::t0c);
   float e_sub_s = missingValueFloat;  // Saturation vapour pressure (Pa)
 
@@ -164,8 +164,8 @@ float SatVaporPres_correction(float e_sub_s, float temp_K, float pressure,
 /* -------------------------------------------------------------------------------------*/
 
 float Qsat_From_Psat(float Psat, float P, MethodFormulation formulation) {
-  float QSat = util::missingValue(1.0f);  // Saturated specific humidity or
-                                          // saturated vapour pressure (if P<0)
+  float QSat = util::missingValue<float>();  // Saturated specific humidity or
+                                             // saturated vapour pressure (if P<0)
 
   switch (formulation) {
     case formulas::MethodFormulation::NCAR:
@@ -189,7 +189,7 @@ float Qsat_From_Psat(float Psat, float P, MethodFormulation formulation) {
 
 // VirtualTemperature()
 float VirtualTemp_From_Psat_P_T(float Psat, float P, float T, MethodFormulation formulation) {
-  float Tv = util::missingValue(1.0f);  // virtual temperature
+  float Tv = util::missingValue<float>();  // virtual temperature
 
   switch (formulation) {
     case formulas::MethodFormulation::NCAR:
@@ -207,7 +207,7 @@ float VirtualTemp_From_Psat_P_T(float Psat, float P, float T, MethodFormulation 
 
 float VirtualTemp_From_Rh_Psat_P_T(float Rh, float Psat, float P, float T,
                                    MethodFormulation formulation) {
-  float Tv = util::missingValue(1.0f);  // virtual temperature
+  float Tv = util::missingValue<float>();  // virtual temperature
 
   switch (formulation) {
     case formulas::MethodFormulation::NCAR:
@@ -226,7 +226,7 @@ float VirtualTemp_From_Rh_Psat_P_T(float Rh, float Psat, float P, float T,
 /* -------------------------------------------------------------------------------------*/
 
 float Height_To_Pressure_ICAO_atmos(float height, MethodFormulation formulation) {
-  const float missingValueFloat = util::missingValue(1.0f);
+  const float missingValueFloat = util::missingValue<float>();
   float Pressure = missingValueFloat;
 
   switch (formulation) {
@@ -273,7 +273,7 @@ float Height_To_Pressure_ICAO_atmos(float height, MethodFormulation formulation)
 /* -------------------------------------------------------------------------------------*/
 
 float Pressure_To_Height(float pressure, MethodFormulation method) {
-  const float missingValueFloat = util::missingValue(1.0f);
+  const float missingValueFloat = util::missingValue<float>();
   const float pressure_hPa = pressure * 0.01;
   float height = missingValueFloat;
 
@@ -325,7 +325,7 @@ float Pressure_To_Height(float pressure, MethodFormulation method) {
 }
 
 float GetWindDirection(float u, float v) {
-  const float missing = util::missingValue(1.0f);
+  const float missing = util::missingValue<float>();
   float windDirection = missing;  // wind direction
 
   if (u != missing && v != missing) {
@@ -339,7 +339,7 @@ float GetWindDirection(float u, float v) {
 }
 
 float GetWindSpeed(float u, float v) {
-  const float missing = util::missingValue(1.0f);
+  const float missing = util::missingValue<float>();
   float windSpeed = missing;  // wind speed
 
   if (u != missing && v != missing) {
@@ -349,7 +349,7 @@ float GetWindSpeed(float u, float v) {
 }
 
 float GetWind_U(float windSpeed, float windFromDirection) {
-  const float missing = util::missingValue(1.0f);
+  const float missing = util::missingValue<float>();
   float u = missing;  // wind speed
 
   if (windFromDirection != missing
@@ -361,7 +361,7 @@ float GetWind_U(float windSpeed, float windFromDirection) {
 
 
 float GetWind_V(float windSpeed, float windFromDirection) {
-  const float missing = util::missingValue(1.0f);
+  const float missing = util::missingValue<float>();
   float v = missing;  // wind speed
 
   if (windFromDirection != missing
@@ -416,7 +416,7 @@ void horizontalDrift
  std::vector<util::DateTime> & time_out,
  MethodFormulation formulation,
  const util::DateTime * const window_end) {
-  const float missingValueFloat = util::missingValue(1.0f);
+  const float missingValueFloat = util::missingValue<float>();
 
   switch (formulation) {
   case formulas::MethodFormulation::NCAR:
@@ -520,7 +520,7 @@ void horizontalDrift
 /* -------------------------------------------------------------------------------------*/
 
 float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
-  float BkP = util::missingValue(1.0f);
+  float BkP = util::missingValue<float>();
   double ToRaise =  (PSurfParamA - height)/PSurfParamB;
   if (ToRaise > 0.0) {
     BkP = pow(ToRaise, (Constants::grav/(Constants::Lclr*Constants::rd)));
@@ -531,7 +531,7 @@ float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
 /* -------------------------------------------------------------------------------------*/
 
 float Geometric_to_Geopotential_Height(float latitude, float geomH) {
-  float geopH = util::missingValue(1.0f);
+  float geopH = util::missingValue<float>();
   double sino = std::pow(std::sin(Constants::deg2rad * latitude), 2);
   double termg = Constants::grav_equator * ((1.0 + Constants::somigliana * sino) /
                  std::sqrt(1.0 - Constants::eccentricity_sq * sino));
@@ -544,7 +544,7 @@ float Geometric_to_Geopotential_Height(float latitude, float geomH) {
 /* -------------------------------------------------------------------------------------*/
 
 float Geopotential_to_Geometric_Height(float latitude, float geopH) {
-  float geomH = util::missingValue(1.0f);
+  float geomH = util::missingValue<float>();
   double sino = std::pow(std::sin(Constants::deg2rad * latitude), 2);
   double termg = Constants::grav_equator * ((1.0 + Constants::somigliana * sino) /
                  std::sqrt(1.0 - Constants::eccentricity_sq * sino));

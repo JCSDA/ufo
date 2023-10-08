@@ -136,7 +136,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
 
   // Get variables from ObsSpace
   // Get effective observation error and convert it to inverse of the error variance
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   std::vector<int> qcflag(nlocs, 0);
   std::vector<std::vector<float>> varinv_use(nchans, std::vector<float>(nlocs, 0.0));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {

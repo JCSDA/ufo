@@ -47,7 +47,7 @@ namespace ufo {
       (ProfileDataHolder & profile,
        const std::vector <std::string> & variableNames)
     {
-      const T missing = util::missingValue(missing);
+      const T missing = util::missingValue<T>();
       for (const std::string & variableName : variableNames) {
         profile.set<T>(variableName,
                        std::move(std::vector<T>(profile.getNumProfileLevels(), missing)));

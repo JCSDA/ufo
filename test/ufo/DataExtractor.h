@@ -25,7 +25,7 @@
 namespace ufo {
 namespace test {
 
-float missing = util::missingValue(missing);
+const float missing = util::missingValue<float>();
 
 
 template <typename T, typename R>

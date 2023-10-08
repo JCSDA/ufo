@@ -62,7 +62,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ImpactHeightCheck post-filter" << std::endl;
   const oops::Variables observed = obsdb_.assimvariables();
-  const float missingFloat = util::missingValue(missingFloat);
+  const float missingFloat = util::missingValue<float>();
 
   // Check that we have the same number of variables as vertical levels
   const size_t nchans = std::max(obsdb_.nchans(), 1LU);

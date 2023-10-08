@@ -47,7 +47,7 @@ void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   int nlocs = ovec.size();
   int nlevs = gv.nlevs("mass_concentration_of_chlorophyll_in_sea_water");
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   // common vectors storage
   std::vector <double> tmp(nlocs, 0.0);

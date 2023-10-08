@@ -157,7 +157,7 @@ void ObsErrorCrossVarCov::update(const ioda::ObsVector & obserr) {
 void ObsErrorCrossVarCov::recondition(const Parameters_ & options, const ioda::ObsVector & mask) {
   const size_t nlocs = mask.nlocs();
   const size_t nvars = mask.nvars();
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
   // preallocate data
   Eigen::MatrixXd avgcorr = Eigen::MatrixXd::Zero(nvars, nvars);
   size_t nused_locs = 0;
@@ -341,7 +341,7 @@ void ObsErrorCrossVarCov::multiply(ioda::ObsVector & dy) const {
   // C * D^{1/2} * dy
   const size_t nlocs = dy.nlocs();
   const size_t nvars = dy.nvars();
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
   // preallocate data
   std::vector<int> usedobs_indices(nvars);
   Eigen::VectorXd dy_at_loc(nvars);
@@ -389,7 +389,7 @@ void ObsErrorCrossVarCov::inverseMultiply(ioda::ObsVector & dy) const {
   // C^{-1} * D^{-1/2} * dy
   const size_t nlocs = dy.nlocs();
   const size_t nvars = dy.nvars();
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
   // preallocate data
   std::vector<int> usedobs_indices(nvars);
   Eigen::VectorXd dy_at_loc(nvars);

@@ -379,7 +379,7 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
         getGlobalVariable<float>(backgroundErrorVariable(filtervars[filterVarIndex],
                                                          options_.backgroundErrorSuffix.value(),
                                                          options_.backgroundErrorGroup.value()));
-    std::vector<float> bgErrors2(bgErrors.size(), util::missingValue(1.0f));
+    std::vector<float> bgErrors2(bgErrors.size(), util::missingValue<float>());
     if (options_.backgroundErrorGroup2.value()) {
       bgErrors2 = getGlobalVariable<float>(backgroundErrorVariable(filtervars[filterVarIndex],
                                               options_.backgroundErrorSuffix2.value(),
@@ -677,7 +677,7 @@ void MetOfficeBuddyCheck::checkScalarData(const std::vector<MetOfficeBuddyPair> 
   }
 
   const double invTemporalCorrScale = 1.0 / options_.temporalCorrelationScale.value().toSeconds();
-  const float missing = util::missingValue(1.0f);
+  const float missing = util::missingValue<float>();
 
   // Loop over buddy pairs
   for (const MetOfficeBuddyPair &pair : pairs) {
@@ -888,7 +888,7 @@ void MetOfficeBuddyCheck::checkVectorData(const std::vector<MetOfficeBuddyPair> 
                           "Dist   Corr  Agree   PgeA   PgeB   Mult\n";
   }
   const double invTemporalCorrScale = 1.0 / options_.temporalCorrelationScale.value().toSeconds();
-  const float missing = util::missingValue(1.0f);
+  const float missing = util::missingValue<float>();
 
   // Loop over buddy pairs
   for (const MetOfficeBuddyPair &pair : pairs) {

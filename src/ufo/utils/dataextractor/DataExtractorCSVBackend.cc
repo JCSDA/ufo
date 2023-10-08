@@ -47,7 +47,7 @@ class AppendValueVisitor : public boost::static_visitor<void> {
   void operator()(std::vector<int> &values) const {
     int value;
     if (value_.as<std::string>() == missingValuePlaceholder)
-      value = util::missingValue(value);
+      value = util::missingValue<int>();
     else
       // NOLINTNEXTLINE(runtime/int): It's not our fault that eckit uses the 'long long' type...
       value = static_cast<int>(value_.as<long long>());
@@ -57,7 +57,7 @@ class AppendValueVisitor : public boost::static_visitor<void> {
   void operator()(std::vector<float> &values) const {
     float value;
     if (value_.as<std::string>() == missingValuePlaceholder)
-      value = util::missingValue(value);
+      value = util::missingValue<float>();
     else
       value = static_cast<float>(value_.as<double>());
     values.push_back(value);
@@ -66,7 +66,7 @@ class AppendValueVisitor : public boost::static_visitor<void> {
   void operator()(std::vector<std::string> &values) const {
     std::string value = value_.as<std::string>();
     if (value == missingValuePlaceholder)
-      value = util::missingValue(value);
+      value = util::missingValue<std::string>();
     values.push_back(value);
   }
 
@@ -77,8 +77,8 @@ class AppendValueVisitor : public boost::static_visitor<void> {
 template <typename Source, typename Destination>
 void convertVectorToColumnArray(const std::vector<Source> &source,
                                     boost::multi_array<Destination, 3> &destination) {
-  const Source missingSource = util::missingValue(Source());
-  const Destination missingDestination = util::missingValue(Destination());
+  const Source missingSource = util::missingValue<Source>();
+  const Destination missingDestination = util::missingValue<Destination>();
   destination.resize(boost::extents[source.size()][1][1]);
   for (size_t i = 0; i < source.size(); ++i)
     if (source[i] != missingSource)

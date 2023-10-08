@@ -34,7 +34,7 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   oops::Log::debug() << "ObsErrorFactorSfcPressure: config = " << config << std::endl;
   const float tiny_float = FLT_MIN;
   const float huge_float = FLT_MAX;
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   // Initialize options
   options_.reset(new ObsErrorFactorSfcPressureParameters());
   options_->deserialize(config);
@@ -70,7 +70,7 @@ ObsErrorFactorSfcPressure::~ObsErrorFactorSfcPressure() {}
 
 void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   static constexpr float g_over_rd = 1.0f*Constants::grav/Constants::rd;
   const float lapse_rate = 1.0f*Constants::Lclr;
 

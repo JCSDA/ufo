@@ -51,7 +51,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
 
   const oops::Variables observed = obsdb_.assimvariables();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   float amsua_clw(float, float, float);
 
 // Get config
@@ -133,7 +133,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
 float amsua_clw(float tobs1, float tobs2, float sza) {
     const float d1 = 0.754;
     const float d2 = -2.265;
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
 
     float clw;
 

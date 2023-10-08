@@ -84,7 +84,7 @@ void ObsErrorWithinGroupCov::multiply(ioda::ObsVector & dy) const {
 
 void ObsErrorWithinGroupCov::multiplyCorrelations(ioda::ObsVector & dy) const {
   const size_t nvars = dy.nvars();
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
 
   size_t recnumLocal = 0;
   for (auto irec = obspace_.recidx_begin(); irec != obspace_.recidx_end();
@@ -136,7 +136,7 @@ void ObsErrorWithinGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
 
   // C^{-1} * D^{-1/2} * dy
   const size_t nvars = dy.nvars();
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
 
   size_t recnumLocal = 0;
   for (auto irec = obspace_.recidx_begin(); irec != obspace_.recidx_end();
@@ -222,7 +222,7 @@ void ObsErrorWithinGroupCov::saveCorrelations(const std::string & filename,
     ioda::VariableCreationParameters float_params;
     float_params.chunk = true;               // allow chunking
     float_params.compressWithGZIP();         // compress using gzip
-    float missing_value = util::missingValue(float());
+    const float missing_value = util::missingValue<float>();
     float_params.setFillValue<float>(missing_value);
 
     // Create a variable for correlations, save the values to the variable

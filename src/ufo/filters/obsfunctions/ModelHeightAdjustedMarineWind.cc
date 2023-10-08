@@ -43,7 +43,7 @@ void ModelHeightAdjustedMarineWindComponent::compute(const ObsFilterData & in,
   in.get(Variable(wind_), WindComponent);
   in.get(Variable("MetaData/anemometerHeight"), StationHeight);
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const float a = 1.0/0.0016;
   const float ref_height = std::log(10.0*a);
   // TODO(jwaller): When QC flaging is availiable add flags indicate corrected values

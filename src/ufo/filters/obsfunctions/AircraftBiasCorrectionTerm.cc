@@ -52,7 +52,7 @@ AircraftBiasCorrectionTerm::~AircraftBiasCorrectionTerm() {}
 void AircraftBiasCorrectionTerm::compute(const ObsFilterData & in,
                                        ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   // Ensure that only one output variable is expected.
   ASSERT(out.nvars() == 1);
   // Retrieve observation aircraft bias correction coefficient

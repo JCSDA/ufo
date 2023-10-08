@@ -87,8 +87,8 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
   std::vector<float> ob_iwp(nlocs);
   std::vector<int> ob_surf_type(nlocs);
 
-  float const missing = util::missingValue(missing);
-  const int missingValueInt = util::missingValue(missingValueInt);
+  const float missing = util::missingValue<float>();
+  const int missingValueInt = util::missingValue<int>();
 
   if (in.has(Variable("OneDVar/liquidWaterPath"))) {
     in.get(Variable("OneDVar/liquidWaterPath"), ob_lwp);

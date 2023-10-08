@@ -62,7 +62,7 @@ namespace ufo {
     getObservation("MetaData", "pressure", obsPressure, true);
 
     // Missing values
-    const double missing = util::missingValue(obsPressure[0]);
+    const double missing = util::missingValue<double>();
 
     // Containers for GeoVaLs profiles
     std::vector<double> windReductionFactorAt10m(1), surfacePressure(1), airPressure(nlevs),

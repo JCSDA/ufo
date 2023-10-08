@@ -54,8 +54,8 @@ SolarZenith::SolarZenith(const eckit::LocalConfiguration & conf) {
 }
 
 void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
-  const float missingFloat = util::missingValue(float());
-  const util::DateTime missingDateTime = util::missingValue(util::DateTime());
+  const float missingFloat = util::missingValue<float>();
+  const util::DateTime missingDateTime = util::missingValue<util::DateTime>();
 
   const int secondsPerDay = 60 * 60 * 24;
   const double centuriesPerDay = 1.0 / 36525.0;

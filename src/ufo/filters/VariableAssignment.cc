@@ -59,7 +59,7 @@ void assignValue(const std::string &valueAsString,
                  ioda::ObsDataVector<VariableType> &values) {
   VariableType newValue;
   if (valueAsString == "missing") {
-    newValue = util::missingValue(newValue);
+    newValue = util::missingValue<VariableType>();
   } else {
     if (!boost::conversion::try_lexical_convert(valueAsString, newValue))
       throw eckit::BadCast("Value '" + valueAsString +
@@ -86,8 +86,8 @@ void assignObsDataVector(const std::vector<bool> &apply,
                          ioda::ObsDataVector<DestinationVariableType> &destination) {
   ASSERT(source.nvars() == destination.nvars());
 
-  const SourceVariableType missingSource = util::missingValue(SourceVariableType());
-  const DestinationVariableType missingDestination = util::missingValue(DestinationVariableType());
+  const SourceVariableType missingSource = util::missingValue<SourceVariableType>();
+  const DestinationVariableType missingDestination = util::missingValue<DestinationVariableType>();
 
   for (size_t ival = 0; ival < source.nvars(); ++ival) {
     const ioda::ObsDataRow<SourceVariableType> &currentSource = source[ival];
@@ -217,7 +217,7 @@ ioda::ObsDataVector<VariableType> getCurrentValues(const ufo::Variable &variable
       obsdb.get_db(variable.group(), variableWithChannel, values[ich], {}, skipDerived);
     } else {
       // Variable doesn't exist yet -- fill the vector with missing values
-      values[ich].assign(obsdb.nlocs(), util::missingValue(VariableType()));
+      values[ich].assign(obsdb.nlocs(), util::missingValue<VariableType>());
     }
   }
   return values;
@@ -235,7 +235,7 @@ void saveValues(const ufo::Variable &variable,
 /// Change the QC flag from `miss` to `pass` if the obs value is no longer missing or from `pass` to
 /// `miss` if the obs value is now missing.
 void updateQCFlags(const ioda::ObsDataVector<float> &obsvalues, ioda::ObsDataVector<int> &qcflags) {
-  const float missing = util::missingValue(float());
+  const float missing = util::missingValue<float>();
 
   for (size_t ivar = 0; ivar < obsvalues.nvars(); ++ivar) {
     if (qcflags.varnames().has(obsvalues.varnames()[ivar])) {

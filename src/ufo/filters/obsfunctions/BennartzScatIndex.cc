@@ -37,7 +37,7 @@ void BennartzScatIndex::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get dimension
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   ASSERT(out.nvars() == 1);
 

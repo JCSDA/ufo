@@ -61,7 +61,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   const std::string btOvercastName = "ObsDiag/brightness_temperature_from_atmosphere_layer_to_toa";
   const std::vector<std::string> vars = {"brightnessTemperature"};
   const std::vector<std::string> clearSkyName = {"brightness_temperature_assuming_clear_sky"};
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const float largeCostValue = 1.0e9f;
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable(btOvercastName, channels_)[0]);

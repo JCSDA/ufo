@@ -383,8 +383,8 @@ class GeoVaLs : public util::Printable,
   template <typename T>
   void cast(const std::vector<double> & doubleVals,
             std::vector<T> & vals) const {
-    const T missing = util::missingValue(T());
-    const double missingDouble = util::missingValue(double());
+    const T missing = util::missingValue<T>();
+    const double missingDouble = util::missingValue<double>();
     std::transform(doubleVals.begin(),
                    doubleVals.end(),
                    vals.begin(),

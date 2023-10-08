@@ -64,7 +64,7 @@ namespace ufo {
     getObservation("MetaData", "stationElevation", stationElevation, true);
 
     // Missing values
-    const double missing = util::missingValue(heightVariable[0]);
+    const double missing = util::missingValue<double>();
 
     // Containers for GeoVaLs profiles
     std::vector<double> windReductionFactorAt10m(1), surfacePressure(1), surfaceGeometricHeight(1),

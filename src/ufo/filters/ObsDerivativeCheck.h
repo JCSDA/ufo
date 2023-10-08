@@ -60,13 +60,13 @@ class ObsDerivativeCheckParameters : public FilterParametersBase {
   oops::Parameter<float> minvalue
     {"minvalue",
      "An observation will be flagged if its derivative is lower than this bound.",
-     util::missingValue(1.0f),
+     util::missingValue<float>(),
      this};
 
   oops::Parameter<float> maxvalue
     {"maxvalue",
      "An observation will be flagged if its derivative is larger than this bound.",
-     util::missingValue(1.0f),
+     util::missingValue<float>(),
      this};
 };
 

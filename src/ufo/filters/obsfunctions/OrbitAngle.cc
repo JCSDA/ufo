@@ -34,8 +34,8 @@ OrbitAngle::OrbitAngle(const eckit::LocalConfiguration & conf) {
 
 void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
   // constants
-  const float missingFloat = util::missingValue(float());
-  const util::DateTime missingDateTime = util::missingValue(util::DateTime());
+  const float missingFloat = util::missingValue<float>();
+  const util::DateTime missingDateTime = util::missingValue<util::DateTime>();
 
   const util::DateTime firstjan2000(2000, 1, 1, 0, 0, 0);
 

@@ -126,7 +126,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
 
   // Get Original Observation Error (if ObsError is filled up with missing values, replace it)
   std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
     for (size_t iloc = 0; iloc < nlocs; iloc++) {

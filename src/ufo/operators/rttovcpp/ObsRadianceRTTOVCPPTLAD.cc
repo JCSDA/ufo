@@ -142,7 +142,7 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
 //-------------------------------------------
   ASSERT(dx.nlocs() == dy.nlocs());
 
-  double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   std::vector <double> var_k(nlevels, 0.0);
 

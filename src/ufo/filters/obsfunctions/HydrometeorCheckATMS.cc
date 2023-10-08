@@ -202,7 +202,7 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
                             std::abs(innov[ich890][iloc])};
     bool result = false;
     result = any_of(OmFs.begin(), OmFs.end(), [](float x){
-               return (x > 200.0 || x == util::missingValue(1.0f));});
+               return (x > 200.0 || x == util::missingValue<float>());});
 
     if (result) {
       // remove channels 1-7, 16, 17-22

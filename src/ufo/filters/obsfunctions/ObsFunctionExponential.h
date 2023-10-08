@@ -36,7 +36,7 @@ class ExponentialParameters : public oops::Parameters {
   oops::Parameter<float> coeffA{"coeffA", 1.0, this};
   oops::Parameter<float> coeffB{"coeffB", 1.0, this};
   oops::Parameter<float> coeffC{"coeffC", 0.0, this};
-  oops::Parameter<float> coeffD{"coeffD", util::missingValue(0.0f), this};
+  oops::Parameter<float> coeffD{"coeffD", util::missingValue<float>(), this};
 };
 
 // -----------------------------------------------------------------------------

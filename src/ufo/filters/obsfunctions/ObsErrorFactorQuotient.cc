@@ -48,7 +48,7 @@ ObsErrorFactorQuotient::~ObsErrorFactorQuotient() {}
 
 void ObsErrorFactorQuotient::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & out) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get the numeratory and denominator names
   const Variable &numerator = options_.numerator.value();

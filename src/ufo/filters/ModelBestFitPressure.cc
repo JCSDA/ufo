@@ -79,7 +79,7 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ModelBestFitPressure applyFilter" << std::endl;
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
 
   // Get parameters from options.

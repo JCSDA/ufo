@@ -130,7 +130,7 @@ void PrintFilterData::printVariable
     oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << "masked by where";
   } else {
     const VariableType value = boost::get<std::vector<VariableType>>(filterData_[varname])[loc];
-    if (value == util::missingValue(value))
+    if (value == util::missingValue<VariableType>())
       oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << "missing";
     else
       oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << value;

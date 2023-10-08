@@ -44,7 +44,7 @@ void OceanPressureToDepth::compute(const ObsFilterData & in,
   const size_t nlocs = in.nlocs();
 
   // parameters (see eqn 3 of https://archimer.ifremer.fr/doc/00447/55889/57949.pdf)
-  const float missingFloat = util::missingValue(float());
+  const float missingFloat = util::missingValue<float>();
   const double param1 = 9.780318;
   const double param2 = 5.2788E-3;
   const double param3 = 2.36E-5;

@@ -90,7 +90,7 @@ void ModelObThreshold::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "ModelObThreshold priorFilter" << std::endl;
   print(oops::Log::trace());
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
 
 // Get piece-wise parameters from options.

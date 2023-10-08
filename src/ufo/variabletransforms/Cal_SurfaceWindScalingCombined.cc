@@ -51,7 +51,7 @@ namespace ufo {
                    true);
 
     // Missing values
-    const double missing = util::missingValue(height[0]);
+    const double missing = util::missingValue<double>();
 
     // Loop over locations and compute the surface wind scaling factor for height coordinate
     // -------------------------------------------------------------------------------------

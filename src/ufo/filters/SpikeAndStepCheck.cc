@@ -195,7 +195,7 @@ void SpikeAndStepCheck::set_xyrec(const std::vector<float> &x,
       }
     }
   };
-  const float missingValueFloat = util::missingValue(missingValueFloat);
+  const float missingValueFloat = util::missingValue<float>();
   const float dxResolution = parameters_.toleranceOptions.value().dxResolution.value();
   std::vector<float> boundaryRange;
   std::vector<float> maxDx;
@@ -313,7 +313,7 @@ void SpikeAndStepCheck::identifyThinnedObservations(std::vector<bool> &isThinned
   if (xy.ydiff.size() < 2) {
     return;  // don't do anything if record is <=2 obs long (can't tell spike or step)
   }
-  const float missingValueFloat = util::missingValue(missingValueFloat);
+  const float missingValueFloat = util::missingValue<float>();
   const bool yesSpikes = parameters_.yesSpikes.value();
   const bool yesSteps = parameters_.yesSteps.value();
   const float gradientTolerance =

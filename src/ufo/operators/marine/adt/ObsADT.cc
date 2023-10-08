@@ -59,7 +59,7 @@ void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
                          ObsDiagnostics &) const {
   oops::Log::trace() << "ObsADT: simulateObs starting" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   // get geovals
   std::vector<double> vec(ovec.nlocs());

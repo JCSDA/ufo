@@ -25,8 +25,8 @@ namespace {
 
 /// \brief Store all components of `input` in `output`.
 void save(const ioda::ObsDataVector<float> &input, ioda::ObsVector &output) {
-  const float fmiss = util::missingValue(fmiss);
-  const double dmiss = util::missingValue(dmiss);
+  const float fmiss = util::missingValue<float>();
+  const double dmiss = util::missingValue<double>();
   const size_t numLocs = input.nlocs();
   const size_t numInputVars = input.nvars();
   const size_t numOutputVars = output.nvars();

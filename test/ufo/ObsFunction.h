@@ -59,7 +59,7 @@ const char *expectConstructorToThrow = "expect constructor to throw exception wi
 void dataVectorDiff(const ioda::ObsSpace & ospace, ioda::ObsDataVector<float> & vals,
                     const ioda::ObsDataVector<float> & ref, std::vector<float> & rms_out,
                     size_t &num_missing_mismatches) {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   num_missing_mismatches = 0;
   /// Loop through variables and calculate rms for each variable
   for (size_t ivar = 0; ivar < vals.nvars() ; ++ivar) {

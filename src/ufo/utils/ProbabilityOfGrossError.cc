@@ -22,7 +22,7 @@ namespace ufo {
                          const std::vector<float> *bkgVal2,
                          std::vector<float> *TotalPd)
   {
-    const float missingValueFloat = util::missingValue(1.0f);
+    const float missingValueFloat = util::missingValue<float>();
     // PGE multiplication factor used to store PGE values for later use.
     const double PGEMult = 1000.0;
     // Missing data indicator for stored PGEs.

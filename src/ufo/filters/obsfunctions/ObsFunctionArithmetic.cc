@@ -98,7 +98,7 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
   out.zero();
 
   // compute linear combination of input variables
-  const FunctionValue missing = util::missingValue(missing);
+  const FunctionValue missing = util::missingValue<FunctionValue>();
   for (size_t ivar = 0; ivar < nv; ++ivar) {
     ioda::ObsDataVector<FunctionValue> varin(in.obsspace(), invars_[ivar].toOopsVariables());
     in.get(invars_[ivar], varin);

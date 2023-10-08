@@ -114,10 +114,10 @@ namespace ufo {
     const ConventionalProfileProcessingParameters &options_;
 
     /// Missing value (int)
-    const int missingValueInt = util::missingValue(1);
+    const int missingValueInt = util::missingValue<int>();
 
     /// Missing value (float)
-    const float missingValueFloat = util::missingValue(1.0f);
+    const float missingValueFloat = util::missingValue<float>();
   };
 
   /// Profile check factory

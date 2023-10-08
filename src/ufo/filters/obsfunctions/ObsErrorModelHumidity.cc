@@ -103,7 +103,7 @@ ObsErrorModelHumidity::~ObsErrorModelHumidity() {
 
 void ObsErrorModelHumidity::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
-  const float missing = util::missingValue(float());
+  const float missing = util::missingValue<float>();
   float logp_ob, temp, satVaporPres, satSpecificHumidity;
 
   // Get dimensions

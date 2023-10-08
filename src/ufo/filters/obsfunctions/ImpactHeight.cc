@@ -76,9 +76,9 @@ void ImpactHeight::compute(const ObsFilterData & in,
     std::vector<float> impact_parameter;
     in.get(Variable("MetaData/impactParameterRO", channels_)[ichan], impact_parameter);
     for (size_t jj = 0; jj < nlocs; ++jj) {
-      if (impact_parameter[jj] == util::missingValue(impact_parameter[jj]) ||
-          radius_curvature[jj] == util::missingValue(radius_curvature[jj])) {
-          out[ichan][jj] = util::missingValue(out[ichan][jj]);
+      if (impact_parameter[jj] == util::missingValue<float>() ||
+          radius_curvature[jj] == util::missingValue<float>()) {
+          out[ichan][jj] = util::missingValue<float>();
       } else {
           out[ichan][jj] = impact_parameter[jj] - radius_curvature[jj];
       }

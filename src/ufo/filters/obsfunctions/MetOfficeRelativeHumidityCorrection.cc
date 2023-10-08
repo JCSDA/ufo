@@ -51,7 +51,7 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
   oops::Log::trace() << "MetOfficeRelativeHumidityCorrection::compute started" << std::endl;
 
   // Missing float value.
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // ObsSpace.
   const ioda::ObsSpace & obsdb = in.obsspace();

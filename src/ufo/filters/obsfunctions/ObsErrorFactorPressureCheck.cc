@@ -79,7 +79,7 @@ static ObsFunctionMaker<ObsErrorFactorPressureCheck> makerSteps_("ObsErrorFactor
 
 ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configuration &config)
   : invars_() {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   // Initialize options
   options_.reset(new ObsErrorFactorPressureCheckParameters());
   options_->deserialize(config);
@@ -116,7 +116,7 @@ ObsErrorFactorPressureCheck::~ObsErrorFactorPressureCheck() {}
 
 void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get output variable size
   int nvars = obserr.nvars();

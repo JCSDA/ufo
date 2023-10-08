@@ -132,7 +132,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     std::vector<float> obserrdata;
     const std::string &errgrp = options_.testObserr.value();
     const std::string &flaggrp = options_.testQCflag.value();
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
 
     // Calculate error factors (error_factors) for each channel
     for (size_t ichan = 0; ichan < nchans; ++ichan) {

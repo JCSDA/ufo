@@ -481,8 +481,7 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
     // observation values in this bin:
     std::vector<float> obsgroup;
     for (size_t validObsIndex : group) {
-      if (obsval[validObsIds[validObsIndex]] !=
-          util::missingValue(obsval[validObsIds[validObsIndex]])) {
+      if (obsval[validObsIds[validObsIndex]] != util::missingValue<float>()) {
         obsgroup.push_back(obsval[validObsIds[validObsIndex]]);
       }
     }

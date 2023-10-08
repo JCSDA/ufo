@@ -50,7 +50,7 @@ void FinalCheck::doFilter() const {
 
   // Set the QC flag to missing for any observations that haven't been rejected yet,
   // but have missing error estimates.
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   for (size_t jv = 0; jv < obsdb_.obsvariables().size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if ((*flags_)[jv][jobs] == QCflags::pass && (*obserr_)[jv][jobs] == missing) {

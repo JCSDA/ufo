@@ -27,7 +27,7 @@ namespace ufo {
   {}
 
 std::vector<std::size_t> RecordHandler::getLaunchPositions() const {
-  const util::DateTime missingDateTime = util::missingValue(missingDateTime);
+  const util::DateTime missingDateTime = util::missingValue<util::DateTime>();
 
   // Retrieve datetimes.
   std::vector<util::DateTime> dateTimes(obsdb_.nlocs());

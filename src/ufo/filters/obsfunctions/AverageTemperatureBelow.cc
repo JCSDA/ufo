@@ -114,7 +114,7 @@ void AverageTemperatureBelow::compute(const ObsFilterData & in,
   }
 
   // Normalise the sum by the total number of levels, or the total layer depth.
-  float missingFloat = util::missingValue(missingFloat);
+  const float missingFloat = util::missingValue<float>();
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
     if (weights_sum[iloc] > 0) {
       out[0][iloc] = temperature_sum[iloc] / weights_sum[iloc];

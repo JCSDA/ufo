@@ -69,7 +69,7 @@ class TransformBase {
   void filterObservation(const std::string &variableName,
                          std::vector<T> &obsVector) const {
     if (flags_.has(variableName)) {
-      const T missing = util::missingValue(T());
+      const T missing = util::missingValue<T>();
       const std::vector<int> *varFlags = &flags_[variableName];
 
       std::transform(obsVector.begin(), obsVector.end(),  // Input range 1
@@ -128,7 +128,7 @@ class TransformBase {
       if (obsdb_.has(originalTag, varName)) {
         std::vector <T> originalValues(obsdb_.nlocs());
         obsdb_.get_db(originalTag, varName, originalValues);
-        const T missing = util::missingValue(missing);
+        const T missing = util::missingValue<T>();
         for (size_t jloc = 0; jloc < obsdb_.nlocs(); ++jloc) {
           if (outputObsVector[jloc] == missing &&
               originalValues[jloc] != missing) {
@@ -145,7 +145,7 @@ class TransformBase {
       std::vector<int> &varFlags = flags_[varName];
       ASSERT(varFlags.size() == outputObsVector.size());
 
-      const T missing = util::missingValue(T());
+      const T missing = util::missingValue<T>();
       for (size_t iloc = 0; iloc < outputObsVector.size(); ++iloc) {
         if (varFlags[iloc] == QCflags::missing && outputObsVector[iloc] != missing)
           varFlags[iloc] = QCflags::pass;
@@ -180,7 +180,7 @@ class TransformBase {
         std::vector <T> originalValues(obsdb_.nlocs());
         // Need to skipDerived so we pickup original ObsValues
         obsdb_.get_db(originalTag, varName + "_" + channel, originalValues, {}, true);
-        const T missing = util::missingValue(missing);
+        const T missing = util::missingValue<T>();
         for (size_t jloc = 0; jloc < obsdb_.nlocs(); ++jloc) {
           if (outputObsVector[jloc] == missing &&
               originalValues[jloc] != missing) {
@@ -194,7 +194,7 @@ class TransformBase {
       std::vector<int> &varFlags = flags_[varName + "_" + channel];
       ASSERT(varFlags.size() == outputObsVector.size());
 
-      const T missing = util::missingValue(T());
+      const T missing = util::missingValue<T>();
       for (size_t iloc = 0; iloc < outputObsVector.size(); ++iloc) {
         if (varFlags[iloc] == QCflags::missing && outputObsVector[iloc] != missing)
           varFlags[iloc] = QCflags::pass;
@@ -223,9 +223,9 @@ class TransformBase {
   ioda::ObsDataVector<int> &flags_;
   ioda::ObsDataVector<float> &obserr_;
   /// Missing value (int)
-  const int missingValueInt = util::missingValue(1);
+  const int missingValueInt = util::missingValue<int>();
   /// Missing value (float)
-  const float missingValueFloat = util::missingValue(1.0f);
+  const float missingValueFloat = util::missingValue<float>();
 };
 
 /// \brief Transform factory

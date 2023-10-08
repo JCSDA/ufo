@@ -90,7 +90,7 @@ void ObsRadianceRTTOVCPP::simulateObs(const GeoVaLs & geovals, ioda::ObsVector &
   ASSERT(geovals.nlocs() == hofx.nlocs());
   hofx.zero();  // this may not be necessary
 
-  double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   std::vector <double> bt;
 

@@ -69,7 +69,7 @@ void updateVariable(const std::string &key, ioda::Variable var,
     const T sourceFillValue = ioda::detail::getFillValue<T>(sourceFvData);
     // TODO(someone): This won't call the correct overload for datetimes (which are treated
     // as strings by ioda-engines).
-    const T oopsFillValue = util::missingValue(oopsFillValue);
+    const T oopsFillValue = util::missingValue<T>();
     if (oopsFillValue != sourceFillValue)
       std::replace(values.begin(), values.end(), sourceFillValue, oopsFillValue);
   }

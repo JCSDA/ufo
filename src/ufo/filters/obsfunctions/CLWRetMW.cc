@@ -146,7 +146,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
 
     // Calculate retrieved cloud liquid water
     std::vector<float> bt238(nlocs), bt314(nlocs);
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
     for (size_t igrp = 0; igrp < ngrps; ++igrp) {
       // Get data based on group type
       in.get(Variable(vargrp[igrp] + "/brightnessTemperature", channels)[0], bt238);
@@ -202,7 +202,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
 
 //  Add bias correction to "brightness_temperature_assuming_clear_sky"
     std::vector<float> bias37v(nlocs), bias37h(nlocs);
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
     bool bc_cloud_terms = false;
     if (in.has(Variable(options_.testBias.value() + "/brightnessTemperature", channels)
         [jch37v])) {

@@ -53,7 +53,7 @@ void ModelHeightAdjustedRelativeHumidity::compute(const ObsFilterData & in,
   in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Maximum values of RH_ice for temperatures 0 to -40 deg C
   const std::vector<float>  rhmax{100.00, 100.98, 101.97, 102.96, 103.97, 104.99,

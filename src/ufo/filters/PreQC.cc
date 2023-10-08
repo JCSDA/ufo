@@ -31,7 +31,7 @@ void PreQC::applyFilter(const std::vector<bool> & apply,
                         std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "PreQC applyFilter starting " << std::endl;
 
-  const int missing = util::missingValue(missing);
+  const int missing = util::missingValue<int>();
 
   // Read QC flags from pre-processing
   ioda::ObsDataVector<int> preqc(obsdb_,

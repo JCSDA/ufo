@@ -361,7 +361,7 @@ double GeoVaLs::dot_product_with(const GeoVaLs & other) const {
   assert(vars_ == other.vars_);
   auto accumulator = dist_->createAccumulator<double>();
   std::vector<double> this_values, other_values;
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
   const size_t nlocs = this->nlocs();
   std::vector<util::Range<size_t>> profileRangesByLocation;
 

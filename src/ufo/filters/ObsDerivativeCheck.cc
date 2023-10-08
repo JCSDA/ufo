@@ -97,7 +97,7 @@ void get_locs(const std::vector<std::size_t> & rSort, const size_t & i1, const s
 void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const double radiusEarth = Constants::mean_earth_rad*1000.0;
 
   // first we want to get the config of the two vars to use in computing the derivative

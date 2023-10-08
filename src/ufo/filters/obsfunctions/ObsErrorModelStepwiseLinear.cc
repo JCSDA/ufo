@@ -92,7 +92,7 @@ ObsErrorModelStepwiseLinear::~ObsErrorModelStepwiseLinear() {}
 
 void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   // Linearly interpolate from y0 to y1 at xstar between x0 and x1 to arrive at error
   float x0, x1, y0, y1;
   float xstar, error;

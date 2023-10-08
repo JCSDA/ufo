@@ -13,6 +13,7 @@
 #include <limits>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
@@ -114,9 +115,12 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // on the first value in the profile.
       for (size_t jobs : obs_numbers) {
         if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
-          ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
-          ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-          ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
+          // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
+          // and its underlying type could in principle change without it being obvious here.
+          ASSERT((*obserr_)[iv][jobs] !=
+              util::missingValue<std::remove_reference_t<decltype((*obserr_)[iv][jobs])>>());
+          ASSERT(obs[jv][jobs] != util::missingValue<float>());
+          ASSERT(hofx[jobs] != util::missingValue<float>());
 
           if (first_ob) {
             if (rel_thr[jobs] == std::numeric_limits<float>::max()) {

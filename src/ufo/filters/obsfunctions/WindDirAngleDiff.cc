@@ -51,7 +51,7 @@ WindDirAngleDiff::~WindDirAngleDiff() {}
 void WindDirAngleDiff::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const double deg = Constants::rad2deg;
 
   // Ensure that only one output variable is expected.

@@ -101,7 +101,7 @@ class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
   template <typename T>
   void applyOffsets(const ObsFilterData & in,
                     ioda::ObsDataVector<util::DateTime> & out) const {
-    const T missing = util::missingValue(missing);
+    const T missing = util::missingValue<T>();
     const size_t nlocs = in.obsspace().nlocs();
     const util::DateTime window_start = in.obsspace().windowStart();
     const util::DateTime window_end = in.obsspace().windowEnd();

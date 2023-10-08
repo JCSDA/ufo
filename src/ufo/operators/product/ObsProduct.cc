@@ -90,7 +90,7 @@ void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   }
 
   // Set missing values to 1.0
-  auto missing = util::missingValue(scalingVariable[0]);
+  const double missing = util::missingValue<double>();
   for (double& element : scalingVariable) {
     element = (element == missing) ? 1.0 : element;
   }

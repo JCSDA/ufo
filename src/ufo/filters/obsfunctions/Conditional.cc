@@ -37,7 +37,7 @@ template <typename FunctionValue>
 void Conditional<FunctionValue>::compute(const ObsFilterData & in,
                                          ioda::ObsDataVector<FunctionValue> & out) const {
   // Assign default value to array
-  const FunctionValue missing = util::missingValue(FunctionValue());
+  const FunctionValue missing = util::missingValue<FunctionValue>();
   for (size_t ivar = 0; ivar < out.nvars(); ++ivar) {
     std::fill(out[ivar].begin(), out[ivar].end(), options_.defaultvalue.value().value_or(missing));
   }  // ivar

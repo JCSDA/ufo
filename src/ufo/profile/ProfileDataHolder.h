@@ -74,8 +74,8 @@ namespace ufo {
       {
         // Ensure vector has expected length for this profile;
         // this may not be the case for GeoVaLs.
-        vec_in.resize(this->getNumProfileLevels(),
-                      util::missingValue(vec_in.front()));
+        vec_in.resize(this->getNumProfileLevels(), util::missingValue<T>());
+
         // Check whether vector is already in map.
         auto it_profileData = profileData_.find(fullname);
         if (it_profileData != profileData_.end()) {

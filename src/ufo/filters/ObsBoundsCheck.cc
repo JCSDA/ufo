@@ -41,7 +41,7 @@ void flagWhereOutOfBounds(const std::vector<bool> & apply,
   ASSERT(apply.size() == nlocs);
   ASSERT(flagged.size() == nlocs);
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   for (size_t i = 0; i < nlocs; ++i) {
     if (apply[i]) {
       if (testValues[i] != missing) {
@@ -98,7 +98,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                      << testvars << std::endl;
 
   // Retrieve the bounds.
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const float vmin = parameters_.minvalue.value().value_or(missing);
   const float vmax = parameters_.maxvalue.value().value_or(missing);
 

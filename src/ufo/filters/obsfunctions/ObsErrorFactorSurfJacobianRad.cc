@@ -149,7 +149,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
   const std::string &biastermgrp = options_.testBiasTerm.value();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   bool usebiasterm = false;
   if (options_.useBiasTerm.value() != boost::none) {
     usebiasterm = options_.useBiasTerm.value().get();

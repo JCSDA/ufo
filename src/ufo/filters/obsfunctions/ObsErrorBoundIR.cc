@@ -95,7 +95,7 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
   std::vector<int> qcflagdata(nlocs);    //!< effective qcflag
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   float varinv = 0.0;
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);

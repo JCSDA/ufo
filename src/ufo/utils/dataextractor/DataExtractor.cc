@@ -119,7 +119,7 @@ void exactMatch(const std::string &varName,
     // be reported).
     bounds = std::equal_range(varValues.begin() + range.begin(),
                               varValues.begin() + range.end(),
-                              util::missingValue(obVal));
+                              util::missingValue<T>());
   }
 
   range.constrain(static_cast<int>(bounds.first - varValues.begin()),
@@ -392,8 +392,8 @@ float linearInterpolation(
     const ConstrainedRange &range,
     const DataExtractorPayload<float>::const_array_view<1>::type &interpolatedArray) {
 
-  if (obVal == util::missingValue(obVal)) {
-    const float missing = util::missingValue(missing);
+  if (obVal == util::missingValue<CoordinateValue>()) {
+    const float missing = util::missingValue<float>();
     return missing;
   }
 
@@ -711,7 +711,7 @@ void DataExtractor<ExtractedValue>::resetExtract() {
 
 void applyLogLinearTransform(const std::string &varName,
                              std::vector<float> &varValues) {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   if (std::any_of(varValues.cbegin(), varValues.cend(),
                   [missing](float c){return c != missing && c < 0.0f;})) {
     std::stringstream msg;
@@ -750,11 +750,9 @@ float trilinearInterpolation(
     const CoordinateTransformation &coordTrans2,
     const DataExtractorPayload<float>::const_array_view<3>::type &interpolatedArray)
 {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
-  if (obVal0 == util::missingValue(obVal0) ||
-      obVal1 == util::missingValue(obVal1) ||
-      obVal2 == util::missingValue(obVal2)) {
+  if (obVal0 == missing || obVal1 == missing || obVal2 == missing) {
     return missing;
   }
 

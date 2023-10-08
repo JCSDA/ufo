@@ -47,7 +47,7 @@ void SurfaceCloudModelLevelCBH::compute(const ObsFilterData & in,
 
   in.get(Variable(options_.cloud_base_height.value()), CBH);
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     std::vector<float> Height(nlevs);

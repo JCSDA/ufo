@@ -132,7 +132,7 @@ void ObsVertLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
                                               const LocalObs & localobs) const {
   oops::Log::trace() << "ObsVertLocalization::computeLocalization(lengthscale)" << std::endl;
 
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
   const size_t nvars = locvector.nvars();
   const size_t nlocal = localobs.index.size();
 
@@ -158,7 +158,7 @@ void ObsVertLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
       }
   } else if (options_.localizationFunction.value().compare("SOAR") == 0) {
       const double SOARexpDecayH = options_.SOARexpDecayH;
-      if (SOARexpDecayH == util::missingValue(double())) {
+      if (SOARexpDecayH == util::missingValue<double>()) {
         std::string message = "soar horizontal decay parameter is not specified";
         throw eckit::BadParameter(message);
       }

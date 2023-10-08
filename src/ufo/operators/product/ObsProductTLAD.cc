@@ -79,7 +79,7 @@ void ObsProductTLAD::setTrajectory(const GeoVaLs & gv, ObsDiagnostics &) {
   }
 
   // Set missing values to 1.0
-  auto missing = util::missingValue(scalingVariable_[0]);
+  const double missing = util::missingValue<double>();
   for (double& element : scalingVariable_) {
     element = (element == missing) ? 1.0 : element;
   }
@@ -114,7 +114,7 @@ void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) con
   oops::Log::trace() << "ObsProductTLAD: TL observation operator starting" << std::endl;
 
   std::vector<double> vec(dy.nlocs());
-  const auto missing = util::missingValue(scalingVariable_[0]);
+  const double missing = util::missingValue<double>();
   for (int jvar : operatorVarIndices_) {
       const std::string varname = (geovalName_ == "")?
                         nameMap_.convertName(dy.varnames().variables()[jvar])
@@ -137,7 +137,7 @@ void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) con
 void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsProductTLAD: adjoint observation operator starting" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {

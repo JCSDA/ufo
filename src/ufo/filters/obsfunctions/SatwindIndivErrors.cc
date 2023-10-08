@@ -146,7 +146,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/" + vcoord));
 
   // local variables
-  float const missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get variables from ObsSpace if present. If not, throw an exception
   std::vector<float> ob_p;

@@ -46,7 +46,7 @@ void processWhereMinMax(const std::vector<T> & data,
                         std::vector<bool> & mask,
                         bool minExclusive,
                         bool maxExclusive) {
-  const T missing = util::missingValue(missing);
+  const T missing = util::missingValue<T>();
   if (vmin != missing || vmax != missing) {
     for (size_t jj = 0; jj < data.size(); ++jj) {
       if (data[jj] == missing) continue;
@@ -65,7 +65,7 @@ void processWhereMinMax(const std::vector<util::DateTime> & data,
                         bool minExclusive,
                         bool maxExclusive) {
   const util::PartialDateTime not_set_value {};
-  const util::DateTime missing = util::missingValue(missing);
+  const util::DateTime missing = util::missingValue<util::DateTime>();
   if (vmin != not_set_value || vmax != not_set_value) {
     for (size_t jj = 0; jj < data.size(); ++jj) {
       if (data[jj] == missing) continue;
@@ -82,7 +82,7 @@ template<typename T>
 void processWhereIsDefined(const ObsFilterData & filterdata,
                            const Variable & varname,
                            std::vector<bool> & mask) {
-  const T missing = util::missingValue(missing);
+  const T missing = util::missingValue<T>();
   std::vector<T> data;
   filterdata.get(varname, data);
   for (size_t jj = 0; jj < data.size(); ++jj) {
@@ -95,7 +95,7 @@ template<typename T>
 void processWhereIsNotDefined(const ObsFilterData & filterdata,
                               const Variable & varname,
                               std::vector<bool> & mask) {
-  const T missing = util::missingValue(missing);
+  const T missing = util::missingValue<T>();
   std::vector<T> data;
   filterdata.get(varname, data);
   for (size_t jj = 0; jj < data.size(); ++jj) {
@@ -143,7 +143,7 @@ template <class T>
 void processWhereIsNotIn(const std::vector<T> & data,
                          const std::set<T> & blacklist,
                          std::vector<bool> & mask) {
-  const T missing = util::missingValue(missing);
+  const T missing = util::missingValue<T>();
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] == missing || oops::contains(blacklist, data[jj])) mask[jj] = false;
   }
@@ -163,7 +163,7 @@ void processWhereIsNotClose(const std::vector<float> & data,
                             const float tolerance, const bool relative,
                             const std::vector<float> & blacklist,
                             std::vector<bool> & mask) {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   for (size_t jj = 0; jj < data.size(); ++jj) {
     for (auto testvalue : blacklist) {
       if (relative) {
@@ -206,7 +206,7 @@ void processWhereIsFalse(const std::vector<DiagnosticFlag> & data,
 template <typename T>
 void applyMinMax(std::vector<bool> & where, WhereParameters const & parameters,
                  ObsFilterData const & filterdata, Variable const & varname) {
-  const T not_set_value = util::missingValue(not_set_value);
+  const T not_set_value = util::missingValue<T>();
 
   // Set vmin to the value of the 'minvalue' option if it exists; if not, leave vmin unchanged.
   T vmin = not_set_value;

@@ -204,7 +204,7 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
     ioda::VariableCreationParameters float_params;
     float_params.chunk = true;               // allow chunking
     float_params.compressWithGZIP();         // compress using gzip
-    float missing_value = util::missingValue(missing_value);
+    const float missing_value = util::missingValue<float>();
     float_params.setFillValue<float>(missing_value);
 
     // Create a variable for bias coefficients, save bias coeffs to the variable

@@ -245,7 +245,7 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
     ioda::VariableCreationParameters float_params;
     float_params.chunk = true;               // allow chunking
     float_params.compressWithGZIP();         // compress using gzip
-    float missing_value = util::missingValue(missing_value);
+    const float missing_value = util::missingValue<float>();
     float_params.setFillValue<float>(missing_value);
 
     // Create a variable for bias covariance coefficients,
@@ -262,8 +262,8 @@ void ObsBiasCovariance::write(const Parameters_ & params) {
 void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
   if (vars_.size() * prednames_.size() > 0) {
-    const float missing = util::missingValue(missing);
-    const int missing_int = util::missingValue(missing_int);
+    const float missing = util::missingValue<float>();
+    const int missing_int = util::missingValue<int>();
     const int jouter = innerConf.getInt("iteration");
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
         odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
@@ -418,7 +418,7 @@ void ObsBiasCovariance::inverseMultiply(const ObsBiasIncrement & dx1,
 void ObsBiasCovariance::randomize(ObsBiasIncrement & dx) const {
   oops::Log::trace() << "ObsBiasCovariance::randomize starts" << std::endl;
   if (dx) {
-    const double missing = util::missingValue(missing);
+    const double missing = util::missingValue<double>();
     static util::NormalDistribution<double> dist(variances_.size());
     for (std::size_t jj = 0; jj < variances_.size(); ++jj) {
       if (variances_[jj] != missing) {

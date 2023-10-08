@@ -57,7 +57,7 @@ void AssignError::apply(const Variables & vars,
                         ioda::ObsDataVector<int> & qcFlags,
                         ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " AssignError input obserr: " << obserr << std::endl;
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   // If float error is specified
   if (parameters_.errorParameter.value() != boost::none) {
     float error = *parameters_.errorParameter.value();

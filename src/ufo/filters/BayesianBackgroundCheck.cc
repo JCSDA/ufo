@@ -106,7 +106,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
   Variables varhofx(filtervars_, "HofX");
   Variables varflags(filtervars_, "QCFlags");
-  const float missingValueFloat = util::missingValue(missingValueFloat);
+  const float missingValueFloat = util::missingValue<float>();
 
   // Probability density of bad observations, PdBad:
   const std::vector<float> PdBad(obsdb_.nlocs(), parameters_.PdBad.value());

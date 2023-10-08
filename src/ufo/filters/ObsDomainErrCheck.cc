@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
@@ -63,8 +64,11 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
       if (!inside[jobs]) {
         flagged[jv][jobs] = true;
       } else {
-        ASSERT((*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs]));
-        ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
+        // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
+        // and its underlying type could in principle change without it being obvious here.
+        ASSERT((*obserr_)[iv][jobs] != util::missingValue<std::remove_reference_t<
+                                                          decltype((*obserr_)[iv][jobs])>>());
+        ASSERT(obs[jv][jobs] != util::missingValue<float>());
         float bound = 2.5 * (*obserr_)[iv][jobs];
         float obserrinc = parameter * std::max((values[jobs]-9.0), 0.0) * (*obserr_)[iv][jobs];
         obserrinc = std::max((*obserr_)[iv][jobs], bound);

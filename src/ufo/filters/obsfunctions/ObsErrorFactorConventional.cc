@@ -70,7 +70,7 @@ ObsErrorFactorConventional::~ObsErrorFactorConventional() {
 
 void ObsErrorFactorConventional::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
-  const int missing = util::missingValue(missing);
+  const int missing = util::missingValue<int>();
   static constexpr float con_g_rd = 500.0f*Constants::grav/(273.0f*Constants::rd);
   const float tiny_float = FLT_MIN;
   // TODO(HuiShao): replace the earth radius at equator after matching GSI

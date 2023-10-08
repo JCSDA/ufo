@@ -156,7 +156,7 @@ void HydrometeorCheckAMSUAclr::compute(const ObsFilterData & in,
   }
 
   // Set parameters
-  const float fmissing = util::missingValue(1.0f);
+  const float fmissing = util::missingValue<float>();
   float w1f6 = 1.0/10.0, w2f6 = 1.0/0.80;
   float w1f4 = 1.0/0.30, w2f4 = 1.0/1.80;
 
@@ -181,7 +181,7 @@ void HydrometeorCheckAMSUAclr::compute(const ObsFilterData & in,
                       std::abs(innov[ich544][iloc]), std::abs(innov[ich890][iloc])};
     bool result = false;
     result = any_of(OmFs.begin(), OmFs.end(), [](float x){
-             return (x > 200.0 || x == util::missingValue(1.0f));});
+             return (x > 200.0 || x == util::missingValue<float>());});
     if (result) {
       for (size_t ich = 0; ich < nchans; ++ich) {
         if (affected_channels[ich][iloc] == 0 && (ich <= ich544 || ich >= ich890)) {

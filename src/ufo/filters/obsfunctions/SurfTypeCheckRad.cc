@@ -100,7 +100,7 @@ void SurfTypeCheckRad::compute(const ObsFilterData & in,
   float varinv = 0.0;
   const std::string &errgrp = options_.testObserr.value();
   const std::string &flaggrp = options_.testQCflag.value();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);

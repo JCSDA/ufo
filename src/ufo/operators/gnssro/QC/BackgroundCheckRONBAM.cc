@@ -53,7 +53,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "BackgroundCheckRONBAM postFilter" << std::endl;
 
   const oops::Variables observed = obsdb_.obsvariables();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
@@ -75,9 +75,9 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
-        ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-        ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
-        ASSERT(impactparameter[0][jobs] != util::missingValue(impactparameter[0][jobs]));
+        ASSERT(obs[jv][jobs] != missing);
+        ASSERT(hofx[jobs] != missing);
+        ASSERT(impactparameter[0][jobs] != missing);
 
         float imp = impactparameter[0][jobs]/1000.0 - earthradius[0][jobs]/1000.0;
         float lat = latitude[0][jobs]*Constants::deg2rad;

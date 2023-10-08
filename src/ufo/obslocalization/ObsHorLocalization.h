@@ -158,7 +158,7 @@ void ObsHorLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
   oops::Log::trace() << "ObsHorLocalization::computeLocalization(lengthscale)" << std::endl;
 
   // set all to missing (outside of localization distance)
-  const double missing = util::missingValue(double());
+  const double missing = util::missingValue<double>();
   for (size_t jj = 0; jj < locvector.size(); ++jj) {
     locvector[jj] = missing;
   }

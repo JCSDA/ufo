@@ -94,7 +94,7 @@ void CLWRetMW_SSMIS::cloudLiquidWater(const std::vector<float> & bt19h,
   ///          Sounder (SSMIS) and Special Sensor Microwave Imager (SSM/I)', TGARS Special
   ///          Issue on the DMSP SSMIS, 46, 984-995.
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const size_t nchannels = 7;
   const size_t nlocs = bt19h.size();
 

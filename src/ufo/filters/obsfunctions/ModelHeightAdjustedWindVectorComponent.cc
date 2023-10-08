@@ -63,7 +63,7 @@ void ModelHeightAdjustedWindVectorComponent<northwardWind>::compute(const ObsFil
   in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // compute wind correction and adjusted winds.
   for (size_t jj = 0; jj < nlocs; ++jj) {

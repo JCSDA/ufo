@@ -62,8 +62,8 @@ void compareMissingValues(const std::vector<float> & float_ref,
   EXPECT(float_ref.size() == double_ref.size());
 ///  Get the data in float and double types, and check the missing data values
 ///  match
-  float missingFloat = util::missingValue(float());
-  float missingDouble = util::missingValue(double());
+  const float missingFloat = util::missingValue<float>();
+  const float missingDouble = util::missingValue<double>();
   for (int ivar=0; ivar < float_ref.size(); ivar++) {
     if ((float_ref[ivar] == missingFloat) != (double_ref[ivar] == missingDouble)) {
       std::cout << "Missings not equal: " << ivar << "  " << float_ref[ivar] <<

@@ -45,7 +45,7 @@ void testRecordHandler(const eckit::LocalConfiguration &conf) {
 
   // Change -999 to the missing floating-point value.
   // Also set the relevant QC flag to missing.
-  const float missingFloat = util::missingValue(missingFloat);
+  const float missingFloat = util::missingValue<float>();
   for (size_t jloc = 0; jloc < obsspace.nlocs(); ++jloc) {
     if (air_temperature[jloc] == -999) {
       air_temperature[jloc] = missingFloat;

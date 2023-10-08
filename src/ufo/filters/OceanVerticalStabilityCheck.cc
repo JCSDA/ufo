@@ -128,7 +128,7 @@ std::vector<float> OceanVerticalStabilityCheck::calculateDensityDiff
     std::vector<float> densityDiff;
     return densityDiff;
   }
-  const float missingValueFloat = util::missingValue(missingValueFloat);
+  const float missingValueFloat = util::missingValue<float>();
   std::vector<float> densityDiff(obs_indices.size()-1, missingValueFloat);
   for (size_t ind = 1; ind < obs_indices.size(); ++ind) {
     if (salinity[obs_indices[ind]] != missingValueFloat &&
@@ -161,7 +161,7 @@ void OceanVerticalStabilityCheck::identifyDensityInversions(std::vector<bool> &i
   if (densityDiff.size() < 2) {
     return;  // don't do anything if record is <=2 obs long (can't tell spike or step)
   }
-  const float missingValueFloat = util::missingValue(missingValueFloat);
+  const float missingValueFloat = util::missingValue<float>();
   const bool yesSpikes = parameters_.yesSpikes.value();
   const bool yesSteps = parameters_.yesSteps.value();
   const float tolerance = parameters_.nominal.value();

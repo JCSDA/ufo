@@ -47,8 +47,8 @@ std::string BayesianBackgroundQCFlags::getPGEsubstituteName(const std::string &v
 void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
                                          const std::vector<bool>& apply,
                                          std::vector<bool>& flagged) const {
-  const float missingValueFloat = util::missingValue(missingValueFloat);
-  const int missingValueInt = util::missingValue(missingValueInt);
+  const float missingValueFloat = util::missingValue<float>();
+  const int missingValueInt = util::missingValue<int>();
   const size_t nlocs = obsdb_.nlocs();
   // Missing data indicator for PGEs (for compatibility with OPS).
   const float PGEMDI = 1.111;

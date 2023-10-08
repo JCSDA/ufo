@@ -51,7 +51,7 @@ SymmCldImpactIR::~SymmCldImpactIR() {}
 
 void SymmCldImpactIR::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & SCI) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get dimensions
   size_t nlocs = in.nlocs();

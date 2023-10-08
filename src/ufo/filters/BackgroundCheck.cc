@@ -13,6 +13,7 @@
 #include <limits>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
@@ -85,7 +86,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
   const oops::Variables observed = obsdb_.obsvariables();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_ << std::endl;
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
 
@@ -105,10 +106,14 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<float> hofx;
       data_.get(varhofx.variable(jv), hofx);
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass &&
-            (*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs])) {
-          ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-          ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
+        // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
+        // and its underlying type could in principle change without it being obvious here.
+        const bool obserrNotMissing = ((*obserr_)[iv][jobs]
+                                       != util::missingValue<std::remove_reference_t<
+                                                             decltype((*obserr_)[iv][jobs])>>());
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass && obserrNotMissing) {
+          ASSERT(obs[jv][jobs] != missing);
+          ASSERT(hofx[jobs] != missing);
 
 //        Threshold for current observation
           float zz = function_abs_threshold[jv][jobs];
@@ -148,11 +153,15 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
         thr = getScalarOrFilterData(*parameters_.threshold.value(), data_);
 
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass &&
-            (*obserr_)[iv][jobs] != util::missingValue((*obserr_)[iv][jobs])) {
-          ASSERT(obs[jv][jobs] != util::missingValue(obs[jv][jobs]));
-          ASSERT(hofx[jobs] != util::missingValue(hofx[jobs]));
-          ASSERT(bias[jobs] != util::missingValue(bias[jobs]));
+        // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
+        // and its underlying type could in principle change without it being obvious here.
+        const bool obserrNotMissing = ((*obserr_)[iv][jobs]
+                                       != util::missingValue<std::remove_reference_t<
+                                                             decltype((*obserr_)[iv][jobs])>>());
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass && obserrNotMissing) {
+          ASSERT(obs[jv][jobs] != missing);
+          ASSERT(hofx[jobs] != missing);
+          ASSERT(bias[jobs] != missing);
 
           const std::vector<float> &errorMultiplier = thresholdWrtBGerror ?
                                                       hofxerr : (*obserr_)[iv];

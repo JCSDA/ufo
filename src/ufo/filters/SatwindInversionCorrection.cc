@@ -90,7 +90,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "SatwindInversionCorrection priorFilter" << std::endl;
   print(oops::Log::trace());
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
 
 // Get parameters from options.

@@ -33,7 +33,7 @@ namespace ufo {
     IndStd_.assign(numProfileLevels, -1);
 
     /// Missing value (float)
-    const float missingValueFloat = util::missingValue(1.0f);
+    const float missingValueFloat = util::missingValue<float>();
 
     int SigPrev = -1;  // Previous significant level
     int jlevStdA = 0;  // Standard level below previous significant level
@@ -112,7 +112,7 @@ namespace ufo {
     LogP_.assign(numProfileLevels, 0.0);
 
     /// Missing value (float)
-    const float missingValueFloat = util::missingValue(1.0f);
+    const float missingValueFloat = util::missingValue<float>();
 
     int SigPrev = -1;  // Previous significant level
     int jlevStdA = 0;  // Standard level below previous significant level

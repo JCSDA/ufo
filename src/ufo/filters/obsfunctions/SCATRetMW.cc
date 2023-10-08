@@ -90,7 +90,7 @@ void SCATRetMW::compute(const ObsFilterData & in,
         }
       }
     }
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
     // Retrieve scattering index
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (water_frac[iloc] >= 0.99 &&

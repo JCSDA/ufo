@@ -240,9 +240,9 @@ float bilinearInterpolation(
     const ConstrainedRange &range1,
     const DataExtractorPayload<float>::const_array_view<2>::type &interpolatedArray) {
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
-  if (obVal0 == util::missingValue(obVal0) || obVal1 == util::missingValue(obVal1)) {
+  if (obVal0 == util::missingValue<T>() || obVal1 == util::missingValue<R>()) {
     return missing;
   }
 
@@ -671,7 +671,7 @@ class DataExtractor
         break;
       case ufo::ExtrapolationMode::MISSING:
         resultSet_ = true;
-        result_ = util::missingValue(result_);
+        result_ = util::missingValue<ExtractedValue>();
         return obValN;
       default:
         throw eckit::Exception("Unrecognised extrapolation mode for '" + varName + "', please "

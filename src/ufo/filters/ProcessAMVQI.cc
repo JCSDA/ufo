@@ -55,8 +55,8 @@ ProcessAMVQI::~ProcessAMVQI() {
 void ProcessAMVQI::doFilter() const {
   oops::Log::trace() << "ProcessAMVQI doFilter" << std::endl;
 
-  const float missing = util::missingValue(float());
-  const int int_missing = util::missingValue(int());
+  const float missing = util::missingValue<float>();
+  const int int_missing = util::missingValue<int>();
   const size_t nlocs = obsdb_.nlocs();
   const size_t number_of_apps = parameters_.number_of_apps.value();
 

@@ -94,7 +94,7 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
 void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsProfileAverageTLAD: simulateObsAD started" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   // Get correspondence between record numbers and indices in the total sample.
   const std::vector<std::size_t> &recnums = odb_.recidx_all_recnums();

@@ -46,7 +46,7 @@ void BgdDepartureAnomaly::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
   // Get dimension
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get obs space
   auto & obsdb = in.obsspace();

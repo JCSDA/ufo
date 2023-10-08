@@ -64,7 +64,7 @@ void SelectStatistic::compute(const ObsFilterData & in, ioda::ObsDataVector<int>
   // (all true if there is no where clause).
   const std::vector<bool> apply = processWhere(options_.where, in, options_.whereOperator);
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   ObsAccessor obsAccessor = createObsAccessor(obsdb);
   const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
   oops::Log::debug() << "validObsIds: " << validObsIds << std::endl;

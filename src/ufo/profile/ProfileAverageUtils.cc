@@ -20,7 +20,7 @@ namespace ufo {
    const std::string & flag_name,
    const std::string & obs_name)
   {
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
     const size_t halfnprofs = profileDataHandler.getObsdb().nrecs() / 2;
 
     // Retrieve filter QC flags.
@@ -49,7 +49,7 @@ namespace ufo {
    const std::string & geovals_testreference_name,
    const std::string & geovals_qcflags_name)
   {
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
 
     // Retrieve, then save, the OPS versions of the variable averaged onto model levels,
     // and the QC flags associated with the averaging process.
@@ -92,8 +92,8 @@ namespace ufo {
                                         const std::vector<float> &model_vert_coord,
                                         const size_t &nlocs,
                                         const bool &obs_to_mod_only) {
-    const int64_t missingValInt = util::missingValue(missingValInt);  // size_t type
-    const float missingValFloat = util::missingValue(missingValFloat);
+    const int64_t missingValInt = util::missingValue<int64_t>();  // size_t type
+    const float missingValFloat = util::missingValue<float>();
     const size_t nlocs_obs = locsOriginal.size();
     const size_t nlocs_ext = locsExt.size();
     const bool vert_coord_increasing = validateVertCoords(locsOriginal,
@@ -156,7 +156,7 @@ namespace ufo {
                         std::vector<bool> &flagged,
                         std::vector<int> &flags) {
     const size_t nlocs_ext = locsExt.size();
-    const int64_t missingValInt = util::missingValue(missingValInt);  // size_t type
+    const int64_t missingValInt = util::missingValue<int64_t>();  // size_t type
 
     // Set flags
     for (size_t mlev = 0; mlev < nlocs_ext; ++mlev) {
@@ -179,8 +179,8 @@ namespace ufo {
                             const std::vector<int> &flags,
                             const std::vector<float> &hofx,
                             std::vector<float> &obs) {
-    const int64_t missingValInt = util::missingValue(missingValInt);  // size_t type
-    const float missingValFloat = util::missingValue(missingValFloat);
+    const int64_t missingValInt = util::missingValue<int64_t>();  // size_t type
+    const float missingValFloat = util::missingValue<float>();
     const size_t nlocs_obs = locsOriginal.size();
     const size_t nlocs_ext = locsExt.size();
     const size_t nlocs = hofx.size();

@@ -27,7 +27,7 @@ namespace ioda {
   class ObsSpace;
 }
 namespace ufo {
-  static const std::string missing_value_string = util::missingValue(missing_value_string);
+  static const std::string missing_value_string = util::missingValue<std::string>();
 //
 // table in yaml file to relate satellite name and wmo number label in yaml "Satellite_id"
 //

@@ -35,7 +35,7 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
   oops::Log::trace() << "      --> obsName: " << obsName() << std::endl;
 
   const size_t nlocs = obsdb_.nlocs();
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get all required obs, metadata and geovals
   // Obs

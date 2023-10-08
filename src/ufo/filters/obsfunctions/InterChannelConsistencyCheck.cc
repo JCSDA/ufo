@@ -72,7 +72,7 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
 
   // Get effective observation error and qcflag from ObsSpace
   // Convert effective observation error to inverse of the error variance
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   std::vector<int> qcflagdata(nlocs);
   std::vector<float> obserrdata(nlocs);
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs, 0.0));

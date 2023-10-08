@@ -79,7 +79,7 @@ ObsErrorModelRamp::~ObsErrorModelRamp() {}
 
 void ObsErrorModelRamp::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<float> & out) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Get piece-wise parameters from options
   const std::vector<float> &x0 = options_.x0.value();

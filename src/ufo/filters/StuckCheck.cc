@@ -87,7 +87,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
     }
     const std::vector<float> variableValues = obsAccessor.getFloatVariableFromObsSpace(
           "ObsValue", variable);
-    const float missingFloat = util::missingValue(float());
+    const float missingFloat = util::missingValue<float>();
     for (auto station : splitter.multiElementGroups()) {
       std::string stationId = std::to_string(stationNumber);
       std::vector<float> variableDataStation = collectStationVariableData(

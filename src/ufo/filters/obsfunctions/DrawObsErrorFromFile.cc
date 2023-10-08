@@ -66,7 +66,7 @@ DrawObsErrorFromFile::DrawObsErrorFromFile(const eckit::LocalConfiguration &conf
 
 void DrawObsErrorFromFile::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<float> & out) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
 
   // Interpolate variances
   drawValueFromFile_->compute(in, out);

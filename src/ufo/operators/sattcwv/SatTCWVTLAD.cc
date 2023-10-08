@@ -146,7 +146,7 @@ void SatTCWVTLAD::simulateObsAD(
   }
 
   // Get the missing value indicator
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   // Loop through the obs, adding the increment to the model state
   for (size_t prof = 0; prof < nprofiles; ++prof) {

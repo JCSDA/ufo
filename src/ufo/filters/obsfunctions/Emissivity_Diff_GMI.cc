@@ -49,7 +49,7 @@ Emissivity_Diff_GMI::~Emissivity_Diff_GMI() {}
 
 void Emissivity_Diff_GMI::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   std::vector<float> &regression_diff = out[0];
   // Get dimension
   const size_t nlocs = in.nlocs();

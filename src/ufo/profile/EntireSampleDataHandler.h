@@ -175,13 +175,13 @@ namespace ufo {
                          std::vector <bool>>> entireSampleData_;
 
     /// Missing value (int)
-    const int missingValueInt = util::missingValue(missingValueInt);
+    const int missingValueInt = util::missingValue<int>();
 
     /// Missing value (float)
-    const float missingValueFloat = util::missingValue(missingValueFloat);
+    const float missingValueFloat = util::missingValue<float>();
 
     /// Missing value (string)
-    const std::string missingValueString = util::missingValue(missingValueString);
+    const std::string missingValueString = util::missingValue<std::string>();
   };
 }  // namespace ufo
 

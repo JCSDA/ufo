@@ -554,7 +554,7 @@ void PoissonDiskThinning::thinCategoryMedian(const ObsData &obsData,
   // this code will be deprecated in the future.
   //
   std::vector<bool> isUsed(obsData.totalNumObs, false);
-  const float medianMissingValue = util::missingValue(medianMissingValue);
+  const float medianMissingValue = util::missingValue<float>();
 
   // Function to check if a candidate observation is the median (depends on opsCompatibilityMode).
   auto isMedian = [opsCompatibilityMode](float medianObCandidate,

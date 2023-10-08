@@ -48,7 +48,7 @@ class ObsVertLocParameters : public oops::ObsLocalizationParametersBase {
 
   oops::Parameter<double> SOARexpDecayH{"soar decay",
                        "soar decay",
-                       util::missingValue(double()), this};
+                       util::missingValue<double>(), this};
 
   oops::Parameter<bool> assignConstantVcoordToObs{"assign constant vertical coordinate to obs",
                         "assign constant vertical coordinate to obs (e.g. for surface obs)",
@@ -56,7 +56,7 @@ class ObsVertLocParameters : public oops::ObsLocalizationParametersBase {
 
   oops::Parameter<float> constantVcoordValue{"constant vertical coordinate value",
                        "value of the constant vertical coordinate",
-                       util::missingValue(float()), this};
+                       util::missingValue<float>(), this};
 
   /// returns distance between points \p p1 and \p p2
   double distance(const double & vCoord1, const double & vCoord2) const {

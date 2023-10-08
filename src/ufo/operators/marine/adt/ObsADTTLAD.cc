@@ -61,7 +61,7 @@ void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
 void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsADTTLAD: simulateObsTL starting" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   // get geovals
   std::vector<double> vec(ovec.nlocs());
@@ -98,7 +98,7 @@ void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) 
 void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsADTTLAD: simulateObsAD starting" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   // get geovals
   std::vector<double> vec(ovec.nlocs());

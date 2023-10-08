@@ -125,7 +125,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   std::vector<float> gv_pres_1(nlocs), gv_pres_N(nlocs);
   in.get(Variable("GeoVaLs/air_pressure"), 0, gv_pres_1);
   in.get(Variable("GeoVaLs/air_pressure"), np - 1, gv_pres_N);
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   ASSERT(gv_pres_1[0] != missing);
   ASSERT(gv_pres_N[0] != missing);
   bool p_ascending = (gv_pres_N[0] > gv_pres_1[0]);

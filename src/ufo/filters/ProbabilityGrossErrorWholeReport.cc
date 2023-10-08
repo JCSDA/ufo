@@ -45,7 +45,7 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProbabilityGrossErrorWholeReport preProcess" << std::endl;
   // Missing value indicator
-  const float missingValueFloat = util::missingValue(missingValueFloat);
+  const float missingValueFloat = util::missingValue<float>();
   // Dimensions
   const size_t nlocs = obsdb_.nlocs();
   const size_t nvars = filtervars.nvars();

@@ -23,7 +23,7 @@ namespace ufo {
                                                  const std::string & obsVerticalCoord,
                                                  const std::string & modelVerticalCoord,
                                                  const int itermax) {
-    const float missing = util::missingValue(missing);
+    const float missing = util::missingValue<float>();
 
     // Get observed pressure.
     std::vector<float> pressure_obs(odb.nlocs());

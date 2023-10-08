@@ -135,8 +135,8 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
   const std::size_t nlocs = out.nlocs();
   const std::size_t nvars = out.nvars();
 
-  const float fmiss = util::missingValue(fmiss);
-  const double dmiss = util::missingValue(dmiss);
+  const float fmiss = util::missingValue<float>();
+  const double dmiss = util::missingValue<double>();
 
   std::vector<float> bt19h, bt19v, bt22v, bt37h, bt37v, bt91v, bt91h;
   if (sensor == "SSMIS") {
@@ -339,7 +339,7 @@ void CloudLiquidWater::clwDerivative_amsua(const std::vector<float> & tsavg,
   const float d1 = 0.754, d2 = -2.265;
   const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
   const float tbmax = 550.0, r284 = 284.0, r285 = 285.0;
-  const float fmiss = util::missingValue(fmiss);
+  const float fmiss = util::missingValue<float>();
 
   for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
     if (water_frac[iloc] >= 0.99) {

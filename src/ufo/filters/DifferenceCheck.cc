@@ -43,7 +43,7 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
 
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
 
 // min/max value setup

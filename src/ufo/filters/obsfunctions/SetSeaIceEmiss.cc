@@ -64,7 +64,7 @@ namespace ufo {
     // Get dimensions and initialise constants
     const size_t nlocs = in.nlocs();
     const size_t nchans = channels_.size();
-    const int missingValueInt = util::missingValue(missingValueInt);
+    const int missingValueInt = util::missingValue<int>();
 
     // constant emissivities defined for different ice types
     static constexpr float emissivity_multiice = 0.84f;

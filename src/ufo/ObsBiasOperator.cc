@@ -34,7 +34,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
                                      const ObsBias & biascoeffs, ObsDiagnostics & ydiags) const {
   oops::Log::trace() << "ObsBiasOperator::computeObsBias starting" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
   ScopedDefaultGeoVaLFormatChange change(geovals, GeoVaLFormat::REDUCED);
   const Predictors & predictors = biascoeffs.predictors();
   const std::size_t npreds = predictors.size();

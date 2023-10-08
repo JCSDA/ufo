@@ -32,8 +32,8 @@ namespace {
 /// At each location, set the QC flag to QCflags::missing if the current QC flag is invalid
 /// or if the ObsValue is missing.
 void updateQCFlags(const std::vector<float> *obsValues, std::vector<int>& qcflags) {
-  const float rmiss = util::missingValue(rmiss);
-  const int imiss = util::missingValue(imiss);
+  const float rmiss = util::missingValue<float>();
+  const int imiss = util::missingValue<int>();
   for (size_t jobs = 0; jobs < qcflags.size(); ++jobs) {
     if (qcflags[jobs] == imiss || !obsValues || (*obsValues)[jobs] == rmiss) {
       qcflags[jobs] = QCflags::missing;
@@ -62,8 +62,8 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
   ASSERT(flags_->nvars() == allObservedVars.size());
   ASSERT(flags_->nlocs() == obsdb_.nlocs());
 
-  const float rmiss = util::missingValue(rmiss);
-  const int imiss = util::missingValue(imiss);
+  const float rmiss = util::missingValue<float>();
+  const int imiss = util::missingValue<int>();
 
   const ioda::ObsDataVector<float> obs(obsdb, initialObservedVars, "ObsValue");
 
@@ -98,7 +98,7 @@ void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
                            const ObsDiagnostics & /*diags*/) {
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
   const oops::Variables &allObservedVars = obsdb_.assimvariables();
 
 

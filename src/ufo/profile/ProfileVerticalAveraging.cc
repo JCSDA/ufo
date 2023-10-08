@@ -34,7 +34,7 @@ namespace ufo {
                                 std::vector <float> *coordMax,
                                 std::vector <float> *coordMin)
   {
-    const float missingValueFloat = util::missingValue(missingValueFloat);
+    const float missingValueFloat = util::missingValue<float>();
     const size_t numRepLev = coordIn.size();
     const size_t numInterp = coordOut.size();
     const size_t numOut = method == ProfileAveraging::Method::Interpolation ?

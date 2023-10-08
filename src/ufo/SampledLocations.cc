@@ -48,7 +48,7 @@ SampledLocations::SampledLocations(
 
   // Set float_params that add safety in case of missing values and optimize the
   // potential future use of hdf5's "memory file" as the ObsGroup backend.
-  const float floatMissing = util::missingValue(floatMissing);
+  const float floatMissing = util::missingValue<float>();
   ioda::VariableCreationParameters float_params;
   float_params.chunk = true;
   float_params.compressWithGZIP();
@@ -98,7 +98,7 @@ SampledLocations::SampledLocations(const eckit::Configuration & conf, const ecki
 
   // Set float_params that add safety in case of missing values and optimize the
   // potential future use of hdf5's "memory file" as the ObsGroup backend.
-  const float floatMissing = util::missingValue(floatMissing);
+  const float floatMissing = util::missingValue<float>();
   ioda::VariableCreationParameters float_params;
   float_params.chunk = true;
   float_params.compressWithGZIP();

@@ -82,7 +82,7 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) co
 void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator starting" << std::endl;
 
-  const double missing = util::missingValue(missing);
+  const double missing = util::missingValue<double>();
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
