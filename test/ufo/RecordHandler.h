@@ -21,6 +21,7 @@
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "oops/util/missingValues.h"
+#include "oops/util/TimeWindow.h"
 
 #include "ufo/utils/RecordHandler.h"
 
@@ -30,11 +31,12 @@ namespace test {
 void testRecordHandler(const eckit::LocalConfiguration &conf) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsTopLevelParameters obsParams;
   obsParams.validateAndDeserialize(obsSpaceConf);
-  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   // Obtain air_temperature and eastward_wind from configuration and save to ObsSpace.
   std::vector<float> air_temperature = conf.getFloatVector("air_temperature");

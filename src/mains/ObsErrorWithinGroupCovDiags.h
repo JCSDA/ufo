@@ -19,6 +19,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "oops/util/TimeWindow.h"
 
 #include "ufo/errors/ObsErrorWithinGroupCov.h"
 
@@ -42,8 +43,10 @@ class ObsErrorWithinGroupCovDiagsParameters : public oops::Parameters {
  public:
   /// Only observations taken at times lying in the (`window begin`, `window end`]
   /// interval will be included in observation spaces.
+  /// If `window shift` is set to true, the interval becomes [`window begin`, `window end`).
   oops::RequiredParameter<util::DateTime> windowBegin{"window begin", this};
   oops::RequiredParameter<util::DateTime> windowEnd{"window end", this};
+  oops::Parameter<bool> windowShift{"window shift", false, this};
 
   oops::RequiredParameter<ioda::ObsTopLevelParameters> obsSpace{"obs space",
         "options used to configure the observation space", this};
@@ -67,8 +70,11 @@ class ObsErrorWithinGroupCovDiags : public oops::Application {
     if (validate) params.validate(fullConfig);
     params.deserialize(fullConfig);
 
-    ioda::ObsSpace obsdb(params.obsSpace, this->getComm(), params.windowBegin,
-                         params.windowEnd, this->getComm());
+    ioda::ObsSpace obsdb(params.obsSpace, this->getComm(),
+                         util::TimeWindow(params.windowBegin,
+                                          params.windowEnd,
+                                          util::boolToWindowBound(params.windowShift)),
+                         this->getComm());
     ioda::ObsVector randomVec(obsdb);
     randomVec.random();
 

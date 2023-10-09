@@ -37,6 +37,7 @@ void testObsBiasCovarianceDetails() {
   //  Setup ObsSpace
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
   std::vector<eckit::LocalConfiguration> obsconfs
     = conf.getSubConfigurations("observations");
 
@@ -45,7 +46,7 @@ void testObsBiasCovarianceDetails() {
 
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
-    ioda::ObsSpace odb(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace odb(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
     // Setup ObsBias
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");

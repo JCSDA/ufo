@@ -53,6 +53,7 @@ void testGeoVaLs() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  util::TimeWindow timeWindow(bgn, end);
 
   std::vector<eckit::LocalConfiguration> confs;
   conf.get("geovals test", confs);
@@ -61,7 +62,7 @@ void testGeoVaLs() {
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(obsconf);
-    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
 /// Setup GeoVaLs
     const eckit::LocalConfiguration geovalsconf(confs[jconf], "geovals");

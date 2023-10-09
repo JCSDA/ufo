@@ -45,6 +45,8 @@ void testNoReconditioning() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
   util::DateTime bgn(Tconf.getString("window begin"));
   util::DateTime end(Tconf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
+
   ufo::instantiateObsErrorFactory();
   std::vector<eckit::LocalConfiguration> conf;
   ::test::TestEnvironment::config().get("observations", conf);
@@ -59,7 +61,7 @@ void testNoReconditioning() {
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
     ioda::ObsTopLevelParameters obsParams;
     obsParams.validateAndDeserialize(obsSpaceConf);
-    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
     ObsErrorCrossVarCov R(Params, obsspace, oops::mpi::myself());
     ObsErrorCrossVarCov RRecon(Params, obsspace, oops::mpi::myself());
@@ -80,6 +82,7 @@ void compareKnownOutput() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
   util::DateTime bgn(Tconf.getString("window begin"));
   util::DateTime end(Tconf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
 
   ufo::instantiateObsErrorFactory();
 
@@ -93,7 +96,7 @@ void compareKnownOutput() {
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
     ioda::ObsTopLevelParameters obsParams;
     obsParams.validateAndDeserialize(obsSpaceConf);
-    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
     const eckit::LocalConfiguration rconf(conf[jj], "obs error");
     const eckit::LocalConfiguration testconf(conf[jj], "obs error test");
@@ -123,6 +126,7 @@ void testNoValidOptionSelected() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
   util::DateTime bgn(Tconf.getString("window begin"));
   util::DateTime end(Tconf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
 
   ufo::instantiateObsErrorFactory();
 
@@ -136,7 +140,7 @@ void testNoValidOptionSelected() {
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
     ioda::ObsTopLevelParameters obsParams;
     obsParams.validateAndDeserialize(obsSpaceConf);
-    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
     const eckit::LocalConfiguration rconf(conf[jj], "obs error");
     ObsErrorCrossVarCovParameters Params;

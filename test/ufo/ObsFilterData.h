@@ -134,14 +134,13 @@ void checkObsDiagsGet(const ufo::ObsFilterData & data,
 // -----------------------------------------------------------------------------
 
 void testSkipDerived(const eckit::LocalConfiguration & conf,
-                     const util::DateTime & bgn,
-                     const util::DateTime & end,
+                     const util::TimeWindow & timeWindow,
                      const bool skipDerived) {
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(conf, "obs space");
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(obsconf);
-    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
 /// Setup ObsFilterData
     ObsFilterData data(ospace);
@@ -165,13 +164,13 @@ void testObsFilterData() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
-
+  const util::TimeWindow timeWindow(bgn, end);
   std::vector<eckit::LocalConfiguration> confs;
   conf.get("obs filter data", confs);
   for (size_t jconf = 0; jconf < confs.size(); ++jconf) {
 ///  Test the skipDerived option if it is present. After doing so move to the next configuration.
     if (confs[jconf].has("skipDerived")) {
-      testSkipDerived(confs[jconf], bgn, end, confs[jconf].getBool("skipDerived"));
+      testSkipDerived(confs[jconf], timeWindow, confs[jconf].getBool("skipDerived"));
       continue;
     }
 
@@ -179,7 +178,7 @@ void testObsFilterData() {
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(obsconf);
-    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "geovals");

@@ -73,10 +73,11 @@ class SampledLocationsTestFixture : private boost::noncopyable {
     const eckit::Configuration & conf = ::test::TestEnvironment::config();
     util::DateTime bgn(conf.getString("window begin"));
     util::DateTime end(conf.getString("window end"));
+    const util::TimeWindow timeWindow(bgn, end);
     const eckit::LocalConfiguration obsconf(conf, "obs space");
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(obsconf);
-    obsspace_.reset(new ioda::ObsSpace(obsparams, oops::mpi::world(), bgn, end,
+    obsspace_.reset(new ioda::ObsSpace(obsparams, oops::mpi::world(), timeWindow,
                                        oops::mpi::myself()));
     testconfig_ = conf.getSubConfiguration("locations test");
     testparams_.validateAndDeserialize(testconfig_);

@@ -89,12 +89,13 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   // Perform drift calculation for each profile in the sample.
   for (size_t jprof = 0; jprof < nprofs; ++jprof) {
     const std::vector<size_t> &locs = obsdb_.recidx_vector(recnums[jprof]);
+    const util::DateTime windowEnd = obsdb_.windowEnd();
     formulas::horizontalDrift(locs, apply,
                               latitude_in, longitude_in, datetime_in,
                               height, wind_speed, wind_from_direction,
                               latitude_out, longitude_out, datetime_out,
                               formulas::MethodFormulation::UKMO,
-                              keep_in_window_ ? &(obsdb_.windowEnd()) : nullptr);
+                              keep_in_window_ ? &windowEnd : nullptr);
   }
 
   // Save output values.

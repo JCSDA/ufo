@@ -87,10 +87,13 @@ SampledLocations::SampledLocations(const eckit::Configuration & conf, const ecki
   const eckit::LocalConfiguration obsconf(conf, "obs space");
   const util::DateTime bgn = util::DateTime(conf.getString("window begin"));
   const util::DateTime end = util::DateTime(conf.getString("window end"));
+  const bool shift = static_cast<bool>(conf.getBool("window shift", false));
+  const util::TimeWindow timeWindow(bgn, end, util::boolToWindowBound(shift));
+
   ioda::ObsTopLevelParameters obsparams;
   obsparams.validateAndDeserialize(obsconf);
 
-  const ioda::ObsSpace obspace(obsparams, comm, bgn, end, oops::mpi::myself());
+  const ioda::ObsSpace obspace(obsparams, comm, timeWindow, oops::mpi::myself());
   const size_t nlocs = obspace.nlocs();
   dist_ = obspace.distribution();
 

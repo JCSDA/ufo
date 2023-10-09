@@ -46,10 +46,12 @@ template <typename OBS> class RunCRTM : public oops::Application {
 //  Setup observation window
     const util::DateTime winbgn(fullConfig.getString("window begin"));
     const util::Duration winlen(fullConfig.getString("window length"));
-    const util::DateTime winend(winbgn + winlen);
+    const bool winshift(fullConfig.getBool("window shift", false));
+    const util::TimeWindow timeWindow(winbgn, winbgn + winlen,
+                                      util::boolToWindowBound(winshift));
 
 //  Setup observations
-    ObsSpaces_ obsdb(fullConfig, this->getComm(), winbgn, winend);
+    ObsSpaces_ obsdb(fullConfig, this->getComm(), timeWindow);
 
     oops::Variables diagvars;
 

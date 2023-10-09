@@ -64,12 +64,13 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
                                std::vector<std::vector<bool> > & flagged) const {
   util::DateTime widerWindowStart = obsdb_.windowStart() - options_.timeBeforeStartOfWindow.value();
   util::DateTime widerWindowEnd = obsdb_.windowEnd() + options_.timeAfterEndOfWindow.value();
+  const util::TimeWindow widerTimeWindow(widerWindowStart, widerWindowEnd);
   // In order to prevent the MPI from distributing the aux spaces's observations to different
   // ranks from the distribution used for obsdb_, widerObsSpace uses the myself communicator
   // for both time and spatial communicators, ensuring that all observations in widerObsSpace
   // are saved to all ranks
-  ioda::ObsSpace widerObsSpace(options_.largerObsSpace, oops::mpi::myself(), widerWindowStart,
-                               widerWindowEnd, oops::mpi::myself());
+  ioda::ObsSpace widerObsSpace(options_.largerObsSpace, oops::mpi::myself(), widerTimeWindow,
+                               oops::mpi::myself());
   if (options_.resetLargerObsSpaceVariables) {  // used for unit testing
     if (unitTestConfig_.has("station_ids_wide")) {
       const std::vector<int> stationIds = unitTestConfig_.getIntVector("station_ids_wide");

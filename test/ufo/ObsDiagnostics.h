@@ -83,7 +83,8 @@ void testObsDiagnostics() {
   params.validateAndDeserialize(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
-  ioda::ObsSpace ospace(params.obsSpace, oops::mpi::world(), params.windowBegin, params.windowEnd,
+  ioda::ObsSpace ospace(params.obsSpace, oops::mpi::world(),
+                        util::TimeWindow(params.windowBegin, params.windowEnd),
                         oops::mpi::myself());
   const size_t nlocs = ospace.nlocs();
 

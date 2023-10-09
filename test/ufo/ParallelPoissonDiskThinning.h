@@ -45,11 +45,12 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
                              bool expectValidationError = false) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsTopLevelParameters obsParams;
   obsParams.validateAndDeserialize(obsSpaceConf);
-  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
       obsspace, obsspace.obsvariables(), "ObsError"));

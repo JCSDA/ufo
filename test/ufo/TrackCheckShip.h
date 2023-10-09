@@ -38,11 +38,12 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(
     const eckit::LocalConfiguration &conf, std::vector<size_t> *rejectedObsIndices = nullptr) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsTopLevelParameters obsParams;
   obsParams.validateAndDeserialize(obsSpaceConf);
-  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   if (conf.has("station_ids")) {
     const std::vector<int> stationIds = conf.getIntVector("station_ids");

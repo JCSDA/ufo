@@ -94,11 +94,12 @@ int maxNumBuddiesWithSameStationId(const std::vector<ObsPair> &pairs,
 void testDuplicatesAndBuddyCountConstraints(const eckit::LocalConfiguration &conf) {
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  const util::TimeWindow timeWindow(bgn, end);
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsTopLevelParameters obsParams;
   obsParams.validateAndDeserialize(obsSpaceConf);
-  ioda::ObsSpace obsSpace(obsParams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+  ioda::ObsSpace obsSpace(obsParams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   boost::optional<std::vector<float>> airPressures;
   if (obsSpace.has("MetaData", "pressure")) {

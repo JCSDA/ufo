@@ -36,13 +36,15 @@ void testObsBiasReadWrite() {
 
   util::DateTime bgn(conf.getString("window begin"));
   util::DateTime end(conf.getString("window end"));
+  util::TimeWindow timeWindow(bgn, end);
+
   std::vector<eckit::LocalConfiguration> obsconfs
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
-    ioda::ObsSpace odb(obsparams, oops::mpi::world(), bgn, end, oops::mpi::myself());
+    ioda::ObsSpace odb(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
     // setup ObsBias parameters
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
