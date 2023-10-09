@@ -48,14 +48,20 @@ namespace ufo {
     // Number of observation locations
     const size_t nlocs = obsdb_.nlocs();
 
+    // Initialize the output variable
+    std::vector<double> surfaceWindScalingPressure(nlocs);
+
+    // If no locations to process, add to obs space and return
+    if (nlocs == 0) {
+      obsdb_.put_db("DerivedVariables", "SurfaceWindScalingPressure", surfaceWindScalingPressure);
+      return;
+    }
+
     // Pointer to the GeoVaLs
     const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
     // Number of 'full' model levels
     size_t nlevs = gvals->nlevs("virtual_temperature");
-
-    // Set output quantities to 1 everywhere (i.e. do nothing unless specified otherwise)
-    std::vector<double> surfaceWindScalingPressure(nlocs);
 
     // Get observation height and pressure
     std::vector<double> obsPressure(nlocs);

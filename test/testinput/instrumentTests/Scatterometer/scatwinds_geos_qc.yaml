@@ -35,11 +35,13 @@ observations:
   # ------------------------------------------------------------
   - filter: Variable Transforms
     Transform: AdjustedHeightCoordinate
+    SkipWhenNoObs: False
 
   # Apply variable changes needed wind scaling
   # ------------------------------------------
   - filter: Variable Transforms
     Transform: SurfaceWindScalingHeight
+    SkipWhenNoObs: False
 
   #
   # Reject all obs with PreQC mark already set above 3

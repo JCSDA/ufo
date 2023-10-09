@@ -49,14 +49,21 @@ namespace ufo {
     // Number of observation locations
     const size_t nlocs = obsdb_.nlocs();
 
+    // Initialize the output variable
+    std::vector<double> surfaceWindScalingHeight(nlocs);
+
+    // If no locations to process, add to obs space and return
+    if (nlocs == 0) {
+      obsdb_.put_db("DerivedVariables", "SurfaceWindScalingHeight", surfaceWindScalingHeight);
+      return;
+    }
+
     // Pointer to the GeoVaLs
     const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
     // Number of 'full' model levels
     size_t nlevs = gvals->nlevs("geopotential_height");
 
-    // Set output quantities to 1 everywhere (i.e. do nothing unless specified otherwise)
-    std::vector<double> surfaceWindScalingHeight(nlocs);
 
     // Get observation height and pressure
     std::vector<double> heightVariable(nlocs), stationElevation(nlocs);

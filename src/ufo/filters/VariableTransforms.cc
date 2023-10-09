@@ -63,7 +63,7 @@ void VariableTransforms::applyFilter(
   oops::Log::debug() << " --> In variabletransforms::applyFilter" << std::endl;
 
   // Do not perform transformation if there are no observations present.
-  if (data_.nlocs() == 0) {
+  if (parameters_->SkipWhenNoObs.value() && data_.nlocs() == 0) {
     oops::Log::debug() << " --> No observations present. "
                        << "Transformation will not be performed." << std::endl;
     return;

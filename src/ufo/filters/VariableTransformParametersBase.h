@@ -71,6 +71,9 @@ class VariableTransformParametersBase : public FilterParametersBase {
   /// the non-missing entries of the vector in the equivalent original group (e.g. ObsValue).
   oops::Parameter<bool> FillMissingDerivedFromOriginal{"FillMissingDerivedFromOriginal",
                                                        false, this};
+
+  /// Skip the variable transform calculation when there are no observations
+  oops::Parameter<bool> SkipWhenNoObs{"SkipWhenNoObs", true, this};
 };
 
 /// \brief Concrete class containing the options specified by the VariableTransformParametersBase.

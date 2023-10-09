@@ -51,6 +51,7 @@ observations:
   # Compute wind scaling factors
   - filter: Variable Transforms
     Transform: SurfaceWindScalingPressure
+    SkipWhenNoObs: False
 
 ## Surface pressure
 ## ----------------

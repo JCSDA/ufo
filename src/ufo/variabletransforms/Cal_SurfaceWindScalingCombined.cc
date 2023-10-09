@@ -42,9 +42,18 @@ namespace ufo {
     // Number of observation locations
     const size_t nlocs = obsdb_.nlocs();
 
+    // Initialize the output variable
+    std::vector<double> SurfaceWindScalingCombined(nlocs);
+
+    // If no locations to process, add to obs space and return
+    if (nlocs == 0) {
+      obsdb_.put_db("DerivedVariables", "SurfaceWindScalingCombined", SurfaceWindScalingCombined);
+      return;
+    }
+
     // Get observation quantities
     std::vector<double> height(nlocs), SurfaceWindScalingHeight(nlocs),
-                        SurfaceWindScalingPressure(nlocs), SurfaceWindScalingCombined(nlocs);
+                        SurfaceWindScalingPressure(nlocs);
     getObservation("MetaData", "height", height, true);
     getObservation("DerivedVariables", "SurfaceWindScalingHeight", SurfaceWindScalingHeight, true);
     getObservation("DerivedVariables", "SurfaceWindScalingPressure", SurfaceWindScalingPressure,

@@ -67,12 +67,16 @@ observations:
   # Compute wind scaling factors
   - filter: Variable Transforms
     Transform: AdjustedHeightCoordinate
+    SkipWhenNoObs: False
   - filter: Variable Transforms
     Transform: SurfaceWindScalingHeight
+    SkipWhenNoObs: False
   - filter: Variable Transforms
     Transform: SurfaceWindScalingPressure
+    SkipWhenNoObs: False
   - filter: Variable Transforms
     Transform: SurfaceWindScalingCombined
+    SkipWhenNoObs: False
 
   obs post filters:
 
