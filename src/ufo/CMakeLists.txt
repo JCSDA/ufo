@@ -142,6 +142,9 @@ ecbuild_add_library( TARGET   ufo
                      HEADER_DESTINATION ${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}
                     )
 
+# Mark Boost as a system library to silence compiler warnings from Boost headers
+target_include_directories( ${PROJECT_NAME} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS} )
+
 ## Link dependencies
 target_link_libraries(ufo PUBLIC MPI::MPI_C MPI::MPI_CXX MPI::MPI_Fortran)
 target_link_libraries(ufo PUBLIC Boost::boost)
