@@ -34,7 +34,7 @@ void ROobserrInflationGEOS::apply(const Variables & vars,
                             int filterQCflag,
                             ioda::ObsDataVector<int> & flags,
                             ioda::ObsDataVector<float> & obserr) const {
-  const float missing = util::missingValue(missing);
+  const float missing = util::missingValue<float>();
   size_t nlocs = data.nlocs();
   const std::vector<size_t> & recordNumbers = data.obsspace().recidx_all_recnums();
   ioda::ObsDataVector<int> layeridx(data.obsspace(), "modelLayerIndex", "ObsDiag");
