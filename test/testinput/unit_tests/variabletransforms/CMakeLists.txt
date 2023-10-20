@@ -14,8 +14,7 @@ ufo_add_test( NAME    test_ufo_observed_derived_and_simulated_variables
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 if( ${gsw_FOUND} )
     ufo_add_test( NAME    test_ufo_variabletransforms_oceandensity
@@ -26,8 +25,7 @@ if( ${gsw_FOUND} )
                 MPI     1
                 LIBS    ufo
                 LABELS  unit_tests variabletransforms
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                TEST_DEPENDS ufo_get_ufo_test_data )
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
     ufo_add_test( NAME    test_ufo_variabletransforms_oceandepthtopressure
                 TIER    1
@@ -37,8 +35,7 @@ if( ${gsw_FOUND} )
                 MPI     1
                 LIBS    ufo
                 LABELS  unit_tests variabletransforms
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                TEST_DEPENDS ufo_get_ufo_test_data )
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
     ufo_add_test( NAME    test_ufo_variabletransforms_oceantemptotheta
                 TIER    1
@@ -48,8 +45,7 @@ if( ${gsw_FOUND} )
                 MPI     1
                 LIBS    ufo
                 LABELS  unit_tests variabletransforms
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                TEST_DEPENDS ufo_get_ufo_test_data )
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
     ufo_add_test( NAME    test_ufo_variabletransforms_oceantemptoconservativetemp
                 TIER    1
@@ -59,8 +55,7 @@ if( ${gsw_FOUND} )
                 MPI     1
                 LIBS    ufo
                 LABELS  unit_tests variabletransforms
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                TEST_DEPENDS ufo_get_ufo_test_data )
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
     ufo_add_test( NAME    test_ufo_variabletransforms_oceanpracticalsalinitytoabsolutesalinity
                 TIER    1
@@ -70,8 +65,7 @@ if( ${gsw_FOUND} )
                 MPI     1
                 LIBS    ufo
                 LABELS  unit_tests variabletransforms
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                TEST_DEPENDS ufo_get_ufo_test_data )
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( ${gsw_FOUND} )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_potentialT
@@ -82,8 +76,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_potentialT
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift
               TIER    1
@@ -93,8 +86,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_zero_obs
               TIER    1
@@ -104,8 +96,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_zero_ob
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_keepinwindow
               TIER    1
@@ -115,8 +106,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_keepinw
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_pstar
               TIER    1
@@ -126,8 +116,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_pstar
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_QFEtoQNH
               TIER    1
@@ -137,8 +126,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_QFEtoQNH
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity
               TIER    1
@@ -148,8 +136,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part2
               TIER    1
@@ -159,8 +146,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part2
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part3
               TIER    1
@@ -170,8 +156,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part3
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_shumidity
               TIER    1
@@ -181,8 +166,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_shumidity
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_shumidity2
               TIER    1
@@ -192,8 +176,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_shumidity2
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_virtualTemperature
               TIER    1
@@ -203,8 +186,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_virtualTemperature
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_SondeHeightFromPressure
               TIER    1
@@ -214,8 +196,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_SondeHeightFromPressure
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeight
               TIER    1
@@ -225,8 +206,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeight
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeightICAO
               TIER    1
@@ -236,8 +216,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeightICAO
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_szacorrection
               TIER    1
@@ -247,8 +226,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_szacorrection
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents
               TIER    1
@@ -258,8 +236,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_windspeedanddirection
               TIER    1
@@ -269,8 +246,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_windspeedanddirection
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents_scatwind
               TIER    1
@@ -280,8 +256,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents_scatwind
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_variabletransforms_btfromradiance
               TIER    1
@@ -291,8 +266,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_btfromradiance
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 if( ${rttov_FOUND} )
 
@@ -304,7 +278,6 @@ if( ${rttov_FOUND} )
                   MPI     1
                   LIBS    ufo
                   LABELS  rttov unit_tests variabletransforms
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 endif( ${rttov_FOUND} )

@@ -14,8 +14,7 @@ ufo_add_test( NAME    test_ufo_metoffice_error_matrices
               MPI     1
               LIBS    ufo
               LABELS  errors metoffice
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_obserrorcrossvarcorr
               TIER    1
@@ -25,8 +24,7 @@ ufo_add_test( NAME    test_ufo_obserrorcrossvarcorr
               MPI     4
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_obserrorcrossvarcov
               TIER    1
@@ -36,8 +34,7 @@ ufo_add_test( NAME    test_ufo_obserrorcrossvarcov
               MPI     4
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 #
 ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
@@ -48,8 +45,7 @@ ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
               MPI     2
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 # Test the diagnostics application
 ufo_add_test( NAME    test_ufo_obserrorwithingroupcorrdiags
@@ -60,8 +56,7 @@ ufo_add_test( NAME    test_ufo_obserrorwithingroupcorrdiags
               MPI     2
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 #
 ufo_add_test( NAME    test_ufo_obserrordiagonal
@@ -72,8 +67,7 @@ ufo_add_test( NAME    test_ufo_obserrordiagonal
               MPI     4
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    test_ufo_reconditioning
               TIER    1
@@ -83,8 +77,7 @@ ufo_add_test( NAME    test_ufo_reconditioning
               MPI     1
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    test_ufo_reconditioning_mpi
               TIER    1
@@ -94,5 +87,4 @@ ufo_add_test( NAME    test_ufo_reconditioning_mpi
               MPI     2
               LIBS    ufo
               LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

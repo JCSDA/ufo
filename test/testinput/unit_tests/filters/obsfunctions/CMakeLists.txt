@@ -15,8 +15,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_atovs_lwpfirstguess
@@ -27,8 +26,7 @@ ufo_add_test( NAME    test_ufo_atovs_lwpfirstguess
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_atovs_scenedeperrors
               TIER    1
@@ -38,8 +36,7 @@ ufo_add_test( NAME    test_ufo_atovs_scenedeperrors
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_arithmetic
               TIER    1
@@ -49,8 +46,7 @@ ufo_add_test( NAME    test_ufo_function_arithmetic
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_aircraft_bc_offline
               TIER    1
@@ -60,8 +56,7 @@ ufo_add_test( NAME    test_ufo_function_aircraft_bc_offline
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_averagetemperaturebelow
               TIER    1
@@ -71,8 +66,7 @@ ufo_add_test( NAME    test_ufo_function_averagetemperaturebelow
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_bennartzscatindex
               TIER    1
@@ -82,8 +76,7 @@ ufo_add_test( NAME    test_ufo_function_bennartzscatindex
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_bgddepartureanomaly
               TIER    1
@@ -93,8 +86,7 @@ ufo_add_test( NAME    test_ufo_function_bgddepartureanomaly
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 if( rttov_FOUND )
     ufo_add_test( NAME    test_ufo_function_cloudcost
@@ -105,8 +97,7 @@ if( rttov_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  rttov filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
     ufo_add_test( NAME    test_ufo_function_cloudcost_scattering
                   TIER    1
@@ -116,8 +107,7 @@ if( rttov_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  rttov filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
     ufo_add_test( NAME    test_ufo_function_cloudcost_surfwind
                   TIER    1
@@ -127,8 +117,7 @@ if( rttov_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  rttov filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 
 endif( rttov_FOUND )
 #
@@ -140,8 +129,7 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_airs
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clouddetect_cris
               TIER    2
@@ -151,8 +139,7 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_cris
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clouddetect_iasi
               TIER    2
@@ -162,8 +149,7 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_iasi
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 if( rttov_FOUND )
     ufo_add_test( NAME    test_ufo_function_cloudfirstguess
@@ -174,8 +160,7 @@ if( rttov_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  rttov filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( rttov_FOUND )
 #
 ufo_add_test( NAME    test_ufo_function_clwmatchidx
@@ -186,8 +171,7 @@ ufo_add_test( NAME    test_ufo_function_clwmatchidx
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwmatchidx_atms
               TIER    1
@@ -197,8 +181,7 @@ ufo_add_test( NAME    test_ufo_function_clwmatchidx_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret
               TIER    1
@@ -208,8 +191,7 @@ ufo_add_test( NAME    test_ufo_function_clwret
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret_atms
               TIER    1
@@ -219,8 +201,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret_hofx_atms
               TIER    1
@@ -230,8 +211,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_hofx_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret_hofx
               TIER    1
@@ -241,8 +221,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_hofx
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret_ssmis
               TIER    1
@@ -252,8 +231,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_ssmis
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwretmean
               TIER    1
@@ -263,8 +241,7 @@ ufo_add_test( NAME    test_ufo_function_clwretmean
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwretmean_atms
               TIER    1
@@ -274,8 +251,7 @@ ufo_add_test( NAME    test_ufo_function_clwretmean_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret_obsval
               TIER    1
@@ -285,8 +261,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_obsval
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_clwret_obsval_atms
               TIER    1
@@ -296,8 +271,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_obsval_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_conditional
               TIER    1
@@ -307,8 +281,7 @@ ufo_add_test( NAME    test_ufo_function_conditional
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_datetimeoffset
               TIER    1
@@ -318,8 +291,7 @@ ufo_add_test( NAME    test_ufo_function_datetimeoffset
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_drawvaluefromfile
               TIER    1
@@ -329,8 +301,7 @@ ufo_add_test( NAME    test_ufo_function_drawvaluefromfile
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errfgrosschk
               TIER    1
@@ -340,8 +311,7 @@ ufo_add_test( NAME    test_ufo_function_errfgrosschk
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errfjsfc
               TIER    1
@@ -351,8 +321,7 @@ ufo_add_test( NAME    test_ufo_function_errfjsfc
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errflat
               TIER    1
@@ -362,8 +331,7 @@ ufo_add_test( NAME    test_ufo_function_errflat
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errfsdoei
               TIER    1
@@ -373,8 +341,7 @@ ufo_add_test( NAME    test_ufo_function_errfsdoei
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errfsdoei_atms
               TIER    1
@@ -384,8 +351,7 @@ ufo_add_test( NAME    test_ufo_function_errfsdoei_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errftopo
               TIER    1
@@ -395,8 +361,7 @@ ufo_add_test( NAME    test_ufo_function_errftopo
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errftransmittop
               TIER    1
@@ -406,8 +371,7 @@ ufo_add_test( NAME    test_ufo_function_errftransmittop
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_errfwavenum
               TIER    1
@@ -417,8 +381,7 @@ ufo_add_test( NAME    test_ufo_function_errfwavenum
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_exponential
               TIER    1
@@ -428,8 +391,7 @@ ufo_add_test( NAME    test_ufo_function_exponential
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_hydrometeorchk
               TIER    1
@@ -439,8 +401,7 @@ ufo_add_test( NAME    test_ufo_function_hydrometeorchk
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_hydrometeorchk_atms
               TIER    1
@@ -450,8 +411,7 @@ ufo_add_test( NAME    test_ufo_function_hydrometeorchk_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_lam_domaincheck
               TIER    1
@@ -461,8 +421,7 @@ ufo_add_test( NAME    test_ufo_function_lam_domaincheck
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_lam_domaincheck_circle
               TIER    1
@@ -472,8 +431,7 @@ ufo_add_test( NAME    test_ufo_function_lam_domaincheck_circle
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_linear_combination_int
               TIER    1
@@ -483,8 +441,7 @@ ufo_add_test( NAME    test_ufo_function_linear_combination_int
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_linear_combination_multichannel
               TIER    1
@@ -494,8 +451,7 @@ ufo_add_test( NAME    test_ufo_function_linear_combination_multichannel
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_metoffice_rh_corr
               TIER    1
@@ -505,8 +461,7 @@ ufo_add_test( NAME    test_ufo_function_metoffice_rh_corr
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustMarineWinds
               TIER    1
@@ -516,8 +471,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustMarineWinds
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustRelativeHumidity
               TIER    1
@@ -527,8 +481,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustRelativeHumidity
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustTemperature
               TIER    1
@@ -538,8 +491,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustTemperature
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustWindVector
               TIER    1
@@ -549,8 +501,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustWindVector
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_nsstret
               TIER    2
@@ -560,8 +511,7 @@ ufo_add_test( NAME    test_ufo_function_nsstret
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrmean
               TIER    1
@@ -571,8 +521,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrmean_abi
               TIER    1
@@ -582,8 +531,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean_abi
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrmean_atms
               TIER    1
@@ -593,8 +541,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrmean_mhs
               TIER    1
@@ -604,8 +551,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean_mhs
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrorfactorconv
               TIER    1
@@ -615,8 +561,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorfactorconv
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrorfactorquotient
               TIER    1
@@ -626,8 +571,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorfactorquotient
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrorhumidity
               TIER    1
@@ -637,8 +581,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorhumidity
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrorinflatesfcp
               TIER    1
@@ -648,8 +591,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorinflatesfcp
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_obserrorstepwiselinear
               TIER    1
@@ -659,8 +601,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorstepwiselinear
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_oceanpressuretodepth
               TIER    1
@@ -670,8 +611,7 @@ ufo_add_test( NAME    test_ufo_function_oceanpressuretodepth
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_orbitangle_ssmis
               TIER    1
@@ -681,8 +621,7 @@ ufo_add_test( NAME    test_ufo_function_orbitangle_ssmis
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_profilelevelcount
               TIER    1
@@ -692,8 +631,7 @@ ufo_add_test( NAME    test_ufo_function_profilelevelcount
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_reperr
               TIER    1
@@ -703,8 +641,7 @@ ufo_add_test( NAME    test_ufo_function_reperr
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_satwind_indiv_errors
               TIER    2
@@ -714,8 +651,7 @@ ufo_add_test( NAME    test_ufo_function_satwind_indiv_errors
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_satwindsLNVDcheck
               TIER    1
@@ -725,8 +661,7 @@ ufo_add_test( NAME    test_ufo_function_satwindsLNVDcheck
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_satwindsSPDBcheck
               TIER    1
@@ -736,8 +671,7 @@ ufo_add_test( NAME    test_ufo_function_satwindsSPDBcheck
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_scatret
               TIER    1
@@ -747,8 +681,7 @@ ufo_add_test( NAME    test_ufo_function_scatret
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_scatret_atms
               TIER    1
@@ -758,8 +691,7 @@ ufo_add_test( NAME    test_ufo_function_scatret_atms
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_selectstatistic
               TIER    1
@@ -769,8 +701,7 @@ ufo_add_test( NAME    test_ufo_function_selectstatistic
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_setseaiceemiss
               TIER    1
@@ -780,8 +711,7 @@ ufo_add_test( NAME    test_ufo_function_setseaiceemiss
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_setsurfacetype
               TIER    1
@@ -791,8 +721,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_setsurfacetype_default
               TIER    1
@@ -802,8 +731,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_default
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_setsurfacetype_airs
               TIER    1
@@ -813,8 +741,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_airs
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_setsurfacetype_ssmis
               TIER    1
@@ -824,8 +751,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_ssmis
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_setsurfacetype_tolerance
               TIER    1
@@ -835,8 +761,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_tolerance
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_solarzenith
               TIER    1
@@ -846,8 +771,7 @@ ufo_add_test( NAME    test_ufo_function_solarzenith
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_solarzenith_skiprejected
               TIER    1
@@ -857,8 +781,7 @@ ufo_add_test( NAME    test_ufo_function_solarzenith_skiprejected
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 	      
 # Test for the string manipulation obsfucntion
 ufo_add_test( NAME    test_ufo_function_stringmanipulation
@@ -869,8 +792,7 @@ ufo_add_test( NAME    test_ufo_function_stringmanipulation
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )	      
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )	      
 	      
 #
 ufo_add_test( NAME    test_ufo_function_surfacecloudmodellevelcbh
@@ -881,8 +803,7 @@ ufo_add_test( NAME    test_ufo_function_surfacecloudmodellevelcbh
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_surfacecloudcreatecloudcolumn
               TIER    1
@@ -892,8 +813,7 @@ ufo_add_test( NAME    test_ufo_function_surfacecloudcreatecloudcolumn
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_tropo_estimate
               TIER    1
@@ -903,8 +823,7 @@ ufo_add_test( NAME    test_ufo_function_tropo_estimate
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_velocity_channels
               TIER    1
@@ -914,8 +833,7 @@ ufo_add_test( NAME    test_ufo_function_velocity_channels
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_velocity
               TIER    1
@@ -925,8 +843,7 @@ ufo_add_test( NAME    test_ufo_function_velocity
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_wdirdiff
               TIER    1
@@ -936,8 +853,7 @@ ufo_add_test( NAME    test_ufo_function_wdirdiff
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_scatambiguity
               TIER    1
@@ -947,8 +863,7 @@ ufo_add_test( NAME    test_ufo_function_scatambiguity
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_function_satwindserrnorm
               TIER    1
@@ -958,8 +873,7 @@ ufo_add_test( NAME    test_ufo_function_satwindserrnorm
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 if( crtm_FOUND )
     ufo_add_test( NAME    test_ufo_gmi_clw_ret
@@ -970,8 +884,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_qc_velocitycheck
@@ -982,5 +895,4 @@ ufo_add_test( NAME    test_ufo_qc_velocitycheck
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )

@@ -16,8 +16,7 @@ if( crtm_FOUND )
         MPI     1
         LABELS  crtm atms n20 HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+        LIBS    ufo )
 
     ufo_add_test( NAME  instrument_atms_npp_gfs_HofX
         TIER    2
@@ -27,8 +26,7 @@ if( crtm_FOUND )
         MPI     1
         LABELS  crtm atms npp HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+        LIBS    ufo )
 
     # H(x) with Bias Correction (bc)
     ufo_add_test( NAME  instrument_atms_n20_gfs_HofX_bc
@@ -39,8 +37,7 @@ if( crtm_FOUND )
         MPI     1
         LABELS  crtm atms n20 bc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+        LIBS    ufo )
 
     ufo_add_test( NAME  instrument_atms_npp_gfs_HofX_bc
         TIER    2
@@ -50,8 +47,7 @@ if( crtm_FOUND )
         MPI     1
         LABELS  crtm atms npp bc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+        LIBS    ufo )
 
     # H(x) with QC
     ufo_add_test( NAME  instrument_atms_n20_gfs_HofX_qc
@@ -62,8 +58,7 @@ if( crtm_FOUND )
         MPI     1
         LABELS  crtm atms n20 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+        LIBS    ufo )
 
     ufo_add_test( NAME  instrument_atms_npp_gfs_HofX_qc
         TIER    2
@@ -73,6 +68,5 @@ if( crtm_FOUND )
         MPI     1
         LABELS  crtm atms npp qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo
-        TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
+        LIBS    ufo )
 endif( crtm_FOUND )

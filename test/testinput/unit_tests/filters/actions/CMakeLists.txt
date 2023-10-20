@@ -14,8 +14,7 @@ ufo_add_test( NAME    test_ufo_qc_actions
               MPI     1
               LIBS    ufo
               LABELS  filters actions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_qc_performaction
               TIER    1
@@ -25,8 +24,7 @@ ufo_add_test( NAME    test_ufo_qc_performaction
               MPI     1
               LIBS    ufo
               LABELS  filters actions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 ufo_add_test( NAME    test_ufo_qc_performaction_both_action_and_actions
               TIER    1
@@ -36,8 +34,7 @@ ufo_add_test( NAME    test_ufo_qc_performaction_both_action_and_actions
               MPI     1
               LIBS    ufo
               LABELS  filters actions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 set_tests_properties(ufo_test_tier1_test_ufo_qc_performaction_both_action_and_actions
                      PROPERTIES
                      PASS_REGULAR_EXPRESSION ".*The 'action' and 'actions' options are mutually exclusive.*")
@@ -50,8 +47,7 @@ ufo_add_test( NAME    test_ufo_qc_performaction_neither_action_nor_actions
               MPI     1
               LIBS    ufo
               LABELS  filters actions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 set_tests_properties(ufo_test_tier1_test_ufo_qc_performaction_neither_action_nor_actions
                      PROPERTIES
                      PASS_REGULAR_EXPRESSION ".*Either the 'action' or 'actions' option must be set.*")

@@ -14,8 +14,7 @@ ufo_add_test( NAME    instrument_ompsnp_npp_gfs_HofX
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_gfs_HofX.yaml"
               LIBS    ufo
               LABELS  ozone instrument HofX
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 # H(x) with QC
 ufo_add_test( NAME    instrument_ompsnp_npp_gfs_qc
@@ -25,5 +24,4 @@ ufo_add_test( NAME    instrument_ompsnp_npp_gfs_qc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_gfs_qc.yaml"
               LIBS    ufo
               LABELS  ozone instrument QC
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

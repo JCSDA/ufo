@@ -15,8 +15,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_amsua_crtm_bc_geos
                   TIER    1
@@ -26,8 +25,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_amsua_crtm_bc_obsoperator
                   TIER    1
@@ -37,8 +35,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_amsua_crtm_bc_tlad
                   TIER    1
@@ -48,8 +45,7 @@ if( crtm_FOUND )
                   MPI     2
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff
@@ -60,8 +56,7 @@ ufo_add_test( NAME    test_ufo_bias_coeff
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff_increment
               TIER    1
@@ -71,8 +66,7 @@ ufo_add_test( NAME    test_ufo_bias_coeff_increment
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_covariance_amsua
               TIER    1
@@ -82,8 +76,7 @@ ufo_add_test( NAME    test_ufo_bias_covariance_amsua
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_covariance_details
               TIER    1
@@ -93,8 +86,7 @@ ufo_add_test( NAME    test_ufo_bias_covariance_details
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff_readwrite
               TIER    1
@@ -104,8 +96,7 @@ ufo_add_test( NAME    test_ufo_bias_coeff_readwrite
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_linear_op
               TIER    1
@@ -115,8 +106,7 @@ ufo_add_test( NAME    test_ufo_bias_linear_op
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_single_channel
               TIER    1
@@ -126,8 +116,7 @@ ufo_add_test( NAME    test_ufo_bias_single_channel
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_constant_predictor
               TIER    1
@@ -137,8 +126,7 @@ ufo_add_test( NAME    test_ufo_constant_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_legendre_predictor
               TIER    1
@@ -148,8 +136,7 @@ ufo_add_test( NAME    test_ufo_legendre_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_interpolate_data_from_file_predictor
               TIER    1
@@ -159,8 +146,7 @@ ufo_add_test( NAME    test_ufo_interpolate_data_from_file_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_orbital_angle_predictor
               TIER    1
@@ -170,8 +156,7 @@ ufo_add_test( NAME    test_ufo_orbital_angle_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_satellite_selector_predictor
               TIER    1
@@ -181,8 +166,7 @@ ufo_add_test( NAME    test_ufo_satellite_selector_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 if( crtm_FOUND )
     ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_bc
@@ -193,8 +177,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_ssmis_f17_gfs_backgroundcheck_nbc
                   TIER    1
@@ -204,8 +187,7 @@ if( crtm_FOUND )
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( crtm_FOUND )
 #
 ufo_add_test( NAME    test_ufo_thickness_predictor
@@ -216,8 +198,7 @@ ufo_add_test( NAME    test_ufo_thickness_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    test_ufo_read_bias_predictor
               TIER    1
@@ -227,5 +208,4 @@ ufo_add_test( NAME    test_ufo_read_bias_predictor
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

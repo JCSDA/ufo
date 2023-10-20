@@ -14,8 +14,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_pressure_ob
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_pressure_obsfilter
               TIER    2
@@ -25,8 +24,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_pressur
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_pressure_OPScomparison
               TIER    1
@@ -36,8 +34,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_pressure_OP
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_pressure_OPScomparison
               TIER    2
@@ -47,8 +44,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_pressur
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_relativehumidity_obsfilter
               TIER    1
@@ -58,8 +54,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_relativehum
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_relativehumidity_obsfilter
               TIER    2
@@ -69,8 +64,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_relativ
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_relativehumidity_OPScomparison
               TIER    1
@@ -80,8 +74,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_relativehum
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_relativehumidity_OPScomparison
               TIER    2
@@ -91,8 +84,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_relativ
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_single_level_profile_obsfilter
               TIER    1
@@ -102,8 +94,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_single_leve
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_temperature_obsfilte
               TIER    1
@@ -113,8 +104,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_temperature
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_temperature_obsfilte
               TIER    2
@@ -124,8 +114,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_tempera
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_temperature_OPScomparison
               TIER    1
@@ -135,8 +124,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_temperature
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_temperature_OPScomparison
               TIER    2
@@ -146,8 +134,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_tempera
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_windspeed_obsfilter
               TIER    1
@@ -157,8 +144,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_windspeed_o
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_windspeed_obsfilter
               TIER    2
@@ -168,8 +154,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_windspe
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_windspeed_OPScomparison
               TIER    1
@@ -179,8 +164,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_average_windspeed_O
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_windspeed_OPScomparison
               TIER    2
@@ -190,8 +174,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_average_windspe
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_modobs_obsfilter
               TIER    1
@@ -201,8 +184,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_modobs_obsfil
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_obsfilter
               TIER    2
@@ -212,8 +194,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_ob
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_modobs_OPScomparison
               TIER    1
@@ -223,8 +204,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_modobs_OPScom
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_OPScomparison
               TIER    2
@@ -234,8 +214,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_OP
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_modobs_separatefilters_obsfilter
               TIER    1
@@ -245,8 +224,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_modobs_separa
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_separatefilters_obsfilter
               TIER    2
@@ -256,8 +234,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_modobs_se
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_obsfilter
               TIER    1
@@ -267,8 +244,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_obsfil
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_differenterrors_obsfilter
               TIER    1
@@ -278,8 +254,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_differ
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_obsfilter
               TIER    2
@@ -289,8 +264,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_ob
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_OPScomparison
               TIER    1
@@ -300,8 +274,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_OPScom
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_OPScomparison
               TIER    2
@@ -311,8 +284,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_OP
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_separatefilters_obsfilter
               TIER    1
@@ -322,8 +294,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_bkgqc_repobs_separa
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_separatefilters_obsfilter
               TIER    2
@@ -333,8 +304,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_bkgqc_repobs_se
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_monolithicfilter
               TIER    1
@@ -344,8 +314,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_monolithicfilter
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_monolithicfilter
               TIER    2
@@ -355,8 +324,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_monolithicfilte
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_obsfunction_fillaveragedprofiledata
               TIER    1
@@ -366,8 +334,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_obsfunction_fillave
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_obsfunction_profileaverageobs
               TIER    1
@@ -377,8 +344,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_obsfunction_profile
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_opr_average
               TIER    1
@@ -388,8 +354,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_opr_average
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_linopr_average
               TIER    1
@@ -399,8 +364,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_linopr_average
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_OPScomparison
               TIER    1
@@ -410,8 +374,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_OPScomparison
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_OPScomparison
               TIER    2
@@ -421,8 +384,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_OPScomparison
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_pressure_obsfilter
               TIER    1
@@ -432,8 +394,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_pressure_obsfilter
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_pressure_obsfilter
               TIER    2
@@ -443,8 +404,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_pressure_obsfil
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_pressure_OPScomparison
               TIER    1
@@ -454,8 +414,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_pressure_OPScompari
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_pressure_OPScomparison
               TIER    2
@@ -465,8 +424,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_pressure_OPScom
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_RH_obsfilter
               TIER    1
@@ -476,8 +434,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_RH_obsfilter
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_RH_obsfilter
               TIER    2
@@ -487,8 +444,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_RH_obsfilter
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_RH_OPScomparison
               TIER    1
@@ -498,8 +454,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_RH_OPScomparison
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_RH_OPScomparison
               TIER    2
@@ -509,8 +464,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_RH_OPScompariso
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_separatefilters
               TIER    1
@@ -520,8 +474,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_separatefilters
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_separatefilters
               TIER    2
@@ -531,8 +484,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_separatefilters
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_sondeflags_obsfilter
               TIER    1
@@ -542,8 +494,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_sondeflags_obsfilte
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_sondeflags_obsfilter
               TIER    2
@@ -553,8 +504,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_sondeflags_obsf
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_sondeflags_OPScomparison
               TIER    1
@@ -564,8 +514,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_sondeflags_OPScompa
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_sondeflags_OPScomparison
               TIER    2
@@ -575,8 +524,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_sondeflags_OPSc
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterp_obsfilter
               TIER    1
@@ -586,8 +534,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterp_obsfilter
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_UInterp_obsfilter
               TIER    2
@@ -597,8 +544,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_UInterp_obsfilt
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterp_OPScomparison
               TIER    1
@@ -608,8 +554,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterp_OPScomparis
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_UInterp_OPScomparison
               TIER    2
@@ -619,8 +564,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_UInterp_OPScomp
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterpAlternative_obsfilter
               TIER    1
@@ -630,8 +574,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterpAlternative_
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_UInterpAlternative_obsfilter
               TIER    2
@@ -641,8 +584,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_UInterpAlternat
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterpAlternative_OPScomparison
               TIER    1
@@ -652,8 +594,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_UInterpAlternative_
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittest_oneprofileMPI
               TIER    1
@@ -663,8 +604,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittest_oneprofile
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests
               TIER    1
@@ -674,8 +614,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_unittests
               TIER    2
@@ -685,8 +624,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_unittests
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests_profiledataholder
               TIER    1
@@ -696,8 +634,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests_profileda
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests_vertaverage_ascending
               TIER    1
@@ -707,8 +644,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests_vertavera
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests_vertaverage
               TIER    1
@@ -718,8 +654,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_unittests_vertavera
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_winproflags_obsfilter
               TIER    1
@@ -729,8 +664,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_winproflags_obsfilt
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_winproflags_obsfilter
               TIER    2
@@ -740,8 +674,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_winproflags_obs
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_winproflags_OPScomparison
               TIER    1
@@ -751,8 +684,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_winproflags_OPScomp
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_winproflags_OPScomparison
               TIER    2
@@ -762,8 +694,7 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_MPI_winproflags_OPS
               MPI     2
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_wrongOPScomparison
               TIER    1
@@ -773,5 +704,4 @@ ufo_add_test( NAME    test_ufo_conventionalprofileprocessing_wrongOPScomparison
               MPI     1
               LIBS    ufo
               LABELS  unit_tests profile
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

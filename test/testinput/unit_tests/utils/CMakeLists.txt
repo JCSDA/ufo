@@ -14,8 +14,7 @@ ufo_add_test( NAME    test_ufo_utils_metoffice_sort
               MPI     1
               LIBS    ufo
               LABELS  utils metoffice
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    test_ufo_utils_variable_name_map
               TIER    1
@@ -25,5 +24,4 @@ ufo_add_test( NAME    test_ufo_utils_variable_name_map
               MPI     1
               LIBS    ufo
               LABELS  utils variablenamemap
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

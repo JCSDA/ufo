@@ -1,11 +1,74 @@
-# (C) Copyright 2017-2022 UCAR.
+# (C) Copyright 2017-2023 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 # Include macros for creating links and symlinks
 include( ufo_functions )
-include( git_functions )
+
+# CRTM test data - from tarball if not provided locally
+# It's unclear if anyone is using the local data functionality, therefore comment it out
+# for now and add in if someone complains / remove if completely if not.
+#if (crtm_FOUND AND DEFINED ENV{UFO_CRTM_TESTFILES})
+#  message(STATUS "Use crtm test data from local directory $ENV{UFO_CRTM_TESTFILES}")
+#  # A bit of guesswork here, I don't know if folks using this option stored it in the same directory structure
+#  set (UFO_CRTM_TESTFILES_PATH "$ENV{UFO_CRTM_TESTFILES}")
+#elseif (crtm_FOUND)
+if (crtm_FOUND)
+  set (UFO_CRTM_TESTFILES_PATH "${CMAKE_SOURCE_DIR}/test-data-release/crtm/${crtm_data_tag}")
+  if (EXISTS ${UFO_CRTM_TESTFILES_PATH})
+    message(STATUS "Skipping download of test data from ${crtm_data_download_url}/${crtm_data_tarball_name} since it already exists")
+  else()
+    message(STATUS "Download test data from ${crtm_data_download_url}/${crtm_data_tarball_name}")
+    include(FetchContent)
+    FetchContent_Declare(
+      crtm-testdata
+      DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/test-data-release
+      DOWNLOAD_NO_EXTRACT ON
+      URL      ${crtm_data_download_url}/${crtm_data_tarball_name}
+      URL_HASH MD5=${crtm_data_tarball_hash}
+    )
+    FetchContent_MakeAvailable(crtm-testdata)
+    file(ARCHIVE_EXTRACT INPUT ${CMAKE_SOURCE_DIR}/test-data-release/${crtm_data_tarball_name} DESTINATION ${CMAKE_SOURCE_DIR}/test-data-release)
+  endif()
+endif()
+# Make UFO_CRTM_TESTFILES_PATH available at parent scope so that downstream repos have access to it
+set (UFO_CRTM_TESTFILES_PATH ${UFO_CRTM_TESTFILES_PATH} PARENT_SCOPE)
+
+# UFO test data - from ufo-data repo if found, from local directory, or from tarball (release/develop-in-future?)
+if (ufo-data_FOUND)
+  message(STATUS "Use test data from ufo-data repository")
+  set (ufo_data_testinput_tier_1_local "${CMAKE_SOURCE_DIR}/ufo-data/testinput_tier_1")
+# It's unclear if anyone is using the local data functionality, therefore comment it out
+# for now and add in if someone complains / remove if completely if not.
+#elseif (DEFINED ENV{UFO_TESTFILES})
+#  message(STATUS "Use test data from local directory $ENV{UFO_TESTFILES}")
+#  # A bit of guesswork here, I don't know if folks using this option stored it in the same directory structure
+#  set (ufo_data_testinput_tier_1_local "$ENV{UFO_TESTFILES}/ufo-data/testinput_tier_1")
+else()
+  set (ufo_data_testinput_tier_1_local "${CMAKE_SOURCE_DIR}/test-data-release/ufo/${ufo_data_tag}/testinput_tier_1")
+  if (EXISTS ${ufo_data_testinput_tier_1_local})
+    message(STATUS "Skipping download of test data from ${ufo_data_download_url}/${ufo_data_tarball_name} since it already exists")
+  else()
+    message(STATUS "Download test data from ${ufo_data_download_url}/${ufo_data_tarball_name}")
+    include(FetchContent)
+    FetchContent_Declare(
+      ufo-testdata
+      DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/test-data-release
+      DOWNLOAD_NO_EXTRACT ON
+      URL      ${ufo_data_download_url}/${ufo_data_tarball_name}
+      URL_HASH MD5=${ufo_data_tarball_hash}
+    )
+    FetchContent_MakeAvailable(ufo-testdata)
+    file(ARCHIVE_EXTRACT INPUT ${CMAKE_SOURCE_DIR}/test-data-release/${ufo_data_tarball_name} DESTINATION ${CMAKE_SOURCE_DIR}/test-data-release)
+  endif()
+endif()
+if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/Data/ufo/testinput_tier_1")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo)
+  file(CREATE_LINK ${ufo_data_testinput_tier_1_local} ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo/testinput_tier_1 SYMBOLIC)
+endif()
+# Make UFO_UFO_TESTFILES_PATH available at parent scope so that downstream repos have access to it
+set (UFO_UFO_TESTFILES_PATH ${ufo_data_testinput_tier_1_local} PARENT_SCOPE)
 
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
@@ -49,169 +112,6 @@ ecbuild_add_resources( TARGET ufo_test_scripts
                        ${ufo_test_input}
                      )
 
-# Create Data directory for test data and symlink files
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data)
-
-if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-    set( CRTM_COEFFS_BRANCH "3.0.0_skylab_6.0" )
-    set( checksum "1" )
-    set( CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/testinput" )
-else()
-    set( CRTM_COEFFS_BRANCH "2.4.0_skylab_3.0" )
-    set( checksum "0" )
-    set( CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/testinput/CRTMv2" )
-endif()
-
-# Test data filenames
-set(ufo_test_data  ufo_testinput_tier_1_1.8.0.tar.gz)
-set(crtm_test_data crtm_coefficients_${CRTM_COEFFS_BRANCH}.tar.gz)
-
-#############################################
-# macro for downloading test data
-# options:
-# - tag 1.0.0: download from UCAR ftp, flat directory
-#   Note: when we change the tag, this will have to be updated somehow.
-# - anything else: download from AWS, either from branch directory
-#   if available, or from develop directory
-# input: repo (e.g. ioda or ufo)
-#        test_data: test data filename (archive)
-# output: output_data_path: path to data on local machine after download
-
-
-function(ADD_DOWNLOAD_TEST repo test_files_dirname output_data_path)
-  # If REPO branch is being built set GIT_BRANCH_FUNC to REPO's current branch.
-  # If a tagged version of REPO is being built set GIT_TAG_FUNC to REPO's current tag.
-  find_branch_name(REPO_DIR_NAME ${repo})
-
-  if( ${repo} STREQUAL "crtm" )
-    set( GIT_TAG_FUNC ${CRTM_COEFFS_BRANCH} )
-  endif()
-
-  if( DEFINED GIT_BRANCH_FUNC )
-    set( REPO_GIT_BRANCH ${GIT_BRANCH_FUNC} )
-  elseif( DEFINED GIT_TAG_FUNC )
-    set( REPO_GIT_BRANCH ${GIT_TAG_FUNC} )
-  endif()
-
-
-  # When env veriable LOCAL_PATH_JEDI_TESTFILES is set, simply link test files
-  # to build directory. get_${repo}_test_data checks the existence of test file directory.
-  # ${repo} test data must be stored in
-  # ${LOCAL_PATH_JEDI_TESTFILES}/${repo}/${BRANCH}/testinput_tier_1
-  if( DEFINED ENV{LOCAL_PATH_JEDI_TESTFILES} )
-    set( LOCAL_PATH_JEDI_TESTFILES "$ENV{LOCAL_PATH_JEDI_TESTFILES}" )
-    message( STATUS "use LOCAL_PATH_JEDI_TESTFILES: ${LOCAL_PATH_JEDI_TESTFILES}" )
-    # If test data specific to testing branch exists locally use it.
-    # If not use test data specific to develop branch.
-    if( EXISTS ${LOCAL_PATH_JEDI_TESTFILES}/${repo}/${REPO_GIT_BRANCH} )
-      set( TESTFILE_DIR_REPO "${LOCAL_PATH_JEDI_TESTFILES}/${repo}/${REPO_GIT_BRANCH}" )
-    else()
-      set( TESTFILE_DIR_REPO "${LOCAL_PATH_JEDI_TESTFILES}/${repo}/develop" )
-    endif()
-
-    message( STATUS "Test data in ${TESTFILE_DIR_REPO} is linked to build directory" )
-    list( APPEND REPO_DATA_DOWNLOADER_ARGS
-    ${TESTFILE_DIR_REPO} )
-    set ( REPO_DATA_DOWNLOADER ufo_data_checker.py )
-
-  # Any tagged version of REPO is being built.
-  # Build ufo_get_{repo}_test_data test to download test data from DASH.
-  elseif( DEFINED GIT_TAG_FUNC)
-    message( STATUS "Tagged version of ${repo} is used" )
-    # set ARGS for get_${repo}_test_data
-
-    # ECBUILD_DOWNLOAD_BASE_URL env var can be used to force test files and
-    # crtm coef to be downloaded from other databases such as S3 instead of DASH
-    # example ECBUILD_DOWNLOAD_BASE_URL=https://jedi-test-files.s3.amazonaws.com
-
-    if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL} )
-      set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL}/${repo}/${GIT_TAG_FUNC}" )
-    else()
-      # set( ECBUILD_DOWNLOAD_BASE_URL https://gdex.ucar.edu/dataset/jedi-skylab/file )
-      # set( ECBUILD_DOWNLOAD_BASE_URL https://ftp.ssec.wisc.edu/pub/s4/CRTM/file )
-      set( ECBUILD_DOWNLOAD_BASE_URL https://bin.ssec.wisc.edu/pub/s4/CRTM/file )
-    endif()
-
-    if( DEFINED ENV{ECBUILD_DOWNLOAD_BASE_URL_CRTM} )
-      set( ECBUILD_DOWNLOAD_BASE_URL "$ENV{ECBUILD_DOWNLOAD_BASE_URL_CRTM}/${repo}/${GIT_TAG_FUNC}" )
-    endif()
-
-
-    set( TESTFILE_DIR_REPO "${CMAKE_SOURCE_DIR}/test-data-release/${repo}/${GIT_TAG_FUNC}" )
-    # Create test-data-release in source directory
-    file( MAKE_DIRECTORY ${TESTFILE_DIR_REPO} )
-    list( APPEND REPO_DATA_DOWNLOADER_ARGS
-          ${ECBUILD_DOWNLOAD_BASE_URL}
-          ${CMAKE_SOURCE_DIR}/test-data-release
-          ${test_files_dirname}
-          ${checksum} )
-
-    message( STATUS "Test files will be downloaded from ${ECBUILD_DOWNLOAD_BASE_URL} and
-    saved to ${TESTFILE_DIR_REPO} for ${repo}")
-
-    set ( REPO_DATA_DOWNLOADER ufo_data_downloader.py )
-
-  elseif( DEFINED ENV{UFO_TESTFILES} )
-    # Any branch of ufo is being built.
-    # ufo-data repository is already cloned by bundle/CMakeLists.txt.
-    # Link test files in ufo-data repo to build directory.
-    # get_ufo_test_data checks the existence of test file directory.
-    set( TESTFILE_DIR_REPO $ENV{UFO_TESTFILES} )
-    list( APPEND REPO_DATA_DOWNLOADER_ARGS
-          ${TESTFILE_DIR_REPO} )
-    set (REPO_DATA_DOWNLOADER ufo_data_checker.py )
-  else()
-    # Any branch of REPO is being built.
-    # repo-data repository is already cloned by bundle/CMakeLists.txt.
-    # Link test files in repo-data repo to build directory.
-    # get_repo_test_data checks the existence of test file directory
-    set( TESTFILE_DIR_REPO ${CMAKE_SOURCE_DIR}/${repo}-data )
-    list( APPEND REPO_DATA_DOWNLOADER_ARGS
-          ${TESTFILE_DIR_REPO} )
-    set (REPO_DATA_DOWNLOADER ufo_data_checker.py )
-  endif()
-
-  # add test for downloading data
-  ecbuild_add_test( TARGET    ufo_get_${repo}_test_data
-                    TYPE      SCRIPT
-                    COMMAND   ${CMAKE_BINARY_DIR}/bin/${REPO_DATA_DOWNLOADER}
-                    ARGS  ${REPO_DATA_DOWNLOADER_ARGS} )
-
-  # pass output data path back to calling code
-  set(${output_data_path} ${TESTFILE_DIR_REPO} PARENT_SCOPE)
-
-  # Create download script for ufo_get_*_test_data test
-  set ( FILENAME ${REPO_DATA_DOWNLOADER})
-  set ( SOURCE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME} )
-  set ( DEST_FILE ${CMAKE_BINARY_DIR}/bin/${FILENAME} )
-
-  if( EXISTS "${SOURCE_FILE}.in" )
-    configure_file( ${SOURCE_FILE}.in ${DEST_FILE} @ONLY )
-  else()
-    configure_file( ${SOURCE_FILE}    ${DEST_FILE} @ONLY )
-  endif()
-
-
-  add_custom_target( bin_ufo_${repo}_test_download_scripts ALL
-    COMMAND chmod +x ${DEST_FILE}
-    DEPENDS ${DEST_FILE} )
-
-endfunction()
-#############################################
-# add tests to download ufo & crtm data
-
-ADD_DOWNLOAD_TEST( "ufo" ${ufo_test_data} UFO_UFO_TESTFILES_PATH )
-
-execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                 ${UFO_UFO_TESTFILES_PATH}
-                 ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo)
-
-if( crtm_FOUND )
-  ADD_DOWNLOAD_TEST( "crtm" ${crtm_test_data} UFO_CRTM_TESTFILES_PATH )
-  execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink
-                   ${UFO_CRTM_TESTFILES_PATH}
-                   ${CMAKE_CURRENT_BINARY_DIR}/Data/crtm)
-endif( crtm_FOUND )
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
@@ -304,8 +204,7 @@ ecbuild_add_test( TARGET  test_ufo_recursivesplitter
                   # a path to a configuration file to be passed in the first command-line parameter.
                   ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_dataextractor
                   SOURCES mains/TestDataExtractor.cc
@@ -313,8 +212,7 @@ ecbuild_add_test( TARGET  test_ufo_dataextractor
                   # a path to a configuration file to be passed in the first command-line parameter.
                   ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  LIBS    ufo )
 
 # Test nearest_neighbor interpolation
 ecbuild_add_test( TARGET  test_ufo_nearest_neighbor_interpolation
@@ -330,14 +228,14 @@ if(eckit_VERSION VERSION_GREATER_EQUAL 1.16)
                     SOURCES mains/TestParameters.cc
                     ARGS    "testinput/parameters.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
-                    LIBS    ufo)
+                    LIBS    ufo )
 else()
   # Due to changes in eckit 1.16 a different input file is required.
   ecbuild_add_test( TARGET  test_ufo_parameters
                     SOURCES mains/TestParameters.cc
                     ARGS    "testinput/parameters_older_eckit.yaml"
                     ENVIRONMENT OOPS_TRAPFPE=1
-                    LIBS    ufo)
+                    LIBS    ufo )
 endif()
 
 # Test operator utils
@@ -345,7 +243,7 @@ ecbuild_add_test( TARGET  test_ufo_operator_utils
                   SOURCES mains/TestOperatorUtils.cc
                   ARGS    "testinput/operatorutils.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo)
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_variables
                   SOURCES mains/TestVariables.cc
@@ -358,29 +256,26 @@ ecbuild_add_test( TARGET  test_ufo_primitive_variables
                   SOURCES mains/TestPrimitiveVariables.cc
                   ARGS    "testinput/primitive_variables.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo)
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_geovals
                   SOURCES mains/TestGeoVaLs.cc
                   ARGS    "testinput/geovals.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_geovals_mpi
                   SOURCES mains/TestGeoVaLs.cc
                   ARGS    "testinput/geovals.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   MPI     4
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_geovals_spec
                   SOURCES mains/TestGeoVaLsSpec.cc
                   ARGS    "testinput/geovals_spec.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_sampled_locations
                   SOURCES mains/TestSampledLocations.cc
@@ -388,15 +283,13 @@ ecbuild_add_test( TARGET  test_ufo_sampled_locations
                           ufo/sampled_locations_test.F90
                   ARGS    "testinput/locations.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  LIBS    ufo )
 
 ecbuild_add_test( TARGET  test_ufo_recordhandler
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_RecordHandler.x
                   ARGS    "testinput/recordhandler.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  DEPENDS test_RecordHandler.x
-                  TEST_DEPENDS ufo_get_ufo_test_data )
+                  DEPENDS test_RecordHandler.x )
 
 ecbuild_add_test( TARGET  test_ufo_geovals_setup_with_mismatched_nvars
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_FortranGeoVaLs.x

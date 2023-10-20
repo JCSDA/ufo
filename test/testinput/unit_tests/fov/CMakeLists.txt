@@ -14,8 +14,7 @@ ufo_add_test( NAME    test_ufo_fov_amsua
               MPI     1
               LIBS    ufo
               LABELS  unit_tests fov
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_fov_ssmis
               TIER    1
@@ -25,5 +24,4 @@ ufo_add_test( NAME    test_ufo_fov_ssmis
               MPI     1
               LIBS    ufo
               LABELS  unit_tests fov
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-              TEST_DEPENDS ufo_get_ufo_test_data )
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
