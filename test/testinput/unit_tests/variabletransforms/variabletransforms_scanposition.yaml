@@ -1,29 +1,15 @@
 window begin: 2019-12-29T21:00:00Z
-window end: 2019-12-30T03:00:00Z
+window end: 2021-07-01T18:00:00Z
 
 observations:
-- obs operator:
-    name: RTTOV
-    Absorbers: &rttov_absorbers [CLW]
-    obs options: &rttov_options
-      RTTOV_default_opts: UKMO_PS45
-      SatRad_compatibility: true
-      WMO_ID: [225]
-      Sat_ID: [noaa_20]
-      Instrument_Name: ATMS
-      CoefficientPath: Data/
-      RTTOV_GasUnitConv: true
-      UseRHwaterForQC: true
-  obs space:
-    name: atms_n20
+- obs space:
+    name: ATMS RemapScanPosition no `remap to floor` specified
     obsdatain:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-22
-  geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
   obs filters:
     - filter: Variable Transforms
       Transform: RemapScanPosition
@@ -31,5 +17,43 @@ observations:
   compareVariables:
     - reference:
         name: TestReference/sensorScanPosition
+      test:
+        name: MetaData/sensorScanPosition
+
+- obs space:
+    name: RemapScanPosition `remap to floor` is false
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20210701T1200Z_ukv.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-22
+  obs filters:
+    - filter: Variable Transforms
+      Transform: RemapScanPosition
+      UseValidDataOnly: false
+      remap to floor: false
+  compareVariables:
+    - reference:
+        name: TestReference/remapScanPositionCeiling
+      test:
+        name: MetaData/sensorScanPosition
+
+- obs space:
+    name: RemapScanPosition `remap to floor` is true
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20210701T1200Z_ukv.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-22
+  obs filters:
+    - filter: Variable Transforms
+      Transform: RemapScanPosition
+      UseValidDataOnly: false
+      remap to floor: true
+  compareVariables:
+    - reference:
+        name: TestReference/remapScanPositionFloor
       test:
         name: MetaData/sensorScanPosition

@@ -27,6 +27,10 @@ class Cal_RemapScanPositionParameters: public VariableTransformParametersBase {
   /// The number of fields of view to remap the current scan position from.  For ATMS this
   /// is 3 and so to preserve backwards compatibility this is the default.
   oops::Parameter<int> numFOV{"number of fields of view", 3, this};
+  /// By default, floorRemap is false and the remapping will use the formula
+  /// std::ceil(scanpos/numFOV). If floorRemap is True the alternative formula
+  /// std::floor((scanpos+1)/numFOV) is used.
+  oops::Parameter<bool> floorRemap{"remap to floor", false, this};
 };
 
 /*!

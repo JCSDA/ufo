@@ -44,10 +44,10 @@ void Cal_RemapScanPosition::runTransform(const std::vector<bool> &apply) {
     // if the data have been excluded by the where statement
     if (!apply[jobs]) continue;
 
-    // Calculate wind vector
+    // Calculate revised scan position
     if (original_scan_position[jobs] != missingValueInt) {
-       remapped_scan_position[jobs] = formulas::RenumberScanPosition(original_scan_position[jobs],
-                                                                     parameters_.numFOV.value());
+       remapped_scan_position[jobs] = formulas::RenumberScanPosition(
+         original_scan_position[jobs], parameters_.numFOV.value(), parameters_.floorRemap.value());
     }
   }
   // Overwrite variable at existing locations

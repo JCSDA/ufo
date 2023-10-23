@@ -392,11 +392,17 @@ double inversePlanck(const double radiance, const double wavenumber,
 
 /* -------------------------------------------------------------------------------------*/
 
-int RenumberScanPosition(const int scanpos, const int numFOV) {
-  // std::ceil has floats as input and output
+int RenumberScanPosition(const int scanpos, const int numFOV, const bool floorRemap) {
+  // std::ceil, std::floor have floats as input and output,
   // therefore static casts required
-  const float scanpos_numFOV = static_cast<float>(scanpos)/static_cast<float>(numFOV);
-  int newpos = static_cast<int>(std::ceil(scanpos_numFOV));
+  int newpos;
+  if (floorRemap) {
+    const float scanpos_numFOV = static_cast<float>(scanpos + 1)/static_cast<float>(numFOV);
+    newpos = static_cast<int>(std::floor(scanpos_numFOV));
+  } else {
+    const float scanpos_numFOV = static_cast<float>(scanpos)/static_cast<float>(numFOV);
+    newpos = static_cast<int>(std::ceil(scanpos_numFOV));
+  }
   return newpos;
 }
 

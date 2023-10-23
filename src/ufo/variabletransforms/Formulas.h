@@ -279,20 +279,24 @@ double inversePlanck(const double radiance, const double wavenumber,
 
 // -------------------------------------------------------------------------------------
 /*!
-* \brief Get renumbered scan position 1,2,3,... for satellite instrument
-* which has been spatially resampled using the ceiling method of the number of fields
-* of view:
+* \brief Get renumbered scan position for satellite instrument which has
+* been spatially resampled. By default use the ceiling method of the number
+* of fields of view:
 *        numpos = std::ceil(scanpos/numFOV)
 * where std::ceil calculates the maximum integer from a float calculation.
+* Optionally, set floorRemap to true in order to use a variant floor method:
+*        numpos = std::floor((scanpos+1)/numFOV)
 *
 * \param scanpos
 *     satellite instrument scan position
 * \param numFOV
 *     satellite instrument number of fields of fov for an instrument.  For IASI
 *     this is 4 as an example.
+* \param floorRemap
+*     (boolean) use floor method instead of default ceiling method.
 * \return newpos
 */
-int RenumberScanPosition(int scanpos, int numFOV);
+int RenumberScanPosition(int scanpos, int numFOV, bool floorRemap);
 
 // -------------------------------------------------------------------------------------
 /*!
