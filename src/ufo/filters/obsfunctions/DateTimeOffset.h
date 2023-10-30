@@ -131,10 +131,10 @@ class DateTimeOffset : public ObsFunctionBase<util::DateTime> {
           util::Duration(static_cast<int64_t>(offset * offsetmult));
         // Check for the observation remaining within the window
         if (options_.keep_in_window.value()) {
-          if (out[0][jloc] <= window_start)
-            out[0][jloc] = window_start + one_second;
-          if (out[0][jloc] > window_end)
-            out[0][jloc] = window_end;
+          if (out[0][jloc] < window_start)
+            out[0][jloc] = window_start;
+          if (out[0][jloc] >= window_end)
+            out[0][jloc] = window_end - one_second;
         }
       }
     }
