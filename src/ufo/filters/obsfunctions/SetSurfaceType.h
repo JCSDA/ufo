@@ -39,6 +39,16 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   ///          MinWaterFrac: 0.8
   oops::Parameter<float> MinWaterFrac{"MinWaterFrac", 0.99f, this};
 
+  /// Minimum land fraction for assignment of land surface type (default 0.5)
+  /// Example: Override default and set to 0.1
+  ///          MinLandFrac: 0.1
+  oops::Parameter<float> MinLandFrac{"MinLandFrac", 0.5f, this};
+
+  /// Use model land fraction in setting of the land_sea mask (default false)
+  /// Example: To use the model land fraction set
+  ///          UseModelLandFraction: true
+  oops::Parameter<bool> UseModelLandFraction{"UseModelLandFraction", false, this};
+
   /// Use reported Surface Types (default false)
   /// Example: To use the reported surface types set
   ///          UseReportSurface: true

@@ -1,0 +1,28 @@
+window begin: 2022-06-02T09:00:00Z
+window end: 2022-06-02T15:00:00Z
+
+observations:
+- obs space:
+    name: scatwind
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/scatwind_obs_2d_20220602T1200Z.nc4
+    simulated variables: [windEastward, windNorthward]
+    observed variables: []
+    derived variables: [windEastward, windNorthward]
+    channels: 1-4
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/scatwind_geoval_with_land_area_fraction_20220602T1200Z.nc4
+      # Values of land_area_fraction:
+      #  0, 0, 0, 0, 0, 0.002378607, 0.008159236, 0.3471756, 0.7667504, 0.9597012, 0.9999697, 1, 1, 1, 1, 0, 0, 0, 0, 0 ;
+      # Expected values of surfaceQualifier:
+      #  1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1 ;
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      UseModelLandFraction: true
+      MinLandFrac: 0.3
+    variables: [surfaceQualifier]
+    tolerance: 1.0e-7

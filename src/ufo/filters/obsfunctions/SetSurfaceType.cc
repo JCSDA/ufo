@@ -33,6 +33,10 @@ namespace ufo {
     invars_ += Variable("GeoVaLs/ice_area_fraction");
     invars_ += Variable("GeoVaLs/surface_altitude");
 
+    if (options_.UseModelLandFraction.value()) {
+      invars_ += Variable("GeoVaLs/land_area_fraction");
+    }
+
     // Include list of required data from ObsSpace
     invars_ += Variable("MetaData/latitude");
 
@@ -79,30 +83,55 @@ namespace ufo {
 
     float heighttolerance = options_.HeightTolerance.value();
 
-    // if available and requested, set elevation to ob surface height
+    // Set elevation from observation, or use model surface height
+    // -----------------------------------------------------------------------------
+    bool elevation_from_ob = false;
     if (options_.UseReportElevation.value()) {
       if (in.has(Variable("MetaData/heightOfSurface"))) {
         in.get(Variable("MetaData/heightOfSurface"), elevation);
+        elevation_from_ob = true;
       } else {
-        oops::Log::warning() << "UseReportElevation is true but MetaData/heightOfSurface"
-                             << " not present. Using model data for elevation data\n";
-          elevation = model_height;
+        throw eckit::Exception("UseReportElevation is true "
+                               "but MetaData/heightOfSurface not present", Here());
       }
     } else {  // otherwise
       elevation = model_height;
     }
 
-    // set land_sea mask according to elevation data from ob (if available and requested) and model
-    // note that the elevation > 0 comes directly from OPS and so negative surface report elevations
-    // require the model height to be non-zero to be recognised as land which is likely but this is
-    // probably not logically correct.
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      land_sea[iloc] = (elevation[iloc] > 0.0f ||
-                        model_height[iloc] > 0.0f + heighttolerance ||
-                        model_height[iloc] < 0.0f - heighttolerance) ?
-        surftype_land_ : surftype_sea_;
+    // Set land_sea mask
+    // -------------------------------------------------------------------------------------
+    if (options_.UseModelLandFraction.value()) {
+      // Use model land fraction: set land_sea mask according to model land fraction
+      // Location is recognised as land if:
+      // - elevation (from ob only) is greater than zero, or
+      // - model land_area_fraction exceeds a threshold value
+      if (in.has(Variable("GeoVaLs/land_area_fraction"))) {
+        std::vector<float> land_area_fraction(nlocs);
+        in.get(Variable("GeoVaLs/land_area_fraction"), land_area_fraction);
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          land_sea[iloc] = ((elevation_from_ob && elevation[iloc] > 0.0f) ||
+                            land_area_fraction[iloc] > options_.MinLandFrac.value()) ?
+            surftype_land_ : surftype_sea_;
+        }
+      } else {
+        throw eckit::Exception("UseModelLandFraction is true "
+                               "but GeoVaLs/land_area_fraction not present", Here());
+      }
+    } else {
+      // OPS method: set land_sea mask according to elevation data and model surface height
+      // Location is recognised as land if:
+      // - elevation (from ob or model) is greater than zero, or
+      // - model surface height is non-zero (not logically correct, but true for UM field)
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        land_sea[iloc] = (elevation[iloc] > 0.0f ||
+                          model_height[iloc] > 0.0f + heighttolerance ||
+                          model_height[iloc] < 0.0f - heighttolerance) ?
+          surftype_land_ : surftype_sea_;
+      }
     }
 
+    // Set the surface type using reported surface type, or land_sea mask
+    // -----------------------------------------------------------------------------
     // if available and requested, set closest appropriate surface type using reported surface
     if (options_.UseReportSurface.value()) {
       if (in.has(Variable(options_.SurfaceMetaDataName.value()))) {
@@ -126,35 +155,36 @@ namespace ufo {
           }
         }
       } else {
-        oops::Log::warning() << "UseReportSurface is true but "
-                             << options_.SurfaceMetaDataName.value() << " not present. "
-                             << "Using elevation data to determine initial surface type\n";
-        surftype = land_sea;
+        throw eckit::Exception("UseReportSurface is true but " +
+                               options_.SurfaceMetaDataName.value() + " not present", Here());
       }
     } else {  // set surface type using land_sea directly
         surftype = land_sea;
     }
 
-    // if available and requested, set closest appropriate surface type using water_fraction
+    // Override surface type (land/sea) using water area fraction (optional)
+    // -----------------------------------------------------------------------------
+    // if available and requested, set closest appropriate surface type using waterAreaFraction
     if (options_.UseSurfaceWaterFraction.value()) {
       if (in.has(Variable("MetaData/waterAreaFraction"))) {
-        std::vector<float> water_fraction(nlocs);
-        in.get(Variable("MetaData/waterAreaFraction"), water_fraction);
+        std::vector<float> water_area_fraction(nlocs);
+        in.get(Variable("MetaData/waterAreaFraction"), water_area_fraction);
 
         for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          if (water_fraction[iloc] > options_.MinWaterFrac.value()) {
+          if (water_area_fraction[iloc] > options_.MinWaterFrac.value()) {
             surftype[iloc] = surftype_sea_;
           } else {
             surftype[iloc] = surftype_land_;
           }
         }
       } else {
-        oops::Log::warning() << "UseSurfaceWaterFraction is true but MetaData/waterAreaFraction "
-                             << "not present. Ignoring\n";
-          }
+        throw eckit::Exception("UseSurfaceWaterFraction is true "
+                               "but MetaData/waterAreaFraction not present", Here());
+      }
     }
 
     // Set sea ice surfaces
+    // -----------------------------------------------------------------------------
     // Only sea spots can be reclassified as ice (land points that may be covered
     // with ice are left as land as we don't have a suitable method of determining
     // where they are). The presence of seaice is determined by enforcing a
@@ -166,6 +196,8 @@ namespace ufo {
       }
     }
 
+    // Override surface type (land/sea/seaice) using AAPP surface class (optional)
+    // -----------------------------------------------------------------------------
     // AAPP can provide additional surface type information derived from radiances.
     // This can be used to help identify sea and seaice surfaces correctly,
     // although it can give odd results at very high latitudes
@@ -193,12 +225,13 @@ namespace ufo {
           }
         }
       } else {
-        oops::Log::warning() << "UseAAPPSurfaceClass is true but MetaData/surfaceClassAAPP not "
-                             << "present. Ignoring\n";
-          }
+        throw eckit::Exception("UseAAPPSurfaceClass is true "
+                               "but MetaData/surfaceClassAAPP not present", Here());
+      }
     }
 
-    // Any sea point south of IceShelfLimit is assumed to be ice
+    // Any sea point south of IceLimitHard is assumed to be seaice
+    // -----------------------------------------------------------------------------
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (surftype[iloc] == surftype_sea_) {
         if (latitude[iloc] < -1.0f * options_.IceLimitHard.value()) {
@@ -208,7 +241,6 @@ namespace ufo {
     }
 
     // Finally assign surftype to obsfunction output
-
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       out[0][iloc] = static_cast <float> (surftype[iloc]);
       }

@@ -24,9 +24,6 @@ observations:
     name: ObsFunction/SetSurfaceType
     options:
       UseReportSurface: true
-      UseReportElevation: true
-      UseAAPPSurfaceClass: true
-      UseSurfaceWaterFraction: true
       SurfaceTypeDefault: *rttov_surftype_land
     variables: [surfaceQualifier]
     tolerance: 1.0e-7
@@ -50,8 +47,68 @@ observations:
     name: ObsFunction/SetSurfaceType
     options:
       UseReportSurface: true
-      UseReportElevation: true
-      UseAAPPSurfaceClass: true
-      UseSurfaceWaterFraction: false
     variables: [surfaceQualifier_default]
     tolerance: 1.0e-7
+
+### Test UseReportElevation is true, but variable not present
+- obs space:
+    name: Test UseReportElevation is true, but variable not present
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_setsurface_default.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      UseReportElevation: true
+      UseReportSurface: true
+      SurfaceTypeDefault: *rttov_surftype_land
+    variables: [surfaceQualifier]
+  expect compute to throw exception with message: UseReportElevation is true but MetaData/heightOfSurface not present
+
+### Test UseAAPPSurfaceClass is true, but variable not present
+- obs space:
+    name: Test UseAAPPSurfaceClass is true, but variable not present
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_setsurface_default.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      UseAAPPSurfaceClass: true
+      UseReportSurface: true
+      SurfaceTypeDefault: *rttov_surftype_land
+    variables: [surfaceQualifier]
+  expect compute to throw exception with message: UseAAPPSurfaceClass is true but MetaData/surfaceClassAAPP not present
+
+### Test UseSurfaceWaterFraction is true, but variable not present
+- obs space:
+    name: Test UseSurfaceWaterFraction is true, but variable not present
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_setsurface_default.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-22
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      UseSurfaceWaterFraction: true
+      UseReportSurface: true
+      SurfaceTypeDefault: *rttov_surftype_land
+    variables: [surfaceQualifier]
+  expect compute to throw exception with message: UseSurfaceWaterFraction is true but MetaData/waterAreaFraction not present

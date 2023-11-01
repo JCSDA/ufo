@@ -39,7 +39,7 @@ observations:
         name: ObsFunction/SetSurfaceType
         options:
           UseReportSurface: true
-          SurfaceReport Name: MetaData/surfaceFlag
+          SurfaceReport Name: MetaData/surface_flag
 ### Set sensor zenith angle for rttov ###
   - filter: Variable Assignment
     assignments:

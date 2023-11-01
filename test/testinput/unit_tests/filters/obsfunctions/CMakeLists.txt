@@ -723,6 +723,17 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    test_ufo_function_setsurfacetype_landfrac
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_landfrac.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
+              TEST_DEPENDS ufo_get_ufo_test_data )
+#
 ufo_add_test( NAME    test_ufo_function_setsurfacetype_default
               TIER    1
               ECBUILD

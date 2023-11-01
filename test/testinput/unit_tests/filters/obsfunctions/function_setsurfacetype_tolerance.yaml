@@ -19,7 +19,6 @@ observations:
       UseReportSurface: true
       UseReportElevation: true
       UseAAPPSurfaceClass: true
-      UseSurfaceWaterFraction: true
       HeightTolerance: 1.0e-9
     variables: [surfaceQualifier]
     tolerance: 1.0e-7
@@ -43,7 +42,6 @@ observations:
       UseReportSurface: true
       UseReportElevation: true
       UseAAPPSurfaceClass: true
-      UseSurfaceWaterFraction: true
       HeightTolerance: 1.0e-10
     variables: [surfaceQualifier]
     tolerance: 1.0e-7
