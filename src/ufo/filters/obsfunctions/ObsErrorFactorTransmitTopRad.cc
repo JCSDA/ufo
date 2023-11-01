@@ -48,8 +48,12 @@ ObsErrorFactorTransmitTopRad::~ObsErrorFactorTransmitTopRad() {}
 
 void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorTransmitTopRad::compute start" << std::endl;
   // Get dimensions
   size_t nlocs = in.nlocs();
+  if (nlocs == 0) {
+    return;
+  }
   size_t nchans = channels_.size();
 
   // Inflate obs error as a function of model top-to-spaec transmittance
@@ -60,6 +64,7 @@ void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
       out[ich][iloc] = sqrt(1.0 / tao_top[iloc]);
     }
   }
+  oops::Log::trace() << "ObsErrorFactorTransmitTopRad::compute done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

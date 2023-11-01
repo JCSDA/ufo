@@ -38,10 +38,15 @@ ObsErrorFactorLatRad::~ObsErrorFactorLatRad() {}
 
 void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorLatRad::compute start" << std::endl;
   // Get parameters from options
   const std::vector<float> &params = options_.latitudeParameters.value();
 
   const size_t nlocs = in.nlocs();
+  if (nlocs == 0) {
+    return;
+  }
+
   std::vector<float> lats;
   in.get(Variable("MetaData/latitude"), lats);
   if (params[0] > 0.0) {
@@ -58,6 +63,7 @@ void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
       out[0][jj] = 1.0;
     }
   }
+  oops::Log::trace() << "ObsErrorFactorLatRad::compute done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

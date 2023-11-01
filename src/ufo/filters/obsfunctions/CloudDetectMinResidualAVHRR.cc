@@ -76,6 +76,7 @@ CloudDetectMinResidualAVHRR::~CloudDetectMinResidualAVHRR() {}
 
 void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "CloudDetectMinResidualAVHRR::compute start" << std::endl;
   // Get channel use flags from options
   std::vector<int> use_flag = options_.useflagChannel.value();
   std::vector<int> use_flag_clddet = options_.useflagCloudDetect.value();
@@ -85,6 +86,9 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
 
   // Get dimensions
   size_t nlocs = in.nlocs();
+  if (nlocs == 0) {
+    return;
+  }
   size_t nchans = channels_.size();
   size_t nlevs = in.nlevs(Variable("GeoVaLs/air_pressure"));
 
@@ -328,6 +332,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     }
   // end of location loop
   }
+  oops::Log::trace() << "CloudDetectMinResidualAVHRR::compute done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

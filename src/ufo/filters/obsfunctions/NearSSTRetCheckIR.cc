@@ -69,11 +69,15 @@ NearSSTRetCheckIR::~NearSSTRetCheckIR() {}
 
 void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "NearSSTRetCheckIR::compute start" << std::endl;
   // Get channel usage information from options
   std::vector<int> use_flag = options_.useflagChannel.value();
 
   // Get dimensions
   size_t nlocs = in.nlocs();
+  if (nlocs == 0) {
+    return;
+  }
   size_t nchans = channels_.size();
   size_t nlevs = in.nlevs(Variable("ObsDiag/brightness_temperature_jacobian_air_temperature",
                                     channels_)[0]);
@@ -269,6 +273,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     }
   // end of location loop
   }
+  oops::Log::trace() << "NearSSTRetCheckIR::compute done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

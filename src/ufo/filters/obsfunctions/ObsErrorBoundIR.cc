@@ -60,10 +60,14 @@ ObsErrorBoundIR::~ObsErrorBoundIR() {}
 
 void ObsErrorBoundIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorBoundIR::compute start" << std::endl;
   // Get observation error bounds from options
   const std::vector<float> &obserr_bound_max = options_.obserrBoundMax.value();
   // Get dimensions
   size_t nlocs = in.nlocs();
+  if (nlocs == 0) {
+    return;
+  }
   size_t nchans = channels_.size();
 
   // Get error factor from ObsFunction
@@ -112,6 +116,7 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorBoundIR::compute end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
