@@ -36,6 +36,9 @@ class ObsErrorModelStepwiseLinearParameters : public oops::Parameters {
   oops::RequiredParameter<std::vector<float>> errors{"errors", this};
   /// When final answer is a multiplication factor, we need to know which variable to multiply
   oops::OptionalParameter<Variable> scale_factor_var{"scale_factor_var", this};
+  /// Round the output of this function to the nearest integer
+  oops::OptionalParameter<Variable> round_to_the_nearest_integer {"round_to_the_nearest_integer",
+        this};
 };
 
 // -----------------------------------------------------------------------------
@@ -103,6 +106,7 @@ class ObsErrorModelStepwiseLinear : public ObsFunctionBase<float> {
   ObsErrorModelStepwiseLinearParameters options_;
   bool isAscending_ = true;
   bool multiplicative_ = false;
+  bool roundvalue_ = false;
 };
 
 // -----------------------------------------------------------------------------

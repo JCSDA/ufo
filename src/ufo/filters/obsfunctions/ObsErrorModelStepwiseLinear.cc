@@ -58,6 +58,9 @@ ObsErrorModelStepwiseLinear::ObsErrorModelStepwiseLinear(const eckit::LocalConfi
     invars_ += *scale_factor_var;
     oops::Log::debug() << " StepwiseLinear, scale_factor_var: " << *scale_factor_var << std::endl;
   }
+  if (options_.round_to_the_nearest_integer.value() != boost::none) {
+    roundvalue_ = true;
+  }
 
   // Check that all errors >= 0
   for (size_t i = 0; i < errors.size(); ++i) {
@@ -168,6 +171,9 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
       }
     } else {
       obserr[iv][jobs] = error;
+    }
+    if (roundvalue_) {
+       obserr[iv][jobs] = std::round(obserr[iv][jobs]);
     }
   }
 }
