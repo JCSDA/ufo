@@ -19,6 +19,7 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/Variable.h"
 
 namespace ufo {
 
@@ -56,6 +57,18 @@ class MetOfficeDuplicateCheckParameters : public FilterParametersBase {
      "Name of a category variable in the MetaData group. "
      "If defined, whenever an observation O is thinned, all other observations with the same value "
      "of the category variable as O are also thinned.",
+     this};
+  oops::Parameter <bool> preSortByRecordID
+    {"pre-sort by record ID",
+     "If true, sort the valid observation IDs before the filter by recordID to guarantee the check "
+     "is independent of the number of MPI processes. The default value is false.",
+     false,
+     this};
+  oops::Parameter <Variable> verticalCoordinateVariableName
+    {"vertical coordinate variable",
+     "If set, use this variable as the vertical coordinate instead of the pressure."
+     " The default value is MetaData/pressure.",
+     Variable("MetaData/pressure"),
      this};
 };
 

@@ -1,10 +1,46 @@
 # This test compares the results produced by the Met Office Duplicate check filter against
 # those obtained with the equivalent routine in the Met Office OPS system.
-# The input data set consists of 1000 points at random spatial and temporal locations.
+# The aircraft input data set consists of 1000 points at random spatial and temporal locations.
+# The ocean profile data is synthetic data chosen specifically to cause
+# different QC results depending on the number of MPI processes, assuming that
+# the sort option is not used.
 window begin: 2000-01-01T00:00:00Z
 window end: 2030-12-31T23:59:59Z
 
 observations:
+- obs space:
+    name: ocean profile
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/oceanprofile_duplicatecheck.nc4
+    simulated variables: [waterTemperature]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    flags:
+      - name: Thin4DReject
+        initial value: false
+  - filter: Met Office Duplicate Check
+    filter variables:
+      - name: ObsValue/waterTemperature
+    priority name: thinningPriority
+    latitude band width: 1.0
+    latitude bin half-width: 0.1
+    longitude bin half-width: 0.1
+    time bin half-width: 86400
+    pressure bin half-width: 10000
+    vertical coordinate variable: ObsValue/waterPressure
+    pre-sort by record ID: true
+    actions:
+      - name: set
+        flag: Thin4DReject
+      - name: reject
+  passedBenchmark: 3
+  passedObservationsBenchmark:
+    - 8
+    - 10
+    - 19
+
 # All observations have the same priority.
 - obs space:
     name: Aircraft

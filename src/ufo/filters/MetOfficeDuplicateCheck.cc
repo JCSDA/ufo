@@ -37,6 +37,15 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
   const int nlocs = obsAccessor.totalNumObservations();
 
   std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
+  if (options_.preSortByRecordID.value()) {
+    // The user wants to process observations in fixed (non-random) order. Ensure the filter
+    // produces the same results regardless of the number of MPI ranks by ordering the observations
+    // to be processed as if we were running in serial: by record ID.
+    const std::vector<size_t> recordIds = obsAccessor.getRecordIds();
+    std::stable_sort(validObsIds.begin(), validObsIds.end(),
+                     [&recordIds](size_t obsIdA, size_t obsIdB)
+                     { return recordIds[obsIdA] < recordIds[obsIdB]; });
+  }
   std::vector<bool> isThinned(nlocs, false);
 
   const std::vector <float> latitude =
@@ -51,8 +60,9 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
   std::transform(dateTime.cbegin(), dateTime.cend(),
                  dateTimeOffset.begin(),
                  [&winstart](util::DateTime d){return (d - winstart).toSeconds();});
+  Variable pressureVariable = options_.verticalCoordinateVariableName.value();
   const std::vector <float> pressure =
-    obsAccessor.getFloatVariableFromObsSpace("MetaData", "pressure");
+    obsAccessor.getFloatVariableFromObsSpace(pressureVariable.group(), pressureVariable.variable());
   std::vector <int> priority =
     obsAccessor.getIntVariableFromObsSpace("MetaData", options_.priorityName);
 
