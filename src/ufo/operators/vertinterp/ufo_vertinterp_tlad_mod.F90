@@ -127,15 +127,19 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
   self%hofx_scaling = .false.
   if ( grid_conf%has("hofx scaling field") ) then
     self%hofx_scaling = .true.
+    ! Get field name
     call grid_conf%get_or_die("hofx scaling field", hofx_scaling_field)
     self%hofx_scaling_field = hofx_scaling_field
+    ! Get field name group
     self%hofx_scaling_field_group = "GeoVaLs"
     if ( grid_conf%has("hofx scaling field group") ) then
       call grid_conf%get_or_die("hofx scaling field group", hofx_scaling_field_group)
       self%hofx_scaling_field_group = hofx_scaling_field_group
     endif
     ! If the group is GeoVaLs then push back the variable name
-    call self%geovars%push_back(trim(self%hofx_scaling_field))
+    if (trim(self%hofx_scaling_field_group) == "GeoVaLs") then
+      call self%geovars%push_back(trim(self%hofx_scaling_field))
+    endif
   endif
 
   !> Determine observation vertical coordinate group.
