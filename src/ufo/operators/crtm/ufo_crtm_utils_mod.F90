@@ -82,6 +82,7 @@ type crtm_conf
  character(len=MAXVARLEN) :: aerosol_option
  character(len=255) :: salinity_option
  character(len=MAXVARLEN) :: sfc_wind_geovars
+ real(kind_real) :: unit_coef = 1.0_kind_real
 end type crtm_conf
 
 INTERFACE calculate_aero_layer_factor
@@ -300,6 +301,7 @@ logical :: message_flag = .true.
     conf%n_Aerosols  = 0
     conf%aerosol_option = ""
  ENDIF
+ call f_confOpts%get_or_die("model units coeff", conf%unit_coef)
 
  ! Surface variables
  !----------
@@ -1027,7 +1029,7 @@ end function uv_to_wdir
 ! -----------------------------------------------------------------------------
 
 SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
-     &aerosol_option,atm)
+     &aerosol_option,atm,unit_coef)
 
     USE CRTM_aerosolcoeff, ONLY: aeroc
 
@@ -1045,6 +1047,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
     INTEGER :: ivar
+    REAL(kind_real), INTENT(in) :: unit_coef
 
     CALL assign_aerosols(aerosol_option)
 
@@ -1093,7 +1096,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
       DO m=1,n_profiles
 
-         CALL calculate_aero_layer_factor(atm(m),layer_factors)
+         CALL calculate_aero_layer_factor(atm(m), layer_factors)
 
          DO i=1,n_aerosols_gocart_default
 
@@ -1101,7 +1104,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
             CALL ufo_geovals_get_var(geovals,varname, geoval)
 
             atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-                 &MAX(geoval%vals(:,m)*layer_factors,aerosol_concentration_minvalue_layer)
+                 &MAX(geoval%vals(:,m)*unit_coef*layer_factors, &
+                 &aerosol_concentration_minvalue_layer)
 
             SELECT CASE (TRIM(varname))
             CASE (var_sulfate)
@@ -1258,7 +1262,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
    END SUBROUTINE assign_aerosol_names
 
-   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm,layer_factors)
+   SUBROUTINE calculate_aero_layer_factor_atm_profile(atm, layer_factors)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm
      REAL(kind_real), INTENT(out) :: layer_factors(:)
@@ -1266,9 +1270,9 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      INTEGER :: k
 
      DO k=1,SIZE(layer_factors)
-!correct for mixing ratio factor layer_factors
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+1.61*mixing_ratio)
+        !correct for mixing ratio factor layer_factors
+        !being calculated from dry pressure, cotton eq. (2.4)
+        !p_dry=p_total/(1+1.61*mixing_ratio)
         layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
              &atm%Level_Pressure(k-1))*100_kind_real/grav/&
              &(1_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
@@ -1276,18 +1280,17 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
 
    END SUBROUTINE calculate_aero_layer_factor_atm_profile
 
-   SUBROUTINE calculate_aero_layer_factor_atm(atm,layer_factors)
+   SUBROUTINE calculate_aero_layer_factor_atm(atm, layer_factors)
 
      TYPE(CRTM_atmosphere_type), INTENT(in) :: atm(:)
      REAL(kind_real), INTENT(out) :: layer_factors(:,:)
-
      INTEGER :: k,m
 
      DO k=1,SIZE(layer_factors,1)
         DO m=1,SIZE(layer_factors,2)
-!correct for mixing ratio factor layer_factors
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+1.61*mixing_ratio)
+           !correct for mixing ratio factor layer_factors
+           !being calculated from dry pressure, cotton eq. (2.4)
+           !p_dry=p_total/(1+1.61*mixing_ratio)
            layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
                 &atm(m)%Level_Pressure(k-1))*100_kind_real/grav/&
                 &(1_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)

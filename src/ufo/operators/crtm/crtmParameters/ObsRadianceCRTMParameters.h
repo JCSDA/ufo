@@ -48,6 +48,9 @@ namespace ufo
     oops::OptionalParameter<std::string> IRVISiceCoeff{"IRVISiceCoeff", "NPOESS", this};
     /// MWwaterCoeff
     oops::OptionalParameter<std::string> MWwaterCoeff{"MWwaterCoeff", "FASTEM6", this};
+    /// Scaling factor
+    oops::Parameter <double> modelUnitsCoeff{"model units coeff",
+          "Conversion between model units", 1.0, this};
   };  // end class ObsOptionsParameters
 
   /// \brief Sub-parameters for the linear obs operator

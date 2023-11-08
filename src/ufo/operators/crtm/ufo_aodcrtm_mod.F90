@@ -202,8 +202,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
 
    if (trim(self%conf%aerosol_option) /= "") &
-       & call load_aerosol_data(n_profiles,n_layers,geovals, &
-       & self%conf%aerosol_option,atm)
+       & call load_aerosol_data(n_profiles, n_layers, geovals, &
+       & self%conf%aerosol_option, atm, self%conf%unit_coef)
 
    ! Call THE CRTM inspection
    ! ------------------------

@@ -214,8 +214,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    CALL Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
 
    IF (TRIM(self%conf%aerosol_option) /= "") &
-        &CALL load_aerosol_data(self%n_profiles,self%n_layers,geovals,&
-        &self%conf%aerosol_option,atm)
+        &CALL load_aerosol_data(self%n_profiles, self%n_layers, geovals,&
+        &self%conf%aerosol_option, atm, self%conf%unit_coef)
 
    CALL CRTM_RTSolution_Create(rts, self%n_layers )
    CALL CRTM_RTSolution_Create(rts_k, self%n_layers )
@@ -345,7 +345,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
         DO jlevel = 1, var_p%nval
            hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
                                       self%atm_k(self%channels(jchannel),jprofile)%aerosol(jaero)%concentration(jlevel) *  &
-                                      var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile)
+                                      var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile) * self%conf%unit_coef
         ENDDO
      ENDDO
    enddo
@@ -411,7 +411,7 @@ INTEGER :: jaero
     ENDDO
 
     FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) &
-        var_p%vals(jlevel,jprofile)=var_p%vals(jlevel,jprofile)*self%scaling_factor(jlevel,jprofile)
+        var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile) * self%conf%unit_coef
 
  ENDDO
 
