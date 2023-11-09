@@ -1319,10 +1319,10 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      j1 = 1
      IF ( rh <= aeroc%rh(1) ) THEN
         j1 = 1
-     ELSE IF ( rh >= aeroc%rh(aeroc%n_rh) ) THEN
-        j1 = aeroc%n_rh
+     ELSE IF ( rh >= aeroc%rh(aeroc%n_rh_radii) ) THEN
+        j1 = aeroc%n_rh_radii
      ELSE
-        DO m = 1, aeroc%n_rh-1
+        DO m = 1, aeroc%n_rh_radii-1
            IF ( rh < aeroc%rh(m+1) .AND. rh > aeroc%rh(m) ) THEN
               j1 = m
               j2 = m+1
