@@ -1312,17 +1312,20 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      REAL(kind_real)    ,INTENT(in) :: rh
 
      INTEGER :: j1,j2,m
+     INTEGER :: n_rh
      REAL(kind_real)    :: h1
      REAL(kind_real)    :: r_eff
 
      j2 = 0
      j1 = 1
+     n_rh = 36    ! total number of RH in CRTM Default LUTs
+
      IF ( rh <= aeroc%rh(1) ) THEN
         j1 = 1
-     ELSE IF ( rh >= aeroc%rh(aeroc%n_rh_radii) ) THEN
-        j1 = aeroc%n_rh_radii
+     ELSE IF ( rh >= aeroc%rh(n_rh) ) THEN
+        j1 = n_rh
      ELSE
-        DO m = 1, aeroc%n_rh_radii-1
+        DO m = 1, n_rh-1
            IF ( rh < aeroc%rh(m+1) .AND. rh > aeroc%rh(m) ) THEN
               j1 = m
               j2 = m+1
