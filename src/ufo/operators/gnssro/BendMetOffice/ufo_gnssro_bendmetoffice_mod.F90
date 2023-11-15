@@ -103,6 +103,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   real(kind_real), allocatable :: refractivity(:)               ! Refractivity on various model levels
   real(kind_real), allocatable :: model_heights(:)              ! Geopotential heights that refractivity is calculated on
   real(kind_real)              :: calculated_hofx(nlevels)      ! Array to receive the calculated h(x) on levels
+  real(kind_real), allocatable :: tobs(:)                       ! Virtual temperature at observation locations
 
   write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: begin"
   call fckit_log%info(err_msg)
@@ -112,7 +113,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   ! it is called in a loop).
   DO iVar = 1, obs_diags % nvar
     IF (obs_diags % variables(ivar) == "atmosphericRefractivity_model" .OR. &
-        obs_diags % variables(ivar) == "geopotentialHeight_model") THEN
+        obs_diags % variables(ivar) == "geopotentialHeight_model" .OR. &
+        obs_diags % variables(ivar) == "virtualTemperature") THEN
       write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: initialising obs_diags for " // &
         obs_diags % variables(ivar)
       call fckit_log%info(err_msg)
@@ -170,6 +172,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   allocate(impact_param(nlevels * nlocs))
   allocate(radius_curv(nlocs))
   allocate(undulation(nlocs))
+  allocate(tobs(nlevels))
 
   call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
@@ -203,7 +206,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
                                 calculated_hofx, &
                                 BAErr, &
                                 refractivity, &
-                                model_heights)
+                                model_heights, &
+                                tobs)
     hofx(:, iloc) = calculated_hofx
 
     if (BAErr) then
@@ -242,6 +246,19 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
                 obs_diags % geovals(iVar) % vals(:,iloc) = model_heights(SIZE(model_heights):1:-1)
             END IF
         END IF
+
+        IF (obs_diags % variables(ivar) == "virtualTemperature") THEN
+            IF (iloc == 1) THEN
+                obs_diags % geovals(iVar) % nval = nlevels
+                ALLOCATE(obs_diags % geovals(iVar) % vals(nlevels, obs_diags % nlocs))
+            END IF
+
+            IF (BAerr) THEN
+                obs_diags % geovals(iVar) % vals(:,iloc) = missing_value(obs_diags % geovals(iVar) % vals(1,1))
+            ELSE
+                obs_diags % geovals(iVar) % vals(:,iloc) = tobs(:)
+            END IF
+        END IF
     END DO
   end do obs_loop
 
@@ -275,7 +292,8 @@ SUBROUTINE Ops_GPSRO_ForwardModel(nlevp, &
                                   ycalc, &
                                   BAErr, &
                                   refractivity, &
-                                  model_heights)
+                                  model_heights, &
+                                  tobs)
 
 INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
 INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
@@ -295,11 +313,13 @@ REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)          ! Model forecast of the
 LOGICAL, INTENT(OUT)           :: BAErr                  ! Was an error encountered during the calculation?
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)  ! Refractivity as calculated
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:) ! Height of the levels for refractivity
+REAL(kind_real), INTENT(OUT)   :: tobs(1:nobs)           ! Virtual temperature on model levels
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 ! 
 INTEGER                      :: nRefLevels          ! Number of levels in refractivity calculation
 REAL(kind_real), ALLOCATABLE :: nr(:)               ! Model calculation of impact parameters
+REAL(kind_real), ALLOCATABLE :: temperature(:)      ! Calculated virtual temperature on pseudo levels
 ! 
 ! Local parameters
 ! 
@@ -311,6 +331,8 @@ character(len=*), parameter  :: myname_ = "Ops_GPSRO_ForwardModel"
 INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
 REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
+integer                      :: ilevel            ! Loop variable, model level number
+integer                      :: iobs              ! Loop variable, observation number
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
@@ -334,7 +356,8 @@ CALL ufo_calculate_refractivity (nlevp,                 &
                                  BAerr,                 &
                                  nRefLevels,            &
                                  refractivity,          &
-                                 model_heights)
+                                 model_heights,         &
+                                 tpseudo=temperature)
 
 ALLOCATE(nr(1:nRefLevels))
 
@@ -356,6 +379,18 @@ IF (.NOT. BAerr) THEN
                               refractivity, &      ! refractivity values
                               nr,           &      ! index * radius product
                               ycalc)               ! forward modelled bending angle
+
+    ! 4. Linearly interpolate the virtual temperature to the observation levels
+    DO iobs = 1, nobs
+        DO iLevel = 1, nRefLevels-1
+            IF (nr(iLevel) < zobs(iobs) .AND. nr(iLevel+1) > zobs(iobs)) EXIT
+        END DO
+        IF (iLevel == nRefLevels) THEN
+            tobs(iobs) = missing_value(tobs(iobs))
+        ELSE
+            tobs(iobs) = temperature(iLevel) + (temperature(iLevel+1) - temperature(iLevel)) * (zobs(iobs) - nr(iLevel)) / (nr(iLevel+1) - nr(iLevel))
+        END IF
+    END DO
 END IF
 
 END SUBROUTINE Ops_GPSRO_ForwardModel

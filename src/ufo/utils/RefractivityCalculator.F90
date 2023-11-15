@@ -79,26 +79,28 @@ SUBROUTINE ufo_calculate_refractivity (nlevP,           &
                                        refractivity,    &
                                        model_heights,   &
                                        temperature,     &
-                                       interp_pressure)
+                                       interp_pressure, &
+                                       tpseudo)
 
 IMPLICIT NONE
 
 ! Subroutine arguments:
-INTEGER, INTENT(IN)                       :: nlevP                   !< no. of p levels in state vec.
-INTEGER, INTENT(IN)                       :: nlevq                   !< no. of theta levels
-REAL(kind_real), INTENT(IN)               :: za(nlevp)               !< heights of rho levs
-REAL(kind_real), INTENT(IN)               :: zb(nlevq)               !< heights of theta levs
-REAL(kind_real), INTENT(IN)               :: P(nlevp)                !< state vector
-REAL(kind_real), INTENT(IN)               :: q(nlevq)                !< state vector
-LOGICAL, INTENT(IN)                       :: vert_interp_ops         !< Use log(p) for vertical interpolation?
-LOGICAL, INTENT(IN)                       :: pseudo_ops              !< Use pseudo-levels to reduce errors?
-REAL(kind_real), INTENT(IN)               :: min_temp_grad           !< Minimum value for the vertical temperature gradient
-LOGICAL, INTENT(OUT)                      :: refracerr               !< refractivity error
-INTEGER, INTENT(OUT)                      :: nRefLevels              !< no. of pseudo levs
-REAL(kind_real), ALLOCATABLE, INTENT(OUT) :: refractivity(:)         !< Ref. on pseudo levs
-REAL(kind_real), ALLOCATABLE, INTENT(OUT) :: model_heights(:)        !< height of pseudo levs
-REAL(kind_real), OPTIONAL, INTENT(OUT)    :: temperature(nlevq)      !< Calculated temperature on model levels
-REAL(kind_real), OPTIONAL, INTENT(OUT)    :: interp_pressure(nlevq)  !< Model pressure, interpolated to temperature levels
+INTEGER, INTENT(IN)                                   :: nlevP                   !< no. of p levels in state vec.
+INTEGER, INTENT(IN)                                   :: nlevq                   !< no. of theta levels
+REAL(kind_real), INTENT(IN)                           :: za(nlevp)               !< heights of rho levs
+REAL(kind_real), INTENT(IN)                           :: zb(nlevq)               !< heights of theta levs
+REAL(kind_real), INTENT(IN)                           :: P(nlevp)                !< state vector
+REAL(kind_real), INTENT(IN)                           :: q(nlevq)                !< state vector
+LOGICAL, INTENT(IN)                                   :: vert_interp_ops         !< Use log(p) for vertical interpolation?
+LOGICAL, INTENT(IN)                                   :: pseudo_ops              !< Use pseudo-levels to reduce errors?
+REAL(kind_real), INTENT(IN)                           :: min_temp_grad           !< Minimum value for the vertical temperature gradient
+LOGICAL, INTENT(OUT)                                  :: refracerr               !< refractivity error
+INTEGER, INTENT(OUT)                                  :: nRefLevels              !< no. of pseudo levs
+REAL(kind_real), ALLOCATABLE, INTENT(OUT)             :: refractivity(:)         !< Ref. on pseudo levs
+REAL(kind_real), ALLOCATABLE, INTENT(OUT)             :: model_heights(:)        !< height of pseudo levs
+REAL(kind_real), OPTIONAL, INTENT(OUT)                :: temperature(nlevq)      !< Calculated temperature on model
+REAL(kind_real), OPTIONAL, INTENT(OUT)                :: interp_pressure(nlevq)  !< Model pressure, interpolated to temperature levels
+REAL(kind_real), ALLOCATABLE, OPTIONAL, INTENT(INOUT) :: tpseudo(:)              !< Calculated temperature on pseudo levels (or model levels if pseudo_ops is false)
 
 ! Local declarations:
 CHARACTER(len=*), PARAMETER               :: RoutineName = "ufo_calculate_refractivity"
@@ -263,6 +265,16 @@ END IF
 
 IF (PRESENT(temperature)) THEN
   temperature(:) = T_local(:)
+END IF
+
+IF (PRESENT(tpseudo)) THEN
+  IF (pseudo_ops) THEN
+    ALLOCATE (tpseudo(1:nRefLevels))
+    tpseudo(:) = T_pseudo(:)
+  ELSE
+    ALLOCATE (tpseudo(1:nlevq))
+    tpseudo(:) = T_local(:)
+  END IF
 END IF
 
 IF (PRESENT(interp_pressure)) THEN

@@ -271,7 +271,7 @@ Iteration_loop: DO
                                    nRefLevels,             &
                                    refractivity,           &
                                    model_heights,          &
-                                   T)
+                                   temperature=T)
 
   ! no point proceeding further if ...
   IF (BAerr) EXIT

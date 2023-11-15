@@ -340,8 +340,8 @@ CALL ufo_calculate_refractivity (nlevp,                 &
                                  nRefLevels,            &
                                  refractivity,          &
                                  model_heights,         &
-                                 temperature,           &
-                                 Pb)
+                                 temperature=temperature, &
+                                 interp_pressure=Pb)
 
 ! Vertically interpolate the model refractivity to the observation locations
 DO iObs = 1, nobs
