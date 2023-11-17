@@ -20,6 +20,7 @@ set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 
 ## Configuration options
 option( ENABLE_UFO_DOC "Build UFO documentation" OFF )
+option( ROPP_ARO "Using ROPP for airborne radio occultation" OFF )
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -100,6 +101,10 @@ endif( ${gsw_FOUND} )
 find_package( ropp-ufo QUIET )
 if( ${ropp-ufo_FOUND} )
     message(STATUS "ROPP FOUND; Including GNSSRO Bending angle ROPP Operators (${ropp-ufo_VERSION})")
+    if ( ROPP_ARO)
+        message(STATUS "Will use ROPP ARO Operator")
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Dropp_aro")
+    endif()
 else( ${ropp-ufo_FOUND} )
     message(STATUS "ROPP NOT FOUND: Excluding GNSSRO Bending angle ROPP Operators")
 endif( ${ropp-ufo_FOUND} )

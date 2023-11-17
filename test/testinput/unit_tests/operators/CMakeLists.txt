@@ -439,6 +439,28 @@ if( ${ropp-ufo_FOUND} )
               LIBS    ufo
               LABELS  ropp-ufo operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+if ( ROPP_ARO)
+    ufo_add_test( NAME    test_ufo_opr_gnssarobndropp2d
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssarobndropp2d.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  ropp-ufo operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    test_ufo_linopr_gnssaroBndROPP2d
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssarobndropp2d.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  ropp-ufo operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+endif()
 
 endif( ${ropp-ufo_FOUND} )
 #

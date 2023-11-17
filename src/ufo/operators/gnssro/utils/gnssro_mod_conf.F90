@@ -22,6 +22,7 @@ type gnssro_conf
   character(len=:), allocatable :: str
   real(kind_real)    :: res
   real(kind_real)    :: top_2d
+  character(len=20)  :: ro_type
   real(kind_real)    :: dtheta
   character(len=20)  :: vertlayer
   character(len=20)  :: output_diags
@@ -32,6 +33,7 @@ end type gnssro_conf
 integer(c_int),  parameter, public :: n_horiz_2d = 31   !should be odd number
 real(kind_real), parameter, public :: res_2d     = 40.0 !km
 real(kind_real), parameter, public :: top_2d     = 20.0 !km; maximum height the 2d operator is applied
+character(len=20), parameter, public :: ro_type  = "spaceborne" !takes values spaceborne/airborne
 contains
 !-------------------------------
 
@@ -51,6 +53,12 @@ if (f_conf%has("res")) call f_conf%get_or_die("res",roconf%res)
 roconf%top_2d = top_2d
 if (f_conf%has("top_2d")) call f_conf%get_or_die("top_2d",roconf%top_2d)
 roconf%top_2d        = roconf%top_2d*1000.0     ! km to m
+roconf%ro_type = ro_type
+if (f_conf%has("ro_type"))  then
+  call f_conf%get_or_die("ro_type",str)
+  roconf%ro_type=trim(str)
+endif
+!if (f_conf%has("ro_type")) call f_conf%get_or_die("ro_type",roconf%ro_type)
 roconf%dtheta        = roconf%res/mean_earth_rad
 roconf%vertlayer = "full"
 if (f_conf%has("vertlayer")) then

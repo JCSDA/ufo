@@ -147,7 +147,8 @@ end subroutine ufo_gnssro_bndropp2d_tlad_settraj
 subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
   use ropp_fm_types, only: State2dFM, State1dFM
-  use ropp_fm_types, only: Obs1dBangle
+  use ropp_fm_types, only: Obs1dBangle, Obs1dRefrac
+  use geodesy,       only: geometric2geopotential
   use datetimetypes, only: dp
   implicit none
   class(ufo_gnssro_BndROPP2D_tlad), intent(in)    :: self
@@ -159,6 +160,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   type(State2dFM)                 :: x,x_tl
   type(State1dFM)                 :: x1d,x1d_tl
   type(Obs1dBangle)               :: y,y_tl
+  type(Obs1dRefrac)               :: y2    ! Observation vector (levels required)
  
   integer                         :: iobs,nlev, nlocs,nvprof
     
@@ -175,11 +177,15 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
   real(kind_real)               :: ob_time
+  character(len=20)             :: ro_type
+  real(kind_real), allocatable  :: obsAlt(:),obsRef(:),geop(:)                  !nlocs
+  integer                       :: i
 
   missing = missing_value(missing)
 
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
+  ro_type = self%roconf%ro_type
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: begin"
   call fckit_log%debug(err_msg)
@@ -216,12 +222,27 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
   allocate(obsAzim(nlocs))
+  allocate(obsAlt(nlocs))
+  allocate(obsRef(nlocs))
+  allocate(y2%refrac(nlocs))
+  allocate(y2%geop(nlocs))
+  allocate(geop(nlocs))
+
   call obsspace_get_db(obss, "MetaData", "longitude",            obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude",             obsLat)
   call obsspace_get_db(obss, "MetaData", "impactParameterRO",    obsImpP)
   call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid)
   call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle",   obsAzim)
+  call obsspace_get_db(obss, "MetaData", "height",                  obsAlt)
+  call obsspace_get_db(obss, "ObsValue", "atmosphericRefractivity", obsRef)
+
+  do i = 1, nlocs
+    geop(i) = geometric2geopotential(obsLat(i), obsAlt(i))
+  enddo
+
+  y2%refrac = obsRef(:)
+  y2%geop = geop(:)
 
   nvprof  = 1  ! no. of bending angles in profile 
   ob_time = 0.0
@@ -264,7 +285,18 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                              y,y_tl)
 
 !      now call TL of forward model
-       call ropp_fm_bangle_2d_tl(x,x_tl,y, y_tl)
+       if ( ro_type .eq. "airborne" ) then
+#ifdef ropp_aro
+         call ropp_fm_bangle_2d_tl_aro(x,x_tl,y, y_tl,y2)
+#else
+         write(err_msg,*) myname_, ' ERROR: option "ro_type = airborne"',&
+       ' requires compiling UFO with the "-Dropp_aro" cpp argument'
+         call abor1_ftn(err_msg)
+#endif
+       else
+         call ropp_fm_bangle_2d_tl(x,x_tl,y, y_tl)
+       end if
+
        hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
 
 !      tidy up -deallocate ropp structures 
@@ -323,6 +355,10 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsGeoid)
   deallocate(obsAzim)
   deallocate(gph_d_zero)
+  deallocate(obsAlt)
+  deallocate(obsRef)
+  deallocate(y2%refrac)
+  deallocate(y2%geop)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: complete"
   call fckit_log%debug(err_msg)
@@ -334,7 +370,8 @@ end subroutine ufo_gnssro_bndropp2d_simobs_tl
 subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
   use ropp_fm_types, only: State2dFM, State1dFM
-  use ropp_fm_types, only: Obs1dBangle
+  use ropp_fm_types, only: Obs1dBangle, Obs1dRefrac
+  use geodesy,       only: geometric2geopotential
   use typesizes,     only: wp => EightByteReal
   use datetimetypes, only: dp
   use ropp_fm, only: ropp_fm_bangle_1d_ad
@@ -357,15 +394,20 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   type(State2dFM)                 :: x,x_ad
   type(State1dFM)                 :: x1d,x1d_ad
   type(Obs1dBangle)               :: y,y_ad
+  type(Obs1dRefrac)               :: y2    ! Observation vector (levels required)
   integer                         :: iobs,nlev,nlocs,nvprof
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs_ad"
   character(max_string)           :: err_msg
   integer                         :: n_horiz 
   real(kind_real)                 :: dtheta
   real(kind_real)                 :: ob_time
+  character(len=20)               :: ro_type
+  real(kind_real), allocatable    :: obsAlt(:),obsRef(:),geop(:)                  !nlocs
+  integer                         :: i
 
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
+  ro_type = self%roconf%ro_type
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: begin"
   call fckit_log%debug(err_msg)
@@ -402,13 +444,27 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   allocate(obsLocR(nlocs))
   allocate(obsGeoid(nlocs))
   allocate(obsAzim(nlocs))
+  allocate(obsAlt(nlocs))
+  allocate(obsRef(nlocs))
+  allocate(y2%refrac(nlocs))
+  allocate(y2%geop(nlocs))
+  allocate(geop(nlocs))
 
-  call obsspace_get_db(obss, "MetaData", "longitude",            obsLon)
-  call obsspace_get_db(obss, "MetaData", "latitude",             obsLat)
-  call obsspace_get_db(obss, "MetaData", "impactParameterRO",    obsImpP)
-  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid)
-  call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle",   obsAzim)
+  call obsspace_get_db(obss, "MetaData", "longitude",               obsLon)
+  call obsspace_get_db(obss, "MetaData", "latitude",                obsLat)
+  call obsspace_get_db(obss, "MetaData", "impactParameterRO",       obsImpP)
+  call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature",    obsLocR)
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation",         obsGeoid)
+  call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle",      obsAzim)
+  call obsspace_get_db(obss, "MetaData", "height",                  obsAlt)
+  call obsspace_get_db(obss, "ObsValue", "atmosphericRefractivity", obsRef)
+
+  do i = 1, nlocs
+    geop(i) = geometric2geopotential(obsLat(i), obsAlt(i))
+  enddo
+
+  y2%refrac = obsRef(:)
+  y2%geop = geop(:)
 
   missing = missing_value(missing)
 
@@ -460,7 +516,17 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 !       now call AD of forward model
         y_ad%bangle(nvprof)  = y_ad%bangle(nvprof) + hofx(iobs)
-        call ropp_fm_bangle_2d_ad(x,x_ad,y,y_ad)
+        if ( ro_type .eq. "airborne" ) then
+#ifdef ropp_aro
+          call ropp_fm_bangle_2d_ad_aro(x,x_ad,y,y_ad,y2)
+#else
+          write(err_msg,*) myname_, ' ERROR: option "ro_type = airborne"',&
+        ' requires compiling UFO with the "-Dropp_aro" cpp argument'
+          call abor1_ftn(err_msg)
+#endif
+        else
+          call ropp_fm_bangle_2d_ad(x,x_ad,y,y_ad)
+        end if
 
         call init_ropp_2d_statevec_ad(           &
                           t_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
@@ -545,6 +611,10 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   deallocate(obsGeoid)
   deallocate(obsAzim)
   deallocate(gph_d_zero)
+  deallocate(obsAlt)
+  deallocate(obsRef)
+  deallocate(y2%refrac)
+  deallocate(y2%geop)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: complete"
   call fckit_log%debug(err_msg)

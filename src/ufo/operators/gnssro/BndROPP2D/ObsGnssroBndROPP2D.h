@@ -32,6 +32,7 @@ class GnssroBndROPP2DOptionsParameters: public oops::Parameters {
   oops::Parameter<size_t> nHoriz{"n_horiz", 31, this};
   oops::Parameter<double> res{"res", 40.0, this};
   oops::Parameter<double> top2D{"top_2d", 20.0, this};
+  oops::Parameter<std::string> roType{"ro_type", "spaceborne", this};
 };
 
 class GnssroBndROPP2DParameters: public ObsOperatorParametersBase {

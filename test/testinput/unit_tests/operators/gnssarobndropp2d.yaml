@@ -1,0 +1,31 @@
+window begin: 2018-04-14T21:00:00Z
+window end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+   name: GnssroBndROPP2D
+   obs options:
+    n_horiz: 3
+    res: 40.0
+    top_2d: 20.0
+    ro_type: airborne
+  obs space:
+    name: GnssaroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2018041500_s.nc4
+    simulated variables: [bendingAngle]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_obs_2018041500_s_ropp2d_opr_out.nc4
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s_2d.nc4
+   loc_multiplier: 3
+  rms ref: 0.0091672370053598844
+  tolerance: 1.0e-11
+  linear obs operator test:
+    iterations TL:  10
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-11
