@@ -14,6 +14,8 @@ set ( crtm_files
   ObsRadianceCRTM.interface.h
   ObsRadianceCRTMTLAD.interface.F90
   ObsRadianceCRTMTLAD.interface.h
+  ufo_crtm_passive_mod.F90
+  ufo_crtm_active_mod.F90
   ufo_radiancecrtm_mod.F90
   ufo_radiancecrtm_tlad_mod.F90
   ufo_crtm_utils_mod.F90

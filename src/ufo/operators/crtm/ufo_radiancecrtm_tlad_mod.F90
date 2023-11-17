@@ -22,6 +22,8 @@ module ufo_radiancecrtm_tlad_mod
  use ufo_crtm_utils_mod
 
  use ufo_constants_mod, only: deg2rad
+ use ufo_crtm_passive_mod
+ use ufo_crtm_active_mod 
 
  implicit none
  private
@@ -148,6 +150,7 @@ use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
 use ieee_arithmetic,    only: ieee_is_nan
 use ufo_utils_mod,      only: cmp_strings
+use CRTM_SpcCoeff, only:  SC
 
 implicit none
 
@@ -186,21 +189,15 @@ type(CRTM_Atmosphere_type), allocatable :: atm_Ka(:,:)
 type(CRTM_Surface_type),    allocatable :: sfc_Ka(:,:)
 type(CRTM_RTSolution_type), allocatable :: rtsa(:,:)
 type(CRTM_RTSolution_type), allocatable :: rts_Ka(:,:)
-integer :: lch
 
+character(len=MAXVARLEN),  dimension(hofxdiags%nvar) :: &
+                          ystr_diags, xstr_diags
+integer :: str_pos(4), ch_diags(hofxdiags%nvar),numNaN
+integer :: lch
 ! Used to parse hofxdiags
 character(len=MAXVARLEN) :: varstr
-character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
-                          ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
-integer :: str_pos(4), ch_diags(hofxdiags%nvar),numNaN
-
-real(kind_real) :: total_od, secant_term, wfunc_max
-real(kind_real), allocatable :: TmpVar(:)
-real(kind_real), allocatable :: Tao(:)
-real(kind_real), allocatable :: Wfunc(:)
-! For gmi_gpm geophysical angles at channels 10-13.
-character(len=1) :: angle_hf
+integer(c_size_t) :: nvars, nlocs
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -226,18 +223,27 @@ character(len=1) :: angle_hf
  !**       CRTM_Lifecycle.f90 for more details.
 
  ! write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
- err_stat = CRTM_Init( self%conf_traj%SENSOR_ID, chinfo, &
-            File_Path=trim(self%conf_traj%COEFFICIENT_PATH), &
-            IRwaterCoeff_File=trim(self%conf_traj%IRwaterCoeff_File), &
-            IRlandCoeff_File=trim(self%conf_traj%IRlandCoeff_File), &
-            IRsnowCoeff_File=trim(self%conf_traj%IRsnowCoeff_File), &
-            IRiceCoeff_File=trim(self%conf_traj%IRiceCoeff_File), &
-            VISwaterCoeff_File=trim(self%conf_traj%VISwaterCoeff_File), &
-            VISlandCoeff_File=trim(self%conf_traj%VISlandCoeff_File), &
-            VISsnowCoeff_File=trim(self%conf_traj%VISsnowCoeff_File), &
-            VISiceCoeff_File=trim(self%conf_traj%VISiceCoeff_File), &
-            MWwaterCoeff_File=trim(self%conf_traj%MWwaterCoeff_File), &
-            Quiet=.TRUE.)
+ err_stat = CRTM_Init( self%conf_traj%SENSOR_ID                                      , &
+                       chinfo                                                        , &
+                       File_Path           = trim(self%conf_traj%COEFFICIENT_PATH)   , &
+                       NC_File_Path        = trim(self%conf_traj%NC_COEFFICIENT_PATH), &
+                       Aerosol_Model       = trim(self%conf_traj%Aerosol_Model)      , &
+                       AerosolCoeff_Format = trim(self%conf_traj%AerosolCoeff_Format), &
+                       AerosolCoeff_File   = trim(self%conf_traj%AerosolCoeff_File)  , &
+                       Cloud_Model         = trim(self%conf_traj%Cloud_Model)        , &
+                       CloudCoeff_Format   = trim(self%conf_traj%CloudCoeff_Format)  , &
+                       CloudCoeff_File     = trim(self%conf_traj%CloudCoeff_File)    , &
+                       IRwaterCoeff_File   = trim(self%conf_traj%IRwaterCoeff_File)  , &
+                       IRlandCoeff_File    = trim(self%conf_traj%IRlandCoeff_File)   , &
+                       IRsnowCoeff_File    = trim(self%conf_traj%IRsnowCoeff_File)   , &
+                       IRiceCoeff_File     = trim(self%conf_traj%IRiceCoeff_File)    , &
+                       VISwaterCoeff_File  = trim(self%conf_traj%VISwaterCoeff_File) , &
+                       VISlandCoeff_File   = trim(self%conf_traj%VISlandCoeff_File)  , &
+                       VISsnowCoeff_File   = trim(self%conf_traj%VISsnowCoeff_File)  , &
+                       VISiceCoeff_File    = trim(self%conf_traj%VISiceCoeff_File)   , &
+                       MWwaterCoeff_File   = trim(self%conf_traj%MWwaterCoeff_File)  , &
+                       Quiet               = .TRUE.)
+
  message = 'Error initializing CRTM (setTraj)'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
 
@@ -314,8 +320,8 @@ character(len=1) :: angle_hf
 
    !Assign the data from the GeoVaLs
    !--------------------------------
-   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj)
-   call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj)
+   call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj, SC(n)%Is_Active_Sensor)
+   call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj,SC(n)%Is_Active_Sensor)
    if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
       allocate( geo_hf( self%n_Profiles ))
       call Load_Geom_Data(obss,geo,geo_hf,self%conf%SENSOR_ID(n))
@@ -328,13 +334,27 @@ character(len=1) :: angle_hf
    call CRTM_Atmosphere_Zero( self%atm_K )
    call CRTM_Surface_Zero( self%sfc_K )
 
-
    ! Inintialize the K-matrix INPUT so that the results are dTb/dx
    ! -------------------------------------------------------------
-   rts_K%Radiance               = ZERO
-   rts_K%Brightness_Temperature = ONE
+   if (SC(n)%Is_Active_Sensor) then
+       do jchannel = 1, self%n_Channels
+          do jprofile = 1, self%n_Profiles
+             do jlevel = 1, self%n_Layers
+                rts_K(jchannel,jprofile)%Reflectivity(jlevel)            = ZERO
+                rts_K(jchannel,jprofile)%Reflectivity_Attenuated(jlevel) = ONE
+             end do
+          end do
+       end do
 
-   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,atm,sfc,self%Options)
+       rts_K%Radiance                = ZERO
+       rts_K%Brightness_Temperature  = ZERO
+   else
+       rts_K%Radiance                = ZERO
+       rts_K%Brightness_Temperature  = ONE
+   end if
+
+
+   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,atm,sfc,SC(n)%Is_Active_Sensor, self%Options)
 
    ! Call the K-matrix model
    ! -----------------------
@@ -368,8 +388,9 @@ character(len=1) :: angle_hf
       call CRTM_Surface_Zero( self%sfc_K )
       ! Inintialize the K-matrix INPUT so that the results are dTb/dx
       ! -------------------------------------------------------------
-      rts_K%Radiance               = ZERO
-      rts_K%Brightness_Temperature = ONE
+      rts_K%Radiance                = ZERO
+      rts_K%Brightness_Temperature  = ONE
+
       ! Call the K-matrix model
       ! -----------------------
       err_stat = CRTM_K_Matrix( atm         , &  ! FORWARD  Input
@@ -428,7 +449,7 @@ character(len=1) :: angle_hf
       read(varstr(str_pos(3)+1:str_pos(4)),*, err=999) ch_diags(jvar)
  999  str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
       if (str_pos(1) == 0) then
-         write(err_msg,*) 'ufo_radiancecrtm_simobs: _jacobian_ must be // &
+         write(err_msg,*) 'ufo_crtm_passive_tlad_diags: _jacobian_ must be // &
                            & preceded by dependent variable in config: ', &
                            & hofxdiags%variables(jvar)
          call abor1_ftn(err_msg)
@@ -448,200 +469,64 @@ character(len=1) :: angle_hf
       end if
    end do
 
-   ! Set missing value
-   missing = missing_value(missing)
+   nvars = hofxdiags%nvar
+   nlocs = geovals%nlocs
+   ! put CRTM output into hofxdiags
+   if (SC(n)%Is_Active_Sensor) then
+      call ufo_crtm_active_diag(rts, & 
+                                 rts_K, &
+                                 atm, &
+                                 self%atm_K, &
+                                 self%sfc_K, &
+                                 self%conf, &
+                                 self%Options, &
+                                 self%channels, &
+                                 geovals, &
+                                 obss, &
+                                 nvars, &
+                                 nlocs, &
+                                 self%n_Profiles, &
+                                 self%n_Layers, &
+                                 xstr_diags, &
+                                 ystr_diags, &
+                                 ch_diags, &
+                                 hofxdiags,&
+                                 err_stat)
+   else
+      call ufo_crtm_passive_diag(rts, & 
+                                 rts_K, &
+                                 atm, &
+                                 self%atm_K, &
+                                 self%sfc_K, &
+                                 self%conf, &
+                                 self%Options, &
+                                 self%channels, &
+                                 geovals, &
+                                 obss, &
+                                 nvars, &
+                                 nlocs, &
+                                 self%n_Profiles, &
+                                 self%n_Layers, &
+                                 xstr_diags, &
+                                 ystr_diags, &
+                                 ch_diags, &
+                                 hofxdiags,&
+                                 err_stat)
 
-   ! Put simulated diagnostics into hofxdiags
-   ! ----------------------------------------------
-   do jvar = 1, hofxdiags%nvar
 
-      if (len(trim(hofxdiags%variables(jvar))) < 1) cycle
+!       call ufo_crtm_passive_tlad_diags(rts, rts_K, atm, obss, &
+!                                        self%conf, &
+!                                        self%Options, self%channels, &
+!                                        self%n_layers, self%n_profiles, &
+!                                        hofxdiags, xstr_diags, ystr_diags, &
+!                                        ch_diags, err_stat)
+   end if
 
-      if (ch_diags(jvar) > 0) then
-         if (size(pack(self%channels,self%channels==ch_diags(jvar))) /= 1) then
-            write(err_msg,*) 'ufo_radiancecrtm_simobs: mismatch between// &
-                              & h(x) channels(', self%channels,') and// &
-                              & ch_diags(jvar) = ', ch_diags(jvar)
-            call abor1_ftn(err_msg)
-         end if
-      end if
-
-      do ichannel = 1, size(self%channels)
-         if (ch_diags(jvar) == self%channels(ichannel)) then
-            jchannel = ichannel
-            exit
-         end if
-      end do
-
-      if (allocated(hofxdiags%geovals(jvar)%vals)) &
-         deallocate(hofxdiags%geovals(jvar)%vals)
-
-      angle_hf=achar(0)
-      if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
-         if (ch_diags(jvar) > 9) then
-            angle_hf="1"
-         endif
-      endif
-
-      !============================================
-      ! Diagnostics used for QC and bias correction
-      !============================================
-      if (cmp_strings(xstr_diags(jvar), "")) then
-         ! forward h(x) diags
-         select case(ystr_diags(jvar))
-            ! variable: optical_thickness_of_atmosphere_layer_CH
-            case (var_opt_depth)
-               hofxdiags%geovals(jvar)%nval = self%n_Layers
-               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-               hofxdiags%geovals(jvar)%vals = missing
-               do jprofile = 1, self%n_Profiles
-                  if (.not.self%Options(jprofile)%Skip_Profile) then
-                     do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                          rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                     end do
-                  end if
-               end do
-
-            ! variable: brightness_temperature_CH
-            case (var_tb)
-               hofxdiags%geovals(jvar)%nval = 1
-               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-               hofxdiags%geovals(jvar)%vals = missing
-               do jprofile = 1, self%n_Profiles
-                  if (.not.self%Options(jprofile)%Skip_Profile) then
-                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                        rts(jchannel,jprofile) % Brightness_Temperature
-                  end if
-               end do
-
-            ! variable: transmittances_of_atmosphere_layer_CH
-            case (var_lvl_transmit)
-              hofxdiags%geovals(jvar)%nval = self%n_Layers
-              allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-              hofxdiags%geovals(jvar)%vals = missing
-              allocate(TmpVar(self%n_Profiles))
-              call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
-              do jprofile = 1, self%n_Profiles
-                 if (.not.self%Options(jprofile)%Skip_Profile) then
-                    secant_term = one/cos(TmpVar(jprofile)*deg2rad)
-                    total_od = 0.0
-                    do jlevel = 1, self%n_Layers
-                       total_od   = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                       hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                          exp(-min(limit_exp,total_od*secant_term))
-                    end do
-                 end if
-              end do
-              deallocate(TmpVar)
-
-            ! variable: weightingfunction_of_atmosphere_layer_CH
-            case (var_lvl_weightfunc)
-               hofxdiags%geovals(jvar)%nval = self%n_Layers
-               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-               hofxdiags%geovals(jvar)%vals = missing
-               allocate(TmpVar(self%n_Profiles))
-               allocate(Tao(self%n_Layers))
-               call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
-               do jprofile = 1, self%n_Profiles
-                  if (.not.self%Options(jprofile)%Skip_Profile) then
-                     ! get layer-to-space transmittance
-                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
-                     total_od = 0.0
-                     do jlevel = 1, self%n_Layers
-                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
-                     end do
-                     ! get weighting function
-                     do jlevel = self%n_Layers-1, 1, -1
-                        hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
-                                (log(atm(jprofile)%pressure(jlevel+1))- &
-                                 log(atm(jprofile)%pressure(jlevel))) )
-                     end do
-                     hofxdiags%geovals(jvar)%vals(self%n_Layers,jprofile) = &
-                     hofxdiags%geovals(jvar)%vals(self%n_Layers-1,jprofile)
-                  end if
-               end do
-               deallocate(TmpVar)
-               deallocate(Tao)
-
-            ! variable: pressure_level_at_peak_of_weightingfunction_CH
-            case (var_pmaxlev_weightfunc)
-               hofxdiags%geovals(jvar)%nval = 1
-               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-               hofxdiags%geovals(jvar)%vals = missing
-               allocate(TmpVar(self%n_Profiles))
-               allocate(Tao(self%n_Layers))
-               allocate(Wfunc(self%n_Layers))
-               call obsspace_get_db(obss, "MetaData", "sensorZenithAngle"//angle_hf, TmpVar)
-               do jprofile = 1, self%n_Profiles
-                  if (.not.self%Options(jprofile)%Skip_Profile) then
-                     ! get layer-to-space transmittance
-                     secant_term = one/cos(TmpVar(jprofile)*deg2rad)
-                     total_od = 0.0
-                     do jlevel = 1, self%n_Layers
-                        total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
-                        Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
-                     end do
-                     ! get weighting function
-                     do jlevel = self%n_Layers-1, 1, -1
-                        Wfunc(jlevel) = &
-                           abs( (Tao(jlevel+1)-Tao(jlevel))/ &
-                                (log(atm(jprofile)%pressure(jlevel+1))- &
-                                 log(atm(jprofile)%pressure(jlevel))) )
-                     end do
-                     Wfunc(self%n_Layers) = Wfunc(self%n_Layers-1)
-                     ! get pressure level at the peak of the weighting function
-                     wfunc_max = -999.0
-                     do jlevel = self%n_Layers-1, 1, -1
-                        if (Wfunc(jlevel) > wfunc_max) then
-                           wfunc_max = Wfunc(jlevel)
-                           hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel
-                        endif
-                     enddo
-                  end if
-               end do
-               deallocate(TmpVar)
-               deallocate(Tao)
-               deallocate(Wfunc)
-
-            case default
-               write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
-                                 & ObsDiagnostic is unsupported, ', &
-                                 & hofxdiags%variables(jvar)
-               ! call abor1_ftn(err_msg)
-               hofxdiags%geovals(jvar)%nval = 1
-               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-               hofxdiags%geovals(jvar)%vals = missing
-         end select
-      else if (ystr_diags(jvar) == var_tb) then
-         ! var_tb jacobians
-         select case (xstr_diags(jvar))
-            ! variable: brightness_temperature_jacobian_surface_emissivity_CH (nval=1)
-            case (var_sfc_emiss)
-               hofxdiags%geovals(jvar)%nval = 1
-               allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,self%n_Profiles))
-               hofxdiags%geovals(jvar)%vals = missing
-               do jprofile = 1, self%n_Profiles
-                  if (.not.self%Options(jprofile)%Skip_Profile) then
-                     hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                        rts_K(jchannel,jprofile) % surface_emissivity
-                  end if
-               end do
-            case default
-               write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
-                                 & ObsDiagnostic is unsupported, ', &
-                                 & hofxdiags%variables(jvar)
-               call abor1_ftn(err_msg)
-         end select
-      else
-         write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
-                           & ObsDiagnostic is unsupported, ', &
-                           & hofxdiags%variables(jvar)
-         call abor1_ftn(err_msg)
-      end if
-   end do
+   ! check for error from either passive or active
+   if (err_stat > 0) then
+       write(err_msg,*) 'ufo_radiancecrtm_tlad_settraj error: failed to put simulated diagnostics into hofxdiags'
+       call abor1_ftn(err_msg)
+    end if
 
    ! Deallocate the structures
    ! -------------------------
@@ -1023,10 +908,6 @@ real(c_double) :: missing
    end select
 
  enddo
-
- ! Once all geovals set replace flag
- ! ---------------------------------
- if (.not. geovals%linit ) geovals%linit=.true.
 
 
 end subroutine ufo_radiancecrtm_simobs_ad

@@ -15,7 +15,7 @@ observations:
       Sensor_ID: atms_npp
       EndianType: little_endian
       CoefficientPath: Data/
-      NC_CoefficientPath: Data/
+      NC_CoefficientPath:  Data/
       CloudCoeff_File: CloudCoeff.nc4
       CloudCoeff_Format: netCDF
       Cloud_Model: CRTM

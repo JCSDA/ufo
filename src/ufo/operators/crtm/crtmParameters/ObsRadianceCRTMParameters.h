@@ -32,6 +32,20 @@ namespace ufo
     oops::RequiredParameter<std::string> EndianType{"EndianType", this};
     /// CoefficientPath
     oops::RequiredParameter<std::string> CoefficientPath{"CoefficientPath", this};
+    /// NetCDF CoefficientPath
+    oops::OptionalParameter<std::string> NC_CoefficientPath{"NC_CoefficientPath", this};
+    /// Cloud_Model
+    oops::OptionalParameter<std::string> Cloud_Model{"Cloud_Model", this};
+    /// CloudCoeff_File
+    oops::OptionalParameter<std::string> CloudCoeff_File{"CloudCoeff_File", this};
+    /// CloudCoeff_Format
+    oops::OptionalParameter<std::string> CloudCoeff_Format{"CloudCoeff_Format", this};
+    /// Aerosol_Model
+    oops::OptionalParameter<std::string> Aerosol_Model{"Aerosol_Model", this};
+    /// AerosolCoeff_File
+    oops::OptionalParameter<std::string> AerosolCoeff_File{"AerosolCoeff_File", this};
+    /// AerosolCoeff_Format
+    oops::OptionalParameter<std::string> AerosolCoeff_Format{"AerosolCoeff_Format", this};
     /// AerosolOption
     oops::OptionalParameter<std::string> AerosolOption{"AerosolOption", this};
     /// Surfaces

@@ -1,0 +1,40 @@
+window begin: 2009-11-30T03:00:00Z
+window end: 2009-11-30T09:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Rain, IceSphere, Snow]
+    Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
+    obs options:
+      Sensor_ID: cpr_cloudsat
+      EndianType: little_endian
+      CoefficientPath:  Data/
+      NC_CoefficientPath:  Data/
+      # See these papers (DOIs below) for the description of the DDA CloudCoeff 
+      # 10.1109/TGRS.2023.3330067 & 10.1029/2022JD036957
+      CloudCoeff_File: CloudCoeff_DDA_Moradi_2022.nc4
+      CloudCoeff_Format: netCDF
+      Cloud_Model: CRTM
+      AerosolCoeff_File: AerosolCoeff.nc4
+      AerosolCoeff_Format: netCDF
+      Aerosol_Model: CRTM
+  obs space:
+    name: cpr_cloudsat
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_obs_2009113003.nc4
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: Output/cpr_cloudsat_sim_2009113003.nc4
+    simulated variables: [ReflectivityAttenuated]
+    channels: 1
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_geoval_2009113003.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-1
+

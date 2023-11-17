@@ -18,6 +18,7 @@ use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_vars_mod
 use obsspace_mod
 use ufo_utils_mod, only: cmp_strings
+use CRTM_SpcCoeff, only: CRTM_SpcCoeff_Load, SC
 
 implicit none
 private
@@ -71,11 +72,13 @@ type crtm_conf
 
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
- character(len=255) :: COEFFICIENT_PATH
+ character(len=255) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
+ character(len=255) :: CloudCoeff_Format, AerosolCoeff_Format
+ character(len=255) :: Aerosol_Model, Cloud_Model
  character(len=255) :: &
     IRwaterCoeff_File, IRlandCoeff_File, IRsnowCoeff_File, IRiceCoeff_File, &
     VISwaterCoeff_File, VISlandCoeff_File, VISsnowCoeff_File, VISiceCoeff_File, &
-    MWwaterCoeff_File
+    MWwaterCoeff_File, CloudCoeff_File, AerosolCoeff_File
  integer, allocatable :: Land_WSI(:)
  real(kind_real) :: Cloud_Fraction = -1.0_kind_real
  integer :: inspect
@@ -84,6 +87,7 @@ type crtm_conf
  character(len=MAXVARLEN) :: sfc_wind_geovars
  real(kind_real) :: unit_coef = 1.0_kind_real
 end type crtm_conf
+
 
 INTERFACE calculate_aero_layer_factor
 
@@ -126,30 +130,63 @@ END INTERFACE qsmith
        , VOLUME_MIXING_RATIO_UNITS & !CO2
        , VOLUME_MIXING_RATIO_UNITS & !O3
         ]
- !** BTJ Note:  N_VALID_CLOUD_CATEGORIES==6 under normal circumstances, but not with v2.4.1
- !** Here we override N_VALID_CLOUD_CATEGORIES with the value "6" (the value used in v2.4.0,
- !** and in v3.0.x).
- INTEGER, PARAMETER :: N_VALID_CLOUD_CATEGORIES_TMP = 6 !** BTJ remove this line in v3.0
+
+ ! I. Moradi: MAX_VALID_CLOUD_CATEGORIES is defined to declare the following variables that can 
+ ! work CRTM V3.0 and greater of the CRTM interface 
+ ! generally requires some considerations in terms of how clouds are defined
+ integer, parameter :: MAX_VALID_CLOUD_CATEGORIES = 25  ! 6 default + 19 from DDA table
 
  character(len=MAXVARLEN), parameter :: &
-      UFO_Clouds(N_VALID_CLOUD_CATEGORIES_TMP,2) = &
-         reshape( &
-            [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg,    var_clh, &
-              var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, var_clhefr ] &
-            , [N_VALID_CLOUD_CATEGORIES_TMP,2] )
+      UFO_CLOUDS(MAX_VALID_CLOUD_CATEGORIES, 2) = &
+       reshape( &
+         [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg, &      ! 1- 5
+           var_clh,    var_cls,    var_cls,    var_cls,    var_cls, &      ! 5-10
+           var_cls,    var_cli,    var_cls,    var_cls,    var_cls, &      ! 11-15
+           var_cls,    var_cls,    var_cls,    var_cls,    var_clh, &      ! 16-20
+           var_clg,    var_cls,    var_clh,    var_cli,    var_clw, &      ! 21-25 
+           var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, &   ! 1- 5
+           var_clhefr, var_clsefr, var_clsefr, var_clsefr, var_clsefr, &   ! 5-10
+           var_clsefr, var_cliefr, var_clsefr, var_clsefr, var_clsefr, &   ! 11-15
+           var_clsefr, var_clsefr, var_clsefr, var_clsefr, var_clhefr, &   ! 16-20
+           var_clgefr, var_clsefr, var_clhefr, var_cliefr, var_clwefr] &   ! 21-25
+           , [MAX_VALID_CLOUD_CATEGORIES,2] )           
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
  character(len=MAXVARLEN), parameter :: &
-      CRTM_Clouds(N_VALID_CLOUD_CATEGORIES_TMP) = &
-         CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES_TMP)
+      CRTM_Clouds(N_VALID_CLOUD_CATEGORIES) = &
+         CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
+
+ ! The hydrometeor types from the DDA tables are defined using corresponding integer
+ ! values so  the ufo interface does not break for the current version of CRTM 
+ ! implemented in the UFO
  integer, parameter :: &
-      CRTM_Cloud_Id(1:N_VALID_CLOUD_CATEGORIES_TMP) = &
-         [   WATER_CLOUD, &
-               ICE_CLOUD, &
-              RAIN_CLOUD, &
-              SNOW_CLOUD, &
-           GRAUPEL_CLOUD, &
-              HAIL_CLOUD  ]
+      CRTM_Cloud_Id(MAX_VALID_CLOUD_CATEGORIES) = &
+         [ WATER_CLOUD                   , &   
+           ICE_CLOUD                     , &   
+           RAIN_CLOUD                    , &   
+           SNOW_CLOUD                    , &   
+           GRAUPEL_CLOUD                 , &   
+           HAIL_CLOUD                    , &   
+           PlateType1                    , &   
+           ColumnType1                   , &   
+           SixBulletRosette              , &   
+           Perpendicular4_BulletRosette  , &   
+           Flat3_BulletRosette           , &   
+           IconCloudIce                  , &   
+           SectorSnowflake               , &   
+           EvansSnowAggregate            , &   
+           EightColumnAggregate          , &   
+           LargePlateAggregate           , &   
+           LargeColumnAggregate          , &   
+           LargeBlockAggregate           , &   
+           IconSnow                      , &   
+           IconHail                      , &   
+           GemGraupel                    , &   
+           GemSnow                       , &   
+           GemHail                       , &   
+           IceSphere                     , &   
+           LiquidSphere                  ]     
+
 
 ! Surface Variables
 
@@ -163,6 +200,8 @@ END INTERFACE qsmith
 
  character(len=MAXVARLEN), parameter :: &
       ValidSurfaceWindGeoVars(2) = [character(len=MAXVARLEN) :: 'vector', 'uv']
+
+
 
 contains
 
@@ -285,6 +324,7 @@ logical :: message_flag = .true.
      write(message,*) trim(ROUTINE_NAME),' error: ',trim(conf%Clouds(jspec,1)),' not supported by UFO_Clouds'
      call abor1_ftn(message)
    end if
+
    conf%Clouds(jspec,1:2) = UFO_Clouds(ivar,1:2)
    conf%Cloud_Id(jspec)   = CRTM_Cloud_Id(ivar)
  end do
@@ -370,12 +410,58 @@ logical :: message_flag = .true.
  call f_confOpts%get_or_die("CoefficientPath",str)
  conf%COEFFICIENT_PATH = str
 
+ !Path to NetCDF coefficient files
+ conf%NC_COEFFICIENT_PATH = conf%COEFFICIENT_PATH
+ if (f_confOpts%has("NC_CoefficientPath")) then
+    call f_confOpts%get_or_die("NC_CoefficientPath",str)
+    conf%NC_COEFFICIENT_PATH = str
+ endif
+
+ ! Cloud coefficient file, model, and format
+ conf%Cloud_Model = "CRTM"
+ if (f_confOpts%has("Cloud_Model")) then
+    call f_confOpts%get_or_die("Cloud_Model",str)
+    conf%Cloud_Model = str
+ end if
+
+ conf%CloudCoeff_File = "CloudCoeff.bin"
+ if (f_confOpts%has("CloudCoeff_File")) then
+    call f_confOpts%get_or_die("CloudCoeff_File",str)
+    conf%CloudCoeff_File = str
+ end if
+
+ conf%CloudCoeff_Format = "Binary"
+ if (f_confOpts%has("CloudCoeff_Format")) then
+    call f_confOpts%get_or_die("CloudCoeff_Format",str)
+    conf%CloudCoeff_Format = str
+ end if
+
+ ! Aerosol coefficient file, format, and format
+ conf%Aerosol_Model = 'CRTM'
+ if (f_confOpts%has("Aerosol_Model")) then
+    call f_confOpts%get_or_die("Aerosol_Model",str)
+    conf%Aerosol_Model = str
+ end if
+
+ conf%AerosolCoeff_File = "AerosolCoeff.bin"
+ if (f_confOpts%has("AerosolCoeff_File")) then
+    call f_confOpts%get_or_die("AerosolCoeff_File",str)
+    conf%AerosolCoeff_File = str
+ end if
+
+ conf%AerosolCoeff_Format = "Binary"
+ if (f_confOpts%has("AerosolCoeff_Format")) then
+    call f_confOpts%get_or_die("AerosolCoeff_Format",str)
+    conf%AerosolCoeff_Format = str
+ end if
+
  ! Coefficient file prefixes
  IRwaterCoeff = "Nalli"
  if (f_confOpts%has("IRwaterCoeff")) then
     call f_confOpts%get_or_die("IRwaterCoeff",str)
     IRwaterCoeff = str
  end if
+
  VISwaterCoeff = "NPOESS"
  if (f_confOpts%has("VISwaterCoeff")) then
     call f_confOpts%get_or_die("VISwaterCoeff",str)
@@ -418,6 +504,8 @@ logical :: message_flag = .true.
                         trim(IRVISlandCoeff)
        call abor1_ftn(message)
  end select
+
+
 
  ! IR emissivity coeff files
  conf%IRwaterCoeff_File = trim(IRwaterCoeff)//".IRwater.EmisCoeff.bin"
@@ -482,7 +570,7 @@ end subroutine crtm_comm_stat_check
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,atm,sfc,Options)
+subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,atm,sfc, Is_Active_Sensor, Options)
 ! Profiles are skipped when the ObsValue of all channels is missing, if the
 ! pressure doesn't increase with levels, and if SST is missing for profiles with
 ! non-zero sea coverage.
@@ -498,6 +586,7 @@ type(c_ptr), value,   intent(in)    :: obss
 integer(c_int),       intent(in)    :: channels(:)
 type(CRTM_Atmosphere_type), intent(in) :: atm(:)
 type(CRTM_Surface_type),    intent(in) :: sfc(:)
+logical, intent(in):: Is_Active_Sensor
 type(CRTM_Options_type),    intent(inout) :: Options(:)
 
 integer :: jprofile, jchannel, jlevel
@@ -518,7 +607,7 @@ real(kind_real) :: missing_r
 ! EffQC = 0
 
  do jchannel = 1, n_Channels
-   call get_var_name(channels(jchannel),varname)
+   call get_var_name(channels(jchannel),varname, Is_Active_Sensor)
    call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
 !   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,jchannel))
 !   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,jchannel))
@@ -553,12 +642,13 @@ end subroutine ufo_crtm_skip_profiles
 
 ! ------------------------------------------------------------------------------
 
-SUBROUTINE Load_Atm_Data(n_Profiles, n_Layers, geovals, atm, conf)
+SUBROUTINE Load_Atm_Data(n_Profiles, n_Layers, geovals, atm, conf, Is_Active_Sensor)
 implicit none
 
 integer, intent(in) :: n_Profiles, n_Layers
 type(ufo_geovals), intent(in) :: geovals
 type(CRTM_Atmosphere_type), intent(inout) :: atm(:)
+logical, intent(in), optional :: Is_Active_Sensor
 type(crtm_conf) :: conf
 
 ! Local variables
@@ -647,11 +737,17 @@ character(max_string) :: err_msg
     end if
   end if
 
+  if (present(Is_Active_Sensor)) then
+       if (Is_Active_Sensor) then
+          Atm%Add_Extra_Layers = .FALSE.
+       end if
+  end if
+
 end subroutine Load_Atm_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(n_Profiles, n_Channels, channels, geovals, sfc, chinfo, obss, conf)
+subroutine Load_Sfc_Data(n_Profiles, n_Channels, channels, geovals, sfc, chinfo, obss, conf, Is_Active_Sensor)
 
 implicit none
 
@@ -662,6 +758,7 @@ type(CRTM_ChannelInfo_type), intent(in)    :: chinfo(:)
 type(c_ptr), value,          intent(in)    :: obss
 integer(c_int),              intent(in)    :: channels(:)
 type(crtm_conf),             intent(in)    :: conf
+logical, intent(in) :: Is_Active_Sensor
 
 type(ufo_geoval), pointer :: geoval, u, v
 integer :: k1, n1
@@ -676,10 +773,12 @@ real(kind_real), allocatable :: ObsTb(:,:)
   allocate(ObsTb(n_profiles, n_channels))
   ObsTb = 0.0_kind_real
 
-  do n1 = 1, n_Channels
-    call get_var_name(channels(n1), varname)
-    call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:, n1))
-  enddo
+  if (.not. Is_Active_Sensor) then
+    do n1 = 1, n_Channels
+      call get_var_name(channels(n1), varname, Is_Active_Sensor)
+      call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:, n1))
+    enddo
+  end if
 
   do k1 = 1, n_Profiles
     !Pass sensor information
@@ -689,9 +788,11 @@ real(kind_real), allocatable :: ObsTb(:,:)
     sfc(k1)%sensordata%sensor_channel   = channels
 
     !Pass observation value
-    do n1 = 1, n_channels
-      sfc(k1)%sensordata%tb(n1) = ObsTb(k1, n1)
-    enddo
+    if (.not. Is_Active_Sensor) then
+      do n1 = 1, n_channels
+         sfc(k1)%sensordata%tb(n1) = ObsTb(k1, n1)
+      enddo
+    end if
 
     !Water_type
     !** NOTE: need to check how to determine fresh vs sea water types (salinity???)
@@ -968,15 +1069,23 @@ end subroutine Load_Geom_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine get_var_name(n,varname)
+subroutine get_var_name(n,varname, Is_Active_Sensor)
 
 integer, intent(in) :: n
 character(len=*), intent(out) :: varname
+logical, intent(in) :: Is_Active_Sensor
 
 character(len=6) :: chan
 
+
+
+
  write(chan, '(I0)') n
- varname = 'brightnessTemperature_' // trim(chan)
+ if (Is_Active_Sensor) then
+     varname = 'ReflectivityAttenuated_' // trim(chan)
+ else
+     varname = 'brightnessTemperature_' // trim(chan)
+ endif 
 
 end subroutine get_var_name
 

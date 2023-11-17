@@ -441,7 +441,10 @@ set_tests_properties(test_ufo_geovals_get_nonexistent_var
 
 list( APPEND crtm_test_input
 AerosolCoeff/Little_Endian/AerosolCoeff.bin
+AerosolCoeff/netCDF/AerosolCoeff.nc4
 CloudCoeff/Little_Endian/CloudCoeff.bin
+CloudCoeff/netCDF/CloudCoeff.nc4
+CloudCoeff/netCDF/CloudCoeff_DDA_Moradi_2022.nc4
 EmisCoeff/MW_Water/Little_Endian/FASTEM6.MWwater.EmisCoeff.bin
 EmisCoeff/IR_Ice/SEcategory/Little_Endian/NPOESS.IRice.EmisCoeff.bin
 EmisCoeff/IR_Land/SEcategory/Little_Endian/NPOESS.IRland.EmisCoeff.bin
@@ -553,6 +556,8 @@ SpcCoeff/Little_Endian/cowvr_ors6.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/cowvr_ors6.TauCoeff.bin
 SpcCoeff/Little_Endian/tempest-D_cubesat.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/tempest-D_cubesat.TauCoeff.bin
+SpcCoeff/Little_Endian/cpr_cloudsat.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/cpr_cloudsat.TauCoeff.bin
 )
 
 if( crtm_FOUND )
