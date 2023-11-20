@@ -56,7 +56,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   character(len=*), parameter             :: myname  = "ufo_gnssro_bndnbam_simobs"
   character(max_string)                   :: err_msg
   integer                                 :: nrecs, nlocs
-  integer, parameter                      :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
+  integer                                 :: nlevAdd  !num of additional levels on top of exsiting model levels
   integer                                 :: ngrd
   integer                                 :: iobs, k, igrd, irec, icount, kk
   integer                                 :: nlev, nlev1, nlevExt, nlevCheck
@@ -126,7 +126,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
-  call ufo_geovals_get_var(geovals, var_sfc_geomz, zs)      ! surface geopotential height/surface altitude
+  call ufo_geovals_get_var(geovals, var_sfc_geomz, zs)  ! surface geopotential height/surface altitude
 
   if (self%roconf%vertlayer .eq. "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
@@ -230,7 +230,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     call abor1_ftn(err_msg)
   end if
 
-  nlevExt   = nlev + nlevAdd
+  nlevAdd   = 13   ! default parameter in GSIv16.3
   nlevCheck = int(nlev/2.0)  !number of levels to check super refaction
 
   if(cmp_strings(self%roconf%GSI_version, "GEOS")) then
@@ -241,12 +241,27 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      SRcloseLayers = 2
      super_ref_GEOS = .true.
   else
-     ngrd = 80
+     ngrd = min(80,self%roconf%ngrd) ! do not provide ngrd if EMC; default is 80km
      SRcheckHeight = five
      ModelsigLevelcheck = three
      SRcloseLayers = 5
      super_ref_GEOS = .false.
   endif
+
+  if (trim(self%roconf%modeltopconfig) .eq. "true") then
+     ! maximum = 80km for low top models refactor needed otherwise
+     if ( self%roconf%modeltop > 80 ) then
+        ! FAIL should either use a GSI config (NOAA or NASA)
+        write(err_msg,*) myname, ' modeltopconfig not applicable for model tops over 80 km'// &
+            '    ... try using default GSI GFS 16.3 setup for NOAA or NASA'
+        call abor1_ftn(err_msg)
+     end if
+     ngrd = min(60, self%roconf%ngrd) ! maximum = 60 for low top models this is not a height in km
+     nlevAdd = (80 - self%roconf%modeltop) + 13  ! 80km is default model top basis for extrapolation
+  end if
+
+  nlevAdd = max(13, max(nlevAdd,self%roconf%nlevadd)) ! overwrite default value if present in yaml
+  nlevExt = nlev + nlevAdd
 
   allocate(grids(ngrd))
 ! define new integration grids

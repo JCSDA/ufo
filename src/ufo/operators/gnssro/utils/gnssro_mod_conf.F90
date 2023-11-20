@@ -1,7 +1,7 @@
 !==========================================================================
 module gnssro_mod_conf
 !==========================================================================
-use fckit_configuration_module, only: fckit_configuration 
+use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use obsspace_mod
@@ -18,6 +18,9 @@ type gnssro_conf
   integer(c_int)     :: use_compress
   integer(c_int)     :: n_horiz
   integer(c_int)     :: sr_steps
+  integer(c_int)     :: modeltop
+  integer(c_int)     :: nlevadd
+  integer(c_int)     :: ngrd
   character(len=MAXVARLEN)      :: super_ref_qc
   character(len=:), allocatable :: str
   real(kind_real)    :: res
@@ -26,6 +29,7 @@ type gnssro_conf
   real(kind_real)    :: dtheta
   character(len=20)  :: vertlayer
   character(len=20)  :: output_diags
+  character(len=20)  :: modeltopconfig
   character(len=20)  :: GSI_version
 end type gnssro_conf
 
@@ -75,14 +79,20 @@ if (f_conf%has("sr_steps")) call f_conf%get_or_die("sr_steps",roconf%sr_steps)
 roconf%output_diags="false"
 if (f_conf%has("output_diags"))  then
   call f_conf%get_or_die("output_diags",str)
-  roconf%output_diags=trim(str) 
+  roconf%output_diags=trim(str)
 endif
 roconf%GSI_version="EMC"
 if (f_conf%has("GSI_version"))  then
   call f_conf%get_or_die("GSI_version",str)
   roconf%GSI_version=trim(str)
 endif
+roconf%modeltopconfig="false"
+if (f_conf%has("modeltop")) then  !an integer specifying roughly the model top in km
+  call f_conf%get_or_die("modeltop", roconf%modeltop)
+  if (roconf%modeltop .gt. 0)   roconf%modeltopconfig="true"
+endif
+if (f_conf%has("nlevadd")) call f_conf%get_or_die("nlevadd", roconf%nlevadd)
+if (f_conf%has("ngrd")) call f_conf%get_or_die("ngrd", roconf%ngrd)
 end subroutine gnssro_conf_setup
-
 
 end module gnssro_mod_conf

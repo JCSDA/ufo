@@ -61,11 +61,11 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   use, intrinsic::  iso_c_binding
   implicit none
   class(ufo_gnssro_bndnbam_tlad), intent(inout) :: self
-  type(ufo_geovals),             intent(in)    :: geovals
-  type(c_ptr), value,            intent(in)    :: obss
+  type(ufo_geovals), intent(in)                 :: geovals
+  type(c_ptr), value, intent(in)                :: obss
   character(len=*), parameter     :: myname  = "ufo_gnssro_bndnbam_tlad_settraj"
   character(max_string)           :: err_msg
-  integer, parameter              :: nlevAdd = 13 !num of additional levels on top of exsiting model levels
+  integer                         ::nlevAdd !num of additional levels on top of existing model levels
   integer                         :: ngrd
   type(ufo_geoval), pointer       :: t, q, gph, prs, zs
   integer                         :: iobs,k,j, klev, irec, icount
@@ -77,7 +77,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   integer(c_size_t), allocatable  :: obsRecnum(:)
   real(kind_real)                 :: d_refXrad, gradRef
   real(kind_real)                 :: d_refXrad_tl
-  real(kind_real),allocatable     :: grids(:)
+  real(kind_real), allocatable    :: grids(:)
   real(kind_real)                 :: sIndx
   integer                         :: indx
   real(kind_real)                 :: p_coef, t_coef, q_coef
@@ -86,7 +86,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable    :: lagConst(:,:), lagConst_tl(:,:)
   real(kind_real), allocatable    :: gesT(:,:), gesQ(:,:), gesP(:,:), gesH(:,:), gesZs(:)
 
-  real(kind_real),allocatable     :: radius(:), dzdh(:), refIndex(:)
+  real(kind_real), allocatable    :: radius(:), dzdh(:), refIndex(:)
   real(kind_real), allocatable    :: dhdp(:), dhdt(:)
   real(kind_real), allocatable    :: ref(:)
   real(kind_real), allocatable    :: refXrad(:)
@@ -130,7 +130,7 @@ if (nlocs > 0 ) then
   self%nlocs = nlocs
   self%nrecs = nrecs
 
-  nlevExt = nlev + nlevAdd
+  nlevAdd = 13
   nlevCheck = int(nlev/2.0) !number of levels to check super refraction
 
   allocate(gesT(nlev,nlocs))
@@ -221,10 +221,24 @@ if (nlocs > 0 ) then
      ngrd = nint(61.0/63.0 * nlev + 18)
      ModelsigLevelcheck = one
   else
-     ngrd = 80
+     ngrd = min(80,self%roconf%ngrd) ! do not provide ngrd if EMC; default is 80km
      ModelsigLevelcheck = three
   endif
 
+  if (trim(self%roconf%modeltopconfig) .eq. "true") then
+    ! maximum = 80km for low top models refactor needed otherwise
+    if ( self%roconf%modeltop > 80 ) then
+       ! FAIL should either use a GSI config (NOAA or NASA)
+       write(err_msg,*) myname, ' modeltopconfig not applicable for model tops over 80 km'// &
+           '    ... try using default GSI GFS 16.3 setup for NOAA or NASA'
+       call abor1_ftn(err_msg)
+    end if
+    ngrd = min(60, self%roconf%ngrd) ! maximum = 60 for low top models
+    nlevAdd = (80 - self%roconf%modeltop) + 13  ! 80km is default model top basis for extrapolation
+  end if
+
+  nlevAdd = max(13, max(nlevAdd,self%roconf%nlevadd)) ! overwrite default value if present in yaml
+  nlevExt = nlev + nlevAdd
 
   allocate(dhdp(nlev))
   allocate(dhdt(nlev))

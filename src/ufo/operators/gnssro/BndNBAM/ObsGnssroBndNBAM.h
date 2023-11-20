@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2018 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OPERATORS_GNSSRO_BNDNBAM_OBSGNSSROBNDNBAM_H_
@@ -37,6 +37,9 @@ class GnssroBndNBAMOptionsParameters: public oops::Parameters {
   oops::Parameter<std::string> superRefQC{"super_ref_qc", "NBAM", this};
   oops::Parameter<std::string> outputDiags{"output_diags", "false", this};
   oops::Parameter<std::string> gsiVersion{"GSI_version", "EMC", this};
+  oops::Parameter<int> nlevAdd{"nlevadd", 13, this};
+  oops::Parameter<int> modelTop{"modeltop", 0, this};
+  oops::Parameter<int> ngrd{"ngrd", 80, this};
 };
 
 class GnssroBndNBAMParameters: public ObsOperatorParametersBase {
