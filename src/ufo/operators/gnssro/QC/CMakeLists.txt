@@ -6,7 +6,7 @@
 set (  qc_src_files
        ROobserror.h
        ROobserror.cc
-       ROobserror.interface.F90  
+       ROobserror.interface.F90
        ROobserror.interface.h
        ufo_roobserror_mod.F90
        ufo_roobserror_utils_mod.F90

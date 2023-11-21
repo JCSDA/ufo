@@ -151,7 +151,8 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::bayesianQC,    "removed by Bayesian background check"},
     {QCflags::modelobthresh, "removed by ModelOb threshold"},
     {QCflags::history,       "removed by history check"},
-    {QCflags::processed,     "rejected as processed but not assimilated"}
+    {QCflags::processed,     "rejected as processed but not assimilated"},
+    {QCflags::superrefraction, "rejected by GNSSRO super refraction QC"}
   };
   const size_t numSpecialCases = 3;
 

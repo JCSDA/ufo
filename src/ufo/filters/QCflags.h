@@ -37,6 +37,7 @@ namespace QCflags {
   constexpr int modelobthresh = 27;  // observation failed modelob threshold check
   constexpr int history = 28;  // observation failed when compared with historical data
   constexpr int processed = 29;  // observation processed but deliberately H(x) not calculated
+  constexpr int superrefraction = 30;  // observation rejected by GNSSRO super refraction QC
   /// \brief Return true if the QC flag \p qcflag indicates that an observation has been rejected,
   /// false otherwise.
   inline bool isRejected(int qcflag) {

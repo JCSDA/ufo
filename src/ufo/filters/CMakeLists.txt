@@ -102,6 +102,8 @@ set ( filters_files
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
+      ObsRefractivityGradientCheck.h
+      ObsRefractivityGradientCheck.cc
       obsfunctions/DrawObsErrorFromFile.cc
       obsfunctions/DrawObsErrorFromFile.h
       obsfunctions/DrawValueFromFile.cc

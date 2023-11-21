@@ -1,0 +1,46 @@
+window begin: 2022-08-31T21:00:00Z
+window end: 2022-09-01T03:00:00Z
+
+observations:
+- obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+  obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_6prof_2022090100.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+        sort variable: "impactHeightRO"
+        sort order: "descending"
+    simulated variables: [bendingAngle]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_6prof_2022090100_superrefractioncheck_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_6prof_2022090100.nc4
+  obs pre filters:
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: srCheckMF
+  obs post filters:
+  - filter: Obs Refractivity Gradient Check
+    filter variables:
+    - name: bendingAngle
+    gradient min: -0.05
+    gradient max: -1.0e-6
+    second derivative: 0.0001
+    action:
+      name: set
+      flag: srCheckMF
+  compareVariables:                       # test output matches precalculated values
+  - reference:
+      name: TestReference/srCheckMF
+    test:
+      name: DiagnosticFlags/srCheckMF/bendingAngle
+    absTol: 1.0e-5
