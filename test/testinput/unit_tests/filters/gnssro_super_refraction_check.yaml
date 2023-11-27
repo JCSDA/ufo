@@ -28,6 +28,8 @@ observations:
   - filter: Create Diagnostic Flags
     flags:
     - name: srCheckMF
+    - name: srCheckImpp
+    - name: srCheckImppProfile
   obs post filters:
   - filter: Obs Refractivity Gradient Check
     filter variables:
@@ -38,9 +40,35 @@ observations:
     action:
       name: set
       flag: srCheckMF
+  - filter: Impact Parameter Check
+    filter variables:
+    - name: bendingAngle
+    threshold: 10
+    profile check: false
+    action:
+      name: set
+      flag: srCheckImpp
+  - filter: Impact Parameter Check
+    filter variables:
+    - name: bendingAngle
+    threshold: 10
+    profile check: true
+    action:
+      name: set
+      flag: srCheckImppProfile
   compareVariables:                       # test output matches precalculated values
   - reference:
       name: TestReference/srCheckMF
     test:
       name: DiagnosticFlags/srCheckMF/bendingAngle
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/srCheckImpp
+    test:
+      name: DiagnosticFlags/srCheckImpp/bendingAngle
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/srCheckImppProfile
+    test:
+      name: DiagnosticFlags/srCheckImppProfile/bendingAngle
     absTol: 1.0e-5

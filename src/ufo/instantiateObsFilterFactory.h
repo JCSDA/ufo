@@ -51,6 +51,7 @@
 #include "ufo/filters/SatwindInversionCorrection.h"
 #include "ufo/filters/SpikeAndStepCheck.h"
 #include "ufo/filters/StuckCheck.h"
+#include "ufo/filters/SuperRefractionCheckImpactParameter.h"
 #include "ufo/filters/TemporalThinning.h"
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
@@ -161,6 +162,8 @@ void instantiateObsFilterFactory() {
            SpikeAndStepCheckMaker("Spike and Step Check");
   static oops::interface::FilterMaker<ObsTraits, StuckCheck>
            StuckCheckMaker("Stuck Check");
+  static oops::interface::FilterMaker<ObsTraits, SuperRefractionCheckImpactParameter>
+           SuperRefractionCheckImpactParameterCheckMaker("Impact Parameter Check");
   static oops::interface::FilterMaker<ObsTraits, TemporalThinning>
            temporalThinningMaker("Temporal Thinning");
   static oops::interface::FilterMaker<ObsTraits, Thinning>

@@ -74,6 +74,8 @@ set ( filters_files
       ObsDomainErrCheck.h
       ObsFilterData.cc
       ObsFilterData.h
+      ObsRefractivityGradientCheck.h
+      ObsRefractivityGradientCheck.cc
       PreQC.cc
       PreQC.h
       ProbabilityGrossErrorWholeReport.cc
@@ -102,8 +104,8 @@ set ( filters_files
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
-      ObsRefractivityGradientCheck.h
-      ObsRefractivityGradientCheck.cc
+      SuperRefractionCheckImpactParameter.h
+      SuperRefractionCheckImpactParameter.cc
       obsfunctions/DrawObsErrorFromFile.cc
       obsfunctions/DrawObsErrorFromFile.h
       obsfunctions/DrawValueFromFile.cc
