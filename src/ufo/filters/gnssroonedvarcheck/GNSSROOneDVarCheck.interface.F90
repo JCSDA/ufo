@@ -47,7 +47,8 @@ subroutine ufo_gnssroonedvarcheck_create_c(c_self, &
                                            y_test, &
                                            c_onedvarflag, &
                                            nchans, &
-                                           chanList) &
+                                           chanList, &
+                                           noSuperCheck) &
                         bind(c,name='ufo_gnssroonedvarcheck_create_f90')
 
 !> \brief Interface to the Fortran create method
@@ -77,6 +78,7 @@ real(c_float), intent(in)                 :: y_test            !< Threshold on d
 integer(c_int), intent(in)                :: c_onedvarflag     !< flag for qc manager logging - input
 integer(c_int), intent(in)                :: nchans            !< Number of channels (levels) to be used
 integer(c_int), intent(in)                :: chanList(nchans)  !< List of channels to use
+logical(c_bool), intent(in)               :: noSuperCheck      !< Whether to avoid using super-refraction check in operator
 
 character(len=filename_length) :: bmatrix_filename  ! Location of the B-matrix file
 integer                        :: ifname            ! Loop variable for filename
@@ -111,7 +113,8 @@ call ufo_gnssroonedvarcheck_create(self, &
                                    vert_interp_ops, &
                                    y_test, &
                                    c_onedvarflag, &
-                                   localChanList)
+                                   localChanList, &
+                                   noSuperCheck)
 
 end subroutine ufo_gnssroonedvarcheck_create_c
 

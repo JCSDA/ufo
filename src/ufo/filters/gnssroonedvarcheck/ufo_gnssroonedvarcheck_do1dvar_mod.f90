@@ -37,6 +37,7 @@ SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                  &
                                  GPSRO_Delta_ct2,        &   ! Delta observations
                                  GPSRO_OB_test,          &   ! Threshold value for the O-B test
                                  capsupersat,            &
+                                 noSuperCheck,           &   ! Do not apply super-refraction check in operator?
                                  BAerr,                  &
                                  Tb,                     &
                                  Ts,                     &
@@ -72,6 +73,7 @@ REAL(kind_real), INTENT(IN)         :: GPSRO_Delta_ct2
 REAL(kind_real), INTENT(IN)         :: GPSRO_Delta_factor
 REAL(kind_real), INTENT(IN)         :: GPSRO_OB_test
 LOGICAL, INTENT(IN)                 :: capsupersat
+LOGICAL, INTENT(IN)                 :: noSuperCheck
 LOGICAL, INTENT(OUT)                :: BAerr
 REAL(kind_real), INTENT(INOUT)      :: Tb(nlevq)
 REAL(kind_real), INTENT(INOUT)      :: Ts(nlevq)
@@ -229,6 +231,7 @@ IF (nobs > 0) THEN
                                 GPSRO_vert_interp_ops,     &
                                 GPSRO_min_temp_grad,       &
                                 capsupersat,               &
+                                noSuperCheck,              &    ! Don't apply super-refraction check in operator?
                                 O_Bdiff,                   &    ! observed -background BA value
                                 temp_rad_curv,             &    ! Radius of curvature of ellipsoid
                                 temp_latitude,             &    ! Latitude of occ

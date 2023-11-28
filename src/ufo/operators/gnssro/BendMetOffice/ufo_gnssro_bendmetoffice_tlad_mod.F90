@@ -40,6 +40,7 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_bendmetoffice_tlad
   private
   logical                       :: vert_interp_ops
   logical                       :: pseudo_ops
+  logical                       :: noSuperCheck
   real(kind_real)               :: min_temp_grad
   integer, allocatable          :: chanList(:)
   integer                       :: nlevp
@@ -67,7 +68,7 @@ contains
 !!
 !-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, &
-                                          min_temp_grad, chanList)
+                                          min_temp_grad, chanList, noSuperCheck)
 
 implicit none
 
@@ -76,12 +77,14 @@ logical(c_bool),                         intent(in) :: vert_interp_ops  !< Wheth
 logical(c_bool),                         intent(in) :: pseudo_ops       !< Whether to use pseudo-levels in the calculation
 real(c_float),                           intent(in) :: min_temp_grad    !< The minimum temperature gradient in the vertical
 integer(c_int),                          intent(in) :: chanList(:)      !< List of channels (vertical levels) to use
+logical(c_bool),                         intent(in) :: noSuperCheck     !< If true the don't perform super-refraction check
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
 self % min_temp_grad = min_temp_grad
 allocate(self % chanList(1:size(chanList)))
 self % chanList = chanList
+self % noSuperCheck = noSuperCheck
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -197,7 +200,8 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
                             self % nlevels, &                          ! Number of observations in the profile
                             impact_param(min_ob:max_ob), &             ! Impact parameter for these observations
                             self % K(min_ob:max_ob, &
-                                     1:prs%nval+q%nval))               ! K-matrix (Jacobian of the observation with respect to the inputs)
+                                     1:prs%nval+q%nval), &             ! K-matrix (Jacobian of the observation with respect to the inputs)
+                            self % noSuperCheck)                       ! If true then don't use super-refraction check
     do ilevel = 1, self % nlevels
       this_ob = ilevel + (iobs - 1) * self % nlevels
       ! Flip the K-matrix back the right way around
@@ -421,7 +425,8 @@ SUBROUTINE jacobian_interface(nlevp, &
                               ro_geoid_und, &
                               nobs, &
                               zobs, &
-                              K)
+                              K, &
+                              noSuperCheck)
 
 IMPLICIT NONE
 
@@ -440,6 +445,7 @@ REAL(kind_real), INTENT(IN)    :: ro_geoid_und     !< The geoid undulation at th
 INTEGER, INTENT(IN)            :: nobs             !< The number of observations in this column
 REAL(kind_real), INTENT(IN)    :: zobs(:)          !< The impact parameters of the column of observations
 REAL(kind_real), INTENT(INOUT) :: K(:,:)           !< The calculated K matrix
+LOGICAL, INTENT(IN)            :: noSuperCheck     !< If true then don't perform super-refraction check
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 !
@@ -507,7 +513,8 @@ IF (.NOT. BAErr) THEN
                         nobs, &
                         zobs, &
                         nr, &
-                        K)
+                        K, &
+                        noSuperCheck)
 ELSE
     K = 0
     write(err_msg,*) "Error in refractivity calculation"
@@ -553,7 +560,8 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
                           nobs, &
                           zobs, &
                           nr, &
-                          K)
+                          K, &
+                          noSuperCheck)
 !
 ! Return the K-matrix for calculating TL/AD
 !
@@ -578,6 +586,7 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
     REAL(kind_real), INTENT(IN)  :: zobs(:)               !< The impact parameters of the column of observations
     REAL(kind_real), INTENT(IN)  :: nr(nRefLevels)        !< The impact parameters of the model data
     REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)   !< The calculated K matrix
+    LOGICAL, INTENT(IN)          :: noSuperCheck          !< If true, then don't apply super-refraction check
 
     REAL(kind_real)              :: m1(nobs, nRefLevels)             ! Intermediate term in the K-matrix calculation
     REAL(kind_real), ALLOCATABLE :: dref_dp(:, :)                    ! Partial derivative of refractivity wrt. pressure
@@ -616,7 +625,8 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
                                ref_model,   &      ! refractivity values on model levels
                                nr,          &      ! index * radius product
                                dalpha_dref, &      ! out
-                               dalpha_dnr)         ! out
+                               dalpha_dnr,  &      ! out
+                               noSuperCheck)       ! Don't use super-refraction check in operator?
 
     ! Calculate overall gradient of bending angle wrt p and q
     m1 = MATMUL (dalpha_dnr,dnr_dref)

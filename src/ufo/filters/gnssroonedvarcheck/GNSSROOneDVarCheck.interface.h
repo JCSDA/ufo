@@ -42,7 +42,8 @@ extern "C" {
                                          const float &,
                                          const int &,
                                          const int &,
-                                         const int &);
+                                         const int &,
+                                         const bool &);
   void ufo_gnssroonedvarcheck_delete_f90(F90onedvarcheck &);
   void ufo_gnssroonedvarcheck_apply_f90(const F90onedvarcheck &,
                                         const F90goms &,

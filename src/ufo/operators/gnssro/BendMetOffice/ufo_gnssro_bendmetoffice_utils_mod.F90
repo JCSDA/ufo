@@ -46,7 +46,8 @@ SUBROUTINE Ops_GPSROcalc_alpha (nobs,   &
                                 a,      &
                                 refrac, &
                                 nr,     &
-                                alpha)
+                                alpha,  &
+                                noCheck)
 
 IMPLICIT NONE
 
@@ -57,12 +58,12 @@ REAL(kind_real), INTENT(IN)  :: a(nobs)        ! observation impact parameters
 REAL(kind_real), INTENT(IN)  :: refrac(nlev)   ! refractivity values on model levels
 REAL(kind_real), INTENT(IN)  :: nr(nlev)       ! refractive index * radius product
 REAL(kind_real), INTENT(OUT) :: alpha(nobs)    ! bending angle
+LOGICAL, INTENT(IN)          :: noCheck        ! If true, do not apply super-refraction check
 
 ! Local declarations:
 CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSROcalc_alpha"
 INTEGER                     :: i
 INTEGER                     :: n
-INTEGER                     :: ibot
 INTEGER                     :: jbot
 INTEGER                     :: kbot
 REAL(kind_real)             :: kval(nlev - 1) ! exponential decay rate between levels
@@ -80,6 +81,10 @@ REAL(kind_real), PARAMETER  :: a1 = 0.3480242 ! consts used in error function ap
 REAL(kind_real), PARAMETER  :: a2 = -0.0958798
 REAL(kind_real), PARAMETER  :: a3 = 0.7478556
 REAL(kind_real), PARAMETER  :: p = 0.47047
+INTEGER                     :: indices(nlev)  ! The indices to use in the refractivity profile
+INTEGER                     :: ngood          ! The number of refractivity values to use
+REAL(kind_real)             :: minNR          ! Minimum value of nr found so far
+INTEGER                     :: iMin           ! Minimum value of indices to use in profile
 
 jbot = 1
 
@@ -92,31 +97,55 @@ DO
 END DO
 
 !-------------------------------------------------------------------------------
-! Calculate lowest usable level (because of superrefraction)
+! Calculate the indices of the model levels which can be used in calculating the
+! bending angles.
+! If no super-refraction check, then search downwards and create a profile where
+! the impact parameter is monotonically decreasing.
+! If using the super-refraction check, then search downwards; if the impact
+! parameter decreases by less than 10 metres, then reject all model levels below
+! this point.
 !-------------------------------------------------------------------------------
 
-kbot = nlev
+if (noCheck) then
+  ! Remove regions where the IP reduces in the model
+  nGood = 0
+  indices = 0
+  minNR = nr(nlev)
+  do i = nlev, jbot, -1
+    if (nr(i) <= minNR) then
+      minNR = nr(i)
+      nGood = nGood + 1
+      indices(nGood) = i
+    end if
+  end do
+  indices(1:nGood) = indices(nGood:1:-1)
+else
+  ! Remove regions below points where the impact parameter decreases by less
+  ! than 10 metres.
+  kbot = nlev
+  DO i = nlev, jbot + 1, -1
+    ! to avoid large gradients
+    IF ((nr(kbot) - nr(kbot - 1)) < 10.0) EXIT
+    kbot = kbot - 1
+  END DO
 
-DO i = nlev,jbot + 1,-1
-
-  ! to avoid large gradients
-  IF ((nr(kbot) - nr(kbot - 1)) < 10.0) EXIT
-
-  kbot = kbot - 1
-
-END DO
-
-jbot = MAX (jbot,kbot)
+  jbot = MAX (jbot,kbot)
+  nGood = 0
+  do i = jbot, nlev
+    nGood = nGood + 1
+    indices(nGood) = i
+  end do
+end if
 
 !-------------------------------------------------------------------------------
 ! Calculate the exponential decay rate between levels
 !-------------------------------------------------------------------------------
 
-DO i = jbot,nlev - 1
+DO i = 1, nGood - 1
 
-  kval(i) = LOG (refrac(i) / refrac(i + 1)) / &
-               MAX (1.0,(nr(i + 1) - nr(i)))
-  kval(i) = MAX (1.0E-6,kval(i))
+  kval(i) = LOG(refrac(indices(i)) / refrac(indices(i+1))) / &
+               MAX(1.0,(nr(indices(i+1)) - nr(indices(i))))
+  kval(i) = MAX(1.0E-6, kval(i))
 
 END DO
 
@@ -126,23 +155,20 @@ END DO
 
 alpha(:) = missing_value(alpha(1))
 
-DO n = 1,nobs
+DO n = 1, nobs
 
-  IF (a(n) < nr(jbot) .OR. a(n) > nr(nlev)) CYCLE
+  IF (a(n) < nr(indices(1)) .OR. a(n) > nr(indices(nGood))) CYCLE
 
   Root_2PIa = SQRT (2.0 * pi * a(n))
-
-  ibot = jbot
 
   ! Find bottom state vector level
   !----------------------------------
 
+  iMin = 1
   DO
     ! check more than 1 metre apart to stop large gradients in K code
-    IF (((nr(ibot + 1) - a(n)) > 1.0) .OR. ibot == nlev - 1) EXIT
-
-    ibot = ibot + 1
-
+    IF (((nr(indices(iMin + 1)) - a(n)) > 1.0) .OR. nGood < iMin + 2) EXIT
+    iMin = iMin + 1
   END DO
 
   ! Initialise bending angle value
@@ -154,38 +180,29 @@ DO n = 1,nobs
   !-----------------------------------------------------------
 !The following line is a compiler directive to avoid bugs with intel compilers
 !DIR$ NOVECTOR
-  DO i = ibot, nlev - 1
+  DO i = iMin, nGood - 1
 
-    IF (i == ibot) THEN
-
-      ref_low = refrac(ibot) * EXP (-kval(ibot) * (a(n) - nr(ibot)))
+    IF (i == iMin) THEN
+      ref_low = refrac(indices(i)) * EXP (-kval(i) * (a(n) - nr(indices(i))))
       nr_low = a(n)
-
     ELSE
-
-      ref_low = refrac(i)
-      nr_low = nr(i)
-
+      ref_low = refrac(indices(i))
+      nr_low = nr(indices(i))
     END IF
 
     ! Limits used in the error function
     !----------------------------------
 
-    IF (i == nlev - 1) THEN
-
+    IF (i == nGood - 1) THEN
       ! Simple extrapolation 100km above the uppermost level
       !-----------------------------------------------------
-      tup = SQRT (kval(i) * (nr(i + 1) + 1.0E5 - a(n)))
-
+      tup = SQRT(kval(i) * (nr(indices(i+1)) + 1.0E5 - a(n)))
     ELSE
-
-      tup = SQRT (kval(i) * (nr(i + 1) - a(n)))
-
+      tup = SQRT(kval(i) * (nr(indices(i+1)) - a(n)))
     END IF
 
     tlow = 0.0
-
-    IF (i > ibot) tlow = SQRT (kval(i) * (nr(i) - a(n)))
+    IF (i > iMin) tlow = SQRT(kval(i) * (nr(indices(i)) - a(n)))
 
     ! Abramowitz and Stegun approx. to error function
     !------------------------------------------------

@@ -98,7 +98,8 @@ SUBROUTINE Ops_GPSROcalc_alphaK (nobs,     &
                                  refrac,   &
                                  nr,       &
                                  Kmat_ref, &
-                                 Kmat_nr)
+                                 Kmat_nr,  &
+                                 noCheck)
 
 IMPLICIT NONE
 
@@ -110,12 +111,12 @@ REAL(kind_real), INTENT(IN)  :: refrac(nlev)        ! refractivity values on mod
 REAL(kind_real), INTENT(IN)  :: nr(nlev)            ! refractive index * radius product
 REAL(kind_real), INTENT(OUT) :: Kmat_ref(nobs,nlev) ! BA gradient wrt refractivity
 REAL(kind_real), INTENT(OUT) :: kmat_nr(nobs,nlev)  ! BA gradient wrt index * radius product
+LOGICAL, INTENT(IN)          :: noCheck             ! If true, do not apply super-refraction check
 
 ! Local declarations:
 CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSROcalc_alphaK"
 INTEGER                     :: i
 INTEGER                     :: n
-INTEGER                     :: ibot
 INTEGER                     :: jbot
 INTEGER                     :: kbot
 REAL(kind_real)             :: kval(nlev - 1)      ! exponential decay rate between levels
@@ -156,6 +157,10 @@ REAL(kind_real)             :: dtup_dref(2)
 REAL(kind_real)             :: dtlow_dref(2)
 REAL(kind_real)             :: dtup_dk
 REAL(kind_real)             :: dtlow_dk
+INTEGER                     :: indices(nlev)  ! The indices to use in the refractivity profile
+INTEGER                     :: ngood          ! The number of refractivity values to use
+REAL(kind_real)             :: minNR          ! Minimum value of nr found so far
+INTEGER                     :: iMin           ! Minimum value of indices to use in profile
 
 !-------------------------------------------------------------------------------
 ! Initialise the K matrices
@@ -177,37 +182,61 @@ DO
 END DO
 
 !-------------------------------------------------------------------------------
-! Calculate lowest usable level (because of superrefraction)
+! Calculate the indices of the model levels which can be used in calculating the
+! bending angles.
+! If no super-refraction check, then search downwards and create a profile where
+! the impact parameter is monotonically decreasing.
+! If using the super-refraction check, then search downwards; if the impact
+! parameter decreases by less than 10 metres, then reject all model levels below
+! this point.
 !-------------------------------------------------------------------------------
 
-kbot = nlev
+if (noCheck) then
+  ! Remove regions where the IP reduces in the model
+  nGood = 0
+  indices = 0
+  minNR = nr(nlev)
+  do i = nlev, jbot, -1
+    if (nr(i) <= minNR) then
+      minNR = nr(i)
+      nGood = nGood + 1
+      indices(nGood) = i
+    end if
+  end do
+  indices(1:nGood) = indices(nGood:1:-1)
+else
+  ! Remove regions below points where the impact parameter decreases by less
+  ! than 10 metres.
+  kbot = nlev
+  DO i = nlev, jbot + 1, -1
+    ! to avoid large gradients
+    IF ((nr(kbot) - nr(kbot - 1)) < 10.0) EXIT
+    kbot = kbot - 1
+  END DO
 
-DO i = nlev,jbot + 1,-1
-
-  ! to avoid large gradients
-  IF ((nr(kbot) - nr(kbot-1)) < 10.0) EXIT
-
-  kbot = kbot - 1
-
-END DO
-
-jbot = MAX (jbot,kbot)
+  jbot = MAX (jbot,kbot)
+  nGood = 0
+  do i = jbot, nlev
+    nGood = nGood + 1
+    indices(nGood) = i
+  end do
+end if
 
 !-------------------------------------------------------------------------------
 ! Calculate the exponential decay rate between levels
 !-------------------------------------------------------------------------------
 
-DO i = jbot,nlev - 1
+DO i = 1, nGood - 1
 
-  kval(i) = LOG (refrac(i) / refrac(i + 1)) / &
-              MAX (1.0,(nr(i + 1) - nr(i)))
+  kval(i) = LOG(refrac(indices(i)) / refrac(indices(i+1))) / &
+               MAX(1.0,(nr(indices(i+1)) - nr(indices(i))))
 
   IF (kval(i) > 1.0E-6) THEN
-    dkval_dref(i,1) = 1.0 / (refrac(i) * MAX (1.0,(nr(i + 1) - nr(i))))
-    dkval_dref(i,2) = -1.0 / (refrac(i + 1) * MAX (1.0,(nr(i + 1) - nr(i))))
+    dkval_dref(i,1) =  1.0 / (refrac(indices(i)) * MAX(1.0, (nr(indices(i+1)) - nr(indices(i)))))
+    dkval_dref(i,2) = -1.0 / (refrac(indices(i+1)) * MAX(1.0, (nr(indices(i+1)) - nr(indices(i)))))
 
-    dkval_dnr(i,1) = kval(i) / MAX (1.0,(nr(i + 1) - nr(i)))
-    dkval_dnr(i,2) = -kval(i) / MAX (1.0,(nr(i + 1) - nr(i)))
+    dkval_dnr(i,1) =  kval(i) / MAX(1.0, (nr(indices(i+1)) - nr(indices(i))))
+    dkval_dnr(i,2) = -kval(i) / MAX(1.0, (nr(indices(i+1)) - nr(indices(i))))
   ELSE
     kval(i) = 1.0E-6
   END IF
@@ -218,29 +247,25 @@ END DO
 ! Calculate the bending angle gradients
 !-------------------------------------------------------------------------------
 
-DO n = 1,nobs
+DO n = 1, nobs
 
-  IF (a(n) < nr(jbot) .OR. a(n) > nr(nlev)) CYCLE
+  IF (a(n) < nr(indices(1)) .OR. a(n) > nr(indices(nGood))) CYCLE
 
   Root_2PIa = SQRT (2.0 * pi * a(n))
 
-  ibot = jbot
-
   ! Find bottom state vector level
   !----------------------------------
+
+  iMin = 1
   DO
-
     ! check more than 1 metre apart to stop large gradients in K code
-    ! ---------------------------------------------------------------
-    IF (((nr(ibot + 1) - a(n)) > 1.0) .OR. ibot == nlev - 1) EXIT
-
-    ibot = ibot + 1
-
+    IF (((nr(indices(iMin + 1)) - a(n)) > 1.0) .OR. nGood < iMin + 2) EXIT
+    iMin = iMin + 1
   END DO
 
   tlow = 0.0
 
-  DO i = ibot, nlev - 1
+  DO i = iMin, nGood - 1
 
     ! initialise matrices
     !---------------------
@@ -267,13 +292,13 @@ DO n = 1,nobs
 
     ! Values of refractivity and impact parameter at lower level
     !-----------------------------------------------------------
-    IF (i == ibot) THEN
+    IF (i == iMin) THEN
 
-      ref_low = refrac(i) * EXP (-kval(i) * (a(n) - nr(i)))
+      ref_low = refrac(indices(i)) * EXP (-kval(i) * (a(n) - nr(indices(i))))
 
-      drlow_dref(1)= ref_low / refrac(i)
-      drlow_dk  = -ref_low * (a(n) - nr(i))
-      drlow_dnr(1) = ref_low * kval(i)
+      drlow_dref(1) =  ref_low / refrac(indices(i))
+      drlow_dk      = -ref_low * (a(n) - nr(indices(i)))
+      drlow_dnr(1)  =  ref_low * kval(i)
 
       nr_low = a(n)
 
@@ -281,11 +306,11 @@ DO n = 1,nobs
 
     ELSE
 
-      ref_low = refrac(i)
+      ref_low = refrac(indices(i))
 
       drlow_dref(1) = 1.0
 
-      nr_low = nr(i)
+      nr_low = nr(indices(i))
 
       dnrlow_dnr(1) = 1.0
 
@@ -297,20 +322,20 @@ DO n = 1,nobs
 
     ! Limits used in the error function
     !----------------------------------
-    IF (i == nlev - 1) THEN
+    IF (i == nGood - 1) THEN
 
       ! simple extrapolation 100km above the uppermost level.
       !-----------------------------------------------------
-      tup = SQRT (kval(i) * (nr(i + 1) + 1.0E5 - a(n)))
+      tup = SQRT(kval(i) * (nr(indices(i+1)) + 1.0E5 - a(n)))
 
-      dtup_dk = 0.5 * (nr(i + 1) + 1.0E5 - a(n)) / tup
+      dtup_dk = 0.5 * (nr(indices(i+1)) + 1.0E5 - a(n)) / tup
       dtup_dnr(2) = 0.5 * kval(i) / tup
 
     ELSE
 
-      tup = SQRT (kval(i) * (nr(i + 1) - a(n)))
+      tup = SQRT (kval(i) * (nr(indices(i+1)) - a(n)))
 
-      dtup_dk = 0.5 * (nr(i + 1) - a(n)) / tup
+      dtup_dk = 0.5 * (nr(indices(i+1)) - a(n)) / tup
       dtup_dnr(2) = 0.5 * kval(i) / tup
 
     END IF
@@ -320,9 +345,9 @@ DO n = 1,nobs
 
     tlow = 0.0
 
-    IF (i > ibot) THEN
-      tlow = SQRT (kval(i) * (nr(i) - a(n)))
-      dtlow_dk = 0.5 * (nr(i) - a(n)) / tlow
+    IF (i > iMin) THEN
+      tlow = SQRT(kval(i) * (nr(indices(i)) - a(n)))
+      dtlow_dk = 0.5 * (nr(indices(i)) - a(n)) / tlow
       dtlow_dnr(1) = 0.5 * kval(i) / tlow
     END IF
 
@@ -381,11 +406,11 @@ DO n = 1,nobs
     ! Now update matrices
     !---------------------
 
-    Kmat_ref(n,i) = Kmat_ref(n,i) + dalpha_dref(1)
-    Kmat_nr(n,i) = Kmat_nr(n,i) + dalpha_dnr(1)
+    Kmat_ref(n,indices(i)) = Kmat_ref(n,indices(i)) + dalpha_dref(1)
+    Kmat_nr(n,indices(i)) = Kmat_nr(n,indices(i)) + dalpha_dnr(1)
 
-    Kmat_ref(n,i + 1) = Kmat_ref(n,i + 1) + dalpha_dref(2)
-    Kmat_nr(n,i + 1) = Kmat_nr(n,i + 1) + dalpha_dnr(2)
+    Kmat_ref(n,indices(i+1)) = Kmat_ref(n,indices(i+1)) + dalpha_dref(2)
+    Kmat_nr(n,indices(i+1)) = Kmat_nr(n,indices(i+1)) + dalpha_dnr(2)
 
   END DO
 

@@ -49,6 +49,7 @@ type, public :: ufo_gnssroonedvarcheck
   logical                   :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
   real(kind_real)           :: min_temp_grad     !< The minimum vertical temperature gradient allowed
   integer, allocatable      :: chanList(:)       !< List of channels (levels) to use
+  logical                   :: noSuperCheck      !< If true then super-refraction check will not be used in operator
 end type ufo_gnssroonedvarcheck
 
 ! ------------------------------------------------------------------------------
@@ -67,7 +68,7 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
                                          Delta_ct2, Delta_factor, min_temp_grad, &
                                          n_iteration_test, OB_test, pseudo_ops, &
                                          vert_interp_ops, y_test, onedvarflag, &
-                                         chanList)
+                                         chanList, noSuperCheck)
 
   implicit none
   type(ufo_gnssroonedvarcheck), intent(inout) :: self              !< gnssroonedvarcheck main object
@@ -85,6 +86,7 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   real(c_float), intent(in)                   :: y_test            !< Threshold on distance between observed and solution bending angles
   integer(c_int), intent(in)                  :: onedvarflag       !< flag for qc manager
   integer(c_int), intent(in)                  :: chanList(:)       !< List of channels to use
+  logical(c_bool), intent(in)                 :: noSuperCheck      !< If true then don't use super-refraction check in operator
 
   character(len=800) :: message
   integer :: i
@@ -105,6 +107,7 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   self % y_test = y_test
   allocate(self % chanList(1:SIZE(chanList)))
   self % chanList(1:SIZE(chanList)) = chanList(1:SIZE(chanList))
+  self % noSuperCheck = noSuperCheck
 
   write(message, '(A)') 'GNSS-RO 1D-Var check: input parameters are:'
   call fckit_log % debug(message)
@@ -136,6 +139,8 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
     write(message, '(100I5)') chanList(i:min(i+99, size(chanList)))
     call fckit_log % debug(message)
   end do
+  write(message, '(A,L1)') 'no super check = ', noSuperCheck
+  call fckit_log % debug(message)
 
 end subroutine ufo_gnssroonedvarcheck_create
 
@@ -377,6 +382,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
                               self % Delta_ct2,        &   ! Delta observations
                               self % OB_test,          &   ! Threshold value for the O-B test
                               self % capsupersat,      &   ! Whether to remove super-saturation
+                              self % noSuperCheck,     &   ! If true then don't use super-refraction check in operator
                               BAerr,                   &   ! Whether there are errors in the bending angle calculation
                               Tb,                      &   ! Calculated background temperature
                               Ts,                      &   ! 1DVar solution temperature

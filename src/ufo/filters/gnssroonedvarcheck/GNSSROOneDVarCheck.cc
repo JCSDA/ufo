@@ -56,7 +56,8 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
                                     parameters_.y_test.value(),
                                     GNSSROOneDVarCheck::qcFlag(),
                                     channels.size(),
-                                    channels[0]);
+                                    channels[0],
+                                    parameters_.noSuperCheck.value());
 
   oops::Log::debug() << "GNSSROOneDVarCheck contructor complete. " << std::endl;
 }

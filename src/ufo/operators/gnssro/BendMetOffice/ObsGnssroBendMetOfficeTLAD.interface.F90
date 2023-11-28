@@ -33,7 +33,8 @@ subroutine ufo_gnssro_bendmetoffice_tlad_setup_c(c_key_self, &
                                                  pseudo_ops, &
                                                  min_temp_grad, &
                                                  nchans, &
-                                                 chanList) bind(c,name='ufo_gnssro_bendmetoffice_tlad_setup_f90')
+                                                 chanList, &
+                                                 noSuperCheck) bind(c,name='ufo_gnssro_bendmetoffice_tlad_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self        !< Reference to this object
 logical(c_bool), intent(in)   :: vert_interp_ops   !< Whether to do vertical interpolation using ln(p)
@@ -41,6 +42,7 @@ logical(c_bool), intent(in)   :: pseudo_ops        !< Whether to use pseudo-leve
 real(c_float), intent(in)     :: min_temp_grad     !< Minimum temperature gradient
 integer(c_int), intent(in)    :: nchans            !< Number of channels (levels) to be used
 integer(c_int), intent(in)    :: chanList(nchans)  !< List of channels to use
+logical(c_bool), intent(in)   :: noSuperCheck      !< Whether to avoid using super-refraction check in operator
 
 integer(c_int)                :: noChans(1)        !< Channel list when no channels are used
 
@@ -50,9 +52,9 @@ call ufo_gnssro_bendmetoffice_tlad_registry%setup(c_key_self, self)
 
 if (nchans == 0) then
   noChans(1) = 0
-  call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, noChans)
+  call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, noChans, noSuperCheck)
 else
-  call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, chanList)
+  call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, chanList, noSuperCheck)
 end if
 
 end subroutine ufo_gnssro_bendmetoffice_tlad_setup_c

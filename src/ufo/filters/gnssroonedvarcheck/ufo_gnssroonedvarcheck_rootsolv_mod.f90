@@ -51,6 +51,7 @@ SUBROUTINE Ops_GPSRO_rootsolv_BA (nstate,        &   ! size of state vector
                                   GPSRO_vert_interp_ops, & ! Whether to vertically interpolate using exner or ln(p)
                                   GPSRO_min_temp_grad, &   ! Minimum vertical temperature gradient allowed
                                   capsupersat,   &
+                                  noSuperCheck,  &   ! Don't apply super-refraction check in operator?
                                   O_Bdiff,       &   ! observed -background bending angle value
                                   RO_Rad_Curv,   &   ! Radius of curvature of ellipsoid
                                   Latitude,      &   ! Latitude of occ
@@ -107,6 +108,7 @@ LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops
 LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops
 REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad
 LOGICAL, INTENT(IN)            :: capsupersat
+LOGICAL, INTENT(IN)            :: noSuperCheck
 INTEGER, INTENT(OUT)           :: it
 REAL(kind_real), INTENT(OUT)   :: x(:)
 REAL(kind_real), INTENT(OUT)   :: yb(:)
@@ -291,7 +293,8 @@ Iteration_loop: DO
                             zobs,         &      ! obs impact parameters
                             refractivity, &      ! refractivity values on model+pseudo levels
                             nr,           &      ! index * radius product
-                            ycalc)               ! forward modelled bending angle
+                            ycalc,        &      ! forward modelled bending angle
+                            noSuperCheck)        ! Whether to avoid super-refraction check in operator
 
   ! Store the bending angle values calculated with `x(:)=xb(:)'
 
@@ -372,13 +375,14 @@ Iteration_loop: DO
                             dnr_dref)                 ! out
 
     !  3.  Calculate the gradient of bending angle wrt ref and nr
-    CALL Ops_GPSROcalc_alphaK (nobs,        &      ! size of ob. vector
-                               nRefLevels,   &      ! no. of refractivity pseudo levels
-                               zobs,        &      ! obs impact parameters
-                               refractivity,    &      ! refractivity values on pseudo levels
-                               nr,          &      ! index * radius product
-                               dalpha_dref, &      ! out
-                               dalpha_dnr)         ! out
+    CALL Ops_GPSROcalc_alphaK (nobs,         &     ! size of ob. vector
+                               nRefLevels,   &     ! no. of refractivity pseudo levels
+                               zobs,         &     ! obs impact parameters
+                               refractivity, &     ! refractivity values on pseudo levels
+                               nr,           &     ! index * radius product
+                               dalpha_dref,  &     ! out
+                               dalpha_dnr,   &     ! out
+                               noSuperCheck)       ! Whether to avoid super-refraction check in operator
 
     ! Calculate overall gradient of bending angle wrt p and q
 

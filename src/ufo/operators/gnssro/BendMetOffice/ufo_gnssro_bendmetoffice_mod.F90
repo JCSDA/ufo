@@ -31,6 +31,7 @@ private
 type :: ufo_gnssro_BendMetOffice
   logical :: vert_interp_ops
   logical :: pseudo_ops
+  logical :: noSuperCheck
   real(kind_real) :: min_temp_grad
   integer, allocatable :: chanList(:)
   contains
@@ -44,7 +45,7 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad, chanList)
+subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad, chanList, noSuperCheck)
 
 implicit none
 
@@ -53,12 +54,36 @@ logical(c_bool), intent(in) :: vert_interp_ops
 logical(c_bool), intent(in) :: pseudo_ops
 real(c_float), intent(in) :: min_temp_grad
 integer(c_int), intent(in) :: chanList(:)
+logical(c_bool), intent(in) :: noSuperCheck
+
+character(len=*), parameter  :: myname_ = "ufo_gnssro_bendmetoffice_setup"
+integer, parameter           :: max_string = 800
+character(max_string)        :: message                       ! General message for output
+integer                      :: i                             ! Loop variable
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
 self % min_temp_grad = min_temp_grad
 allocate(self % chanList(1:size(chanList)))
 self % chanList = chanList
+self % noSuperCheck = noSuperCheck
+
+write(message, *) myname_, ' Setting up Met Office GNSS-RO forward operator with'
+call fckit_log%info(message)
+write(message, *) 'vert_interp_ops =', self % vert_interp_ops
+call fckit_log%info(message)
+write(message, *) 'pseudo_ops =', self % pseudo_ops
+call fckit_log%info(message)
+write(message, *) 'min_temp_grad =', self % min_temp_grad
+call fckit_log%info(message)
+write(message, *) 'no super check =', self % noSuperCheck
+call fckit_log%info(message)
+write(message, '(A)') 'chanList = '
+call fckit_log % debug(message)
+do i = 1, SIZE(chanList), 100
+  write(message, '(100I5)') chanList(i:min(i+99, size(chanList)))
+  call fckit_log % debug(message)
+end do
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -127,12 +152,6 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
       write(err_msg,*) myname_, ' error: nlocs inconsistent between geovals and what was passed in!'
       call abor1_ftn(err_msg)
   endif
-
-  write(message, *) myname_, ' Running Met Office GNSS-RO forward operator with'
-  call fckit_log%info(message)
-  write(message, *) 'vert_interp_ops =', self % vert_interp_ops, &
-    'pseudo_ops =', self % pseudo_ops
-  call fckit_log%info(message)
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
@@ -207,6 +226,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
                                 BAErr, &
                                 refractivity, &
                                 model_heights, &
+                                self % noSuperCheck, &
                                 tobs)
     hofx(:, iloc) = calculated_hofx
 
@@ -293,6 +313,7 @@ SUBROUTINE Ops_GPSRO_ForwardModel(nlevp, &
                                   BAErr, &
                                   refractivity, &
                                   model_heights, &
+                                  noSuperCheck, &
                                   tobs)
 
 INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
@@ -313,6 +334,7 @@ REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)          ! Model forecast of the
 LOGICAL, INTENT(OUT)           :: BAErr                  ! Was an error encountered during the calculation?
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)  ! Refractivity as calculated
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:) ! Height of the levels for refractivity
+LOGICAL, INTENT(IN)            :: noSuperCheck           ! Do we skip a super-refraction check in the operator?
 REAL(kind_real), INTENT(OUT)   :: tobs(1:nobs)           ! Virtual temperature on model levels
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
@@ -378,7 +400,8 @@ IF (.NOT. BAerr) THEN
                               zobs,         &      ! obs impact parameters
                               refractivity, &      ! refractivity values
                               nr,           &      ! index * radius product
-                              ycalc)               ! forward modelled bending angle
+                              ycalc,        &      ! forward modelled bending angle
+                              noSuperCheck)        ! Don't use super-refraction check in operator?
 
     ! 4. Linearly interpolate the virtual temperature to the observation levels
     DO iobs = 1, nobs

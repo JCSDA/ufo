@@ -46,7 +46,8 @@ ObsGnssroBendMetOfficeTLAD::ObsGnssroBendMetOfficeTLAD(const ioda::ObsSpace & od
                                           parameters.pseudoLevels,
                                           parameters.minTempGrad,
                                           channels.size(),
-                                          channels[0]);
+                                          channels[0],
+                                          parameters.noSuperCheck);
 
   oops::Log::trace() << "ObsGnssroBendMetOfficeTLAD created" << std::endl;
 }

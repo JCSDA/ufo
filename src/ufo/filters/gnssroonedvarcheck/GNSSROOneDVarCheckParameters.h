@@ -75,6 +75,9 @@ class GNSSROOneDVarCheckParameters : public FilterParametersBase {
   /// List of channels available for assimilation - this is used for vertical
   /// heights in the case where the observations are read in as profiles.
   oops::Parameter<std::string> channelList{"channels", "", this};
+
+  /// Whether to turn off the super-refraction check in the operator
+  oops::Parameter<bool> noSuperCheck{"no super check", false, this};
 };
 
 }  // namespace ufo

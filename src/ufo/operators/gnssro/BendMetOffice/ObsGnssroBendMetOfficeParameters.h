@@ -42,6 +42,12 @@ class ObsGnssroBendMetOfficeParameters : public ObsOperatorParametersBase {
      1.0e-6,
      this};
 
+  oops::Parameter<bool> noSuperCheck
+    {"no super-refraction check",
+     "Whether to avoid using the super-refraction check in the operator",
+     false,
+     this};
+
   /// List of channels available for assimilation - this is used for vertical
   /// heights in the case where the observations are read in as profiles.
   oops::Parameter<std::string> channelList{"channels", "", this};
