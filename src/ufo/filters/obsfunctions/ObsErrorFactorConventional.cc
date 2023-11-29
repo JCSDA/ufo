@@ -74,7 +74,7 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
   static constexpr float con_g_rd = 500.0f*Constants::grav/(273.0f*Constants::rd);
   const float tiny_float = FLT_MIN;
   // TODO(HuiShao): replace the earth radius at equator after matching GSI
-  // with the mean eartch radius in Constants.
+  // with the mean Earth radius in Constants.
   static constexpr double rearth_equator = 6.37813662e+06;  // equatorial earth radius (m)
 
   // Get dimensions
@@ -148,7 +148,6 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
     int passCount = 0;
     int pointCount = 0;
     int profCount = 0;
-    int thislev = 0;
 
     ioda::ObsSpace::RecIdxIter irec;   // Using obs grouping/sorting indices
     // record (profile) loop
@@ -160,18 +159,33 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
 
       // loop over the vertical obs profile
       for (size_t thisPoint = 0; thisPoint < rSort.size(); ++thisPoint) {
+        float thislevpress = 100000000.0f;
+        float maxlev = 0.0f;
+        int thislev = 0;
         pointCount++;
 
         for (size_t geolev = 0; geolev < nlevs-1; ++geolev) {
           // Background pressure level intervals [cb]
-          dprsl[geolev] = (prsl[geolev][rSort[thisPoint]]-prsl[geolev+1][rSort[thisPoint]])*0.001f;
+          dprsl[geolev] = \
+             abs((prsl[geolev][rSort[thisPoint]]-prsl[geolev+1][rSort[thisPoint]]))*0.001f;
         }
 
         for (size_t geolev = 1; geolev < nlevs-1; ++geolev) {
-          if (ob_pressure[rSort[thisPoint]] < prsl[geolev][rSort[thisPoint]]) {
+          if (ob_pressure[rSort[thisPoint]] < prsl[geolev][rSort[thisPoint]] &&
+            prsl[geolev][rSort[thisPoint]] < thislevpress) {
             thislev = geolev;
+            thislevpress = prsl[thislev][rSort[thisPoint]];
+          }
+          if (prsl[geolev][rSort[thisPoint]] > prsl[maxlev][rSort[thisPoint]]) {
+            maxlev = geolev;
           }
         }
+
+        if (thislevpress > prsl[maxlev][rSort[thisPoint]]) {
+          thislevpress = prsl[maxlev][rSort[thisPoint]];
+          thislev = maxlev;
+        }
+
         if (distthres > 0.) {
           rlat_this = ob_lat[rSort[thisPoint]]*Constants::deg2rad;
           rlon_this = ob_lon[rSort[thisPoint]]*Constants::deg2rad;
@@ -185,8 +199,11 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
         //       = pre1 or pre2, whichever is bigger, if not go beyond 500m in terms
         //         of layer depth in meter, or
         //       = the pressure interval with 500m in depth assuming T=273K
+        // The pressures for this algorithm are assumed to be in centibars,
+        // hence the factor of 0.001.
+        // dprsl is already converted from Pa to centibar.
         pre1 = 0.5f*dprsl[thislev];
-        pre2 = 0.02f*0.001f*prsl[thislev][rSort[thisPoint]];
+        pre2 = 0.02f*0.001f*thislevpress;
         maxpre = std::max(pre1, pre2);
         conpre = con_g_rd*0.001f*ob_pressure[rSort[thisPoint]];
         vmag = std::min(maxpre, conpre);
@@ -250,8 +267,8 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
         pdifftotal = std::max(pdiffd+pdiffu, 5.0f * tiny_float);
         error_factor = sqrt(2.0f*vmag/pdifftotal);
 
-        // Output
-        obserr[ivar][rSort[thisPoint]] = error_factor;
+       // Output
+       obserr[ivar][rSort[thisPoint]] = error_factor;
       }
     }  // thisPoint (observations for single profile) loop
     if (pointCount != nlocs) {
