@@ -193,136 +193,93 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
       affected_channels[ich][iloc] = 0;
     }
 
-    // Window channel sanity check
-    // If any of the window channels is bad, skip all window channels
-    // List of surface sensitivity channels
-    std::vector<float> OmFs{std::abs(innov[ich238][iloc]), std::abs(innov[ich314][iloc]),
-                            std::abs(innov[ich503][iloc]), std::abs(innov[ich528][iloc]),
-                            std::abs(innov[ich536][iloc]), std::abs(innov[ich544][iloc]),
-                            std::abs(innov[ich890][iloc])};
-    bool result = false;
-    result = any_of(OmFs.begin(), OmFs.end(), [](float x){
-               return (x > 200.0 || x == util::missingValue<float>());});
+    // Calculate scattering effect
+    float clwx = 0.6;
+    float dsval = 0.8;
+    if (water_frac[iloc] > 0.99) {
+      clwx = 0.0;
+      float btobsbc238 = btobs[ich238][iloc] - bias_const238[iloc]
+                                             - bias_scanang238[iloc];
+      dsval = ((2.410 - 0.0098 * btobsbc238) * innov[ich238][iloc] +
+                0.454 * innov[ich314][iloc] - innov[ich890][iloc]) * w1f6;
+      dsval = std::max(static_cast<float>(0.0), dsval);
+    }
+    float factch4 = pow(clwx, 2) + pow(innov[ich528][iloc] * w2f4, 2);
+    float factch6 = pow(dsval, 2) + pow(innov[ich544][iloc] * w2f6, 2);
 
-    if (result) {
-      // remove channels 1-7, 16, 17-22
-      for (size_t ich = ich238; ich <= ich544; ++ich) {
-        affected_channels[ich][iloc] = 1;
+    // Hydrometeor check over water surface
+    if (water_frac[iloc] > 0.99) {
+      // Calculate cloud effect from 53.6 GHz (Channel 6)
+      float cldeff_obs536 = btobs[ich536][iloc] - hofxclr536[iloc] - bias[ich536][iloc];
+
+      // Calculate cloud effect from 89 GHz (Channel 16)
+      float cldeff_obs890 = btobs[ich890][iloc] - hofxclr890[iloc] - bias[ich890][iloc];
+
+      // Calculate cloud effect from 165 GHz (Channel 17)
+      float cldeff_obs1650 = btobs[ich1650][iloc] - hofxclr1650[iloc] - bias[ich1650][iloc];
+
+      // Cloud water retrieval sanity check
+      if (clwobs[0][iloc] > 999.0) {
+        for (size_t ich = ich238; ich <= ich544; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+        affected_channels[ich890][iloc] = 1;
+        for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
       }
-      affected_channels[ich890][iloc] = 1;
-      for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-        affected_channels[ich][iloc] = 1;
-      }
-    } else {
-      // Calculate scattering effect
-      float clwx = 0.6;
-      float dsval = 0.8;
-      if (water_frac[iloc] > 0.99) {
-        clwx = 0.0;
-        float btobsbc238 = btobs[ich238][iloc] - bias_const238[iloc]
-                                               - bias_scanang238[iloc];
-        dsval = ((2.410 - 0.0098 * btobsbc238) * innov[ich238][iloc] +
-                  0.454 * innov[ich314][iloc] - innov[ich890][iloc]) * w1f6;
-        dsval = std::max(static_cast<float>(0.0), dsval);
-      }
-      float factch4 = pow(clwx, 2) + pow(innov[ich528][iloc] * w2f4, 2);
-      float factch6 = pow(dsval, 2) + pow(innov[ich544][iloc] * w2f6, 2);
-
-      // Hydrometeor check over water surface
-      if (water_frac[iloc] > 0.99) {
-        // Calculate cloud effect from 53.6 GHz (Channel 6)
-        float cldeff_obs536 = btobs[ich536][iloc] - hofxclr536[iloc] - bias[ich536][iloc];
-
-        // Calculate cloud effect from 89 GHz (Channel 16)
-        float cldeff_obs890 = btobs[ich890][iloc] - hofxclr890[iloc] - bias[ich890][iloc];
-
-        // Calculate cloud effect from 165 GHz (Channel 17)
-        float cldeff_obs1650 = btobs[ich1650][iloc] - hofxclr1650[iloc] - bias[ich1650][iloc];
-
-        // Cloud water retrieval sanity check
-        if (clwobs[0][iloc] > 999.0) {
+      // Precipitation check (factch6: 54.4 GHz)
+      if (factch6 >= 1.0) {
+        for (size_t ich = ich238; ich <= ich544; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+        affected_channels[ich890][iloc] = 1;
+        for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+      // Scattering check (53.6GHz cloud effect)
+      } else if (cldeff_obs536 < -0.5) {
+        for (size_t ich = ich238; ich <= ich544; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+        affected_channels[ich890][iloc] = 1;
+        for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+      // Scattering checks (89GHz vs 166GHz)
+      } else if (std::abs(cldeff_obs890 - cldeff_obs1650) > 10.0) {
+        affected_channels[ich890][iloc] = 1;
+        for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+        if (std::abs(cldeff_obs890 - cldeff_obs1650) > 15.0) {
           for (size_t ich = ich238; ich <= ich544; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-          affected_channels[ich890][iloc] = 1;
-          for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
             affected_channels[ich][iloc] = 1;
           }
         }
-        // Precipitation check (factch6: 54.4 GHz)
-        if (factch6 >= 1.0) {
-          for (size_t ich = ich238; ich <= ich544; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-          affected_channels[ich890][iloc] = 1;
-          for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-        // Scattering check (53.6GHz cloud effect)
-        } else if (cldeff_obs536 < -0.5) {
-          for (size_t ich = ich238; ich <= ich544; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-          affected_channels[ich890][iloc] = 1;
-          for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-        // Scattering checks (89GHz vs 166GHz)
-        } else if (std::abs(cldeff_obs890 - cldeff_obs1650) > 10.0) {
-          affected_channels[ich890][iloc] = 1;
-          for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-          if (std::abs(cldeff_obs890 - cldeff_obs1650) > 15.0) {
-            for (size_t ich = ich238; ich <= ich544; ++ich) {
-              affected_channels[ich][iloc] = 1;
-            }
-          }
-        // Sensitivity of BT to the surface emissivity check
-        } else {
-          float thrd238 = 0.025, thrd314 = 0.015, thrd503 = 0.030, thrd890 = 0.030;
-          float de238 = 0.0, de314 = 0.0, de503 = 0.0, de890 = 0.0;
-          float dbtde238 = dbtde[ich238][iloc];
-          float dbtde314 = dbtde[ich314][iloc];
-          float dbtde503 = dbtde[ich503][iloc];
-          float dbtde890 = dbtde[ich890][iloc];
-          if (dbtde238 != 0.0) de238 = std::abs(innov[ich238][iloc]) / dbtde238 *
-                                       (obserr0[ich238] / obserr[ich238][iloc]) *
-                                       (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
-          if (dbtde314 != 0.0) de314 = std::abs(innov[ich314][iloc]) / dbtde314 *
-                                       (obserr0[ich314] / obserr[ich314][iloc]) *
-                                       (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
-          if (dbtde503 != 0.0) de503 = std::abs(innov[ich503][iloc]) / dbtde503 *
-                                       (obserr0[ich503] / obserr[ich503][iloc]) *
-                                       (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
-          if (dbtde890 != 0.0) de890 = std::abs(innov[ich890][iloc]) / dbtde890 *
-                                       (obserr0[ich890] / obserr[ich890][iloc]) *
-                                       (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
-          bool qcemiss = false;
-          qcemiss = de238 > thrd238 || de314 > thrd314 || de503 > thrd503 || de890 > thrd890;
-          if (qcemiss) {
-            for (size_t ich = ich238; ich <= ich536; ++ich) {
-              affected_channels[ich][iloc] = 1;
-            }
-            affected_channels[ich890][iloc] = 1;
-            for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-              affected_channels[ich][iloc] = 1;
-            }
-          }
-        }
+      // Sensitivity of BT to the surface emissivity check
       } else {
-        // Hydrometeor check over non-water (land/sea ice/snow) surface
-        // Precipitation check (factch6)
-        if (factch6 >= 1.0 || luse == false) {
-          for (size_t ich = ich238; ich <= ich544; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-          affected_channels[ich890][iloc] = 1;
-          for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-            affected_channels[ich][iloc] = 1;
-          }
-        // Thick cloud check (factch4)
-        } else if (factch4 > 0.5) {
+        float thrd238 = 0.025, thrd314 = 0.015, thrd503 = 0.030, thrd890 = 0.030;
+        float de238 = 0.0, de314 = 0.0, de503 = 0.0, de890 = 0.0;
+        float dbtde238 = dbtde[ich238][iloc];
+        float dbtde314 = dbtde[ich314][iloc];
+        float dbtde503 = dbtde[ich503][iloc];
+        float dbtde890 = dbtde[ich890][iloc];
+        if (dbtde238 != 0.0) de238 = std::abs(innov[ich238][iloc]) / dbtde238 *
+                                     (obserr0[ich238] / obserr[ich238][iloc]) *
+                                     (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
+        if (dbtde314 != 0.0) de314 = std::abs(innov[ich314][iloc]) / dbtde314 *
+                                     (obserr0[ich314] / obserr[ich314][iloc]) *
+                                     (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
+        if (dbtde503 != 0.0) de503 = std::abs(innov[ich503][iloc]) / dbtde503 *
+                                     (obserr0[ich503] / obserr[ich503][iloc]) *
+                                     (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
+        if (dbtde890 != 0.0) de890 = std::abs(innov[ich890][iloc]) / dbtde890 *
+                                     (obserr0[ich890] / obserr[ich890][iloc]) *
+                                     (1.0 - std::max(1.0, 10.0*clwobs[0][iloc]));
+        bool qcemiss = false;
+        qcemiss = de238 > thrd238 || de314 > thrd314 || de503 > thrd503 || de890 > thrd890;
+        if (qcemiss) {
           for (size_t ich = ich238; ich <= ich536; ++ich) {
             affected_channels[ich][iloc] = 1;
           }
@@ -330,33 +287,53 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
           for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
             affected_channels[ich][iloc] = 1;
           }
-        // Sensitivity of BT to the surface emissivity check
-        } else {
-          float thrd238 = 0.020, thrd314 = 0.015, thrd503 = 0.035, thrd890 = 0.015;
-          float de238 = 0.0, de314 = 0.0, de503 = 0.0, de890 = 0.0;
-          float dbtde238 = dbtde[ich238][iloc];
-          float dbtde314 = dbtde[ich314][iloc];
-          float dbtde503 = dbtde[ich503][iloc];
-          float dbtde890 = dbtde[ich890][iloc];
-          if (dbtde238 != 0.0) de238 = std::abs(innov[ich238][iloc]) / dbtde238;
-          if (dbtde314 != 0.0) de314 = std::abs(innov[ich314][iloc]) / dbtde314;
-          if (dbtde503 != 0.0) de503 = std::abs(innov[ich503][iloc]) / dbtde503;
-          if (dbtde890 != 0.0) de890 = std::abs(innov[ich890][iloc]) / dbtde890;
-          bool qcemiss = false;
-          qcemiss = de238 > thrd238 || de314 > thrd314 || de503 > thrd503 || de890 > thrd890;
-          if (qcemiss) {
-            for (size_t ich = ich238; ich <= ich536; ++ich) {
-              affected_channels[ich][iloc] = 1;
-            }
-            affected_channels[ich890][iloc] = 1;
-            for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
-              affected_channels[ich][iloc] = 1;
-            }
+        }
+      }
+    } else {
+      // Hydrometeor check over non-water (land/sea ice/snow) surface
+      // Precipitation check (factch6)
+      if (factch6 >= 1.0 || luse == false) {
+        for (size_t ich = ich238; ich <= ich544; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+        affected_channels[ich890][iloc] = 1;
+        for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+      // Thick cloud check (factch4)
+      } else if (factch4 > 0.5) {
+        for (size_t ich = ich238; ich <= ich536; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+        affected_channels[ich890][iloc] = 1;
+        for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+          affected_channels[ich][iloc] = 1;
+        }
+      // Sensitivity of BT to the surface emissivity check
+      } else {
+        float thrd238 = 0.020, thrd314 = 0.015, thrd503 = 0.035, thrd890 = 0.015;
+        float de238 = 0.0, de314 = 0.0, de503 = 0.0, de890 = 0.0;
+        float dbtde238 = dbtde[ich238][iloc];
+        float dbtde314 = dbtde[ich314][iloc];
+        float dbtde503 = dbtde[ich503][iloc];
+        float dbtde890 = dbtde[ich890][iloc];
+        if (dbtde238 != 0.0) de238 = std::abs(innov[ich238][iloc]) / dbtde238;
+        if (dbtde314 != 0.0) de314 = std::abs(innov[ich314][iloc]) / dbtde314;
+        if (dbtde503 != 0.0) de503 = std::abs(innov[ich503][iloc]) / dbtde503;
+        if (dbtde890 != 0.0) de890 = std::abs(innov[ich890][iloc]) / dbtde890;
+        bool qcemiss = false;
+        qcemiss = de238 > thrd238 || de314 > thrd314 || de503 > thrd503 || de890 > thrd890;
+        if (qcemiss) {
+          for (size_t ich = ich238; ich <= ich536; ++ich) {
+            affected_channels[ich][iloc] = 1;
+          }
+          affected_channels[ich890][iloc] = 1;
+          for (size_t ich = ich1650; ich <= ich1830e; ++ich) {
+            affected_channels[ich][iloc] = 1;
           }
         }
-      // surface type
       }
-    // window channel sanity check
+    // surface type
     }
   // loop over locations
   }

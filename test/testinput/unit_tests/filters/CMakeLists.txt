@@ -894,7 +894,6 @@ if( crtm_FOUND )
                   LIBS    ufo
                   LABELS  crtm filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-
 #
     ufo_add_test( NAME    test_ufo_atms_n20_qc_filters_geos
                   TIER    1

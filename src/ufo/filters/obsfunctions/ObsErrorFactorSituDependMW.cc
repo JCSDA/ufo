@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -75,6 +76,11 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
 
   const Variable &clwmatchidx = options_.clwmatchidxFunction.value();
   invars_ += clwmatchidx;
+
+  if (options_.obserrFunction.value() != boost::none) {
+    const boost::optional<Variable> &obserrvar = options_.obserrFunction.value();
+    invars_ += *obserrvar;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -124,20 +130,11 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   ioda::ObsDataVector<float> clwmatchidx(in.obsspace(), clwmatchidxvar.toOopsVariables());
   in.get(clwmatchidxvar, clwmatchidx);
 
-  // Get Original Observation Error (if ObsError is filled up with missing values, replace it)
-  std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
-  const float missing = util::missingValue<float>();
-  for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
-    for (size_t iloc = 0; iloc < nlocs; iloc++) {
-      if (obserr0[ichan][iloc] == missing) obserr0[ichan][iloc] = obserr_clr[ichan];
-    }
-  }
-
   // Get ObsErrorData (obs error from previous QC step) and convert to inverse of error variance
   std::vector<std::vector<float>> varinv(nchans, std::vector<float>(nlocs));
   std::vector<float> obserrdata;
   std::vector<int> qcflagdata;
+  const float missing = util::missingValue<float>();
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
     in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
@@ -180,28 +177,73 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
     ich544 = 7, ich549 = 8, ich890 = 16;
   }
 
-  // Calculate error factors (error_factors) for each channel
-  // Loop through locations
-  for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    for (size_t ichan = 0; ichan < nchans; ++ichan) out[ichan][iloc] = 1.0;
-    if (water_frac[iloc] >= 0.99) {
-      float icol = 1.0;
-      for (size_t ichan = 0; ichan < nchans; ++ichan) icol = icol * clwmatchidx[ichan][iloc];
-      for (size_t ichan = 0; ichan < nchans; ++ichan) {
-        size_t channel = ichan + 1;
-        if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
-          float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
-          term = term + std::min(0.002 * pow(surface_wind_speed[iloc], 2) * obserr0[ichan][iloc],
-                                 0.5 * obserr0[ichan][iloc]);
-          float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
-          term = term + std::min(13.0 * clwtmp * obserr0[ichan][iloc], 3.5 * obserr0[ichan][iloc]);
-          if (scatobs[0][iloc] > 9.0) {
-            term = term + std::min(1.5 * (scatobs[0][iloc] - 9.0) * obserr0[ichan][iloc],
-                                   2.5 * obserr0[ichan][iloc]);
+  // Get Original Observation Error from ObsFunction
+  std::unique_ptr<ioda::ObsDataVector<float>> obserr0;
+  if (options_.obserrFunction.value() != boost::none) {
+    const boost::optional<Variable> &obserrvar = options_.obserrFunction.value();
+    obserr0.reset(new ioda::ObsDataVector<float>(in.obsspace(),
+                 (*obserrvar).toOopsVariables()));
+    in.get(*obserrvar, *obserr0);
+    // Calculate error factors (error_factors) for each channel
+    // Loop through locations
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      for (size_t ichan = 0; ichan < nchans; ++ichan) out[ichan][iloc] = 1.0;
+      if (water_frac[iloc] >= 0.99) {
+        float icol = 1.0;
+        for (size_t ichan = 0; ichan < nchans; ++ichan) icol = icol * clwmatchidx[ichan][iloc];
+        for (size_t ichan = 0; ichan < nchans; ++ichan) {
+          size_t channel = ichan + 1;
+          if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
+            float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
+            term = term + std::min(0.002 * pow(surface_wind_speed[iloc], 2) *
+                          (*obserr0)[ichan][iloc], 0.5 * (*obserr0)[ichan][iloc]);
+            float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
+            term = term + std::min(13.0 * clwtmp * (*obserr0)[ichan][iloc], 3.5 *
+                          (*obserr0)[ichan][iloc]);
+            if (scatobs[0][iloc] > 9.0) {
+              term = term + std::min(1.5 * (scatobs[0][iloc] - 9.0) * (*obserr0)[ichan][iloc],
+                                     2.5 * (*obserr0)[ichan][iloc]);
+            }
+            term = pow(term, 2.0);
+            out[ichan][iloc] = 1.0 / (1.0 + varinv[ichan][iloc] * term);
+            out[ichan][iloc] = sqrt(1.0 / out[ichan][iloc]);
           }
-          term = pow(term, 2.0);
-          out[ichan][iloc] = 1.0 / (1.0 + varinv[ichan][iloc] * term);
-          out[ichan][iloc] = sqrt(1.0 / out[ichan][iloc]);
+        }
+      }
+    }
+  } else {
+    std::vector<std::vector<float>> obserr0(nchans, std::vector<float>(nlocs));
+    // Get Original Observation Error (if ObsError is filled up with missing values, replace it)
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr0[ichan]);
+      for (size_t iloc = 0; iloc < nlocs; iloc++) {
+        if (obserr0[ichan][iloc] == missing) obserr0[ichan][iloc] = obserr_clr[ichan];
+      }
+    }
+    // Calculate error factors (error_factors) for each channel
+    // Loop through locations
+    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+      for (size_t ichan = 0; ichan < nchans; ++ichan) out[ichan][iloc] = 1.0;
+      if (water_frac[iloc] >= 0.99) {
+        float icol = 1.0;
+        for (size_t ichan = 0; ichan < nchans; ++ichan) icol = icol * clwmatchidx[ichan][iloc];
+        for (size_t ichan = 0; ichan < nchans; ++ichan) {
+          size_t channel = ichan + 1;
+          if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
+            float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
+            term = term + std::min(0.002 * pow(surface_wind_speed[iloc], 2) *
+                          obserr0[ichan][iloc], 0.5 * obserr0[ichan][iloc]);
+            float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
+            term = term + std::min(13.0 * clwtmp * obserr0[ichan][iloc], 3.5 *
+                          obserr0[ichan][iloc]);
+            if (scatobs[0][iloc] > 9.0) {
+              term = term + std::min(1.5 * (scatobs[0][iloc] - 9.0) * obserr0[ichan][iloc],
+                                     2.5 * obserr0[ichan][iloc]);
+            }
+            term = pow(term, 2.0);
+            out[ichan][iloc] = 1.0 / (1.0 + varinv[ichan][iloc] * term);
+            out[ichan][iloc] = sqrt(1.0 / out[ichan][iloc]);
+          }
         }
       }
     }

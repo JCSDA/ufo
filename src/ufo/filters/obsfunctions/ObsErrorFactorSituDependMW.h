@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -50,6 +51,9 @@ class ObsErrorFactorSituDependMWParameters : public oops::Parameters {
   /// Function to get the cloud match index based on cloud amount retrieved from
   /// background and observation
   oops::RequiredParameter<Variable> clwmatchidxFunction{"clwmatchidx_function", this};
+
+  /// Function used to estimate observation error based on symmetric cloud amount
+  oops::OptionalParameter<Variable> obserrFunction{"obserr_function", this};
 
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
