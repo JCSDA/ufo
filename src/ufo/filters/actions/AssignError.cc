@@ -63,7 +63,6 @@ void AssignError::apply(const Variables & vars,
     float error = *parameters_.errorParameter.value();
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
-      size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
         if (mask[jv][jobs] && error != missing) {
             obserr[iv][jobs] = error;
@@ -75,10 +74,9 @@ void AssignError::apply(const Variables & vars,
     std::vector<float> errorvector = *parameters_.errorParameterVector.value();
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
-      size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
-        if (mask[jv][jobs] && errorvector[iv] != missing) {
-          obserr[iv][jobs] = errorvector[iv];
+        if (mask[jv][jobs] && errorvector[jv] != missing) {
+          obserr[iv][jobs] = errorvector[jv];
         }
       }
     }
@@ -103,7 +101,6 @@ void AssignError::apply(const Variables & vars,
     for (size_t jv = 0; jv < vars.nvars(); ++jv) {
       // find current variable index in obserr
       size_t iv = obserr.varnames().find(vars.variable(jv).variable());
-      size_t kv = qcFlags.varnames().find(vars.variable(jv).variable());
       for (size_t jobs = 0; jobs < obserr.nlocs(); ++jobs) {
         if (mask[jv][jobs] && errors[error_jv[jv]][jobs] != missing) {
            obserr[iv][jobs] = errors[error_jv[jv]][jobs];

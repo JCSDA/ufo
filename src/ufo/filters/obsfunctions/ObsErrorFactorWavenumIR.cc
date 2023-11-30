@@ -58,6 +58,9 @@ ObsErrorFactorWavenumIR::~ObsErrorFactorWavenumIR() {}
 
 void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  // Get obs space
+  auto & obsdb_ = in.obsspace();
+
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
@@ -72,8 +75,21 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
   in.get(Variable("MetaData/solarZenithAngle"), solza);
 
   // Get sensor band central radiation wavenumber
-  std::vector<float> wavenumber(nchans);
-  in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
+  std::vector<float> wavenumber;
+  if (obsdb_.getObsGroup().vars.exists("MetaData/sensorCentralWavenumber")) {
+    std::vector<float> buf;
+    obsdb_.getObsGroup().vars["MetaData/sensorCentralWavenumber"].read<float>(buf);
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      wavenumber.push_back(buf[ichan]);
+    }
+  } else {
+    ioda::ObsDataVector<float> buf(obsdb_, Variable("MetaData/sensorCentralWavenumber", channels_).
+                               toOopsVariables());
+    in.get(Variable("MetaData/sensorCentralWavenumber", channels_), buf);
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      wavenumber.push_back(buf[ichan][0]);
+    }
+  }
 
   // Inflate obs error for wavenumber in the range of (200000, 240000]
   // during daytime over water surface as a function of wavenumber (1/m),

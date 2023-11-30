@@ -70,6 +70,9 @@ NearSSTRetCheckIR::~NearSSTRetCheckIR() {}
 void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   oops::Log::trace() << "NearSSTRetCheckIR::compute start" << std::endl;
+  // Get obs space
+  auto & obsdb_ = in.obsspace();
+
   // Get channel usage information from options
   std::vector<int> use_flag = options_.useflagChannel.value();
 
@@ -120,10 +123,22 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     }
   }
 
-  // Get variables from ObsSpace
-  // Get sensor band central radiation wavenumber
-  std::vector<float> wavenumber(nchans);
-  in.obsspace().get_db("MetaData", "sensorCentralWavenumber", wavenumber);
+  // Get sensor central wavenumber
+  std::vector<float> wavenumber;
+  if (obsdb_.getObsGroup().vars.exists("MetaData/sensorCentralWavenumber")) {
+    std::vector<float> buf;
+    obsdb_.getObsGroup().vars["MetaData/sensorCentralWavenumber"].read<float>(buf);
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      wavenumber.push_back(buf[ichan]);
+    }
+  } else {
+    ioda::ObsDataVector<float> buf(obsdb_, Variable("MetaData/sensorCentralWavenumber", channels_).
+                               toOopsVariables());
+    in.get(Variable("MetaData/sensorCentralWavenumber", channels_), buf);
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      wavenumber.push_back(buf[ichan][0]);
+    }
+  }
 
   // Get effective observation error and convert it to inverse of the error variance
   const float missing = util::missingValue<float>();
