@@ -271,7 +271,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     // Retrieve the QC flags of the current outer loop and recalculate the number of
     // effective obs
     const std::string qc_group_name = "EffectiveQC" + std::to_string(jouter);
-    const std::vector<std::string> vars = odb_.obsvariables().variables();
+    const std::vector<std::string> vars = odb_.assimvariables().variables();
     std::vector<int> qc_flags(odb_.nlocs(), 999);
     for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
       if (odb_.has(qc_group_name, vars[jvar])) {
