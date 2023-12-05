@@ -22,7 +22,7 @@ module ufo_radiancecrtm_mod
  use ufo_crtm_utils_mod
  use ufo_crtm_passive_mod
  use ufo_crtm_active_mod
- 
+
  use ufo_constants_mod, only: deg2rad
 
  implicit none
@@ -583,31 +583,32 @@ character(len=1) :: angle_hf
    ! put CRTM output into hofxdiags
    if (SC(n)%Is_Active_Sensor) then
       call ufo_crtm_active_sim(rts, &
+                               Options, &
+                               nvars, &
+                               nlocs, &
+                               n_Profiles, &
+                               n_Channels, &
+                               hofx)
+      call ufo_crtm_active_diag(rts, &
+                                rts_K, &
+                                atm, &
+                                atm_K, &
+                                sfc_K, &
+                                self%conf, &
+                                n, &
                                 Options, &
+                                self%channels, &
+                                geovals, &
+                                obss, &
                                 nvars, &
                                 nlocs, &
                                 n_Profiles, &
-                                n_Channels, &
-                                hofx)
-      call ufo_crtm_active_diag(rts, & 
-                                 rts_K, &
-                                 atm, &
-                                 atm_K, &
-                                 sfc_K, &
-                                 self%conf, &
-                                 Options, &
-                                 self%channels, &
-                                 geovals, &
-                                 obss, &
-                                 nvars, &
-                                 nlocs, &
-                                 n_Profiles, &
-                                 n_Layers, &
-                                 xstr_diags, &
-                                 ystr_diags, &
-                                 ch_diags, &
-                                 hofxdiags,&
-                                  err_stat)
+                                n_Layers, &
+                                xstr_diags, &
+                                ystr_diags, &
+                                ch_diags, &
+                                hofxdiags,&
+                                err_stat)
    else
       call ufo_crtm_passive_sim(rts, &
                                 Options, &
@@ -617,12 +618,13 @@ character(len=1) :: angle_hf
                                 n_Channels, &
                                 hofx)
 
-      call ufo_crtm_passive_diag(rts, & 
+      call ufo_crtm_passive_diag(rts, &
                                  rts_K, &
                                  atm, &
                                  atm_K, &
                                  sfc_K, &
                                  self%conf, &
+                                 n, &
                                  Options, &
                                  self%channels, &
                                  geovals, &
@@ -635,7 +637,7 @@ character(len=1) :: angle_hf
                                  ystr_diags, &
                                  ch_diags, &
                                  hofxdiags,&
-                                  err_stat)
+                                 err_stat)
    end if
 
    ! check for error from either passive or active

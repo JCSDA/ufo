@@ -63,12 +63,12 @@ do m = 1, n_Profiles
       end do
    end if
 end do
- 
+
 
 end subroutine ufo_crtm_active_sim
 
 
-subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
+subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use ufo_utils_mod,      only: cmp_strings
 
@@ -89,6 +89,7 @@ type(CRTM_Options_type),   intent(in) :: Options(:)
 character(len=MAXVARLEN), dimension(:), intent(in) :: &
                           ystr_diags, xstr_diags
 integer, intent(in) :: ch_diags(:)
+integer, intent(in) :: n_Sensor
 integer, intent(out)  :: err_stat
 
 ! Local Variables
@@ -97,7 +98,6 @@ integer, intent(out)  :: err_stat
 character(max_string) :: err_msg
 !integer        :: err_stat, alloc_stat
 !integer        :: l, m, n
-integer :: n
 integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 real(c_double) :: missing
 real(kind_real) :: total_od, secant_term, wfunc_max
@@ -107,7 +107,7 @@ real(kind_real), allocatable :: Wfunc(:)
 
 ! Put simulated diagnostics into hofxdiags
 ! We need to call the routines for passive instrument as well when dealing with active obs
-call ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
+call ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
 
 ! ----------------------------------------------
 do jvar = 1, hofxdiags%nvar
@@ -163,7 +163,7 @@ do jvar = 1, hofxdiags%nvar
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         rts(jchannel,jprofile) % Reflectivity_Attenuated(jlevel)
-                  end do 
+                  end do
                end if
             end do
 

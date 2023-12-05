@@ -61,12 +61,12 @@ do m = 1, n_Profiles
       end do
    end if
 end do
- 
+
 
 end subroutine ufo_crtm_passive_sim
 
 
-subroutine ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
+subroutine ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use ufo_utils_mod,      only: cmp_strings
 
@@ -87,6 +87,7 @@ type(CRTM_Options_type),   intent(in) :: Options(:)
 character(len=MAXVARLEN), dimension(:), intent(in) :: &
                           ystr_diags, xstr_diags
 integer, intent(in) :: ch_diags(:)
+integer, intent(in) :: n_Sensor
 integer, intent(out) :: err_stat
 
 ! Local Variables
@@ -95,7 +96,6 @@ integer, intent(out) :: err_stat
 character(max_string) :: err_msg
 !integer        :: err_stat, alloc_stat
 !integer        :: l, m, n
-integer :: n
 integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 real(c_double) :: missing
 real(kind_real) :: total_od, secant_term, wfunc_max
@@ -136,7 +136,7 @@ do jvar = 1, hofxdiags%nvar
       deallocate(hofxdiags%geovals(jvar)%vals)
 
    angle_hf=achar(0)
-   if (cmp_strings(conf%SENSOR_ID(n),'gmi_gpm')) then
+   if (cmp_strings(conf%SENSOR_ID(n_Sensor),'gmi_gpm')) then
       if (ch_diags(jvar) > 9) then
          angle_hf="1"
       endif
@@ -180,11 +180,11 @@ do jvar = 1, hofxdiags%nvar
             hofxdiags%geovals(jvar)%vals = missing
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  ! Note: Using Tb_Clear requires CRTM_Atmosphere_IsFractional(cloud_coverage_flag) 
-                  ! to be true. For CRTM v2.3.0, that happens when 
+                  ! Note: Using Tb_Clear requires CRTM_Atmosphere_IsFractional(cloud_coverage_flag)
+                  ! to be true. For CRTM v2.3.0, that happens when
                   ! atm(jprofile)%Cloud_Fraction > MIN_COVERAGE_THRESHOLD (1e.-6)
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Tb_Clear 
+                     rts(jchannel,jprofile) % Tb_Clear
                end if
             end do
 
@@ -196,7 +196,7 @@ do jvar = 1, hofxdiags%nvar
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Brightness_Temperature 
+                     rts(jchannel,jprofile) % Brightness_Temperature
                end if
             end do
 
@@ -238,7 +238,7 @@ do jvar = 1, hofxdiags%nvar
                      total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                      Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                   end do
-                  ! get weighting function 
+                  ! get weighting function
                   do jlevel = n_Layers-1, 1, -1
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -246,7 +246,7 @@ do jvar = 1, hofxdiags%nvar
                               log(atm(jprofile)%pressure(jlevel))) )
                   end do
                   hofxdiags%geovals(jvar)%vals(n_Layers,jprofile) = &
-                  hofxdiags%geovals(jvar)%vals(n_Layers-1,jprofile) 
+                  hofxdiags%geovals(jvar)%vals(n_Layers-1,jprofile)
                end if
             end do
             deallocate(TmpVar)
@@ -270,7 +270,7 @@ do jvar = 1, hofxdiags%nvar
                      total_od = total_od + rts(jchannel,jprofile) % layer_optical_depth(jlevel)
                      Tao(jlevel) = exp(-min(limit_exp,total_od*secant_term))
                   end do
-                  ! get weighting function 
+                  ! get weighting function
                   do jlevel = n_Layers-1, 1, -1
                      Wfunc(jlevel) = &
                         abs( (Tao(jlevel+1)-Tao(jlevel))/ &
@@ -279,13 +279,13 @@ do jvar = 1, hofxdiags%nvar
                   end do
                   Wfunc(n_Layers) = Wfunc(n_Layers-1)
                   ! get pressure level at the peak of the weighting function
-                  wfunc_max = -999.0 
+                  wfunc_max = -999.0
                   do jlevel = n_Layers-1, 1, -1
-                     if (Wfunc(jlevel) > wfunc_max) then 
+                     if (Wfunc(jlevel) > wfunc_max) then
                         wfunc_max = Wfunc(jlevel)
-                        hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel 
+                        hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel
                      endif
-                  enddo 
+                  enddo
                end if
             end do
             deallocate(TmpVar)

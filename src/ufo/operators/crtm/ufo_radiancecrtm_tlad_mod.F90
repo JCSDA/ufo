@@ -23,7 +23,7 @@ module ufo_radiancecrtm_tlad_mod
 
  use ufo_constants_mod, only: deg2rad
  use ufo_crtm_passive_mod
- use ufo_crtm_active_mod 
+ use ufo_crtm_active_mod
 
  implicit none
  private
@@ -473,32 +473,34 @@ integer(c_size_t) :: nvars, nlocs
    nlocs = geovals%nlocs
    ! put CRTM output into hofxdiags
    if (SC(n)%Is_Active_Sensor) then
-      call ufo_crtm_active_diag(rts, & 
-                                 rts_K, &
-                                 atm, &
-                                 self%atm_K, &
-                                 self%sfc_K, &
-                                 self%conf, &
-                                 self%Options, &
-                                 self%channels, &
-                                 geovals, &
-                                 obss, &
-                                 nvars, &
-                                 nlocs, &
-                                 self%n_Profiles, &
-                                 self%n_Layers, &
-                                 xstr_diags, &
-                                 ystr_diags, &
-                                 ch_diags, &
-                                 hofxdiags,&
-                                 err_stat)
+      call ufo_crtm_active_diag(rts, &
+                                rts_K, &
+                                atm, &
+                                self%atm_K, &
+                                self%sfc_K, &
+                                self%conf, &
+                                n, &
+                                self%Options, &
+                                self%channels, &
+                                geovals, &
+                                obss, &
+                                nvars, &
+                                nlocs, &
+                                self%n_Profiles, &
+                                self%n_Layers, &
+                                xstr_diags, &
+                                ystr_diags, &
+                                ch_diags, &
+                                hofxdiags,&
+                                err_stat)
    else
-      call ufo_crtm_passive_diag(rts, & 
+      call ufo_crtm_passive_diag(rts, &
                                  rts_K, &
                                  atm, &
                                  self%atm_K, &
                                  self%sfc_K, &
                                  self%conf, &
+                                 n, &
                                  self%Options, &
                                  self%channels, &
                                  geovals, &
