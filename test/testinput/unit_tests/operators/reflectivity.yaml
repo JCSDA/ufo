@@ -1,5 +1,6 @@
-window begin: 2019-05-22T21:55:00Z
-window end: 2019-05-22T22:05:00Z
+time window:
+  begin: 2019-05-22T21:55:00Z
+  end: 2019-05-22T22:05:00Z
 
 observations:
 - obs operator:

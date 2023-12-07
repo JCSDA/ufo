@@ -1,5 +1,6 @@
-window begin: 2021-07-01T11:29:59Z
-window end: 2021-07-01T12:29:59Z
+time window:
+  begin: 2021-07-01T11:29:59Z
+  end: 2021-07-01T12:29:59Z
 
 observations:
 - obs space: &obsspace

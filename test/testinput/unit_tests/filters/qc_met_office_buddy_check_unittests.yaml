@@ -3,8 +3,9 @@
 #   values produced by the Met Office OPS system
 # - test both damping_factor_* parameters (which is not done elsewhere).
 Pair of observations:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [air_temperature, eastward_wind, northward_wind]

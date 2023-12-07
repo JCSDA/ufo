@@ -1,6 +1,7 @@
 No thinning:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -22,8 +23,9 @@ No thinning:
   expected_thinned_obs_indices: []
 
 Horizontal thinning, min spacing smaller than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -51,8 +53,9 @@ Horizontal thinning, min spacing smaller than nearest neighbor spacing:
                                  72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Horizontal thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -81,8 +84,9 @@ Horizontal thinning, min spacing larger than nearest neighbor spacing:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Horizontal thinning with median selection, min spacing smaller than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Satellite SST
     obsdatain:
@@ -106,8 +110,9 @@ Horizontal thinning with median selection, min spacing smaller than nearest neig
                                   70, 71, 72, 73, 75, 76, 77, 78, 80  ]
 
 Horizontal thinning with median selection, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Satellite SST
     obsdatain:
@@ -132,8 +137,9 @@ Horizontal thinning with median selection, min spacing larger than nearest neigh
                                   77, 78, 79, 80                      ]
 
 Vertical thinning, min spacing smaller than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -162,8 +168,9 @@ Vertical thinning, min spacing smaller than nearest neighbor spacing:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Vertical thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -192,8 +199,9 @@ Vertical thinning, min spacing larger than nearest neighbor spacing:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Vertical thinning, where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -223,8 +231,9 @@ Vertical thinning, where clause:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Time thinning, min spacing equal to nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -253,8 +262,9 @@ Time thinning, min spacing equal to nearest neighbor spacing:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Time thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -283,8 +293,9 @@ Time thinning, min spacing larger than nearest neighbor spacing:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Horizontal and vertical thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -314,8 +325,9 @@ Horizontal and vertical thinning, min spacing larger than nearest neighbor spaci
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Horizontal and time thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -345,8 +357,9 @@ Horizontal and time thinning, min spacing larger than nearest neighbor spacing:
                                   72, 73, 74, 75, 76, 77, 78, 79, 80]
 
 Vertical and time thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -376,8 +389,9 @@ Vertical and time thinning, min spacing larger than nearest neighbor spacing:
                                       73, 74, 75, 76, 77, 78, 79, 80]
 
 Horizontal, vertical and time thinning, min spacing larger than nearest neighbor spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     obsdatain:
@@ -408,8 +422,9 @@ Horizontal, vertical and time thinning, min spacing larger than nearest neighbor
                                       73,     75,     77,     79    ]
 
 Priorities:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -435,8 +450,9 @@ Priorities:
   expected_thinned_obs_indices: [ 0, 2, 4 ]
 
 Int-valued categories:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -462,8 +478,9 @@ Int-valued categories:
   expected_thinned_obs_indices: [ 2, 3 ]
 
 String-valued categories:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -489,8 +506,9 @@ String-valued categories:
   expected_thinned_obs_indices: [ 2, 3 ]
 
 Variable min spacings:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -518,8 +536,9 @@ Variable min spacings:
   expected_thinned_obs_indices: [ 0, 1, 3, 4, 7, 9 ]
 
 Variable min spacings, shuffling:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -548,8 +567,9 @@ Variable min spacings, shuffling:
   expected_thinned_obs_indices: [ 0, 1, 3, 4, 6, 8, 10]
 
 Cylindrical exclusion volumes:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -573,8 +593,9 @@ Cylindrical exclusion volumes:
   expected_thinned_obs_indices: [1, 2, 4]
 
 Ellipsoidal exclusion volumes:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -598,8 +619,9 @@ Ellipsoidal exclusion volumes:
   expected_thinned_obs_indices: [1, 3]
 
 Incorrectly ordered min horizontal spacings:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -624,8 +646,9 @@ Incorrectly ordered min horizontal spacings:
   expected_thinned_obs_indices: [ 1, 2 ]
 
 Incorrectly ordered min vertical spacings:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -650,8 +673,9 @@ Incorrectly ordered min vertical spacings:
   expected_thinned_obs_indices: [ 1, 2 ]
 
 Incorrectly ordered min time spacings:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]

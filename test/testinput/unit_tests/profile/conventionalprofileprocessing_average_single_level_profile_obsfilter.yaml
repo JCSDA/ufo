@@ -4,8 +4,9 @@
 # In each case a profile with a single observation is processed.
 # The averaging is not performed, and the averaged profile is filled with missing values.
 
-window begin: 2019-06-14T20:30:00Z
-window end: 2019-06-15T03:30:00Z
+time window:
+  begin: 2019-06-14T20:30:00Z
+  end: 2019-06-15T03:30:00Z
 
 observations:
 # Temperature

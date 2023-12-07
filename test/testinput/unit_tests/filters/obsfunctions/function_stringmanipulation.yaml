@@ -1,5 +1,6 @@
-window begin: 2020-05-11T02:59:59Z  # Shifted back by 1 s to include obs taken at 03:00:00
-window end: 2020-05-11T09:00:00Z
+time window:
+  begin: 2020-05-11T02:59:59Z  # Shifted back by 1 s to include obs taken at 03:00:00
+  end: 2020-05-11T09:00:00Z
 
 observations:
 - obs space:

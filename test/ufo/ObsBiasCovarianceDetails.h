@@ -35,9 +35,7 @@ void testObsBiasCovarianceDetails() {
   eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 
   //  Setup ObsSpace
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
-  const util::TimeWindow timeWindow(bgn, end);
+  const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
   std::vector<eckit::LocalConfiguration> obsconfs
     = conf.getSubConfigurations("observations");
 

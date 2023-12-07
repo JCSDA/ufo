@@ -1,9 +1,10 @@
 # Compute profile horizontal drift using the 'keep in window' option.
-# The window end time is set to T01:23:20Z as opposed to the usual T03:00:00Z.
+# The   end time is set to T01:23:20Z as opposed to the usual T03:00:00Z.
 # The test reference dateTime is changed accordingly; around 30 dates are modified.
 
-window begin: 2019-06-14T21:00:00Z
-window end: 2019-06-15T01:23:20Z
+time window:
+  begin: 2019-06-14T21:00:00Z
+  end: 2019-06-15T01:23:20Z
 
 observations:
 - obs space:

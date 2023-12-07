@@ -1,6 +1,7 @@
 Horizontal mesh 20000:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -20,8 +21,9 @@ Horizontal mesh 20000:
   expected_thinned_obs_indices: [1, 2, 3]
 
 Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -41,8 +43,9 @@ Horizontal mesh 20000, extreme longitudes, 0 to 360 degrees:
   expected_thinned_obs_indices: [0, 2, 3, 5]
 
 Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -62,8 +65,9 @@ Horizontal mesh 20000, extreme longitudes, -180 to 180 degrees:
   expected_thinned_obs_indices: [0, 2, 3, 5]
 
 Horizontal mesh 20000, extreme latitudes:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -83,8 +87,9 @@ Horizontal mesh 20000, extreme latitudes:
   expected_thinned_obs_indices: [0, 1, 3, 4]
 
 Horizontal mesh 10000:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -105,8 +110,9 @@ Horizontal mesh 10000:
   expected_thinned_obs_indices: [0, 1, 4, 5, 7, 8]
 
 Vertical mesh, single bin:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -130,8 +136,9 @@ Vertical mesh, single bin:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 6, 7]
 
 Vertical mesh, two bins:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -155,8 +162,9 @@ Vertical mesh, two bins:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Vertical mesh, two bins, all observations in single bin:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -180,8 +188,9 @@ Vertical mesh, two bins, all observations in single bin:
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 6, 7]
 
 Thinning in time, single bin:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -206,8 +215,9 @@ Thinning in time, single bin:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 6, 7]
 
 Thinning in time, two bins:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -232,8 +242,9 @@ Thinning in time, two bins:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Thinning in time, two bins, all observations in single bin:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -257,8 +268,9 @@ Thinning in time, two bins, all observations in single bin:
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 6, 7]
 
 Vertical mesh, two bins, single category:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -285,8 +297,9 @@ Vertical mesh, two bins, single category:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Vertical mesh, two bins, two categories:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -313,8 +326,9 @@ Vertical mesh, two bins, two categories:
   expected_thinned_obs_indices: [1, 3, 5, 7]
 
 Vertical mesh, two bins, two categories, where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -345,8 +359,9 @@ Vertical mesh, two bins, two categories, where clause:
   expected_thinned_obs_indices: [1, 3]
 
 Vertical mesh, two bins, two string-valued categories, where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -377,8 +392,9 @@ Vertical mesh, two bins, two string-valued categories, where clause:
   expected_thinned_obs_indices: [1, 3]
 
 Vertical mesh, two bins, equal priorities:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -405,8 +421,9 @@ Vertical mesh, two bins, equal priorities:
   expected_thinned_obs_indices: [0, 1, 2, 3, 5, 7]
 
 Vertical mesh, two bins, nonequal priorities:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -433,8 +450,9 @@ Vertical mesh, two bins, nonequal priorities:
   expected_thinned_obs_indices: [1, 2, 3, 4, 5, 7]
 
 Vertical mesh, single bin, nonequal priorities, where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -465,8 +483,9 @@ Vertical mesh, single bin, nonequal priorities, where clause:
   expected_thinned_obs_indices: [1, 3, 6]
 
 Vertical mesh, single bin, two categories, nonequal priorities, where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -503,8 +522,9 @@ Vertical mesh, single bin, two categories, nonequal priorities, where clause:
   expected_thinned_obs_indices: [1, 3, 6, 9, 12, 14]
 
 ops_compatibility_mode but round_horizontal_bin_count_to_nearest = false:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -524,8 +544,9 @@ ops_compatibility_mode but round_horizontal_bin_count_to_nearest = false:
   on_deserialization_expect_exception_with_message: round_horizontal_bin_count_to_nearest must not be set to false when ops_compatibility_mode is set to true
 
 ops_compatibility_mode but distance_norm = geodesic:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -545,8 +566,9 @@ ops_compatibility_mode but distance_norm = geodesic:
   on_deserialization_expect_exception_with_message: distance_norm must not be set to 'geodesic' when ops_compatibility_mode is set to true
 
 Thinning in time, obs in single bin, records are single obs:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -577,8 +599,9 @@ Thinning in time, obs in single bin, records are single obs:
   expected_thinned_obs_indices: [4, 5, 6]
 
 Thinning in time, obs in single bin, records are single obs, no priority:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -606,8 +629,9 @@ Thinning in time, obs in single bin, records are single obs, no priority:
   expected_thinned_obs_indices: [0, 1, 2, 3]
 
 Thinning in time, obs in single bin, records are single obs, category variable set:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -640,8 +664,9 @@ Thinning in time, obs in single bin, records are single obs, category variable s
   expected_thinned_obs_indices: [0, 1, 6, 7]
 
 Thinning in time, obs in single bin, records are single obs, four categories per record:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]

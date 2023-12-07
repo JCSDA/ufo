@@ -12,8 +12,9 @@
 # In the Gaussian Thinning setup used, profiles closer to the centre of the bin are retained.
 
 
-window begin: 2000-01-01T00:00:00Z
-window end: 2030-01-01T00:00:00Z
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
 
 observations:
 # Setup:

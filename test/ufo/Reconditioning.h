@@ -43,9 +43,7 @@ class ReconditioningTestParameters : public oops::Parameters {
 // -----------------------------------------------------------------------------
 void testNoReconditioning() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
-  util::DateTime bgn(Tconf.getString("window begin"));
-  util::DateTime end(Tconf.getString("window end"));
-  const util::TimeWindow timeWindow(bgn, end);
+  const util::TimeWindow timeWindow(Tconf.getSubConfiguration("time window"));
 
   ufo::instantiateObsErrorFactory();
   std::vector<eckit::LocalConfiguration> conf;
@@ -80,9 +78,7 @@ void testNoReconditioning() {
 // -----------------------------------------------------------------------------
 void compareKnownOutput() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
-  util::DateTime bgn(Tconf.getString("window begin"));
-  util::DateTime end(Tconf.getString("window end"));
-  const util::TimeWindow timeWindow(bgn, end);
+  const util::TimeWindow timeWindow(Tconf.getSubConfiguration("time window"));
 
   ufo::instantiateObsErrorFactory();
 
@@ -124,9 +120,7 @@ void compareKnownOutput() {
 // -----------------------------------------------------------------------------
 void testNoValidOptionSelected() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
-  util::DateTime bgn(Tconf.getString("window begin"));
-  util::DateTime end(Tconf.getString("window end"));
-  const util::TimeWindow timeWindow(bgn, end);
+  const util::TimeWindow timeWindow(Tconf.getSubConfiguration("time window"));
 
   ufo::instantiateObsErrorFactory();
 

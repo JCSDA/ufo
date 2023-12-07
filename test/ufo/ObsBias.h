@@ -34,9 +34,7 @@ namespace test {
 void testObsBiasReadWrite() {
   eckit::LocalConfiguration conf(::test::TestEnvironment::config());
 
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
-  util::TimeWindow timeWindow(bgn, end);
+  util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
   std::vector<eckit::LocalConfiguration> obsconfs
     = conf.getSubConfigurations("observations");

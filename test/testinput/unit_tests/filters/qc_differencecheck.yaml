@@ -1,5 +1,6 @@
-window begin: 2018-01-01T00:00:00Z
-window end: 2019-01-01T00:00:00Z
+time window:
+  begin: 2018-01-01T00:00:00Z
+  end: 2019-01-01T00:00:00Z
 
 observations:
 - obs space:

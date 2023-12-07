@@ -1,5 +1,6 @@
-window begin: 2022-06-02T09:00:00Z
-window end: 2022-06-02T15:00:00Z
+time window:
+  begin: 2022-06-02T09:00:00Z
+  end: 2022-06-02T15:00:00Z
 
 observations:
 - obs space:

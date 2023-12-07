@@ -1,6 +1,7 @@
 Only valid observations:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -30,8 +31,9 @@ Only valid observations:
   expected_rejected_obs_indices: []
 
 One observation with excessive speed:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -61,8 +63,9 @@ One observation with excessive speed:
   expected_rejected_obs_indices: [2]
 
 One observation with excessive climb rate:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -92,8 +95,9 @@ One observation with excessive climb rate:
   expected_rejected_obs_indices: [2]
 
 Climb rate checks disabled:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]   
@@ -122,8 +126,9 @@ Climb rate checks disabled:
   expected_rejected_obs_indices: []
 
 Where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -157,8 +162,9 @@ Where clause:
   expected_rejected_obs_indices: [2]
 
 Multiple clusters of observations with excessive speed:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -230,8 +236,9 @@ Multiple clusters of observations with excessive speed:
   expected_rejected_obs_indices: [0, 9, 10, 18, 19, 20, 29, 30]
 
 Multiple station ids:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]   
@@ -264,8 +271,9 @@ Multiple station ids:
   expected_rejected_obs_indices: [4, 5]
 
 No station id variable, no observation grouping:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    

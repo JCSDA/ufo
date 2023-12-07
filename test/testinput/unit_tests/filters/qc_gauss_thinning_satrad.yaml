@@ -1,6 +1,7 @@
 Met Office OPS SatRad 10 km thinning of near-duplicate obs:
-  window begin: 2020-03-31T21:00:00Z
-  window end: 2020-04-01T03:00:00Z
+  time window:
+    begin: 2020-03-31T21:00:00Z
+    end: 2020-04-01T03:00:00Z
   obs space:
     name: ATMS
     obsdatain:
@@ -35,8 +36,9 @@ Met Office OPS SatRad 10 km thinning of near-duplicate obs:
   # all 10 Northern Hemisphere obs should be in separate thinning boxes
   expected_thinned_obs_indices: []
 Met Office OPS SatRad thinning for 154 km mesh:
-  window begin: 2020-03-31T21:00:00Z
-  window end: 2020-04-01T03:00:00Z
+  time window:
+    begin: 2020-03-31T21:00:00Z
+    end: 2020-04-01T03:00:00Z
   obs space:
     name: ATMS
     obsdatain:

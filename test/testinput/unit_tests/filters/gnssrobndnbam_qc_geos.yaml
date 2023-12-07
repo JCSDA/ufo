@@ -1,8 +1,9 @@
 # Window information
 # ------------------
 
-window begin: 2022-06-14T20:30:00Z
-window end: 2022-06-15T03:30:00Z
+time window:
+  begin: 2022-06-14T20:30:00Z
+  end: 2022-06-15T03:30:00Z
 
 observations:
 # Use "GEOS" for "super_ref_qc" and

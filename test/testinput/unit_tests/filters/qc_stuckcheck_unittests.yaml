@@ -1,6 +1,7 @@
 All observations' number and time stuck tolerated:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -21,8 +22,9 @@ All observations' number and time stuck tolerated:
   expected_rejected_obs_indices: []
 
 Time stuck tolerated, number stuck untolerated, more than 1 value:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -40,8 +42,9 @@ Time stuck tolerated, number stuck untolerated, more than 1 value:
   expected_rejected_obs_indices: []
 
 Time stuck tolerated, number stuck untolerated, 1 value:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -59,8 +62,9 @@ Time stuck tolerated, number stuck untolerated, 1 value:
   expected_rejected_obs_indices: [ 0, 1, 2, 3, 4, 5 ]
 
 Time stuck tolerated, number stuck tolerated, 1 value:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -77,8 +81,9 @@ Time stuck tolerated, number stuck tolerated, 1 value:
   expected_rejected_obs_indices: []
 
 Time stuck untolerated for both streaks, number stuck tolerated for second streak (but not first):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -96,8 +101,9 @@ Time stuck untolerated for both streaks, number stuck tolerated for second strea
   expected_rejected_obs_indices: [ 0, 1, 2, 3 ]
 
 Time stuck tolerated for first streak (but not second), number stuck untolerated for both streaks:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -115,8 +121,9 @@ Time stuck tolerated for first streak (but not second), number stuck untolerated
   expected_rejected_obs_indices: [ 3, 4, 5 ]
 
 All temperatures different:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -134,8 +141,9 @@ All temperatures different:
   expected_rejected_obs_indices: []
 
 Different variable streaks:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [ airTemperature, pressure ]
@@ -157,8 +165,9 @@ Different variable streaks:
     time stuck tolerance: PT2H
   expected_rejected_obs_indices: [ 1, 2, 3, 4, 5 ]
 Different variable streaks, 1 filter variable considered:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [ airTemperature, pressure ]

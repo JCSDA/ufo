@@ -1,6 +1,7 @@
 Normal ship track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]    
@@ -29,8 +30,9 @@ Ship track error first segment category 2:
 #if speedAveraged of observation after fast seg. is
 #low and either speed of segment after fast or angle between
 #segment after fastest and fastest is small
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]    
@@ -56,8 +58,9 @@ Ship track error first segment category 2:
   expected first rejection index: [1]
   expected error category: [2]
 Ship track error first segment category 1:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]    
@@ -83,8 +86,9 @@ Ship track error first segment category 1:
   expected first rejection index: [0]
   expected error category: [1]
 Ship track error last segment category 2:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature] 
@@ -110,8 +114,9 @@ Ship track error last segment category 2:
   expected first rejection index: [2]
   expected error category: [2]
 Ship track error last segment category 1:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -137,8 +142,9 @@ Ship track error last segment category 1:
   expected first rejection index: [2]
   expected error category: [1]
 Ship track error middle segment prev fast category 4:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -164,8 +170,9 @@ Ship track error middle segment prev fast category 4:
   expected first rejection index: [1]
   expected error category: [4]
 Ship track error middle segment prev fast category 104:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -191,8 +198,9 @@ Ship track error middle segment prev fast category 104:
   expected first rejection index: [ 1, 2 ]
   expected error category: [ 104 ]
 Ship track error middle segment next fast category 4:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -220,8 +228,9 @@ Ship track error middle segment next fast category 4:
 Ship track error middle segment next fast category 104:
 # If speedAveraged of rejected observation is greater than max,
 # 100 will be added to category and both will be rejected.
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -247,8 +256,9 @@ Ship track error middle segment next fast category 104:
   expected first rejection index: [1,2]
   expected error category: [104]
 Ship track error middle segment average fast category 5: #uses time res to control speedAveraged more predictably
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]  
@@ -274,8 +284,9 @@ Ship track error middle segment average fast category 5: #uses time res to contr
   expected first rejection index: [1]
   expected error category: [5]
 Ship track error middle segment prev average fast category 5:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]  
@@ -301,8 +312,9 @@ Ship track error middle segment prev average fast category 5:
   expected first rejection index: [ 2 ]
   expected error category: [ 5 ]
 Ship track error middle segment prev average fast category 105:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]   
@@ -328,8 +340,9 @@ Ship track error middle segment prev average fast category 105:
   expected first rejection index: [ 1, 2 ]
   expected error category: [ 105 ]
 Ship track error middle segment prev angle large category 6:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]   
@@ -355,8 +368,9 @@ Ship track error middle segment prev angle large category 6:
   expected first rejection index: [1]
   expected error category: [6]
 Ship track error middle segment angle large category 6:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -382,8 +396,9 @@ Ship track error middle segment angle large category 6:
   expected first rejection index: [2]
   expected error category: [6]
 Ship track error middle segment previous previous angle large category 7:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]  
@@ -410,8 +425,9 @@ Ship track error middle segment previous previous angle large category 7:
   expected first rejection index: [2]
   expected error category: [7]
 Ship track error middle segment next angle large category 7:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]   
@@ -438,8 +454,9 @@ Ship track error middle segment next angle large category 7:
   expected first rejection index: [2]
   expected error category: [7]
 Ship track error middle segment prev speed < half next speed category 8:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]  
@@ -465,8 +482,9 @@ Ship track error middle segment prev speed < half next speed category 8:
   expected first rejection index: [1]
   expected error category: [8]
 Ship track error middle segment next speed < half prev speed category 8:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]  
@@ -492,8 +510,9 @@ Ship track error middle segment next speed < half prev speed category 8:
   expected first rejection index: [2]
   expected error category: [8]
 Ship track error middle segment category 100:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]    

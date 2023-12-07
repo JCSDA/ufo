@@ -168,12 +168,8 @@ class ObsFiltersParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsFiltersParameters, Parameters)
 
  public:
-  /// Only observations taken at times lying between `window begin` and `window end`
-  /// will be included in observation spaces. If `window shift` is `true`, the
-  /// lower bound of the time window is inclusive; if `false`, the upper bound is inclusive.
-  oops::RequiredParameter<util::DateTime> windowBegin{"window begin", this};
-  oops::RequiredParameter<util::DateTime> windowEnd{"window end", this};
-  oops::Parameter<bool> shifting{"window shift", false, this};
+  /// Time window configuration options.
+  oops::RequiredParameter<eckit::LocalConfiguration> timeWindow{"time window", this};
   /// A list whose elements are used to configure tests running sequences of filters on
   /// observations from individual observation spaces.
   oops::Parameter<std::vector<ObsTypeParameters>> observations{"observations", {}, this};

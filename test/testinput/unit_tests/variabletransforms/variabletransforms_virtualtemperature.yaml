@@ -1,5 +1,6 @@
-window begin: 2020-10-01T05:00:00Z
-window end: 2020-10-01T07:00:00Z
+time window:
+  begin: 2020-10-01T05:00:00Z
+  end: 2020-10-01T07:00:00Z
 
 # The simplest test starts with airTemperature and specificHumidity to result in virtualTemperature.
 

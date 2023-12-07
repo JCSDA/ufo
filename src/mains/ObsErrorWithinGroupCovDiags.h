@@ -41,13 +41,8 @@ class ObsErrorWithinGroupCovDiagsParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsErrorWithinGroupCovDiagsParameters, Parameters)
 
  public:
-  /// Only observations taken at times lying in the (`window begin`, `window end`]
-  /// interval will be included in observation spaces.
-  /// If `window shift` is set to true, the interval becomes [`window begin`, `window end`).
-  oops::RequiredParameter<util::DateTime> windowBegin{"window begin", this};
-  oops::RequiredParameter<util::DateTime> windowEnd{"window end", this};
-  oops::Parameter<bool> windowShift{"window shift", false, this};
-
+  oops::RequiredParameter<eckit::LocalConfiguration> timeWindow{"time window",
+        "options used to configure the assimilation time window", this};
   oops::RequiredParameter<ioda::ObsTopLevelParameters> obsSpace{"obs space",
         "options used to configure the observation space", this};
   oops::RequiredParameter<ObsErrorWithinGroupCovParameters> obsError{"obs error",
@@ -71,9 +66,7 @@ class ObsErrorWithinGroupCovDiags : public oops::Application {
     params.deserialize(fullConfig);
 
     ioda::ObsSpace obsdb(params.obsSpace, this->getComm(),
-                         util::TimeWindow(params.windowBegin,
-                                          params.windowEnd,
-                                          util::boolToWindowBound(params.windowShift)),
+                         util::TimeWindow(fullConfig.getSubConfiguration("time window")),
                          this->getComm());
     ioda::ObsVector randomVec(obsdb);
     randomVec.random();

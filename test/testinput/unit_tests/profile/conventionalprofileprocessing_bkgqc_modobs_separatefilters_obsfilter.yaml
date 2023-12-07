@@ -2,8 +2,9 @@
 #=== Profile processing for background QC on model levels using sequential separate filters ==#
 #
 
-window begin: 2019-06-14T21:00:00Z
-window end: 2019-06-15T02:59:59Z
+time window:
+  begin: 2019-06-14T21:00:00Z
+  end: 2019-06-15T02:59:59Z
 
 observations:
 - obs space:

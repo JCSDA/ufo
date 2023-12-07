@@ -1,8 +1,9 @@
 # Note that this function so far can only copy from extended to original space,
 #  not the other way round yet.
 
-window begin: 2010-01-01T00:00:00Z
-window end: 2030-01-01T00:00:00Z
+time window:
+  begin: 2010-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
 
 observations:
 - obs space:

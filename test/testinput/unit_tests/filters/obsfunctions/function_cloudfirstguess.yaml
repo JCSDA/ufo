@@ -1,7 +1,8 @@
 _: &cloud_first_guess_channels 179, 205, 212, 242, 246, 280, 327, 407, 662, 1786
 
-window begin: 2021-01-14T21:00:00Z
-window end: 2021-01-15T03:00:00Z
+time window:
+  begin: 2021-01-14T21:00:00Z
+  end: 2021-01-15T03:00:00Z
 
 observations:
 - obs operator: &ObsOperator

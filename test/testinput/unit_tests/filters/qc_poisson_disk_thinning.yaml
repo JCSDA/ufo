@@ -2,8 +2,9 @@
 # obtained with the Ops_PoissonThinning function from the Met Office observation processing system.
 # This file also contains tests pertaining to ocean profile level sub-sampling and the hybrid 
 # Poisson median averaging thinning used by legacy Met Office sea surface temperature configurations.
-window begin: 2000-01-01T00:00:00Z
-window end: 2030-12-31T23:59:59Z
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-12-31T23:59:59Z
 
 observations:
 - obs space:

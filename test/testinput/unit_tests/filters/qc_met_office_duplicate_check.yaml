@@ -1,11 +1,10 @@
-# This test compares the results produced by the Met Office Duplicate check filter against
-# those obtained with the equivalent routine in the Met Office OPS system.
 # The aircraft input data set consists of 1000 points at random spatial and temporal locations.
 # The ocean profile data is synthetic data chosen specifically to cause
 # different QC results depending on the number of MPI processes, assuming that
 # the sort option is not used.
-window begin: 2000-01-01T00:00:00Z
-window end: 2030-12-31T23:59:59Z
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-12-31T23:59:59Z
 
 observations:
 - obs space:

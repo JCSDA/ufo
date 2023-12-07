@@ -85,10 +85,7 @@ SampledLocations::SampledLocations(
 SampledLocations::SampledLocations(const eckit::Configuration & conf, const eckit::mpi::Comm & comm)
   : dist_(), times_(), lons_(), lats_() {
   const eckit::LocalConfiguration obsconf(conf, "obs space");
-  const util::DateTime bgn = util::DateTime(conf.getString("window begin"));
-  const util::DateTime end = util::DateTime(conf.getString("window end"));
-  const bool shift = static_cast<bool>(conf.getBool("window shift", false));
-  const util::TimeWindow timeWindow(bgn, end, util::boolToWindowBound(shift));
+  const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
   ioda::ObsTopLevelParameters obsparams;
   obsparams.validateAndDeserialize(obsconf);

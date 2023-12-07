@@ -1,5 +1,6 @@
-window begin: 2021-12-11T20:30:00Z
-window end: 2021-12-12T03:30:00Z
+time window:
+  begin: 2021-12-11T20:30:00Z
+  end: 2021-12-12T03:30:00Z
 
 observations:
 

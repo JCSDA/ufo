@@ -1,6 +1,7 @@
 Assign constant observation error value:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -26,8 +27,9 @@ Assign constant observation error value:
 # Tests using the NetCDF backend
 
 Assign observation error from NetCDF variance; 1 exact; 1 linear (along the first axis):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -58,8 +60,9 @@ Assign observation error from NetCDF variance; 1 exact; 1 linear (along the firs
             method: linear
   expected_obserror_variance: [375.5, 601, 242.5, 175, 337]
 Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the second axis):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -90,8 +93,9 @@ Assign observation error from NetCDF variance; 1 nearest; 1 linear (along the se
             method: linear
   expected_obserror_variance: [1, 1.5, 2, 5.5]
 Assign observation error from NetCDF variance; 1 exact; 1 nearest:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -122,8 +126,9 @@ Assign observation error from NetCDF variance; 1 exact; 1 nearest:
             method: nearest
   expected_obserror_variance: [278, 755, 397, 846, 676]
 Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -160,8 +165,9 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest:
             method: nearest
   expected_obserror_variance: [685, 431, 771, 25, 805]
 Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrating yaml order respected with sorting:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -198,8 +204,9 @@ Assign observation error from NetCDF full matrix; 3 exact; 1 nearest; demonstrat
             method: exact
   expected_obserror_variance: [685, 431, 771, 25, 805]
 Assign observation error from NetCDF full matrix with ioda-v2-style variable names; 3 exact; 1 nearest; demonstrating yaml order respected with sorting:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -236,8 +243,9 @@ Assign observation error from NetCDF full matrix with ioda-v2-style variable nam
             method: exact
   expected_obserror_variance: [685, 431, 771, 25, 805]
 Assign observation error from NetCDF full matrix 2D; 1 exact:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -264,8 +272,9 @@ Assign observation error from NetCDF full matrix 2D; 1 exact:
             method: exact
   expected_obserror_variance: [88, 685, 798, 618, 544]
 Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -298,8 +307,9 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
             method: exact
   expected_obserror_variance: [278, 487, 917, 178, 289]
   Assign observation error from NetCDF file; data types float, int and string; missing values:
-    window begin: 2000-01-01T00:00:00Z
-    window end: 2030-01-01T00:00:00Z
+    time window:
+      begin: 2000-01-01T00:00:00Z
+      end: 2030-01-01T00:00:00Z
     obs space:
       name: Aircraft
       simulated variables: [airTemperature]
@@ -334,8 +344,9 @@ Assign observation error from NetCDF variance; 3 exact (1 string, 1 datetime):
               method: exact
     expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from NetCDF variance; attempt at using 'nearest' for strings:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -364,8 +375,9 @@ Assign observation error from NetCDF variance; attempt at using 'nearest' for st
             method: nearest
   expectExceptionWithMessage: The 'nearest' method cannot be used for string variables
 Assign observation error from NetCDF variance; attempt at using 'linear' for strings:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -396,8 +408,9 @@ Assign observation error from NetCDF variance; attempt at using 'linear' for str
             method: linear
   expectExceptionWithMessage: Linear interpolation cannot be performed along coordinate axes indexed by string variables such as MetaData/stringVar
 Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -428,8 +441,9 @@ Assign observation error from NetCDF variance; 1 least upper bound; 1 exact:
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6]
 Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -460,8 +474,9 @@ Assign observation error from NetCDF variance; 1 greatest lower bound; 1 exact:
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6]
 Assign observation error from NetCDF variance; no match found for an 'exact' variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -492,8 +507,9 @@ Assign observation error from NetCDF variance; no match found for an 'exact' var
             method: linear
   expectExceptionWithMessage: No match found for exact match extraction of value '1000' of the variable 'MetaData/observationTypeNum'
 Assign observation error from NetCDF variance; no match found for a 'least upper bound' variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -524,8 +540,9 @@ Assign observation error from NetCDF variance; no match found for a 'least upper
             method: exact
   expectExceptionWithMessage: No match found for 'least upper bound' extraction of value '99999' of the variable 'MetaData/pressure'
 Assign observation error from NetCDF variance; no match found for a 'greatest lower bound' variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -556,8 +573,9 @@ Assign observation error from NetCDF variance; no match found for a 'greatest lo
             method: exact
   expectExceptionWithMessage: No match found for 'greatest lower bound' extraction of value '-99999' of the variable 'MetaData/pressure'
 Assign observation error from NetCDF variance; attempt to use the 'least upper bound' mode for a string variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -586,8 +604,9 @@ Assign observation error from NetCDF variance; attempt to use the 'least upper b
             method: least upper bound
   expectExceptionWithMessage: The 'least upper bound' method cannot be used for string variables
 Assign observation error from NetCDF variance; attempt to use the 'greatest lower bound' mode for a string variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -616,8 +635,9 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
             method: greatest lower bound
   expectExceptionWithMessage: The 'greatest lower bound' method cannot be used for string variables
 Assign observation error from NetCDF file; no variable with the @ErrorVariance suffix:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -648,8 +668,9 @@ Assign observation error from NetCDF file; no variable with the @ErrorVariance s
             method: exact
   expectExceptionWithMessage: "No payload variable found: no variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from NetCDF file; multiple variables with the @ErrorVariance suffix:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -680,8 +701,9 @@ Assign observation error from NetCDF file; multiple variables with the @ErrorVar
             method: exact
   expectExceptionWithMessage: "Multiple payload candidates found: more than one variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from NetCDF file; 2D array of full covariance matrices:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -709,8 +731,9 @@ Assign observation error from NetCDF file; 2D array of full covariance matrices:
             method: exact
   expectExceptionWithMessage: Expecting 3D or 2D array for error covariance
 Assign observation error from NetCDF variance; multi-channel variable support:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [brightnessTemperature]
@@ -763,8 +786,9 @@ Assign observation error from NetCDF variance; multi-channel variable support:
 # Tests using the CSV backend
 
 Assign observation error from CSV file; data types float, int and string; payload of type float:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -799,8 +823,9 @@ Assign observation error from CSV file; data types float, int and string; payloa
             method: nearest
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from CSV file with ioda-v2-style variable names; data types float, int and string; payload of type float:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -835,8 +860,9 @@ Assign observation error from CSV file with ioda-v2-style variable names; data t
             method: nearest
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from CSV file; data types float, int and string; payload of type float; strings containing spaces:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -872,8 +898,9 @@ Assign observation error from CSV file; data types float, int and string; payloa
             method: nearest
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from CSV file; data type datetime; payload of type int:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -900,8 +927,9 @@ Assign observation error from CSV file; data type datetime; payload of type int:
             method: exact
   expected_obserror_variance: [3, 4, 1, 2]
 Assign observation error from CSV file; data types float, int and string; missing values:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -936,8 +964,9 @@ Assign observation error from CSV file; data types float, int and string; missin
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
 Assign observation error from CSV file; no column with @ErrorVariance suffix:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -965,8 +994,9 @@ Assign observation error from CSV file; no column with @ErrorVariance suffix:
             method: exact
   expectExceptionWithMessage: "No payload column found: no column name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from CSV file; multiple columns with @ErrorVariance suffix:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -994,8 +1024,9 @@ Assign observation error from CSV file; multiple columns with @ErrorVariance suf
             method: exact
   expectExceptionWithMessage: "Multiple payload candidates found: more than one column name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
 Assign observation error from CSV file; string data in column with @ErrorVariance suffix:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1023,8 +1054,9 @@ Assign observation error from CSV file; string data in column with @ErrorVarianc
             method: exact
   expectExceptionWithMessage: The payload column must contain numeric data
 Assign observation error from CSV file; datetime data in column with @ErrorVariance suffix:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1052,8 +1084,9 @@ Assign observation error from CSV file; datetime data in column with @ErrorVaria
             method: exact
   expectExceptionWithMessage: The payload column must contain numeric data
 Assign observation error from CSV file; empty file:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1081,8 +1114,9 @@ Assign observation error from CSV file; empty file:
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; only one header line:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1110,8 +1144,9 @@ Assign observation error from CSV file; only one header line:
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; no data lines:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1139,8 +1174,9 @@ Assign observation error from CSV file; no data lines:
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; empty data line:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1168,8 +1204,9 @@ Assign observation error from CSV file; empty data line:
             method: exact
   expectExceptionWithMessage: No data could be loaded from the file
 Assign observation error from CSV file; incorrect number of data types:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1197,8 +1234,9 @@ Assign observation error from CSV file; incorrect number of data types:
             method: exact
   expectExceptionWithMessage: The number of columns in line 2 differs from that in line 1
 Assign observation error from CSV file; incorrect number of columns in the first data line:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1226,8 +1264,9 @@ Assign observation error from CSV file; incorrect number of columns in the first
             method: exact
   expectExceptionWithMessage: The number of columns in line 3 differs from that in line 1
 Assign observation error from CSV file; unsupported data type:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1255,8 +1294,9 @@ Assign observation error from CSV file; unsupported data type:
             method: exact
   expectExceptionWithMessage: Unsupported data type 'color'
 Assign observation error from CSV file; criteria insufficient to identify a unique matching row:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1284,8 +1324,9 @@ Assign observation error from CSV file; criteria insufficient to identify a uniq
             method: exact
   expectExceptionWithMessage: Extraction criteria were not sufficient to identify a unique match in the interpolation array
 Assign observation error from CSV file; data types float, int and string; missing values:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -1323,8 +1364,9 @@ Assign observation error from CSV file; data types float, int and string; missin
 # Tests using the CSV backend to extract errors instead of variances
 
 Assign observation error from CSV file containing errors; data types float, int and string; payload of type float:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]

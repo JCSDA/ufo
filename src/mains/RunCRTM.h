@@ -44,11 +44,7 @@ template <typename OBS> class RunCRTM : public oops::Application {
 // -----------------------------------------------------------------------------
   int execute(const eckit::Configuration & fullConfig, bool validate) const {
 //  Setup observation window
-    const util::DateTime winbgn(fullConfig.getString("window begin"));
-    const util::Duration winlen(fullConfig.getString("window length"));
-    const bool winshift(fullConfig.getBool("window shift", false));
-    const util::TimeWindow timeWindow(winbgn, winbgn + winlen,
-                                      util::boolToWindowBound(winshift));
+    const util::TimeWindow timeWindow(fullConfig.getSubConfiguration("time window"));
 
 //  Setup observations
     ObsSpaces_ obsdb(fullConfig, this->getComm(), timeWindow);

@@ -30,9 +30,7 @@ namespace ufo {
 namespace test {
 
 void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
-  const util::TimeWindow timeWindow(bgn, end);
+  const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsTopLevelParameters obsParams;

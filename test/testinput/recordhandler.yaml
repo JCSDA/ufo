@@ -1,6 +1,7 @@
 Two records, input true everywhere:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -22,8 +23,9 @@ Two records, input true everywhere:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true at earliest datetime in each:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -45,8 +47,9 @@ Two records, input true at earliest datetime in each:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true at latest datetime in each:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -68,8 +71,9 @@ Two records, input true at latest datetime in each:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true at earliest datetime in each, dateTimes out of order:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -91,8 +95,9 @@ Two records, input true at earliest datetime in each, dateTimes out of order:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true at latest datetime in each, dateTimes out of order:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -114,8 +119,9 @@ Two records, input true at latest datetime in each, dateTimes out of order:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, missing dateTime at start of each:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -137,8 +143,9 @@ Two records, missing dateTime at start of each:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, all dateTimes missing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -160,8 +167,9 @@ Two records, all dateTimes missing:
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, no grouping:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -182,8 +190,9 @@ Two records, no grouping:
 
 # Note that (here and below) a value of -999 is translated to the floating-point missing value in the test code.
 Two records, input true everywhere, air_temperature missing at first location in each record, retain if all filter variables are valid:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -206,8 +215,9 @@ Two records, input true everywhere, air_temperature missing at first location in
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true everywhere, air_temperature missing at first two locations in each record, retain if all filter variables are valid:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -230,8 +240,9 @@ Two records, input true everywhere, air_temperature missing at first two locatio
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true everywhere, air_temperature missing everywhere, retain if any filter variable is valid:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -253,8 +264,9 @@ Two records, input true everywhere, air_temperature missing everywhere, retain i
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true everywhere, air_temperature missing everywhere, eastward_wind missing at start of each profile, retain if any filter variable is valid:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]
@@ -276,8 +288,9 @@ Two records, input true everywhere, air_temperature missing everywhere, eastward
   expected_isThinned : [ 1, 1, 1, 1, 1, 1 ]
 
 Two records, input true everywhere, dateTimes out of order, air_temperature missing everywhere, eastward_wind missing at start of each profile, retain if any filter variable is valid:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     simulated variables: [air_temperature, eastward_wind]

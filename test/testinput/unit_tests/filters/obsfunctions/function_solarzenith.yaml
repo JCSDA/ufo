@@ -1,5 +1,6 @@
-window begin: 1900-01-01T00:00:00Z
-window end: 9999-01-01T00:00:00Z
+time window:
+  begin: 1900-01-01T00:00:00Z
+  end: 9999-01-01T00:00:00Z
 
 observations:
 - obs space: &ObsSpace

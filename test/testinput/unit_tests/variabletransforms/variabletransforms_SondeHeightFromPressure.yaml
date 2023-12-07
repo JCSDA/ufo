@@ -2,8 +2,9 @@
 #=== Pressure to height conversion for vertical profile ===#
 #
 
-window begin: 2015-01-08T20:30:00Z
-window end: 2015-01-09T03:30:00Z
+time window:
+  begin: 2015-01-08T20:30:00Z
+  end: 2015-01-09T03:30:00Z
 
 observations:
 # UKMO method (uses ICAO atmosphere).

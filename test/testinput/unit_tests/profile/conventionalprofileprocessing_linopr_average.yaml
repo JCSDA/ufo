@@ -1,5 +1,6 @@
-window begin: 2019-06-14T20:30:00Z
-window end: 2019-06-15T03:30:00Z
+time window:
+  begin: 2019-06-14T20:30:00Z
+  end: 2019-06-15T03:30:00Z
 
 observations:
 # Standard case: windEastward.

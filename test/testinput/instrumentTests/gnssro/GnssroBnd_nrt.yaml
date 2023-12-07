@@ -1,5 +1,6 @@
-window begin: '2020-10-01T03:00:00Z'
-window length: PT6H
+time window:
+  begin: '2020-10-01T03:00:00Z'
+  length: PT6H
 forecast length: PT6H
 geometry:
   nml_file_mpp: config/fv3files/fmsmpp.nml

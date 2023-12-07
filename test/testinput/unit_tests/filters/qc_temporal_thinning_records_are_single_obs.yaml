@@ -13,8 +13,9 @@
 # In the Temporal Thinning setup used, profiles at earlier times are retained.
 
 
-window begin: 2000-01-01T00:00:00Z
-window end: 2030-01-01T00:00:00Z
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
 
 observations:
 # Setup:

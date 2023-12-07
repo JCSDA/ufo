@@ -1,6 +1,7 @@
 Normal ship track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -35,8 +36,9 @@ Normal ship track:
   expected mean speed: [43.5]
   expected early breaks: [0]
 Bending ship track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -71,8 +73,9 @@ Bending ship track:
   expected mean speed: [33.9]
   expected early breaks: [0]
 Fast ship track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -107,8 +110,9 @@ Fast ship track:
   expected mean speed: [0.0]
   expected early breaks: [1]
 Short ship track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -144,8 +148,9 @@ Short ship track:
   expected mean speed: [0.0]
   expected early breaks: [1]
 Short buoy track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -181,8 +186,9 @@ Short buoy track:
   expected mean speed: [0.0]
   expected early breaks: [0]
 Fast/short ship track:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -217,8 +223,9 @@ Fast/short ship track:
   expected mean speed: [0.0]
   expected early breaks: [1]
 Ship Track Dist0:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -252,8 +259,9 @@ Ship Track Dist0:
   expected mean speed: [0.0]
   expected early breaks: [0]
 Ship Track Simultaneous Same Location:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -287,8 +295,9 @@ Ship Track Simultaneous Same Location:
   expected mean speed: [0]
   expected early breaks: [1]
 Ship Track Simultaneous Different Location:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -322,8 +331,9 @@ Ship Track Simultaneous Different Location:
   expected mean speed: [0]
   expected early breaks: [1]
 Ship Tracks Different Station IDs:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -359,8 +369,9 @@ Ship Tracks Different Station IDs:
   expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]
 Ship Tracks Different Station IDs Shuffled:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -396,8 +407,9 @@ Ship Tracks Different Station IDs Shuffled:
   expected mean speed: [33.9, 0.0]
   expected early breaks: [0, 1]
 Ship Track Segment from Comparison Test early break false:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -423,8 +435,9 @@ Ship Track Segment from Comparison Test early break false:
       name: MetaData/stationIdentification
   expected rejected obs indices: [0, 1, 2, 3, 4]
 Ship Track Segment from Comparison Test early break true:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]
@@ -450,8 +463,9 @@ Ship Track Segment from Comparison Test early break true:
       name: MetaData/stationIdentification
   expected rejected obs indices: [0, 1, 2, 3, 4, 5]
 Ship Track Records as single obs:  # 3rd profile [8-11] is off-track
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ocean Profile
     simulated variables: [airTemperature]
@@ -481,8 +495,9 @@ Ship Track Records as single obs:  # 3rd profile [8-11] is off-track
   expected rejected obs indices: [8,9,10,11]
 # Test for bugfix PR2158, copied from mainloop test which does not test actual obs flagged
 Ship track error middle segment category 100:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Ship
     simulated variables: [airTemperature]    

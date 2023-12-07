@@ -1,5 +1,6 @@
-window begin: 2020-05-01T03:00:00Z
-window end: 2021-07-02T09:00:00Z
+time window:
+  begin: 2020-05-01T03:00:00Z
+  end: 2021-07-02T09:00:00Z
 
 observations:
 # Test the specification of observation errors by latitude

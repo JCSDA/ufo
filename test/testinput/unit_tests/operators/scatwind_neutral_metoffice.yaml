@@ -1,5 +1,6 @@
-window begin: 2020-10-01T03:00:00Z
-window end: 2020-10-01T09:00:00Z
+time window:
+  begin: 2020-10-01T03:00:00Z
+  end: 2020-10-01T09:00:00Z
 
 observations:
 #  Test cases for single dimension

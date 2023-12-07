@@ -1,6 +1,7 @@
-window begin: 2020-12-14T20:30:00Z
-window end: 2020-12-15T03:30:00Z
-#window length: PT7H
+time window:
+  begin: 2020-12-14T20:30:00Z
+  end: 2020-12-15T03:30:00Z
+#  length: PT7H
 #forecast length: PT7H
 # model/gfs/hofx3d.jedi.yaml
 #geometry:

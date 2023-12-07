@@ -1,6 +1,7 @@
 successful:
-  window begin: 2018-01-01T00:00:00Z
-  window end: 2019-01-01T00:00:00Z
+  time window:
+    begin: 2018-01-01T00:00:00Z
+    end: 2019-01-01T00:00:00Z
   obs space:
     name: ProcessWhere Test Data
     obsdatain:
@@ -633,8 +634,9 @@ successful:
 
 # test use of logical operators in a where statement with multiple conditions
 operator:
-  window begin: 2018-01-01T00:00:00Z
-  window end: 2019-01-01T00:00:00Z
+  time window:
+    begin: 2018-01-01T00:00:00Z
+    end: 2019-01-01T00:00:00Z
   obs space:
     name: ProcessWhere Test Data
     obsdatain:
@@ -711,8 +713,9 @@ operator:
       size where true: 6
 
 user_error_type_handling_is_in:
-  window begin: 2018-01-01T00:00:00Z
-  window end: 2019-01-01T00:00:00Z
+  time window:
+    begin: 2018-01-01T00:00:00Z
+    end: 2019-01-01T00:00:00Z
   obs space:
     name: ProcessWhere Test Data
     obsdatain:

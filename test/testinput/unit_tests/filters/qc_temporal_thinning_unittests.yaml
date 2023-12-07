@@ -1,6 +1,7 @@
 Min_spacing below observation spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -24,8 +25,9 @@ Min_spacing below observation spacing:
   expected_thinned_obs_indices: []
 
 Min spacing equal to observation spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -49,8 +51,9 @@ Min spacing equal to observation spacing:
   expected_thinned_obs_indices: []
 
 Min spacing above observation spacing:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -74,8 +77,9 @@ Min spacing above observation spacing:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Int-valued categories:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -102,8 +106,9 @@ Int-valued categories:
   expected_thinned_obs_indices: [1, 4, 6]
 
 String-valued categories:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -130,8 +135,9 @@ String-valued categories:
   expected_thinned_obs_indices: [1, 4, 6]
 
 Categories, observations sorted in descending order:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]    
@@ -158,8 +164,9 @@ Categories, observations sorted in descending order:
   expected_thinned_obs_indices: [0, 2, 5]
 
 Categories, where clause:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -190,8 +197,9 @@ Categories, where clause:
   expected_thinned_obs_indices: [2, 4]
 
 Tolerance and priorities, first observation in each group to be retained:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -245,8 +253,9 @@ Tolerance and priorities, first observation in each group to be retained:
                                  19, 20]
 
 Tolerance and priorities, second observation in each group to be retained:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -300,8 +309,9 @@ Tolerance and priorities, second observation in each group to be retained:
                                  18, 20]
 
 Tolerance and priorities, third observation in each group to be retained:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -355,8 +365,9 @@ Tolerance and priorities, third observation in each group to be retained:
                                  18, 19]
 
 Tolerance but no priorities:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -404,8 +415,9 @@ Tolerance but no priorities:
                                  19, 20]
 
 Seed time inside observation time range (should pick preceding observation):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -430,8 +442,9 @@ Seed time inside observation time range (should pick preceding observation):
   expected_thinned_obs_indices: [0, 2, 4, 6]
 
 Seed time inside observation time range (should pick following observation):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -456,8 +469,9 @@ Seed time inside observation time range (should pick following observation):
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time midway between two observations (should pick following observation):
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -482,8 +496,9 @@ Seed time midway between two observations (should pick following observation):
   expected_thinned_obs_indices: [0, 2, 4, 6]
 
 Seed time at earliest observation:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -508,8 +523,9 @@ Seed time at earliest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time before earliest observation:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -534,8 +550,9 @@ Seed time before earliest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time at latest observation:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -560,8 +577,9 @@ Seed time at latest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Seed time after latest observation:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -586,8 +604,9 @@ Seed time after latest observation:
   expected_thinned_obs_indices: [1, 3, 5]
 
 Tolerance, priorities and seed time at a low-priority observation followed by a high-priority one:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -642,8 +661,9 @@ Tolerance, priorities and seed time at a low-priority observation followed by a 
                                  18, 19, 20]
 
 Tolerance, priorities and seed time at a low-priority observation preceded by a high-priority one:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -705,8 +725,9 @@ Tolerance, priorities and seed time at a low-priority observation preceded by a 
 # Records:
 # - expect record with lower priority to be thinned: indices 0, 1, 2
 Records are single obs, priority variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -745,8 +766,9 @@ Records are single obs, priority variable:
 # Records:
 # - expect record at later time to be thinned: indices 3, 4, 5, 6
 Records are single obs, no priority variable:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -782,8 +804,9 @@ Records are single obs, no priority variable:
 # Records:
 # - expect record at later time in each category to be thinned: indices 2, 3, 6, 7
 Records are single obs, no priority variable, category variable set to category:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]
@@ -823,8 +846,9 @@ Records are single obs, no priority variable, category variable set to category:
 # Records:
 # - expect record with lower priority in each category to be thinned: indices 0, 1, 6, 7
 Records are single obs, priority variable, category variable set to category:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
     simulated variables: [airTemperature]

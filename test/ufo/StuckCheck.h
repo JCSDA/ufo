@@ -30,9 +30,7 @@ namespace ufo {
 namespace test {
 
 void testStuckCheck(const eckit::LocalConfiguration &conf) {
-  util::DateTime bgn(conf.getString("window begin"));
-  util::DateTime end(conf.getString("window end"));
-  util::TimeWindow timeWindow(bgn, end);
+  util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsTopLevelParameters obsParams;

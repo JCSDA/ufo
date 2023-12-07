@@ -1,5 +1,6 @@
-window begin: 2019-12-15T15:00:00Z
-window end: 2019-12-15T21:00:00Z
+time window:
+  begin: 2019-12-15T15:00:00Z
+  end: 2019-12-15T21:00:00Z
 
 observations:
 # Explicit specification of the model and observation vertical coordinates

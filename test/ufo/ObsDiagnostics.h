@@ -61,11 +61,7 @@ class TestParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(TestParameters, Parameters)
 
  public:
-  /// Only observations taken at times lying in the (`window begin`, `window end`] interval
-  /// will be included in observation spaces.
-  oops::RequiredParameter<util::DateTime> windowBegin{"window begin", this};
-  oops::RequiredParameter<util::DateTime> windowEnd{"window end", this};
-
+  oops::RequiredParameter<eckit::LocalConfiguration> timeWindow{"time window", this};
   oops::RequiredParameter<ioda::ObsSpace::Parameters_> obsSpace{"obs space", this};
   oops::RequiredParameter<ObsOperator::Parameters_> obsOperator{"obs operator", this};
   oops::RequiredParameter<GeoVaLs::Parameters_> geovals{"geovals", this};
@@ -79,12 +75,13 @@ class TestParameters : public oops::Parameters {
 // -----------------------------------------------------------------------------
 
 void testObsDiagnostics() {
+  const eckit::Configuration & conf = ::test::TestEnvironment::config();
   TestParameters params;
-  params.validateAndDeserialize(::test::TestEnvironment::config());
+  params.validateAndDeserialize(conf);
 
   //  Setup ObsSpace
   ioda::ObsSpace ospace(params.obsSpace, oops::mpi::world(),
-                        util::TimeWindow(params.windowBegin, params.windowEnd),
+                        util::TimeWindow(conf.getSubConfiguration("time window")),
                         oops::mpi::myself());
   const size_t nlocs = ospace.nlocs();
 

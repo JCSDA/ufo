@@ -1,5 +1,6 @@
-window begin: 1948-05-21T08:59:59Z
-window end: 2021-05-21T15:00:00Z
+time window:
+  begin: 1948-05-21T08:59:59Z
+  end: 2021-05-21T15:00:00Z
 
 observations:
 - obs space:

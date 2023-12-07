@@ -63,9 +63,7 @@ class TestFixture : private boost::noncopyable {
 
   TestFixture() {
     const eckit::Configuration & conf = ::test::TestEnvironment::config();
-    util::DateTime bgn(conf.getString("window begin"));
-    util::DateTime end(conf.getString("window end"));
-    const util::TimeWindow timeWindow(bgn, end);
+    const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
     const eckit::LocalConfiguration obsconf(conf, "obs space");
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(obsconf);

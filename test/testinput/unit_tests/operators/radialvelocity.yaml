@@ -1,5 +1,6 @@
-window begin: 2020-10-12T23:30:00Z
-window end: 2020-10-13T00:30:00Z
+time window:
+  begin: 2020-10-12T23:30:00Z
+  end: 2020-10-13T00:30:00Z
 
 observations:
 - obs operator:

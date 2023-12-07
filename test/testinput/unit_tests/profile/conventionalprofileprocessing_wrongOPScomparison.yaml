@@ -9,8 +9,9 @@
 #the checks that (1) the code values are the same as the OPS equivalents,
 #and (2) all required variables are present.
 Incorrect and missing values, RH:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -31,8 +32,9 @@ Incorrect and missing values, RH:
 
 #One of the variables is missing in a different sample (for completeness).
 Incorrect and missing values:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -53,8 +55,9 @@ Incorrect and missing values:
 
 #One of the variables is missing in a different sample (for completeness). Expect an exception to be thrown during the averaging.
 Incorrect and missing values, averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -76,8 +79,9 @@ Incorrect and missing values, averaging:
 
 #One of the variables is missing, basic check is run.
 Incorrect and missing values, Basic:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -97,8 +101,9 @@ Incorrect and missing values, Basic:
 #All ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -122,8 +127,9 @@ Wrong number of entries per profile:
 #UInterp: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, UInterp:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -145,8 +151,9 @@ Wrong number of entries per profile, UInterp:
 #UInterpAlternative: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, UInterpAlternative:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -166,8 +173,9 @@ Wrong number of entries per profile, UInterpAlternative:
 #RH: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, RH:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -189,8 +197,9 @@ Wrong number of entries per profile, RH:
 #Background: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, background:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -212,8 +221,9 @@ Wrong number of entries per profile, background:
 #Pressure transformation: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, pressure transformation:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -240,8 +250,9 @@ Wrong number of entries per profile, pressure transformation:
 #Temperature averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, temperature averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -267,8 +278,9 @@ Wrong number of entries per profile, temperature averaging:
 #Wind speed averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, wind speed averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -294,8 +306,9 @@ Wrong number of entries per profile, wind speed averaging:
 #Relative humidity averaging: all ObsValue variables are given one value per profile.
 #This is designed to fail the check that all variables are the same size.
 Wrong number of entries per profile, relative humidity averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -320,8 +333,9 @@ Wrong number of entries per profile, relative humidity averaging:
 
 #A group variable is not chosen, throwing an exception
 No group variable chosen:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -340,8 +354,9 @@ No group variable chosen:
 
 #An ascending sort order is chosen, throwing an exception
 Ascending sort order:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -364,8 +379,9 @@ Ascending sort order:
 
 #An invalid check is requested, throwing an exception
 Invalid check requested:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -386,8 +402,9 @@ Invalid check requested:
 
 #A duplicate check is requested, throwing an exception
 Duplicate check requested:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -410,8 +427,9 @@ Duplicate check requested:
 
 #An incorrect type is used in the 'get' function, throwing an exception
 Incorrect type in get:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -434,8 +452,9 @@ Incorrect type in get:
 
 #The standard levels (for the hydrostatic check) are out of order, throwing an exception
 Standard levels out of order:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -459,8 +478,9 @@ Standard levels out of order:
 
 #Time: set SondeLaunchWindRej to a nonzero value
 Background SondeLaunchWindRej:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -481,8 +501,9 @@ Background SondeLaunchWindRej:
 
 #Manually set QC flags
 Background manual QC flags:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -505,8 +526,9 @@ Background manual QC flags:
 #The Sign check ensures that pressure GeoVaLs are loaded, avoiding
 #triggering the exception related to reorderzdir.
 Profile pressure not run before temperature averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -529,8 +551,9 @@ Profile pressure not run before temperature averaging:
 
 #GeoVaLs missing for pressure calculation (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for pressure calculation:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -552,8 +575,9 @@ Missing GeoVaLs for pressure calculation:
 
 #GeoVaLs missing for temperature averaging (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for temperature averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -579,8 +603,9 @@ Missing GeoVaLs for temperature averaging:
 #The Sign check ensures that pressure GeoVaLs are loaded, avoiding
 #triggering the exception related to reorderzdir.
 Profile pressure not run before wind speed averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -603,8 +628,9 @@ Profile pressure not run before wind speed averaging:
 
 #GeoVaLs missing for wind speed averaging (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for wind speed averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -630,8 +656,9 @@ Missing GeoVaLs for wind speed averaging:
 #The Sign check ensures that pressure GeoVaLs are loaded, avoiding
 #triggering the exception related to reorderzdir.
 Profile pressure not run before relative humidity averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -655,8 +682,9 @@ Profile pressure not run before relative humidity averaging:
 #Do not run profile pressure routine before relative humidity averaging
 #This triggers the exception related to reorderzdir in ProfileDataHandled.
 Exception in ProfileDataHandler due to reorderzdir:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -679,8 +707,9 @@ Exception in ProfileDataHandler due to reorderzdir:
 
 #GeoVaLs missing for relative humidity averaging (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for relative humidity averaging:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:
@@ -704,8 +733,9 @@ Missing GeoVaLs for relative humidity averaging:
 
 #GeoVaLs missing for sign check (because set IgnoreGeoVaLs to true):
 Missing GeoVaLs for sign check:
-  window begin: 2000-01-01T00:00:00Z
-  window end: 2030-01-01T00:00:00Z
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
   obs space:
     name: Radiosonde
     obsdatain:

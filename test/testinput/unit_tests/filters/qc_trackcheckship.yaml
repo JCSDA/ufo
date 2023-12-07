@@ -1,8 +1,9 @@
 # This test compares the output of the Track Check Ship filter against reference
 # results obtained with the Met Office OPS code (Ops_CheckShipTrack/Ops_OceanTrackCheck).
 
-window begin: 2000-01-01T00:00:00Z
-window end: 2029-12-12T23:59:59Z
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2029-12-12T23:59:59Z
 
 observations:
 - obs space:
