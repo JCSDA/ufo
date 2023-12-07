@@ -8,7 +8,7 @@ Pair of observations:
     end: 2030-01-01T00:00:00Z
   obs space:
     name: Aircraft
-    simulated variables: [air_temperature, eastward_wind, northward_wind]
+    simulated variables: [airTemperature, windEastward, windNorthward]
     obsdatain:
       engine:
         type: GenList
@@ -18,33 +18,33 @@ Pair of observations:
         epoch: "seconds since 2010-01-01T00:00:00Z"
         obs errors: [1.0, 1.0, 1.0]
   FloatVariables:
-    air_temperature@ObsValue:              [ 290, 291]
-    air_temperature@ObsError:              [   1,   2]
-    air_temperature@GrossErrorProbability: [0.05, 0.1]
-    air_temperature@HofX:                  [ 289, 293]
+    ObsValue/airTemperature:               [ 290, 291]
+    ObsError/airTemperature:               [   1,   2]
+    GrossErrorProbability/airTemperature:  [0.05, 0.1]
+    HofX/airTemperature:                   [ 289, 293]
 
-    eastward_wind@ObsValue:                [  20,   21]
-    eastward_wind@ObsError:                [ 0.5,  1.0]
-    eastward_wind@GrossErrorProbability:   [0.07, 0.12]
-    eastward_wind@HofX:                    [  19,   23]
+    ObsValue/windEastward:                 [  20,   21]
+    ObsError/windEastward:                 [ 0.5,  1.0]
+    GrossErrorProbability/windEastward:    [0.07, 0.12]
+    HofX/windEastward:                     [  19,   23]
 
-    northward_wind@ObsValue:               [ -30,  -31]
-    northward_wind@ObsError:               [ 0.5,  1.0]
-    northward_wind@GrossErrorProbability:  [0.07, 0.12]
-    northward_wind@HofX:                   [ -29,  -33]
+    ObsValue/windNorthward:                [ -30,  -31]
+    ObsError/windNorthward:                [ 0.5,  1.0]
+    GrossErrorProbability/windNorthward:   [0.07, 0.12]
+    HofX/windNorthward:                    [ -29,  -33]
   IntVariables:
-    station_id@MetaData:                   [   1,   2]
+    MetaData/stationIdentification:        [   1,   2]
   obs diagnostics:
     air_temperature_background_error:      [   2,    1]
     eastward_wind_background_error:        [   1,  0.5]
     northward_wind_background_error:       [   1,  0.5]
   Met Office Buddy Check:
     filter variables:
-    - name: eastward_wind
+    - name: windEastward
       options:
         first_component_of_two: true
-    - name: northward_wind
-    - name: air_temperature
+    - name: windNorthward
+    - name: airTemperature
     horizontal_correlation_scale: {"90": 150, "30": 150, "20": 200,
                                    "-20": 200, "-30": 250, "-90": 250}
     temporal_correlation_scale: PT1H
@@ -62,8 +62,8 @@ Pair of observations:
         min_longitude: -180
         max_longitude:  180
     station_id_variable:
-      name: station_id@MetaData
+      name: MetaData/stationIdentification
   ExpectedGrossErrorProbabilities:
-    air_temperature@GrossErrorProbability: [0.053149, 0.106297]
-    eastward_wind@GrossErrorProbability:   [0.073023, 0.125183]
-    northward_wind@GrossErrorProbability:  [0.073023, 0.125183]
+    GrossErrorProbability/airTemperature: [0.053149, 0.106297]
+    GrossErrorProbability/windEastward:   [0.073023, 0.125183]
+    GrossErrorProbability/windNorthward:  [0.073023, 0.125183]

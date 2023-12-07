@@ -122,7 +122,7 @@ observations:
         name: MetaData/solarZenithAngle
       maxvalue: 88.9999
     - variable:
-        name: water_area_fraction@GeoVaLs
+        name: GeoVaLs/water_area_fraction
       minvalue: 1.0e-12
     action:
       name: reject

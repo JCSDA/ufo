@@ -23,7 +23,7 @@ observations:
         name: MetaData/latitude  # [1, 2, ..., 10]
       minvalue: 3
       maxvalue: 4
-  # This filter will put missing values in the first 3 elements of variable1@DerivedObsValue.
+  # This filter will put missing values in the first 3 elements of DerivedObsValue/variable1
   # It should also set the QC flag to "missing" at locations 0 and 1 (location 2 has already been
   # rejected by the BlackList, so its QC flag should not change)
   - filter: Variable Assignment

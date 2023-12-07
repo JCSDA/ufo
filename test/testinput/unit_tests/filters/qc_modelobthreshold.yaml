@@ -22,9 +22,9 @@ observations:
   # is less than 30% at 200 hPa or less. The threshold then increases with increasing pressure,
   # using linear interpolation between points.
     model profile:
-      name: relative_humidity@GeoVaLs
+      name: GeoVaLs/relative_humidity
     model vertical coordinate:
-      name: air_pressure@GeoVaLs
+      name: GeoVaLs/air_pressure
     observation height:
       name: MetaData/pressure
     thresholds: [50,45,40,30]
@@ -34,9 +34,9 @@ observations:
   # Reject any observed Satwind wind components where the model temperature at the observation
   # pressure is greater than 300K
     model profile:
-      name: air_temperature@GeoVaLs
+      name: GeoVaLs/air_temperature
     model vertical coordinate:
-      name: air_pressure@GeoVaLs
+      name: GeoVaLs/air_pressure
     observation height:
       name: MetaData/pressure
     thresholds: [300,300]

@@ -76,7 +76,7 @@ observations:
 #    - variable: solarZenithAngle
 #      minvalue: 89.
     - variable:
-        name: water_area_fraction@GeoVaLs
+        name: GeoVaLs/water_area_fraction
       maxvalue: 0.0
   - filter: Bounds Check
     filter variables:

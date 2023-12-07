@@ -36,7 +36,7 @@ observations:
         obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping:
         group variables: [ record_number ]
-        sort variable: impact_height
+        sort variable: impactHeightRO
         sort order: ascending
 #    obsdataout:
 #      engine:
@@ -56,7 +56,7 @@ observations:
     - name: [bending_angle]
     where:
     - variable:
-        name: impact_height@MetaData
+        name: MetaData/impactHeightRO
       minvalue: 0
       maxvalue: 50000
   - filter: ROobserror
@@ -75,7 +75,7 @@ observations:
         obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping: 
         group variables: [ record_number ]
-        sort variable: impact_height
+        sort variable: impactHeightRO
         sort order: ascending
 #    obsdataout:
 #      engine:
@@ -91,7 +91,7 @@ observations:
     - name: [bending_angle]
     where:
     - variable:
-        name: impact_height@MetaData
+        name: MetaData/impactHeightRO
       minvalue: 0
       maxvalue: 50000
   - filter: ROobserror
@@ -110,7 +110,7 @@ observations:
         obsfile: input/obs/ioda_nomads_gnssro_PT6H_20201001_0300Z.nc4
       obsgrouping:
         group variables: [ record_number ]
-        sort variable: impact_height
+        sort variable: impactHeightRO
         sort order: ascending
 #    obsdataout:
 #      engine:
@@ -129,7 +129,7 @@ observations:
     - name: [bending_angle]
     where:
     - variable:
-        name: impact_height@MetaData
+        name: MetaData/impactHeightRO
       minvalue: 0
       maxvalue: 50000
   - filter: ROobserror

@@ -46,7 +46,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 0
   HofX: HofX
   benchmarkFlag: 24
@@ -76,7 +76,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 0
   HofX: HofX
   benchmarkFlag: 24
@@ -108,7 +108,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 0
   HofX: HofX
   benchmarkFlag: 24
@@ -140,7 +140,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 1
   HofX: HofX
   benchmarkFlag: 24
@@ -173,7 +173,7 @@ observations:
     flagBasicChecksFail: false
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 1
   HofX: HofX
   benchmarkFlag: 24
@@ -207,7 +207,7 @@ observations:
     BChecks_minValidP: 995
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 2
   HofX: HofX
   benchmarkFlag: 24
@@ -240,7 +240,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 999
   HofX: HofX
   benchmarkFlag: 24
@@ -272,7 +272,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 3
   HofX: HofX
   benchmarkFlag: 24
@@ -303,7 +303,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 3
   HofX: HofX
   benchmarkFlag: 24
@@ -334,7 +334,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 4
   HofX: HofX
   benchmarkFlag: 24
@@ -366,7 +366,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 5
   HofX: HofX
   benchmarkFlag: 24
@@ -399,7 +399,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 5
   HofX: HofX
   benchmarkFlag: 24

@@ -32,7 +32,7 @@ observations:
     observation pressure:
       name: MetaData/pressure
     model pressure:
-      name: air_pressure_levels_minus_one@GeoVaLs
+      name: GeoVaLs/air_pressure_levels_minus_one
     top pressure: 10000
     pressure band half-width: 10000
     upper vector diff: 4
@@ -77,7 +77,7 @@ observations:
     observation pressure:
       name: MetaData/pressure
     model pressure:
-      name: air_pressure_levels_minus_one@GeoVaLs
+      name: GeoVaLs/air_pressure_levels_minus_one
     top pressure: 10000
     pressure band half-width: 10000
     upper vector diff: 4
@@ -104,7 +104,7 @@ observations:
     observation pressure:
       name: MetaData/pressure
     model pressure:
-      name: air_pressure_levels_minus_one@GeoVaLs
+      name: GeoVaLs/air_pressure_levels_minus_one
     top pressure: 10000
     pressure band half-width: 10000
     upper vector diff: 4

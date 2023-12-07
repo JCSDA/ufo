@@ -92,10 +92,10 @@ observations:
         name: MetaData/height
       maxvalue: 2000
     - variable:
-        name: water_area_fraction@GeoVaLs
+        name: GeoVaLs/water_area_fraction
       minvalue: 0.99
     - variable:
-        name: surface_temperature_where_sea@GeoVaLs
+        name: GeoVaLs/surface_temperature_where_sea
       minvalue: 275
   - filter: BlackList
     filter variables:

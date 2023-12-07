@@ -634,7 +634,7 @@ Assign observation error from NetCDF variance; attempt to use the 'greatest lowe
           - name: MetaData/stringVar
             method: greatest lower bound
   expectExceptionWithMessage: The 'greatest lower bound' method cannot be used for string variables
-Assign observation error from NetCDF file; no variable with the @ErrorVariance suffix:
+Assign observation error from NetCDF file; no variable with the ErrorVariance prefix:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
@@ -666,8 +666,8 @@ Assign observation error from NetCDF file; no variable with the @ErrorVariance s
             method: greatest lower bound
           - name: MetaData/stationIdentification
             method: exact
-  expectExceptionWithMessage: "No payload variable found: no variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
-Assign observation error from NetCDF file; multiple variables with the @ErrorVariance suffix:
+  expectExceptionWithMessage: "No payload variable found: no variable name begins with 'ErrorVariance/'"
+Assign observation error from NetCDF file; multiple variables with the ErrorVariance prefix:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
@@ -699,7 +699,7 @@ Assign observation error from NetCDF file; multiple variables with the @ErrorVar
             method: greatest lower bound
           - name: MetaData/stationIdentification
             method: exact
-  expectExceptionWithMessage: "Multiple payload candidates found: more than one variable name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
+  expectExceptionWithMessage: "Multiple payload candidates found: more than one variable name begins with 'ErrorVariance/'"
 Assign observation error from NetCDF file; 2D array of full covariance matrices:
   time window:
     begin: 2000-01-01T00:00:00Z
@@ -963,7 +963,7 @@ Assign observation error from CSV file; data types float, int and string; missin
           - name: MetaData/longitude
             method: exact
   expected_obserror_variance: [1, 2, 3, 4, 5, 6, 7, 8]
-Assign observation error from CSV file; no column with @ErrorVariance suffix:
+Assign observation error from CSV file; no column with ErrorVariance prefix:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
@@ -992,8 +992,8 @@ Assign observation error from CSV file; no column with @ErrorVariance suffix:
           interpolation:
           - name: MetaData/stringVar
             method: exact
-  expectExceptionWithMessage: "No payload column found: no column name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
-Assign observation error from CSV file; multiple columns with @ErrorVariance suffix:
+  expectExceptionWithMessage: "No payload column found: no column name begins with 'ErrorVariance/'"
+Assign observation error from CSV file; multiple columns with ErrorVariance prefix:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
@@ -1022,8 +1022,8 @@ Assign observation error from CSV file; multiple columns with @ErrorVariance suf
           interpolation:
           - name: MetaData/stringVar
             method: exact
-  expectExceptionWithMessage: "Multiple payload candidates found: more than one column name begins with 'ErrorVariance/' or ends with '@ErrorVariance'"
-Assign observation error from CSV file; string data in column with @ErrorVariance suffix:
+  expectExceptionWithMessage: "Multiple payload candidates found: more than one column name begins with 'ErrorVariance/'"
+Assign observation error from CSV file; string data in column with ErrorVariance prefix:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
@@ -1053,7 +1053,7 @@ Assign observation error from CSV file; string data in column with @ErrorVarianc
           - name: MetaData/stringVar
             method: exact
   expectExceptionWithMessage: The payload column must contain numeric data
-Assign observation error from CSV file; datetime data in column with @ErrorVariance suffix:
+Assign observation error from CSV file; datetime data in column with ErrorVariance prefix:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z

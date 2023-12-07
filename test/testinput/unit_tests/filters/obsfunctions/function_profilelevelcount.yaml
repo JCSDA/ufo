@@ -21,7 +21,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: DerivedMetaData/number_of_levels
+    - name: DerivedMetaData/numberOfLevels
       type: int
       function:
         name: IntObsFunction/ProfileLevelCount
@@ -32,9 +32,9 @@ observations:
               is_in: 1
   compareVariables:
   - test:
-      name: number_of_levels@DerivedMetaData
+      name: DerivedMetaData/numberOfLevels
     reference:
-      name: number_of_levels@TestReference
+      name: TestReference/numberOfLevels
 
 - obs space:
     name: Profile level count, where clause not used
@@ -54,13 +54,13 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: DerivedMetaData/number_of_levels
+    - name: DerivedMetaData/numberOfLevels
       type: int
       function:
         name: IntObsFunction/ProfileLevelCount
   compareVariables:
   - test:
-      name: DerivedMetaData/number_of_levels
+      name: DerivedMetaData/numberOfLevels
     reference:
       name: TestReference/number_of_levels_without_where
 
@@ -78,7 +78,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: DerivedMetaData/number_of_levels
+    - name: DerivedMetaData/numberOfLevels
       type: int
       function:
         name: IntObsFunction/ProfileLevelCount
@@ -107,7 +107,7 @@ observations:
   obs filters:
   - filter: Variable Assignment
     assignments:
-    - name: DerivedMetaData/number_of_levels
+    - name: DerivedMetaData/numberOfLevels
       type: int
       function:
         name: IntObsFunction/ProfileLevelCount
@@ -122,7 +122,7 @@ observations:
           where operator: or
   compareVariables:
   - test:
-      name: DerivedMetaData/number_of_levels
+      name: DerivedMetaData/numberOfLevels
     reference:
       # expect all locations to be selected
       name: TestReference/number_of_levels_without_where

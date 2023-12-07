@@ -100,22 +100,22 @@ void testAllFromGroupFor(const std::string &funcName,
 // Test that ufo::Variables::allFromGroup() gets variables from the functions
 void testAllFromGroup() {
   Variables vars;
-  vars += Variable("height@GeoVaLs");
-  vars += Variable("latitude@MetaData");
+  vars += Variable("GeoVaLs/height");
+  vars += Variable("MetaData/latitude");
   vars += Variable("temperature@ObsValue");
-  vars += Variable("longitude@MetaData");
+  vars += Variable("MetaData/longitude");
 
   const eckit::Configuration &conf = ::test::TestEnvironment::config();
-  testAllFromGroupFor("Conditional@ObsFunction",
+  testAllFromGroupFor("ObsFunction/Conditional",
                       eckit::LocalConfiguration(conf, "float conditional"),
                       vars);
-  testAllFromGroupFor("Conditional@IntObsFunction",
+  testAllFromGroupFor("IntObsFunction/Conditional",
                       eckit::LocalConfiguration(conf, "int conditional"),
                       vars);
-  testAllFromGroupFor("Conditional@StringObsFunction",
+  testAllFromGroupFor("StringObsFunction/Conditional",
                       eckit::LocalConfiguration(conf, "string conditional"),
                       vars);
-  testAllFromGroupFor("Conditional@DateTimeObsFunction",
+  testAllFromGroupFor("DateTimeObsFunction/Conditional",
                       eckit::LocalConfiguration(conf, "datetime conditional"),
                       vars);
 }
@@ -132,23 +132,23 @@ void testHasGroupFor(const std::string &funcName,
 // Test that ufo::Variables::hasGroup() works for functions
 void testHasGroup() {
   ufo::Variables vars;
-  vars += Variable("latitude@MetaData");
-  vars += Variable("longitude@MetaData");
+  vars += Variable("MetaData/latitude");
+  vars += Variable("MetaData/longitude");
 
   EXPECT(vars.hasGroup("MetaData"));
   EXPECT(!vars.hasGroup("ObsValue"));
 
   const eckit::Configuration &conf = ::test::TestEnvironment::config();
-  testHasGroupFor("Conditional@ObsFunction",
+  testHasGroupFor("ObsFunction/Conditional",
                   eckit::LocalConfiguration(conf, "float conditional"),
                   vars);
-  testHasGroupFor("Conditional@IntObsFunction",
+  testHasGroupFor("IntObsFunction/Conditional",
                   eckit::LocalConfiguration(conf, "int conditional"),
                   vars);
-  testHasGroupFor("Conditional@StringObsFunction",
+  testHasGroupFor("StringObsFunction/Conditional",
                   eckit::LocalConfiguration(conf, "string conditional"),
                   vars);
-  testHasGroupFor("Conditional@DateTimeObsFunction",
+  testHasGroupFor("DateTimeObsFunction/Conditional",
                   eckit::LocalConfiguration(conf, "datetime conditional"),
                   vars);
 }

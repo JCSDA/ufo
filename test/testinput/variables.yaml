@@ -1,16 +1,16 @@
 ---
 test variables:
   # ioda-v1-style variable names
-  - name: brightness_temperature@ObsValue
+  - name: ObsValue/brightness_temperature
     channels: 1, 4-5
     reference names: [brightness_temperature_1, brightness_temperature_4, brightness_temperature_5]
     reference group: ObsValue
     reference full name: ObsValue/brightness_temperature
-  - name: latitude@MetaData
+  - name: MetaData/latitude
     reference names: [latitude]
     reference group: MetaData
     reference full name: MetaData/latitude
-  - name: optical_thickness_of_atmosphere_layer@ObsDiag
+  - name: ObsDiag/optical_thickness_of_atmosphere_layer
     channels: 23-25
     reference names: [optical_thickness_of_atmosphere_layer_23, optical_thickness_of_atmosphere_layer_24, optical_thickness_of_atmosphere_layer_25]
     reference group: ObsDiag
@@ -45,36 +45,36 @@ oops variables:
   - variables: ['var']
     channels: 3-5,8
     reference names: ['var_3', 'var_4', 'var_5', 'var_8']
-# Options passed to Conditional@ObsFunction. The test uses them to verify that when a Variables
+# Options passed to ObsFunction/Conditional. The test uses them to verify that when a Variables
 # object contains a variable from the ObsFunction group, the results produced by its has() and
 # allFromGroup() functions include variables needed by the ObsFunction itself (e.g.
-# eastward_wind@ObsValue in the example below).
+# ObsValue /eastward_wind in the example below).
 float conditional:
   cases:
   - where:
     - variable:
-        name: eastward_wind@ObsValue
+        name: ObsValue/eastward_wind
       minvalue: 10
     value: 1.5
-# Same for Conditional@IntObsFunction, and so on.
+# Same for IntObsFunction/Conditional, and so on.
 int conditional:
   cases:
   - where:
     - variable:
-        name: eastward_wind@ObsValue
+        name: ObsValue/eastward_wind
       minvalue: 10
     value: 1
 string conditional:
   cases:
   - where:
     - variable:
-        name: eastward_wind@ObsValue
+        name: ObsValue/eastward_wind
       minvalue: 10
     value: XYZ
 datetime conditional:
   cases:
   - where:
     - variable:
-        name: eastward_wind@ObsValue
+        name: ObsValue/eastward_wind
       minvalue: 10
     value: 2000-01-01T00:00:00Z

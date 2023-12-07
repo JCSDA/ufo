@@ -582,7 +582,7 @@ observations:
     action:
       name: assign error
       error function:
-        name: ObsErrorModelStepwiseLinear@ObsFunction
+        name: ObsFunction/ObsErrorModelStepwiseLinear
         options:
           xvar:
             name: MetaData/pressure

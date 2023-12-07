@@ -34,7 +34,7 @@ observations:
     flagBasicChecksFail: true
     where:
     - variable:
-        name: test_id@MetaData
+        name: MetaData/test_id
       is_in: 0
   HofX: HofX
   benchmarkFlag: 24
