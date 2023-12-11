@@ -45,6 +45,7 @@
 #include "ufo/filters/ProfileAverageObsToModLevels.h"
 #include "ufo/filters/ProfileBackgroundCheck.h"
 #include "ufo/filters/ProfileFewObsCheck.h"
+#include "ufo/filters/ProfileMaxDifferenceCheck.h"
 #include "ufo/filters/ProfileUnFlagObsCheck.h"
 #include "ufo/filters/QCmanager.h"
 #include "ufo/filters/SatName.h"
@@ -144,6 +145,8 @@ void instantiateObsFilterFactory() {
            ProfileBackgroundCheckMaker("Profile Background Check");
   static oops::interface::FilterMaker<ObsTraits, ProfileFewObsCheck>
            ProfileFewObsCheckMaker("Profile Few Observations Check");
+  static oops::interface::FilterMaker<ObsTraits, ProfileMaxDifferenceCheck>
+           ProfileMaxDifferenceCheckMaker("Profile Max Difference Check");
   static oops::interface::FilterMaker<ObsTraits, ProfileUnFlagObsCheck>
            ProfileUnFlagObsCheckMaker("Profile Unflag Observations Check");
   static oops::interface::FilterMaker<ObsTraits, BlackList>

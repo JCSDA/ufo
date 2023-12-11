@@ -93,6 +93,8 @@ set ( filters_files
       ProfileBackgroundCheck.h
       ProfileFewObsCheck.cc
       ProfileFewObsCheck.h
+      ProfileMaxDifferenceCheck.cc
+      ProfileMaxDifferenceCheck.h
       ProfileUnFlagObsCheck.cc
       ProfileUnFlagObsCheck.h
       SatName.h

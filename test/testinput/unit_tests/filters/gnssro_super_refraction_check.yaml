@@ -31,6 +31,7 @@ observations:
     - name: srCheckMF
     - name: srCheckImpp
     - name: srCheckImppProfile
+    - name: srCheckProfMaxDiff
   obs post filters:
   - filter: Obs Refractivity Gradient Check
     filter variables:
@@ -57,6 +58,19 @@ observations:
     action:
       name: set
       flag: srCheckImppProfile
+  - filter: Profile Max Difference Check
+    filter variables:
+    - name: bendingAngle
+    variable:
+      name: HofX/bendingAngle
+    observation height:
+      name: MetaData/impactHeightRO
+    max check height: 18000
+    threshold: 0.0055
+    bin size: 1000
+    action:
+      name: set
+      flag: srCheckProfMaxDiff
   compareVariables:                       # test output matches precalculated values
   - reference:
       name: TestReference/srCheckMF
@@ -72,4 +86,9 @@ observations:
       name: TestReference/srCheckImppProfile
     test:
       name: DiagnosticFlags/srCheckImppProfile/bendingAngle
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/srCheckProfMaxDiff
+    test:
+      name: DiagnosticFlags/srCheckProfMaxDiff/bendingAngle
     absTol: 1.0e-5
