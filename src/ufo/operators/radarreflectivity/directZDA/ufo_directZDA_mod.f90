@@ -479,7 +479,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
           call calcMDR()
           call calcMu()
           if (firstcalled) then
-             CALL calcConstants()
+!             CALL calcConstants()
              firstcalled = .false.
           end if
             
