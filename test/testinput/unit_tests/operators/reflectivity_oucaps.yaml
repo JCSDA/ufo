@@ -1,0 +1,53 @@
+time window:
+  begin: 2022-05-12T21:00:00Z
+  end: 2022-05-13T00:00:00Z
+
+# Test Thompson microphysics reflectivity operator with variational method (option 108)
+observations:
+- obs operator:
+    name: DirectZDA
+    microphysics option: Thompson
+    use variational method: true
+    vertical coordinate: geopotential_height
+  obs space:
+    name: Radar_Reflectivity
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs_radar_mrms_202205122200.nc
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: hofx108_radar_mrms_202205122200.nc
+    simulated variables: [reflectivity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_radar_mrms_202205122200.nc
+  vector ref: Reference_TM_VarOP
+  tolerance: 1.e-6
+  linear obs operator test:
+    coef TL: 1.e-6
+    iterations TL: 3
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-13
+
+# Now test the option of disabling variational method (option 109)
+- obs operator:
+    name: DirectZDA
+    microphysics option: Thompson
+    use variational method: False
+    vertical coordinate: geopotential_height
+  obs space:
+    name: Radar_Reflectivity2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs_radar_mrms_202205122200.nc
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: hofx109_radar_mrms_202205122200.nc
+    simulated variables: [reflectivity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_radar_mrms_202205122200.nc
+  vector ref: Reference_TM_EnKFOP
+  tolerance: 1.e-6

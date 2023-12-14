@@ -29,8 +29,8 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsAodMetOfficeTLAD> makerAodMetOfficeTL_("AodMetOffice");
 // -----------------------------------------------------------------------------
 
-ObsAodMetOfficeTLAD::ObsAodMetOfficeTLAD(const ioda::ObsSpace & odb, const Parameters_ &params)
-  : LinearObsOperatorBase(odb), varin_(), kMatrix_(), trajInit_(false)
+ObsAodMetOfficeTLAD::ObsAodMetOfficeTLAD(const ioda::ObsSpace & odb, const Parameters_ &params):
+  LinearObsOperatorBase(odb), varin_(), kMatrix_(), trajInit_(false)
 {
   // 1. Read in number of dust bins and extinction coefficients from yaml file.
   NDustBins_ = params.NDustBins;  // number of dust bins
