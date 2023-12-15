@@ -203,7 +203,6 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   integer :: iret_coef4dbzfwrd
 
 ! variables added for radarZ
-  logical :: firstcalled
   real(kind_real),dimension(nscalar) :: qscalar
   type(t_obs_dual) :: obs_dual
   type(t_para_dsd) :: var_dsd
@@ -478,11 +477,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
           call set_dsd_para()
           call calcMDR()
           call calcMu()
-          if (firstcalled) then
-!             CALL calcConstants()
-             firstcalled = .false.
-          end if
-            
+
           obs_dual = init_refl()
           var_dsd = init_para_dsd()
           ta = T1D ! pass air temperature to radarZ
