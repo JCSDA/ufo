@@ -19,8 +19,8 @@ extern "C" {
 
   void lam_domaincheck_esg_f90(const float &, const float &, const float &, const float &,
                                const float &, const int &, const int &,
-                               const float &, const float &, const float &, const float &,
-                               int &);
+                               const float &, const float &, const int &, const float &,
+                               const float &, int &);
 
   void lam_domaincheck_circle_f90(const float &, const float &, const float &,
                                   const float &, const float &, int &);

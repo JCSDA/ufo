@@ -41,23 +41,24 @@ contains
 !!
 
 subroutine lam_domaincheck_esg_c(c_a, c_k, c_plat, c_plon, c_pazi, c_npx, c_npy,&
-                                 c_dx, c_dy, c_lat, c_lon, c_mask) &
+                                 c_dx, c_dy, c_nbdy, c_lat, c_lon, c_mask) &
                                  bind(c, name='lam_domaincheck_esg_f90')
   use esg_grid_mod, only: gtoxm_ak_rr
   implicit none
   real(c_float),  intent(in   ) :: c_a, c_k, c_plat, c_plon, c_pazi, c_dx, c_dy
   real(c_float),  intent(in   ) :: c_lat, c_lon
-  integer(c_int), intent(in   ) :: c_npx, c_npy
+  integer(c_int), intent(in   ) :: c_npx, c_npy, c_nbdy
   integer(c_int), intent(inout) :: c_mask
   real(kind_real), dimension(2) :: xm
   logical :: failure
 
   real(kind_real) :: a, k, plat, plon, pazi, dx, dy, lat, lon
-  integer :: npx, npy
+  integer :: npx, npy, nbdy
 
   !! convert integers
   npx = int(c_npx)
   npy = int(c_npy)
+  nbdy = int(c_nbdy)
   !! convert from C to kind_real
   a = real(c_a, kind_real)
   k = real(c_k, kind_real)
@@ -77,7 +78,9 @@ subroutine lam_domaincheck_esg_c(c_a, c_k, c_plat, c_plon, c_pazi, c_npx, c_npy,
 
   ! use xm to determine if mask is 1 (good) or 0 (bad)
   c_mask = 0
-  if ((abs(xm(1)) < npx/2) .and. (abs(xm(2)) < npy/2) .and. (.not. failure)) then
+!  if ((abs(xm(1)) < npx/2) .and. (abs(xm(2)) < npy/2) .and. (.not. failure)) then
+! Add a parameter "nbdy" to control the depth of model grid-points from the lateral boundary where observations are rejected.
+   if ((abs(xm(1)) < npx/2-nbdy) .and. (abs(xm(2)) < npy/2-nbdy) .and. (.not. failure)) then
     c_mask = 1
   end if
 

@@ -62,6 +62,7 @@ LAMDomainCheck::~LAMDomainCheck() {}
 * * dy - grid spacing in y (degrees, default 1)
 * * npx - number of gridpoints in x (default 2)
 * * npy - number of gridpoints in y (default 2)
+* * nbdy - number of gridpoints from lateral boundary where observations are rejected in this buffer zone (default 0)
 * If using FV3-LAM, the above values are provided in the netCDF grid file attributes,
 * but this option will work for any regional model that utilizes the
 * Extended Schmidt Gnomonic grid developed by R. Jim Purser:
@@ -100,9 +101,10 @@ void LAMDomainCheck::compute(const ObsFilterData & in,
     const float dy = options_.esg_dy.value();
     const int npx = options_.esg_npx.value();
     const int npy = options_.esg_npy.value();
+    const int nbdy = options_.esg_nbdy.value();
     for (size_t jj = 0; jj < nlocs; ++jj) {
       lam_domaincheck_esg_f90(a, k, plat, plon, pazi, npx, npy,
-                         dx, dy, latitude[jj], longitude[jj], iidx[jj]);
+                         dx, dy, nbdy, latitude[jj], longitude[jj], iidx[jj]);
       out[0][jj] = static_cast<float>(iidx[jj]);
     }
   } else if (options_.mapproj.value() == "circle") {

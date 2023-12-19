@@ -38,6 +38,7 @@ class LAMDomainCheckParameters : public oops::Parameters {
   oops::Parameter<float> esg_dy{"dy", 1.0f, this};
   oops::Parameter<int> esg_npx{"npx", 2, this};
   oops::Parameter<int> esg_npy{"npy", 2, this};
+  oops::Parameter<int> esg_nbdy{"nbdy", 0, this};
   oops::Parameter<bool> save{"save", false, this};
 
 // for a circle domain on sphere with central lat/lon in degree
