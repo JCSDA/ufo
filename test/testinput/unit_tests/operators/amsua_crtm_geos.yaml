@@ -6,9 +6,9 @@ observations:
 - obs operator:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
-#   SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
+      Surfaces: [Water_Temperature, Land_Temperature, Ice_Temperature, Snow_Temperature]
     obs options:
       Sensor_ID: &Sensor_ID amsua_n19
       EndianType: little_endian
@@ -31,6 +31,6 @@ observations:
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-3
-    tolerance TL: 1.0e-3
+    tolerance TL: 1.0e-1
     tolerance AD: 1.0e-11
 

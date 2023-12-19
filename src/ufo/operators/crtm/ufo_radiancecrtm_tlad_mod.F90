@@ -677,6 +677,7 @@ type(ufo_geoval), pointer :: geoval_d
 
    select case(self%conf%Surfaces(jspec))
 
+      ! Surface Temperature Where Sea / Water Temperature
       case(var_sfc_wtmp)
 
          ! Multiply by Jacobian and add to hofx
@@ -690,7 +691,55 @@ type(ufo_geoval), pointer :: geoval_d
                enddo
             end if
          enddo
+
+      ! Surface Temperature Where Land / Land Temperature
+      case(var_sfc_ltmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%land_temperature * &
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+
+      ! Surface Temperature Where Ice / Ice Temperature
+      case(var_sfc_itmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%ice_temperature * &
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+
+      ! Surface Temperature Where Snow / Snow Temperature
+      case(var_sfc_stmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do jchannel = 1, size(self%channels)
+                  jlevel = 1
+                  hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
+                        self%sfc_K(jchannel,jprofile)%snow_temperature * &
+                        geoval_d%vals(jlevel,jprofile)
+               enddo
+            end if
+         enddo
+
+      ! Surface Wind Speed / Wind Speed
       case(var_sfc_wspeed)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -702,7 +751,10 @@ type(ufo_geoval), pointer :: geoval_d
                enddo
             end if
          enddo
+
+      ! Surface Wind From Direction / Wind Direction
       case(var_sfc_wdir)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -714,7 +766,10 @@ type(ufo_geoval), pointer :: geoval_d
                enddo
             end if
          enddo
+
+      ! Sea Surface Salinity / Salinity
       case(var_sfc_sss)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -850,7 +905,9 @@ real(c_double) :: missing
 
    select case(self%conf%Surfaces(jspec))
 
+      ! Surface Temperature Where Sea / Water Temperature
       case(var_sfc_wtmp)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -864,7 +921,61 @@ real(c_double) :: missing
                enddo
             end if
          enddo
+
+      ! Surface Temperature Where Land / Land Temperature
+      case(var_sfc_ltmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%land_temperature * &
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+
+      ! Surface Temperature Where Ice / Ice Temperature
+      case(var_sfc_itmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%ice_temperature * &
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+
+      ! Surface Temperature Where Snow / Snow Temperature
+      case(var_sfc_stmp)
+
+         ! Multiply by Jacobian and add to hofx
+         do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do jchannel = 1, size(self%channels)
+                  if (hofx(jchannel, jprofile) /= missing) then
+                     jlevel = 1
+                     geoval_d%vals(jlevel, jprofile) = geoval_d%vals(jlevel,jprofile) + &
+                          self%sfc_K(jchannel,jprofile)%snow_temperature * &
+                          hofx(jchannel,jprofile)
+                  endif
+               enddo
+            end if
+         enddo
+
+      ! Surface Wind Speed / Wind Speed
       case(var_sfc_wspeed)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -878,7 +989,10 @@ real(c_double) :: missing
                enddo
             end if
          enddo
+
+      ! Surface Wind From Direction / Wind Direction
       case(var_sfc_wdir)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -892,7 +1006,10 @@ real(c_double) :: missing
                enddo
             end if
          enddo
+
+      ! Sea Surface Salinity / Salinity
       case(var_sfc_sss)
+
          ! Multiply by Jacobian and add to hofx
          do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then

@@ -131,8 +131,8 @@ END INTERFACE qsmith
        , VOLUME_MIXING_RATIO_UNITS & !O3
         ]
 
- ! I. Moradi: MAX_VALID_CLOUD_CATEGORIES is defined to declare the following variables that can 
- ! work CRTM V3.0 and greater of the CRTM interface 
+ ! I. Moradi: MAX_VALID_CLOUD_CATEGORIES is defined to declare the following variables that can
+ ! work CRTM V3.0 and greater of the CRTM interface
  ! generally requires some considerations in terms of how clouds are defined
  integer, parameter :: MAX_VALID_CLOUD_CATEGORIES = 25  ! 6 default + 19 from DDA table
 
@@ -143,13 +143,13 @@ END INTERFACE qsmith
            var_clh,    var_cls,    var_cls,    var_cls,    var_cls, &      ! 5-10
            var_cls,    var_cli,    var_cls,    var_cls,    var_cls, &      ! 11-15
            var_cls,    var_cls,    var_cls,    var_cls,    var_clh, &      ! 16-20
-           var_clg,    var_cls,    var_clh,    var_cli,    var_clw, &      ! 21-25 
+           var_clg,    var_cls,    var_clh,    var_cli,    var_clw, &      ! 21-25
            var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, &   ! 1- 5
            var_clhefr, var_clsefr, var_clsefr, var_clsefr, var_clsefr, &   ! 5-10
            var_clsefr, var_cliefr, var_clsefr, var_clsefr, var_clsefr, &   ! 11-15
            var_clsefr, var_clsefr, var_clsefr, var_clsefr, var_clhefr, &   ! 16-20
            var_clgefr, var_clsefr, var_clhefr, var_cliefr, var_clwefr] &   ! 21-25
-           , [MAX_VALID_CLOUD_CATEGORIES,2] )           
+           , [MAX_VALID_CLOUD_CATEGORIES,2] )
 
  ! copy of CLOUD_CATEGORY_NAME defined in CRTM_Cloud_Define
  character(len=MAXVARLEN), parameter :: &
@@ -157,46 +157,49 @@ END INTERFACE qsmith
          CLOUD_CATEGORY_NAME(1:N_VALID_CLOUD_CATEGORIES)
 
  ! The hydrometeor types from the DDA tables are defined using corresponding integer
- ! values so  the ufo interface does not break for the current version of CRTM 
+ ! values so  the ufo interface does not break for the current version of CRTM
  ! implemented in the UFO
  integer, parameter :: &
       CRTM_Cloud_Id(MAX_VALID_CLOUD_CATEGORIES) = &
-         [ WATER_CLOUD                   , &   
-           ICE_CLOUD                     , &   
-           RAIN_CLOUD                    , &   
-           SNOW_CLOUD                    , &   
-           GRAUPEL_CLOUD                 , &   
-           HAIL_CLOUD                    , &   
-           PlateType1                    , &   
-           ColumnType1                   , &   
-           SixBulletRosette              , &   
-           Perpendicular4_BulletRosette  , &   
-           Flat3_BulletRosette           , &   
-           IconCloudIce                  , &   
-           SectorSnowflake               , &   
-           EvansSnowAggregate            , &   
-           EightColumnAggregate          , &   
-           LargePlateAggregate           , &   
-           LargeColumnAggregate          , &   
-           LargeBlockAggregate           , &   
-           IconSnow                      , &   
-           IconHail                      , &   
-           GemGraupel                    , &   
-           GemSnow                       , &   
-           GemHail                       , &   
-           IceSphere                     , &   
-           LiquidSphere                  ]     
+         [ WATER_CLOUD                   , &
+           ICE_CLOUD                     , &
+           RAIN_CLOUD                    , &
+           SNOW_CLOUD                    , &
+           GRAUPEL_CLOUD                 , &
+           HAIL_CLOUD                    , &
+           PlateType1                    , &
+           ColumnType1                   , &
+           SixBulletRosette              , &
+           Perpendicular4_BulletRosette  , &
+           Flat3_BulletRosette           , &
+           IconCloudIce                  , &
+           SectorSnowflake               , &
+           EvansSnowAggregate            , &
+           EightColumnAggregate          , &
+           LargePlateAggregate           , &
+           LargeColumnAggregate          , &
+           LargeBlockAggregate           , &
+           IconSnow                      , &
+           IconHail                      , &
+           GemGraupel                    , &
+           GemSnow                       , &
+           GemHail                       , &
+           IceSphere                     , &
+           LiquidSphere                  ]
 
 
 ! Surface Variables
 
  character(len=MAXVARLEN), parameter :: &
-      UFO_Surfaces(4) = &
-         [ var_sfc_wtmp, var_sfc_wspeed, var_sfc_wdir, var_sfc_sss]
+      UFO_Surfaces(7) = &
+         [ var_sfc_wtmp, var_sfc_ltmp, var_sfc_itmp, var_sfc_stmp, var_sfc_wspeed, var_sfc_wdir, &
+           var_sfc_sss ]
 
  character(len=MAXVARLEN), parameter :: &
-      CRTM_Surfaces(4) = &
-         [  character(len=MAXVARLEN):: 'Water_Temperature', 'Wind_Speed', 'Wind_Direction', 'Salinity' ]
+      CRTM_Surfaces(7) = &
+         [  character(len=MAXVARLEN):: 'Water_Temperature', 'Land_Temperature', 'Ice_Temperature', &
+                                       'Snow_Temperature', 'Wind_Speed', &
+                                       'Wind_Direction', 'Salinity' ]
 
  character(len=MAXVARLEN), parameter :: &
       ValidSurfaceWindGeoVars(2) = [character(len=MAXVARLEN) :: 'vector', 'uv']
@@ -636,6 +639,7 @@ real(kind_real) :: missing_r
        (sfc(jprofile)%Water_Coverage > 0.0)) then
      Options(jprofile)%Skip_Profile = .TRUE.
    endif
+
  end do profile_loop
 
 end subroutine ufo_crtm_skip_profiles
@@ -1085,7 +1089,7 @@ character(len=6) :: chan
      varname = 'ReflectivityAttenuated_' // trim(chan)
  else
      varname = 'brightnessTemperature_' // trim(chan)
- endif 
+ endif
 
 end subroutine get_var_name
 
