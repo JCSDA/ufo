@@ -18,10 +18,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n19_obs_2020110112_m.nc4
-#    obsdataout:
-#      engine:
-#        type: H5File
-#        obsfile: Data/amsua_n19_obs_2020110112_qc_filters_out.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_2020110112_userDefinedFlags.nc4
     simulated variables: [brightnessTemperature]
     channels: &all_channels 1-15
   geovals:
@@ -45,6 +45,25 @@ observations:
         order: 2
       - name: scan_angle
   obs filters:
+  # Must create the flag
+  - filter: Create Diagnostic Flags
+    filter variables:
+    - name: brightnessTemperature
+      channels: *all_channels
+    flags:
+    - name: CLW_Retrieval_ObsValue_Check
+      initial value: false
+    - name: CLW_Retrieval_HofX_Check
+      initial value: false
+    - name: Hydrometeor_Check
+      initial value: false
+    - name: ObsErrorBound_Check
+      initial value: false
+    - name: InterChannelConsistency_Check
+      initial value: false
+    - name: UseFlag_Check
+      initial value: false
+
   - filter: BlackList
     filter variables:
     - name: brightnessTemperature
@@ -86,8 +105,11 @@ observations:
         clwret_ch314: 2
         clwret_types: [ObsValue]
     maxvalue: 999.0
-    action:
-      name: reject
+    actions:
+    - name: set
+      flag: CLW_Retrieval_ObsValue_Check
+      ignore: rejected observations
+    - name: reject
 #  CLW Retrieval Check
   - filter: Bounds Check
     filter variables:
@@ -100,8 +122,11 @@ observations:
         clwret_ch314: 2
         clwret_types: [HofX]
     maxvalue: 999.0
-    action:
-      name: reject
+    actions:
+    - name: set
+      flag: CLW_Retrieval_HofX_Check
+      ignore: rejected observations
+    - name: reject
 #  Hydrometeor Check (cloud/precipitation affected chanels)
   - filter: Bounds Check
     filter variables:
@@ -145,8 +170,11 @@ observations:
                      0.300,  0.230,  0.250,  0.250,  0.350,
                      0.400,  0.550,  0.800,  3.000, 18.000]
     maxvalue: 0.0
-    action:
-      name: reject
+    actions:
+    - name: set
+      flag: Hydrometeor_Check
+      ignore: rejected observations
+    - name: reject
 #  Topography check
   - filter: BlackList
     filter variables:
@@ -298,8 +326,11 @@ observations:
         obserr_bound_max: [4.5, 4.5, 4.5, 2.5, 2.0,
                            2.0, 2.0, 2.0, 2.0, 2.0,
                            2.5, 3.5, 4.5, 4.5, 4.5]
-    action:
-      name: reject
+    actions:
+    - name: set
+      flag: ObsErrorBound_Check
+      ignore: rejected observations
+    - name: reject
 #  Inter-channel check
   - filter: Bounds Check
     filter variables:
@@ -315,8 +346,11 @@ observations:
                     1, -1, -1,  1,  1,
                     1,  1,  1, -1,  1 ]
     maxvalue: 1.0e-12
-    action:
-      name: reject
+    actions:
+    - name: set
+      flag: InterChannelConsistency_Check
+      ignore: rejected observations
+    - name: reject
 #  Useflag check
   - filter: Bounds Check
     filter variables:
@@ -331,8 +365,10 @@ observations:
                     1, -1, -1,  1,  1,
                     1,  1,  1, -1,  1 ]
     minvalue: 1.0e-12
-    action:
-      name: reject
+    actions:
+    - name: set
+      flag: UseFlag_Check
+    - name: reject
 # passedBenchmark: 76 # crtm v2.3
 # passedBenchmark: 81 # crtm v2.4
   passedBenchmark: 86 # crtm v3.0
