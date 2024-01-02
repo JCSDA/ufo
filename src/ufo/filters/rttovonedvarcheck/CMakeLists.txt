@@ -8,6 +8,7 @@ set ( rttovonedvarcheck_files
     RTTOVOneDVarCheck.cc
     RTTOVOneDVarCheck.interface.F90
     RTTOVOneDVarCheck.interface.h
+    RTTOVOneDVarCheckParameters.h
     ufo_rttovonedvarcheck_constants_mod.f90
     ufo_rttovonedvarcheck_minimize_jacobian_mod.f90
     ufo_rttovonedvarcheck_minimize_ml_mod.f90
