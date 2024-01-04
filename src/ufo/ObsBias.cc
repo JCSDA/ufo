@@ -66,13 +66,18 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
     varIndexNoBC_.push_back(index);
   }
 
-  if (varIndexNoBC_.empty()) {
-    oops::Log::info() << "All variables / channels are bias-corrected." << std::endl;
+  if (prednames_.size() == 0) {
+    oops::Log::info() << "No bias-correction is performed for this ObsSpace." << std::endl;
+  } else if (varIndexNoBC_.empty()) {
+    oops::Log::info() << "All variables / channels for this ObsSpace are bias-corrected."
+                      << std::endl;
   } else if (varsNoBC == vars_) {
-    oops::Log::warning() << "None of the variables / channels is bias-corrected." << std::endl;
+    oops::Log::warning() << "None of the variables / channels for this ObsSpace is bias-corrected."
+                         << std::endl;
   } else {
-    oops::Log::info() << "The following variables / channels are not bias-corrected: "
-                      << varsNoBC << std::endl;
+    oops::Log::info()
+            << "The following variables / channels for this ObsSpace are not bias-corrected: "
+            << varsNoBC << std::endl;
   }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
