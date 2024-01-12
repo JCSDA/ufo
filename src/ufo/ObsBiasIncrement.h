@@ -1,5 +1,6 @@
 /*
  * (C) Copyright 2017-2021 UCAR
+ * (C) Crown Copyright 2024, the Met Office.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -12,6 +13,8 @@
 
 #include <string>
 #include <vector>
+
+#include "eckit/mpi/Comm.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
@@ -45,8 +48,9 @@ class ObsBiasIncrement : public util::Printable {
   double dot_product_with(const ObsBiasIncrement &) const;
 
   // I/O and diagnostics
-  void read(const eckit::Configuration &) {}
-  void write(const eckit::Configuration &) const {}
+  void read(const eckit::Configuration &);  // For tests only, due to lack of appropriate use case;
+                                            // hence it checks for YAML key "test input file"
+  void write(const eckit::Configuration &) const;
   double norm() const;
 
   /// Return bias coefficient increments
@@ -69,6 +73,13 @@ class ObsBiasIncrement : public util::Printable {
  private:
   void print(std::ostream &) const;
 
+  /// index in flattened biascoeffsinc_ for record \p jrec, variable \p jvar
+  /// and variable predictor \p jpred
+  size_t index(size_t jrec, size_t jvar, size_t jpred) const {
+    return jrec * (vars_.size() * prednames_.size())
+             + jvar * prednames_.size() + jpred;
+  }
+
   /// Bias coefficient increments
   Eigen::VectorXd biascoeffsinc_;
   std::vector<std::string> prednames_;
@@ -79,6 +90,15 @@ class ObsBiasIncrement : public util::Printable {
 
   /// List of simulated variables
   oops::Variables vars_;
+
+  /// Name of the output file of the bias coeff increments
+  std::string outputFile_;
+
+  /// MPI rank, used to determine whether the task should output bias coeff increments to a file
+  size_t rank_;
+
+  /// MPI communicator used in time decomposition for 4DEnVar and weak-constraint 4DVar
+  const eckit::mpi::Comm & commTime_;
 };
 
 // -----------------------------------------------------------------------------

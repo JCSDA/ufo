@@ -1,5 +1,5 @@
 /*
- * (C) Crown copyright 2021, Met Office
+ * (C) Crown Copyright 2024, the Met Office.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -105,6 +105,9 @@ class ObsBiasParameters : public oops::Parameters {
   /// Path to a NetCDF file containing final values of the coefficients of predictors used
   /// in VarBC.
   oops::OptionalParameter<std::string> outputFile{"output file", this};
+  /// Path to a NetCDF file containing increments of the coefficients of predictors used
+  /// in VarBC.
+  oops::OptionalParameter<std::string> outputFileInc{"increment output file", this};
   /// Options controlling the covariance matrix.
   oops::OptionalParameter<ObsBiasCovarianceParameters> covariance{"covariance", this};
 };

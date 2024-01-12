@@ -18,6 +18,7 @@ observations:
   obs bias:  # test reading coefficients for 2 predictors; coeffs are zero for all channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test1.nc4
+    increment output file: Data/satbias_amsua_n19_increment_test1.nc4
     variational bc:
       predictors:
       - name: cosine_of_latitude_times_orbit_node
@@ -41,6 +42,7 @@ observations:
   obs bias:  # test reading coefficients for 1 predictor (all channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test2.nc4
+    increment output file: Data/satbias_amsua_n19_increment_test2.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -63,6 +65,7 @@ observations:
   obs bias:  # test reading coefficients for 1 predictor (subset of channels)
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test3.nc4
+    increment output file: Data/satbias_amsua_n19_increment_test3.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -85,6 +88,7 @@ observations:
   obs bias:  # test reading coefficients for 2 predictors and subset of channels
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test4.nc4
+    increment output file: Data/satbias_amsua_n19_increment_test4.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -109,6 +113,7 @@ observations:
              # and static (==1) coefficients for another predictor
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test5.nc4
+    increment output file: Data/satbias_amsua_n19_increment_test5.nc4
     variational bc:
       predictors:
       - name: emissivity
@@ -134,6 +139,7 @@ observations:
   obs bias:  # test reading all channels and most predictors
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     output file: Data/satbias_amsua_n19_test6.nc4
+    increment output file: Data/satbias_amsua_n19_increment_test6.nc4
     variational bc:
       predictors:
       - name: constant

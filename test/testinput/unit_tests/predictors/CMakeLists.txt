@@ -1,4 +1,5 @@
 # (C) Copyright 2022 UCAR.
+# (C) Crown Copyright 2024, the Met Office.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -92,6 +93,16 @@ ufo_add_test( NAME    test_ufo_bias_coeff_readwrite
               TIER    1
               ECBUILD
               SOURCES ../../../mains/TestUfoObsBias.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_bias_coeff_increment_readwrite
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestUfoObsBiasIncrement.cc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff.yaml"
               MPI     1
               LIBS    ufo
