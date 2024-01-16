@@ -1845,6 +1845,16 @@ if( ${rttov_FOUND} )
               LABELS  rttov operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+    ufo_add_test( NAME    test_ufo_linopr_atovs_rttov_scatt
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  rttov operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
     ufo_add_test( NAME    test_ufo_opr_iasi_rttov_ops
               TIER    1
               ECBUILD

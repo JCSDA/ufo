@@ -246,7 +246,7 @@ contains
     ! Determine the total number of radiances to simulate (nchan_sim).
     nchan_sim = nprof_sim * size(self%channels)
 
-    ! Allocate structures for RTTOV direct code (and, if needed, K code)
+    ! Allocate structures for RTTOV direct code (and, if needed, K code and any structures for RTTOV-SCATT)
     write(message,'(2A,I0,A,I0,A)')                                                   &
       trim(routine_name), ': Allocating resources for RTTOV direct code: ', nprof_sim, ' and ', nchan_sim, ' channels'
     call fckit_log%debug(message)
@@ -408,8 +408,8 @@ contains
               chanprof(1:nchan_sim),                                          &! in    LOCAL channel and profile index structure
               self % conf % rttov_opts,                                       &! in    options structure
               self % RTProf % profiles(prof_start:prof_start + nprof_sim -1), &! in    profile array
-              self % RTProf % profiles_k(1:nchan_sim),                        &! in    profile array
-              self % conf % rttov_coef_array(sensor_index),                     &! in    coefficients structure
+              self % RTProf % profiles_k(1:nchan_sim),                        &! inout profile array
+              self % conf % rttov_coef_array(sensor_index),                   &! in    coefficients structure
               self % RTProf % transmission,                                   &! inout computed transmittances
               self % RTProf % transmission_k,                                 &! inout computed transmittances
               self % RTProf % radiance,                                       &! inout computed radiances

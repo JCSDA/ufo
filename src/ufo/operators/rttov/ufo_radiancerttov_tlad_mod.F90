@@ -174,6 +174,7 @@ contains
     real(kind_real), allocatable                 :: sfc_emiss(:,:)
 
     include 'rttov_k.interface'
+    include 'rttov_scatt_ad.interface'
 
     !Initialisations
     missing = missing_value(missing)
@@ -218,6 +219,7 @@ contains
     end if
 
     ! Allocate memory for *ALL* RTTOV_K channels
+    ! If RTTOV-SCATT is being used as the obs operator then memory is allocated for profiles_k in mw_scatt too
     write(message,'(2A,I0,A)') &
       trim(routine_name), ': Allocating Trajectory resources for RTTOV K: ', self % nprofiles * self % RTprof_K % nchan_inst, ' total channels'
     call self % RTprof_K % alloc_profiles_k(errorstatus, self % conf, self % nprofiles * self % RTprof_K % nchan_inst, self % nlevels, init=.true., asw=1)
@@ -355,20 +357,40 @@ contains
       ! Call RTTOV K model
       ! --------------------------------------------------------------------------
     
-      call rttov_k(                              &
-        errorstatus,                             &! out   error flag
-        chanprof(1:nchan_sim), &! in channel and profile index structure
-        self % conf % rttov_opts,                     &! in    options structure
-        self % RTprof_K % profiles(prof_start:prof_start + nprof_sim - 1), &! in    profile array
-        self % RTprof_K % profiles_k(nchan_total + 1 : nchan_total + nchan_sim), &! in    profile array
-        self % conf % rttov_coef_array(sensor_index),                &! in    coefficients structure
-        self % RTprof_K % transmission,                            &! inout computed transmittances
-        self % RTprof_K % transmission_k,                          &! inout computed transmittances
-        self % RTprof_K % radiance,                                &! inout computed radiances
-        self % RTprof_K % radiance_k,                              &! inout computed radiances
-        calcemis    = self % RTprof_K % calcemis(1:nchan_sim),                  &! in    flag for internal emissivity calcs
-        emissivity  = self % RTprof_K % emissivity(1:nchan_sim),                &! inout input/output emissivities per channel
-        emissivity_k = self % RTprof_K % emissivity_k(1:nchan_sim))!,           &! inout input/output emissivities gradients per channel
+      if (self % conf % do_mw_scatt) then
+        call rttov_scatt_ad(                                                            &
+          errorstatus,                                                                  &! out   error flag
+          self % conf % mw_scatt % opts,                                                &! in    options structure
+          int (self % nlevels, KIND = jpim),                                                   &
+          chanprof(1:nchan_sim),                                                        &! in    LOCAL channel and profile index structure
+          self % RTprof_K % mw_scatt % freq_indices(1:nchan_sim),                       &! in    frequency indices
+          self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1),             &! in    profile array
+          self % RTProf_K % mw_scatt % profiles(prof_start:prof_start + nprof_sim -1),  &! in    scattering profile array
+          self % conf % rttov_coef_array(sensor_index),                                 &! in    coefficients structure
+          self % conf % mw_scatt % coef,                                                &! in    scatt coefficients structure
+          self % RTProf_K % calcemis(1:nchan_sim),                                      &! in    flag for internal emissivity calcs
+          self % RTProf_K % emissivity(1:nchan_sim),                                    &! inout input/output emissivities per channel
+          self % RTProf_K % profiles_k(1:nchan_sim),                                    &! inout 
+          self % RTProf_K % mw_scatt % profiles_k(1:nchan_sim),                         &! inout 
+          self % RTProf_K % emissivity_k(1:nchan_sim),                                  &! inout input/output emissivity jacs per channel
+          self % RTProf_K % radiance,                                                   &! inout computed radiances
+          self % RTProf_K % radiance_k)                                                  ! inout computed radiance jacobians
+      else
+        call rttov_k(                                                                   &
+          errorstatus,                                                                  &! out   error flag
+          chanprof(1:nchan_sim),                                                        &! in channel and profile index structure
+          self % conf % rttov_opts,                                                     &! in    options structure
+          self % RTprof_K % profiles(prof_start:prof_start + nprof_sim - 1),            &! in    profile array
+          self % RTprof_K % profiles_k(nchan_total + 1 : nchan_total + nchan_sim),      &! in    profile array
+          self % conf % rttov_coef_array(sensor_index),                                 &! in    coefficients structure
+          self % RTprof_K % transmission,                                               &! inout computed transmittances
+          self % RTprof_K % transmission_k,                                             &! inout computed transmittances
+          self % RTprof_K % radiance,                                                   &! inout computed radiances
+          self % RTprof_K % radiance_k,                                                 &! inout computed radiances
+          calcemis     = self % RTprof_K % calcemis(1:nchan_sim),                       &! in    flag for internal emissivity calcs
+          emissivity   = self % RTprof_K % emissivity(1:nchan_sim),                     &! inout input/output emissivities per channel
+          emissivity_k = self % RTprof_K % emissivity_k(1:nchan_sim))                    ! inout input/output emissivities gradients per channel
+      end if
 
       if(size(self % conf % inspect) > 0) then
         do ichan = 1, ichan_sim, self % RTprof_K % nchan_inst
@@ -405,7 +427,7 @@ contains
     call self % RTprof_K % alloc_k(errorstatus, self % conf, -1, -1, -1, asw=0)
     call self % RTprof_K % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
     call self % RTprof_K % alloc_profiles(errorstatus, self % conf, -1, -1, asw=0)
-    
+
  
     ! Set flag that the tracectory was set
     ! ------------------------------------
@@ -485,9 +507,15 @@ end subroutine ufo_radiancerttov_tlad_settraj
                   sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(:) * &
                       geoval_d % vals(1:geoval_d % nval, prof)) * self%conf%scale_fac(gas_id_watervapour) / g_to_kg
               else if (trim(varname) == var_clw) then
-                hofx(jchan, prof) = hofx(jchan, prof) + &
-                  sum(self % RTprof_K % profiles_k(ichan+jchan-1) % clw(:) * &
-                      geoval_d % vals(1:geoval_d % nval, prof))
+                if (self % conf % do_mw_scatt) then
+                  hofx(jchan, prof) = hofx(jchan, prof) + &
+                    sum(self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % clw(:) * &
+                        geoval_d % vals(1:geoval_d % nval, prof))
+                else
+                  hofx(jchan, prof) = hofx(jchan, prof) + &
+                    sum(self % RTprof_K % profiles_k(ichan+jchan-1) % clw(:) * &
+                        geoval_d % vals(1:geoval_d % nval, prof))
+                end if
               end if
             end do
           end do
@@ -595,8 +623,13 @@ end subroutine ufo_radiancerttov_tlad_settraj
                     (self % RTprof_K % profiles_k(ichan+jchan-1) % q(:) * hofx(jchan, prof)) * &
                     self%conf%scale_fac(gas_id_watervapour) / g_to_kg
                 else if (trim(varname) == var_clw) then
-                  geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
-                    self % RTprof_K % profiles_k(ichan+jchan-1) % clw(:) * hofx(jchan, prof)
+                  if (self % conf % do_mw_scatt) then
+                    geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
+                      self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % clw(:) * hofx(jchan, prof)
+                  else
+                    geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
+                      self % RTprof_K % profiles_k(ichan+jchan-1) % clw(:) * hofx(jchan, prof)
+                  end if
                 end if
               endif
             enddo
