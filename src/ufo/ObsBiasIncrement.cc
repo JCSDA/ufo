@@ -166,7 +166,7 @@ void ObsBiasIncrement::read(const eckit::Configuration & conf) {
       }
     }
   } else {
-    oops::Log::warning() << "ObsBias::prior file is NOT available, starting from ZERO"
+    oops::Log::warning() << "ObsBiasIncrement::read is not designed to be called outside tests"
                          << std::endl;
   }
 
