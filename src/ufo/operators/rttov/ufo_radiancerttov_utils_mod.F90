@@ -1427,7 +1427,7 @@ contains
       profiles(1) % sunzenangle = ob_info % solar_zenith_angle
       profiles(1) % sunazangle  = ob_info % solar_azimuth_angle
 
-      profiles(1)%skin%surftype = ob_info % surface_type
+      profiles(1) % skin % surftype = ob_info % surface_type
 
     else
 

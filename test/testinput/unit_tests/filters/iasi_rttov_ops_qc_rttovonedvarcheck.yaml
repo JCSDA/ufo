@@ -55,7 +55,7 @@ time window:
   end: 2021-01-15T03:00:00Z
 
 observations:
-- obs operator:
+- obs operator: &ObsOperator
     name: RTTOV
     Absorbers: &rttov_absorbers [Ozone]
     obs options: &rttov_options
@@ -71,7 +71,7 @@ observations:
       RTTOV_ScaleRefOzone: &RTTOV_ScaleRefOzone true
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
-  obs space:
+  obs space: &ObsSpace
     name: Test the hyperspectral retrievals
     obsdatain:
       engine:
@@ -83,7 +83,7 @@ observations:
 #     engine:
 #       type: H5File
 #       obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_out.nc4
-  geovals:
+  geovals: &GeoVaLs
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   obs bias: &ObsBias
     static bc:
@@ -166,3 +166,173 @@ observations:
       test:
         name: OneDVar/pressureAtTopOfCloud
       absTol: 1.0e-2
+    - reference:
+        name: TestReference/skinTemperature_onedvar
+      test:
+        name: OneDVar/skinTemperature
+      absTol: 1.0e-2
+# Test the hyperspectral IR with skin T read from the obsspace
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test with skin T from the ObsSpace
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_skinTobsspace_out.nc4
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+### No Channels ###
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: *all_channels
+    where:
+    - variable:
+        name: MetaData/qcf_NoChannels
+      is_in: 1
+### BlackList ###
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: *1dvar_not_used
+### Remove channels over land
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: *land_not_used
+    where:
+    - variable:
+        name: MetaData/surfaceQualifier
+      is_in: 0
+### Create a fixed skin T bias
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/skinTemperatureBias
+      type: float
+      value: 0.7
+### Create a corrected skin T
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/skinTemperature
+      type: float
+      function:
+        name: ObsFunction/LinearCombination
+        options:
+          variables:
+          - name: GeoVaLs/skin_temperature
+          - name: MetaData/skinTemperatureBias
+          coefs: [1, 1]
+### 1D-Var check ###
+  - filter: RTTOV OneDVar Check
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        RTTOV_GasUnitConv: *gasunitconv
+        UseRHwaterForQC: false
+        UseColdSurfaceCheck: false
+        RTTOV_ScaleRefOzone: *RTTOV_ScaleRefOzone
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *instrument_id
+        CoefficientPath: *coefpath
+        RTTOV_clw_data: false
+    BMatrix: ../resources/bmatrix/rttov/iasi_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/iasi_metopb_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *1dvarchannels
+    retrieval variables from geovals:
+    - air_temperature # 1
+    - specific_humidity  # 2
+    - surface_temperature # 3
+    - specific_humidity_at_two_meters_above_surface # 4
+    - skin_temperature # 5
+    - surface_pressure # 6
+    retrieval variables not from geovals:
+    - cloud_top_pressure # 16
+    - cloud_fraction # 17
+    - emissivity_pc # 18
+    set the initial skin temperature from the obsspace: true
+    nlevels: 70
+    UseMLMinimization: true
+    defer to post: true
+    Max1DVarIterations: 10
+    MaxMLIterations: 10
+    SkinTempErrorLand: 5.0
+    surface emissivity:
+      type: principalcomponent
+      EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
+    RecalculateBT: true
+  passedBenchmark: 470
+  compareVariables:
+    - reference:
+        name: TestReference/skinTemperature_onedvar_biasTskin
+      test:
+        name: OneDVar/skinTemperature
+      absTol: 1.0e-2
+# Test the hyperspectral IR with skin T read from the obsspace
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test for error when skin T from the ObsSpace is requested but not there
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_qc_rttovonedvarcheck_skinTobsspace_out.nc4
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+### 1D-Var check ###
+  - filter: RTTOV OneDVar Check
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        RTTOV_GasUnitConv: *gasunitconv
+        UseRHwaterForQC: false
+        UseColdSurfaceCheck: false
+        RTTOV_ScaleRefOzone: *RTTOV_ScaleRefOzone
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *instrument_id
+        CoefficientPath: *coefpath
+        RTTOV_clw_data: false
+    BMatrix: ../resources/bmatrix/rttov/iasi_bmatrix_70_test.dat
+    RMatrix: ../resources/rmatrix/rttov/iasi_metopb_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *1dvarchannels
+    retrieval variables from geovals:
+    - air_temperature # 1
+    - specific_humidity  # 2
+    - surface_temperature # 3
+    - specific_humidity_at_two_meters_above_surface # 4
+    - skin_temperature # 5
+    - surface_pressure # 6
+    retrieval variables not from geovals:
+    - cloud_top_pressure # 16
+    - cloud_fraction # 17
+    - emissivity_pc # 18
+    set the initial skin temperature from the obsspace: true
+    nlevels: 70
+    UseMLMinimization: true
+    defer to post: true
+    Max1DVarIterations: 10
+    MaxMLIterations: 10
+    SkinTempErrorLand: 5.0
+    surface emissivity:
+      type: principalcomponent
+      EmisEigVecPath: ../resources/auxillary/IASI_EmisEigenVec.dat
+    RecalculateBT: true
+  expectExceptionWithMessage: You have requested the initial skin temperature from the ObsSpace but the array MetaData/skinTemperature is not present => aborting.

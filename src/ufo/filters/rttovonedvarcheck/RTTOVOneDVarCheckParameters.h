@@ -160,6 +160,12 @@ class RTTOVOneDVarCheckParameters : public FilterParametersBase {
   /// profile has converged
   oops::Parameter<bool> RecalculateBT{"RecalculateBT", false, this};
 
+  /// Flag to read the initial skin temperature from the obs space replacing the
+  /// value in the GeoVaLs. The value will then be passed around and updated in the
+  /// geovals as the RTTOV interface expects.
+  oops::Parameter<bool> SetInitialSkinTFromObsSpace{
+      "set the initial skin temperature from the obsspace", false, this};
+
   /// Turn on extra diagnostics
   oops::Parameter<bool> FullDiagnostics{"FullDiagnostics", false, this};
 

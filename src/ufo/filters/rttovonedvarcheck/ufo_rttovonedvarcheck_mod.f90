@@ -12,7 +12,6 @@ use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use iso_c_binding
 use kinds
-use missing_values_mod
 use obsspace_mod
 use oops_variables_mod
 use ufo_geovals_mod
@@ -121,6 +120,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   character(len=max_string)          :: varname
   character(len=max_string)          :: message
   integer                            :: jvar, ivar, jobs, band, ii, irej, jnew ! counters
+  integer                            :: igval, gv_index ! counters for geoval
   integer                            :: nchans_used      ! counter for number of channels used for an ob
   integer                            :: jchans_used
   integer                            :: fileunit        ! unit number for reading in files
@@ -129,7 +129,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   integer                            :: failed_retrievedBTcheck_count ! number of profiles with retrieved BTs outside error
   integer                            :: nprofelements   ! number of elements in 1d-var state profile
   integer, allocatable               :: fields_in(:)
-  real(kind_real)                    :: missing         ! missing value
   real(kind_real)                    :: t1, t2          ! timing
   real(kind_real), allocatable       :: b_matrix(:,:)   ! 1d-var profile b matrix
   real(kind_real), allocatable       :: b_inverse(:,:)  ! inverse for each 1d-var profile b matrix
@@ -149,8 +148,6 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! ------------------------------------------
   ! 1. Setup
   ! ------------------------------------------
-  missing = missing_value(missing)
-
   ! Setup rttov simobs
   call rttov_simobs % setup(f_conf, self % channels)
 
@@ -286,6 +283,15 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         ob % pcemiss_object => obs % pcemiss_object
         allocate(ob % pcemiss(size(obs % pcemiss, 1)))
         ob % pcemiss(:) = obs % pcemiss(:, jobs)
+      end if
+
+      ! Use the skinTemperature from the obsspace if it was provided
+      if (self % skinTemperatureFromObsSpace) then
+        gv_index = 0
+        do igval = 1, geovals % nvar
+          if (cmp_strings(var_sfc_tskin, firstguess_geovals % variables(igval))) gv_index = igval
+        end do
+        firstguess_geovals % geovals(gv_index) % vals(1,1) = obs % skinTemperature(jobs)
       end if
 
       ! Check if ctp very close to model pressure level.  If so

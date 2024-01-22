@@ -62,6 +62,7 @@ type, public :: ufo_rttovonedvarcheck
   logical                          :: cloud_retrieval !< flag gets turned on if cloud_top_pressure in list of retrieval variables
   logical                          :: pcemiss !< flag gets turned on if emissivity eigen vector file is present
   logical                          :: mwEmissRetrieval !< if true do emissivity retrival using the mwemiss method
+  logical                          :: skinTemperatureFromObsSpace !< flag to get the first skin temperature from the obs space
   integer                          :: Max1DVarIterations !< maximum number of iterations
   integer                          :: JConvergenceOption !< integer to select convergence option
   integer                          :: IterNumForLWPCheck !< choose which iteration to start checking LWP
@@ -188,6 +189,10 @@ call f_conf % get_or_die("RecalculateBT", self % RecalculateBT)
 
 ! Flag to turn on full diagnostics
 call f_conf % get_or_die("FullDiagnostics", self % FullDiagnostics)
+
+! Flag to read the intial skin temperature from the obsspace
+call f_conf % get_or_die("set the initial skin temperature from the obsspace", &
+                         self % skinTemperatureFromObsSpace)
 
 ! maximum number of iterations allowed
 call f_conf % get_or_die("Max1DVarIterations", self % Max1DVarIterations)
@@ -356,6 +361,7 @@ write(*,*) "retrieval_variables = "
 do ivar = 1, self % nmvars
   write(*,*) trim(self % retrieval_variables(ivar))," "
 end do
+write(*,*) "skinTemperatureFromObsSpace = ", self % skinTemperatureFromObsSpace
 write(*,*) "nlevels = ",self %  nlevels
 write(*,*) "nmvars = ",self % nmvars
 write(*,*) "nchans = ",self % nchans

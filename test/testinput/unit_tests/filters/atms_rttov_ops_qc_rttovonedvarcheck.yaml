@@ -238,7 +238,7 @@ observations:
   obs space:
     <<: *ObsSpace
     name: Test the full diagnostics for ML minimizer
-  geovals: &GeoVaLs
+  geovals:
     <<: *GeoVaLs
   obs bias:
     <<: *ObsBias

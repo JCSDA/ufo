@@ -8,6 +8,7 @@
 module ufo_rttovonedvarcheck_obs_mod
 
 use datetime_mod, only: datetime
+use fckit_exception_module, only: fckit_exception
 use kinds
 use iso_c_binding
 use missing_values_mod
@@ -49,6 +50,7 @@ real(kind_real), allocatable :: final_cost(:)   ! final cost at solution
 real(kind_real), allocatable :: LWP(:)          ! liquid water path from final iteration
 real(kind_real), allocatable :: IWP(:)          ! liquid water path from final iteration
 real(kind_real), allocatable :: clw(:,:)        ! cloud liquid water profile from final iteration
+real(kind_real), allocatable :: skinTemperature(:) ! skin temperature for first iteration
 real(kind_real), allocatable :: transmittance(:,:) ! surface to space transmittance for each channel
 real(kind_real), allocatable :: output_profile(:,:) ! output profile
 real(kind_real), allocatable :: output_BT(:,:)   ! output brightness temperature
@@ -136,6 +138,7 @@ allocate(self % channels(config % nchans))
 allocate(self % final_cost(self % iloc))
 allocate(self % LWP(self % iloc))
 allocate(self % IWP(self % iloc))
+allocate(self % skinTemperature(self % iloc))
 if (config % Store1DVarCLW) allocate(self % CLW(config % nlevels, self % iloc))
 if (config % Store1DVarTransmittance) allocate(self % transmittance(config % nchans, self % iloc))
 allocate(self % output_profile(prof_index % nprofelements, self % iloc))
@@ -165,6 +168,7 @@ self % channels(:) = 0
 self % final_cost(:) = missing_real
 self % LWP(:) = missing_real
 self % IWP(:) = missing_real
+self % skinTemperature(:) = missing_real
 if (allocated(self % CLW)) self % CLW(:,:) = missing_real
 if (allocated(self % transmittance)) self % transmittance(:,:) = missing_real
 self % emiss(:,:) = missing_real
@@ -280,6 +284,17 @@ if (obsspace_has(config % obsdb, "MetaData", "satelliteIdentifier")) then
   call obsspace_get_db(config % obsdb, "MetaData", "satelliteIdentifier", self % satellite_identifier(:))
 endif
 
+! Read in skin temperature from the obs space
+if (config % skinTemperatureFromObsSpace) then
+  if (obsspace_has(config % obsdb, "MetaData", "skinTemperature")) then
+    call obsspace_get_db(config % obsdb, "MetaData", "skinTemperature", self % skinTemperature(:))
+  else
+     write(message,*) "You have requested the initial skin temperature from the ObsSpace ", &
+                      "but the array MetaData/skinTemperature is not present ", &
+                      "=> aborting."
+    call fckit_exception % throw(message)
+  endif
+end if
 
 ! Setup surface emissivity
 ! default self % emiss = zero
@@ -358,6 +373,7 @@ if (allocated(self % niter))          deallocate(self % niter)
 if (allocated(self % final_cost))     deallocate(self % final_cost)
 if (allocated(self % LWP))            deallocate(self % LWP)
 if (allocated(self % IWP))            deallocate(self % IWP)
+if (allocated(self % skinTemperature)) deallocate(self % skinTemperature)
 if (allocated(self % CLW))            deallocate(self % CLW)
 if (allocated(self % transmittance))  deallocate(self % transmittance)
 if (allocated(self % emiss))          deallocate(self % emiss)
