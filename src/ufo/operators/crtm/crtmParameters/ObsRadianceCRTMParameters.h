@@ -95,6 +95,8 @@ namespace ufo
     oops::OptionalParameter<std::vector<std::string> > Clouds{"Clouds", this};
     /// Cloud_Fraction
     oops::OptionalParameter<float> Cloud_Fraction{"Cloud_Fraction", this};
+    /// Cloud_Seeding
+    oops::OptionalParameter<bool> Cloud_Seeding{"Cloud_Seeding", this};
     /// Salinity
     oops::OptionalParameter<bool> Salinity{"Salinity", this};
     /// Obs Options

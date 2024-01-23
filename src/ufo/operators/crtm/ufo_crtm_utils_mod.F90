@@ -86,6 +86,7 @@ type crtm_conf
  character(len=255) :: salinity_option
  character(len=MAXVARLEN) :: sfc_wind_geovars
  real(kind_real) :: unit_coef = 1.0_kind_real
+ logical :: Cloud_Seeding = .false. 
 end type crtm_conf
 
 
@@ -230,7 +231,6 @@ character(len=:), allocatable :: str_array(:)
 CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
 logical :: message_flag = .true.
 
-
  !Some config needs to come from user
  !-----------------------------------
 
@@ -308,6 +308,14 @@ logical :: message_flag = .true.
              ': Cloud_Fraction is not provided in conf.' // &
              ' Will request as a geoval.'
      if (message_flag) CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+   end if
+   if (f_confOper%has("Cloud_Seeding")) then
+     call f_confOper%get_or_die("Cloud_Seeding",conf%Cloud_Seeding)
+     if ( conf%Cloud_Seeding ) then 
+       write(message,*) trim(ROUTINE_NAME),' Cloud Seeding is activated '
+     else
+       write(message,*) trim(ROUTINE_NAME),' Cloud Seeding is not activated '
+     endif
    end if
  end if
 
@@ -656,7 +664,7 @@ logical, intent(in), optional :: Is_Active_Sensor
 type(crtm_conf) :: conf
 
 ! Local variables
-integer :: k1, jspec
+integer :: k1, jspec, jlevel
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
 
@@ -738,6 +746,48 @@ character(max_string) :: err_msg
           atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)
         end do
       end if
+    end if
+  end if
+
+  if (conf%n_Clouds > 0) then
+    if ( conf%Cloud_Seeding ) then 
+      do k1 = 1, n_Profiles
+        do jlevel = 1, atm(k1)%n_layers
+           ! Check Cloud Content 
+           do jspec = 1, conf%n_Clouds  
+             if (atm(k1)%Cloud(jspec)%Type == WATER_CLOUD .and. atm(k1)%Temperature(jlevel) - tice > -20.0_kind_real ) then 
+                 atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
+                 atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 5.001_kind_real)
+             end if
+             if (atm(k1)%Cloud(jspec)%Type == ICE_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real ) then 
+                 atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
+                 atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 5.001_kind_real)
+             end if
+             if (atm(k1)%Cloud(jspec)%Type == RAIN_CLOUD .and. atm(k1)%Temperature(jlevel) - tice > -20.0_kind_real ) then 
+                 atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
+                 atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 100.001_kind_real)
+             end if
+             if (atm(k1)%Cloud(jspec)%Type == SNOW_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real ) then 
+                 atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
+                 atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 50.001_kind_real)
+             end if
+             if (atm(k1)%Cloud(jspec)%Type == GRAUPEL_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real) then 
+                 atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
+                 atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 500.001_kind_real)
+             end if
+             if (atm(k1)%Cloud(jspec)%Type == HAIL_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real) then 
+                 atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
+                 atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 1000.001_kind_real)
+             end if
+           end do
+           ! Check Cloud Fraction
+           do jspec = 1, conf%n_Clouds 
+             if (atm(k1)%Cloud(jspec)%Water_Content(jlevel) > WATER_CONTENT_THRESHOLD*1.001_kind_real .and. atm(k1)%Cloud_Fraction(jlevel) < 0.001_kind_real) then 
+               atm(k1)%Cloud_Fraction(jlevel) = 0.001_kind_real
+             end if
+           end do
+        end do
+      end do
     end if
   end if
 
