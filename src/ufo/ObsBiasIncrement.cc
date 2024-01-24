@@ -126,7 +126,7 @@ double ObsBiasIncrement::dot_product_with(const ObsBiasIncrement & rhs) const {
 // -----------------------------------------------------------------------------
 
 void ObsBiasIncrement::read(const eckit::Configuration & conf) {
-  oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
+  oops::Log::trace() << "ObsBiasIncrement::read and initialize from file, starting "<< std::endl;
 
   if (conf.has("test input file")) {
     // Open an hdf5 file with bias coefficients, read only
@@ -170,7 +170,7 @@ void ObsBiasIncrement::read(const eckit::Configuration & conf) {
                          << std::endl;
   }
 
-  oops::Log::trace() << "ObsBias::read and initilization done " << std::endl;
+  oops::Log::trace() << "ObsBiasIncrement::read and initilization done " << std::endl;
 }
 
 // -----------------------------------------------------------------------------
