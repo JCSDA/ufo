@@ -17,7 +17,7 @@ observations:
     #     obsfile: oceanprofileaverage_testout.nc4
     simulated variables: [salinity, waterPotentialTemperature, depthBelowWaterSurface]
     observed variables: [salinity]
-    derived variables: [waterPotentialTemperature, depthBelowWaterSurface]
+    derived variables: [waterConservativeTemperature, waterPotentialTemperature, depthBelowWaterSurface]
   HofX: HofX
 
   obs post filters:
@@ -63,6 +63,11 @@ observations:
     - name: salinity
     observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
     model vertical coordinate: HofX/depthBelowWaterSurface
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/waterConservativeTemperature
+      type: float
+      value: 0.0
   compareVariables:
     - reference:
         name: TestReference/waterPotentialTemperature
