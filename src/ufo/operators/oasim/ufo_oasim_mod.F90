@@ -88,7 +88,7 @@ implicit none
     logical :: is_midnight 
     integer :: km, day_of_year
     real(kind_real) :: dt
-    type(ufo_geoval), pointer :: slp, wspd, ozone, wvapor, rh, cov, cldtau, clwp, cldre
+    type(ufo_geoval), pointer :: slp, wspd, ozone, wvapor, rh, cov, clwp
     type(ufo_geoval), pointer :: ta_in, wa_in, asym, dh, cdet, pic, cdc, diatom, chloro, cyano
     type(ufo_geoval), pointer :: cocco, dino, phaeo
 
@@ -126,9 +126,7 @@ implicit none
     call ufo_geovals_get_var(geovals, var_water_vapor , wvapor )
     call ufo_geovals_get_var(geovals, var_rh , rh )
     call ufo_geovals_get_var(geovals, var_cldfrac , cov )
-    call ufo_geovals_get_var(geovals, var_cld_tau , cldtau )
     call ufo_geovals_get_var(geovals, var_cld_lwp , clwp )
-    call ufo_geovals_get_var(geovals, var_clwefr , cldre )
     call ufo_geovals_get_var(geovals, var_aerosol_tau , ta_in )
     call ufo_geovals_get_var(geovals, var_scat_albedo , wa_in )
     call ufo_geovals_get_var(geovals, var_asym_par , asym )
@@ -165,13 +163,13 @@ implicit none
     do iobs = 1, obss_nlocs
        ! check if the ocean thickness is positive (valid)
        if (dh%vals(1,iobs) > 0) then
-          call self%oasim_%run(km, dt, is_midnight, day_of_year, &
-               cosz(iobs), Wave_Ch(self%channels), slp%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
-               rh%vals(1,iobs), cov%vals(1,iobs), cldtau%vals(1,iobs), clwp%vals(1,iobs), &
-               cldre%vals(1,iobs), ta_in%vals(:,iobs), wa_in%vals(:,iobs), asym%vals(:,iobs), &
-               dh%vals(:,iobs), cdet%vals(:,iobs), pic%vals(:,iobs), cdc%vals(:,iobs), &
-               diatom%vals(:,iobs), chloro%vals(:,iobs), cyano%vals(:,iobs), &
-               cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), rlwnref(iobs,:))
+          call self%oasim_%run(km, dt, is_midnight, day_of_year, cosz(iobs), Wave_Ch(self%channels), &
+               slp%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
+               rh%vals(1,iobs), cov%vals(1,iobs), clwp%vals(1,iobs), ta_in%vals(:,iobs), &
+               wa_in%vals(:,iobs), asym%vals(:,iobs), dh%vals(:,iobs),cdet%vals(:,iobs), &
+               pic%vals(:,iobs), cdc%vals(:,iobs), diatom%vals(:,iobs), chloro%vals(:,iobs), &
+               cyano%vals(:,iobs), cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), &
+               tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), rlwnref(iobs,:))
 
           hofx(iobs,:)=rlwnref(iobs,:) 
        endif
