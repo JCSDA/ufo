@@ -110,6 +110,9 @@ struct Constants {
   static constexpr double eccentricity_sq = (semi_major_axis * semi_major_axis -
                                             semi_minor_axis * semi_minor_axis) /
                                             semi_major_axis / semi_major_axis;
+
+  // Constants used for gnssro super refraction check
+  static constexpr float superRefractionCritVal = 0.157;  // unit: N m^-1
 };
 
 //--------------------------------------------------------------------------------------------------

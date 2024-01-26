@@ -108,6 +108,8 @@ set ( filters_files
       StuckCheckParameters.h
       SuperRefractionCheckImpactParameter.h
       SuperRefractionCheckImpactParameter.cc
+      SuperRefractionCheckNBAM.h
+      SuperRefractionCheckNBAM.cc
       obsfunctions/DrawObsErrorFromFile.cc
       obsfunctions/DrawObsErrorFromFile.h
       obsfunctions/DrawValueFromFile.cc

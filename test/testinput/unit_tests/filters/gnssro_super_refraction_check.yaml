@@ -32,6 +32,7 @@ observations:
     - name: srCheckImpp
     - name: srCheckImppProfile
     - name: srCheckProfMaxDiff
+    - name: srCheckNBAM
   obs post filters:
   - filter: Obs Refractivity Gradient Check
     filter variables:
@@ -71,6 +72,18 @@ observations:
     action:
       name: set
       flag: srCheckProfMaxDiff
+  - filter: Super Refraction Check NBAM
+    filter variables:
+    - name: bendingAngle
+    step: 2
+    threshold step1: 0.75
+    threshold step2: 0.5
+    max obs value: 0.03
+    check height: 5000
+    close layers: 5
+    action:
+      name: set
+      flag: srCheckNBAM
   compareVariables:                       # test output matches precalculated values
   - reference:
       name: TestReference/srCheckMF
@@ -91,4 +104,9 @@ observations:
       name: TestReference/srCheckProfMaxDiff
     test:
       name: DiagnosticFlags/srCheckProfMaxDiff/bendingAngle
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/srCheckNBAM
+    test:
+      name: DiagnosticFlags/srCheckNBAM/bendingAngle
     absTol: 1.0e-5
