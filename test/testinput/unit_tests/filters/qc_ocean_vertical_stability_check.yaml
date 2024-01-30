@@ -40,7 +40,7 @@ observations:
     where:
     - variable:
         name: ObsValue/waterTemperature
-      is_defined:
+      value: is_valid
     filter variables:
       - name: DerivedObsValue/depthBelowWaterSurface  # density spikes/steps --> flag d
     variables:
@@ -62,7 +62,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/Superadiabat/depthBelowWaterSurface
-      is_true:
+      value: is_true
     action:
       name: reject
 ### where density spikes, reject all vars (temperature and salinity):
@@ -73,7 +73,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/DensitySpike/depthBelowWaterSurface
-      is_true:
+      value: is_true
     action:
       name: reject
 # create derived metadata counting levels:
@@ -87,7 +87,7 @@ observations:
           where:
             - variable:
                 name: ObsValue/waterTemperature
-              is_defined:
+              value: is_valid
 # create derived metadata counting spikes and steps:
   - filter: Variable Assignment
     assignments:
@@ -99,10 +99,10 @@ observations:
           where:
             - variable:
                 name: DiagnosticFlags/DensitySpike/depthBelowWaterSurface
-              is_true:
+              value: is_true
             - variable:
                 name: DiagnosticFlags/DensityStep/depthBelowWaterSurface
-              is_true:
+              value: is_true
           where operator: or
 # whole profile is rejected if spikes+steps >= numlev/4, so compute
 #  4*( sum spikes+steps ) minus numlev

@@ -97,7 +97,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/variable
-      is_true:
+      value: is_true
     actions:
     - name: reject
   - filter: Profile Few Observations Check
@@ -107,7 +107,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/variable
-      is_false:       # don't reject based on sub-sampled obs
+      value: is_false       # don't reject based on sub-sampled obs
   passedBenchmark: 93   # accepts all profiles except those removed by Perform Action
 - obs space:
     name: test data
@@ -123,7 +123,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/variable
-      is_true:
+      value: is_true
     actions:
     - name: reject
   - filter: Profile Few Observations Check

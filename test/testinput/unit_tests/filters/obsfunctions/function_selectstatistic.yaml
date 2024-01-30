@@ -69,7 +69,7 @@ observations:
       where:
         - variable:
             name: ObsValue/waterTemperature
-          is_defined:
+          value: is_valid
     tolerance: 1.0e-6
     expect missing value locations to match: true
 - obs space:

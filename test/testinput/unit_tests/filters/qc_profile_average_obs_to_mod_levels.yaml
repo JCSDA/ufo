@@ -49,7 +49,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/BayBgCheckReject/waterPotentialTemperature
-      is_false:
+      value: is_false
     filter variables:
     - name: waterPotentialTemperature
     observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
@@ -58,7 +58,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/BayBgCheckReject/salinity
-      is_false:
+      value: is_false
     filter variables:
     - name: salinity
     observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface
@@ -126,7 +126,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/BayBgCheckReject/waterPotentialTemperature
-      is_false:
+      value: is_false
     filter variables:
     - name: waterPotentialTemperature
     observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface_minus
@@ -135,7 +135,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/BayBgCheckReject/salinity
-      is_false:
+      value: is_false
     filter variables:
     - name: salinity
     observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface_minus

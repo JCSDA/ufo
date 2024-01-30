@@ -17,7 +17,7 @@ observations:
     where:
     - variable:
         name: ObsValue/salinity
-      is_defined:
+      value: is_valid
     Transform: OceanPracticalSalinityToAbsoluteSalinity
     ocean pressure group: TestReference
   # Make the ObsErrorData a normal variable for the purposes of
@@ -55,7 +55,7 @@ observations:
     where:
     - variable:
         name: ObsValue/salinity
-      is_defined:
+      value: is_valid
     Transform: OceanPracticalSalinityToAbsoluteSalinity
     ocean pressure group: TestReference
   expectExceptionWithMessage: "Both `absoluteSalinity` and `salinity` must be observed or derived variables for the `OceanPracticalSalinityToAbsoluteSalinity` variable transform."

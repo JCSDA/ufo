@@ -29,6 +29,10 @@ constexpr char WhereOperatorParameterTraitsHelper::enumTypeName[];
 constexpr util::NamedEnumerator<WhereOperator>
   WhereOperatorParameterTraitsHelper::namedValues[];
 
+constexpr char WhereValueParameterTraitsHelper::enumTypeName[];
+constexpr util::NamedEnumerator<WhereValue>
+  WhereValueParameterTraitsHelper::namedValues[];
+
 // -----------------------------------------------------------------------------
 ufo::Variables getAllWhereVariables(const std::vector<WhereParameters> & params) {
   ufo::Variables vars;
@@ -476,7 +480,8 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
         }
 
 //      Apply mask is_defined
-        if (currentParams.isDefined.value()) {
+        if (currentParams.valueIs.value() &&
+            (*currentParams.valueIs.value() == WhereValue::VALID)) {
           setWhereVector(whereTest, true);
           if (filterdata.has(varname)) {
             if (dtype == ioda::ObsDtype::Integer) {
@@ -498,7 +503,8 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
         }
 
 //      Apply mask is_not_defined
-        if (currentParams.isNotDefined.value()) {
+        if (currentParams.valueIs.value() &&
+            (*currentParams.valueIs.value() == WhereValue::NOT_VALID)) {
           setWhereVector(whereTest, true);
           if (dtype == ioda::ObsDtype::Integer) {
             processWhereIsNotDefined<int>(filterdata, varname, whereTest);
@@ -604,7 +610,8 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
         }
 
 //      Apply mask is_set
-        if (currentParams.isTrue.value()) {
+        if (currentParams.valueIs.value() &&
+            (*currentParams.valueIs.value() == WhereValue::TRUE)) {
           setWhereVector(whereTest, true);
           if (filterdata.has(varname)) {
             std::vector<DiagnosticFlag> data;
@@ -617,7 +624,8 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
         }
 
 //      Apply mask is_not_set
-        if (currentParams.isFalse.value()) {
+        if (currentParams.valueIs.value() &&
+            (*currentParams.valueIs.value() == WhereValue::FALSE)) {
           setWhereVector(whereTest, true);
           std::vector<DiagnosticFlag> data;
           filterdata.get(varname, data);

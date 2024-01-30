@@ -17,7 +17,7 @@ observations:
     where:
     - variable:
         name: MetaData/depthBelowWaterSurface
-      is_defined:
+      value: is_valid
     Transform: OceanDepthToPressure
     # ocean depth variable: MetaData/depthBelowWaterSurface
   compareVariables:
@@ -42,7 +42,7 @@ observations:
     where:
     - variable:
         name: MetaData/depthBelowWaterSurface
-      is_defined:
+      value: is_valid
     Transform: OceanDepthToPressure
     ocean depth variable: MetaData/depthBelowWaterSurface
   expectExceptionWithMessage: "`waterPressure` must be an observed or derived variable for the `OceanDepthToPressure` variable transform."

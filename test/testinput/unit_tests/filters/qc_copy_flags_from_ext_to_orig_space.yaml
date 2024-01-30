@@ -27,7 +27,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/flag1/var1
-      is_false:
+      value: is_false
     filter variables: [DiagnosticFlags/flag1/var1]
     model vertical coordinate: HofX/depthBelowWaterSurface
     observation vertical coordinate: DerivedObsValue/depthBelowWaterSurface

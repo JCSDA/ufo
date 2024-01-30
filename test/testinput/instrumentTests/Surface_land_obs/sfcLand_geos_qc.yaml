@@ -171,7 +171,7 @@ observations:
       maxvalue: 100
     - variable:
         name: TempObsErrorData/stationPressure
-      is_defined:
+      value: is_valid
     defer to post: true
   # set ObsErrorData 300 Pa if it > 300 Pa.
   - filter: Perform Action
@@ -186,7 +186,7 @@ observations:
       minvalue: 300
     - variable:
         name: TempObsErrorData/stationPressure
-      is_defined:
+      value: is_valid
     defer to post: true
 
   # Background check
@@ -253,7 +253,7 @@ observations:
     where:
     - variable:
         name: TempObsErrorData/stationPressure
-      is_defined:
+      value: is_valid
     defer to post: true
   # Duplicate factor
   - filter: Perform Action

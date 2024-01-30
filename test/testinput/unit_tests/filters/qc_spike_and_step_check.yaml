@@ -70,7 +70,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/spike/waterTemperature
-      is_true:
+      value: is_true
     actions:
     - name: set
       flag: spike
@@ -85,7 +85,7 @@ observations:
           where:
             - variable:
                 name: DiagnosticFlags/spike/waterTemperature
-              is_true:
+              value: is_true
   - filter: Variable Assignment  # create derived obs value containing only T steps
     assignments:
     - name: DerivedMetaData/waterTemperature_steps
@@ -96,7 +96,7 @@ observations:
           where:
             - variable:
                 name: DiagnosticFlags/step/waterTemperature
-              is_true:
+              value: is_true
   - filter: Variable Assignment  # compute sum 2*spikes+steps
     assignments:
     - name: DerivedMetaData/waterTemperature_rejections
@@ -123,7 +123,7 @@ observations:
           where:
             - variable:
                 name: DiagnosticFlags/spike/salinity
-              is_true:
+              value: is_true
   - filter: Variable Assignment  # create derived obs value containing only S steps
     assignments:
     - name: DerivedMetaData/salinity_steps
@@ -134,7 +134,7 @@ observations:
           where:
             - variable:
                 name: DiagnosticFlags/step/salinity
-              is_true:
+              value: is_true
   - filter: Variable Assignment  # compute sum 2*spikes+steps
     assignments:
     - name: DerivedMetaData/salinity_rejections

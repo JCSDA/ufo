@@ -21,7 +21,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/PermanentReject/stationPressure
-      is_true:
+      value: is_true
 
   - filter: BlackList
     filter variables:
@@ -29,7 +29,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/PermanentReject/standardPressure
-      is_true:
+      value: is_true
 
   - filter: BlackList
     filter variables:
@@ -37,7 +37,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/PermanentReject/pressureReducedToMeanSeaLevel
-      is_true:
+      value: is_true
 
   - filter: Variable Transforms
     Transform: PStar

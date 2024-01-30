@@ -33,6 +33,20 @@ namespace ufo {
         { WhereOperator::OR, "or" }
       };
   };
+
+  enum class WhereValue {VALID, NOT_VALID, TRUE, FALSE};
+
+  struct WhereValueParameterTraitsHelper {
+    typedef WhereValue EnumType;
+    static constexpr char enumTypeName[] = "WhereValue";
+    static constexpr util::NamedEnumerator<WhereValue> namedValues[] =
+      { { WhereValue::VALID,     "is_valid" },
+        { WhereValue::NOT_VALID, "is_not_valid" },
+        { WhereValue::TRUE,      "is_true" },
+        { WhereValue::FALSE,     "is_false" }
+      };
+  };
+
 }  // namespace ufo
 
 namespace oops {
@@ -42,6 +56,10 @@ namespace oops {
     public EnumParameterTraits<ufo::WhereOperatorParameterTraitsHelper>
   {};
 
+  template<>
+  struct ParameterTraits<ufo::WhereValue> :
+    public EnumParameterTraits<ufo::WhereValueParameterTraitsHelper>
+  {};
 }  // namespace oops
 
 namespace ufo {
@@ -108,17 +126,12 @@ class WhereParameters : public oops::Parameters {
   /// relative_tolerance (see above);
   oops::OptionalParameter<std::vector<float>> isNotClose{"is_not_close_to_any_of", this};
 
-  /// Select locations at which the condition variable is not set to to the missing value indicator.
-  oops::OptionalParameter<void> isDefined{"is_defined", this};
-
-  /// Select locations at which the condition variable is set to to the missing value indicator.
-  oops::OptionalParameter<void> isNotDefined{"is_not_defined", this};
-
-  /// Select locations at which the condition variable (typically a diagnostic flag) is true.
-  oops::OptionalParameter<void> isTrue{"is_true", this};
-
-  /// Select locations at which the condition variable (typically a diagnostic flag) is false.
-  oops::OptionalParameter<void> isFalse{"is_false", this};
+  /// Select locations at which the condition variable is:
+  /// - not set to the missing value indicator or
+  /// - set to the missing value indicator or
+  /// - is true (typically a diagnostic flag) or
+  /// - is false (typically a diagnostic flag)
+  oops::OptionalParameter<WhereValue> valueIs{"value", this};
 
   /// Select locations at which any of the specified bits in the condition variable is set.
   oops::OptionalParameter<std::set<int>> anyBitSetOf{"any_bit_set_of", this};

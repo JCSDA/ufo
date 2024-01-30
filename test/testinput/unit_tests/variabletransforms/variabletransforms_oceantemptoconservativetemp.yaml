@@ -17,7 +17,7 @@ observations:
     where:
     - variable:
         name: ObsValue/waterTemperature
-      is_defined:
+      value: is_valid
     Transform: OceanTempToConservativeTemp
     ocean pressure group: TestReference
     ocean salinity group: TestReference
@@ -54,7 +54,7 @@ observations:
     where:
     - variable:
         name: ObsValue/waterTemperature
-      is_defined:
+      value: is_valid
     Transform: OceanTempToConservativeTemp
     ocean pressure group: TestReference
     ocean salinity group: TestReference

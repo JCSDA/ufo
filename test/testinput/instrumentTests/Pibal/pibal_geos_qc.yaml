@@ -130,7 +130,7 @@ observations:
     where:
     - variable:
         name: GsiAdjustObsError/windEastward
-      is_defined:
+      value: is_valid
 
   - filter: Perform Action
     filter variables:
@@ -141,7 +141,7 @@ observations:
     where:
     - variable:
         name: GsiAdjustObsError/windNorthward
-      is_defined:
+      value: is_valid
 
   - filter: Perform Action
     filter variables:

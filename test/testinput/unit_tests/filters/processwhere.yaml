@@ -235,52 +235,52 @@ successful:
   # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
   # MetaData/var2 = 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
       size where true: 5
-    - where:                      # test that is_defined works when all is defined
+    - where:                      # test that is_valid works when all is defined
       - variable:
           name:  MetaData/var1
-        is_defined:
+        value: is_valid
   # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 10
-    - where:                      # test that is_not_defined works when all is defined
+    - where:                      # test that is_not_valid works when all is defined
       - variable:
           name:  MetaData/var1
-        is_not_defined:
+        value: is_not_valid
   # MetaData/var1 = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
       size where true: 0
-    - where:                      # test that is_defined works when some are defined
+    - where:                      # test that is_valid works when some are defined
       - variable:
           name:  MetaData/var5
-        is_defined:
+        value: is_valid
   # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 6
-    - where:                      # test that is_not_defined works when some are defined
+    - where:                      # test that is_not_valid works when some are defined
       - variable:
           name:  MetaData/var5
-        is_not_defined:
+        value: is_not_valid
   # MetaData/var5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
-    - where:                      # test is_defined on an integer variable
+    - where:                      # test is_valid on an integer variable
       - variable:
           name:  MetaData/intvar5
-        is_defined:
+        value: is_valid
   # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 6
-    - where:                      # test is_not_defined on an integer variable
+    - where:                      # test is_not_valid on an integer variable
       - variable:
           name:  MetaData/intvar5
-        is_not_defined:
+        value: is_not_valid
   # MetaData/intvar5 = 1, _, 2, _, 3, _, 4, _, 5, 0
       size where true: 4
-    - where:                      # test is_defined on a string variable
+    - where:                      # test is_valid on a string variable
       - variable:
           name:  MetaData/stationIdentification
-        is_defined:
+        value: is_valid
   # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 10
-    - where:                      # test is_not_defined on a string variable
+    - where:                      # test is_not_valid on a string variable
       - variable:
           name:  MetaData/stationIdentification
-        is_not_defined:
+        value: is_not_valid
   # MetaData/stationIdentification = WARUBAJH, HUAVFIBU, DKPAIDZX, MTLGWTHE, LESDCYOD, UGCMFXFK, HSMHFHQI, JALVYAAR, MOYSUYWB, XKEHXQSD
       size where true: 0
     - where:                       # test is_in
@@ -572,12 +572,12 @@ successful:
     - where:                       # test is_true
       - variable:
           name:  MetaData/boolvar1     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
-        is_true:
+        value: is_true
       size where true: 6
     - where:                       # test is_false
       - variable:
           name:  MetaData/boolvar1     #  [1, 1, 1, 0, 0, 1, 1, 1, 0, 0]
-        is_false:
+        value: is_false
       size where true: 4
     - where:                       # test use of a float-valued obs function as a variable
       - variable:
@@ -688,10 +688,10 @@ operator:
     - where:
       - variable:
           name: MetaData/intvar5  # 1, _, 2, _, 3, _, 4, _, 5, 0
-        is_not_defined:
+        value: is_not_valid
       - variable:
           name: MetaData/intvar5  # 1, _, 2, _, 3, _, 4, _, 5, 0
-        is_defined:
+        value: is_valid
       where operator: or
       size where true: 10
     - where:
@@ -801,13 +801,13 @@ user_error_type_handling_is_in:
         absolute_tolerance: 0.2
         is_close_to_any_of: [1.5]
       size where true: 0
-    - where:                       # test is_defined for unsupported type (DateTime)
+    - where:                       # test is_valid for unsupported type (DateTime)
       - variable:
           name:  MetaData/dateTime
-        is_defined:
+        value: is_valid
       size where true: 0
-    - where:                       # test is_not_defined for unsupported type (DateTime)
+    - where:                       # test is_not_valid for unsupported type (DateTime)
       - variable:
           name:  MetaData/dateTime
-        is_not_defined:
+        value: is_not_valid
       size where true: 0

@@ -20,14 +20,14 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
-      is_true:
+      value: is_true
     actions:
     - name: reject
   - filter: Profile Unflag Observations Check
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
-      is_false:  # this condition ignores data rejected by subsample reject during the unflagging
+      value: is_false  # this condition ignores data rejected by subsample reject during the unflagging
     filter variables:
     - name: ObsValue/waterTemperature
     absolute tolerance: 0.1
@@ -56,7 +56,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
-      is_true:
+      value: is_true
     actions:
     - name: passivate
   - filter: Profile Unflag Observations Check
@@ -88,7 +88,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
-      is_true:
+      value: is_true
     actions:
     - name: reject
   - filter: Profile Unflag Observations Check
@@ -120,7 +120,7 @@ observations:
     where:
     - variable:
         name: DiagnosticFlags/LevelSubsampleReject/waterTemperature
-      is_true:
+      value: is_true
     actions:
     - name: reject
   - filter: Profile Unflag Observations Check
