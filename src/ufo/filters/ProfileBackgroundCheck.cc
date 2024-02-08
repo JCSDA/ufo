@@ -69,7 +69,7 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProfileBackgroundCheck postFilter" << std::endl;
-  const oops::Variables observed = obsdb_.assimvariables();
+  const oops::Variables observed = obsdb_.obsvariables();
 
   oops::Log::debug() << "ProfileBackgroundCheck obserr: " << *obserr_;
 

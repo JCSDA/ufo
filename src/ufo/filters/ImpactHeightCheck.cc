@@ -61,7 +61,6 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ImpactHeightCheck post-filter" << std::endl;
-  const oops::Variables observed = obsdb_.assimvariables();
   const float missingFloat = util::missingValue<float>();
 
   // Check that we have the same number of variables as vertical levels
@@ -158,8 +157,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
     // should choose the first observation.
     int bottomOb = -1;
     int bottomVar = -1;
-    for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
-      const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+    for (size_t iVar = 0; iVar < filtervars.nvars(); ++iVar) {
       for (size_t iobs : obs_numbers) {
         if (impactParameter[iVar][iobs] > 0 && impactParameter[iVar][iobs] != missingFloat) {
           if (bottomOb < 0) {
@@ -175,7 +173,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
     if (bottomOb == -1) {
       oops::Log::warning() << "Have not found any valid impact parameters, defaulting to first ob"
                            << std::endl;
-      bottomVar = observed.find(filtervars.variable(0).variable());
+      bottomVar = 0;
       bottomOb = obs_numbers[0];
     }
     if (parameters_.verboseOutput.value()) {
@@ -237,8 +235,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
 
-    for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
-      const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+    for (size_t iVar = 0; iVar < filtervars.nvars(); ++iVar) {
       // Loop over all observations in the profile
       for (size_t jobs : obs_numbers) {
         // Check that this observation should be considered in this routine
@@ -262,7 +259,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
               obsImpactHeight < calcImpactHeight(refracProfile.back(), heightProfile.back(),
                                                  radiusCurvature[jobs]) +
                                                  parameters_.surfaceOffset.value())
-            flagged[iFilterVar][jobs] = true;
+            flagged[iVar][jobs] = true;
 
           if (parameters_.verboseOutput.value())
             oops::Log::debug() << "Checking maximum height " << obsImpactHeight << "   " <<
@@ -273,7 +270,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
           if (obsImpactHeight > calcImpactHeight(refracProfile.front(), heightProfile.front(),
                                                  radiusCurvature[jobs]) ||
               obsImpactHeight > parameters_.maximumHeight)
-            flagged[iFilterVar][jobs] = true;
+            flagged[iVar][jobs] = true;
         }
       }
     }
