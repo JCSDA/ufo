@@ -66,7 +66,7 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
   std::vector<float> bias(nlocs);
 
   const float c1 = options_.sigmoid_c1.value();    // Affects slope of sigmoid function
-  const float c2 = options_.sigmoid_c1.value();    // The 50-percent value of sigmoid function
+  const float c2 = options_.sigmoid_c2.value();    // The 50-percent value of sigmoid function
 
   float Cmod, Cobs, Comb, dx, frac;
 
