@@ -1,0 +1,71 @@
+time window:
+  begin: 2019-01-01T00:00:00Z
+  end: 2021-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Radar beam geometry
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_beam_geometry.nc4
+    simulated variables: [radialVelocity]
+    observed variables: [radialVelocity]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: RadarBeamGeometry
+  compareVariables:
+    - reference:
+        name: TestReference/sinTilt
+      test:
+        name: MetaData/sinTilt
+      relTol: 1.0e-4
+    - reference:
+        name: TestReference/cosAzimuthCosTilt
+      test:
+        name: MetaData/cosAzimuthCosTilt
+      relTol: 1.0e-4
+    - reference:
+        name: TestReference/sinAzimuthCosTilt
+      test:
+        name: MetaData/sinAzimuthCosTilt
+      relTol: 1.0e-4
+    - reference:
+        name: TestReference/height
+      test:
+        name: MetaData/height
+      relTol: 1.0e-4
+
+- obs space:
+    name: Radar beam geometry, OPS compatibility mode
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_beam_geometry.nc4
+    simulated variables: [radialVelocity]
+    observed variables: [radialVelocity]
+  obs filters:
+    - filter: Variable Transforms
+      Transform: RadarBeamGeometry
+      OPS compatibility mode: true
+  compareVariables:
+    - reference:
+        name: TestReferenceOPS/sinTilt
+      test:
+        name: MetaData/sinTilt
+      relTol: 1.0e-4
+    - reference:
+        name: TestReferenceOPS/cosAzimuthCosTilt
+      test:
+        name: MetaData/cosAzimuthCosTilt
+      relTol: 1.0e-4
+    - reference:
+        name: TestReferenceOPS/sinAzimuthCosTilt
+      test:
+        name: MetaData/sinAzimuthCosTilt
+      relTol: 1.0e-4
+    - reference:
+        name: TestReferenceOPS/height
+      test:
+        name: MetaData/height
+      relTol: 1.0e-4
