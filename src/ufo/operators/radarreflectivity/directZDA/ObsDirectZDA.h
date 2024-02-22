@@ -32,7 +32,7 @@ namespace ufo {
   class ObsDiagnostics;
 
   enum class MicrophysicsOption {
-    THOMPSON, NSSL, LIN
+    THOMPSON, NSSL, LIN, GFDL
   };
 
   struct MicrophysicsOptionParameterTraitsHelper {
@@ -41,7 +41,8 @@ namespace ufo {
     static constexpr util::NamedEnumerator<MicrophysicsOption> namedValues[] = {
       { MicrophysicsOption::THOMPSON, "Thompson" },
       { MicrophysicsOption::NSSL, "NSSL"},
-      { MicrophysicsOption::LIN, "Lin"}
+      { MicrophysicsOption::LIN, "Lin"},
+      { MicrophysicsOption::GFDL, "GFDL"}
     };
   };
 }  // namespace ufo
@@ -72,7 +73,7 @@ class ObsDirectZDAParameters: public ObsOperatorParametersBase {
 
   oops::Parameter<MicrophysicsOption> microOption
     {"microphysics option",
-     "microphysics option by name (e.g. Thompson, NSSL, others)",
+     "microphysics option by name (e.g. Thompson, NSSL, GFDL, others)",
      MicrophysicsOption::THOMPSON,
      this};
 

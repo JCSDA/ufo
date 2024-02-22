@@ -73,6 +73,10 @@ subroutine ufo_directZDA_tlad_setup_(self, yaml_conf)
     !self%micro_option = LIN
     self%mphyopt = 2
     mp_option = 2
+  else if(trim(micro_option) == 'GFDL') then
+    !self%micro_option = GFDL
+    self%mphyopt = 5
+    mp_option = 5
   else
     print*, ' TLAD micro_option set to ', trim(micro_option)
     call abor1_ftn("microphysics option not set or unsupported, aborting")
@@ -101,16 +105,11 @@ subroutine ufo_directZDA_tlad_setup_(self, yaml_conf)
   if ( self%mphyopt .eq. 108 ) then      ! TM VarOP: 108
     n_geovars=7
     if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = &
-         (/var_clr,var_cls,var_clg, &
-           var_qnr, &
-           var_prs,var_ts,var_q/)
-  else if ( self%mphyopt .eq. 2 ) then   ! LIN VarOP: 2
+    geovars_default = (/var_qr, var_qs, var_qg, var_nr, var_prs, var_ts, var_q/)
+  else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then   ! LIN=2, GFDL=5
     n_geovars=6
     if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = &
-         (/var_clr,var_cls,var_clg, &
-           var_prs,var_ts,var_q/)
+    geovars_default = (/var_qr, var_qs, var_qg, var_prs, var_ts, var_q/)
   end if
 
   call self%geovars%push_back(geovars_default)
@@ -204,14 +203,14 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
   allocate(self%wf(self%nlocs))
 
 ! get geoval column
-  call ufo_geovals_get_var(geovals, var_clr, qr)
-  call ufo_geovals_get_var(geovals, var_cls, qs)
-  call ufo_geovals_get_var(geovals, var_clg, qg)
+  call ufo_geovals_get_var(geovals, var_qr, qr)
+  call ufo_geovals_get_var(geovals, var_qs, qs)
+  call ufo_geovals_get_var(geovals, var_qg, qg)
   call ufo_geovals_get_var(geovals, var_prs, prs)
   call ufo_geovals_get_var(geovals, var_ts, t)
   call ufo_geovals_get_var(geovals, var_q, qv)
   if ( self%mphyopt .eq. 108 ) then ! TM operator only
-     call ufo_geovals_get_var(geovals, var_qnr, qnr)
+     call ufo_geovals_get_var(geovals, var_nr, qnr)
   end if
 
   allocate(obsvcoord(self%nlocs))
@@ -225,7 +224,7 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, self%wi(iobs), self%wf(iobs))
   end do
 
-  if ( self%mphyopt .eq. 2 ) then
+  if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then
 ! Initialize coefficients and power index numers used in the dbz obs operator
 ! for single moment scheme
     i_melt_snow=-1
@@ -275,7 +274,7 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
     Zeg_dry = zero ;     Zeg_wet = zero ;
 
 ! --------------- LIN operator code from GSI 'setupdbz.f90' --------------
-    if ( self%mphyopt .eq. 2 ) then ! LIN operator
+    if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then ! LIN operator
       ! rain
         Zer = Cr  * (RHO * qrexp)**(Pr)
 
@@ -534,11 +533,11 @@ subroutine ufo_directZDA_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   if ( self%mphyopt .eq. 108 ) then ! TM
      nvars_geovars = 4 ! Qr, Qs, Qg, Qnr
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_clr,var_cls,var_clg,var_qnr/)
+     geovars_list=(/var_qr, var_qs, var_qg, var_nr/)
   else                              ! LIN 
      nvars_geovars = 3 ! Qr, Qs, Qg
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_clr,var_cls,var_clg/)
+     geovars_list=(/var_qr, var_qs, var_qg/)
   end if
   allocate(vfields(nvars_geovars,nlocs))
   vfields=0.0_kind_real
@@ -599,11 +598,11 @@ subroutine ufo_directZDA_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   if ( self%mphyopt .eq. 108 ) then ! TM
      nvars_geovars = 4 ! Qr, Qs, Qg, Qnr
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_clr,var_cls,var_clg,var_qnr/)
+     geovars_list=(/var_qr, var_qs, var_qg, var_nr/)
   else                              ! LIN 
      nvars_geovars = 3 ! Qr, Qs, Qg
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_clr,var_cls,var_clg/)
+     geovars_list=(/var_qr, var_qs, var_qg/)
   end if
 
   allocate(vfields(nvars_geovars,nlocs))

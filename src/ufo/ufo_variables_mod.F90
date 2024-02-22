@@ -35,18 +35,28 @@ character(len=MAXVARLEN), public, parameter :: var_zimo   = "geopotential_height
 character(len=MAXVARLEN), public, parameter :: var_sfc_z  = "surface_geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_oz     = "mole_fraction_of_ozone_in_air"
 character(len=MAXVARLEN), public, parameter :: var_co2    = "mole_fraction_of_carbon_dioxide_in_air"
+! Directly predicted microphysics species mixing ratios (kg/kg) and number concentrations (#/kg)
+character(len=MAXVARLEN), public, parameter :: var_qc     = "cloud_liquid_water"  ! liq_wat
+character(len=MAXVARLEN), public, parameter :: var_qi     = "cloud_liquid_ice"    ! ice_wat
+character(len=MAXVARLEN), public, parameter :: var_qr     = "rain_water"          ! rainwat
+character(len=MAXVARLEN), public, parameter :: var_qs     = "snow_water"          ! snowwat
+character(len=MAXVARLEN), public, parameter :: var_qg     = "graupel"             ! graupel
+character(len=MAXVARLEN), public, parameter :: var_qh     = "hail"                ! hail
+character(len=MAXVARLEN), public, parameter :: var_nc     = "cloud_droplet_number_concentration"  ! water_nc
+character(len=MAXVARLEN), public, parameter :: var_ni     = "cloud_ice_number_concentration"      ! ice_nc
+character(len=MAXVARLEN), public, parameter :: var_nr     = "rain_number_concentration"           ! rain_nc
+character(len=MAXVARLEN), public, parameter :: var_ns     = "snow_number_concentration"           ! snow_nc
+character(len=MAXVARLEN), public, parameter :: var_ng     = "graupel_number_concentration"        ! graupel_nc
+character(len=MAXVARLEN), public, parameter :: var_nh     = "hail_number_concentration"           ! hail_nc
+character(len=MAXVARLEN), public, parameter :: var_qvg    = "volume_mixing_ratio_of_graupel_in_air"
+character(len=MAXVARLEN), public, parameter :: var_qvh    = "volume_mixing_ratio_of_hail_in_air"
+! Derived liquid and ice water paths (k/m2) computed from mixing ratios times delta-Z divided by air density.
 character(len=MAXVARLEN), public, parameter :: var_clw    = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_cli    = "mass_content_of_cloud_ice_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_clr    = "mass_content_of_rain_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_cls    = "mass_content_of_snow_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_clg    = "mass_content_of_graupel_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_clh    = "mass_content_of_hail_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_qnr    = "mass_number_concentration_of_rain_water_in_air"
-character(len=MAXVARLEN), public, parameter :: var_qns    = "mass_number_concentration_of_snow_in_air"
-character(len=MAXVARLEN), public, parameter :: var_qng    = "mass_number_concentration_of_graupel_in_air"
-character(len=MAXVARLEN), public, parameter :: var_qnh    = "mass_number_concentration_of_hail_in_air"
-character(len=MAXVARLEN), public, parameter :: var_qvg    = "volume_mixing_ratio_of_graupel_in_air"
-character(len=MAXVARLEN), public, parameter :: var_qvh    = "volume_mixing_ratio_of_hail_in_air"
 character(len=MAXVARLEN), public, parameter :: var_clwefr = "effective_radius_of_cloud_liquid_water_particle"
 character(len=MAXVARLEN), public, parameter :: var_cliefr = "effective_radius_of_cloud_ice_particle"
 character(len=MAXVARLEN), public, parameter :: var_clrefr = "effective_radius_of_rain_particle"

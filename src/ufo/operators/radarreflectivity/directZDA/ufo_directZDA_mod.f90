@@ -64,6 +64,10 @@ subroutine ufo_directZDA_setup(self, yaml_conf)
     !self%micro_option = LIN
     self%mphyopt = 2
     mp_option = 2
+  else if(trim(micro_option) .eq. "GFDL") then
+    !self%micro_option = GFDL
+    self%mphyopt = 5
+    mp_option = 5
   else
     print*, ' microphysics picked is: ', trim(micro_option)
     call abor1_ftn("microphysics option not set or unsupported, aborting")
@@ -94,24 +98,16 @@ subroutine ufo_directZDA_setup(self, yaml_conf)
   if ( self%mphyopt .eq. 14 ) then         !  NSSL EnKF OP: 14
     n_geovars=13 
     if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = &
-         (/var_clr,var_cls,var_clg,var_clh, &
-           var_qnr,var_qns,var_qng,var_qnh, &
-           var_qvg,var_qvh, &
-           var_prs,var_ts,var_q/)
+    geovars_default = (/var_qr, var_qs, var_qg, var_qh, var_nr, var_ns, var_ng, var_nh, &
+                        var_qvg, var_qvh, var_prs, var_ts, var_q/)
   else if ( self%mphyopt .eq. 108 ) then   ! TM OP : 108
     n_geovars=7
     if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = &
-         (/var_clr,var_cls,var_clg, &
-           var_qnr, &
-           var_prs,var_ts,var_q/)
-  else if ( self%mphyopt .eq. 2 ) then   ! LIN VarOP: 2
+    geovars_default = (/var_qr, var_qs, var_qg, var_nr, var_prs, var_ts, var_q/)
+  else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then   ! LIN=2, GFDL=5
     n_geovars=6
     if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = &
-         (/var_clr,var_cls,var_clg, &
-           var_prs,var_ts,var_q/)
+    geovars_default = (/var_qr, var_qs, var_qg, var_prs, var_ts, var_q/)
   end if
 
   call self%geovars%push_back(geovars_default)
@@ -246,7 +242,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
     enddo
   enddo
 
-  if ( self%mphyopt .eq. 2 ) then
+  if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then
 ! Initialize coefficients and power index numers used in the dbz obs operator
 ! for single moment scheme (LIN)
     i_melt_snow=-1
@@ -304,7 +300,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
          P1D=vfields(5,iobs) ! pressure (Pa)
          T1D=vfields(6,iobs) ! temperature (K)
          Q1D=vfields(7,iobs) ! specific humidity
-      else if ( self%mphyopt .eq. 2 ) then
+      else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then
          P1D=vfields(4,iobs) ! pressure (Pa)
          T1D=vfields(5,iobs) ! temperature (K)
          Q1D=vfields(6,iobs) ! specific humidity
@@ -330,7 +326,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
       Zeg_dry = zero ;     Zeg_wet = zero ;
 
 ! --------------- LIN operator code from GSI 'setupdbz.f90' --------------
-      if ( self%mphyopt .eq. 2 ) then ! LIN operator
+      if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then ! LIN operator
 !      ! rain
          Zer = Cr  * (RHO * qrexp)**(Pr)
 
