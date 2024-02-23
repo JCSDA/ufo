@@ -165,8 +165,6 @@ void SuperRefractionCheckNBAM::applyFilter(
                         radiusCurvature[0][iobs]);
         const std::vector<float> & refGradient = calcRefractivityGradient(
                         refracProfile, impactParameterModel);
-        refracProfile.clear();
-        heightProfile.clear();
 
         // check from the middle of the model levels to surface
         int ncheckstart = static_cast<int>(refGradient.size()/2.0);

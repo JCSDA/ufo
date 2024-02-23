@@ -71,9 +71,9 @@ class ProfileMaxDifferenceCheck : public FilterBase,
                    std::vector<std::vector<bool>> &) const override;
   int qcFlag() const override {return QCflags::profile;}
   Parameters_ parameters_;
-  float calcMaxDifference(const std::vector<float> &,
-                          const std::vector<float> &)
-                          const;
+  int calcMaxDifference(const std::vector<float> &,
+                        const std::vector<float> &)
+                        const;
 };
 
 }  // namespace ufo

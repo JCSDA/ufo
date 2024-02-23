@@ -60,7 +60,6 @@ void SuperRefractionCheckImpactParameter::applyFilter(
                                       std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "SuperRefractionCheckImpactParameter postFilter, "
                      << "using profile check = "<< parameters_.profileCheck.value()<< std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
   const float missingFloat = util::missingValue<float>();
 
   // Get the refractivity from the obs diagnostics, including the number of
@@ -135,20 +134,24 @@ void SuperRefractionCheckImpactParameter::applyFilter(
       }
       std::vector<float> refracProfile;
       std::vector<float> heightProfile;
+
+      // count the number of valid levels of model profiles for iobs
+      int nLevel = 0;
       for (size_t iLevel = 0; iLevel < nRefLevels; ++iLevel)
          if (refractivity[iLevel][bottomOb] != missingFloat &&
              modelHeights[iLevel][bottomOb] != missingFloat) {
              refracProfile.push_back(refractivity[iLevel][bottomOb]);
              heightProfile.push_back(modelHeights[iLevel][bottomOb]);
+             nLevel++;
          }
+      // skip to next observation if model profiles are missing for iobs
+      if (nLevel == 0) continue;
 
       const  std::vector<float>  impactParameterModel = calcImpactParameterModel(
                         refracProfile, heightProfile,
                         latitude[0][bottomOb],
                         geoid[0][bottomOb],
                         radiusCurvature[0][bottomOb]);
-      refracProfile.clear();
-      heightProfile.clear();
       float impactParaDiff = missingFloat;
       int kLevel = 0;
       for (size_t iLevel = 1; iLevel < nRefLevels; ++iLevel) {
@@ -158,53 +161,54 @@ void SuperRefractionCheckImpactParameter::applyFilter(
           break;
         }
       }
-      for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
-        const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+      for (size_t iVar = 0; iVar < filtervars.nvars(); ++iVar) {
         for (size_t iobs : obs_numbers) {
           if (apply[iobs] &&  (*flags_)[iVar][iobs] == QCflags::pass &&
               impactParameterObs[0][iobs] <= impactParameterModel[kLevel] &&
               kLevel > 0) {
-            flagged[iFilterVar][iobs] = true;
+            flagged[iVar][iobs] = true;
           }
         }  // end iobs loop
-      }  // end iFilterVar loop
+      }  // end iVar loop
 
     } else {  //  profileCheck = false
-      for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
-        const size_t iVar = observed.find(filtervars.variable(iFilterVar).variable());
+      for (size_t iVar = 0; iVar < filtervars.nvars(); ++iVar) {
         for (size_t iobs : obs_numbers) {
           if (apply[iobs] &&  (*flags_)[iVar][iobs] == QCflags::pass) {
             std::vector<float> refracProfile;
             std::vector<float> heightProfile;
+            // count the number of valid levels of model profiles for iobs
+            int nLevel = 0;
             for (size_t iLevel = 0; iLevel < nRefLevels; ++iLevel)
               if (refractivity[iLevel][iobs] != missingFloat &&
                   modelHeights[iLevel][iobs] != missingFloat) {
-                  refracProfile.push_back(refractivity[iLevel][iobs]);
-                  heightProfile.push_back(modelHeights[iLevel][iobs]);
+                refracProfile.push_back(refractivity[iLevel][iobs]);
+                heightProfile.push_back(modelHeights[iLevel][iobs]);
+                nLevel++;
               }
+            // skip to next observation if model profiles are missing for iobs
+            if (nLevel == 0) continue;
 
-              const  std::vector<float>  impactParameterModel = calcImpactParameterModel(
+            const  std::vector<float>  impactParameterModel = calcImpactParameterModel(
                           refracProfile, heightProfile,
                           latitude[0][iobs],
                           geoid[0][iobs],
                           radiusCurvature[0][iobs]);
-             refracProfile.clear();
-             heightProfile.clear();
-             float impactParaDiff = missingFloat;
-             int kLevel = 0;
-             for (size_t iLevel = 1; iLevel < nRefLevels; ++iLevel) {
-               impactParaDiff = impactParameterModel[iLevel-1] - impactParameterModel[iLevel];
-               if (impactParaDiff <= parameters_.threshold.value()) {
-                 kLevel = iLevel-1;
-                 break;
-               }
-             }
-             if (impactParameterObs[0][iobs] <= impactParameterModel[kLevel] &&
-                 kLevel > 0)
-                 flagged[iFilterVar][iobs] = true;
+            float impactParaDiff = missingFloat;
+            int kLevel = 0;
+            for (size_t iLevel = 1; iLevel < nRefLevels; ++iLevel) {
+              impactParaDiff = impactParameterModel[iLevel-1] - impactParameterModel[iLevel];
+              if (impactParaDiff <= parameters_.threshold.value()) {
+                kLevel = iLevel-1;
+                break;
+              }
+            }
+            if (impactParameterObs[0][iobs] <= impactParameterModel[kLevel] &&
+                kLevel > 0)
+              flagged[iVar][iobs] = true;
           }
         }  // end iobs loop
-      }  // end iFilterVar loop
+      }  // end iVar loop
     }  // end if profileCheck
   }   //  end iProfile loop
 }  // end applyFilter

@@ -74,6 +74,11 @@ void ProfileMaxDifferenceCheck::applyFilter(
     std::sort(idx.begin(), idx.end(),
          [&observationHeight, &obs_numbers](size_t i1, size_t i2)
          {return observationHeight[obs_numbers[i1]] < observationHeight[obs_numbers[i2]];});
+
+    // check if the profile does not penetrate below the maxCheckHeight
+    if (observationHeight[obs_numbers[idx[0]]] >= parameters_.maxCheckHeight.value())
+      continue;
+
     // Create the sorted heights and variables from the list of indices, checking
     // for missing values and whether we're within the check range
     std::vector<float> heightProfile;
@@ -91,20 +96,17 @@ void ProfileMaxDifferenceCheck::applyFilter(
     //  Calculate the maximum different in the profile
     int jSuper;
     jSuper = calcMaxDifference(heightProfile, variableProfile);
-    for (size_t iFilterVar = 0; iFilterVar < filtervars.nvars(); ++iFilterVar) {
+    for (size_t iVar = 0; iVar < filtervars.nvars(); ++iVar) {
       for (size_t iobs : obs_numbers) {
         if (observationHeight[iobs] <= heightProfile[jSuper] &&
             jSuper != heightProfile.size()-1 )
-          flagged[iFilterVar][iobs] = true;
+          flagged[iVar][iobs] = true;
       }
-    }  //  end iFilterVar loop
-    heightProfile.clear();
-    variableProfile.clear();
-    idx.clear();
+    }  //  end iVar loop
   }  //  end iProfile loop
 }  //  end applyFilter
 
-float ProfileMaxDifferenceCheck::calcMaxDifference(
+int ProfileMaxDifferenceCheck::calcMaxDifference(
                                  const std::vector<float> & heightProfile,
                                  const std::vector<float> & variableProfile) const {
   int jSuper = heightProfile.size()-1;
