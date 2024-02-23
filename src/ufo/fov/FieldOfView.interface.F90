@@ -1,4 +1,4 @@
-! (C) Copyright 2021 UCAR.
+! (C) Copyright 2024 UCAR.
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -85,7 +85,7 @@ subroutine ufo_fov_ellipse_c(c_key_self, sensor_len, sensor_cstr, scan_position,
   integer(c_int), intent(inout) :: c_key_self
   integer(c_int), intent(in) :: sensor_len
   character(kind=c_char, len=1), intent(in) :: sensor_cstr(sensor_len + 1)
-  real(c_double), intent(in) :: scan_position
+  integer(c_int), intent(in) :: scan_position
   real(c_double), intent(in) :: sat_azimuth_angle
   real(c_double), intent(in) :: fov_center_lon
   real(c_double), intent(in) :: fov_center_lat
@@ -117,7 +117,7 @@ subroutine ufo_antenna_power_within_fov_c(c_key_self, sensor_len, sensor_cstr, s
   integer(c_int), intent(inout) :: c_key_self
   integer(c_int), intent(in) :: sensor_len
   character(kind=c_char, len=1), intent(in) :: sensor_cstr(sensor_len + 1)
-  real(c_double), intent(in) :: scan_position
+  integer(c_int), intent(in) :: scan_position
   real(c_double), intent(in) :: sat_azimuth_angle
   real(c_double), intent(in) :: fov_center_lon
   real(c_double), intent(in) :: fov_center_lat

@@ -1,4 +1,4 @@
-! (C) Copyright 2021 UCAR
+! (C) Copyright 2024 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -115,24 +115,22 @@ contains
 
     class(ufo_fov), intent(in) :: self
     character(len=*), intent(in) :: sensor
-    real(kind_real), intent(in) :: scan_position
+    integer, intent(in) :: scan_position
     real(kind_real), intent(in) :: sat_azimuth_angle
     real(kind_real), intent(in) :: fov_center_lon
     real(kind_real), intent(in) :: fov_center_lat
     real(kind_real), intent(out) :: fov_ellipse_lons(npoly)
     real(kind_real), intent(out) :: fov_ellipse_lats(npoly)
 
-    integer :: fov
     logical :: valid
 
     if (self%is_crosstrack) then
-      fov = int(scan_position)
-      call fov_check(fov, self%instr, self%ichan, valid)
+      call fov_check(scan_position, self%instr, self%ichan, valid)
       if (.not. valid) then
         call abor1_ftn("Error in ufo_fov_mod: invalid field of view")
       end if
 
-      call fov_ellipse_crosstrk(fov, self%instr, sat_azimuth_angle, &
+      call fov_ellipse_crosstrk(scan_position, self%instr, sat_azimuth_angle, &
                                 fov_center_lat, fov_center_lon, fov_ellipse_lats, fov_ellipse_lons)
     else
       call fov_ellipse_conical(self%ichan, sat_azimuth_angle, &
@@ -151,7 +149,7 @@ contains
 
     class(ufo_fov), intent(in) :: self
     character(len=*), intent(in) :: sensor
-    real(kind_real), intent(in) :: scan_position
+    integer, intent(in) :: scan_position
     real(kind_real), intent(in) :: sat_azimuth_angle
     real(kind_real), intent(in) :: fov_center_lon
     real(kind_real), intent(in) :: fov_center_lat
@@ -159,11 +157,8 @@ contains
     real(kind_real), intent(in) :: test_lat
     real(kind_real), intent(out) :: antenna_power
 
-    integer :: fov
-
     if (self%is_crosstrack) then
-      fov = int(scan_position)
-      call inside_fov_crosstrk(self%instr, fov, sat_azimuth_angle, &
+      call inside_fov_crosstrk(self%instr, scan_position, sat_azimuth_angle, &
                                fov_center_lat, fov_center_lon, test_lat, test_lon, &
                                self%expansion, self%ichan, antenna_power)
     else

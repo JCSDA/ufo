@@ -5,7 +5,7 @@ field of view:
   # is able to view the indicated lat/lon with the indicated scan position + azimuth angle.
   sensor: amsua
   satellite: n19
-  scan position: 1.0
+  scan position: 1
   sensor azimuth angle: 80.0
   longitude: 213.0
   latitude: 38.0

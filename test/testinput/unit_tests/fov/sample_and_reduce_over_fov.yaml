@@ -1,0 +1,29 @@
+field of view sampling:
+  # Parameters defining the field of view of a set of fake observation. For this test, we don't
+  # need the obs metadata to be real values from a file, so we just write reasonable values into a
+  # few yaml keys. Note that while each of these inputs should be within reasonable bounds, they
+  # need not (for this test) correspond to a physically realizable observation. In other words, it
+  # does not matter if the satellite is able to view the indicated lat/lon with the indicated scan
+  # position + azimuth angle.
+  sensor: amsua
+  satellite: n19
+  scan positions: [1, 2, 3]
+  sensor azimuth angles: [80.0, 70.0, 60.0]
+  longitudes: [213.0, 92.3, 0.0]
+  latitudes: [38.0, 0.5, -81.2]
+  times: ["2018-04-15T03:00:00Z", "2018-04-15T03:00:10Z", "2018-04-15T03:00:20Z"]
+
+  # The reference values below are empirically determined by running the code.
+  reference range begins: [0, 27, 54]
+  reference range ends: [27, 54, 78]
+  reference longitude mins: [210.43107604980469, 90.700004577636719, -5.8950762748718262]
+  reference longitude avgs: [213.00000621654368, 92.300001638906977, -0.12281408905982971]
+  reference longitude maxs: [215.56893920898438, 93.899993896484375, 5.8950762748718262]
+  reference latitude mins: [36.880203247070312, -0.5894013643264770, -82.271820068359375]
+  reference latitude avgs: [37.999999434859667, 0.5, -81.244656244913742]
+  reference latitude maxs: [39.119796752929688, 1.5894013643264771, -80.485450744628906]
+  reference weight mins: [0.00045683249865069268, 0.0005474931463941014, 0.0006596564504826862]
+  reference weight avgs: [0.18077111271822924, 0.17601782611259026, 0.18636143114332773]
+  reference weight maxs: [0.95001405015714202, 0.95001405015714202, 0.95001405015714202]
+
+  abs tol: 1.0e-7

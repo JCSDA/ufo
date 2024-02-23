@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021 UCAR.
+ * (C) Copyright 2024 UCAR.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -33,7 +33,7 @@ class FovWrapperTestParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> sensor{"sensor", this};
   oops::RequiredParameter<std::string> satellite{"satellite", this};
   // scan position is for cross-track scanning instruments only
-  oops::Parameter<float> scan_position{"scan position", -999.0, this};
+  oops::Parameter<int> scan_position{"scan position", -999, this};
   oops::RequiredParameter<float> sensor_azimuth_angle{"sensor azimuth angle", this};
   oops::RequiredParameter<float> longitude{"longitude", this};
   oops::RequiredParameter<float> latitude{"latitude", this};
@@ -58,7 +58,7 @@ class FovWrapperTestParameters : public oops::Parameters {
 
 /// Check that field of view ellipse and antenna power match the references within abs_tol
 void fovWrapperTestHelper(const std::string sensor, const std::string satellite,
-                          const float scan_position,
+                          const int scan_position,
                           const float sensor_azimuth_angle,
                           const float longitude, const float latitude,
                           const std::vector<double>& reference_ellipse_lons,
@@ -75,29 +75,29 @@ void fovWrapperTestHelper(const std::string sensor, const std::string satellite,
   bool gsi_valid_instr;
   int gsi_npoly;
 
-  ufo_fov_setup_f90(key, sensor_len, sensor_cstr, satellite_len, satellite_cstr, gsi_valid_instr,
-                    gsi_npoly);
+  fov::ufo_fov_setup_f90(key, sensor_len, sensor_cstr, satellite_len, satellite_cstr,
+                         gsi_valid_instr, gsi_npoly);
 
   EXPECT(gsi_valid_instr);
   EXPECT(gsi_npoly == 30);
 
   std::vector<double> ellipse_lons(gsi_npoly);
   std::vector<double> ellipse_lats(gsi_npoly);
-  ufo_fov_ellipse_f90(key, sensor_len, sensor_cstr, scan_position, sensor_azimuth_angle, longitude,
-                      latitude, gsi_npoly, ellipse_lons[0], ellipse_lats[0]);
+  fov::ufo_fov_ellipse_f90(key, sensor_len, sensor_cstr, scan_position, sensor_azimuth_angle,
+                           longitude, latitude, gsi_npoly, ellipse_lons[0], ellipse_lats[0]);
 
   EXPECT(oops::are_all_close_absolute(ellipse_lons, reference_ellipse_lons, abs_tol));
   EXPECT(oops::are_all_close_absolute(ellipse_lats, reference_ellipse_lats, abs_tol));
 
   for (size_t i = 0; i < reference_sample_powers.size(); ++i) {
     double sample_power;
-    ufo_antenna_power_within_fov_f90(key, sensor_len, sensor_cstr, scan_position,
-                                     sensor_azimuth_angle, longitude, latitude, sample_lons[i],
-                                     sample_lats[i], sample_power);
+    fov::ufo_antenna_power_within_fov_f90(key, sensor_len, sensor_cstr, scan_position,
+                                          sensor_azimuth_angle, longitude, latitude, sample_lons[i],
+                                          sample_lats[i], sample_power);
     EXPECT(oops::is_close_absolute(sample_power, reference_sample_powers[i], abs_tol));
   }
 
-  ufo_fov_delete_f90(key);
+  fov::ufo_fov_delete_f90(key);
 }
 
 // -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ void testFieldOfViewFromConf() {
 class FieldOfView : public oops::Test {
  public:
   FieldOfView() = default;
-  virtual ~FieldOfView() = default;
+  ~FieldOfView() = default;
 
  private:
   std::string testid() const override { return "ufo::test::FieldOfView"; }
