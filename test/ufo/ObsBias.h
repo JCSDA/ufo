@@ -40,14 +40,11 @@ void testObsBiasReadWrite() {
     = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
-    ioda::ObsTopLevelParameters obsparams;
-    obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
-    ioda::ObsSpace odb(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+    eckit::LocalConfiguration ospconf(oconf, "obs space");
+    ioda::ObsSpace odb(ospconf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
     // setup ObsBias parameters
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
-    ObsBiasParameters biasparams;
-    biasparams.validateAndDeserialize(biasconf);
 
     // setup ObsBias parameters with input file == output file from the original yaml
     // Need a temporary workaround for issues that surface where multiple file handles
@@ -69,24 +66,22 @@ void testObsBiasReadWrite() {
     auto pos = readTestRefFile.find("Data/");
     readTestRefFile.replace(pos, 4, "Data/ufo/testinput_tier_1");
     biasconf_forread.set("input file", readTestRefFile);
-    ObsBiasParameters biasparams_forread;
-    biasparams_forread.validateAndDeserialize(biasconf_forread);
 
     // init ObsBias
-    ObsBias ybias(odb, biasparams);
+    ObsBias ybias(odb, biasconf);
     oops::Log::test() << "Initialized obs bias: " << ybias << std::endl;
     // save original coefficients for comparison later
     const Eigen::VectorXd original_coeffs = ybias.data();
     // write out; assign zero; read back in; compare with original coefficients
-    ybias.write(biasparams);
+    ybias.write(biasconf);
     ybias.zero();
     EXPECT_EQUAL(ybias.data().norm(), 0.0);
-    ybias.read(biasparams_forread);
+    ybias.read(biasconf_forread);
     oops::Log::test() << "Obs bias after write out; assign zero; read back in: "
                       << ybias << std::endl;
     EXPECT_EQUAL((original_coeffs - ybias.data()).norm(), 0.0);
     // create ObsBias from output coefficients; compare with original coefficients
-    ObsBias ybias2(odb, biasparams_forread);
+    ObsBias ybias2(odb, biasconf_forread);
     oops::Log::test() << "Obs bias initialized from the written out file: " << ybias2 << std::endl;
     EXPECT_EQUAL((original_coeffs - ybias2.data()).norm(), 0.0);
   }

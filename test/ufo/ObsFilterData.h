@@ -138,9 +138,7 @@ void testSkipDerived(const eckit::LocalConfiguration & conf,
                      const bool skipDerived) {
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(conf, "obs space");
-    ioda::ObsTopLevelParameters obsparams;
-    obsparams.validateAndDeserialize(obsconf);
-    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+    ioda::ObsSpace ospace(obsconf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
 /// Setup ObsFilterData
     ObsFilterData data(ospace);
@@ -174,28 +172,22 @@ void testObsFilterData() {
 
 ///  Setup ObsSpace
     const eckit::LocalConfiguration obsconf(confs[jconf], "obs space");
-    ioda::ObsTopLevelParameters obsparams;
-    obsparams.validateAndDeserialize(obsconf);
-    ioda::ObsSpace ospace(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+    ioda::ObsSpace ospace(obsconf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
 ///  Setup GeoVaLs
     const eckit::LocalConfiguration gconf(confs[jconf], "geovals");
-    GeoVaLsParameters geovalsparams;
-    geovalsparams.validateAndDeserialize(gconf);
     std::vector<eckit::LocalConfiguration> varconfs;
     confs[jconf].get("geovals variables", varconfs);
     const Variables geovars(varconfs);
-    GeoVaLs gval(geovalsparams, ospace, geovars.toOopsVariables());
+    GeoVaLs gval(gconf, ospace, geovars.toOopsVariables());
     gval.setDefaultFormat(GeoVaLFormat::REDUCED);
 
 ///  Setup ObsDiags
     const eckit::LocalConfiguration obsdiagconf(confs[jconf], "obs diagnostics");
-    GeoVaLsParameters obsdiagparams;
-    obsdiagparams.validateAndDeserialize(obsdiagconf);
     varconfs.clear();
     confs[jconf].get("obs diagnostics variables", varconfs);
     const Variables diagvars(varconfs);
-    const ObsDiagnostics obsdiags(obsdiagparams, ospace, diagvars.toOopsVariables());
+    const ObsDiagnostics obsdiags(obsdiagconf, ospace, diagvars.toOopsVariables());
 
 ///  Setup H(x)
     const eckit::LocalConfiguration hofxconf(confs[jconf], "HofX");

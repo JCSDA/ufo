@@ -23,6 +23,10 @@
 #include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
+namespace eckit {
+  class Configuration;
+}
+
 namespace ioda {
   class ObsSpace;
 }
@@ -40,15 +44,15 @@ class ObsBias : public util::Printable,
 
   static const std::string classname() {return "ufo::ObsBias";}
 
-  ObsBias(ioda::ObsSpace &, const Parameters_ &);
+  ObsBias(ioda::ObsSpace &, const eckit::Configuration &);
   ObsBias(const ObsBias &, const bool);
 
   ObsBias & operator+=(const ObsBiasIncrement &);
   ObsBias & operator=(const ObsBias &);
 
   /// Read bias correction coefficients from file
-  void read(const Parameters_ &);
-  void write(const Parameters_ &) const;
+  void read(const eckit::Configuration &);
+  void write(const eckit::Configuration &) const;
   double norm() const;
   std::size_t size() const {return biascoeffs_.size();}
 

@@ -53,9 +53,7 @@ void testPredictor() {
 
     // initialize bias correction
     eckit::LocalConfiguration bconf(conf, "obs bias");
-    ObsBiasParameters bparams;
-    bparams.validateAndDeserialize(bconf);
-    const ObsBias ybias(ospace, bparams);
+    const ObsBias ybias(ospace, bconf);
     // get predictor names
     std::vector<std::string> predictor_names = ybias.requiredPredictors();
 
@@ -66,9 +64,7 @@ void testPredictor() {
     if (gvars.size() > 0) {
       // Read GeoVaLs from a file
       eckit::LocalConfiguration gconf(conf, "geovals");
-      GeoVaLsParameters geovalsparams;
-      geovalsparams.validateAndDeserialize(gconf);
-      gval.reset(new GeoVaLs(geovalsparams, ospace, gvars));
+      gval.reset(new GeoVaLs(gconf, ospace, gvars));
     } else {
       // Create an empty GeoVaLs object
       gval.reset(new GeoVaLs(ospace.distribution(), oops::Variables()));

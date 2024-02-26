@@ -62,12 +62,12 @@ class TestParameters : public oops::Parameters {
 
  public:
   oops::RequiredParameter<eckit::LocalConfiguration> timeWindow{"time window", this};
-  oops::RequiredParameter<ioda::ObsSpace::Parameters_> obsSpace{"obs space", this};
-  oops::RequiredParameter<ObsOperator::Parameters_> obsOperator{"obs operator", this};
-  oops::RequiredParameter<GeoVaLs::Parameters_> geovals{"geovals", this};
-  oops::Parameter<ObsBias::Parameters_> obsBias{"obs bias", {}, this};
+  oops::RequiredParameter<eckit::LocalConfiguration> obsSpace{"obs space", this};
+  oops::RequiredParameter<eckit::LocalConfiguration> obsOperator{"obs operator", this};
+  oops::RequiredParameter<eckit::LocalConfiguration> geovals{"geovals", this};
+  oops::Parameter<eckit::LocalConfiguration> obsBias{"obs bias", eckit::LocalConfiguration(), this};
   oops::RequiredParameter<ObsDiagnosticsParameters> obsDiagnostics{"obs diagnostics", this};
-  oops::RequiredParameter<GeoVaLs::Parameters_> referenceObsDiagnostics{
+  oops::RequiredParameter<eckit::LocalConfiguration> referenceObsDiagnostics{
     "reference obs diagnostics", this};
   oops::RequiredParameter<double> tolerance{"tolerance", this};
 };

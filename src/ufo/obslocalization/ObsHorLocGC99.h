@@ -11,6 +11,8 @@
 #include <ostream>
 #include <vector>
 
+#include "eckit/config/Configuration.h"
+
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -28,8 +30,7 @@ class ObsHorLocGC99: public ufo::ObsHorLocalization<MODEL> {
   typedef typename ObsHorLocalization<MODEL>::LocalObs LocalObs_;
 
  public:
-  typedef ObsHorLocParameters Parameters_;
-  ObsHorLocGC99(const Parameters_ &, const ioda::ObsSpace &);
+  ObsHorLocGC99(const eckit::Configuration &, const ioda::ObsSpace &);
 
  protected:
   /// Compute GC99 localization using the set of \p localobs, the same lengthscale
@@ -45,11 +46,10 @@ class ObsHorLocGC99: public ufo::ObsHorLocalization<MODEL> {
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-ObsHorLocGC99<MODEL>::ObsHorLocGC99(const Parameters_ & params,
-                                    const ioda::ObsSpace & obsspace):
-       ObsHorLocalization<MODEL>::ObsHorLocalization(params, obsspace) {
-  oops::Log::debug() <<  *this;
-}
+ObsHorLocGC99<MODEL>::ObsHorLocGC99(const eckit::Configuration & conf,
+                                    const ioda::ObsSpace & obsspace)
+  : ObsHorLocalization<MODEL>::ObsHorLocalization(conf, obsspace)
+{}
 
 // -----------------------------------------------------------------------------
 

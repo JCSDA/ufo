@@ -35,18 +35,16 @@ void testObsBiasIncrementReadWrite() {
 
   util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
-  std::vector<eckit::LocalConfiguration> obsconfs
-    = conf.getSubConfigurations("observations");
+  std::vector<eckit::LocalConfiguration> obsconfs = conf.getSubConfigurations("observations");
 
   for (auto & oconf : obsconfs) {
     ioda::ObsTopLevelParameters obsparams;
     obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
-    ioda::ObsSpace odb(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+    eckit::LocalConfiguration obsconf(oconf, "obs space");
+    ioda::ObsSpace odb(obsconf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
     // set up ObsBias parameters
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
-    ObsBiasParameters biasparams;
-    biasparams.validateAndDeserialize(biasconf);
 
     // set up modified configuration for reading in later
     eckit::LocalConfiguration biasconf_forread = biasconf;
@@ -55,9 +53,9 @@ void testObsBiasIncrementReadWrite() {
 
     // initialize ObsBiasIncrement by taking the difference between a non-trivial ObsBias and
     // a zero-valued ObsBias
-    ObsBiasIncrement ybiasinc(odb, biasparams);
-    ObsBias ybias1(odb, biasparams);
-    ObsBias ybias2(odb, biasparams);
+    ObsBiasIncrement ybiasinc(odb, biasconf);
+    ObsBias ybias1(odb, biasconf);
+    ObsBias ybias2(odb, biasconf);
     ybias2.zero();
     ybiasinc.diff(ybias1, ybias2);
 

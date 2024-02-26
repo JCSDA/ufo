@@ -87,10 +87,7 @@ SampledLocations::SampledLocations(const eckit::Configuration & conf, const ecki
   const eckit::LocalConfiguration obsconf(conf, "obs space");
   const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
-  ioda::ObsTopLevelParameters obsparams;
-  obsparams.validateAndDeserialize(obsconf);
-
-  const ioda::ObsSpace obspace(obsparams, comm, timeWindow, oops::mpi::myself());
+  const ioda::ObsSpace obspace(obsconf, comm, timeWindow, oops::mpi::myself());
   const size_t nlocs = obspace.nlocs();
   dist_ = obspace.distribution();
 

@@ -16,6 +16,7 @@
 #include <utility>
 #include <vector>
 
+#include "eckit/config/Configuration.h"
 #include "eckit/geometry/Point3.h"
 
 #include "ioda/ObsSpace.h"
@@ -35,9 +36,7 @@ class ObsVertLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
   typedef typename MODEL::GeometryIterator   GeometryIterator_;
 
  public:
-  typedef ObsVertLocParameters Parameters_;
-
-  ObsVertLocalization(const Parameters_ &, const ioda::ObsSpace &);
+  ObsVertLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
 
   /// Compute localization and save localization values in \p locvector.
   /// Missing values indicate that observation is outside of localization.
@@ -85,15 +84,15 @@ class ObsVertLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
 // -----------------------------------------------------------------------------
 
 template<typename MODEL>
-ObsVertLocalization<MODEL>::ObsVertLocalization(const Parameters_ & params,
-                                              const ioda::ObsSpace & obsspace)
-  : options_(params)
+ObsVertLocalization<MODEL>::ObsVertLocalization(const eckit::Configuration & config,
+                                                const ioda::ObsSpace & obsspace)
+  : options_()
 {
+  options_.validateAndDeserialize(config);
   // check that this distribution supports local obs space
   // TODO(travis) this has been moved to computeLocalization as a quick fix for a bug.
   distName_ = obsspace.distribution()->name();
 
-  const size_t nlocs = obsspace.nlocs();
   // Get vertical coordinate of all observations.
   if (options_.assignConstantVcoordToObs.value()) {
     vCoord_.resize(obsspace.nlocs(), options_.constantVcoordValue.value() );

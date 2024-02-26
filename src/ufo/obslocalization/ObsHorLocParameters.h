@@ -15,9 +15,9 @@
 #include "eckit/geometry/Point3.h"
 #include "eckit/geometry/UnitSphere.h"
 
-#include "oops/base/ObsLocalizationParametersBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 namespace ufo {
 
@@ -69,10 +69,12 @@ struct ParameterTraits<ufo::SearchMethod> :
 namespace ufo {
 
 /// \brief Options controlling local observations subsetting
-class ObsHorLocParameters : public oops::ObsLocalizationParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsHorLocParameters, oops::ObsLocalizationParametersBase)
+class ObsHorLocParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsHorLocParameters, oops::Parameters)
 
  public:
+  oops::RequiredParameter<std::string> method{"localization method", this};
+
   /// Localization lengthscale (find all obs within the distance from reference point)
   oops::Parameter<double> lengthscale{"lengthscale", 0.0, this};
 

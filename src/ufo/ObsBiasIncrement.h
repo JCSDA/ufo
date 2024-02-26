@@ -33,8 +33,7 @@ class ObsBiasIncrement : public util::Printable {
  public:
   typedef ObsBiasParameters Parameters_;
 
-  ObsBiasIncrement(const ioda::ObsSpace & odb,
-                   const Parameters_ & params);
+  ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Configuration &);
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
 
   // Linear algebra operators

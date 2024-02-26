@@ -20,17 +20,16 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os,
-                               const Locations_ & locs,
+ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations_ & locs,
                                const oops::Variables & vars)
   : obsdb_(os), gdiags_(locs, vars)
 {}
 
 // -----------------------------------------------------------------------------
 
-ObsDiagnostics::ObsDiagnostics(const Parameters_ & params, const ioda::ObsSpace & os,
+ObsDiagnostics::ObsDiagnostics(const eckit::Configuration & config, const ioda::ObsSpace & os,
                                const oops::Variables & vars)
-  : obsdb_(os), gdiags_(params, os, vars)
+  : obsdb_(os), gdiags_(config, os, vars)
 {}
 
 // -----------------------------------------------------------------------------

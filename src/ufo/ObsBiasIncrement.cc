@@ -11,6 +11,8 @@
 #include <iomanip>
 #include <memory>
 
+#include "eckit/config/Configuration.h"
+
 #include "ioda/Engines/HH.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
@@ -22,11 +24,14 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb,
-                                   const Parameters_ & params)
+ObsBiasIncrement::ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Configuration & config)
   : vars_(odb.assimvariables()), outputFile_(),
-    rank_(odb.distribution()->rank()), commTime_(odb.commTime()) {
+    rank_(odb.distribution()->rank()), commTime_(odb.commTime())
+{
   oops::Log::trace() << "ufo::ObsBiasIncrement::create starting." << std::endl;
+
+  Parameters_ params;
+  params.validateAndDeserialize(config);
 
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :

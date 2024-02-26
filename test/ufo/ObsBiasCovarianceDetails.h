@@ -42,22 +42,19 @@ void testObsBiasCovarianceDetails() {
   for (auto & oconf : obsconfs) {
     const double tolerance = oconf.getDouble("tolerance");
 
-    ioda::ObsTopLevelParameters obsparams;
-    obsparams.validateAndDeserialize(oconf.getSubConfiguration("obs space"));
-    ioda::ObsSpace odb(obsparams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+    eckit::LocalConfiguration ospconf(oconf, "obs space");
+    ioda::ObsSpace odb(ospconf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
     // Setup ObsBias
     eckit::LocalConfiguration biasconf = oconf.getSubConfiguration("obs bias");
-    ObsBiasParameters biasparams;
-    biasparams.validateAndDeserialize(biasconf);
-    ObsBias ybias(odb, biasparams);
+    ObsBias ybias(odb, biasconf);
 
     // Setup ObsBiasIncrements
     eckit::LocalConfiguration biaserrconf = biasconf.getSubConfiguration("covariance");
-    ObsBiasIncrement ybias_inc(odb, biasparams);
+    ObsBiasIncrement ybias_inc(odb, biasconf);
 
     // Setup ObsBiasCovariance (include reading from file)
-    ObsBiasCovariance ybias_cov(odb, biasparams);
+    ObsBiasCovariance ybias_cov(odb, biasconf);
 
     // Randomize increments
     ybias_cov.randomize(ybias_inc);
@@ -104,14 +101,13 @@ void testObsBiasCovarianceDetails() {
       // pointing to the same file" issue, we can restore this code to directly read
       // the file created by the write call below.
       std::string output_file = biasconf.getString("covariance.output file");
-      ybias_cov.write(biasparams);
+      ybias_cov.write(biasconf);
 
       // replace the prefix "Data" with "Data/ufo/testinput_tier_1"
       auto pos = output_file.find("Data/");
       output_file.replace(pos, 4, "Data/ufo/testinput_tier_1");
       biasconf.set("covariance.prior.input file", output_file);
-      biasparams.validateAndDeserialize(biasconf);
-      ObsBiasCovariance ybias_cov2(odb, biasparams);
+      ObsBiasCovariance ybias_cov2(odb, biasconf);
       ybias_cov.multiply(ybias_inc, ybias_inc_2);
       ybias_cov2.multiply(ybias_inc, ybias_inc_3);
       EXPECT(ybias_inc_2.norm() - ybias_inc_3.norm() < tolerance);

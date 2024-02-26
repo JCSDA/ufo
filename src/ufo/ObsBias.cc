@@ -14,6 +14,8 @@
 #include <iomanip>
 #include <set>
 
+#include "eckit/config/Configuration.h"
+
 #include "ioda/Engines/EngineUtils.h"
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"
@@ -32,10 +34,14 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
+ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
   : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.assimvariables()),
-    rank_(odb.distribution()->rank()), commTime_(odb.commTime()) {
+    rank_(odb.distribution()->rank()), commTime_(odb.commTime())
+{
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
+
+  ObsBiasParameters params;
+  params.validateAndDeserialize(config);
 
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :
@@ -57,7 +63,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const ObsBiasParameters & params)
     // are not stored; they are always equal to 1.)
     biascoeffs_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * numVariablePredictors_);
     // Read or initialize bias coefficients
-    this->read(params);
+    this->read(config);
   }
 
   oops::Variables varsNoBC = params.variablesNoBC;
@@ -133,8 +139,11 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::read(const Parameters_ & params) {
+void ObsBias::read(const eckit::Configuration & config) {
   oops::Log::trace() << "ObsBias::read and initialize from file, starting "<< std::endl;
+
+  Parameters_ params;
+  params.validateAndDeserialize(config);
 
   if (params.inputFile.value() != boost::none) {
     // Open an hdf5 file with bias coefficients, read only
@@ -184,7 +193,10 @@ void ObsBias::read(const Parameters_ & params) {
 
 // -----------------------------------------------------------------------------
 
-void ObsBias::write(const Parameters_ & params) const {
+void ObsBias::write(const eckit::Configuration & config) const {
+  Parameters_ params;
+  params.validateAndDeserialize(config);
+
   // only write files out on the task with MPI rank 0
   if (rank_ != 0 || commTime_.rank() != 0) return;
 

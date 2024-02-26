@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
 #include "ioda/distribution/Accumulator.h"
@@ -156,19 +157,21 @@ GeoVaLs::GeoVaLs(const Locations_ & locations,
  * are read from the file in all formats (sampled, reduced or both) in which they are available.
  * available in the file.
  */
-GeoVaLs::GeoVaLs(const Parameters_ & params,
+GeoVaLs::GeoVaLs(const eckit::Configuration & config,
                  const ioda::ObsSpace & obspace,
                  const oops::Variables & vars)
   : keyGVL_(-1), dist_(obspace.distribution())
 {
   oops::Log::trace() << "GeoVaLs constructor config starting" << std::endl;
+  Parameters_ params;
+  params.validateAndDeserialize(config);
   ufo_geovals_default_constr_f90(keyGVL_);
   // only read if there are variables specified
   if (vars.size() > 0) {
     if (params.filename.value() == boost::none) {
       throw eckit::UserError("geovals requires 'filename' section", Here());
     }
-    ufo_geovals_read_file_f90(keyGVL_, params.toConfiguration(), obspace, vars);
+    ufo_geovals_read_file_f90(keyGVL_, config, obspace, vars);
     ufo_geovals_get_vars_f90(keyGVL_, vars_, static_cast<int>(GeoVaLFormat::SAMPLED));
     ufo_geovals_get_vars_f90(keyGVL_, reducedVars_, static_cast<int>(GeoVaLFormat::REDUCED));
   }
@@ -746,9 +749,11 @@ void GeoVaLs::fillAD(const std::string &name, const ConstVectorRef<size_t> &indx
 }
 // -----------------------------------------------------------------------------
 /*! \brief Read GeoVaLs from the file */
-void GeoVaLs::read(const Parameters_ & params,
+void GeoVaLs::read(const eckit::Configuration & config,
                    const ioda::ObsSpace & obspace) {
   oops::Log::trace() << "GeoVaLs::read starting" << std::endl;
+  Parameters_ params;
+  params.validateAndDeserialize(config);
   if (params.filename.value() == boost::none) {
     throw eckit::UserError("geovals requires 'filename' section", Here());
   }
@@ -762,12 +767,9 @@ void GeoVaLs::read(const Parameters_ & params,
 }
 // -----------------------------------------------------------------------------
 /*! \brief Write GeoVaLs to the file */
-void GeoVaLs::write(const Parameters_ & params) const {
+void GeoVaLs::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "GeoVaLs::write starting" << std::endl;
-  if (params.filename.value() == boost::none) {
-    throw eckit::UserError("geovals requires 'filename' section", Here());
-  }
-  ufo_geovals_write_file_f90(keyGVL_, params.toConfiguration(), dist_->rank());
+  ufo_geovals_write_file_f90(keyGVL_, config, dist_->rank());
   oops::Log::trace() << "GeoVaLs::write done" << std::endl;
 }
 // -----------------------------------------------------------------------------

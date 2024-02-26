@@ -73,7 +73,8 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   // ranks from the distribution used for obsdb_, widerObsSpace uses the myself communicator
   // for both time and spatial communicators, ensuring that all observations in widerObsSpace
   // are saved to all ranks
-  ioda::ObsSpace widerObsSpace(options_.largerObsSpace, oops::mpi::myself(), widerTimeWindow,
+  ioda::ObsSpace widerObsSpace(options_.largerObsSpace.value().toConfiguration(),
+                               oops::mpi::myself(), widerTimeWindow,
                                oops::mpi::myself());
   if (options_.resetLargerObsSpaceVariables) {  // used for unit testing
     if (unitTestConfig_.has("station_ids_wide")) {

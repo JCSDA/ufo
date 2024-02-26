@@ -32,9 +32,7 @@ void testRecordHandler(const eckit::LocalConfiguration &conf) {
   const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsTopLevelParameters obsParams;
-  obsParams.validateAndDeserialize(obsSpaceConf);
-  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   // Obtain air_temperature and eastward_wind from configuration and save to ObsSpace.
   std::vector<float> air_temperature = conf.getFloatVector("air_temperature");

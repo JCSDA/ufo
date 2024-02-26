@@ -18,6 +18,10 @@
 #include "ufo/ObsOperatorBase.h"
 
 // Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
 namespace oops {
   template <typename OBS> class Locations;
   class Variables;
@@ -42,7 +46,7 @@ class ObsOperator : public util::Printable,
   typedef oops::Locations<ObsTraits> Locations_;
   typedef ObsOperatorParametersWrapper Parameters_;
 
-  ObsOperator(ioda::ObsSpace &, const Parameters_ &);
+  ObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Obs Operator
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ioda::ObsVector &,

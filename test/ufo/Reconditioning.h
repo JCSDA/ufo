@@ -57,9 +57,7 @@ void testNoReconditioning() {
         != ufo::ReconditionMethod::NORECONDITIONING)
       continue;
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
-    ioda::ObsTopLevelParameters obsParams;
-    obsParams.validateAndDeserialize(obsSpaceConf);
-    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), timeWindow, oops::mpi::myself());
+    ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
     ObsErrorCrossVarCov R(Params, obsspace, oops::mpi::myself());
     ObsErrorCrossVarCov RRecon(Params, obsspace, oops::mpi::myself());
@@ -90,9 +88,7 @@ void compareKnownOutput() {
       continue;
     }
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
-    ioda::ObsTopLevelParameters obsParams;
-    obsParams.validateAndDeserialize(obsSpaceConf);
-    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), timeWindow, oops::mpi::myself());
+    ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
     const eckit::LocalConfiguration rconf(conf[jj], "obs error");
     const eckit::LocalConfiguration testconf(conf[jj], "obs error test");
@@ -132,9 +128,7 @@ void testNoValidOptionSelected() {
       continue;
     }
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
-    ioda::ObsTopLevelParameters obsParams;
-    obsParams.validateAndDeserialize(obsSpaceConf);
-    ioda::ObsSpace obsspace(obsParams, oops::mpi::myself(), timeWindow, oops::mpi::myself());
+    ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
     const eckit::LocalConfiguration rconf(conf[jj], "obs error");
     ObsErrorCrossVarCovParameters Params;

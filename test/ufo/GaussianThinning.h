@@ -33,9 +33,7 @@ void testGaussianThinning(const eckit::LocalConfiguration &conf) {
   util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
 
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
-  ioda::ObsTopLevelParameters obsParams;
-  obsParams.validateAndDeserialize(obsSpaceConf);
-  ioda::ObsSpace obsspace(obsParams, oops::mpi::world(), timeWindow, oops::mpi::myself());
+  ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   if (conf.has("air_temperature")) {
     const std::vector<float> air_temperature = conf.getFloatVector("air_temperature");

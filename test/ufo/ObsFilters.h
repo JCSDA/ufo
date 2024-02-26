@@ -110,11 +110,12 @@ class ObsTypeParameters : public oops::Parameters {
 
   /// Options used to load GeoVaLs from a file. Required if any observation filters depend on
   /// GeoVaLs or of the `obs operator` option is set.
-  oops::Parameter<GeoVaLsParameters> geovals{"geovals", {}, this};
+  oops::Parameter<eckit::LocalConfiguration> geovals{"geovals", eckit::LocalConfiguration(), this};
 
   /// Options used to load observation diagnostics from a file. Required if any observation filters
   /// depend on observation diagnostics.
-  oops::Parameter<GeoVaLsParameters> obsDiagnostics{"obs diagnostics", {}, this};
+  oops::Parameter<eckit::LocalConfiguration> obsDiagnostics{"obs diagnostics",
+                                                            eckit::LocalConfiguration(), this};
 
   /// Options used to configure the observation bias.
   oops::Parameter<ObsBiasParameters> obsBias{"obs bias", {}, this};
@@ -390,7 +391,6 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   typedef oops::ObsFilters<ufo::ObsTraits>        ObsFilters_;
   typedef oops::ObsOperator<ufo::ObsTraits>       ObsOperator_;
   typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
-  typedef oops::ObsSpace<ufo::ObsTraits>          ObsSpace_;
   typedef oops::ObsDataVector<ufo::ObsTraits, float> ObsDataVector_;
 
 /// init QC and error
@@ -399,9 +399,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 
 //  Create filters and run preProcess
-  ObsFilters_ filters(obspace,
-                      params.filtersParams,
-                      qcflags, obserrfilter);
+  ObsFilters_ filters(obspace, params.filtersParams, qcflags, obserrfilter);
   filters.preProcess();
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
@@ -424,7 +422,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::string &hofxgroup = *params.hofx.value();
     ObsVector_ hofx(obspace, hofxgroup);
     if (diagvars.size() > 0) {
-      if (params.obsDiagnostics.value().filename.value() == boost::none)
+      if (!params.obsDiagnostics.value().has("filename"))
         throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
                      " of the 'observations' list requires an 'obs diagnostics.filename' section",
                      Here());
@@ -436,8 +434,8 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
-    ObsOperator_ hop(obspace, *params.obsOperator.value());
-    const ObsAuxCtrl_ ybias(obspace, params.obsBias.value());
+    ObsOperator_ hop(obspace, params.obsOperator.value()->toConfiguration());
+    const ObsAuxCtrl_ ybias(obspace, params.obsBias.value().toConfiguration());
     ObsVector_ hofx(obspace);
     oops::Variables vars = hop.requiredVars();
     oops::Variables reducedVars = filters.requiredVars();
@@ -610,7 +608,6 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 
 void runTest() {
   typedef ::test::ObsTestsFixture<ObsTraits> Test_;
-  typedef oops::ObsSpace<ufo::ObsTraits>     ObsSpace_;
 
   ObsFiltersParameters params;
   params.validateAndDeserialize(::test::TestEnvironment::config());

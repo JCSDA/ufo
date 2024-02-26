@@ -15,19 +15,15 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "ufo/ObsBiasParameters.h"
-
 namespace ufo {
   class ObsBiasIncrement;
 
 // -----------------------------------------------------------------------------
 
 class ObsBiasPreconditioner : public util::Printable,
-                          private boost::noncopyable,
-                          private util::ObjectCounter<ObsBiasPreconditioner> {
+                              private boost::noncopyable,
+                              private util::ObjectCounter<ObsBiasPreconditioner> {
  public:
-  typedef ObsBiasParameters Parameters_;
-
   static const std::string classname() {return "ufo::ObsBiasPreconditioner";}
 
 // Constructor, destructor

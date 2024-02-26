@@ -26,6 +26,10 @@
 
 #include "ufo/Fortran.h"
 
+namespace eckit {
+  class Configuration;
+}
+
 namespace oops {
   template <typename OBS> class Locations;
 }
@@ -144,7 +148,7 @@ class GeoVaLs : public util::Printable,
 // Deprecated constructor - Please do not use this constructor in new code.
   GeoVaLs(const Locations_ & locations, const oops::Variables & vars);
 // Constructor for tests - Please do not use this constructor in new code.
-  GeoVaLs(const Parameters_ & params, const ioda::ObsSpace & obspace, const oops::Variables & vars);
+  GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &, const oops::Variables &);
 
   GeoVaLs(const GeoVaLs &, const int &);
   GeoVaLs(const GeoVaLs &);
@@ -339,8 +343,8 @@ class GeoVaLs : public util::Printable,
       std::vector<util::Range<size_t>> &profileIndicesGroupedByLocation,
       GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
-  void read(const Parameters_ &, const ioda::ObsSpace &);
-  void write(const Parameters_ &) const;
+  void read(const eckit::Configuration &, const ioda::ObsSpace &);
+  void write(const eckit::Configuration &) const;
 
   /// \brief Return the number of observation locations.
   ///

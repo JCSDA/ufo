@@ -38,13 +38,16 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
-                                     const Parameters_ & params)
+ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configuration & config)
   : odb_(odb), ht_rinv_h_(0), preconditioner_(0), obs_num_(0),
     minimal_required_obs_number_(0), analysis_variances_(0), variances_(),
     prednames_(0), vars_(odb.assimvariables()), rank_(odb.distribution()->rank()),
-    commTime_(odb.commTime()) {
+    commTime_(odb.commTime())
+{
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
+
+  Parameters_ params;
+  params.validateAndDeserialize(config);
 
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :
@@ -111,7 +114,7 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
 
       // read in Variances prior (analysis_variances_) and number of obs. (obs_num_)
       // from previous cycle
-      this->read(priorParams);
+      this->read(priorParams.toConfiguration());
 
       // set variances for bias predictor coeff. based on diagonal info
       // of previous analysis error variance
@@ -140,8 +143,11 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb,
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
+void ObsBiasCovariance::read(const eckit::Configuration & config) {
   oops::Log::trace() << "ObsBiasCovariance::read from file " << std::endl;
+
+  ObsBiasCovariancePriorParameters params;
+  params.validateAndDeserialize(config);
 
   if (params.inputFile.value() != boost::none) {
     // Open an hdf5 file, read only
@@ -193,14 +199,17 @@ void ObsBiasCovariance::read(const ObsBiasCovariancePriorParameters & params) {
 
 // -----------------------------------------------------------------------------
 
-void ObsBiasCovariance::write(const Parameters_ & params) {
+void ObsBiasCovariance::write(const eckit::Configuration & config) {
   // only write files out on the task with MPI rank 0
   if (rank_ != 0 || commTime_.rank() != 0) return;
+
+  Parameters_ params;
+  params.validateAndDeserialize(config);
 
   oops::Log::trace() << "ObsBiasCovariance::write to file " << std::endl;
   const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
 
-  if (biasCovParams.outputFile.value() != boost::none) {
+  if (config.has("covariance") && biasCovParams.outputFile.value() != boost::none) {
     // FIXME: only implemented for channels currently
     if (vars_.channels().size() == 0) {
       throw eckit::NotImplemented("ObsBiasCovariance::write not implemented for without channels",

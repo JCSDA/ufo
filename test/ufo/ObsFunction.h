@@ -173,9 +173,7 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   std::unique_ptr<GeoVaLs> gval;
   if (geovars.size() > 0) {
     const eckit::LocalConfiguration gconf(conf, "geovals");
-    GeoVaLsParameters geovalsparams;
-    geovalsparams.validateAndDeserialize(gconf);
-    gval.reset(new GeoVaLs(geovalsparams, ospace, geovars));
+    gval.reset(new GeoVaLs(gconf, ospace, geovars));
     gval->setDefaultFormat(GeoVaLFormat::REDUCED);
     inputs.associate(*gval);
   }
@@ -190,9 +188,7 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   std::unique_ptr<ObsDiagnostics> diags;
   if (diagvars.size() > 0) {
     const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
-    GeoVaLsParameters diagparams;
-    diagparams.validateAndDeserialize(diagconf);
-    diags.reset(new ObsDiagnostics(diagparams, ospace, diagvars));
+    diags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
     inputs.associate(*diags);
   }
 

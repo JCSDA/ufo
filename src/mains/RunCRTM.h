@@ -28,7 +28,6 @@ namespace ufo {
 
 template <typename OBS> class RunCRTM : public oops::Application {
   typedef oops::GeoVaLs<OBS>             GeoVaLs_;
-  typedef typename GeoVaLs_::Parameters_ GeoVaLsParameters_;
   typedef oops::ObsAuxControl<OBS>       ObsAuxCtrl_;
   typedef oops::ObsDiagnostics<OBS>      ObsDiags_;
   typedef oops::Observations<OBS>        Observations_;
@@ -56,26 +55,17 @@ template <typename OBS> class RunCRTM : public oops::Application {
 
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
       eckit::LocalConfiguration obsopconf(conf[jj], "obs operator");
-      typename ObsOperator_::Parameters_ obsopparams;
-      if (validate) obsopparams.validate(obsopconf);
-      obsopparams.deserialize(obsopconf);
-      ObsOperator_ hop(obsdb[jj], obsopparams);
+      ObsOperator_ hop(obsdb[jj], obsopconf);
 
       eckit::LocalConfiguration biasconf = conf[jj].getSubConfiguration("obs bias");
-      typename ObsAuxCtrl_::Parameters_ biasparams;
-      if (validate) biasparams.validate(biasconf);
-      biasparams.deserialize(biasconf);
-      const ObsAuxCtrl_ ybias(obsdb[jj], biasparams);
+      const ObsAuxCtrl_ ybias(obsdb[jj], biasconf);
 
       oops::Variables vars = hop.requiredVars();
       oops::Variables reducedVars = ybias.requiredVars();
       vars += reducedVars;  // the reduced format is derived from the sampled format
 
       const eckit::LocalConfiguration gconf(conf[jj], "geovals");
-      GeoVaLsParameters_ geovalsparams;
-      if (validate) geovalsparams.validate(gconf);
-      geovalsparams.deserialize(gconf);
-      GeoVaLs_ gval(geovalsparams, obsdb[jj], vars);
+      GeoVaLs_ gval(gconf, obsdb[jj], vars);
       hop.computeReducedVars(reducedVars, gval);
 
       ObsVector_ hofx(obsdb[jj]);

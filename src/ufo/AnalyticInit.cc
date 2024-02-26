@@ -25,8 +25,10 @@ static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic5_("dcmip-t
 
 // -----------------------------------------------------------------------------
 /// \brief Constructor for tests
-AnalyticInit::AnalyticInit(const Parameters_ & options) : options_(options)
-{ }
+AnalyticInit::AnalyticInit(const eckit::Configuration & config) : options_()
+{
+  options_.validateAndDeserialize(config);
+}
 // -----------------------------------------------------------------------------
 /*! \brief Analytic initialization for GeoVaLs
  *

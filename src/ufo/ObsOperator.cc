@@ -7,6 +7,8 @@
 
 #include "ufo/ObsOperator.h"
 
+#include "eckit/config/Configuration.h"
+
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -27,9 +29,12 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsOperator::ObsOperator(ioda::ObsSpace & os, const Parameters_ & params)
-  : oper_(ObsOperatorFactory::create(os, params.operatorParameters)), odb_(os)
+ObsOperator::ObsOperator(ioda::ObsSpace & os, const eckit::Configuration & config)
+  : oper_(), odb_(os)
 {
+  Parameters_ params;
+  params.validateAndDeserialize(config);
+  oper_.reset(ObsOperatorFactory::create(os, params.operatorParameters));
   // We use += rather than = to make sure the Variables objects contain no duplicate entries.
   oops::Variables operatorVars;
   operatorVars += oper_->simulatedVars();

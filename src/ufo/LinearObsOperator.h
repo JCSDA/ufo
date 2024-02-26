@@ -17,6 +17,10 @@
 #include "ufo/LinearObsOperatorBase.h"
 
 // Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
 namespace oops {
   class Variables;
 }
@@ -38,7 +42,7 @@ class LinearObsOperator : public util::Printable,
  public:
   typedef LinearObsOperatorParametersWrapper Parameters_;
 
-  LinearObsOperator(ioda::ObsSpace &, const Parameters_ &);
+  LinearObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Obs Operator
   void setTrajectory(const GeoVaLs &, const ObsBias &);

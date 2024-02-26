@@ -18,6 +18,10 @@
 #include "ufo/GeoVaLs.h"
 
 // Forward declarations
+namespace eckit {
+  class Configuration;
+}
+
 namespace oops {
   template <typename OBS> class Locations;
   class Variables;
@@ -35,13 +39,10 @@ namespace ufo {
 class ObsDiagnostics : public util::Printable,
                        private boost::noncopyable {
  public:
-  typedef GeoVaLs::Parameters_ Parameters_;
   typedef oops::Locations<ObsTraits> Locations_;
 
-  ObsDiagnostics(const ioda::ObsSpace &, const Locations_ &,
-                 const oops::Variables &);
-  ObsDiagnostics(const Parameters_ &, const ioda::ObsSpace &,
-                 const oops::Variables &);
+  ObsDiagnostics(const ioda::ObsSpace &, const Locations_ &, const oops::Variables &);
+  ObsDiagnostics(const eckit::Configuration &, const ioda::ObsSpace &, const oops::Variables &);
   ~ObsDiagnostics() {}
 
   /// \brief Allocate diagnostics for variables \p vars with \p nlev number of levels
@@ -69,8 +70,9 @@ class ObsDiagnostics : public util::Printable,
     gdiags_.get(vals, var);
   }
 
-  void write(const Parameters_ & params) const {
-    gdiags_.write(params);}
+  void write(const eckit::Configuration & config) const {
+    gdiags_.write(config);
+  }
  private:
   void print(std::ostream &) const;
   const ioda::ObsSpace & obsdb_;

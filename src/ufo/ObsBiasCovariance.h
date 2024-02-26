@@ -46,7 +46,7 @@ class ObsBiasCovariance : public util::Printable,
   static const std::string classname() {return "ufo::ObsBiasCovariance";}
 
 // Constructor, destructor
-  ObsBiasCovariance(ioda::ObsSpace & odb, const Parameters_ & params);
+  ObsBiasCovariance(ioda::ObsSpace &, const eckit::Configuration &);
   ~ObsBiasCovariance() {}
 
 // Linear algebra operators
@@ -56,8 +56,8 @@ class ObsBiasCovariance : public util::Printable,
   void randomize(ObsBiasIncrement &) const;
 
 // Utilities
-  void read(const ObsBiasCovariancePriorParameters &);
-  void write(const Parameters_ &);
+  void read(const eckit::Configuration &);
+  void write(const eckit::Configuration &);
   const std::vector<std::string> predictorNames() const {return prednames_;}
   std::unique_ptr<ObsBiasPreconditioner> preconditioner() const;
 

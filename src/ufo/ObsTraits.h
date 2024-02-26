@@ -13,15 +13,15 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "SampledLocations.h"
 #include "GeoVaLs.h"
+#include "LinearObsOperator.h"
 #include "ObsBias.h"
 #include "ObsBiasCovariance.h"
 #include "ObsBiasIncrement.h"
 #include "ObsBiasPreconditioner.h"
 #include "ObsDiagnostics.h"
 #include "ObsOperator.h"
-#include "LinearObsOperator.h"
+#include "SampledLocations.h"
 
 namespace ufo {
 
@@ -30,7 +30,7 @@ struct ObsTraits {
 
   typedef ufo::GeoVaLs               GeoVaLs;
   typedef ufo::ObsDiagnostics        ObsDiagnostics;
-  typedef ufo::SampledLocations SampledLocations;
+  typedef ufo::SampledLocations      SampledLocations;
   typedef ioda::ObsSpace             ObsSpace;
   typedef ioda::ObsVector            ObsVector;
   template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;
