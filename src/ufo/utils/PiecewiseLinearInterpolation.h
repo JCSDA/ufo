@@ -8,6 +8,8 @@
 #ifndef UFO_UTILS_PIECEWISELINEARINTERPOLATION_H_
 #define UFO_UTILS_PIECEWISELINEARINTERPOLATION_H_
 
+#include <tuple>
+#include <utility>
 #include <vector>
 
 namespace ufo {
@@ -32,6 +34,9 @@ class PiecewiseLinearInterpolation
   static double interpolate(const std::vector<double> &sortedAbscissas,
                             const std::vector<double> &ordinates,
                             double abscissa);
+
+  static std::pair<int, double> interpolationIndexAndWeight
+    (const std::vector<double> &sortedAbscissas, double abscissa);
 
  private:
   std::vector<double> abscissas_;

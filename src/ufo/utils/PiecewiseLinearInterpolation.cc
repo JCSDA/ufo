@@ -47,4 +47,18 @@ double PiecewiseLinearInterpolation::interpolate(const std::vector<double> &sort
   return f;
 }
 
+std::pair<int, double> PiecewiseLinearInterpolation::interpolationIndexAndWeight
+(const std::vector<double> &sortedAbscissas, double abscissa) {
+  if (sortedAbscissas.size() == 1) {
+    // The Fortran functions don't handle this case correctly.
+    return {0, 1.0};
+  }
+
+  int wi = 0;
+  double wf = 0.0;
+  vert_interp_weights_f90(sortedAbscissas.size(), abscissa, sortedAbscissas.data(), wi, wf);
+
+  // Convert Fortran index to C++ index
+  return {wi - 1, wf};
+}
 }  // namespace ufo

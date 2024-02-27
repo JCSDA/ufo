@@ -1,0 +1,28 @@
+time window:
+  begin: 2000-10-12T23:30:00Z
+  end: 2030-10-13T00:30:00Z
+
+observations:
+- obs operator:
+    name: RadarDopplerWind
+    vertical coordinate for horizontal wind: height_levels
+    vertical coordinate for vertical wind: height
+  obs space:
+    name: Radar
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_doppler_wind_obs.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/radar_doppler_wind_obs_opr_out.nc4
+    simulated variables: [radialVelocity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_doppler_wind_geovals.nc4
+  vector ref: ReferenceHofX
+  tolerance: 1.0e-8
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-12
