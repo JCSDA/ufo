@@ -203,10 +203,19 @@ void ObsBiasCovariance::write(const eckit::Configuration & config) {
   // only write files out on the task with MPI rank 0
   if (rank_ != 0 || commTime_.rank() != 0) return;
 
+  oops::Log::trace() << "ObsBiasCovariance::write to file " << std::endl;
+
   Parameters_ params;
   params.validateAndDeserialize(config);
 
-  oops::Log::trace() << "ObsBiasCovariance::write to file " << std::endl;
+  // only write files out if the obs bias covariance section is present.
+  if (params.covariance.value() == boost::none) {
+    oops::Log::trace() << "ObsBiasCovariance::write: exiting because the "
+                       << "`obs bias.covariance` yaml section is not present."
+                       << std::endl;
+    return;
+  }
+
   const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
 
   if (config.has("covariance") && biasCovParams.outputFile.value() != boost::none) {
