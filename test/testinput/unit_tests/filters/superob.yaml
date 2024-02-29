@@ -1,0 +1,131 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-12-31T23:59:59Z
+
+observations:
+# Superobbing performed on two filter variables.
+# All locations apart from the one chosen for the superob are flagged as rejected.
+- obs space:
+    name: Sonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob.nc4
+      obsgrouping:
+        group variables: [stationIdentification]
+    simulated variables: [airTemperature, windEastward]
+  HofX: HofX
+  obs filters:
+  - filter: SuperOb
+    filter variables:
+    - name: airTemperature
+    - name: windEastward
+    algorithm: mean OmB
+    action:
+      name: reject
+  passedBenchmark: 4
+  compareVariables:
+  - reference:
+      name: TestReference/airTemperature
+    test:
+      name: DerivedObsValue/airTemperature
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/windEastward
+    test:
+      name: DerivedObsValue/windEastward
+    absTol: 1.0e-5
+
+# Superobbing performed on two filter variables, selecting locations using the `where` statement.
+# The same number of observations pass, but the superob values change.
+- obs space:
+    name: Sonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob.nc4
+      obsgrouping:
+        group variables: [stationIdentification]
+    simulated variables: [airTemperature, windEastward]
+  HofX: HofX
+  obs filters:
+  - filter: SuperOb
+    where:
+    - variable:
+        name: MetaData/latitude
+      maxvalue: 0.5
+    filter variables:
+    - name: airTemperature
+    - name: windEastward
+    algorithm: mean OmB
+    action:
+      name: reject
+  passedBenchmark: 4
+  compareVariables:
+  - reference:
+      name: TestReference/where_airTemperature
+    test:
+      name: DerivedObsValue/airTemperature
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/where_windEastward
+    test:
+      name: DerivedObsValue/windEastward
+    absTol: 1.0e-5
+
+# Superobbing performed on two filter variables.
+# All locations apart from the one chosen for the superob are not rejected,
+# but a diagnostic flag is set at those locations.
+- obs space:
+    name: Sonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob.nc4
+      obsgrouping:
+        group variables: [stationIdentification]
+    simulated variables: [airTemperature, windEastward]
+  HofX: HofX
+  obs filters:
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: superob
+      initial value: false
+  - filter: SuperOb
+    filter variables:
+    - name: airTemperature
+    - name: windEastward
+    algorithm: mean OmB
+    action:
+      name: set
+      flag: superob
+  # Some of the observations and H(x) values are missing. All others pass.
+  passedBenchmark: 8
+  compareVariables:
+  - reference:
+      name: TestReference/superob_airTemperature
+    test:
+      name: DiagnosticFlags/superob/airTemperature
+  - reference:
+      name: TestReference/superob_windEastward
+    test:
+      name: DiagnosticFlags/superob/windEastward
+
+# Observation grouping is not specified, throwing an exception.
+- obs space:
+    name: Sonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob.nc4
+    simulated variables: [airTemperature, windEastward]
+  HofX: HofX
+  obs filters:
+  - filter: SuperOb
+    filter variables:
+    - name: airTemperature
+    - name: windEastward
+    algorithm: mean OmB
+    action:
+      name: reject
+  expectExceptionWithMessage: group variables configuration is empty

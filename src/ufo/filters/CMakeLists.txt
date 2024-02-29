@@ -106,6 +106,8 @@ set ( filters_files
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
+      SuperOb.h
+      SuperOb.cc
       SuperRefractionCheckImpactParameter.h
       SuperRefractionCheckImpactParameter.cc
       SuperRefractionCheckNBAM.h

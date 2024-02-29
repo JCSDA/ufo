@@ -152,7 +152,8 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::modelobthresh, "removed by ModelOb threshold"},
     {QCflags::history,       "removed by history check"},
     {QCflags::processed,     "rejected as processed but not assimilated"},
-    {QCflags::superrefraction, "rejected by GNSSRO super refraction QC"}
+    {QCflags::superrefraction, "rejected by GNSSRO super refraction QC"},
+    {QCflags::superob,       "rejected by superobbing"}
   };
   const size_t numSpecialCases = 3;
 

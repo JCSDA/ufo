@@ -11,6 +11,7 @@ add_subdirectory( fov )
 add_subdirectory( obslocalization )
 add_subdirectory( predictors )
 add_subdirectory( profile )
+add_subdirectory( superob )
 add_subdirectory( utils )
 add_subdirectory( variabletransforms )
 
@@ -137,6 +138,7 @@ list( APPEND ufo_src_files
     ${marine_src_files}
     ${oasim_src_files}
     ${timeoper_src_files}
+    ${superob_src_files}
 )
 
 ## Create Library target
