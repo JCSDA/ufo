@@ -255,6 +255,9 @@ contains
 
     RTTOV_loop : do while (prof_start <= prof_end)
 
+      ! Zero all k code variables.  These arrays are of size prof_end-prof_start
+      call self % RTprof_K % zero_k(self % conf, reset_profiles_k=.false.)
+
       ! Reduce number of simulated profiles/channel if at end of the of profiles to be processed
       nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
       nchan_sim = nprof_sim * size(self%channels)
@@ -328,6 +331,7 @@ contains
             if (self % conf % rttov_coef_array(1) % coef % ff_ori_chn(chanprof(ichan) % chan) == self % channels(jchan)) then
               iprof = prof_start + chanprof(ichan) % prof - 1
               self % RTprof_K % emissivity(ichan) % emis_in = sfc_emiss(jchan, iprof)
+              self % RTprof_K % calcemis(ichan) = .false.
               if (self % RTprof_K % emissivity(ichan) % emis_in == 0.0) then
                 self % RTprof_K % calcemis(ichan) = .true.
               end if

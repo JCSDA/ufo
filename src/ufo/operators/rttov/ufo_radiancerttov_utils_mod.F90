@@ -1896,18 +1896,25 @@ contains
 
   end subroutine ufo_rttov_alloc_profiles_k
 
-  subroutine ufo_rttov_zero_k(self, conf)
+  subroutine ufo_rttov_zero_k(self, conf, reset_profiles_k)
     implicit none
 
     class(ufo_rttov_io), target, intent(inout) :: self
     type(rttov_conf), intent(in) :: conf
+    logical, intent(in)          :: reset_profiles_k
 
     include 'rttov_init_prof.interface'
     include 'rttov_init_rad.interface'
     include 'rttov_init_scatt_prof.interface'
     include 'rttov_init_transmission.interface'
 
-    call rttov_init_prof(self % profiles_k)
+    if (reset_profiles_k) then
+      call rttov_init_prof(self % profiles_k)
+      if(conf % Do_MW_Scatt) then
+        call rttov_init_scatt_prof(self % mw_scatt % profiles_k)
+      end if
+    end if
+
     call rttov_init_rad(self % radiance_k)
     call rttov_init_transmission(self % transmission_k)
 
@@ -1919,10 +1926,6 @@ contains
 ! Set radiance jacobian scaling (should equal one) 
     self % radiance_k % bt(:) = one
     self % radiance_k % total(:) = one
-
-    if(conf % Do_MW_Scatt) then
-      call rttov_init_scatt_prof(self % mw_scatt % profiles_k)
-    end if
 
   end subroutine ufo_rttov_zero_k
 
