@@ -1,0 +1,46 @@
+time window:
+  begin: 2020-12-14T21:00:00Z
+  end: 2020-12-15T03:00:00Z
+
+observations:
+- obs space:
+      name: osw
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/osw_cygnss_obs_2020121500.nc
+#      obsdataout:
+#        engine:
+#          type: H5File
+#          obsfile: Data/osw.nc4
+      simulated variables: [windEastward, windNorthward]
+      observed variables: [windSpeed]
+      derived variables: [windEastward, windNorthward]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/osw_cygnss_geovals_2020121500.nc4
+  obs operator:
+    name: VertInterp
+    vertical coordinate: height
+    observation vertical coordinate: height
+    interpolation method: linear
+  obs filters:
+  # Obsfunction. calculate wind components from obs windspeed and hofx winddirection
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/windDirection
+      type: float
+      function:
+        name: ObsFunction/WindUVfromObsSpdHofxDir
+        options:
+          hofx_group: HofX
+  compareVariables:
+  - test:
+      name: DerivedObsValue/windEastward
+    reference:
+      name: TestReference/windEastward
+    absTol: 1.0e-5
+  - test:
+      name: DerivedObsValue/windNorthward
+    reference:
+      name: TestReference/windNorthward
+    absTol: 1.0e-5

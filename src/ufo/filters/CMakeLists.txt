@@ -325,6 +325,8 @@ set ( filters_files
       obsfunctions/TropopauseEstimate.h
       obsfunctions/WindDirAngleDiff.cc
       obsfunctions/WindDirAngleDiff.h
+      obsfunctions/WindUVfromObsSpdHofxDir.cc
+      obsfunctions/WindUVfromObsSpdHofxDir.h
       obsfunctions/LAMDomainCheck/LAMDomainCheck.cc
       obsfunctions/LAMDomainCheck/LAMDomainCheck.h
       obsfunctions/LAMDomainCheck/LAMDomainCheck.interface.h
