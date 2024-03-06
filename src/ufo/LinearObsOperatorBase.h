@@ -15,6 +15,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/HasParameters_.h"
@@ -36,7 +37,8 @@ class ObsVector;
 namespace ufo {
 class GeoVaLs;
 class ObsDiagnostics;
-
+class ObsBias;
+class ObsBiasIncrement;
 // -----------------------------------------------------------------------------
 /// Base class for linear observation operators
 ///
@@ -49,6 +51,7 @@ class ObsDiagnostics;
 class LinearObsOperatorBase : public util::Printable,
                               private boost::noncopyable {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   explicit LinearObsOperatorBase(const ioda::ObsSpace & odb,
                                  const VariableNameMap & nameMap = VariableNameMap(boost::none))
            : odb_(odb), nameMap_(nameMap) {}
@@ -56,8 +59,8 @@ class LinearObsOperatorBase : public util::Printable,
 
 /// Obs Operator
   virtual void setTrajectory(const GeoVaLs &, ObsDiagnostics &) = 0;
-  virtual void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const = 0;
-  virtual void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const = 0;
+  virtual void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const = 0;
+  virtual void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const = 0;
 
 /// Operator input required from Model
   virtual const oops::Variables & requiredVars() const = 0;

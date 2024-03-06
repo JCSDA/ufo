@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -115,6 +116,7 @@ class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
   typedef ObsBackgroundErrorVertInterpParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() {return "ufo::ObsBackgroundErrorVertInterp";}
 
@@ -122,7 +124,9 @@ class ObsBackgroundErrorVertInterp : public ObsOperatorBase,
 
   virtual ~ObsBackgroundErrorVertInterp();
 
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+// Obs Operator
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override;
 

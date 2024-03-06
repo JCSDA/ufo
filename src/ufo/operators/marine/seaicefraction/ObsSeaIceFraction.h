@@ -12,6 +12,8 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorParametersBase.h"
@@ -42,6 +44,8 @@ class ObsSeaIceFractionParameters : public ObsOperatorParametersBase  {
 class ObsSeaIceFraction : public ObsOperatorBase,
                           private util::ObjectCounter<ObsSeaIceFraction> {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   typedef ObsSeaIceFractionParameters Parameters_;
 
   static const std::string classname() {return "ufo::ObsSeaIceFraction";}
@@ -50,7 +54,8 @@ class ObsSeaIceFraction : public ObsOperatorBase,
   virtual ~ObsSeaIceFraction();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}

@@ -29,7 +29,6 @@ ObsColumnRetrievalTLAD::ObsColumnRetrievalTLAD(const ioda::ObsSpace & odb,
 {
   ufo_columnretrieval_tlad_setup_f90(keyOperColumnRetrieval_, parameters.toConfiguration(),
                                odb.assimvariables(), varin_);
-
   oops::Log::trace() << "ObsColumnRetrievalTLAD created" << std::endl;
 }
 
@@ -52,19 +51,19 @@ void ObsColumnRetrievalTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnosti
 
 // -----------------------------------------------------------------------------
 
-void ObsColumnRetrievalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsColumnRetrievalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                           const QCFlags_t & qc_flags) const {
   ufo_columnretrieval_simobs_tl_f90(keyOperColumnRetrieval_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
-
   oops::Log::trace() << "ObsColumnRetrievalTLAD::simulateObsTL exiting" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsColumnRetrievalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsColumnRetrievalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                           const QCFlags_t & qc_flags) const {
   ufo_columnretrieval_simobs_ad_f90(keyOperColumnRetrieval_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
-
   oops::Log::trace() << "ObsColumnRetrievalTLAD::simulateObsAD exiting" << std::endl;
 }
 

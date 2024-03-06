@@ -99,7 +99,7 @@ void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
 // -----------------------------------------------------------------------------
 
 void SatTCWVTLAD::simulateObsTL(
-        const GeoVaLs & geovals, ioda::ObsVector & hofx) const {
+        const GeoVaLs & geovals, ioda::ObsVector & hofx, const QCFlags_t & qc_flags) const {
   // Ensure trajectory has already been calculated
   ASSERT(traj_init);
 
@@ -128,7 +128,7 @@ void SatTCWVTLAD::simulateObsTL(
 // -----------------------------------------------------------------------------
 
 void SatTCWVTLAD::simulateObsAD(
-        GeoVaLs & geovals, const ioda::ObsVector & hofx) const {
+        GeoVaLs & geovals, const ioda::ObsVector & hofx, const QCFlags_t & qc_flags) const {
   // Ensure trajectory has already been calculated
   ASSERT(traj_init);
 

@@ -46,7 +46,8 @@ ObsBackgroundErrorIdentity::~ObsBackgroundErrorIdentity() {
 }
 
 void ObsBackgroundErrorIdentity::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
-                                               ObsDiagnostics & ydiags) const {
+                                             ObsDiagnostics & ydiags,
+                                             const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsBackgroundErrorIdentity: simulateObs entered" << std::endl;
 
   oops::Variables variables;

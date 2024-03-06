@@ -40,8 +40,8 @@ ObsAodExt::~ObsAodExt() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodExt::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                             ObsDiagnostics &) const {
+void ObsAodExt::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec, ObsDiagnostics & d,
+                            const QCFlags_t & qc_flags) const {
   ufo_aodext_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsAodExt: observation operator run" << std::endl;

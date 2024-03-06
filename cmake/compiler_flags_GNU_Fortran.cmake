@@ -34,13 +34,13 @@ set( CMAKE_Fortran_FLAGS_DEBUG   "-O0 -g -fcheck=bounds -ffpe-trap=invalid,zero,
 # BIT REPRODUCIBLE FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_FLAGS_BIT     "-O2 -funroll-all-loops -finline-functions" )
+set( CMAKE_Fortran_FLAGS_BIT     "-O2 -funroll-all-loops -finline-functions")
 
 ####################################################################
 # LINK FLAGS
 ####################################################################
 
-set( CMAKE_Fortran_LINK_FLAGS    "" )
+set( CMAKE_Fortran_LINK_FLAGS    "-Wl,-no_compact_unwind")
 
 ####################################################################
 

@@ -43,7 +43,7 @@ ObsChlEuzIntegr::~ObsChlEuzIntegr() {
 
 // -----------------------------------------------------------------------------
 void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                  ObsDiagnostics &) const {
+                                  ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   int nlocs = ovec.size();
   int nlevs = gv.nlevs("mass_concentration_of_chlorophyll_in_sea_water");
 

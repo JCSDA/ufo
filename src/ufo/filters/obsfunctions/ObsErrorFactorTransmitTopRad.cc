@@ -10,10 +10,10 @@
 #include <math.h>
 
 #include <algorithm>
+#include <limits>
 #include <set>
 #include <string>
 #include <vector>
-
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -55,13 +55,13 @@ void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
     return;
   }
   size_t nchans = channels_.size();
-
+  constexpr float eps = std::numeric_limits<float>::epsilon();
   // Inflate obs error as a function of model top-to-spaec transmittance
   std::vector<float> tao_top(nlocs);
   for (size_t ich = 0; ich < nchans; ++ich) {
     in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich], 0, tao_top);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      out[ich][iloc] = sqrt(1.0 / tao_top[iloc]);
+      out[ich][iloc] = sqrt(1.0f / (std::abs(tao_top[iloc])+eps) );
     }
   }
   oops::Log::trace() << "ObsErrorFactorTransmitTopRad::compute done" << std::endl;

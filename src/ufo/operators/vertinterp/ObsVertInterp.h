@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
@@ -32,6 +33,7 @@ namespace ufo {
 class ObsVertInterp : public ObsOperatorBase,
                       private util::ObjectCounter<ObsVertInterp> {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   static const std::string classname() {return "ufo::ObsVertInterp";}
 
   typedef ObsVertInterpParameters Parameters_;
@@ -39,8 +41,9 @@ class ObsVertInterp : public ObsOperatorBase,
   ObsVertInterp(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsVertInterp();
 
-// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+/// Obs Operator
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

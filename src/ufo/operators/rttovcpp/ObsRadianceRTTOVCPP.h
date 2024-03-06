@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
@@ -37,6 +38,7 @@ class ObsRadianceRTTOVCPP : public ObsOperatorBase,
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
   typedef ObsRadianceRTTOVCPPParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() {return "ufo::ObsRadianceRTTOVCPP";}
 
@@ -44,7 +46,8 @@ class ObsRadianceRTTOVCPP : public ObsOperatorBase,
   virtual ~ObsRadianceRTTOVCPP();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other: declare variable function with return type of oops:Variables
   const oops::Variables & requiredVars() const override {return varin_;}

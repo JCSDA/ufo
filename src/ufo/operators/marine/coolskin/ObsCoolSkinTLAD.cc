@@ -53,7 +53,8 @@ void ObsCoolSkinTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+ const QCFlags_t& qc_flags) const {
   ufo_CoolSkin_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                              ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD: tangent linear observation operator run" << std::endl;
@@ -61,7 +62,8 @@ void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                    const QCFlags_t & qc_flags) const {
   ufo_CoolSkin_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                              ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD: adjoint observation operator run" << std::endl;

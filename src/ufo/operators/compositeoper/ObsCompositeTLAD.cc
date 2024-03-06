@@ -53,31 +53,33 @@ ObsCompositeTLAD::~ObsCompositeTLAD() {
 void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory entered" << std::endl;
 
-  for (const std::unique_ptr<LinearObsOperatorBase> &component : components_)
+  for (const std::unique_ptr<LinearObsOperatorBase> &component : components_) {
     component->setTrajectory(geovals, ydiags);
-
+  }
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory exit " <<  std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsCompositeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                     const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsCompositeTLAD: simulateObsTL entered" << std::endl;
 
-  for (const std::unique_ptr<LinearObsOperatorBase> &component : components_)
-    component->simulateObsTL(geovals, ovec);
-
+  for (const std::unique_ptr<LinearObsOperatorBase> &component : components_) {
+    component->simulateObsTL(geovals, ovec, qc_flags);
+  }
   oops::Log::trace() << "ObsCompositeTLAD: simulateObsTL exit " <<  std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsCompositeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                     const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsCompositeTLAD: simulateObsAD entered" << std::endl;
 
-  for (const std::unique_ptr<LinearObsOperatorBase> &component : components_)
-    component->simulateObsAD(geovals, ovec);
-
+  for (const std::unique_ptr<LinearObsOperatorBase> &component : components_) {
+    component->simulateObsAD(geovals, ovec, qc_flags);
+  }
   oops::Log::trace() << "ObsCompositeTLAD: simulateObsAD exit " <<  std::endl;
 }
 

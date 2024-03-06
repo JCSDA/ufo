@@ -51,7 +51,8 @@ void ObsRadarDopplerWindTLAD::setTrajectory(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarDopplerWindTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
+void ObsRadarDopplerWindTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
+                                            const QCFlags_t &) const {
   oops::Log::trace() << "ObsRadarDopplerWindTLAD: simulateObsTL entered" << std::endl;
 
   data_.fillHofX(odb_, dx, dy);
@@ -61,7 +62,8 @@ void ObsRadarDopplerWindTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
+void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
+                                           const QCFlags_t &) const {
   oops::Log::trace() << "ObsRadarDopplerWindTLAD: simulateObsAD entered" << std::endl;
 
   // The vertical coordinate GeoVaLs must have been cached prior to running this function.

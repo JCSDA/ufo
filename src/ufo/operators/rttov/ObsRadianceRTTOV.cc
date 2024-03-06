@@ -58,7 +58,7 @@ ObsRadianceRTTOV::~ObsRadianceRTTOV() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                  ObsDiagnostics & dvec) const {
+                                  ObsDiagnostics & dvec, const QCFlags_t& qc_flags) const {
   ufo_radiancerttov_simobs_f90(keyOperRadianceRTTOV_, gom.toFortran(), odb_,
                           ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
                           dvec.toFortran());

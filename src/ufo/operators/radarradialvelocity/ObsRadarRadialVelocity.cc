@@ -41,7 +41,7 @@ ObsRadarRadialVelocity::~ObsRadarRadialVelocity() {
 // -----------------------------------------------------------------------------
 
 void ObsRadarRadialVelocity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                         ObsDiagnostics &) const {
+                                         ObsDiagnostics &, const QCFlags_t & qc_flags) const {
   ufo_radarradialvelocity_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsRadarRadialVelocity: observation operator run" << std::endl;

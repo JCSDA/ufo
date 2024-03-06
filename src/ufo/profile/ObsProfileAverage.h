@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -82,12 +83,15 @@ class ObsProfileAverage : public ObsOperatorBase,
   private util::ObjectCounter<ObsProfileAverage> {
  public:
   static const std::string classname() {return "ufo::ObsProfileAverage";}
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   typedef ObsProfileAverageParameters Parameters_;
 
   ObsProfileAverage(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsProfileAverage() override;
 
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+// Obs Operator
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override { return requiredVars_; }
 

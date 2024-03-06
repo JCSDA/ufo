@@ -55,8 +55,8 @@ void ObsRadarRadialVelocityTLAD::setTrajectory(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec)
-                                 const {
+void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                               const QCFlags_t & qc_flags) const {
   ufo_radarradialvelocity_simobs_tl_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),
                                         obsspace(), ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
@@ -65,8 +65,8 @@ void ObsRadarRadialVelocityTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::Ob
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarRadialVelocityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec)
-                                 const {
+void ObsRadarRadialVelocityTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                               const QCFlags_t & qc_flags) const {
   ufo_radarradialvelocity_simobs_ad_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),
                                         obsspace(), ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 

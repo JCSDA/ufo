@@ -47,7 +47,8 @@ void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostic
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & ovec) const {
+void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & ovec,
+  const QCFlags_t& qc_flags) const {
   size_t nlocs = ovec.size();
   size_t nlevs = gv.nlevs("sea_ice_category_area_fraction");
 
@@ -63,7 +64,8 @@ void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & 
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & ovec) const {
+void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & ovec,
+                                          const QCFlags_t & qc_flags) const {
   size_t nlocs = ovec.size();
   size_t nlevs = gv.nlevs("sea_ice_category_area_fraction");
   std::vector<double> aicen(nlocs);

@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -34,12 +35,16 @@ class ObsADT : public ObsOperatorBase,
                    private util::ObjectCounter<ObsADT> {
  public:
   typedef ObsADTParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   static const std::string classname() {return "ufo::ObsADT";}
 
   ObsADT(const ioda::ObsSpace &, const ObsADTParameters &);
   virtual ~ObsADT();
 
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+// Obs Operator
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override {return requiredVars_;}
   oops::Variables simulatedVars() const override { return operatorVars_; }

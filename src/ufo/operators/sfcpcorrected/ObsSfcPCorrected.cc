@@ -49,7 +49,7 @@ ObsSfcPCorrected::~ObsSfcPCorrected() {
 // -----------------------------------------------------------------------------
 
 void ObsSfcPCorrected::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                             ObsDiagnostics &) const {
+                             ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   ufo_sfcpcorrected_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsSfcPCorrected: observation operator run" << std::endl;

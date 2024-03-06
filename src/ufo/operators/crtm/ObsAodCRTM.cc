@@ -49,7 +49,7 @@ ObsAodCRTM::~ObsAodCRTM() {
 // -----------------------------------------------------------------------------
 
 void ObsAodCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                             ObsDiagnostics &) const {
+                             ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   ufo_aodcrtm_simobs_f90(keyOperAodCRTM_, gom.toFortran(), odb_,
                           ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }

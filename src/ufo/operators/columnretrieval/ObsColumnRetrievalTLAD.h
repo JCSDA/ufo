@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
@@ -34,6 +35,7 @@ class ObsColumnRetrievalTLAD : public LinearObsOperatorBase,
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the LinearObsOperatorFactory.
   typedef ObsColumnRetrievalParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() {return "ufo::ObsColumnRetrievalTLAD";}
 
@@ -42,8 +44,8 @@ class ObsColumnRetrievalTLAD : public LinearObsOperatorBase,
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}

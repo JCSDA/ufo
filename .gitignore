@@ -5,3 +5,4 @@ _templates
 *.swp
 test-data-release
 ._*
+*~

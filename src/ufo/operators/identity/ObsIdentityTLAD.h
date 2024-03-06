@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -20,37 +22,37 @@
 
 // Forward declarations
 namespace ioda {
-  class ObsSpace;
-  class ObsVector;
+class ObsSpace;
+class ObsVector;
 }
 
 namespace ufo {
-  class GeoVaLs;
-  class ObsDiagnostics;
+class GeoVaLs;
+class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// TL/AD code for the Identity observation operator.
 class ObsIdentityTLAD : public LinearObsOperatorBase,
-  private util::ObjectCounter<ObsIdentityTLAD> {
+                        private util::ObjectCounter<ObsIdentityTLAD> {
  public:
-  static const std::string classname() {return "ufo::ObsIdentityTLAD";}
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+  static const std::string classname() { return "ufo::ObsIdentityTLAD"; }
   typedef ObsIdentityParameters Parameters_;
 
   ObsIdentityTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsIdentityTLAD();
 
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
-  const oops::Variables & requiredVars() const override {return requiredVars_;}
+  const oops::Variables &requiredVars() const override { return requiredVars_; }
 
-  oops::Variables simulatedVars() const override {return operatorVars_;}
+  oops::Variables simulatedVars() const override { return operatorVars_; }
 
  private:
   void print(std::ostream &) const override;
 
- private:
   /// Required variables.
   oops::Variables requiredVars_;
 
@@ -64,7 +66,6 @@ class ObsIdentityTLAD : public LinearObsOperatorBase,
   bool levelIndexZeroAtSurface_;
 };
 
-// -----------------------------------------------------------------------------
 
 }  // namespace ufo
 #endif  // UFO_OPERATORS_IDENTITY_OBSIDENTITYTLAD_H_

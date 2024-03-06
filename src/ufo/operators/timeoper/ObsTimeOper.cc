@@ -71,7 +71,8 @@ ObsTimeOper::Locations_ ObsTimeOper::locations() const {
 // -----------------------------------------------------------------------------
 
 void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              ObsDiagnostics & ydiags) const {
+                              ObsDiagnostics & ydiags,
+                              const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsTimeOper: simulateObs entered" << std::endl;
 
   oops::Log::trace() << gv <<  std::endl;
@@ -85,7 +86,7 @@ void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   gv1 *= timeWeights_[0];
   gv2 *= timeWeights_[1];
   gv1 += gv2;
-  actualoperator_->simulateObs(gv1, ovec, ydiags);
+  actualoperator_->simulateObs(gv1, ovec, ydiags, qc_flags);
 
   oops::Log::trace() << "ObsTimeOper: simulateObs exit " <<  std::endl;
 }

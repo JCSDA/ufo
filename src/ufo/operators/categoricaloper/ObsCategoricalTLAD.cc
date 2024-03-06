@@ -57,7 +57,8 @@ void ObsCategoricalTLAD::setTrajectory(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void ObsCategoricalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsCategoricalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                       const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsCategoricalTLAD: simulateObsTL entered" << std::endl;
 
   oops::Log::debug() << "Running TL operators" << std::endl;
@@ -67,7 +68,7 @@ void ObsCategoricalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector 
   // Run each TL operator and store output in ovecs.
   for (const auto& component : data_.components()) {
     ioda::ObsVector ovecTemp(ovec);
-    component.second->simulateObsTL(geovals, ovecTemp);
+    component.second->simulateObsTL(geovals, ovecTemp, qc_flags);
     ovecs.insert({component.first, ovecTemp});
   }
 
@@ -80,7 +81,8 @@ void ObsCategoricalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector 
 
 // -----------------------------------------------------------------------------
 
-void ObsCategoricalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsCategoricalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                       const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsCategoricalTLAD: simulateObsAD entered" << std::endl;
 
   oops::Log::debug() << "Running AD operators" << std::endl;
@@ -90,7 +92,7 @@ void ObsCategoricalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector 
   // Run each AD operator and store output in gvals.
   for (const auto& component : data_.components()) {
     GeoVaLs gvalTemp(geovals);
-    component.second->simulateObsAD(gvalTemp, ovec);
+    component.second->simulateObsAD(gvalTemp, ovec, qc_flags);
     gvals.insert({component.first, gvalTemp});
   }
 

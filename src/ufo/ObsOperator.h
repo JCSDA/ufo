@@ -13,6 +13,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/Printable.h"
 
 #include "ufo/ObsOperatorBase.h"
@@ -45,13 +46,12 @@ class ObsOperator : public util::Printable,
  public:
   typedef oops::Locations<ObsTraits> Locations_;
   typedef ObsOperatorParametersWrapper Parameters_;
-
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   ObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &, ioda::ObsVector &,
-                   ObsDiagnostics &) const;
-
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &,
+                   const QCFlags_t &, ioda::ObsVector &, ObsDiagnostics &) const;
 /// Operator input required from Model
   const oops::Variables & requiredVars() const;
 

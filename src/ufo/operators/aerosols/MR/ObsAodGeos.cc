@@ -46,7 +46,8 @@ ObsAodGeos::~ObsAodGeos() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodGeos::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec, ObsDiagnostics &) const {
+void ObsAodGeos::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec, ObsDiagnostics &,
+                             const QCFlags_t & qc_flags) const {
   ufo_aodgeos_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsAodGeos: observation operator run" << std::endl;

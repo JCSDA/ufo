@@ -54,7 +54,7 @@ namespace ufo {
 
     /// Get the switch indicating if geovals are in the same direction as observations.
     /// (Beware, default 'false'!)
-    const bool geovalsObsSameDir() const {return geovalsObsSameDir_;}
+    bool geovalsObsSameDir() const {return geovalsObsSameDir_;}
 
    private:
     /// Set up auxiliary reference variables that are used for comparison with OPS.

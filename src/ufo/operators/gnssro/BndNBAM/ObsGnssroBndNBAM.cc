@@ -55,7 +55,7 @@ ObsGnssroBndNBAM::~ObsGnssroBndNBAM() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBndNBAM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                  ObsDiagnostics &) const {
+                                   ObsDiagnostics &, const QCFlags_t & qc_flags) const {
   ufo_gnssro_bndnbam_simobs_f90(keyOperGnssroBndNBAM_, gom.toFortran(), odb_,
                                ovec.size(), ovec.toFortran());
 }

@@ -48,7 +48,7 @@ ObsGroundgnssMetOffice::~ObsGroundgnssMetOffice() {
 // -----------------------------------------------------------------------------
 
 void ObsGroundgnssMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics &) const {
+                                     ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   ufo_groundgnss_metoffice_simobs_f90(keyOperGroundgnssMetOffice_, gom.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran());
 }

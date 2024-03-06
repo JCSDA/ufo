@@ -47,7 +47,7 @@ ObsAodLUTs::~ObsAodLUTs() {
 // -----------------------------------------------------------------------------
 
 void ObsAodLUTs::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                             ObsDiagnostics &) const {
+                             ObsDiagnostics & diags, const QCFlags_t & qc_flags) const {
   ufo_aodluts_simobs_f90(keyOperAodLUTs_, gom.toFortran(), odb_,
                           ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 }

@@ -69,7 +69,7 @@ void ObsGnssroBendMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagn
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBendMetOfficeTLAD::simulateObsTL(
-        const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+        const GeoVaLs & geovals, ioda::ObsVector & ovec, const QCFlags_t & qc_flags) const {
   ufo_gnssro_bendmetoffice_simobs_tl_f90(keyOperGnssroBendMetOffice_, geovals.toFortran(),
                                          obsspace(), ovec.size(), ovec.toFortran());
 }
@@ -77,7 +77,7 @@ void ObsGnssroBendMetOfficeTLAD::simulateObsTL(
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBendMetOfficeTLAD::simulateObsAD(
-        GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+        GeoVaLs & geovals, const ioda::ObsVector & ovec, const QCFlags_t & qc_flags) const {
   ufo_gnssro_bendmetoffice_simobs_ad_f90(keyOperGnssroBendMetOffice_, geovals.toFortran(),
                                          obsspace(), ovec.size(), ovec.toFortran());
 }

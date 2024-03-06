@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -57,13 +58,14 @@ class ObsComposite : public ObsOperatorBase,
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
   typedef ObsCompositeParameters Parameters_;
-
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   static const std::string classname() {return "ufo::ObsComposite";}
 
   ObsComposite(const ioda::ObsSpace &, const Parameters_ &);
   ~ObsComposite() override;
 
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override { return requiredVars_; }
 

@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
@@ -37,6 +38,7 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
   typedef ObsRadianceRTTOVCPPParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() {return "ufo::ObsRadianceRTTOVCPPTLAD";}
 
@@ -46,9 +48,10 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
   // Calculate Jacobian H(x_g) of obs operator
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
   // Calculate dy = H dx
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
   // Calculate H^T dy
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+
 
 // Other: declare variable function with return type of oops:Variables
   const oops::Variables & requiredVars() const override {return varin_;}

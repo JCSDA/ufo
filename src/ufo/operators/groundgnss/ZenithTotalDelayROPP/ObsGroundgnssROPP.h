@@ -12,6 +12,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
@@ -39,13 +40,16 @@ class ObsGroundgnssROPP : public ObsOperatorBase,
                           private util::ObjectCounter<ObsGroundgnssROPP> {
  public:
   typedef GroundgnssROPPParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   static const std::string classname() {return "ufo::ObsGroundgnssROPP";}
 
   ObsGroundgnssROPP(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsGroundgnssROPP();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}

@@ -11,6 +11,8 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -110,6 +112,7 @@ class ObsDirectZDAParameters: public ObsOperatorParametersBase {
 class ObsDirectZDA: public ObsOperatorBase,
                    private util::ObjectCounter<ObsDirectZDA> {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   typedef ObsDirectZDAParameters Parameters_;
   static const std::string classname() {return "ufo::ObsDirectZDA";}
 
@@ -117,7 +120,8 @@ class ObsDirectZDA: public ObsOperatorBase,
   virtual ~ObsDirectZDA();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

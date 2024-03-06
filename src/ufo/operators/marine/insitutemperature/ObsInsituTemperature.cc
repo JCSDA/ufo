@@ -57,7 +57,7 @@ ObsInsituTemperature::~ObsInsituTemperature() {
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperature::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                       ObsDiagnostics &) const {
+                                       ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   ufo_insitutemperature_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(),
                                    ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperature: observation operator run" << std::endl;

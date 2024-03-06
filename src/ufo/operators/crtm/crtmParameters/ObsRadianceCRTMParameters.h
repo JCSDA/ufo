@@ -26,6 +26,9 @@ namespace ufo
    public:
     /// InspectProfileNumber
     oops::OptionalParameter<int> InspectProfile{"InspectProfileNumber", this};
+    //// use qc flags
+    oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
+       "do not calculate hofx for values not passing qc (true or false)", false, this};
     /// Sensor_ID
     oops::RequiredParameter<std::string> Sensor_ID{"Sensor_ID", this};
     /// EndianType
@@ -78,6 +81,9 @@ namespace ufo
     oops::OptionalParameter<std::vector<std::string> > Clouds{"Clouds", this};
     /// Surfaces
     oops::OptionalParameter<std::vector<std::string> > Surfaces{"Surfaces", this};
+    //// use qc flags
+    oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
+       "do not calculate hofx for values not passing qc (true or false)", false, this};
   };  // end class CRTMLinearObsOperatorParameters
 
 
@@ -104,6 +110,9 @@ namespace ufo
     /// Linear Obs Operator
     oops::OptionalParameter<CRTMLinearObsOperatorParameters>
           LinearObsOperator{"linear obs operator", this};
+    //// use qc flags
+    oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
+       "do not calculate hofx for values not passing qc (true or false)", false, this};
   };  // end class ObsRadianceCRTMParameters
 
 }  // namespace ufo

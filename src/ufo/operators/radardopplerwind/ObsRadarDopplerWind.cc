@@ -40,7 +40,8 @@ ObsRadarDopplerWind::~ObsRadarDopplerWind() {
 // -----------------------------------------------------------------------------
 
 void ObsRadarDopplerWind::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                      ObsDiagnostics &) const {
+                                      ObsDiagnostics &,
+                                      const QCFlags_t &) const {
   oops::Log::trace() << "ObsRadarDopplerWind: simulateObs entered" << std::endl;
 
   data_.cacheVertCoordGeoVaLs(gv);

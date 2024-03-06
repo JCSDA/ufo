@@ -75,7 +75,7 @@ ObsRadianceRTTOVCPP::~ObsRadianceRTTOVCPP() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceRTTOVCPP::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
-                                   ObsDiagnostics &) const {
+                                   ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
 //
   std::vector<bool>  skip_profile;
   ufo::rttovcpp_interface(geovals, odb_, aRttov_, CoefFileName, channels_,

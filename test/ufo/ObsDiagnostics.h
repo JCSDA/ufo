@@ -16,6 +16,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Locations.h"
@@ -112,9 +113,10 @@ void testObsDiagnostics() {
   const oops::Variables &diagvars = params.obsDiagnostics.value().variables;
   EXPECT(diagvars.size() > 0);
   ObsDiagnostics diags(ospace, hop.locations(), diagvars);
-
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+  QCFlags_t qc_flags(ospace, ospace.obsvariables(), std::string());
   // call H(x) to compute diagnostics
-  hop.simulateObs(gval, hofx, ybias, bias, diags);
+  hop.simulateObs(gval, hofx, ybias, qc_flags, bias, diags);
 
   // read tolerance and reference Diagnostics
   const double tol = params.tolerance;

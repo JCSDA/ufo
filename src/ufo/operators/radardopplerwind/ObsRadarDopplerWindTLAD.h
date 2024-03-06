@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -33,6 +34,7 @@ class ObsRadarDopplerWindTLAD : public LinearObsOperatorBase,
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the LinearObsOperatorFactory.
   typedef ObsRadarDopplerWindParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() { return "ufo::ObsRadarDopplerWindTLAD"; }
 
@@ -40,8 +42,8 @@ class ObsRadarDopplerWindTLAD : public LinearObsOperatorBase,
   ~ObsRadarDopplerWindTLAD() override;
 
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
 

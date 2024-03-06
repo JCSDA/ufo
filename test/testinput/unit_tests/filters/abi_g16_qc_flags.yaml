@@ -1,0 +1,112 @@
+time window:
+  begin: 2022-02-15T00:00:00Z
+  end: 2022-02-15T06:00:00Z
+
+observations:
+- obs space:
+    name: abi_g16
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs.abi_g16.20220215T030000Z.small.nc4
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: /work2/noaa/jcsda/gthompsn/jedi/hofx_output.abi_g16_bt_64km.20220216T000000Z.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &abi_g16_channels 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+  geovals:
+    filename: Data/ufo/testinput_tier_1/abi_g16_geovals_gfs_2022021503_small.nc4
+  obs operator:
+      name: CRTM
+      Absorbers: [H2O,O3]
+      Clouds: [Water, Ice, Snow]
+      Cloud_Fraction: 1.0
+      UseQCFlagsToSkipHofX: true
+      obs options:
+        Sensor_ID: abi_g16 
+        EndianType: little_endian
+        CoefficientPath: Data/
+
+  # Filters for QC
+  obs filters:
+  # Data Quality Flags (DQF) from original data are in PreQC (0=good, 1=conditionally_usable, 2 or 3 are bad)
+  - filter: PreQC
+    maxvalue: 1
+    action:
+      name: reject
+  # Reject observation points that are towards the limb of the satellite view.
+  - filter: RejectList
+    filter variables:
+    - name: brightnessTemperature
+      channels: *abi_g16_channels
+    where:
+    - variable:
+        name: MetaData/sensorZenithAngle
+      minvalue: 69.0
+    action:
+      name: reject
+  # Gross check the brightness temperatures are physically sensible (individual channels).
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: *abi_g16_channels
+    minvalue: 230
+    maxvalue: 245
+    action:
+      name: reject
+
+  passedBenchmark: 47
+- obs space:
+    name: abi_g16
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs.abi_g16.20220215T030000Z.small.nc4
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: /work2/noaa/jcsda/gthompsn/jedi/hofx_output.abi_g16_bt_64km.20220216T000000Z.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &abi_g16_channels 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+  geovals:
+    filename: Data/ufo/testinput_tier_1/abi_g16_geovals_gfs_2022021503_small.nc4
+  obs operator:
+      name: CRTM
+      Absorbers: [H2O,O3]
+      Clouds: [Water, Ice, Snow]
+      Cloud_Fraction: 1.0
+      UseQCFlagsToSkipHofX: false
+      obs options:
+        Sensor_ID: abi_g16 
+        EndianType: little_endian
+        CoefficientPath: Data/
+
+  # Filters for QC
+  obs filters:
+  # Data Quality Flags (DQF) from original data are in PreQC (0=good, 1=conditionally_usable, 2 or 3 are bad)
+  - filter: PreQC
+    maxvalue: 1
+    action:
+      name: reject
+  # Reject observation points that are towards the limb of the satellite view.
+  - filter: RejectList
+    filter variables:
+    - name: brightnessTemperature
+      channels: *abi_g16_channels
+    where:
+    - variable:
+        name: MetaData/sensorZenithAngle
+      minvalue: 69.0
+    action:
+      name: reject
+  # Gross check the brightness temperatures are physically sensible (individual channels).
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: *abi_g16_channels
+    minvalue: 183
+    maxvalue: 340
+    action:
+      name: reject
+  passedBenchmark: 400

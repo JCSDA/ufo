@@ -53,12 +53,13 @@ ObsComposite::~ObsComposite() {
 // -----------------------------------------------------------------------------
 
 void ObsComposite::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              ObsDiagnostics & ydiags) const {
+                               ObsDiagnostics & ydiags, const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsComposite: simulateObs entered" << std::endl;
 
   for (const std::unique_ptr<ObsOperatorBase> &component : components_)
-    component->simulateObs(gv, ovec, ydiags);
-
+  {
+    component->simulateObs(gv, ovec, ydiags, qc_flags);
+  }
   oops::Log::trace() << "ObsComposite: simulateObs exit " <<  std::endl;
 }
 

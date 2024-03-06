@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -30,6 +32,7 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
+  class ObsBiasIncrements;
 
 /// \brief TL/AD code for the ProfileAverage observation operator.
 class ObsProfileAverageTLAD : public LinearObsOperatorBase,
@@ -37,13 +40,14 @@ class ObsProfileAverageTLAD : public LinearObsOperatorBase,
  public:
   static const std::string classname() {return "ufo::ObsProfileAverageTLAD";}
   typedef ObsProfileAverageParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   ObsProfileAverageTLAD(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsProfileAverageTLAD();
 
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override { return requiredVars_; }
 

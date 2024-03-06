@@ -6,7 +6,8 @@
 !> Fortran module to handle radiancecrtm observations
 
 module ufo_radiancecrtm_mod
-
+ use,intrinsic :: iso_c_binding
+ use,intrinsic :: iso_fortran_env
  use crtm_module
 
  use fckit_configuration_module, only: fckit_configuration
@@ -16,7 +17,7 @@ module ufo_radiancecrtm_mod
  use missing_values_mod
 
  use obsspace_mod
-
+ use obsdatavector_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
  use ufo_crtm_utils_mod
@@ -34,6 +35,7 @@ module ufo_radiancecrtm_mod
    character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
    integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
+   logical :: use_qc_flags
  contains
    procedure :: setup  => ufo_radiancecrtm_setup
    procedure :: delete => ufo_radiancecrtm_delete
@@ -60,7 +62,6 @@ class(ufo_radiancecrtm),   intent(inout) :: self
 type(fckit_configuration), intent(in)    :: f_confOper
 integer(c_int),            intent(in)    :: channels(:)  !List of channels to use
 type(fckit_mpi_comm),      intent(in)    :: comm
-
 integer :: nvars_in
 integer :: ind, js, jspec
 integer :: err_stat
@@ -69,8 +70,9 @@ type(fckit_configuration) :: f_confOpts
 logical :: request_mw_vegtyp_soiltyp_data, request_visir_landtyp_data
 logical :: request_cldfrac, request_salinity
 
- call f_confOper%get_or_die("obs options",f_confOpts)
 
+ call f_confOper%get_or_die("obs options",f_confOpts)
+ call f_confOper%get_or_die("UseQCFlagsToSkipHofX",self%use_qc_flags)  
  call crtm_conf_setup(self%conf,f_confOpts,f_confOper,comm)
  if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 ) then
    write(err_msg,*) 'ufo_radiancecrtm_setup error: H2O must be included in CRTM Absorbers'
@@ -216,7 +218,7 @@ end subroutine ufo_radiancecrtm_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags)
+subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags, qcf_p)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use ufo_utils_mod,      only: cmp_strings
 use CRTM_SpcCoeff, only: SC
@@ -229,7 +231,8 @@ integer(c_size_t),        intent(in) :: nvars, nlocs
 real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
 type(ufo_geovals),     intent(inout) :: hofxdiags    !non-h(x) diagnostics
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace
-
+type(c_ptr), value,       intent(in) :: qcf_p
+type(obsdatavector_int) :: qc_flags
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_simobs'
 character(255) :: message, version
@@ -240,9 +243,15 @@ type(ufo_geoval), pointer :: temp
 integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 real(c_double) :: missing
 type(fckit_mpi_comm)  :: f_comm
+integer :: n_skipped
+integer :: qc_ff
+real(kind_real) :: total_od, secant_term, wfunc_max
+real(kind_real), allocatable :: TmpVar(:)
+real(kind_real), allocatable :: Tao(:)
+real(kind_real), allocatable :: Wfunc(:)
 
 integer :: n_Profiles, n_Layers, n_Channels
-
+integer(int64) :: ll,ml
 ! Define the "non-demoninational" arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
 type(CRTM_Geometry_type),   allocatable :: geo(:)
@@ -271,7 +280,7 @@ character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer :: str_pos(4), ch_diags(hofxdiags%nvar)
-logical :: jacobian_needed
+logical :: jacobian_needed, skip_prof
 ! For gmi_gpm geophysical angles at channels 10-13.
 character(len=1) :: angle_hf
 
@@ -284,7 +293,7 @@ character(len=1) :: angle_hf
  n_Layers = temp%nval
  nullify(temp)
 
-
+ qc_flags%data_ptr = qcf_p
  ! Program header
  ! --------------
  ! call CRTM_Version( Version )
@@ -323,7 +332,7 @@ character(len=1) :: angle_hf
 
  message = 'Error initializing CRTM'
  call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
-
+ 
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
  Sensor_Loop:do n = 1, self%conf%n_Sensors
@@ -432,7 +441,30 @@ character(len=1) :: angle_hf
 
    ! set profiles that should be skipeed
    call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,atm,sfc,SC(n)%Is_Active_Sensor,Options)
-
+   if ( self%use_qc_flags ) then
+   ! eliminate remaining profiles that are "QCed" out
+     n_skipped = 0
+     do m = 1, n_Profiles
+       if (.not.Options(m)%Skip_Profile) then
+         ml = m
+         skip_prof = .true.
+! can't use all here since the qc flags are out of order and not an array
+         do l = 1, size(self%channels)
+           ll = l
+           qc_ff = qc_flags%get(ll,ml)
+           if ( qc_ff < 2) then 
+             skip_prof = .false.
+             exit
+           end if
+         end do
+         if ( skip_prof ) then
+           n_skipped = n_skipped + 1
+         end if
+         Options(m)%Skip_Profile = skip_prof
+       end if
+     end do
+   end if
+   
    if (jacobian_needed) then
       ! Allocate the ARRAYS (for CRTM_K_Matrix)
       ! --------------------------------------

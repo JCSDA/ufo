@@ -46,7 +46,7 @@ ObsCategorical::~ObsCategorical() {
 // -----------------------------------------------------------------------------
 
 void ObsCategorical::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                 ObsDiagnostics & ydiags) const {
+                                 ObsDiagnostics & ydiags, const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsCategorical: simulateObs entered" << std::endl;
 
   oops::Log::debug() << "Running operators" << std::endl;
@@ -56,7 +56,7 @@ void ObsCategorical::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   // Run each operator and store output in ovecs.
   for (const auto& component : data_.components()) {
     ioda::ObsVector ovecTemp(ovec);
-    component.second->simulateObs(gv, ovecTemp, ydiags);
+    component.second->simulateObs(gv, ovecTemp, ydiags, qc_flags);
     ovecs.insert({component.first, ovecTemp});
   }
 

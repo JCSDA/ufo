@@ -62,14 +62,16 @@ void ObsGnssroBndNBAMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                         const QCFlags_t & qc_flags) const {
   ufo_gnssro_bndnbam_simobs_tl_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndNBAMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsGnssroBndNBAMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                         const QCFlags_t & qc_flags) const {
   ufo_gnssro_bndnbam_simobs_ad_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
 }

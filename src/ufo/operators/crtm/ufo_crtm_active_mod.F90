@@ -68,7 +68,9 @@ end do
 end subroutine ufo_crtm_active_sim
 
 
-subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
+subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options,&
+             channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags,&
+             ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use ufo_utils_mod,      only: cmp_strings
 

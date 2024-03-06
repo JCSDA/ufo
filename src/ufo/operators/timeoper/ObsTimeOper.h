@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/ObsOperatorBase.h"
@@ -39,6 +40,7 @@ namespace ufo {
 class ObsTimeOper : public ObsOperatorBase,
                     private util::ObjectCounter<ObsTimeOper> {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   typedef ObsTimeOperParameters Parameters_;
 
   static const std::string classname() {return "ufo::ObsTimeOper";}
@@ -47,7 +49,8 @@ class ObsTimeOper : public ObsOperatorBase,
   virtual ~ObsTimeOper();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
   Locations_ locations() const override;
 

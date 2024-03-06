@@ -44,7 +44,8 @@ ObsProfileAverage::~ObsProfileAverage() {
 // -----------------------------------------------------------------------------
 
 void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                    ObsDiagnostics &) const {
+                                    ObsDiagnostics & diags,
+                                    const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsProfileAverage: simulateObs started" << std::endl;
 
   // Cache the input GeoVaLs for use in the slant path location algorithm.

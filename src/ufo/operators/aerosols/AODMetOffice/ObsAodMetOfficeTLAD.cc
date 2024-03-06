@@ -121,7 +121,8 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
     trajInit_ = true;
 }
 
-void ObsAodMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & hofx) const {
+void ObsAodMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & hofx,
+                                        const QCFlags_t & qc_flags) const {
     // Ensure trajectory has already been calculated
     ASSERT(trajInit_);
 
@@ -155,7 +156,8 @@ void ObsAodMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector
 
 // -----------------------------------------------------------------------------
 
-void ObsAodMetOfficeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & hofx) const {
+void ObsAodMetOfficeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & hofx,
+                                        const QCFlags_t & qc_flags) const {
   // Ensure trajectory has already been calculated
   ASSERT(trajInit_);
 

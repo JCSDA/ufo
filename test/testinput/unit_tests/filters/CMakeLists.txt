@@ -815,6 +815,7 @@ ufo_add_test( NAME    test_ufo_superob_4PE
 # Filters that require CRTM in ObsOperator
 
 if( crtm_FOUND )
+#
     ufo_add_test( NAME    test_ufo_airs_qc_filters
                   TIER    2
                   ECBUILD
@@ -1025,6 +1026,16 @@ if( crtm_FOUND )
                   LIBS    ufo
                   LABELS  crtm filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    test_ufo_qc_flags_true
+              	  TIER    1
+              	  ECBUILD
+              	  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              	  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/abi_g16_qc_flags.yaml"
+              	  MPI     1
+              	  LIBS    ufo
+              	  LABELS  filters
+		  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( crtm_FOUND )
 
 # Filters that require RTTOV in ObsOperator

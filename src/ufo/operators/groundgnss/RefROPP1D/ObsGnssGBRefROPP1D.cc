@@ -47,7 +47,8 @@ ObsGnssGBRefROPP1D::~ObsGnssGBRefROPP1D() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssGBRefROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics &) const {
+                                     ObsDiagnostics &, const QCFlags_t & qc_flags) const
+{
   ufo_gnssgb_refropp1d_simobs_f90(keyOperGnssGBRefROPP1D_, gom.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran());
 }

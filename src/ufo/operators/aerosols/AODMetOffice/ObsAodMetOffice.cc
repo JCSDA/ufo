@@ -69,7 +69,7 @@ ObsAodMetOffice::~ObsAodMetOffice() {
 // -----------------------------------------------------------------------------
 
 void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
-                             ObsDiagnostics &) const {
+                                  ObsDiagnostics &, const QCFlags_t & qc_flags) const {
   // Calculate dust AOD at one wavelength (e.g. 550nm) from dust mass concentration.
 
   // Check hofx size and initialise hofx to zero:

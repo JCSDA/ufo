@@ -53,7 +53,8 @@ ObsVertInterp::~ObsVertInterp() {
 // -----------------------------------------------------------------------------
 
 void ObsVertInterp::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                   ObsDiagnostics &) const {
+                                   ObsDiagnostics & odiags,
+                                   const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsVertInterp::simulateObs entered" << std::endl;
 
   ufo_vertinterp_simobs_f90(keyOperVertInterp_, gom.toFortran(), odb_,

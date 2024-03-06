@@ -51,7 +51,8 @@ void ObsProfileAverageTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostic
 
 // -----------------------------------------------------------------------------
 
-void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
+void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
+                                          const QCFlags_t &  qc_flags) const {
   oops::Log::trace() << "ObsProfileAverageTLAD: simulateObsTL started" << std::endl;
 
   // Get correspondence between record numbers and indices in the total sample.
@@ -91,7 +92,8 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
 
 // -----------------------------------------------------------------------------
 
-void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
+void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
+                                          const QCFlags_t &  qc_flags) const {
   oops::Log::trace() << "ObsProfileAverageTLAD: simulateObsAD started" << std::endl;
 
   const double missing = util::missingValue<double>();

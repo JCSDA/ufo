@@ -58,7 +58,7 @@ void ObsGroundgnssMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagn
 // -----------------------------------------------------------------------------
 
 void ObsGroundgnssMetOfficeTLAD::simulateObsTL(
-        const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+        const GeoVaLs & geovals, ioda::ObsVector & ovec, const QCFlags_t & qc_flags) const {
   ufo_groundgnss_metoffice_simobs_tl_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(),
                                          obsspace(), ovec.size(), ovec.toFortran());
 }
@@ -66,7 +66,7 @@ void ObsGroundgnssMetOfficeTLAD::simulateObsTL(
 // -----------------------------------------------------------------------------
 
 void ObsGroundgnssMetOfficeTLAD::simulateObsAD(
-        GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+        GeoVaLs & geovals, const ioda::ObsVector & ovec, const QCFlags_t & qc_flags) const {
   ufo_groundgnss_metoffice_simobs_ad_f90(keyOperGroundgnssMetOffice_, geovals.toFortran(),
                                          obsspace(), ovec.size(), ovec.toFortran());
 }

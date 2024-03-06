@@ -47,7 +47,8 @@ ObsGroundgnssROPP::~ObsGroundgnssROPP() {
 // -----------------------------------------------------------------------------
 
 void ObsGroundgnssROPP::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics &) const {
+                                     ObsDiagnostics & d,
+                                     const QCFlags_t & qc_flags) const {
   ufo_groundgnss_ropp_simobs_f90(keyOperGroundgnssROPP_, gom.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran());
 }

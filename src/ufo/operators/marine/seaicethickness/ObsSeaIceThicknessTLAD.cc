@@ -51,7 +51,8 @@ void ObsSeaIceThicknessTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnosti
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+                                           const QCFlags_t & qc_flags) const {
   ufo_seaicethickness_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                                     ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: TL observation operator run" << std::endl;
@@ -59,7 +60,8 @@ void ObsSeaIceThicknessTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVec
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceThicknessTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsSeaIceThicknessTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+                                           const QCFlags_t & qc_flags) const {
   ufo_seaicethickness_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                                     ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThicknessTLAD: adjoint observation operator run" << std::endl;

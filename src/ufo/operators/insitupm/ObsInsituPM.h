@@ -24,6 +24,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -48,6 +49,8 @@ class ObsInsituPM : public ObsOperatorBase,
  public:
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   typedef ObsInsituPMParameters Parameters_;
 
   static const std::string classname() {return "ufo::ObsInsituPM";}
@@ -56,7 +59,8 @@ class ObsInsituPM : public ObsOperatorBase,
   virtual ~ObsInsituPM();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

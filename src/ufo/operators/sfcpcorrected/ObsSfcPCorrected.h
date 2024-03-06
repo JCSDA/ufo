@@ -11,6 +11,7 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
@@ -33,6 +34,7 @@ class ObsSfcPCorrected : public ObsOperatorBase,
                    private util::ObjectCounter<ObsSfcPCorrected> {
  public:
   typedef ObsSfcPCorrectedParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() {return "ufo::ObsSfcPCorrected";}
 
@@ -40,7 +42,8 @@ class ObsSfcPCorrected : public ObsOperatorBase,
   virtual ~ObsSfcPCorrected();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

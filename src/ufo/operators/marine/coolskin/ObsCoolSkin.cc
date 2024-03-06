@@ -49,7 +49,7 @@ ObsCoolSkin::~ObsCoolSkin() {
 // -----------------------------------------------------------------------------
 
 void ObsCoolSkin::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              ObsDiagnostics &) const {
+                              ObsDiagnostics &, const QCFlags_t & qc_flags) const {
   ufo_CoolSkin_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkin: observation operator run" << std::endl;
 }

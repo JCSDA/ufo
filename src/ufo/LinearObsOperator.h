@@ -12,6 +12,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/util/Printable.h"
 #include "ufo/LinearObsBiasOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
@@ -41,13 +42,15 @@ class LinearObsOperator : public util::Printable,
                           private boost::noncopyable {
  public:
   typedef LinearObsOperatorParametersWrapper Parameters_;
-
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   LinearObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Obs Operator
   void setTrajectory(const GeoVaLs &, const ObsBias &);
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &,
+                     const QCFlags_t &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &,
+                     const QCFlags_t &) const;
 
 /// Operator input required from Model
   const oops::Variables & requiredVars() const;

@@ -44,7 +44,8 @@ ObsDirectZDA::~ObsDirectZDA() {
 // -----------------------------------------------------------------------------
 
 void ObsDirectZDA::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                       ObsDiagnostics &) const {
+                                       ObsDiagnostics & diags,
+                                       const QCFlags_t & qc_flags) const {
   ufo_directZDA_simobs_f90(keyOperDirectZDA_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsDirectZDA: observation operator run" << std::endl;

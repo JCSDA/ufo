@@ -48,7 +48,7 @@ ObsSeaIceThickness::~ObsSeaIceThickness() {
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceThickness::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                     ObsDiagnostics &) const {
+                                     ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   ufo_seaicethickness_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsSeaIceThickness: observation operator run" << std::endl;
 }

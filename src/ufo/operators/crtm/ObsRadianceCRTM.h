@@ -8,14 +8,19 @@
 #ifndef UFO_OPERATORS_CRTM_OBSRADIANCECRTM_H_
 #define UFO_OPERATORS_CRTM_OBSRADIANCECRTM_H_
 
-#include <ostream>
+#include <iostream>
 #include <string>
+#include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
+#include "ufo/GeoVaLs.h"
+#include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/crtm/crtmParameters/ObsRadianceCRTMParameters.h"
+#include "ufo/operators/crtm/ObsRadianceCRTM.interface.h"
 
 namespace ioda {
   class ObsSpace;
@@ -33,12 +38,14 @@ class ObsRadianceCRTM : public ObsOperatorBase,
  public:
   static const std::string classname() {return "ufo::ObsRadianceCRTM";}
   typedef ObsRadianceCRTMParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   ObsRadianceCRTM(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsRadianceCRTM();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

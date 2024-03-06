@@ -40,7 +40,7 @@ ObsAtmVertInterpLay::~ObsAtmVertInterpLay() {
 // -----------------------------------------------------------------------------
 
 void ObsAtmVertInterpLay::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                      ObsDiagnostics &) const {
+                                      ObsDiagnostics &, const QCFlags_t & qc_flags) const {
   ufo_atmvertinterplay_simobs_f90(keyOperAtmVertInterpLay_, gom.toFortran(), odb_, ovec.nvars(),
                          ovec.nlocs(), ovec.toFortran());
 }

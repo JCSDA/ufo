@@ -12,6 +12,8 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -37,6 +39,7 @@ namespace ufo {
 class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
                                  private util::ObjectCounter<ObsInsituTemperatureTLAD> {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   typedef ObsInsituTemperatureParameters Parameters_;
   static const std::string classname() {return "ufo::ObsInsituTemperatureTLAD";}
 
@@ -45,8 +48,8 @@ class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}

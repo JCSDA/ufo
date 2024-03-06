@@ -7,7 +7,7 @@
 
 #ifndef UFO_OBSBIASOPERATOR_H_
 #define UFO_OBSBIASOPERATOR_H_
-
+#include "ioda/ObsDataVector.h"
 #include "oops/util/Printable.h"
 
 // forward declarations
@@ -27,11 +27,12 @@ namespace ufo {
 /// predictors using bias correction coefficients, both specified in ObsBias class.
 class ObsBiasOperator : public util::Printable {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
   explicit ObsBiasOperator(ioda::ObsSpace &);
 
   /// Compute bias correction
   void computeObsBias(const GeoVaLs &, ioda::ObsVector &, const ObsBias &,
-                      ObsDiagnostics &) const;
+                      ObsDiagnostics &, const QCFlags_t &) const;
 
  private:
   /// Print details (used for logging)

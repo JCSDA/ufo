@@ -54,17 +54,21 @@ void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
+void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
+  const QCFlags_t& qc_flags) const {
   ufo_radiancecrtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
-                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+                             ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
+                             reinterpret_cast<const void*>(&qc_flags));
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsTL done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
+void ObsRadianceCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
+  const QCFlags_t& qc_flags) const {
   ufo_radiancecrtm_simobs_ad_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
-                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+                                 ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
+                                 reinterpret_cast<const void*>(&qc_flags));
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsAD done" << std::endl;
 }
 

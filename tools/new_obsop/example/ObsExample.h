@@ -10,6 +10,8 @@
 
 #include <ostream>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 
 #include "ufo/example/ObsExampleParameters.h"
@@ -33,12 +35,14 @@ class ObsExample : public ObsOperatorBase {
   /// The type of parameters accepted by the constructor of this operator.
   /// This typedef is used by the ObsOperatorFactory.
   typedef ObsExampleParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t; 
 
   ObsExample(const ioda::ObsSpace &, const Parameters_ &);
   virtual ~ObsExample();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

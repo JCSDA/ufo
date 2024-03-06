@@ -185,10 +185,10 @@ class ObsFiltersParameters : public oops::Parameters {
 //! is not available.
 //!
 void runFinalCheck(oops::ObsSpace<ufo::ObsTraits> &obsspace,
-                   oops::ObsDataVector<ufo::ObsTraits, int> &qcflags,
+                   oops::ObsDataVector<ufo::ObsTraits, int> & qc_flags,
                    oops::ObsDataVector<ufo::ObsTraits, float> &obserr) {
   FinalCheck finalCheck(obsspace.obsspace(), FinalCheckParameters(),
-                        qcflags.obsdatavectorptr(),
+                        qc_flags.obsdatavectorptr(),
                         std::make_shared<ioda::ObsDataVector<float>>(obserr.obsdatavector()));
   finalCheck.doFilter();
 }
@@ -216,7 +216,7 @@ void convertLocalObsIndicesToGlobal(std::vector<size_t> &indices,
 //! Return the indices of observations whose quality control flags satisfy the
 //! predicate in at least one variable.
 //!
-//! \param qcFlags
+//! \param qc_flags
 //!   Vector of quality control flags for all observations.
 //! \param obsDisttribution
 //!   The MPI distribution used by the ObsSpace.
@@ -227,16 +227,16 @@ void convertLocalObsIndicesToGlobal(std::vector<size_t> &indices,
 //!
 template <typename Predicate>
 std::vector<size_t> getObservationIndicesWhere(
-    const ObsTraits::ObsDataVector<int> &qcFlags,
+    const ObsTraits::ObsDataVector<int> &qc_flags,
     const eckit::mpi::Comm &comm,
     const std::vector<size_t> &globalIdxFromLocalIdx,
     const Predicate &predicate) {
   // Among the locations held on the calling process, identify those that satisfy the predicate.
   std::vector<size_t> indices;
-  for (size_t locIndex = 0; locIndex < qcFlags.nlocs(); ++locIndex) {
+  for (size_t locIndex = 0; locIndex < qc_flags.nlocs(); ++locIndex) {
     bool satisfied = false;
-    for (size_t varIndex = 0; varIndex < qcFlags.nvars(); ++varIndex) {
-      if (predicate(qcFlags[varIndex][locIndex])) {
+    for (size_t varIndex = 0; varIndex < qc_flags.nvars(); ++varIndex) {
+      if (predicate(qc_flags[varIndex][locIndex])) {
         satisfied = true;
         break;
       }
@@ -262,10 +262,10 @@ std::vector<size_t> getObservationIndicesWhere(
 //! Return the indices of observations that have passed quality control in
 //! at least one variable.
 //!
-std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
+std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<int> & qc_flags,
                                                 const eckit::mpi::Comm &comm,
                                                 const std::vector<size_t> &globalIdxFromLocalIdx) {
-  return getObservationIndicesWhere(qcFlags, comm, globalIdxFromLocalIdx,
+  return getObservationIndicesWhere(qc_flags, comm, globalIdxFromLocalIdx,
                                     [](int qcFlag) { return qcFlag == 0; });
 }
 
@@ -275,10 +275,10 @@ std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<i
 //! Return the indices of observations that have failed quality control in
 //! at least one variable.
 //!
-std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
+std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<int> & qc_flags,
                                                 const eckit::mpi::Comm &comm,
                                                 const std::vector<size_t> &globalIdxFromLocalIdx) {
-  return getObservationIndicesWhere(qcFlags, comm, globalIdxFromLocalIdx,
+  return getObservationIndicesWhere(qc_flags, comm, globalIdxFromLocalIdx,
                                     [](int qcFlag) { return qcFlag != 0; });
 }
 
@@ -288,11 +288,11 @@ std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<i
 //! Return the indices of observations whose quality control flag is set to \p flag in
 //! at least one variable.
 //!
-std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<int> &qcFlags,
+std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<int> & qc_flags,
                                                  const eckit::mpi::Comm &comm,
                                                  const std::vector<size_t> &globalIdxFromLocalIdx,
                                                  int flag) {
-  return getObservationIndicesWhere(qcFlags, comm, globalIdxFromLocalIdx,
+  return getObservationIndicesWhere(qc_flags, comm, globalIdxFromLocalIdx,
                                     [flag](int qcFlag) { return qcFlag == flag; });
 }
 
@@ -396,10 +396,13 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 /// init QC and error
   ObsDataVector_ obserrfilter(obspace, obspace.obsvariables(), "ObsError");
   std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
-    qcflags(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
+    qc_flags_(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
 
 //  Create filters and run preProcess
-  ObsFilters_ filters(obspace, params.filtersParams, qcflags, obserrfilter);
+  ObsFilters_ filters(obspace,
+                      params.filtersParams,
+                      qc_flags_, obserrfilter);
+
   filters.preProcess();
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
@@ -448,7 +451,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
-    hop.simulateObs(gval, hofx, ybias, bias, diags);
+    hop.simulateObs(gval, hofx, ybias, *qc_flags_, bias, diags);
     filters.postFilter(gval, hofx, bias, diags);
     hofx.save("hofx");
   } else if (geovars.size() > 0) {
@@ -458,18 +461,18 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qcflags, obserrfilter);
-    obserrfilter.mask(*qcflags);
+    runFinalCheck(obspace, *qc_flags_, obserrfilter);
+    obserrfilter.mask(*qc_flags_);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qcflags, obserrfilter);
-    obserrfilter.mask(*qcflags);
+    runFinalCheck(obspace, *qc_flags_, obserrfilter);
+    obserrfilter.mask(*qc_flags_);
   }
 
-  qcflags->save("EffectiveQC");
+  qc_flags_->save("EffectiveQC");
   const std::string errname = "EffectiveError";
   obserrfilter.save(errname);
 
@@ -482,14 +485,14 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &passedObsBenchmark =
         *params.passedObservationsBenchmark.value();
     const std::vector<size_t> passedObs = getPassedObservationIndices(
-          qcflags->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
+          qc_flags_->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
     EXPECT_EQUAL(passedObs, passedObsBenchmark);
   }
 
   if (params.passedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t passedBenchmark = *params.passedBenchmark.value();
-    size_t passed = numEqualTo(qcflags->obsdatavector(), ufo::QCflags::pass,
+    size_t passed = numEqualTo(qc_flags_->obsdatavector(), ufo::QCflags::pass,
                                *ufoObsSpace.distribution());
     EXPECT_EQUAL(passed, passedBenchmark);
   }
@@ -499,14 +502,14 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &failedObsBenchmark =
         *params.failedObservationsBenchmark.value();
     const std::vector<size_t> failedObs = getFailedObservationIndices(
-          qcflags->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
+          qc_flags_->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
     EXPECT_EQUAL(failedObs, failedObsBenchmark);
   }
 
   if (params.failedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t failedBenchmark = *params.failedBenchmark.value();
-    size_t failed = numNonzero(qcflags->obsdatavector(), *ufoObsSpace.distribution());
+    size_t failed = numNonzero(qc_flags_->obsdatavector(), *ufoObsSpace.distribution());
     EXPECT_EQUAL(failed, failedBenchmark);
   }
 
@@ -518,7 +521,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       const std::vector<size_t> &flaggedObsBenchmark =
           *params.flaggedObservationsBenchmark.value();
       const std::vector<size_t> flaggedObs =
-          getFlaggedObservationIndices(qcflags->obsdatavector(), ufoObsSpace.comm(),
+          getFlaggedObservationIndices(qc_flags_->obsdatavector(), ufoObsSpace.comm(),
                                        ufoObsSpace.index(), flag);
       EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
     }
@@ -526,7 +529,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     if (params.flaggedBenchmark.value() != boost::none) {
       atLeastOneBenchmarkFound = true;
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
-      size_t flagged = numEqualTo(qcflags->obsdatavector(), flag, *ufoObsSpace.distribution());
+      size_t flagged = numEqualTo(qc_flags_->obsdatavector(), flag, *ufoObsSpace.distribution());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
     }
   }

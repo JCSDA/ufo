@@ -21,20 +21,20 @@
 namespace ufo {
 
 // -----------------------------------------------------------------------------
+
 static ObsOperatorMaker<ObsIdentity> obsIdentityMaker_("Identity");
+
 // -----------------------------------------------------------------------------
 
-ObsIdentity::ObsIdentity(const ioda::ObsSpace & odb,
-                         const Parameters_ & parameters)
-  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value()))
-{
+ObsIdentity::ObsIdentity(const ioda::ObsSpace &odb, const Parameters_ &parameters)
+    : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())) {
   oops::Log::trace() << "ObsIdentity constructor starting" << std::endl;
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
   requiredVars_ += nameMap_.convertName(operatorVars_);
   // Check whether level index 0 is closest to the Earth's surface.
-  levelIndexZeroAtSurface_  = parameters.levelIndex0IsClosestToSurface.value();
+  levelIndexZeroAtSurface_ = parameters.levelIndex0IsClosestToSurface.value();
 
   oops::Log::trace() << "ObsIdentity constructor finished" << std::endl;
 }
@@ -47,8 +47,8 @@ ObsIdentity::~ObsIdentity() {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              ObsDiagnostics &) const {
+void ObsIdentity::simulateObs(const GeoVaLs &gv, ioda::ObsVector &ovec,
+                              ObsDiagnostics &, const QCFlags_t &) const {
   oops::Log::trace() << "ObsIdentity: simulateObs starting" << std::endl;
 
   std::vector<double> vec(ovec.nlocs());
@@ -58,24 +58,21 @@ void ObsIdentity::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
     if (levelIndexZeroAtSurface_) {
       gv.getAtLevel(vec, varname, 0);
       oops::Log::info() << "WARNING: Bottom up GeoVaLs will eventually be deprecated."
-                        << std::endl;}
-    else
+                        << std::endl;
+    } else {
       gv.getAtLevel(vec, varname, gv.nlevs(varname) - 1);
+    }
     for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
       const size_t idx = jloc * ovec.nvars() + jvar;
       ovec[idx] = vec[jloc];
     }
   }
-
   oops::Log::trace() << "ObsIdentity: simulateObs finished" << std::endl;
 }
-
-// -----------------------------------------------------------------------------
 
 void ObsIdentity::print(std::ostream & os) const {
   os << "ObsIdentity operator" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
 
 }  // namespace ufo

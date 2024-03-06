@@ -68,7 +68,7 @@ ObsGnssroBendMetOffice::~ObsGnssroBendMetOffice() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBendMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics & ydiags) const {
+                                       ObsDiagnostics & ydiags, const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "Starting simulateObs" << std::endl;
   oops::Log::debug() << "ObsVector: nvars = " << ovec.nvars() << "  nlocs = "
                      << ovec.nlocs() << "  size = " << ovec.size() << std::endl;

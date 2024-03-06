@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
@@ -46,6 +48,7 @@ class ObsAodGeos : public ObsOperatorBase,
                    private util::ObjectCounter<ObsAodGeos> {
  public:
   typedef ObsAodGeosParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   static const std::string classname() {return "ufo::ObsAodGeos";}
 
@@ -53,7 +56,8 @@ class ObsAodGeos : public ObsOperatorBase,
   virtual ~ObsAodGeos();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}

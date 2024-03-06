@@ -26,10 +26,8 @@ namespace ufo {
 static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 // -----------------------------------------------------------------------------
 
-ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
-                                 const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value()))
-{
+ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb, const Parameters_ & parameters)
+    : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())) {
   oops::Log::trace() << "ObsIdentityTLAD constructor starting" << std::endl;
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),
@@ -37,7 +35,7 @@ ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb,
   requiredVars_ += nameMap_.convertName(operatorVars_);
 
   // Check whether level index 0 is closest to the Earth's surface.
-  levelIndexZeroAtSurface_  = parameters.levelIndex0IsClosestToSurface.value();
+  levelIndexZeroAtSurface_ = parameters.levelIndex0IsClosestToSurface.value();
 
   oops::Log::trace() << "ObsIdentityTLAD constructor finished" << std::endl;
 }
@@ -57,17 +55,18 @@ void ObsIdentityTLAD::setTrajectory(const GeoVaLs &, ObsDiagnostics &) {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
+void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
+                                    const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsIdentityTLAD: TL observation operator starting" << std::endl;
-
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+    const std::string &varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
     // Fill dy with dx at the level closest to the Earth's surface.
-    if (levelIndexZeroAtSurface_)
+    if (levelIndexZeroAtSurface_) {
       dx.getAtLevel(vec, varname, 0);
-    else
+    } else {
       dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
+    }
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
       dy[idx] = vec[jloc];
@@ -79,30 +78,34 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) co
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
+void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
+                                    const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator starting" << std::endl;
 
   const double missing = util::missingValue<double>();
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string& varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+    const std::string &varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
     // Get current value of dx at the level closest to the Earth's surface.
-    if (levelIndexZeroAtSurface_)
+    if (levelIndexZeroAtSurface_) {
       dx.getAtLevel(vec, varname, 0);
-    else
+    } else {
       dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
+    }
     // Increment dx with non-missing values of dy.
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
-      if (dy[idx] != missing)
+      if (dy[idx] != missing) {
         vec[jloc] += dy[idx];
+      }
     }
     // Store new value of dx.
-    if (levelIndexZeroAtSurface_)
+    if (levelIndexZeroAtSurface_) {
       dx.putAtLevel(vec, varname, 0);
-    else
+    } else {
       dx.putAtLevel(vec, varname, dx.nlevs(varname) - 1);
+    }
   }
 
   oops::Log::trace() << "ObsIdentityTLAD: adjoint observation operator finished" << std::endl;
@@ -114,6 +117,5 @@ void ObsIdentityTLAD::print(std::ostream & os) const {
   os << "ObsIdentityTLAD operator" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
 
 }  // namespace ufo

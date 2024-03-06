@@ -31,7 +31,8 @@ ObsBiasOperator::ObsBiasOperator(ioda::ObsSpace & odb)
 // -----------------------------------------------------------------------------
 
 void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & ybias,
-                                     const ObsBias & biascoeffs, ObsDiagnostics & ydiags) const {
+                                     const ObsBias & biascoeffs, ObsDiagnostics & ydiags,
+                                     const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsBiasOperator::computeObsBias starting" << std::endl;
 
   const double missing = util::missingValue<double>();

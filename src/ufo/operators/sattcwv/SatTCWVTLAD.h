@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
@@ -37,6 +38,8 @@ class SatTCWVTLADParameters : public ObsOperatorParametersBase {
 class SatTCWVTLAD : public LinearObsOperatorBase,
                       private util::ObjectCounter<SatTCWVTLAD> {
  public:
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   static const std::string classname() {return "ufo::SatTCWVTLAD";}
 
   typedef SatTCWVTLADParameters Parameters_;
@@ -65,7 +68,7 @@ class SatTCWVTLAD : public LinearObsOperatorBase,
   * \date Sept. 2021: Created by J. Hocking (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
 
   // -----------------------------------------------------------------------------
   /*! \brief Given an increment to the observation, calculate the equivalent
@@ -77,7 +80,9 @@ class SatTCWVTLAD : public LinearObsOperatorBase,
   * \date Sept. 2021: Created by J. Hocking (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+
+
 
   // Other
   const oops::Variables & requiredVars() const override {return *varin_;}

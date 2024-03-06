@@ -77,7 +77,8 @@ ObsProduct::~ObsProduct() {
 // -----------------------------------------------------------------------------
 
 void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                              ObsDiagnostics &) const {
+                              ObsDiagnostics & odiags,
+                              const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsProduct: simulateObs starting" << std::endl;
 
   // Get variable that will scale h(x)

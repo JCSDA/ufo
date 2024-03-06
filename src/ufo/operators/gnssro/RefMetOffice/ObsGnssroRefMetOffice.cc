@@ -54,7 +54,7 @@ ObsGnssroRefMetOffice::~ObsGnssroRefMetOffice() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics & ydiags) const {
+                                     ObsDiagnostics & ydiags, const QCFlags_t & qc_flags) const {
   ufo_gnssro_refmetoffice_simobs_f90(keyOperGnssroRefMetOffice_, gom.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran(), ydiags.toFortran());
 }

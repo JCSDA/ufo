@@ -47,7 +47,7 @@ SatTCWV::~SatTCWV() {
 // -----------------------------------------------------------------------------
 
 void SatTCWV::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
-                          ObsDiagnostics &) const {
+                          ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   // Check hofx size and initialise hofx to zero
   ASSERT(geovals.nlocs() == hofx.nlocs());
   hofx.zero();

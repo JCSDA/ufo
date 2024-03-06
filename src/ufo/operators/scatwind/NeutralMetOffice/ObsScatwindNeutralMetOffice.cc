@@ -53,7 +53,8 @@ ObsScatwindNeutralMetOffice::~ObsScatwindNeutralMetOffice() {
 // -----------------------------------------------------------------------------
 
 void ObsScatwindNeutralMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                              ObsDiagnostics &) const {
+                                              ObsDiagnostics & d,
+                                              const QCFlags_t & qc_flags) const {
     oops::Log::trace() << "ObsScatwindNeutralMetOffice::simulateObs entered" << std::endl;
 
     ufo_scatwind_neutralmetoffice_simobs_f90(keyOperScatwindNeutralMetOffice_,

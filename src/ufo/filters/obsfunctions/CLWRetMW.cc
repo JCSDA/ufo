@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -436,9 +437,10 @@ void CLWRetMW::CIret_37v37h_diff(const std::vector<float> & bt_clr_37v,
   /// Tb_37v_clr and Tb_37h_clr for calculated Tb at 37V and 37H GHz from model values
   /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
   ///
+  const float eps = std::numeric_limits<float>::epsilon();
   for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
     if (water_frac[iloc] >= 0.99) {
-      if (bt37h[iloc] <= bt37v[iloc]) {
+      if (bt37h[iloc] <= bt37v[iloc] && std::fabs(bt_clr_37v[iloc] - bt_clr_37h[iloc]) > eps) {
         out[iloc] = 1.0 - (bt37v[iloc] - bt37h[iloc])/(bt_clr_37v[iloc] - bt_clr_37h[iloc]);
         out[iloc] = std::max(0.f, out[iloc]);
       } else {

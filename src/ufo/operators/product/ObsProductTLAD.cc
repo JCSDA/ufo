@@ -110,7 +110,8 @@ void ObsProductTLAD::setTrajectory(const GeoVaLs & gv, ObsDiagnostics &) {
 
 // -----------------------------------------------------------------------------
 
-void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
+void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
+                                   const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsProductTLAD: TL observation operator starting" << std::endl;
 
   std::vector<double> vec(dy.nlocs());
@@ -134,7 +135,8 @@ void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) con
 
 // -----------------------------------------------------------------------------
 
-void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
+void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
+                                   const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsProductTLAD: adjoint observation operator starting" << std::endl;
 
   const double missing = util::missingValue<double>();

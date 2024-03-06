@@ -56,7 +56,7 @@ ObsADT::~ObsADT() {
 // -----------------------------------------------------------------------------
 
 void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                         ObsDiagnostics &) const {
+                         ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsADT: simulateObs starting" << std::endl;
 
   const double missing = util::missingValue<double>();

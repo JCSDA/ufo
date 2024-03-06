@@ -7,14 +7,6 @@
 
 #include "ufo/operators/crtm/ObsRadianceCRTM.h"
 
-#include <vector>
-
-#include "ioda/ObsVector.h"
-
-#include "ufo/GeoVaLs.h"
-#include "ufo/ObsDiagnostics.h"
-#include "ufo/operators/crtm/ObsRadianceCRTM.interface.h"
-
 namespace ufo {
 
 // -----------------------------------------------------------------------------
@@ -49,10 +41,11 @@ ObsRadianceCRTM::~ObsRadianceCRTM() {
 // -----------------------------------------------------------------------------
 
 void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                  ObsDiagnostics & dvec) const {
+                                  ObsDiagnostics & dvec, const QCFlags_t & qc_flags) const {
   ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
                           ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          dvec.toFortran());
+                          dvec.toFortran(),
+                          reinterpret_cast<const void*>(&qc_flags));
   oops::Log::trace() << "ObsRadianceCRTM simulateObs done." << std::endl;
 }
 

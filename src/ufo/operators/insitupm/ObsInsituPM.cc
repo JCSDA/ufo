@@ -40,7 +40,7 @@ ObsInsituPM::~ObsInsituPM() {
 // -----------------------------------------------------------------------------
 
 void ObsInsituPM::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                             ObsDiagnostics &) const {
+                              ObsDiagnostics & odiags, const QCFlags_t & qc_flags) const {
   ufo_insitupm_simobs_f90(keyOper_, gv.toFortran(), odb_, ovec.nvars(), ovec.nlocs(),
                          ovec.toFortran());
   oops::Log::trace() << "ObsInsituPM: observation operator run" << std::endl;

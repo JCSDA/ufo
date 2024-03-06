@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
@@ -34,6 +35,8 @@ class ObsAodLUTsTLAD : public LinearObsOperatorBase,
                         private util::ObjectCounter<ObsAodLUTsTLAD> {
  public:
   typedef AodLUTsParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   static const std::string classname() {return "ufo::ObsAodLUTsTLAD";}
 
   ObsAodLUTsTLAD(const ioda::ObsSpace &, const Parameters_ &);
@@ -41,8 +44,8 @@ class ObsAodLUTsTLAD : public LinearObsOperatorBase,
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}

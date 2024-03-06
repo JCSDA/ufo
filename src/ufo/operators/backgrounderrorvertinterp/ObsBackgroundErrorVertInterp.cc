@@ -56,7 +56,8 @@ ObsBackgroundErrorVertInterp::~ObsBackgroundErrorVertInterp() {
 }
 
 void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
-                                               ObsDiagnostics & ydiags) const {
+                                               ObsDiagnostics & ydiags,
+                                               const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsBackgroundErrorVertInterp: simulateObs entered" << std::endl;
 
   const std::string &obsVerticalCoordinate = parameters_.observationVerticalCoordinate;

@@ -47,7 +47,7 @@ ObsGnssroBndROPP1D::~ObsGnssroBndROPP1D() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroBndROPP1D::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                                     ObsDiagnostics &) const {
+                                     ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   ufo_gnssro_bndropp1d_simobs_f90(keyOperGnssroBndROPP1D_, gom.toFortran(), odb_,
                                   ovec.size(), ovec.toFortran());
 }

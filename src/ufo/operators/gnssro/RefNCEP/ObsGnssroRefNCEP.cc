@@ -47,7 +47,7 @@ ObsGnssroRefNCEP::~ObsGnssroRefNCEP() {
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefNCEP::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
-                               ObsDiagnostics &) const {
+                               ObsDiagnostics &, const QCFlags_t & qc_flags) const {
   ufo_gnssro_refncep_simobs_f90(keyOperGnssroRefNCEP_, gom.toFortran(), odb_,
                             ovec.size(), ovec.toFortran());
 }

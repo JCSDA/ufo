@@ -15,6 +15,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/Parameters.h"
@@ -51,14 +52,16 @@ class ObsOperatorBase : public util::Printable,
                         private boost::noncopyable {
  public:
   typedef oops::Locations<ObsTraits> Locations_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
 
   explicit ObsOperatorBase(const ioda::ObsSpace & odb,
                            const VariableNameMap & nameMap = VariableNameMap(boost::none))
      : odb_(odb), nameMap_(nameMap) {}
   virtual ~ObsOperatorBase() {}
 
-/// Obs Operator
-  virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const = 0;
+// Obs Operator
+  virtual void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                           const QCFlags_t &) const = 0;
 
 /// \brief Required model variables.
   virtual const oops::Variables & requiredVars() const = 0;

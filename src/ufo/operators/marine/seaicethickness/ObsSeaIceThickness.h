@@ -12,6 +12,8 @@
 #include <ostream>
 #include <string>
 
+#include "ioda/ObsDataVector.h"
+
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorParametersBase.h"
@@ -42,13 +44,16 @@ class ObsSeaIceThickness : public ObsOperatorBase,
                            private util::ObjectCounter<ObsSeaIceThickness> {
  public:
   typedef ObsSeaIceThicknessParameters Parameters_;
+  typedef ioda::ObsDataVector<int> QCFlags_t;
+
   static const std::string classname() {return "ufo::ObsSeaIceThickness";}
 
   ObsSeaIceThickness(const ioda::ObsSpace &, const ObsSeaIceThicknessParameters &);
   virtual ~ObsSeaIceThickness();
 
 // Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &) const override;
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}

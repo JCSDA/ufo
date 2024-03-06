@@ -42,7 +42,7 @@ ObsSeaIceFraction::~ObsSeaIceFraction() {
 // -----------------------------------------------------------------------------
 
 void ObsSeaIceFraction::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
-                                    ObsDiagnostics &) const {
+                                    ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   size_t nlocs = ovec.size();
   size_t nlevs = gv.nlevs("sea_ice_category_area_fraction");
 

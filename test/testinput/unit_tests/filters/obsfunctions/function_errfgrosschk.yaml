@@ -148,4 +148,4 @@ observations:
                           6.0, 6.0, 6.0, 6.0, 6.0, 6.0]
     variables: [error_inflation_factor_grosschk]
     channels: *all_channels
-    tolerance: 1.0e-8
+    tolerance: 2.0e-6

@@ -46,7 +46,6 @@ integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
 type(c_ptr), intent(in), value :: c_varlist
 type(c_ptr), value, intent(in) :: c_comm
-
 type(oops_variables) :: oops_vars
 type(ufo_radiancecrtm), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -83,7 +82,7 @@ end subroutine ufo_radiancecrtm_delete_c
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_radiancecrtm_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-           c_hofx, c_key_hofxdiags) bind(c,name='ufo_radiancecrtm_simobs_f90')
+           c_hofx, c_key_hofxdiags, c_qc_flags) bind(c,name='ufo_radiancecrtm_simobs_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -91,19 +90,18 @@ type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_size_t), intent(inout) :: c_nvars, c_nlocs
 real(c_double), intent(inout) :: c_hofx(c_nvars, c_nlocs)
 integer(c_int), intent(in) :: c_key_hofxdiags
-
+type(c_ptr),value, intent(in) :: c_qc_flags
 type(ufo_radiancecrtm), pointer :: self
 type(ufo_geovals),  pointer :: geovals
 type(ufo_geovals),  pointer :: hofxdiags
-
-character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_c"
+character(len=*), parameter :: myname_='ufo_radiancecrtm_simobs_c'
 
 call ufo_radiancecrtm_registry%get(c_key_self, self)
 
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_geovals_registry%get(c_key_hofxdiags,hofxdiags)
 
-call self%simobs(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx, hofxdiags)
+call self%simobs(geovals, c_obsspace, c_nvars, c_nlocs, c_hofx, hofxdiags, c_qc_flags)
 
 end subroutine ufo_radiancecrtm_simobs_c
 
