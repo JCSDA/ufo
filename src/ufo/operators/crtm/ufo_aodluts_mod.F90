@@ -208,7 +208,7 @@ CONTAINS
 !    name: AodLUTs
 !    obs options:
 !      Sensor_ID: aeronet
-!      AerosolOption: aerosols_gocart_1
+!      AerosolOption: aerosols_gocart_gefs
 !      RCFile: [geosaod_aeronet.rc]
 !      AbsorptionAod: true
 

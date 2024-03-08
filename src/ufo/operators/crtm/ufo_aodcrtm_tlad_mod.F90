@@ -113,6 +113,7 @@ type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_tlad_mod.F90'
+character(len=MAXVARLEN) :: def_aero_mod
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 INTEGER        :: n,l,m
@@ -153,9 +154,14 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  ! write( *,'(/5x,"Initializing the CRTM (setTraj) ...")' )
+ call define_aerosol_model(self%conf%AerosolCoeff_File, def_aero_mod)
  err_stat = CRTM_Init( self%conf%SENSOR_ID, &
             chinfo, &
-            File_Path=trim(self%conf%COEFFICIENT_PATH), &
+            File_Path           = trim(self%conf%COEFFICIENT_PATH), &
+            NC_File_Path        = trim(self%conf%NC_COEFFICIENT_PATH), &
+            Aerosol_Model       = trim(def_aero_mod), &
+            AerosolCoeff_Format = trim(self%conf%AerosolCoeff_Format), &
+            AerosolCoeff_File   = trim(self%conf%AerosolCoeff_File), &
             Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM (setTraj)'
@@ -215,7 +221,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    IF (TRIM(self%conf%aerosol_option) /= "") &
         &CALL load_aerosol_data(self%n_profiles, self%n_layers, geovals,&
-        &self%conf%aerosol_option, atm, self%conf%unit_coef)
+        &self%conf, self%varin, trim(def_aero_mod), atm)
 
    CALL CRTM_RTSolution_Create(rts, self%n_layers )
    CALL CRTM_RTSolution_Create(rts_k, self%n_layers )

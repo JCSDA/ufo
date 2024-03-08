@@ -449,6 +449,12 @@ set_tests_properties(test_ufo_geovals_get_nonexistent_var
 list( APPEND crtm_test_input
 AerosolCoeff/Little_Endian/AerosolCoeff.bin
 AerosolCoeff/netCDF/AerosolCoeff.nc4
+AerosolCoeff/Little_Endian/AerosolCoeff.NAAPS.bin
+AerosolCoeff/netCDF/AerosolCoeff.NAAPS.nc4
+AerosolCoeff/Little_Endian/AerosolCoeff.GOCART-GEOS5.bin
+AerosolCoeff/netCDF/AerosolCoeff.GOCART-GEOS5.nc4
+AerosolCoeff/Little_Endian/AerosolCoeff.CMAQ.bin
+AerosolCoeff/netCDF/AerosolCoeff.CMAQ.nc4
 CloudCoeff/Little_Endian/CloudCoeff.bin
 CloudCoeff/netCDF/CloudCoeff.nc4
 CloudCoeff/netCDF/CloudCoeff_DDA_Moradi_2022.nc4

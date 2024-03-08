@@ -35,6 +35,7 @@ public ufo_crtm_skip_profiles
 
 PUBLIC Load_Aerosol_Data
 public assign_aerosol_names
+public define_aerosol_model
 public calculate_aero_layer_factor
 PUBLIC :: qsmith
 PUBLIC :: upper2lower
@@ -86,7 +87,7 @@ type crtm_conf
  character(len=255) :: salinity_option
  character(len=MAXVARLEN) :: sfc_wind_geovars
  real(kind_real) :: unit_coef = 1.0_kind_real
- logical :: Cloud_Seeding = .false. 
+ logical :: Cloud_Seeding = .false.
 end type crtm_conf
 
 
@@ -311,7 +312,7 @@ logical :: message_flag = .true.
    end if
    if (f_confOper%has("Cloud_Seeding")) then
      call f_confOper%get_or_die("Cloud_Seeding",conf%Cloud_Seeding)
-     if ( conf%Cloud_Seeding ) then 
+     if ( conf%Cloud_Seeding ) then
        write(message,*) trim(ROUTINE_NAME),' Cloud Seeding is activated '
      else
        write(message,*) trim(ROUTINE_NAME),' Cloud Seeding is not activated '
@@ -693,6 +694,16 @@ character(max_string) :: err_msg
     atm(k1)%Climatology = US_STANDARD_ATMOSPHERE
   end do
 
+  if ((conf%Aerosol_Model == 'GOCART-GEOS5') .or. &
+      (conf%Aerosol_Model == 'NAAPS')) then
+    call ufo_geovals_get_var(geovals, var_rh, geoval)
+    do k1 = 1, n_Profiles
+      WHERE (geoval%vals(:, k1) > 1.0_kind_real) geoval%vals(:, k1) = 1.0_kind_real
+      atm(k1)%Relative_Humidity(:) = geoval%vals(:, k1)        ! fraction
+      atm(k1)%Climatology = US_STANDARD_ATMOSPHERE
+    end do
+  endif
+
   do jspec = 1, conf%n_Absorbers
     ! O3 Absorber has special treatment for Aerosols
     if (cmp_strings(conf%Absorbers(jspec), var_oz) .AND. &
@@ -741,8 +752,8 @@ character(max_string) :: err_msg
       if ( ufo_vars_getindex(geovals%variables, var_cldfrac) > 0 ) then
         CALL ufo_geovals_get_var(geovals, var_cldfrac, geoval)
         do k1 = 1, n_Profiles
-          where( geoval%vals(:, k1) < 0_kind_real ) geoval%vals(:, k1) = 0_kind_real
-          where( geoval%vals(:, k1) > 1_kind_real ) geoval%vals(:, k1) = 1_kind_real
+          where( geoval%vals(:, k1) < 0.0_kind_real ) geoval%vals(:, k1) = 0.0_kind_real
+          where( geoval%vals(:, k1) > 1.0_kind_real ) geoval%vals(:, k1) = 1.0_kind_real
           atm(k1)%Cloud_Fraction(:) =  geoval%vals(:, k1)
         end do
       end if
@@ -750,39 +761,39 @@ character(max_string) :: err_msg
   end if
 
   if (conf%n_Clouds > 0) then
-    if ( conf%Cloud_Seeding ) then 
+    if ( conf%Cloud_Seeding ) then
       do k1 = 1, n_Profiles
         do jlevel = 1, atm(k1)%n_layers
-           ! Check Cloud Content 
-           do jspec = 1, conf%n_Clouds  
-             if (atm(k1)%Cloud(jspec)%Type == WATER_CLOUD .and. atm(k1)%Temperature(jlevel) - tice > -20.0_kind_real ) then 
+           ! Check Cloud Content
+           do jspec = 1, conf%n_Clouds
+             if (atm(k1)%Cloud(jspec)%Type == WATER_CLOUD .and. atm(k1)%Temperature(jlevel) - tice > -20.0_kind_real ) then
                  atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
                  atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 5.001_kind_real)
              end if
-             if (atm(k1)%Cloud(jspec)%Type == ICE_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real ) then 
+             if (atm(k1)%Cloud(jspec)%Type == ICE_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real ) then
                  atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
                  atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 5.001_kind_real)
              end if
-             if (atm(k1)%Cloud(jspec)%Type == RAIN_CLOUD .and. atm(k1)%Temperature(jlevel) - tice > -20.0_kind_real ) then 
+             if (atm(k1)%Cloud(jspec)%Type == RAIN_CLOUD .and. atm(k1)%Temperature(jlevel) - tice > -20.0_kind_real ) then
                  atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
                  atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 100.001_kind_real)
              end if
-             if (atm(k1)%Cloud(jspec)%Type == SNOW_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real ) then 
+             if (atm(k1)%Cloud(jspec)%Type == SNOW_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real ) then
                  atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
                  atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 50.001_kind_real)
              end if
-             if (atm(k1)%Cloud(jspec)%Type == GRAUPEL_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real) then 
+             if (atm(k1)%Cloud(jspec)%Type == GRAUPEL_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real) then
                  atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
                  atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 500.001_kind_real)
              end if
-             if (atm(k1)%Cloud(jspec)%Type == HAIL_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real) then 
+             if (atm(k1)%Cloud(jspec)%Type == HAIL_CLOUD .and. atm(k1)%Temperature(jlevel) - tice < 0.0_kind_real) then
                  atm(k1)%Cloud(jspec)%Water_Content(jlevel) = max(atm(k1)%Cloud(jspec)%Water_Content(jlevel), WATER_CONTENT_THRESHOLD*1.001_kind_real )
                  atm(k1)%Cloud(jspec)%Effective_Radius(jlevel) = max(atm(k1)%Cloud(jspec)%Effective_Radius(jlevel), 1000.001_kind_real)
              end if
            end do
            ! Check Cloud Fraction
-           do jspec = 1, conf%n_Clouds 
-             if (atm(k1)%Cloud(jspec)%Water_Content(jlevel) > WATER_CONTENT_THRESHOLD*1.001_kind_real .and. atm(k1)%Cloud_Fraction(jlevel) < 0.001_kind_real) then 
+           do jspec = 1, conf%n_Clouds
+             if (atm(k1)%Cloud(jspec)%Water_Content(jlevel) > WATER_CONTENT_THRESHOLD*1.001_kind_real .and. atm(k1)%Cloud_Fraction(jlevel) < 0.001_kind_real) then
                atm(k1)%Cloud_Fraction(jlevel) = 0.001_kind_real
              end if
            end do
@@ -1191,215 +1202,30 @@ end function uv_to_wdir
 
 ! -----------------------------------------------------------------------------
 
-SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
-     &aerosol_option,atm,unit_coef)
+   SUBROUTINE define_aerosol_model(aerosol_coef_file, aerosol_model)
+    ! Possible models are:
+    ! CRTM, NAAPS, GOCART-GEOS5, CMAQ
+    CHARACTER(*), INTENT(in) :: aerosol_coef_file
+    CHARACTER(*), INTENT(out) :: aerosol_model
+    integer :: checkstring
 
-    USE CRTM_aerosolcoeff, ONLY: aeroc
+    if (aerosol_coef_file == "AerosolCoeff.nc4" .or. &
+        aerosol_coef_file == "AerosolCoeff.bin") then
+       aerosol_model = "CRTM"
+    else if (aerosol_coef_file == "AerosolCoeff.NAAPS.nc4" .or. &
+             aerosol_coef_file == "AerosolCoeff.NAAPS.bin") then
+       aerosol_model = "NAAPS"
+    else if (aerosol_coef_file == "AerosolCoeff.GOCART-GEOS5.nc4" .or. &
+             aerosol_coef_file == "AerosolCoeff.GOCART-GEOS5.bin") then
+       aerosol_model = "GOCART-GEOS5"
+    else if (aerosol_coef_file == "AerosolCoeff.CMAQ.nc4" .or. &
+             aerosol_coef_file == "AerosolCoeff.CMAQ.bin") then
+       aerosol_model = "CMAQ"
+    endif
 
-    INTEGER, INTENT(in) :: n_profiles,n_layers
-    TYPE(ufo_geovals), INTENT(in) :: geovals
-    TYPE(CRTM_atmosphere_type), INTENT(inout) :: atm(:)
+   END SUBROUTINE define_aerosol_model
 
-    CHARACTER(*) :: aerosol_option
-    CHARACTER(max_string) :: message
-    CHARACTER(len=MAXVARLEN) :: varname
-
-    TYPE(ufo_geoval), POINTER :: geoval
-
-    CHARACTER(*), PARAMETER :: routine_name = 'Load_Aerosol_Data'
-
-    REAL(kind_real), DIMENSION(n_layers,n_profiles) :: rh
-    INTEGER :: ivar
-    REAL(kind_real), INTENT(in) :: unit_coef
-
-    CALL assign_aerosols(aerosol_option)
-
-  CONTAINS
-
-    SUBROUTINE assign_aerosols(aerosol_option)
-
-      CHARACTER(*), INTENT(in) :: aerosol_option
-
-      CONTINUE
-
-      IF (cmp_strings(aerosol_option,"aerosols_gocart_default")) THEN
-         CALL assign_gocart_default
-      ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_1")) THEN
-         CALL assign_gocart_1
-      ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_2")) THEN
-         CALL assign_gocart_2
-      ELSE
-         CALL assign_other
-      ENDIF
-
-    END SUBROUTINE assign_aerosols
-
-    SUBROUTINE assign_gocart_default
-
-!this is the original version of GOCART parameterization that exists
-!in CRTM (bc1,bc2,oc1,oc2,sulf,dust1-5,seas1-4)
-
-      INTEGER, PARAMETER :: ndust_bins=5, nseas_bins=4
-      REAL(kind_real), DIMENSION(ndust_bins), PARAMETER  :: dust_radii=[&
-           &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
-
-      INTEGER, DIMENSION(nseas_bins), PARAMETER  :: seas_types=[&
-           SEASALT_SSAM_AEROSOL,SEASALT_SSCM1_AEROSOL,SEASALT_SSCM2_AEROSOL,SEASALT_SSCM3_AEROSOL]
-
-      REAL(kind_real), DIMENSION(n_layers) :: layer_factors
-
-      INTEGER :: i,k,m
-
-      CHARACTER(len=MAXVARLEN) :: varname
-
-      varname=var_rh
-      CALL ufo_geovals_get_var(geovals, varname, geoval)
-      rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
-      WHERE (rh > 1_kind_real) rh=1_kind_real
-
-      DO m=1,n_profiles
-
-         CALL calculate_aero_layer_factor(atm(m), layer_factors)
-
-         DO i=1,n_aerosols_gocart_default
-
-            varname=var_aerosols_gocart_default(i)
-            CALL ufo_geovals_get_var(geovals,varname, geoval)
-
-            atm(m)%aerosol(i)%Concentration(1:n_layers)=&
-                 &MAX(geoval%vals(:,m)*unit_coef*layer_factors, &
-                 &aerosol_concentration_minvalue_layer)
-
-            SELECT CASE (TRIM(varname))
-            CASE (var_sulfate)
-               atm(m)%aerosol(i)%TYPE  = SULFATE_AEROSOL
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)%TYPE, &
-                       &rh(k,m))
-               ENDDO
-
-            CASE (var_bcphobic)
-               atm(m)%aerosol(i)%TYPE  = BLACK_CARBON_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)=&
-                    &AeroC%Reff(1,atm(m)%aerosol(i)%TYPE)
-            CASE (var_bcphilic)
-               atm(m)%aerosol(i)%TYPE  = BLACK_CARBON_AEROSOL
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       &gocart_aerosol_size(atm(m)%aerosol(i)&
-                       &%TYPE, rh(k,m))
-               ENDDO
-
-            CASE (var_ocphobic)
-               atm(m)%aerosol(i)%TYPE  = ORGANIC_CARBON_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)= AeroC&
-                    &%Reff(1,atm(m)%aerosol(i)%TYPE)
-            CASE (var_ocphilic)
-               atm(m)%aerosol(i)%TYPE  = ORGANIC_CARBON_AEROSOL
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       & gocart_aerosol_size(atm(m)%aerosol(i)&
-                       &%TYPE, rh(k,m))
-               ENDDO
-
-            CASE (var_du001)
-               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)&
-                    &=dust_radii(1)
-            CASE (var_du002)
-               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)&
-                    &=dust_radii(2)
-            CASE (var_du003)
-               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)&
-                    &=dust_radii(3)
-            CASE (var_du004)
-               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)&
-                    &=dust_radii(4)
-            CASE (var_du005)
-               atm(m)%aerosol(i)%TYPE  = DUST_AEROSOL
-               atm(m)%aerosol(i)%effective_radius(:)&
-                    &=dust_radii(5)
-
-            CASE (var_ss001)
-               atm(m)%aerosol(i)%TYPE  = seas_types(1)
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       & gocart_aerosol_size(atm(m)%aerosol(i)&
-                       &%TYPE, rh(k,m))
-               ENDDO
-            CASE (var_ss002)
-               atm(m)%aerosol(i)%TYPE  = seas_types(2)
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       & gocart_aerosol_size(atm(m)%aerosol(i)&
-                       &%TYPE, rh(k,m))
-               ENDDO
-            CASE (var_ss003)
-               atm(m)%aerosol(i)%TYPE  = seas_types(3)
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       & gocart_aerosol_size(atm(m)%aerosol(i)&
-                       &%TYPE, rh(k,m))
-               ENDDO
-            CASE (var_ss004)
-               atm(m)%aerosol(i)%TYPE  = seas_types(4)
-               DO k=1,n_layers
-                  atm(m)%aerosol(i)%effective_radius(k)=&
-                       & gocart_aerosol_size(atm(m)%aerosol(i)&
-                       &%TYPE, rh(k,m))
-               ENDDO
-            END SELECT
-
-         ENDDO
-
-      ENDDO
-
-
-    END SUBROUTINE assign_gocart_default
-
-    SUBROUTINE assign_gocart_1
-
-!this is a version of GOCART parameterization
-!(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
-!in NOAA's GEFS-Aerosols model
-
-      message = 'this aerosol not implemented in the CRTM - check&
-           & later'
-      CALL Display_Message( aerosol_option, message, FAILURE )
-      STOP
-
-    END SUBROUTINE assign_gocart_1
-
-    SUBROUTINE assign_gocart_2
-!this is a version of GOCART parameterization
-!(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
-!in NOAA's UFS-Aerosols model
-
-
-      message = 'this aerosol not implemented in the CRTM - check&
-           & later'
-      CALL Display_Message( aerosol_option, message, FAILURE )
-      STOP
-
-    END SUBROUTINE assign_gocart_2
-
-
-    SUBROUTINE assign_other
-
-      message = 'this aerosol not implemented - check later'
-      CALL Display_Message( aerosol_option, message, FAILURE )
-      STOP
-
-    END SUBROUTINE assign_other
-
-
-  END SUBROUTINE load_aerosol_data
-
-  SUBROUTINE assign_aerosol_names(aerosol_option,var_aerosols)
+   SUBROUTINE assign_aerosol_names(aerosol_option, var_aerosols)
 
     CHARACTER(*), INTENT(in) :: aerosol_option
     CHARACTER(len=MAXVARLEN), ALLOCATABLE, INTENT(out) :: var_aerosols(:)
@@ -1407,23 +1233,415 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
     CHARACTER(max_string) :: err_msg
 
     IF (cmp_strings(aerosol_option,"aerosols_gocart_default")) THEN
-       ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_default)))
+       ALLOCATE(var_aerosols(n_aerosols_gocart_default))
        var_aerosols=var_aerosols_gocart_default
-    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_1")) THEN
-       ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_1)))
-       var_aerosols=var_aerosols_gocart_1
-    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_2")) THEN
-       ALLOCATE(var_aerosols(SIZE(var_aerosols_gocart_2)))
-       var_aerosols=var_aerosols_gocart_2
-    ELSEIF (cmp_strings(aerosol_option,"aerosols_other")) THEN
-       ALLOCATE(var_aerosols(SIZE(var_aerosols_other)))
-       var_aerosols=var_aerosols_other
+    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_gefs")) THEN
+       ALLOCATE(var_aerosols(n_aerosols_gocart_gefs))
+       var_aerosols=var_aerosols_gocart_gefs
+    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_ufs")) THEN
+       ALLOCATE(var_aerosols(n_aerosols_gocart_ufs))
+       var_aerosols=var_aerosols_gocart_ufs
+    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_geos")) THEN
+       ALLOCATE(var_aerosols(n_aerosols_gocart_geos))
+       var_aerosols=var_aerosols_gocart_geos
     ELSE
-       WRITE(err_msg,*) 'assign_aerosol_names: aerosol_option not implemented '//TRIM(aerosol_option)
-        call abor1_ftn(err_msg)
+       WRITE(err_msg,*) 'assign_aerosol_names: aerosol_option not implemented'&
+       &//TRIM(aerosol_option)
+       call abor1_ftn(err_msg)
      END IF
 
    END SUBROUTINE assign_aerosol_names
+
+   SUBROUTINE load_aerosol_data(n_profiles, n_layers, geovals,&
+     &conf, var_aerosols, aerosol_model, atm)
+
+    USE CRTM_aerosolcoeff, ONLY: aeroc
+
+    TYPE(crtm_conf), INTENT(in)    :: conf
+    TYPE(ufo_geovals), INTENT(in) :: geovals
+    TYPE(CRTM_atmosphere_type), INTENT(inout) :: atm(:)
+    TYPE(ufo_geoval), POINTER :: geoval
+
+    INTEGER, INTENT(in) :: n_profiles, n_layers
+    INTEGER :: ivar, n_aerosols, i, k, m
+
+    REAL(kind_real), DIMENSION(5), PARAMETER  :: dust_radii=[&
+         &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
+    REAL(kind_real), DIMENSION(n_layers) :: layer_factors
+    REAL(kind_real), DIMENSION(n_layers, n_profiles) :: rh
+
+    CHARACTER(*), PARAMETER :: routine_name = 'Load_Aerosol_Data'
+    CHARACTER(*), INTENT(in) :: aerosol_model
+    CHARACTER(len=MAXVARLEN) :: var_aerosols(:)
+    CHARACTER(len=MAXVARLEN) :: varname
+    CHARACTER(max_string) :: err_msg, message
+
+
+    varname = var_rh
+    CALL ufo_geovals_get_var(geovals, varname, geoval)
+    rh(1:n_layers,1:n_profiles)=geoval%vals(1:n_layers,1:n_profiles)
+    WHERE (rh > 1.0_kind_real) rh=1.0_kind_real
+
+    n_aerosols=SIZE(var_aerosols)
+
+    DO m=1,n_profiles
+
+       CALL calculate_aero_layer_factor(atm(m), layer_factors)
+
+       DO i=1,n_aerosols
+
+          varname=var_aerosols(i)
+          CALL ufo_geovals_get_var(geovals,varname, geoval)
+
+          atm(m)%aerosol(i)%Concentration(1:n_layers)=&
+               &MAX(geoval%vals(:,m)*conf%unit_coef*layer_factors, &
+               &aerosol_concentration_minvalue_layer)
+
+
+          IF (cmp_strings(TRIM(aerosol_model), "CRTM")) THEN
+
+            !Indices for CRTM default LUT
+            !DUST_AEROSOL = 1
+            !SEASALT_AEROSOL = 2 - 5
+            !ORGANIC_CARBON_AEROSOL = 6
+            !BLACK_CARBON_AEROSOL = 7
+            !SULFATE_AEROSOL = 8
+            SELECT CASE (TRIM(varname))
+
+            CASE (var_sulfate)
+               atm(m)%aerosol(i)%TYPE  = 8
+
+            CASE (var_bcphobic)
+               atm(m)%aerosol(i)%TYPE  = 7
+            CASE (var_bcphilic)
+               atm(m)%aerosol(i)%TYPE  = 7
+
+            CASE (var_ocphobic)
+               atm(m)%aerosol(i)%TYPE  = 6
+            CASE (var_ocphilic)
+               atm(m)%aerosol(i)%TYPE  = 6
+
+            CASE (var_du001)
+               atm(m)%aerosol(i)%TYPE  = 1
+               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(1)
+            CASE (var_du002)
+               atm(m)%aerosol(i)%TYPE  = 1
+               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(2)
+            CASE (var_du003)
+               atm(m)%aerosol(i)%TYPE  = 1
+               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(3)
+            CASE (var_du004)
+               atm(m)%aerosol(i)%TYPE  = 1
+               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(4)
+            CASE (var_du005)
+               atm(m)%aerosol(i)%TYPE  = 1
+               atm(m)%aerosol(i)%effective_radius(:)=dust_radii(5)
+
+            CASE (var_ss001)
+               atm(m)%aerosol(i)%TYPE  = 2
+            CASE (var_ss002)
+               atm(m)%aerosol(i)%TYPE  = 3
+            CASE (var_ss003)
+               atm(m)%aerosol(i)%TYPE  = 4
+            CASE (var_ss004)
+               atm(m)%aerosol(i)%TYPE  = 5
+            CASE (var_ss005)
+               atm(m)%aerosol(i)%TYPE  = 5
+
+            CASE DEFAULT
+               write(message,*) 'WARNING!: ', TRIM(varname),&
+               &' is not included in ', TRIM(aerosol_model), ' LUT'
+               atm(m)%aerosol(i)%TYPE  = -1
+            END SELECT
+
+            SELECT CASE (TRIM(varname))
+
+            CASE (var_sulfate, var_bcphilic, var_ocphilic,&
+                 &var_ss001, var_ss002, var_ss003, var_ss004)
+               DO k=1,n_layers
+
+                  atm(m)%aerosol(i)%effective_radius(k)=&
+                   & gocart_aerosol_size(atm(m)%aerosol(i)&
+                   &%TYPE, rh(k,m))
+               ENDDO
+
+            CASE (var_bcphobic, var_ocphobic)
+               atm(m)%aerosol(i)%effective_radius(:)= AeroC&
+                &%Reff(1,atm(m)%aerosol(i)%TYPE)
+
+            END SELECT
+
+
+         ELSEIF (cmp_strings(TRIM(aerosol_model), "GOCART-GEOS5")) THEN
+
+            ! This is for the NASA GOCART tables, aerosol scheme GOCART-GEOS5 in CRTM
+            ! Reff are bin effective radius from NASA tables
+            ! 1, 2, 3, 4, 5  = Dust 1, 2, 3, 4, 5;     with Reff 0.64, 1.32, 2.30, 4.17, 7.67 microns
+            ! 6, 7, 8, 9, 10 = Sea salt 1, 2, 3, 4, 5; with Reff 0.08, 0.27, 1.07, 2.55, 7.34 microns
+            ! 11, 12 = Organic carbon 1, 2;            with Reff 0.09 microns, hydrophobic and hydrophilic
+            ! 13, 14 = Black carbon 1, 2;              with Reff 0.04 microns, hydrophobic and hydrophilic
+            ! 15, 16 = Sulfate 1, 2;                   with Reff 0.16, 0.60 microns
+            ! 17, 18, 19 = Nitrate 1, 2, 3;            with Reff 0.16, 2.10, 7.75 microns
+            ! 20, 21 = Brown carbon 1,2;              (Pending release, as of Feb2024)
+
+            ! Cheng: In this code block, the biggest difference from the function assign_gocart_default
+            !        is that no rh adjustmenet to Reff is needed. It'll be interpolated within CRTM.
+            !        Aerosol optical properties of NASA tables will not be interpolated over Reff
+            !        dimension. There is no need to assign effective radius Reff.
+            !        Note that the dust aerosol mapping with the defualt CRTM table
+            !        was done outside of function assign_gocart_default, because
+            !        dust are all assumed hydrophobic that no rh adjustmenet to Reff
+            !        was needed.
+
+            SELECT CASE (TRIM(varname))
+
+            ! Dust
+            CASE (var_du001)
+               atm(m)%aerosol(i)%TYPE  = 1 ! dust bin 1
+            CASE (var_du002)
+               atm(m)%aerosol(i)%TYPE  = 2 ! dust bin 2
+            CASE (var_du003)
+               atm(m)%aerosol(i)%TYPE  = 3 ! dust bin 3
+            CASE (var_du004)
+               atm(m)%aerosol(i)%TYPE  = 4 ! dust bin 4
+            CASE (var_du005)
+               atm(m)%aerosol(i)%TYPE  = 5 ! dust bin 5
+
+            ! Sea salt
+             CASE (var_ss001)
+               atm(m)%aerosol(i)%TYPE  = 6 ! sea salt bin 1
+            CASE (var_ss002)
+               atm(m)%aerosol(i)%TYPE  = 7 ! sea salt bin 2
+            CASE (var_ss003)
+               atm(m)%aerosol(i)%TYPE  = 8 ! sea salt bin 3
+            CASE (var_ss004)
+               atm(m)%aerosol(i)%TYPE  = 9 ! sea salt bin 4
+            CASE (var_ss005)
+               atm(m)%aerosol(i)%TYPE  = 10 ! sea salt bin 5
+
+            ! Organic carbon
+            CASE (var_ocphobic)
+               atm(m)%aerosol(i)%TYPE  = 11 ! hydrophobic
+            CASE (var_ocphilic)
+               atm(m)%aerosol(i)%TYPE  = 12 ! hydrophilic
+
+            ! Black carbon
+            CASE (var_bcphobic)
+               atm(m)%aerosol(i)%TYPE  = 13 ! hydrophobic
+            CASE (var_bcphilic)
+               atm(m)%aerosol(i)%TYPE  = 14 ! hydrophilic
+
+            ! Sulfate
+            CASE (var_sulfate)
+               atm(m)%aerosol(i)%TYPE  = 15 ! bin 1
+            !Jerome: There is only one bin of sulfate so far
+            !CASE (var_sulfate)
+            !   atm(m)%aerosol(i)%TYPE  = 16 ! bin 2
+
+            ! Nitrate
+            CASE (var_no3an1)
+               atm(m)%aerosol(i)%TYPE  = 17 ! bin 1
+            CASE (var_no3an2)
+               atm(m)%aerosol(i)%TYPE  = 18 ! bin 2
+            CASE (var_no3an3)
+               atm(m)%aerosol(i)%TYPE  = 19 ! bin 3
+
+            ! Brown carbon (pending release, comment out now)
+            CASE (var_brphobic)
+               atm(m)%aerosol(i)%TYPE  = 20 ! bin 1
+            CASE (var_brphilic)
+               atm(m)%aerosol(i)%TYPE  = 21 ! bin 2
+
+            CASE DEFAULT
+               write(message,*) 'WARNING!: ', TRIM(varname),&
+               ' is not included in ', TRIM(aerosol_model), ' LUT'
+               atm(m)%aerosol(i)%TYPE  = -1
+            END SELECT
+
+          ELSEIF (cmp_strings(trim(aerosol_model), "CMAQ")) THEN
+            ! Aerosol scheme CMAQ in CRTM
+            ! CMAQ table:
+            ! Dust - 1
+            ! Soot - 2
+            ! Water soluble - 3 (RI of OPAC WASO are used as RI of OC in GOCART)
+            ! Sulfate - 4
+            ! Sea salt - 5
+            ! Water - 6
+            ! Insoluble -7
+            ! dust-like - 8
+
+            ! Place holder for effective radius variance, set as 1.0
+            DO k=1,n_layers
+               atm(m)%aerosol(i)%effective_variance(k)=1.0_kind_real
+            ENDDO
+
+            ! Assign aerosol type
+            SELECT CASE (TRIM(varname))
+
+              !Dust
+              CASE (var_du001)
+                 atm(m)%aerosol(i)%TYPE = 1
+              CASE (var_du002)
+                 atm(m)%aerosol(i)%TYPE = 1
+              CASE (var_du003)
+                 atm(m)%aerosol(i)%TYPE = 1
+              CASE (var_du004)
+                 atm(m)%aerosol(i)%TYPE = 1
+              CASE (var_du005)
+                 atm(m)%aerosol(i)%TYPE = 1
+
+              !Sea Salt
+              CASE (var_ss001)
+                 atm(m)%aerosol(i)%TYPE = 5
+              CASE (var_ss002)
+                 atm(m)%aerosol(i)%TYPE = 5
+              CASE (var_ss003)
+                 atm(m)%aerosol(i)%TYPE = 5
+              CASE (var_ss004)
+                 atm(m)%aerosol(i)%TYPE = 5
+              CASE (var_ss005)
+                 atm(m)%aerosol(i)%TYPE = 5
+
+              ! Organic carbon
+              CASE (var_ocphobic)
+                 atm(m)%aerosol(i)%TYPE = 7
+              CASE (var_ocphilic)
+                 atm(m)%aerosol(i)%TYPE = 3
+
+              ! Black carbon
+              CASE (var_bcphobic)
+                 atm(m)%aerosol(i)%TYPE = 7
+              CASE (var_bcphilic)
+                 atm(m)%aerosol(i)%TYPE = 2
+
+              ! Sulfate
+              CASE (var_sulfate)
+                 atm(m)%aerosol(i)%TYPE = 4
+
+              ! Nitrate
+              CASE (var_no3an1)
+                 atm(m)%aerosol(i)%TYPE = 3
+              CASE (var_no3an2)
+                 atm(m)%aerosol(i)%TYPE = 3
+              CASE (var_no3an3)
+                 atm(m)%aerosol(i)%TYPE = 3
+
+              !!Brown carbon
+              CASE (var_brphobic)
+                 atm(m)%aerosol(i)%TYPE = 7
+              CASE (var_brphilic)
+                 atm(m)%aerosol(i)%TYPE = 3
+
+            CASE DEFAULT
+               write(message,*) 'WARNING!: ', TRIM(varname),&
+               ' is not included in ', TRIM(aerosol_model), ' LUT'
+               atm(m)%aerosol(i)%TYPE  = -1
+            WRITE(err_msg,*) TRIM(conf%aerosol_option)//' not ready in UFO/AODCRTM'
+            call abor1_ftn(err_msg)
+
+            END SELECT
+
+            SELECT CASE (TRIM(varname))
+
+            ! Reff for hydrophilic aerosols
+            CASE (var_sulfate, var_bcphilic, var_ocphilic,&
+                  &var_ss001, var_ss002, var_ss003, var_ss004,&
+                  &var_no3an1, var_no3an2, var_no3an3)
+               DO k=1,n_layers
+                  atm(m)%aerosol(i)%effective_radius(k)=&
+                   & gocart_aerosol_size(atm(m)%aerosol(i)&
+                   &%TYPE, rh(k,m))
+               ENDDO
+            ! Reff for hydrophobic aerosols
+            CASE (var_du001, var_du002, var_du003, var_du004, var_du005,&
+                  &var_bcphobic, var_ocphobic)
+               atm(m)%aerosol(i)%effective_radius(:)= AeroC&
+                &%Reff(1,atm(m)%aerosol(i)%TYPE)
+
+            END SELECT
+
+          ELSEIF (cmp_strings(TRIM(aerosol_model), "NAAPS")) THEN
+            ! This is for the NRL NAAPS tables, aerosol scheme NAAPS in CRTM
+            ! Similar to GOCART-GEOS5 LUT, no Reff needs to be assigned
+            ! NAAPS table is recommended for AOD calculation only due to
+            ! over-simplified phase function reconstruction.
+            ! NAAPS table:
+            ! Dust - 1
+            ! Smoke - 2
+            ! Sea Salt - 3
+            ! Anthropogenic and Biogenic Fine Particles - 4
+
+            ! Assign aerosol type
+            SELECT CASE (TRIM(varname))
+
+            !Dust
+            CASE (var_du001)
+               atm(m)%aerosol(i)%TYPE = 1
+            CASE (var_du002)
+               atm(m)%aerosol(i)%TYPE = 1
+            CASE (var_du003)
+               atm(m)%aerosol(i)%TYPE = 1
+            CASE (var_du004)
+               atm(m)%aerosol(i)%TYPE = 1
+            CASE (var_du005)
+               atm(m)%aerosol(i)%TYPE = 1
+
+            !Sea Salt
+            CASE (var_ss001)
+              atm(m)%aerosol(i)%TYPE  = 3
+            CASE (var_ss002)
+              atm(m)%aerosol(i)%TYPE  = 3
+            CASE (var_ss003)
+              atm(m)%aerosol(i)%TYPE  = 3
+            CASE (var_ss004)
+              atm(m)%aerosol(i)%TYPE  = 3
+            CASE (var_ss005)
+              atm(m)%aerosol(i)%TYPE  = 3
+
+            ! Organic carbon
+            CASE (var_ocphobic)
+               atm(m)%aerosol(i)%TYPE = 2
+            CASE (var_ocphilic)
+               atm(m)%aerosol(i)%TYPE = 2
+
+            ! Black carbon
+            CASE (var_bcphobic)
+               atm(m)%aerosol(i)%TYPE = 2
+            CASE (var_bcphilic)
+               atm(m)%aerosol(i)%TYPE = 2
+
+            ! Sulfate
+            CASE (var_sulfate)
+               atm(m)%aerosol(i)%TYPE = 4
+
+            ! Nitrate
+            CASE (var_no3an1)
+               atm(m)%aerosol(i)%TYPE = 4
+            CASE (var_no3an2)
+               atm(m)%aerosol(i)%TYPE = 4
+            CASE (var_no3an3)
+               atm(m)%aerosol(i)%TYPE = 4
+
+            !Brown carbon
+            CASE (var_brphobic)
+               atm(m)%aerosol(i)%TYPE = 2
+            CASE (var_brphilic)
+               atm(m)%aerosol(i)%TYPE = 2
+
+            CASE DEFAULT
+               write(message,*) 'WARNING!: ', TRIM(varname),&
+               ' is not included in ', TRIM(aerosol_model), ' LUT'
+               atm(m)%aerosol(i)%TYPE  = -1
+            WRITE(err_msg,*) TRIM(conf%aerosol_option)//' not ready in UFO/AODCRTM'
+            call abor1_ftn(err_msg)
+
+            END SELECT
+
+          ENDIF
+       END DO
+     END DO
+
+   END SUBROUTINE load_aerosol_data
 
    SUBROUTINE calculate_aero_layer_factor_atm_profile(atm, layer_factors)
 
@@ -1437,8 +1655,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
         !being calculated from dry pressure, cotton eq. (2.4)
         !p_dry=p_total/(1+1.61*mixing_ratio)
         layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
-             &atm%Level_Pressure(k-1))*100_kind_real/grav/&
-             &(1_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
+             &atm%Level_Pressure(k-1))*100.0_kind_real/grav/&
+             &(1.0_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
      ENDDO
 
    END SUBROUTINE calculate_aero_layer_factor_atm_profile
@@ -1455,8 +1673,8 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
            !being calculated from dry pressure, cotton eq. (2.4)
            !p_dry=p_total/(1+1.61*mixing_ratio)
            layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
-                &atm(m)%Level_Pressure(k-1))*100_kind_real/grav/&
-                &(1_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
+                &atm(m)%Level_Pressure(k-1))*100.0_kind_real/grav/&
+                &(1.0_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
         ENDDO
      ENDDO
 
@@ -1501,7 +1719,7 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
      IF ( j2 == 0 ) THEN
         r_eff = aeroc%reff(j1,itype )
      ELSE
-        r_eff = (1_kind_real-h1)*aeroc%reff(j1,itype ) + h1*aeroc%reff(j2,itype )
+        r_eff = (1.0_kind_real-h1)*aeroc%reff(j1,itype ) + h1*aeroc%reff(j2,itype )
      ENDIF
 
    END FUNCTION gocart_aerosol_size
@@ -1660,4 +1878,3 @@ SUBROUTINE load_aerosol_data(n_profiles,n_layers,geovals,&
    END SUBROUTINE qs_table
 
 END MODULE ufo_crtm_utils_mod
-

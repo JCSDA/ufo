@@ -6,7 +6,7 @@ observations:
 - obs operator:
     name: AodLUTs
     obs options:
-      AerosolOption: aerosols_gocart_1
+      AerosolOption: aerosols_gocart_gefs
       RCFile: geosaod.rc
       Sensor_ID: v.viirs-m_npp
       EndianType: little_endian
@@ -36,7 +36,7 @@ observations:
 - obs operator:
     name: AodLUTs
     obs options:
-      AerosolOption: aerosols_gocart_2
+      AerosolOption: aerosols_gocart_ufs
       RCFile: geosaod.rc
       Sensor_ID: v.viirs-m_npp
       EndianType: little_endian

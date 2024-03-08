@@ -12,8 +12,8 @@ private
 public :: ufo_vars_read, ufo_vars_getindex
 
 integer, parameter, public :: n_aerosols_gocart_default=14,&
-     &n_aerosols_gocart_1=15,n_aerosols_gocart_2=18,&
-     &n_aerosols_other=1
+     &n_aerosols_gocart_gefs=15,n_aerosols_gocart_ufs=18,&
+     &n_aerosols_gocart_geos=18 !soon 21 for geos
 
 integer, parameter, public :: MAXVARLEN=100
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
@@ -160,6 +160,7 @@ character(len=MAXVARLEN), public :: var_cocco_conc      = "coccolithophore_conce
 character(len=MAXVARLEN), public :: var_dino_conc       = "dinoflagellate_concentration"
 character(len=MAXVARLEN), public :: var_phaeo_conc      = "phaeocystis_concentration"
 
+! GOCART quantities  for AODCRTM
 character(len=MAXVARLEN), public, parameter :: var_du001 = "mass_fraction_of_dust001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_du002 = "mass_fraction_of_dust002_in_air"
 character(len=MAXVARLEN), public, parameter :: var_du003 = "mass_fraction_of_dust003_in_air"
@@ -174,10 +175,14 @@ character(len=MAXVARLEN), public, parameter :: var_bcphobic = "mass_fraction_of_
 character(len=MAXVARLEN), public, parameter :: var_bcphilic = "mass_fraction_of_hydrophilic_black_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_ocphobic = "mass_fraction_of_hydrophobic_organic_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_ocphilic = "mass_fraction_of_hydrophilic_organic_carbon_in_air"
+character(len=MAXVARLEN), public, parameter :: var_brphobic = "mass_fraction_of_hydrophobic_brown_carbon_in_air"
+character(len=MAXVARLEN), public, parameter :: var_brphilic = "mass_fraction_of_hydrophilic_brown_carbon_in_air"
 character(len=MAXVARLEN), public, parameter :: var_sulfate = "mass_fraction_of_sulfate_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an1 = "mass_fraction_of_nitrate001_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an2 = "mass_fraction_of_nitrate002_in_air"
 character(len=MAXVARLEN), public, parameter :: var_no3an3 = "mass_fraction_of_nitrate003_in_air"
+
+! Values for AODExt
 character(len=MAXVARLEN), public, parameter :: var_ext1 = "volume_extinction_in_air_due_to_aerosol_particles_lambda1"
 character(len=MAXVARLEN), public, parameter :: var_ext2 = "volume_extinction_in_air_due_to_aerosol_particles_lambda2"
 character(len=MAXVARLEN), public, parameter :: var_ext3 = "volume_extinction_in_air_due_to_aerosol_particles_lambda3"
@@ -195,24 +200,28 @@ character(len=MAXVARLEN), dimension(n_aerosols_gocart_default), public, paramete
      &var_du001, var_du002, var_du003, var_du004, var_du005,&
      &var_ss001, var_ss002, var_ss003, var_ss004]
 
-character(len=maxvarlen), dimension(n_aerosols_gocart_1), public, parameter :: &
-     &var_aerosols_gocart_1 = [&
+character(len=maxvarlen), dimension(n_aerosols_gocart_gefs), public, parameter :: &
+     &var_aerosols_gocart_gefs = [&
      &var_sulfate,&
      &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
      &var_du001, var_du002, var_du003, var_du004, var_du005,&
      &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005]
 
-character(len=maxvarlen), dimension(n_aerosols_gocart_2), public, parameter :: &
-     &var_aerosols_gocart_2 = [&
+character(len=maxvarlen), dimension(n_aerosols_gocart_ufs), public, parameter :: &
+     &var_aerosols_gocart_ufs = [&
      &var_sulfate,&
-     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,& 
      &var_du001, var_du002, var_du003, var_du004, var_du005,&
      &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005,&
-     &var_no3an1,var_no3an2,var_no3an3]
+     &var_no3an1, var_no3an2, var_no3an3]
 
-character(len=MAXVARLEN), dimension(n_aerosols_other), public, parameter :: &
-     &var_aerosols_other = [&
-     &"other                                                   "]
+character(len=maxvarlen), dimension(n_aerosols_gocart_geos), public, parameter :: &
+     &var_aerosols_gocart_geos = [&
+     &var_sulfate,& !two bins for sulfate?
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,& ! var_brphobic, var_brphilic to be added soon
+     &var_du001, var_du002, var_du003, var_du004, var_du005,&
+     &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005,&
+     &var_no3an1, var_no3an2, var_no3an3]
 
 ! ------------------------------------------------------------------------------
 contains

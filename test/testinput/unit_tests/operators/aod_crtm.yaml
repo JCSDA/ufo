@@ -10,7 +10,9 @@ observations:
       Sensor_ID: v.viirs-m_npp
       EndianType: little_endian
       CoefficientPath: Data/
-      AerosolOption: aerosols_gocart_default
+      AerosolCoeff_File: AerosolCoeff.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_gefs
   obs space:
     name: Aod
     obsdatain:
@@ -26,8 +28,116 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
   vector ref: GsiHofX
-  tolerance: 1.0e-03
+  tolerance: 1.0e-3
   linear obs operator test:
     coef TL: 1.0e-3
     tolerance TL: 1.0e-5
-    tolerance AD: 1.0e-13
+    tolerance AD: 1.0e-12
+
+- obs operator:
+    name: AodCRTM
+    Absorbers: [H2O,O3]
+    obs options:
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      AerosolCoeff_File: AerosolCoeff.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_ufs
+  obs space:
+    name: Aod
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosolOpticalDepth]
+    channels: 4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-3
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12
+
+- obs operator:
+    name: AodCRTM
+    Absorbers: [H2O,O3]
+    obs options:
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      AerosolCoeff_File: AerosolCoeff.GOCART-GEOS5.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_ufs
+  obs space:
+    name: Aod
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosolOpticalDepth]
+    channels: 4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-3
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12
+
+- obs operator:
+    name: AodCRTM
+    Absorbers: [H2O,O3]
+    obs options:
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      AerosolCoeff_File: AerosolCoeff.CMAQ.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_ufs
+  obs space:
+    name: Aod
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosolOpticalDepth]
+    channels: 4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-3
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12
+
+- obs operator:
+    name: AodCRTM
+    Absorbers: [H2O,O3]
+    obs options:
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      AerosolCoeff_File: AerosolCoeff.NAAPS.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_ufs
+  obs space:
+    name: Aod
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosolOpticalDepth]
+    channels: 4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-3
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12

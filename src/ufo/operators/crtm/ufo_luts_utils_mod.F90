@@ -163,8 +163,8 @@ CONTAINS
 !(bc1-2,oc1-2,sulf,dust1-5,seas1-5,nitrate1-3) that was implemented
 !in NOAA's UFS-Aerosols model
 
-    IF (TRIM(conf%aerosol_option) /= "aerosols_gocart_1" .AND. &
-         &TRIM(conf%aerosol_option) /= "aerosols_gocart_2") THEN
+    IF (TRIM(conf%aerosol_option) /= "aerosols_gocart_gefs" .AND. &
+         &TRIM(conf%aerosol_option) /= "aerosols_gocart_ufs") THEN
        WRITE(err_msg,*) 'this aerosol not implemented - check later'
        CALL abor1_ftn(err_msg)
     ENDIF
@@ -179,7 +179,7 @@ CONTAINS
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+r_v/r_d*mixing_ratio)
              factors(k,m)=(pint(k+1,m)-pint(k,m))/grav/&
-                  &(1_kind_real+rv_rd*sphum(k,m)/(1_kind_real-sphum(k,m)))
+                  &(1.0_kind_real+rv_rd*sphum(k,m)/(1.0_kind_real-sphum(k,m)))
           ENDDO
        ENDDO
 
@@ -202,7 +202,7 @@ CONTAINS
 
     IF ( PRESENT(rh) ) THEN
        CALL qsmith(t,sphum,pmid,rh)
-       WHERE (rh > 1_kind_real) rh=1_kind_real
+       WHERE (rh > 1.0_kind_real) rh=1.0_kind_real
     ENDIF
 
     IF ( PRESENT(layer_factors) ) layer_factors=conf%convert_factor_model*factors

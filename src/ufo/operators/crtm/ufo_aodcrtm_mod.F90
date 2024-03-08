@@ -24,7 +24,7 @@ module ufo_aodcrtm_mod
  !> Fortran derived type for aod trajectory
  type, public :: ufo_aodcrtm
  private
-  character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variablesrequested from the model
+  character(len=MAXVARLEN), public, allocatable :: varin(:), varin_aero(:) ! variablesrequested from the model
   integer, allocatable                          :: channels(:)
   type(crtm_conf) :: conf
  contains
@@ -65,12 +65,16 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
    call abor1_ftn(err_msg)
  end if
 
- CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
+ CALL assign_aerosol_names(self%conf%aerosol_option, var_aerosols)
 
  nvars_in = SIZE(varin_default)+SIZE(var_aerosols)
  allocate(self%varin(nvars_in))
  self%varin(1:size(varin_default)) = varin_default
  self%varin(SIZE(varin_default)+1:) = var_aerosols
+
+ 
+ allocate(self%varin_aero(SIZE(var_aerosols)))
+ self%varin_aero(:) = var_aerosols(:)
 
  ! save channels
  allocate(self%channels(size(channels)))
@@ -102,6 +106,7 @@ type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
+character(len=MAXVARLEN) :: def_aero_mod
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n, i
@@ -150,9 +155,14 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
  !**       CRTM_Lifecycle.f90 for more details.
 
  ! write( *,'(/5x,"Initializing the CRTM...")' )
+ call define_aerosol_model(self%conf%AerosolCoeff_File, def_aero_mod)
  err_stat = CRTM_Init( self%conf%SENSOR_ID, &
             chinfo, &
-            File_Path=trim(self%conf%COEFFICIENT_PATH), &
+            File_Path           = trim(self%conf%COEFFICIENT_PATH), &
+            NC_File_Path        = trim(self%conf%NC_COEFFICIENT_PATH), &
+            Aerosol_Model       = trim(def_aero_mod), &
+            AerosolCoeff_Format = trim(self%conf%AerosolCoeff_Format), &
+            AerosolCoeff_File   = trim(self%conf%AerosolCoeff_File), &
             Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
    message = 'Error initializing CRTM'
@@ -203,7 +213,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    if (trim(self%conf%aerosol_option) /= "") &
        & call load_aerosol_data(n_profiles, n_layers, geovals, &
-       & self%conf%aerosol_option, atm, self%conf%unit_coef)
+       & self%conf, self%varin_aero, trim(def_aero_mod), atm)
 
    ! Call THE CRTM inspection
    ! ------------------------

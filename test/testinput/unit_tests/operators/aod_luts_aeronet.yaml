@@ -6,7 +6,7 @@ observations:
 - obs operator:
     name: AodLUTs
     obs options:
-      AerosolOption: aerosols_gocart_1
+      AerosolOption: aerosols_gocart_gefs
       RCFile: [geosaod_aeronet.rc]
       Sensor_ID: aeronet
       model units coeff: 1.e-9
