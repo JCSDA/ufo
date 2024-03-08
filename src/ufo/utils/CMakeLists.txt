@@ -19,6 +19,8 @@ set ( utils_files
       DistanceCalculator.h
       EquispacedBinSelectorBase.h
       GeodesicDistanceCalculator.h
+      GeometryCalculations.cc
+      GeometryCalculations.h
       IodaGroupIndices.cc
       IodaGroupIndices.h
       MaxNormDistanceCalculator.h

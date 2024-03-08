@@ -221,6 +221,13 @@ ecbuild_add_test( TARGET  test_ufo_integral_image
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo)
 
+# Test geometry calculations
+ecbuild_add_test( TARGET  test_ufo_geometry_calculations
+                  SOURCES mains/TestGeometryCalculations.cc
+                  ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test nearest_neighbor interpolation
 ecbuild_add_test( TARGET  test_ufo_nearest_neighbor_interpolation
                   SOURCES mains/TestNearestNeighborInterpolation.cc
