@@ -75,16 +75,16 @@ observations:
     variables to use from obsspace:
     - TestReference/pressureAtTopOfCloud
     - TestReference/cloudAmount
-    obs options: &rttov_options
+    obs options:
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
-      WMO_ID: &wmo_id [3]
-      Sat_ID: &sat_id [metop_1]
-      Instrument_Name: &instrument_id IASI
-      CoefficientPath: &coefpath Data/
-      RTTOV_GasUnitConv: &gasunitconv true
-      UseRHwaterForQC: &UseRHwaterForQC true
-      UseColdSurfaceCheck: &UseColdSurfaceCheck false
+      WMO_ID: *wmo_id
+      Sat_ID: *sat_id
+      Instrument_Name: *instrument_id
+      CoefficientPath: *coefpath
+      RTTOV_GasUnitConv: *gasunitconv
+      UseRHwaterForQC: *UseRHwaterForQC
+      UseColdSurfaceCheck: *UseColdSurfaceCheck
       RTTOV_clw_data: false
       RTTOV_profile_checkinput: true
       RTTOV_ScaleRefOzone: false
@@ -106,6 +106,53 @@ observations:
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   rms ref: 244.5034315
   tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 1.0e-2
+    tolerance AD: 1.0e-11
+
+# Test the flags associated with SatRad_compatibility
+- obs operator:
+    name: RTTOV
+    Absorbers: [Ozone]
+    linear obs operator:
+      increment variables:
+      - air_temperature
+      - specific_humidity
+      - specific_humidity_at_two_meters_above_surface
+    obs options:
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      UseColdSurfaceCheck: *UseColdSurfaceCheck
+      BoundQToSaturation: true
+      UseRHwaterForQC: false
+      UseMinimumQ: true
+      RTTOV_GasUnitConv: true
+      WMO_ID: *wmo_id
+      Sat_ID: *sat_id
+      Instrument_Name: *instrument_id
+      CoefficientPath: *coefpath
+      RTTOV_clw_data: false
+      RTTOV_profile_checkinput: true
+      RTTOV_ScaleRefOzone: false
+      surface emissivity group: SurfEmiss
+      max_channels_per_batch: 10
+  obs space:
+    name: Test the flags associated with satrad compatibility
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+    simulated variables: [brightnessTemperature]
+    channels: *all_channels
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/iasi_metopb_obs_2021011500_satradcomp_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
+  rms ref: 245.9799879
+  tolerance: 1.e-5
   linear obs operator test:
     coef TL: 1.e-4
     tolerance TL: 1.0e-2

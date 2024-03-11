@@ -15,6 +15,7 @@ module ufo_radiancerttov_tlad_mod
 
   use obsspace_mod
 
+  use ufo_constants_mod, only : zero, g_to_kg, min_q
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, ufo_geovals_print
   use ufo_vars_mod
   use ufo_radiancerttov_utils_mod
@@ -163,7 +164,7 @@ contains
 
     integer(kind=jpim)                           :: errorstatus ! Return error status of RTTOV subroutine calls
 
-    integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan
+    integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan, ilev, localchan
     integer                                      :: nprof_sim, nprof_max_sim, nchan_total
     integer                                      :: nchan_sim
     integer                                      :: prof_start, prof_end
@@ -172,6 +173,7 @@ contains
 
     logical                                      :: jacobian_needed
     real(kind_real), allocatable                 :: sfc_emiss(:,:)
+    real(kind_real)                              :: minimum_q
 
     include 'rttov_k.interface'
     include 'rttov_scatt_ad.interface'
@@ -181,7 +183,7 @@ contains
 
     !Return the name and name length of obsspace communicator (from ioda)
     call obsspace_get_comm(obss, f_comm)
-    
+
     !! Parse hofxdiags%variables into independent/dependent variables and channel assumed formats:
     ! Note this sets the jacobian_needed flag
     !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
@@ -225,7 +227,7 @@ contains
     call self % RTprof_K % alloc_profiles_k(errorstatus, self % conf, self % nprofiles * self % RTprof_K % nchan_inst, self % nlevels, init=.true., asw=1)
 
     ! Used for keeping track of profiles for setting emissivity
-    allocate(self % RTprof_K % chanprof ( self % nprofiles * self % RTprof_K % nchan_inst )) 
+    allocate(self % RTprof_K % chanprof ( self % nprofiles * self % RTprof_K % nchan_inst ))
 
     ! Maximum number of profiles to be processed by RTTOV per pass
     if(self % conf % prof_by_prof) then
@@ -274,7 +276,7 @@ contains
       !allocate list used to store 'good' profiles
       !initialise to -1, so no bad profile is given an emissivity
       allocate(prof_list(nprof_sim,2))
-      prof_list = -1 
+      prof_list = -1
 
       ! Build the list of profile/channel indices in chanprof
       do iprof_rttov = 1, nprof_sim
@@ -293,7 +295,7 @@ contains
         ! check RTTOV profile will be valid for RTTOV and flag it if it fails the check
         call self % RTprof_K % check_rtprof(self % conf, iprof, errorstatus)
 
-        if (errorstatus == errorstatus_success) then 
+        if (errorstatus == errorstatus_success) then
           ! check sfc_emiss valid if read in
           if (allocated(sfc_emiss)) then
             do ichan = 1, self % RTprof_K % nchan_inst
@@ -360,7 +362,7 @@ contains
       ! --------------------------------------------------------------------------
       ! Call RTTOV K model
       ! --------------------------------------------------------------------------
-    
+
       if (self % conf % do_mw_scatt) then
         call rttov_scatt_ad(                                                            &
           errorstatus,                                                                  &! out   error flag
@@ -374,8 +376,8 @@ contains
           self % conf % mw_scatt % coef,                                                &! in    scatt coefficients structure
           self % RTProf_K % calcemis(1:nchan_sim),                                      &! in    flag for internal emissivity calcs
           self % RTProf_K % emissivity(1:nchan_sim),                                    &! inout input/output emissivities per channel
-          self % RTProf_K % profiles_k(1:nchan_sim),                                    &! inout 
-          self % RTProf_K % mw_scatt % profiles_k(1:nchan_sim),                         &! inout 
+          self % RTProf_K % profiles_k(1:nchan_sim),                                    &! inout
+          self % RTProf_K % mw_scatt % profiles_k(1:nchan_sim),                         &! inout
           self % RTProf_K % emissivity_k(1:nchan_sim),                                  &! inout input/output emissivity jacs per channel
           self % RTProf_K % radiance,                                                   &! inout computed radiances
           self % RTProf_K % radiance_k)                                                  ! inout computed radiance jacobians
@@ -394,6 +396,22 @@ contains
           calcemis     = self % RTprof_K % calcemis(1:nchan_sim),                       &! in    flag for internal emissivity calcs
           emissivity   = self % RTprof_K % emissivity(1:nchan_sim),                     &! inout input/output emissivities per channel
           emissivity_k = self % RTprof_K % emissivity_k(1:nchan_sim))                    ! inout input/output emissivities gradients per channel
+      end if
+
+      ! Zero jacobians if the humidity had been set to the minimum threshold
+      if(self % conf % SatRad_compatibility .and. self % conf % UseMinimumQ) then
+        minimum_q = min_q * self % conf % scale_fac(gas_id_watervapour)
+        do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+          iprof = prof_start + chanprof(ichan) % prof - 1
+          ! Humidity profile
+          do ilev = 1, self % nlevels
+            if (self % RTProf_K % q_profile_reset(iprof, ilev)) then
+              do localchan = 1, self % RTprof_K % nchan_inst
+                self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) % q(ilev) = zero
+              end do
+            end if
+          end do
+        end do
       end if
 
       if(size(self % conf % inspect) > 0) then
@@ -417,11 +435,11 @@ contains
         if(hofxdiags % nvar > 0) &
           call hofxdiags_methods % populate(self % RTprof_K, chanprof, self % conf, prof_start, hofxdiags)
       end if
-      
+
       ! increment profile and channel counters
       nchan_total = nchan_total + nchan_sim
       prof_start = prof_start + nprof_sim
-      
+
       self % nchan_total = nchan_total
       deallocate (chanprof)
     end do RTTOV_loop
@@ -432,20 +450,18 @@ contains
     call self % RTprof_K % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
     call self % RTprof_K % alloc_profiles(errorstatus, self % conf, -1, -1, asw=0)
 
- 
+
     ! Set flag that the tracectory was set
     ! ------------------------------------
     self % ltraj = .true.
-  
+
 end subroutine ufo_radiancerttov_tlad_settraj
 
   ! ------------------------------------------------------------------------------
   subroutine ufo_radiancerttov_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
-    
-    use ufo_constants_mod, only : zero, g_to_kg
 
     implicit none
-  
+
   class(ufo_radiancerttov_tlad), intent(in)    :: self
     type(ufo_geovals),           intent(in)    :: geovals
     type(c_ptr), value,          intent(in)    :: obss
@@ -564,8 +580,6 @@ end subroutine ufo_radiancerttov_tlad_settraj
   ! ------------------------------------------------------------------------------
   subroutine ufo_radiancerttov_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
 
-    use ufo_constants_mod, only : zero, g_to_kg
-
     implicit none
 
     class(ufo_radiancerttov_tlad), intent(in)    :: self
@@ -640,7 +654,7 @@ end subroutine ufo_radiancerttov_tlad_settraj
           end do
         ! Variables with 1 level - surface
         case (var_sfc_t2m, var_sfc_q2m, var_sfc_u10, var_sfc_v10, var_sfc_tskin)
-          call ufo_geovals_get_var(geovals, trim(varname), geoval_d) 
+          call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           do ichan = 1, self % nchan_total, size(self % channels)
             prof = self % RTprof_K % chanprof(ichan) % prof

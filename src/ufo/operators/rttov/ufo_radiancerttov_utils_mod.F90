@@ -133,6 +133,7 @@ module ufo_radiancerttov_utils_mod
     type(mw_scatt_io)                :: mw_scatt
     real(kind_real), allocatable     :: ciw(:,:)        ! pointer to either ice from RTTOV-SCATT or diagnosed ice from Qsplit
     real(kind_real), allocatable     :: tc_ozone(:)     ! total column ozone
+    logical, allocatable             :: q_profile_reset(:,:)    ! flag to say if the humidity has been reset to a minimum value
 
     integer, allocatable             :: sensor_index_array(:)
 
@@ -187,6 +188,8 @@ module ufo_radiancerttov_utils_mod
     logical                               :: SatRad_compatibility
     logical                               :: UseRHwaterForQC  ! only used with SatRad compatibility
     logical                               :: UseColdSurfaceCheck  ! to replicate pre-PS45 results
+    logical                               :: BoundQToSaturation  ! keep values of q equal or below to saturation
+    logical                               :: UseMinimumQ ! apply a lower threshold to the humidity
     logical                               :: SplitQtotal
     logical                               :: UseQtsplitRain
     logical                               :: RTTOV_profile_checkinput
@@ -399,10 +402,14 @@ contains
     call f_confOpts % get_or_die("CoefficientPath",str)
     conf % COEFFICIENT_PATH = str
 
-    ! Set interface options
-    call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility)
-    call f_confOpts % get_or_die("UseRHwaterForQC",conf % UseRHwaterForQC)
-    call f_confOpts % get_or_die("UseColdSurfaceCheck",conf % UseColdSurfaceCheck)
+    ! Set interface options - SatRad_compatibility dependent variables
+    call f_confOpts % get_or_die("SatRad_compatibility",conf % SatRad_compatibility) ! default = true
+    call f_confOpts % get_or_die("UseColdSurfaceCheck",conf % UseColdSurfaceCheck) ! default = false
+    call f_confOpts % get_or_die("BoundQToSaturation",conf % BoundQToSaturation) ! default = true
+    call f_confOpts % get_or_die("UseRHwaterForQC",conf % UseRHwaterForQC) ! default = true
+    call f_confOpts % get_or_die("UseMinimumQ",conf % UseMinimumQ) ! default = true
+
+    ! Settings that control the batching
     call f_confOpts % get_or_die("prof_by_prof",conf % prof_by_prof)
     call f_confOpts % get_or_die("max_channels_per_batch",conf % nchan_max_sim)
 
@@ -879,7 +886,7 @@ contains
     type(ufo_geoval), pointer          :: geoval
     type(datetime), allocatable        :: date_temp(:)
 
-    integer                            :: jspec, isensor, ivar, iprof
+    integer                            :: jspec, isensor, ivar, iprof, ilev
     integer                            :: nlevels
     integer                            :: nprofiles
 
@@ -1263,6 +1270,8 @@ contains
 ! ---------------------------
 
     if(conf % SatRad_compatibility) then
+      allocate(self % q_profile_reset(nProfiles, nlevels))
+      self % q_profile_reset(:, :) = .false.
       do iprof = 1, nProfiles
         !----
         ! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
@@ -1270,7 +1279,7 @@ contains
         !----
         
         if(profiles(iprof)%skin%surftype /= surftype_sea .and. &
-            conf % UseColdSurfaceCheck) then
+           conf % UseColdSurfaceCheck) then
           if(profiles(iprof)%skin%t < 271.4_kind_real .and. &
             profiles(iprof)%s2m%p  > 950.0_kind_real) then
 
@@ -1291,53 +1300,63 @@ contains
         ! -----------------------------------------------
         ! Make sure q does not exceed saturation
         ! -----------------------------------------------
-        allocate(qsaturated(nlevels))
-        if (conf % UseRHwaterForQC) then
-          call Ops_QsatWat (qsaturated(:),    & ! out
-                            profiles(iprof) % t(:),  & ! in
-                            profiles(iprof) % p(:) / Pa_to_hPa, & ! in convert hPa to Pa
-                            nlevels)           ! in
-        else
-          call Ops_Qsat (qsaturated(:),    & ! out
-                         profiles(iprof) % t(:),  & ! in
-                         profiles(iprof) % p(:) / Pa_to_hPa, & ! in convert hPa to Pa
-                         nlevels)           ! in
+        if(conf % BoundQToSaturation) then
+          allocate(qsaturated(nlevels))
+          if (conf % UseRHwaterForQC) then
+            call Ops_QsatWat (qsaturated(:),    & ! out
+                              profiles(iprof) % t(:),  & ! in
+                              profiles(iprof) % p(:) / Pa_to_hPa, & ! in convert hPa to Pa
+                              nlevels)           ! in
+          else
+            call Ops_Qsat (qsaturated(:),    & ! out
+                           profiles(iprof) % t(:),  & ! in
+                           profiles(iprof) % p(:) / Pa_to_hPa, & ! in convert hPa to Pa
+                           nlevels)           ! in
+          end if
+
+          qsaturated = qsaturated * conf%scale_fac(gas_id_watervapour)
+
+          !qsaturated is assumed to be in kg/kg
+          where (profiles(iprof)%q > qsaturated)
+            profiles(iprof)%q = qsaturated
+          end where
+          deallocate(qsaturated)
+
+          ! -----------------------------------------------
+          ! Make sure q2m does not exceed saturation
+          ! -----------------------------------------------
+          allocate(qsaturated(1))
+          s2m_t(1) = profiles(iprof)%s2m%t
+          s2m_p(1) = profiles(iprof)%s2m%p / Pa_to_hPa
+          if (conf % UseRHwaterForQC) then
+            call Ops_QsatWat (qsaturated(1:1),  & ! out
+                              s2m_t(1:1), & ! in
+                              s2m_p(1:1), & ! in
+                              1)            ! in
+          else
+            call Ops_Qsat (qsaturated(1:1),  & ! out
+                           s2m_t(1:1), & ! in
+                           s2m_p(1:1), & ! in
+                           1)            ! in
+          end if
+
+          qsaturated(1) = qsaturated(1) * conf%scale_fac(gas_id_watervapour)
+
+          if (profiles(iprof)%s2m%q > qsaturated(1)) profiles(iprof)%s2m%q = qsaturated(1)
+          deallocate(qsaturated)
         end if
-
-        qsaturated = qsaturated * conf%scale_fac(gas_id_watervapour)
-
-        !qsaturated is assumed to be in kg/kg
-        where (profiles(iprof)%q > qsaturated)
-          profiles(iprof)%q = qsaturated
-        end where
-        deallocate(qsaturated)
-
-        ! -----------------------------------------------
-        ! Make sure q2m does not exceed saturation
-        ! -----------------------------------------------
-        allocate(qsaturated(1))
-        s2m_t(1) = profiles(iprof)%s2m%t
-        s2m_p(1) = profiles(iprof)%s2m%p / Pa_to_hPa
-        if (conf % UseRHwaterForQC) then
-          call Ops_QsatWat (qsaturated(1:1),  & ! out
-                            s2m_t(1:1), & ! in
-                            s2m_p(1:1), & ! in
-                            1)            ! in
-        else
-          call Ops_Qsat (qsaturated(1:1),  & ! out
-                         s2m_t(1:1), & ! in
-                         s2m_p(1:1), & ! in
-                         1)            ! in
+        
+        if(conf % UseMinimumQ) then
+          ! Constrain small values to min_q for q profile
+          do ilev = 1, nlevels
+            if (profiles(iprof) % q(ilev) < min_q * conf % scale_fac(gas_id_watervapour)) then
+              profiles(iprof) % q(ilev) = min_q * conf%scale_fac(gas_id_watervapour)
+              self % q_profile_reset(iprof, ilev) = .true.
+            end if
+          end do
+          ! Constrain small values to min_q for surface q
+          if(profiles(iprof)%s2m%q < min_q * conf%scale_fac(gas_id_watervapour)) profiles(iprof)%s2m%q = min_q * conf%scale_fac(gas_id_watervapour)
         end if
-
-        qsaturated(1) = qsaturated(1) * conf%scale_fac(gas_id_watervapour)
-
-        if (profiles(iprof)%s2m%q > qsaturated(1)) profiles(iprof)%s2m%q = qsaturated(1)
-        deallocate(qsaturated)
-
-        ! Constrain small values to min_q fix
-        where(profiles(iprof)%q < min_q * conf%scale_fac(gas_id_watervapour) ) profiles(iprof)%q = min_q * conf%scale_fac(gas_id_watervapour)
-        if(profiles(iprof)%s2m%q < min_q * conf%scale_fac(gas_id_watervapour)) profiles(iprof)%s2m%q = min_q * conf%scale_fac(gas_id_watervapour)
 
       enddo
     end if
@@ -1675,6 +1694,7 @@ contains
       end if
       if (allocated(self % ciw))                      deallocate(self % ciw)
       if (allocated(self % tc_ozone))                 deallocate(self % tc_ozone)
+      if (allocated(self % q_profile_reset))          deallocate(self % q_profile_reset)
     end if
 
   end subroutine ufo_rttov_alloc_direct
@@ -1828,6 +1848,7 @@ contains
       end if
       if (allocated(self % ciw))                      deallocate(self % ciw)
       if (allocated(self % tc_ozone))                 deallocate(self % tc_ozone)
+      if (allocated(self % q_profile_reset))          deallocate(self % q_profile_reset)
     end if
 
   end subroutine ufo_rttov_alloc_profiles

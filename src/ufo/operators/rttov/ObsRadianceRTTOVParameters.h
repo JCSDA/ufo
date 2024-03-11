@@ -66,15 +66,23 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// the OPS SatRad setup.
   oops::Parameter<bool> satRadCompatibility{"SatRad_compatibility", true, this};
 
-  /// Use liquid water in the q saturation calculations, only used when
-  /// SatRad_compatibility is true.
-  oops::Parameter<bool> useRHwaterForQC{"UseRHwaterForQC", true, this};
-
   /// Use a check on cold surfaces to update the surface temperature and skin temperature
   /// This is legacy code from the Met Office OPS and should generally not be used.
   /// It is included at the moment for backwards compatibility testing.  Only used when
   /// SatRad_compatibility is true.
   oops::Parameter<bool> useColdSurfaceCheck{"UseColdSurfaceCheck", false, this};
+
+  /// Check the humidity profile and surface humidity does not exceed saturation.
+  /// Only used when SatRad_compatibility is true.
+  oops::Parameter<bool> BoundQToSaturation{"BoundQToSaturation", true, this};
+
+  /// Use liquid water in the q saturation calculations, only used when
+  /// SatRad_compatibility is true and BoundQToSaturation is true.
+  oops::Parameter<bool> useRHwaterForQC{"UseRHwaterForQC", true, this};
+
+  /// Check the humidity profile and surface humidity is not less than min_q.
+  /// Only used when SatRad_compatibility is true.
+  oops::Parameter<bool> UseMinimumQ{"UseMinimumQ", true, this};
 
   /// Maximum number of profiles to be processed by RTTOV per pass.  If this is true then
   /// one profile is run at a time.  This will be slow but useful for debugging.  The normal number
