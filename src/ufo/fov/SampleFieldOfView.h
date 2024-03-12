@@ -74,7 +74,7 @@ class FieldOfViewSampler : private util::ObjectCounter<FieldOfViewSampler> {
  public:
   static const std::string classname() { return "ufo::fov::FieldOfViewSampler"; }
 
-  FieldOfViewSampler(const std::string& sensor, const std::string& satellite);
+  FieldOfViewSampler(const std::string& sensor, const std::string& platform);
   ~FieldOfViewSampler();
 
  private:
@@ -89,7 +89,7 @@ class FieldOfViewSampler : private util::ObjectCounter<FieldOfViewSampler> {
       std::vector<util::Range<size_t>> & sample_ranges,
       std::vector<double> & sample_weights,
       const std::string & sensor,
-      const std::string & satellite,
+      const std::string & platform,
       int sample_points_per_semi_axis,
       const std::vector<float> & lons,
       const std::vector<float> & lats,
@@ -107,7 +107,7 @@ class FieldOfViewSampler : private util::ObjectCounter<FieldOfViewSampler> {
  private:
   F90fov keyFov_;
   const std::string sensor_;
-  const std::string satellite_;
+  const std::string platform_;
   int gsi_npoly_;
 };
 
@@ -131,7 +131,7 @@ void getSampleLocationsAndWeights(
     std::vector<util::Range<size_t>> & sample_ranges,
     std::vector<double> & sample_weights,
     const std::string & sensor,
-    const std::string & satellite,
+    const std::string & platform,
     int sample_points_per_semi_axis,
     const std::vector<float> & lons,
     const std::vector<float> & lats,

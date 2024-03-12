@@ -83,8 +83,8 @@ namespace fov {
 
 // -----------------------------------------------------------------------------
 
-FieldOfViewSampler::FieldOfViewSampler(const std::string& sensor, const std::string& satellite)
-  : keyFov_(0), sensor_(sensor), satellite_(satellite), gsi_npoly_(0)
+FieldOfViewSampler::FieldOfViewSampler(const std::string& sensor, const std::string& platform)
+  : keyFov_(0), sensor_(sensor), platform_(platform), gsi_npoly_(0)
 {
   oops::Log::trace() << "ufo::fov::FieldOfViewSampler constructor starting" << std::endl;
 
@@ -92,9 +92,9 @@ FieldOfViewSampler::FieldOfViewSampler(const std::string& sensor, const std::str
 
   const int sensor_len = sensor_.size();
   const char* sensor_cstr = sensor_.c_str();
-  const int satellite_len = satellite_.size();
-  const char* satellite_cstr = satellite_.c_str();
-  ufo_fov_setup_f90(keyFov_, sensor_len, sensor_cstr, satellite_len, satellite_cstr,
+  const int platform_len = platform_.size();
+  const char* platform_cstr = platform_.c_str();
+  ufo_fov_setup_f90(keyFov_, sensor_len, sensor_cstr, platform_len, platform_cstr,
       gsi_valid_instr, gsi_npoly_);
 
   // Make sure initialization was successful
@@ -174,7 +174,7 @@ void getSampleLocationsAndWeights(
     std::vector<util::Range<size_t>> & sample_ranges,
     std::vector<double> & sample_weights,
     const std::string & sensor,
-    const std::string & satellite,
+    const std::string & platform,
     const int sample_points_per_semi_axis,
     const std::vector<float> & lons,
     const std::vector<float> & lats,
@@ -194,7 +194,7 @@ void getSampleLocationsAndWeights(
   // in the underlying GSI FOV code.
   std::lock_guard<std::mutex> guard(gsiFovGlobalsMutex);
 
-  const FieldOfViewSampler sampler(sensor, satellite);
+  const FieldOfViewSampler sampler(sensor, platform);
 
   size_t counter = 0;
   for (size_t i = 0; i < nlocs; ++i) {

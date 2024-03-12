@@ -32,29 +32,29 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_fov_setup_c(c_key_self, sensor_len, sensor_cstr, satellite_len, satellite_cstr, &
+subroutine ufo_fov_setup_c(c_key_self, sensor_len, sensor_cstr, platform_len, platform_cstr, &
                            valid, npoly) bind(c, name='ufo_fov_setup_f90')
   use string_f_c_mod, only: c_f_string
 
   integer(c_int), intent(inout) :: c_key_self
   integer(c_int), intent(in) :: sensor_len
   character(kind=c_char, len=1), intent(in) :: sensor_cstr(sensor_len + 1)
-  integer(c_int), intent(in) :: satellite_len
-  character(kind=c_char, len=1), intent(in) :: satellite_cstr(satellite_len + 1)
+  integer(c_int), intent(in) :: platform_len
+  character(kind=c_char, len=1), intent(in) :: platform_cstr(platform_len + 1)
   logical(c_bool), intent(out) :: valid
   integer(c_int), intent(out) :: npoly
 
   type(ufo_fov), pointer :: self
   character(len=sensor_len) :: sensor
-  character(len=satellite_len) :: satellite
+  character(len=platform_len) :: platform
   logical :: valid_local
 
   ! Copy C char* into Fortran char array
   call c_f_string(sensor_cstr, sensor)
-  call c_f_string(satellite_cstr, satellite)
+  call c_f_string(platform_cstr, platform)
 
   call ufo_fov_registry%setup(c_key_self, self)
-  call self%setup(sensor, satellite, valid_local, npoly)
+  call self%setup(sensor, platform, valid_local, npoly)
 
   valid = valid_local
 

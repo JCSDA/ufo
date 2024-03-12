@@ -15,6 +15,7 @@
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/GeoVaLs.h"
 #include "ufo/ObsOperatorParametersBase.h"
 
 namespace ufo
@@ -113,6 +114,13 @@ namespace ufo
     //// use qc flags
     oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
        "do not calculate hofx for values not passing qc (true or false)", false, this};
+
+    /// Whether to average surface fields over sensor field of view
+    oops::Parameter<bool> DoFovAverage{"do fov average", false, this};
+    /// Resolution of field-of-view sampling (default arbitrary for now)
+    oops::Parameter<int> FovSampleResol{"fov sample points per semimajor axis", 4, this};
+    /// Write reduced GeoVaLs after FOV averaging
+    oops::OptionalParameter<eckit::LocalConfiguration> gvOut{"reduced geovals output", this};
   };  // end class ObsRadianceCRTMParameters
 
 }  // namespace ufo

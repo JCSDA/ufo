@@ -39,10 +39,10 @@ contains
   !> To add support for new sensors, look for GSI's values in the read_{airs,atms,etc} files.
   !> GSI sets values for these parameter while reading in the data. The mapping from sensor name
   !> to the `instr` integer can also be found in comments in the files calc_fov_{crosstrk,conical}.
-  subroutine set_gsi_interface_quantities(self, sensor, satellite)
+  subroutine set_gsi_interface_quantities(self, sensor, platform)
     class(ufo_fov), intent(inout) :: self
     character(len=*), intent(in) :: sensor
-    character(len=*), intent(in) :: satellite
+    character(len=*), intent(in) :: platform  ! note GSI calls this "satellite"
 
     select case(trim(sensor))
       case('amsua')
@@ -50,12 +50,32 @@ contains
         self%ichan = 15
         self%is_crosstrack = .true.
         self%expansion = 2.9_kind_real
+      case('atms')
+        self%instr = 20
+        self%ichan = 16
+        self%is_crosstrack = .true.
+        self%expansion = 2.9_kind_real
+      case('cris')
+        self%instr = 17
+        self%ichan = -999
+        self%is_crosstrack = .true.
+        self%expansion = 1.0_kind_real
+      case('cris-fsr')  ! same as 'cris' above
+        self%instr = 17
+        self%ichan = -999
+        self%is_crosstrack = .true.
+        self%expansion = 1.0_kind_real
+      case('iasi')
+        self%instr = 18
+        self%ichan = -999
+        self%is_crosstrack = .true.
+        self%expansion = 1.0_kind_real
       case('ssmis')
-        if (trim(satellite) == 'f17') then
+        if (trim(platform) == 'f17') then
           self%instr = 27
         else
-          call abor1_ftn("Error in ufo_fov_mod: unknown satellite " &
-                         // trim(satellite) // " for sensor ssmis")
+          call abor1_ftn("Error in ufo_fov_mod: unknown satellite/platform " &
+                         // trim(platform) // " for sensor ssmis")
         end if
         self%ichan = 1
         self%is_crosstrack = .false.
@@ -67,24 +87,24 @@ contains
   end subroutine set_gsi_interface_quantities
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_fov_setup(self, sensor, satellite, valid, npoly_out)
+  subroutine ufo_fov_setup(self, sensor, platform, valid, npoly_out)
     use calc_fov_crosstrk, only: npoly, instrument_init_crosstrk => instrument_init
     use calc_fov_conical, only: instrument_init_conical => instrument_init
 
     class(ufo_fov), intent(inout) :: self
     character(len=*), intent(in) :: sensor
-    character(len=*), intent(in) :: satellite
+    character(len=*), intent(in) :: platform  ! note GSI calls this satellite
     logical, intent(out) :: valid
     integer, intent(out) :: npoly_out
 
     npoly_out = npoly
 
-    call set_gsi_interface_quantities(self, sensor, satellite)
+    call set_gsi_interface_quantities(self, sensor, platform)
 
     if (self%is_crosstrack) then
-      call instrument_init_crosstrk(self%instr, satellite, self%expansion, valid)
+      call instrument_init_crosstrk(self%instr, platform, self%expansion, valid)
     else
-      call instrument_init_conical(self%instr, satellite, self%expansion, valid)
+      call instrument_init_conical(self%instr, platform, self%expansion, valid)
     end if
 
   end subroutine ufo_fov_setup
