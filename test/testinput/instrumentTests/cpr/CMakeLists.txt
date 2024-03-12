@@ -6,7 +6,7 @@
 # Instrument tests for CPR
 
 
-if( crtm_FOUND )
+if( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
     # H(x) test
     ufo_add_test( NAME  instrument_cpr_cloudsat_gfs_HofX
         TIER    2
@@ -17,4 +17,4 @@ if( crtm_FOUND )
         LABELS  crtm cpr cloudsat HofX instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
-endif( crtm_FOUND )
+endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )

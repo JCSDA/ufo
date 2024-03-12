@@ -75,6 +75,9 @@ find_package( oops 1.9.0 REQUIRED )
 
 # crtm
 find_package( crtm 2.4.1 QUIET )
+if( NOT ${crtm_FOUND} )
+   find_package( crtm 2.4.0 QUIET )
+endif( NOT ${crtm_FOUND} )
 if( ${crtm_FOUND} )
     message(STATUS "CRTM FOUND; Including CRTM Observation Operator (${crtm_VERSION})")
 else( ${crtm_FOUND} )
@@ -130,22 +133,34 @@ endif( ${oasim_FOUND} )
 ################################################################################
 
 # Set values for downloading crtm test data from tarball
-set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
+
 if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-    set (crtm_data_tag "3.1.0_skylab_7.0")
-    set (crtm_data_tarball_hash "29a9b6a77096006cc76dbbb9c9569b75")
-    set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput" )
-else()
-    if( crtm_VERSION VERSION_EQUAL 2.4.1 )
-        set (crtm_data_tag "2.4.1_skylab_4.0" )
-        set (crtm_data_tarball_hash "5ef915c445f94c6ef11f53221521a79e")
-    else()
-        set (crtm_data_tag "2.4.0_skylab_3.0" )
-        set (crtm_data_tarball_hash "73a89f04c2ed52b9b904eac9dab52b60")
-    endif()
-    set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput/CRTMv2" )
+	#https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.0.2.tgz
+	set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM")
+  set (crtm_data_tag "fix_REL-3.1.0.2")  #this should work with all v3.0 and v3.1 
+	set (crtm_data_tag_postfix "fix/") #used in test/CMakeLists.txt and permits compatibility with older methods
+  set (crtm_data_tarball_hash "730883a9b1f80a5fb6bf93d9b244321f")
+  set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput" )
+	set (crtm_data_tarball_name ${crtm_data_tag}.tgz)  #tarball name structure changed with the 3.1.0 release
+elseif( crtm_VERSION VERSION_EQUAL 2.4.1 )
+  set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
+  set (crtm_data_tag "2.4.1_skylab_4.0" )
+	set (crtm_data_tag_postfix "") #needed for backward compatibility
+  set (crtm_data_tarball_hash "5ef915c445f94c6ef11f53221521a79e")
+  set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput/CRTMv2" )
+	set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
+elseif( crtm_VERSION VERSION_EQUAL 2.4.0 )
+  set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
+  set (crtm_data_tag "2.4.0_skylab_3.0" )
+	set (crtm_data_tag_postfix "") #needed for backward compatibility
+  set (crtm_data_tarball_hash "73a89f04c2ed52b9b904eac9dab52b60")
+  set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput/CRTMv2" )
+	set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
+else ()
+	#Something is wrong with the CRTM_Version
+	 message(FATAL_ERROR "Error: Requested CRTM Version (${crtm_VERSION}) is incompatible with UFO.  Contact the JCSDA OBS team.")
 endif()
-set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
+
 
 # DH 2023/10/06 - this is unfortunately still true ...
 ### The ufo_data package is problematic in bundles because it has some special CMake logic
