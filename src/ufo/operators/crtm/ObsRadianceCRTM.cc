@@ -85,8 +85,9 @@ class FovSelector : public oops::SamplingMethodSelector {
 double valueOutsideMask(const std::string & varname) {
   if (varname == "vegetation_type_index"
       || varname == "soil_type"
+      || varname == "land_type_index_IGBP"
       || varname == "land_type_index_NPOESS"
-      || varname == "land_type_index_IGBP") {
+      || varname == "land_type_index_USGS") {
     return 1.0;
   } else if (varname == "leaf_area_index") {
     return 3.5;
@@ -373,10 +374,12 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedAveraging(GeoVaLs & geovals) const 
   if (varin_.has("vegetation_type_index") && varin_.has("soil_type")) {
     surfaceTypeHelper("vegetation_type_index", land_avg, land_mask);
     surfaceTypeHelper("soil_type", land_avg, land_mask);
-  } else if (varin_.has("land_type_index_NPOESS")) {
-    surfaceTypeHelper("land_type_index_NPOESS", land_avg, land_mask);
   } else if (varin_.has("land_type_index_IGBP")) {
     surfaceTypeHelper("land_type_index_IGBP", land_avg, land_mask);
+  } else if (varin_.has("land_type_index_NPOESS")) {
+    surfaceTypeHelper("land_type_index_NPOESS", land_avg, land_mask);
+  } else if (varin_.has("land_type_index_USGS")) {
+    surfaceTypeHelper("land_type_index_USGS", land_avg, land_mask);
   } else {
     ABORT("Inconsistent or unsupported surface types");
   }
@@ -423,10 +426,12 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedCopy(GeoVaLs & geovals) const {
   if (varin_.has("vegetation_type_index") && varin_.has("soil_type")) {
     maskHelper("vegetation_type_index");
     maskHelper("soil_type");
-  } else if (varin_.has("land_type_index_NPOESS")) {
-    maskHelper("land_type_index_NPOESS");
   } else if (varin_.has("land_type_index_IGBP")) {
     maskHelper("land_type_index_IGBP");
+  } else if (varin_.has("land_type_index_NPOESS")) {
+    maskHelper("land_type_index_NPOESS");
+  } else if (varin_.has("land_type_index_USGS")) {
+    maskHelper("land_type_index_USGS");
   } else {
     ABORT("Inconsistent or unsupported surface types");
   }
