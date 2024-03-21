@@ -620,7 +620,8 @@ character(len=1) :: angle_hf
                                nlocs, &
                                n_Profiles, &
                                n_Channels, &
-                               hofx)
+                               hofx, &
+                               obss)
       call ufo_crtm_active_diag(rts, &
                                 rts_K, &
                                 atm, &

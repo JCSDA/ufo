@@ -668,6 +668,13 @@ type(crtm_conf) :: conf
 integer :: k1, jspec, jlevel
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
+logical :: IsActiveSensor
+
+  if (present(Is_Active_Sensor)) then
+     IsActiveSensor = Is_Active_Sensor
+  else
+     IsActiveSensor = .FALSE.
+  endif
 
   ! Populate the atmosphere structures for CRTM
   ! -------------------------------------------
@@ -760,8 +767,9 @@ character(max_string) :: err_msg
     end if
   end if
 
-  if (conf%n_Clouds > 0) then
-    if ( conf%Cloud_Seeding ) then
+
+  if ( (conf%n_Clouds > 0) .and. (.NOT. IsActiveSensor) ) then
+    if ( conf%Cloud_Seeding ) then 
       do k1 = 1, n_Profiles
         do jlevel = 1, atm(k1)%n_layers
            ! Check Cloud Content
@@ -802,10 +810,8 @@ character(max_string) :: err_msg
     end if
   end if
 
-  if (present(Is_Active_Sensor)) then
-       if (Is_Active_Sensor) then
-          Atm%Add_Extra_Layers = .FALSE.
-       end if
+  if (IsActiveSensor) then
+       Atm%Add_Extra_Layers = .FALSE.
   end if
 
 end subroutine Load_Atm_Data

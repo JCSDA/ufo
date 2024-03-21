@@ -33,7 +33,7 @@ module ufo_crtm_active_mod
 contains
 
 
-subroutine ufo_crtm_active_sim(rts, Options, nvars, nlocs, n_Profiles, n_Channels, hofx)
+subroutine ufo_crtm_active_sim(rts, Options, nvars, nlocs, n_Profiles, n_Channels, hofx, obss)
 implicit none
 integer(c_size_t),        intent(in) :: nvars
 integer(c_size_t),        intent(in) :: nlocs
@@ -41,13 +41,18 @@ integer, intent(in) :: n_Profiles, n_Channels
 real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
 type(CRTM_RTSolution_type), intent(in) :: rts(:,:)  ! n_channels, n_profiles
 type(CRTM_Options_type),  intent(in) :: Options(:)
+type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 
 real(c_double) :: missing
-integer        :: l, m
+integer        :: l, m, ilayer
+integer, allocatable   :: obs_layer(:)
 
+! allocate observation elevation for reflectivity profiles
+allocate( obs_layer( n_Profiles ))
 
-! Put simulated brightness temperature into hofx
+! Put simulated reflectivity into hofx
 ! ----------------------------------------------
+
 
 ! Set missing value
 missing = missing_value(missing)
@@ -55,11 +60,14 @@ missing = missing_value(missing)
 !Set to missing, then retrieve non-missing profiles
 hofx = missing
 
+! Get the level number for reflectivity profiles
+call obsspace_get_db(obss, "MetaData", "Layer", obs_layer)
+
 do m = 1, n_Profiles
+   ilayer = obs_layer(m)
    if (.not.Options(m)%Skip_Profile) then
       do l = 1, n_Channels
-        ! Needs to be fixed
-        hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(60)
+        hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(ilayer)
       end do
    end if
 end do
