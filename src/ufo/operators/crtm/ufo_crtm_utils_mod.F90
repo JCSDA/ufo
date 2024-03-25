@@ -801,7 +801,7 @@ logical :: IsActiveSensor
            end do
            ! Check Cloud Fraction
            do jspec = 1, conf%n_Clouds
-             if (atm(k1)%Cloud(jspec)%Water_Content(jlevel) > WATER_CONTENT_THRESHOLD*1.001_kind_real .and. atm(k1)%Cloud_Fraction(jlevel) < 0.001_kind_real) then
+             if (atm(k1)%Cloud(jspec)%Water_Content(jlevel) >= WATER_CONTENT_THRESHOLD*1.001_kind_real .and. atm(k1)%Cloud_Fraction(jlevel) < 0.001_kind_real) then
                atm(k1)%Cloud_Fraction(jlevel) = 0.001_kind_real
              end if
            end do
