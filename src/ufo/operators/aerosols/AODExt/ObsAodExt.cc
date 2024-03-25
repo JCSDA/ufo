@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/operators/aerosols/AOP/ObsAodExt.h"
+#include "ufo/operators/aerosols/AODExt/ObsAodExt.h"
 
 #include <ostream>
 

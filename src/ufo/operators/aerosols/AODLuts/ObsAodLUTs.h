@@ -5,17 +5,28 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OPERATORS_CRTM_OBSAODLUTS_H_
-#define UFO_OPERATORS_CRTM_OBSAODLUTS_H_
+#ifndef UFO_OPERATORS_AEROSOLS_AODLUTS_OBSAODLUTS_H_
+#define UFO_OPERATORS_AEROSOLS_AODLUTS_OBSAODLUTS_H_
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
 #include "ufo/ObsOperatorBase.h"
+
+#include "oops/base/ParameterTraitsVariables.h"
+#include "oops/util/parameters/NumericConstraints.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/filters/Variable.h"
+#include "ufo/ObsOperatorParametersBase.h"
+
+#include "ufo/operators/aerosols/AODLuts/ObsAodLUTs.interface.h"
+
 
 namespace ioda {
   class ObsSpace;
@@ -26,8 +37,8 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
-class AodLUTsOptionsParameters: public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(AodLUTsOptionsParameters, Parameters)
+class AodLUTsOptionsParameters: public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(AodLUTsOptionsParameters, ObsOperatorParametersBase)
  public:
   oops::RequiredParameter<std::string> option{"AerosolOption", this};
   oops::RequiredParameter<std::string> file{"RCFile", this};
@@ -79,4 +90,4 @@ class ObsAodLUTs : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_CRTM_OBSAODLUTS_H_
+#endif  // UFO_OPERATORS_AEROSOLS_AODLUTS_OBSAODLUTS_H_

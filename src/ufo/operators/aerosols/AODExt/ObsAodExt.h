@@ -5,22 +5,21 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_AEROSOLS_AOP_OBSAODEXTTLAD_H_
-#define UFO_OPERATORS_AEROSOLS_AOP_OBSAODEXTTLAD_H_
+#ifndef UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXT_H_
+#define UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXT_H_
 
 #include <ostream>
 #include <string>
 
 #include "ioda/ObsDataVector.h"
-
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/aerosols/AOP/ObsAodExtParameters.h"
-#include "ufo/operators/aerosols/AOP/ObsAodExtTLAD.interface.h"
+#include "ufo/ObsOperatorBase.h"
+#include "ufo/operators/aerosols/AODExt/ObsAodExt.interface.h"
+#include "ufo/operators/aerosols/AODExt/ObsAodExtParameters.h"
 
-// Forward declarations
+/// Forward declarations
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -28,25 +27,26 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
-/// AodExt TL/AD observation operator class
-class ObsAodExtTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsAodExtTLAD> {
+/// AodExt observation operator class
+class ObsAodExt : public ObsOperatorBase,
+                   private util::ObjectCounter<ObsAodExt> {
  public:
-  static const std::string classname() {return "ufo::ObsAodExtTLAD";}
   typedef ioda::ObsDataVector<int> QCFlags_t;
+  static const std::string classname() {return "ufo::ObsAodExt";}
+
   typedef ObsAodExtParameters Parameters_;
 
-  ObsAodExtTLAD(const ioda::ObsSpace &, const Parameters_ &);
-  virtual ~ObsAodExtTLAD();
+  ObsAodExt(const ioda::ObsSpace &, const Parameters_ &);
+  virtual ~ObsAodExt();
 
-  // Obs Operators
-  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+// Obs Operator
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
+                   const QCFlags_t &) const override;
 
-  // Other
+// Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
   int & toFortran() {return keyOper_;}
@@ -55,10 +55,11 @@ class ObsAodExtTLAD : public LinearObsOperatorBase,
  private:
   void print(std::ostream &) const override;
   F90hop keyOper_;
+  const ioda::ObsSpace& odb_;
   oops::Variables varin_;
 };
 
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_AEROSOLS_AOP_OBSAODEXTTLAD_H_
+#endif  // UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXT_H_

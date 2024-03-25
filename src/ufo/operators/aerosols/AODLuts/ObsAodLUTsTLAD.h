@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_CRTM_OBSAODLUTSTLAD_H_
-#define UFO_OPERATORS_CRTM_OBSAODLUTSTLAD_H_
+#ifndef UFO_OPERATORS_AEROSOLS_AODLUTS_OBSAODLUTSTLAD_H_
+#define UFO_OPERATORS_AEROSOLS_AODLUTS_OBSAODLUTSTLAD_H_
 
 #include <memory>
 #include <ostream>
@@ -18,7 +18,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/Fortran.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/crtm/ObsAodLUTs.h"
+#include "ufo/ObsOperatorParametersBase.h"
+#include "ufo/operators/aerosols/AODLuts/ObsAodLUTs.h"
 
 // Forward declarations
 namespace ioda {
@@ -62,4 +63,4 @@ class ObsAodLUTsTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_CRTM_OBSAODLUTSTLAD_H_
+#endif  // UFO_OPERATORS_AEROSOLS_AODLUTS_OBSAODLUTSTLAD_H_

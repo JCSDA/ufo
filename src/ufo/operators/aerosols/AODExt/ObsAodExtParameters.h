@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_AEROSOLS_AOP_OBSAODEXTPARAMETERS_H_
-#define UFO_OPERATORS_AEROSOLS_AOP_OBSAODEXTPARAMETERS_H_
+#ifndef UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXTPARAMETERS_H_
+#define UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXTPARAMETERS_H_
 
 #include <string>
 #include <vector>
@@ -38,4 +38,4 @@ class ObsAodExtParameters : public ObsOperatorParametersBase {
 };
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_AEROSOLS_AOP_OBSAODEXTPARAMETERS_H_
+#endif  // UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXTPARAMETERS_H_

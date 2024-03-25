@@ -88,9 +88,6 @@ phases:
       # ropp
       - ./clone.sh jcsda-internal/ropp-test $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle ropp-ufo ${GIT_BASE_BRANCH} develop
 
-      # geos-aero
-      - ./clone.sh jcsda-internal/geos-aero $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle geos-aero ${GIT_BASE_BRANCH} develop
-
       # gsw
       - ./clone.sh jcsda-internal/GSW-Fortran $CODEBUILD_GIT_BRANCH /jcsda/ufo-bundle gsw ${GIT_BASE_BRANCH} develop
 

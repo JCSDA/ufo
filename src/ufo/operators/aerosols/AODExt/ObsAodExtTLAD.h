@@ -1,12 +1,12 @@
 /*
- * (C) Copyright 2019 UCAR
+ * (C) Copyright 2021 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_AEROSOLS_MR_OBSAODGEOSTLAD_H_
-#define UFO_OPERATORS_AEROSOLS_MR_OBSAODGEOSTLAD_H_
+#ifndef UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXTTLAD_H_
+#define UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXTTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -17,8 +17,8 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/aerosols/MR/ObsAodGeos.h"
-#include "ufo/operators/aerosols/MR/ObsAodGeosTLAD.interface.h"
+#include "ufo/operators/aerosols/AODExt/ObsAodExtParameters.h"
+#include "ufo/operators/aerosols/AODExt/ObsAodExtTLAD.interface.h"
 
 // Forward declarations
 namespace ioda {
@@ -30,16 +30,16 @@ namespace ufo {
   class GeoVaLs;
 
 // -----------------------------------------------------------------------------
-/// AodGeos TL/AD observation operator class
-class ObsAodGeosTLAD : public LinearObsOperatorBase,
-                       private util::ObjectCounter<ObsAodGeosTLAD> {
+/// AodExt TL/AD observation operator class
+class ObsAodExtTLAD : public LinearObsOperatorBase,
+                       private util::ObjectCounter<ObsAodExtTLAD> {
  public:
-  typedef ObsAodGeosParameters Parameters_;
+  static const std::string classname() {return "ufo::ObsAodExtTLAD";}
   typedef ioda::ObsDataVector<int> QCFlags_t;
-  static const std::string classname() {return "ufo::ObsAodGeosTLAD";}
+  typedef ObsAodExtParameters Parameters_;
 
-  ObsAodGeosTLAD(const ioda::ObsSpace &, const Parameters_ &);
-  virtual ~ObsAodGeosTLAD();
+  ObsAodExtTLAD(const ioda::ObsSpace &, const Parameters_ &);
+  virtual ~ObsAodExtTLAD();
 
   // Obs Operators
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
@@ -61,4 +61,4 @@ class ObsAodGeosTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_AEROSOLS_MR_OBSAODGEOSTLAD_H_
+#endif  // UFO_OPERATORS_AEROSOLS_AODEXT_OBSAODEXTTLAD_H_

@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/operators/crtm/ObsAodLUTsTLAD.h"
+#include "ufo/operators/aerosols/AODLuts/ObsAodLUTsTLAD.h"
 
 #include <ostream>
 #include <vector>
@@ -15,7 +15,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
-#include "ufo/operators/crtm/ObsAodLUTsTLAD.interface.h"
+#include "ufo/operators/aerosols/AODLuts/ObsAodLUTsTLAD.interface.h"
 
 namespace ufo {
 

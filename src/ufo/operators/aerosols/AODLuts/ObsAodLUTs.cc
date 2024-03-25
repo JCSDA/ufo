@@ -5,14 +5,16 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/operators/crtm/ObsAodLUTs.h"
-
+#include <ostream>
 #include <vector>
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/Variables.h"
+
 #include "ufo/GeoVaLs.h"
-#include "ufo/operators/crtm/ObsAodLUTs.interface.h"
+#include "ufo/ObsDiagnostics.h"
+#include "ufo/operators/aerosols/AODLuts/ObsAodLUTs.h"
 
 namespace ufo {
 

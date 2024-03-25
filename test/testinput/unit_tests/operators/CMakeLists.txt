@@ -1294,32 +1294,6 @@ if( ${gsw_FOUND} )
 
 endif( ${gsw_FOUND} )
 
-# Tests that require geos aerosol
-
-if( ${geos-aero_FOUND} )
-#
-    ufo_add_test( NAME    test_ufo_opr_geos_aod
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/geos_aod.yaml"
-              MPI     4
-              LIBS    ufo
-              LABELS  geos-aero operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-#
-    ufo_add_test( NAME    test_ufo_linopr_geos_aod
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/geos_aod.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  geos-aero operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-
-endif( ${geos-aero_FOUND} )
-
 # Tests that require CRTM
 
 if( crtm_FOUND )
@@ -1757,30 +1731,6 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
-    if( ${geos-aero_FOUND} )
-
-      ufo_add_test( NAME    test_ufo_opr_aod_luts
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_luts.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  crtm geos-aero operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-#
-      ufo_add_test( NAME    test_ufo_linopr_aod_luts
-              TIER    1
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_luts.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  crtm geos-aero operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-
-    endif( ${geos-aero_FOUND} )
-
 endif( crtm_FOUND )
 
 # Tests that require RTTOV
@@ -1923,5 +1873,4 @@ if( ${oasim_FOUND} )
 endif( ${oasim_FOUND} )
 
 # Missing tests at this time
-#  aod_luts_aeronet.yaml
 #  atms_rttov_ops_gasunits.yaml
