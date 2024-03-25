@@ -190,11 +190,11 @@ do jvar = 1, hofxdiags%nvar
       ! var_rad_refl jacobians
       select case (xstr_diags(jvar))
          ! variable: reflectivity_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
-         case (var_clw)
+         case (var_clw_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clw)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clw_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
@@ -205,11 +205,11 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
          ! variable: reflectivity_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
-         case (var_cli)
+         case (var_cli_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cli)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cli_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
@@ -220,11 +220,11 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
          ! variable: reflectivity_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
-         case (var_clr)
+         case (var_clr_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clr)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clr_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
@@ -235,11 +235,11 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
          ! variable: reflectivity_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
-         case (var_cls)
+         case (var_cls_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cls)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cls_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
@@ -250,11 +250,11 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
          ! variable: reflectivity_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
-         case (var_clg)
+         case (var_clg_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clg)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clg_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
@@ -265,11 +265,11 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
          ! variable: reflectivity_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
-         case (var_clh)
+         case (var_clh_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clh)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clh_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then

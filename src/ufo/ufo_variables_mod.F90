@@ -35,6 +35,7 @@ character(len=MAXVARLEN), public, parameter :: var_zimo   = "geopotential_height
 character(len=MAXVARLEN), public, parameter :: var_sfc_z  = "surface_geopotential_height"
 character(len=MAXVARLEN), public, parameter :: var_oz     = "mole_fraction_of_ozone_in_air"
 character(len=MAXVARLEN), public, parameter :: var_co2    = "mole_fraction_of_carbon_dioxide_in_air"
+
 ! Directly predicted microphysics species mixing ratios (kg/kg) and number concentrations (#/kg)
 character(len=MAXVARLEN), public, parameter :: var_qc     = "cloud_liquid_water"  ! liq_wat
 character(len=MAXVARLEN), public, parameter :: var_qi     = "cloud_liquid_ice"    ! ice_wat
@@ -50,13 +51,23 @@ character(len=MAXVARLEN), public, parameter :: var_ng     = "graupel_number_conc
 character(len=MAXVARLEN), public, parameter :: var_nh     = "hail_number_concentration"           ! hail_nc
 character(len=MAXVARLEN), public, parameter :: var_qvg    = "volume_mixing_ratio_of_graupel_in_air"
 character(len=MAXVARLEN), public, parameter :: var_qvh    = "volume_mixing_ratio_of_hail_in_air"
-! Derived liquid and ice water paths (k/m2) computed from mixing ratios times delta-Z divided by air density.
+
+! Derived liquid and ice water paths (kg/m2) computed from mixing ratio times delta-Z times air density.
+! The use of "mass_content" names is consistent with the current CCPP standard, but Met Office
+! use of these names before passing to RTTOV is actually mixing ratio of each species wrt moist air (kg/kg).
+! This should be corrected in the future.
+character(len=MAXVARLEN), public, parameter :: var_clw_wp    = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cli_wp    = "mass_content_of_cloud_ice_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clr_wp    = "mass_content_of_rain_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_cls_wp    = "mass_content_of_snow_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clg_wp    = "mass_content_of_graupel_in_atmosphere_layer"
+character(len=MAXVARLEN), public, parameter :: var_clh_wp    = "mass_content_of_hail_in_atmosphere_layer"
+
+! Microphysics species mixing ratios wrt moist air (kg/kg), for use in RTTOV.
+! See comment above: Met Office use of "mass_content" names for this variables is inconsistent with the CCPP standard
 character(len=MAXVARLEN), public, parameter :: var_clw    = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_cli    = "mass_content_of_cloud_ice_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_clr    = "mass_content_of_rain_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_cls    = "mass_content_of_snow_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_clg    = "mass_content_of_graupel_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_clh    = "mass_content_of_hail_in_atmosphere_layer"
+
 character(len=MAXVARLEN), public, parameter :: var_clwefr = "effective_radius_of_cloud_liquid_water_particle"
 character(len=MAXVARLEN), public, parameter :: var_cliefr = "effective_radius_of_cloud_ice_particle"
 character(len=MAXVARLEN), public, parameter :: var_clrefr = "effective_radius_of_rain_particle"

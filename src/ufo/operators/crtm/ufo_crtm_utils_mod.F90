@@ -141,11 +141,11 @@ END INTERFACE qsmith
  character(len=MAXVARLEN), parameter :: &
       UFO_CLOUDS(MAX_VALID_CLOUD_CATEGORIES, 2) = &
        reshape( &
-         [ var_clw,    var_cli,    var_clr,    var_cls,    var_clg, &      ! 1- 5
-           var_clh,    var_cls,    var_cls,    var_cls,    var_cls, &      ! 5-10
-           var_cls,    var_cli,    var_cls,    var_cls,    var_cls, &      ! 11-15
-           var_cls,    var_cls,    var_cls,    var_cls,    var_clh, &      ! 16-20
-           var_clg,    var_cls,    var_clh,    var_cli,    var_clw, &      ! 21-25
+         [ var_clw_wp,  var_cli_wp,  var_clr_wp,  var_cls_wp,  var_clg_wp, &    ! 1- 5
+           var_clh_wp,  var_cls_wp,  var_cls_wp,  var_cls_wp,  var_cls_wp, &    ! 5-10
+           var_cls_wp,  var_cli_wp,  var_cls_wp,  var_cls_wp,  var_cls_wp, &    ! 11-15
+           var_cls_wp,  var_cls_wp,  var_cls_wp,  var_cls_wp,  var_clh_wp, &    ! 16-20
+           var_clg_wp,  var_cls_wp,  var_clh_wp,  var_cli_wp,  var_clw_wp, &    ! 21-25
            var_clwefr, var_cliefr, var_clrefr, var_clsefr, var_clgefr, &   ! 1- 5
            var_clhefr, var_clsefr, var_clsefr, var_clsefr, var_clsefr, &   ! 5-10
            var_clsefr, var_cliefr, var_clsefr, var_clsefr, var_clsefr, &   ! 11-15
