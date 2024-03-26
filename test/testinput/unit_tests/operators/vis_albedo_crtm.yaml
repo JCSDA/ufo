@@ -1,0 +1,39 @@
+time window:
+  begin: 2022-02-15T15:00:00Z
+  end: 2022-02-15T21:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3]
+    Clouds: [Water, Ice, Snow]
+    Cloud_Fraction: 1.0
+    Cloud_Seeding: true
+    obs options:
+      Sensor_ID: v.abi_g16 
+      EndianType: little_endian
+      CoefficientPath: Data/
+      #InspectProfileNumber: 1
+  obs space:
+    name: abi_g16_albedo
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/obs.abi_g16_rf_64km.20220215T180000Z_small.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/hofx.abi_g16_rf_64km.20220215T180000Z_small.nc4
+    simulated variables: [albedo]
+    channels: &abi_g16_channels 1, 2, 3, 4    # disable channels 5 and 6 until surface emissivity fix in CRTM
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/geovals.abi_g16_rf_64km.20220215T180000Z_small.nc4
+
+  vector ref: test_hofx
+  tolerance: 1.e-6
+
+  # Linear obs operator not yet ready for testing.
+  #linear obs operator test:
+  #  coef TL: 1.e-3
+  #  tolerance TL: 1.0e-3
+  #  tolerance AD: 1.0e-11

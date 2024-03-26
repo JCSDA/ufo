@@ -582,7 +582,8 @@ end subroutine crtm_comm_stat_check
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,atm,sfc, Is_Active_Sensor, Options)
+subroutine ufo_crtm_skip_profiles(n_Profiles,n_Channels,channels,obss,atm,sfc,  &
+                                  Is_Active_Sensor, Is_Vis_or_UV, Options)
 ! Profiles are skipped when the ObsValue of all channels is missing, if the
 ! pressure doesn't increase with levels, and if SST is missing for profiles with
 ! non-zero sea coverage.
@@ -599,6 +600,7 @@ integer(c_int),       intent(in)    :: channels(:)
 type(CRTM_Atmosphere_type), intent(in) :: atm(:)
 type(CRTM_Surface_type),    intent(in) :: sfc(:)
 logical, intent(in):: Is_Active_Sensor
+logical, intent(in):: Is_Vis_or_UV
 type(CRTM_Options_type),    intent(inout) :: Options(:)
 
 integer :: jprofile, jchannel, jlevel
@@ -619,7 +621,7 @@ real(kind_real) :: missing_r
 ! EffQC = 0
 
  do jchannel = 1, n_Channels
-   call get_var_name(channels(jchannel),varname, Is_Active_Sensor)
+   call get_var_name(channels(jchannel),varname, Is_Active_Sensor, Is_Vis_or_UV)
    call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
 !   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,jchannel))
 !   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,jchannel))
@@ -818,7 +820,8 @@ end subroutine Load_Atm_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine Load_Sfc_Data(n_Profiles, n_Channels, channels, geovals, sfc, chinfo, obss, conf, Is_Active_Sensor)
+subroutine Load_Sfc_Data(n_Profiles, n_Channels, channels, geovals, sfc, chinfo, obss, conf,  &
+                         Is_Active_Sensor, Is_Vis_or_UV)
 
 implicit none
 
@@ -830,6 +833,7 @@ type(c_ptr), value,          intent(in)    :: obss
 integer(c_int),              intent(in)    :: channels(:)
 type(crtm_conf),             intent(in)    :: conf
 logical, intent(in) :: Is_Active_Sensor
+logical, intent(in) :: Is_Vis_or_UV
 
 type(ufo_geoval), pointer :: geoval, u, v
 integer :: k1, n1
@@ -846,7 +850,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
 
   if (.not. Is_Active_Sensor) then
     do n1 = 1, n_Channels
-      call get_var_name(channels(n1), varname, Is_Active_Sensor)
+      call get_var_name(channels(n1),varname, Is_Active_Sensor, Is_Vis_or_UV)
       call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:, n1))
     enddo
   end if
@@ -1140,23 +1144,25 @@ end subroutine Load_Geom_Data
 
 ! ------------------------------------------------------------------------------
 
-subroutine get_var_name(n,varname, Is_Active_Sensor)
+subroutine get_var_name(n,varname, Is_Active_Sensor, Is_Vis_or_UV)
 
 integer, intent(in) :: n
 character(len=*), intent(out) :: varname
 logical, intent(in) :: Is_Active_Sensor
+logical, intent(in) :: Is_Vis_or_UV
 
 character(len=6) :: chan
-
-
-
 
  write(chan, '(I0)') n
  if (Is_Active_Sensor) then
      varname = 'ReflectivityAttenuated_' // trim(chan)
  else
-     varname = 'brightnessTemperature_' // trim(chan)
- endif
+     if (Is_Vis_or_UV) then
+        varname = 'albedo_' // trim(chan)
+     else
+        varname = 'brightnessTemperature_' // trim(chan)
+     endif
+ endif 
 
 end subroutine get_var_name
 

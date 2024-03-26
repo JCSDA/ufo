@@ -153,7 +153,11 @@ use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
 use ieee_arithmetic,    only: ieee_is_nan
 use ufo_utils_mod,      only: cmp_strings
-use CRTM_SpcCoeff, only:  SC
+use CRTM_SpcCoeff, only: SC, &
+                         SpcCoeff_IsMicrowaveSensor , &
+                         SpcCoeff_IsInfraredSensor  , &
+                         SpcCoeff_IsVisibleSensor   , &
+                         SpcCoeff_IsUltravioletSensor
 
 implicit none
 
@@ -201,6 +205,9 @@ character(len=MAXVARLEN) :: varstr
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer(c_size_t) :: nvars, nlocs
 logical :: qc_ff
+
+! set a local boolean variable for whether we are in vis or ultraviolet channels
+logical :: Is_Vis_or_UV = .false.
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -321,10 +328,17 @@ logical :: qc_ff
       STOP
    END IF
 
+   ! Some special treatment for Vis or UV as compared to IR or MW.
+   ! ----------------------------------------
+   if (SpcCoeff_IsVisibleSensor(SC(n)) .or. SpcCoeff_IsUltravioletSensor(SC(n))) then
+      Is_Vis_or_UV = .true.
+   endif
+
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf_traj, SC(n)%Is_Active_Sensor)
-   call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj,SC(n)%Is_Active_Sensor)
+   call Load_Sfc_Data(self%N_PROFILES,self%n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf_traj, &
+                      SC(n)%Is_Active_Sensor, Is_Vis_or_UV)
    if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
       allocate( geo_hf( self%n_Profiles ))
       call Load_Geom_Data(obss,geo,geo_hf,self%conf%SENSOR_ID(n))
@@ -337,7 +351,7 @@ logical :: qc_ff
    call CRTM_Atmosphere_Zero( self%atm_K )
    call CRTM_Surface_Zero( self%sfc_K )
 
-   ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+   ! Inintialize the K-matrix INPUT so that the results are dTb/dx or dR/dx
    ! -------------------------------------------------------------
    if (SC(n)%Is_Active_Sensor) then
        do jchannel = 1, self%n_Channels
@@ -351,13 +365,17 @@ logical :: qc_ff
 
        rts_K%Radiance                = ZERO
        rts_K%Brightness_Temperature  = ZERO
+   else if (Is_Vis_or_UV) then
+       rts_K%Radiance                = ONE
+       rts_K%Brightness_Temperature  = ZERO
    else
        rts_K%Radiance                = ZERO
        rts_K%Brightness_Temperature  = ONE
    end if
 
 
-   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,atm,sfc,SC(n)%Is_Active_Sensor, self%Options)
+   call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,atm,sfc, &
+                               SC(n)%Is_Active_Sensor, Is_Vis_or_UV, self%Options)
 
    ! Call the K-matrix model
    ! -----------------------
@@ -632,7 +650,7 @@ type(ufo_geoval), pointer :: geoval_d
    do jprofile = 1, self%n_Profiles
      if (.not.self%Options(jprofile)%Skip_Profile) then
        do jchannel = 1, size(self%channels) 
-	 if ( qc_flags%get(int(jchannel,int64),int(jprofile,int64)) > 1 ) then
+         if ( qc_flags%get(int(jchannel,int64),int(jprofile,int64)) > 1 ) then
            cycle 
          end if
          do jlevel = 1, geoval_d%nval

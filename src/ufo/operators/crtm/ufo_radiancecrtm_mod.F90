@@ -221,7 +221,11 @@ end subroutine ufo_radiancecrtm_delete
 subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags, qcf_p)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use ufo_utils_mod,      only: cmp_strings
-use CRTM_SpcCoeff, only: SC
+use CRTM_SpcCoeff, only: SC, &
+                         SpcCoeff_IsMicrowaveSensor , &
+                         SpcCoeff_IsInfraredSensor  , &
+                         SpcCoeff_IsVisibleSensor   , &
+                         SpcCoeff_IsUltravioletSensor
 
 implicit none
 
@@ -283,6 +287,9 @@ integer :: str_pos(4), ch_diags(hofxdiags%nvar)
 logical :: jacobian_needed, skip_prof
 ! For gmi_gpm geophysical angles at channels 10-13.
 character(len=1) :: angle_hf
+
+! set a local boolean variable for whether we are in vis or ultraviolet channels
+logical        :: Is_Vis_or_UV = .false.
 
  call obsspace_get_comm(obss, f_comm)
 
@@ -382,11 +389,18 @@ character(len=1) :: angle_hf
 
    CALL CRTM_RTSolution_Create(rts, n_Layers )
 
+   ! Some special treatment for Vis or UV as compared to IR or MW.
+   ! ----------------------------------------
+   if (SpcCoeff_IsVisibleSensor(SC(n)) .or. SpcCoeff_IsUltravioletSensor(SC(n))) then
+      Is_Vis_or_UV = .true.
+   endif
+
    !Assign the data from the GeoVaLs
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf, SC(n)%Is_Active_Sensor)
 
-   call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf, SC(n)%Is_Active_Sensor)
+   call Load_Sfc_Data(n_Profiles,n_Channels,self%channels,geovals,sfc,chinfo,obss,self%conf, &
+                      SC(n)%Is_Active_Sensor, Is_Vis_or_UV)
    if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
      allocate( geo_hf( n_Profiles ))
      call Load_Geom_Data(obss,geo,geo_hf,self%conf%SENSOR_ID(n))
@@ -439,8 +453,9 @@ character(len=1) :: angle_hf
       end if
    end do
 
-   ! set profiles that should be skipeed
-   call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,atm,sfc,SC(n)%Is_Active_Sensor,Options)
+   ! set profiles that should be skipped
+   call ufo_crtm_skip_profiles(n_Profiles,n_Channels,self%channels,obss,atm,sfc,  &
+                               SC(n)%Is_Active_Sensor,Is_Vis_or_UV,Options)
    if ( self%use_qc_flags ) then
    ! eliminate remaining profiles that are "QCed" out
      n_skipped = 0
@@ -498,7 +513,7 @@ character(len=1) :: angle_hf
       call CRTM_Atmosphere_Zero( atm_K )
       call CRTM_Surface_Zero( sfc_K )
 
-      ! Inintialize the K-matrix INPUT so that the results are dTb/dx
+      ! Inintialize the K-matrix INPUT so that the results are dTb/dx or dR/dx
       ! -------------------------------------------------------------
       if (SC(n)%Is_Active_Sensor) then
          do jchannel = 1, n_Channels
@@ -510,6 +525,9 @@ character(len=1) :: angle_hf
             end do
          end do
          rts_K%Radiance                = ZERO
+         rts_K%Brightness_Temperature  = ZERO
+      else if (Is_Vis_or_UV) then
+         rts_K%Radiance                = ONE
          rts_K%Brightness_Temperature  = ZERO
       else
          rts_K%Radiance                = ZERO

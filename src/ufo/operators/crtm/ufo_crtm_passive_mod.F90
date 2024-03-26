@@ -33,6 +33,14 @@ contains
 
 
 subroutine ufo_crtm_passive_sim(rts, Options, nvars, nlocs, n_Profiles, n_Channels, hofx)
+
+
+ USE crtm_SpcCoeff, ONLY: SC, &
+                          SpcCoeff_IsMicrowaveSensor , & 
+                          SpcCoeff_IsInfraredSensor  , &
+                          SpcCoeff_IsVisibleSensor   , &
+                          SpcCoeff_IsUltravioletSensor
+
 implicit none
 integer(c_size_t), intent(in) :: nvars
 integer(c_size_t),        intent(in) :: nlocs
@@ -41,11 +49,14 @@ real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
 type(CRTM_RTSolution_type), intent(in) :: rts(:,:)  ! n_channels, n_profiles
 type(CRTM_Options_type),  intent(in) :: Options(:)
 
+real(kind=kind_real), parameter :: PI = ACOS(-1.)
+real(kind=kind_real), parameter :: cos85 = COS(85.)
 real(c_double) :: missing
 integer        :: l, m
+logical        :: is_vis_or_uv = .false.
 
 
-! Put simulated brightness temperature into hofx
+! Put simulated brightness temperature (or reflectance/albedo) into hofx
 ! ----------------------------------------------
 
 ! Set missing value
@@ -54,14 +65,30 @@ missing = missing_value(missing)
 !Set to missing, then retrieve non-missing profiles
 hofx = missing
 
-do m = 1, n_Profiles
-   if (.not.Options(m)%Skip_Profile) then
-      do l = 1, n_Channels
-        hofx(l,m) = rts(l,m)%Brightness_Temperature
-      end do
-   end if
-end do
+IF ( ANY(SpcCoeff_IsVisibleSensor(SC)) .or. ANY(SpcCoeff_IsUltravioletSensor(SC)) ) then
+   is_vis_or_uv = .true.
+end if
 
+! For visible or UV, ensure that it is daytime and solar zenith angle is less than 85 deg.
+if (is_vis_or_uv) then
+   do m = 1, n_Profiles
+      if (.not.Options(m)%Skip_Profile) then
+         if (rts(1,m)%Solar_irradiance .gt. 1.0) then    ! .and. rts(1,m)%COS_SUN .gt. cos85) then
+            do l = 1, n_Channels
+               hofx(l,m) = rts(l,m)%Radiance*PI/rts(l,m)%Solar_irradiance  ! Albedo
+            end do
+         end if
+      end if
+   end do
+else
+   do m = 1, n_Profiles
+      if (.not.Options(m)%Skip_Profile) then
+         do l = 1, n_Channels
+            hofx(l,m) = rts(l,m)%Brightness_Temperature
+         end do
+      end if
+   end do
+end if
 
 end subroutine ufo_crtm_passive_sim
 
@@ -97,11 +124,13 @@ character(max_string) :: err_msg
 !integer        :: err_stat, alloc_stat
 !integer        :: l, m, n
 integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
+real(kind=kind_real), parameter :: PI = ACOS(-1.)
 real(c_double) :: missing
 real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
 real(kind_real), allocatable :: Wfunc(:)
+real(kind_real) :: conv_albedo
 character(len=1) :: angle_hf
 
 ! Set missing value
@@ -197,6 +226,30 @@ do jvar = 1, hofxdiags%nvar
                if (.not.Options(jprofile)%Skip_Profile) then
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
                      rts(jchannel,jprofile) % Brightness_Temperature
+               end if
+            end do
+
+         ! variable: albedo_CH
+         case (var_albedo)
+            hofxdiags%geovals(jvar)%nval = 1
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                     rts(jchannel,jprofile) % Radiance * PI / rts(jchannel,jprofile) % Solar_irradiance 
+               end if
+            end do
+
+         ! variable: albedo_assuming_clear_sky_CH
+         case (var_albedo_clr)
+            hofxdiags%geovals(jvar)%nval = 1
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                     rts(jchannel,jprofile) % R_clear * PI / rts(jchannel,jprofile) % Solar_irradiance 
                end if
             end do
 
@@ -332,6 +385,96 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
+         ! variable: brightness_temperature_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
+         case (var_clw_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clw_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: brightness_temperature_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
+         case (var_cli_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cli_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: brightness_temperature_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
+         case (var_cls_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cls_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: brightness_temperature_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
+         case (var_clr_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clr_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: brightness_temperature_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
+         case (var_clg_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clg_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: brightness_temperature_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
+         case (var_clh_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clh_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
          ! variable: brightness_temperature_jacobian_surface_temperature_CH (nval=1)
          case (var_sfc_t)
             hofxdiags%geovals(jvar)%nval = 1
@@ -358,6 +501,126 @@ do jvar = 1, hofxdiags%nvar
                      rts_K(jchannel,jprofile) % surface_emissivity
                end if
             end do
+
+         case default
+            write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
+                              & ObsDiagnostic is unsupported, ', &
+                              & hofxdiags%variables(jvar)
+            !call abor1_ftn(err_msg)
+            err_stat = 1
+      end select
+   else if (ystr_diags(jvar) == var_albedo) then
+      ! var_albedo jacobians
+      select case (xstr_diags(jvar))
+         ! variable: albedo_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
+         case (var_clw_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clw_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = conv_albedo *     &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: albedo_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
+         case (var_cli_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cli_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = conv_albedo *     &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: albedo_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
+         case (var_cls_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cls_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = conv_albedo *     &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: albedo_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
+         case (var_clr_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clr_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = conv_albedo *     &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: albedo_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
+         case (var_clg_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clg_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = conv_albedo *     &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: albedo_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
+         case (var_clh_wp)
+            hofxdiags%geovals(jvar)%nval = n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clh_wp)
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                     conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = conv_albedo *     &
+                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
+                  end do
+               end if
+            end do
+
+         ! variable: albedo_jacobian_surface_emissivity_CH (nval=1)
+         case (var_sfc_emiss)
+            hofxdiags%geovals(jvar)%nval = 1
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            do jprofile = 1, n_Profiles
+               if (.not.Options(jprofile)%Skip_Profile) then
+                  conv_albedo = PI/rts(jchannel,jprofile)%Solar_irradiance  ! Albedo conversion factor
+                  hofxdiags%geovals(jvar)%vals(1,jprofile) = conv_albedo *     &
+                     rts_K(jchannel,jprofile) % surface_emissivity
+               end if
+            end do
+
          case default
             write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
                               & ObsDiagnostic is unsupported, ', &
