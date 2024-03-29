@@ -605,6 +605,7 @@ type(CRTM_Options_type),    intent(inout) :: Options(:)
 
 integer :: jprofile, jchannel, jlevel
 character(len=MAXVARLEN) :: varname
+character(len=max_string) :: message
 real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
 !real(kind_real) :: EffObsErr(n_Profiles,n_Channels)
 !integer         :: EffQC(n_Profiles,n_Channels)
@@ -622,7 +623,13 @@ real(kind_real) :: missing_r
 
  do jchannel = 1, n_Channels
    call get_var_name(channels(jchannel),varname, Is_Active_Sensor, Is_Vis_or_UV)
-   call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
+   if (obsspace_has(obss, "ObsValue", varname)) then
+     call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
+   else
+     write(message,'(a,a,a,i6,a)') ' in ufo_crtm_skip_profiles ' //  &
+                   'obsspace_has failed for varname: ', varname
+     call abor1_ftn(message)
+   endif
 !   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,jchannel))
 !   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,jchannel))
  enddo
@@ -851,7 +858,13 @@ real(kind_real), allocatable :: ObsTb(:,:)
   if (.not. Is_Active_Sensor) then
     do n1 = 1, n_Channels
       call get_var_name(channels(n1),varname, Is_Active_Sensor, Is_Vis_or_UV)
-      call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:, n1))
+      if (obsspace_has(obss, "ObsValue", varname)) then
+        call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:, n1))
+      else
+        write(message,'(a,a,a,i6,a)') ' UFO Load_Sfc_Data, ' //  &
+                      'obsspace_has failed for varname: ', varname
+        call abor1_ftn(message)
+      endif
     enddo
   end if
 

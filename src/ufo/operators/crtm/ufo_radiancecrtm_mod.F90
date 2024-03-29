@@ -393,6 +393,8 @@ logical        :: Is_Vis_or_UV = .false.
    ! ----------------------------------------
    if (SpcCoeff_IsVisibleSensor(SC(n)) .or. SpcCoeff_IsUltravioletSensor(SC(n))) then
       Is_Vis_or_UV = .true.
+   else
+      Is_Vis_or_UV = .false.
    endif
 
    !Assign the data from the GeoVaLs

@@ -55,7 +55,6 @@ real(c_double) :: missing
 integer        :: l, m
 logical        :: is_vis_or_uv = .false.
 
-
 ! Put simulated brightness temperature (or reflectance/albedo) into hofx
 ! ----------------------------------------------
 
@@ -69,7 +68,8 @@ IF ( ANY(SpcCoeff_IsVisibleSensor(SC)) .or. ANY(SpcCoeff_IsUltravioletSensor(SC)
    is_vis_or_uv = .true.
 end if
 
-! For visible or UV, ensure that it is daytime and solar zenith angle is less than 85 deg.
+#if defined(CRTM_VERSION) && (CRTM_VERSION >= 3)
+! For visible or UV, ensure that it is daytime and solar zenith angle is less than 85 deg (not yet).
 if (is_vis_or_uv) then
    do m = 1, n_Profiles
       if (.not.Options(m)%Skip_Profile) then
@@ -80,7 +80,10 @@ if (is_vis_or_uv) then
          end if
       end if
    end do
-else
+end if
+#endif
+
+if (.not. is_vis_or_uv) then
    do m = 1, n_Profiles
       if (.not.Options(m)%Skip_Profile) then
          do l = 1, n_Channels
@@ -119,7 +122,6 @@ integer, intent(out) :: err_stat
 
 ! Local Variables
 !character(*), parameter :: PROGRAM_NAME = 'ufo_crtm_passive_diag'
-!character(255) :: message, version
 character(max_string) :: err_msg
 !integer        :: err_stat, alloc_stat
 !integer        :: l, m, n
@@ -135,7 +137,6 @@ character(len=1) :: angle_hf
 
 ! Set missing value
 missing = missing_value(missing)
-
 
 ! Put simulated diagnostics into hofxdiags
 
@@ -229,6 +230,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
+#if defined(CRTM_VERSION) && (CRTM_VERSION >= 3)
          ! variable: albedo_CH
          case (var_albedo)
             hofxdiags%geovals(jvar)%nval = 1
@@ -252,6 +254,7 @@ do jvar = 1, hofxdiags%nvar
                      rts(jchannel,jprofile) % R_clear * PI / rts(jchannel,jprofile) % Solar_irradiance 
                end if
             end do
+#endif
 
          ! variable: transmittances_of_atmosphere_layer_CH
          case (var_lvl_transmit)
@@ -509,6 +512,7 @@ do jvar = 1, hofxdiags%nvar
             !call abor1_ftn(err_msg)
             err_stat = 1
       end select
+#if defined(CRTM_VERSION) && (CRTM_VERSION >= 3)
    else if (ystr_diags(jvar) == var_albedo) then
       ! var_albedo jacobians
       select case (xstr_diags(jvar))
@@ -628,6 +632,7 @@ do jvar = 1, hofxdiags%nvar
             !call abor1_ftn(err_msg)
             err_stat = 1
       end select
+#endif
    else
       write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
                         & ObsDiagnostic is unsupported, ', &
