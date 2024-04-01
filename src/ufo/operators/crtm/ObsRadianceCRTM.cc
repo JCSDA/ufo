@@ -394,17 +394,38 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedAveraging(GeoVaLs & geovals) const 
 void ObsRadianceCRTM::fillReducedVarsByMaskedCopy(GeoVaLs & geovals) const {
   oops::Log::trace() << "ObsRadianceCRTM fillReducedVarsByMaskedCopy started" << std::endl;
 
+  const size_t nlocs = geovals.nlocs();
+  std::vector<double> water_area_fraction(nlocs);
+  std::vector<double> land_area_fraction(nlocs);
+  std::vector<double> ice_area_fraction(nlocs);
+  std::vector<double> snow_area_fraction(nlocs);
+
+  geovals.getAtLevel(water_area_fraction, "water_area_fraction", 0, GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(land_area_fraction, "land_area_fraction", 0, GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(ice_area_fraction, "ice_area_fraction", 0, GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(snow_area_fraction, "surface_snow_area_fraction", 0, GeoVaLFormat::SAMPLED);
+
   // Helper to replace missing values with a fallback value
-  // (This could be made more robust by checking missing values only occur when the "correct" area
-  //  fraction is zero: e.g., soil_type should only be missing if land_area_fraction is zero.
-  //  Ideally this would be done in debug builds only, so requires some prior infrastructure.)
-  const auto & maskHelper = [&geovals](const std::string & name) -> void {
-    const size_t nlocs = geovals.nlocs();
+  //
+  // Note that missing values are only replaced when the corresponding area fraction is zero.
+  // That's because if the corresponding area fraction is zero, then the CRTM won't be sensitive
+  // to the numerical value of this field... as long as the numerical value is physical enough to
+  // be accepted by CRTM's sanity checks. By replacing the missing value with a sane default, we
+  // allow the CRTM to proceed with this masked-out obs. In the opposite case, where a field has
+  // a missing value but the corresponding mask is non-zero, this signals a deeper inconsistency:
+  // - perhaps the interpolation mask and area fractions aren't consistent with each other,
+  // - perhaps this is a coupled model, and the obs lies in an ambiguous area between the masks on
+  //   the two different model grids.
+  // In cases like this, there is no way to fill the geovals with a trusted value, so we keep the
+  // missing value and rely on QC filters to skip the obs.
+  const auto & maskHelper = [&geovals, &nlocs](const std::string & name,
+                                               const std::vector<double> & area_fraction) -> void {
     std::vector<double> vals(nlocs);
     geovals.getAtLevel(vals, name, 0, GeoVaLFormat::SAMPLED);
     bool fixed = false;
+    constexpr double area_tol = 1e-9;  // allow tiny area fractions to count as zero
     for (size_t i = 0; i < nlocs; ++i) {
-      if (vals[i] == util::missingValue<double>()) {
+      if (area_fraction[i] < area_tol && vals[i] == util::missingValue<double>()) {
         vals[i] = detail::valueOutsideMask(name);
         fixed = true;
       }
@@ -412,26 +433,26 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedCopy(GeoVaLs & geovals) const {
     if (fixed) geovals.putAtLevel(vals, name, 0, GeoVaLFormat::REDUCED);
   };
 
-  maskHelper("surface_temperature_where_sea");
-  maskHelper("surface_temperature_where_land");
-  maskHelper("surface_temperature_where_ice");
-  maskHelper("surface_temperature_where_snow");
+  maskHelper("surface_temperature_where_sea", water_area_fraction);
+  maskHelper("surface_temperature_where_land", land_area_fraction);
+  maskHelper("surface_temperature_where_ice", ice_area_fraction);
+  maskHelper("surface_temperature_where_snow", snow_area_fraction);
 
-  maskHelper("leaf_area_index");
-  maskHelper("soil_temperature");
-  maskHelper("vegetation_area_fraction");
-  maskHelper("volume_fraction_of_condensed_water_in_soil");
-  maskHelper("surface_snow_thickness");
+  maskHelper("leaf_area_index", land_area_fraction);
+  maskHelper("soil_temperature", land_area_fraction);
+  maskHelper("vegetation_area_fraction", land_area_fraction);
+  maskHelper("volume_fraction_of_condensed_water_in_soil", land_area_fraction);
+  maskHelper("surface_snow_thickness", snow_area_fraction);
 
   if (varin_.has("vegetation_type_index") && varin_.has("soil_type")) {
-    maskHelper("vegetation_type_index");
-    maskHelper("soil_type");
+    maskHelper("vegetation_type_index", land_area_fraction);
+    maskHelper("soil_type", land_area_fraction);
   } else if (varin_.has("land_type_index_IGBP")) {
-    maskHelper("land_type_index_IGBP");
+    maskHelper("land_type_index_IGBP", land_area_fraction);
   } else if (varin_.has("land_type_index_NPOESS")) {
-    maskHelper("land_type_index_NPOESS");
+    maskHelper("land_type_index_NPOESS", land_area_fraction);
   } else if (varin_.has("land_type_index_USGS")) {
-    maskHelper("land_type_index_USGS");
+    maskHelper("land_type_index_USGS", land_area_fraction);
   } else {
     ABORT("Inconsistent or unsupported surface types");
   }
