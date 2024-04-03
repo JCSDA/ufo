@@ -179,9 +179,9 @@ if (ENABLE_UFO_DATA)
 else()
   # Set values for downloading ufo test data from tarball
   set (ufo_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
-  set (ufo_data_tag "1.9.0")
+  set (ufo_data_tag "1.10.0")
   set (ufo_data_tarball_name "ufo_testinput_tier_1_${ufo_data_tag}.tar.gz")
-  set (ufo_data_tarball_hash "e927eab112ae853272234ecacb6184b1")
+  set (ufo_data_tarball_hash "9dde2bc6a84da5d5e0e18e6d0aa62148")
 endif()
 
 ################################################################################
