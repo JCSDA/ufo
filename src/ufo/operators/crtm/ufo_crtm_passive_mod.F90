@@ -66,6 +66,8 @@ hofx = missing
 
 IF ( ANY(SpcCoeff_IsVisibleSensor(SC)) .or. ANY(SpcCoeff_IsUltravioletSensor(SC)) ) then
    is_vis_or_uv = .true.
+else
+   is_vis_or_uv = .false.
 end if
 
 #if defined(CRTM_VERSION) && (CRTM_VERSION >= 3)
