@@ -32,7 +32,7 @@ module ufo_directZDA_mod
  end type ufo_directZDA
  
  integer :: n_geovars
- character(len=maxvarlen), dimension(:), allocatable :: geovars_default
+ character(len=maxvarlen), dimension(:), allocatable :: geovars_list
 
 contains
 
@@ -48,6 +48,8 @@ subroutine ufo_directZDA_setup(self, yaml_conf)
 
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: micro_option
+  character(kind=c_char,len=:), allocatable :: this_varname
+  character(len=maxvarlen) :: var_string
   integer :: iret_init_mphyopt = -1
 
   ! YAML option for microphysics scheme
@@ -93,24 +95,115 @@ subroutine ufo_directZDA_setup(self, yaml_conf)
       endif
   endif
 
-  ! Set up the atmospheric state variables and microphysics species (into geovars_default).
+  ! Set up the atmospheric state variables and microphysics species (into geovars_list).
 
   if ( self%mphyopt .eq. 14 ) then         !  NSSL EnKF OP: 14
     n_geovars=13 
-    if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = (/var_qr, var_qs, var_qg, var_qh, var_nr, var_ns, var_ng, var_nh, &
-                        var_qvg, var_qvh, var_prs, var_ts, var_q/)
+    if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
+    var_string="var_rain_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       !call yaml_conf%get_or_die(trim(var_string), geovars_list(1))
+       call yaml_conf%get_or_die("var_rain_mixing_ratio", this_varname)
+       geovars_list(1) = this_varname
+    endif
+    var_string="var_snow_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(2) = this_varname
+    endif
+    var_string="var_graupel_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(3) = this_varname
+    endif
+    var_string="var_hail_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(4) = this_varname
+    endif
+    var_string="var_rain_number_concentration"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(5) = this_varname
+    endif
+    var_string="var_snow_number_concentration"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(6) = this_varname
+    endif
+    var_string="var_graupel_number_concentration"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(7) = this_varname
+    endif
+    var_string="var_hail_number_concentration"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(8) = this_varname
+    endif
+    var_string="var_graupel_vol_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(9) = this_varname
+    endif
+    var_string="var_hail_vol_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(10) = this_varname
+    endif
+    geovars_list(11) = var_prs
+    geovars_list(12) = var_ts
+    geovars_list(13) = var_q
   else if ( self%mphyopt .eq. 108 ) then   ! TM OP : 108
     n_geovars=7
-    if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = (/var_qr, var_qs, var_qg, var_nr, var_prs, var_ts, var_q/)
+    if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
+    var_string="var_rain_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(1) = this_varname
+    endif
+    var_string="var_snow_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(2) = this_varname
+    endif
+    var_string="var_graupel_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(3) = this_varname
+    endif
+    var_string="var_rain_number_concentration"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(4) = this_varname
+    endif
+    geovars_list(5) = var_prs
+    geovars_list(6) = var_ts
+    geovars_list(7) = var_q
   else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then   ! LIN=2, GFDL=5
     n_geovars=6
-    if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = (/var_qr, var_qs, var_qg, var_prs, var_ts, var_q/)
+    if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
+    var_string="var_rain_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(1) = this_varname
+    endif
+    var_string="var_snow_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(2) = this_varname
+    endif
+    var_string="var_graupel_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(3) = this_varname
+    endif
+    geovars_list(4) = var_prs
+    geovars_list(5) = var_ts
+    geovars_list(6) = var_q
   end if
 
-  call self%geovars%push_back(geovars_default)
+  call self%geovars%push_back(geovars_list)
   call self%geovars%push_back(self%v_coord)
 
   iret_init_mphyopt = init_mphyopt(self%mphyopt)
