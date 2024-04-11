@@ -44,7 +44,8 @@ module ufo_directZDA_tlad_mod
  end type ufo_directZDA_tlad
 
  integer :: n_geovars
- character(len=maxvarlen), dimension(:), allocatable:: geovars_default
+ character(len=maxvarlen), dimension(:), allocatable:: geovars_list
+ character(len=maxvarlen):: varname_qr, varname_qs, varname_qg, varname_qnr
 
   integer, parameter         :: max_string=800
 
@@ -62,6 +63,8 @@ subroutine ufo_directZDA_tlad_setup_(self, yaml_conf)
 
   character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: micro_option
+  character(kind=c_char,len=:), allocatable :: this_varname
+  character(len=maxvarlen):: var_string
 
   ! YAML option for microphysics scheme
   call yaml_conf%get_or_die("microphysics option", micro_option)
@@ -101,18 +104,62 @@ subroutine ufo_directZDA_tlad_setup_(self, yaml_conf)
       endif
   endif
 
-  ! Set up the atmospheric state variables and microphysics species (into geovars_default).
   if ( self%mphyopt .eq. 108 ) then      ! TM VarOP: 108
     n_geovars=7
-    if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = (/var_qr, var_qs, var_qg, var_nr, var_prs, var_ts, var_q/)
+    if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
+    var_string="var_rain_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(1) = this_varname
+       varname_qr = this_varname
+    endif
+    var_string="var_snow_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(2) = this_varname
+       varname_qs = this_varname
+    endif
+    var_string="var_graupel_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(3) = this_varname
+       varname_qg = this_varname
+    endif
+    var_string="var_rain_number_concentration"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(4) = this_varname
+    endif
+    geovars_list(5) = var_prs
+    geovars_list(6) = var_ts
+    geovars_list(7) = var_q
   else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then   ! LIN=2, GFDL=5
     n_geovars=6
-    if (.not.allocated(geovars_default) ) allocate(geovars_default(n_geovars))
-    geovars_default = (/var_qr, var_qs, var_qg, var_prs, var_ts, var_q/)
+    if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
+    var_string="var_rain_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(1) = this_varname
+       varname_qr = this_varname
+    endif
+    var_string="var_snow_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(2) = this_varname
+       varname_qs = this_varname
+    endif
+    var_string="var_graupel_mixing_ratio"
+    if( yaml_conf%has(trim(var_string)) ) then
+       call yaml_conf%get_or_die(trim(var_string), this_varname)
+       geovars_list(3) = this_varname
+       varname_qg = this_varname
+    endif
+    geovars_list(4) = var_prs
+    geovars_list(5) = var_ts
+    geovars_list(6) = var_q
   end if
 
-  call self%geovars%push_back(geovars_default)
+  call self%geovars%push_back(geovars_list)
   call self%geovars%push_back(self%v_coord)
 
 end subroutine ufo_directZDA_tlad_setup_
@@ -203,14 +250,14 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
   allocate(self%wf(self%nlocs))
 
 ! get geoval column
-  call ufo_geovals_get_var(geovals, var_qr, qr)
-  call ufo_geovals_get_var(geovals, var_qs, qs)
-  call ufo_geovals_get_var(geovals, var_qg, qg)
+  call ufo_geovals_get_var(geovals, varname_qr, qr)
+  call ufo_geovals_get_var(geovals, varname_qs, qs)
+  call ufo_geovals_get_var(geovals, varname_qg, qg)
   call ufo_geovals_get_var(geovals, var_prs, prs)
   call ufo_geovals_get_var(geovals, var_ts, t)
   call ufo_geovals_get_var(geovals, var_q, qv)
   if ( self%mphyopt .eq. 108 ) then ! TM operator only
-     call ufo_geovals_get_var(geovals, var_nr, qnr)
+     call ufo_geovals_get_var(geovals, varname_qnr, qnr)
   end if
 
   allocate(obsvcoord(self%nlocs))
@@ -533,11 +580,11 @@ subroutine ufo_directZDA_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   if ( self%mphyopt .eq. 108 ) then ! TM
      nvars_geovars = 4 ! Qr, Qs, Qg, Qnr
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_qr, var_qs, var_qg, var_nr/)
+     geovars_list=(/varname_qr, varname_qs, varname_qg, varname_qnr/)
   else                              ! LIN 
      nvars_geovars = 3 ! Qr, Qs, Qg
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_qr, var_qs, var_qg/)
+     geovars_list=(/varname_qr, varname_qs, varname_qg/)
   end if
   allocate(vfields(nvars_geovars,nlocs))
   vfields=0.0_kind_real
@@ -598,11 +645,11 @@ subroutine ufo_directZDA_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   if ( self%mphyopt .eq. 108 ) then ! TM
      nvars_geovars = 4 ! Qr, Qs, Qg, Qnr
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_qr, var_qs, var_qg, var_nr/)
+     geovars_list=(/varname_qr, varname_qs, varname_qg, varname_qnr/)
   else                              ! LIN 
      nvars_geovars = 3 ! Qr, Qs, Qg
      allocate(geovars_list(nvars_geovars))
-     geovars_list=(/var_qr, var_qs, var_qg/)
+     geovars_list=(/varname_qr, varname_qs, varname_qg/)
   end if
 
   allocate(vfields(nvars_geovars,nlocs))
