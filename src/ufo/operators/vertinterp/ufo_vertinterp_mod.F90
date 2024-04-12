@@ -374,7 +374,7 @@ subroutine vertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     allocate(scaling_field(nlocs))
     if (trim(self%hofx_scaling_field_group) == "GeoVaLs") then
       call ufo_geovals_get_var(geovals, self%hofx_scaling_field, scaling_field_gval)
-      scaling_field(:) = scaling_field_gval%vals(0, :)
+      scaling_field(:) = scaling_field_gval%vals(1, :)
     else
       call obsspace_get_db(obss, self%hofx_scaling_field_group, self%hofx_scaling_field, &
                            scaling_field)
