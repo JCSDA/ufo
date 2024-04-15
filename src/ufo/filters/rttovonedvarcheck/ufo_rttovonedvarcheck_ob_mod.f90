@@ -39,6 +39,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: solar_azimuth_angle  !< solar azimuth of observation
   real(kind_real)      :: cloudtopp !< cloud top pressure (used in if cloudy retrieval used)
   real(kind_real)      :: cloudfrac !< cloud fraction (used in if cloudy retrieval used)
+  real(kind_real)      :: cloudtopp_error !< cloud top pressure error evaluated at the end of the retrieval
   real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real)      :: LWP !< retrieved liquid water path. This is output for future filters
   real(kind_real)      :: IWP !< retrieved ice water path. This is output for future filters
@@ -174,6 +175,7 @@ self % solar_zenith_angle = missing_real
 self % solar_azimuth_angle = missing_real
 self % cloudtopp = 500.0_kind_real
 self % cloudfrac = zero
+self % cloudtopp_error = missing_real
 self % final_cost = missing_real
 self % LWP = missing_real
 self % IWP = missing_real
@@ -238,6 +240,7 @@ write(*,"(A,F8.2)") "Satellite zenith angle: ", self % sensor_zenith_angle
 write(*,"(A,F8.2)") "Solar zenith angle: ", self % solar_zenith_angle
 write(*,"(A,F8.2)") "Cloud Top Pressure: ", self % cloudtopp
 write(*,"(A,F8.2)") "Cloud Fraction: ", self % cloudfrac
+write(*,"(A,F8.2)") "Cloud Top Pressure Error: ", self % cloudtopp_error
 write(*,"(A)") "Background T profile: "
 write(*,"(10F8.2)") self % background_T
 write(*,"(A)") "Emissivity: "
