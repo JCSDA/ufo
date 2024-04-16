@@ -242,6 +242,13 @@ ecbuild_add_test( TARGET  test_ufo_nearest_neighbor_interpolation
                   LIBS    ufo
                   TEST_DEPENDS test_NearestNeighborInterpolation.x)
 
+# Test superob radar template
+ecbuild_add_test( TARGET  test_ufo_superob_radar_template
+                  SOURCES mains/TestSuperObRadarTemplate.cc
+                  ARGS    "testinput/empty.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo)
+
 # Test Parameters
 if(eckit_VERSION VERSION_GREATER_EQUAL 1.16)
   ecbuild_add_test( TARGET  test_ufo_parameters
