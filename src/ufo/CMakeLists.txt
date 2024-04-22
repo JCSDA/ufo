@@ -48,6 +48,7 @@ add_subdirectory( operators/scatwind )
 add_subdirectory( operators/sfcpcorrected )
 add_subdirectory( operators/timeoper )
 add_subdirectory( operators/vertinterp )
+add_subdirectory( operators/windspeed )
 
 
 # Base files
@@ -139,6 +140,7 @@ list( APPEND ufo_src_files
     ${oasim_src_files}
     ${timeoper_src_files}
     ${superob_src_files}
+    ${windspeed_src_files}
 )
 
 ## Create Library target

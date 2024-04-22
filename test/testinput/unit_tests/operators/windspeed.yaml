@@ -1,0 +1,25 @@
+time window:
+  begin: 2020-10-01T03:00:00Z
+  end: 2020-10-01T09:00:00Z
+
+observations: 
+- obs operator: 
+    name: WindSpeed
+    model_surface_eastward_wind: eastward_wind_10m
+    model_surface_northward_wind: northward_wind_10m
+  obs space: 
+    name: WindSpeed
+    obsdatain: 
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/windspeed10m_obs_2020100106.nc4
+    simulated variables: [windSpeed]
+    observed variables: [windSpeed]
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/windspeed10m_obs_2020100106_windspeed10m_out.nc
+  geovals:
+     filename: Data/ufo/testinput_tier_1/scatwind_geoval_small_20201001T0600Z.nc4
+  norm ref: MetOfficeHofX
+  tolerance: 1.0e-5
