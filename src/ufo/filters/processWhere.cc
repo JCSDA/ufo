@@ -8,10 +8,17 @@
 #include "ufo/filters/processWhere.h"
 
 #include <bitset>
-#include <regex>
 #include <set>
 #include <string>
 #include <vector>
+
+#if USE_BOOST_REGEX
+#include <boost/regex.hpp>
+#define REGEX_NAMESPACE boost
+#else
+#include <regex>
+#define REGEX_NAMESPACE std
+#endif
 
 #include "eckit/types/FloatCompare.h"
 #include "ioda/ObsSpace.h"
@@ -314,9 +321,9 @@ void processWhereAnyBitUnsetOf(const std::vector<int> & data,
 void processWhereMatchesRegex(const std::vector<std::string> & data,
                               const std::string & pattern,
                               std::vector<bool> & where) {
-  std::regex regex(pattern);
+  REGEX_NAMESPACE::regex regex(pattern);
   for (size_t jj = 0; jj < data.size(); ++jj) {
-    if (where[jj] && !std::regex_match(data[jj], regex))
+    if (where[jj] && !REGEX_NAMESPACE::regex_match(data[jj], regex))
       where[jj] = false;
   }
 }
@@ -329,9 +336,9 @@ void processWhereMatchesRegex(const std::vector<std::string> & data,
 void processWhereMatchesRegex(const std::vector<int> & data,
                               const std::string & pattern,
                               std::vector<bool> & where) {
-  std::regex regex(pattern);
+  REGEX_NAMESPACE::regex regex(pattern);
   for (size_t jj = 0; jj < data.size(); ++jj) {
-    if (where[jj] && !std::regex_match(std::to_string(data[jj]), regex))
+    if (where[jj] && !REGEX_NAMESPACE::regex_match(std::to_string(data[jj]), regex))
       where[jj] = false;
   }
 }
