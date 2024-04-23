@@ -12,7 +12,7 @@ namespace ufo {
 static SuperObMaker<SuperObMeanOmB> makerSuperObMeanOmB_("mean OmB");
 
 SuperObMeanOmB::SuperObMeanOmB(const GenericSuperObParameters & params,
-                               ioda::ObsSpace & obsdb,
+                               const ObsFilterData & obsdb,
                                const std::vector<bool> & apply,
                                const Variables & filtervars,
                                const ioda::ObsDataVector<int> & flags,

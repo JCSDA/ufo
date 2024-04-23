@@ -1,0 +1,56 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-12-31T23:59:59Z
+
+observations:
+- obs space:
+    name: Sonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_doppler_wind.nc
+      # Group observations into radar scans.
+      obsgrouping:
+        group variables: [dateTime, beamTiltAngle, stationIdentification]
+    observed variables: [radialVelocity]
+    simulated variables: [radialVelocity]
+  HofX: HofX
+  obs post filters:
+  - filter: Perform Action
+    # Reject observations that have already been flagged (in the test data set).
+    where:
+     - variable:
+         name: MetaData/QCflag
+       is_not_in: 0
+    action:
+      name: reject
+  - filter: SuperOb
+    filter variables:
+    - name: radialVelocity
+    algorithm:
+      name: radar
+      number of beams in superob region: 5
+      superob region radial extent [m]: 5000.0
+      minimum number of observations in superob region: 5
+  # Assign arbitrary obs error.
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  compareVariables:
+  - reference:
+      name: TestReference/radialVelocity
+    test:
+      name: DerivedObsValue/radialVelocity
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/radialVelocityTotalUncertainty
+    test:
+      name: TotalUncertainty/radialVelocity
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/radialVelocityBackgroundUncertainty
+    test:
+      name: BackgroundUncertainty/radialVelocity
+    absTol: 1.0e-5
+

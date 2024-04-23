@@ -27,7 +27,9 @@ SuperOb::SuperOb(ioda::ObsSpace & obsdb,
     throw eckit::BadParameter("group variables configuration is empty.", Here());
   }
 
-  oops::Log::debug() << "SuperOb: config = " << options_ << std::endl;
+  allvars_ += Variables(filtervars_, "HofX");
+
+  oops::Log::debug() << "SuperOb constructor finished" << std::endl;
 }
 
 SuperOb::~SuperOb() {
@@ -39,12 +41,12 @@ void SuperOb::applyFilter(const std::vector<bool> & apply,
                           std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "SuperOb applyFilter" << std::endl;
 
-  std::unique_ptr<SuperObParametersBase> parameters =
-    SuperObFactory::createParameters(options_.superObName.value());
+  const SuperObParametersWrapper & params = options_.algorithmParameters.value();
 
   std::unique_ptr<SuperObBase> superOb =
-    SuperObFactory::create(options_.superObName.value(),
-                           *parameters, obsdb_, apply, filtervars, *flags_, flagged);
+    SuperObFactory::create(params.superObName,
+                           data_, apply, filtervars, *flags_, flagged);
+
   superOb->runAlgorithm();
 }
 

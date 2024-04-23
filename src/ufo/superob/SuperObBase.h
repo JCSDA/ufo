@@ -22,21 +22,26 @@
 #include "oops/util/missingValues.h"
 #include "oops/util/parameters/HasParameters_.h"
 
+#include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variables.h"
 
 namespace ufo {
 
 /// \brief SuperOb parameters base class.
-
 class SuperObParametersBase : public oops::Parameters {
-  OOPS_ABSTRACT_PARAMETERS(SuperObParametersBase, Parameters)
+  OOPS_ABSTRACT_PARAMETERS(SuperObParametersBase, oops::Parameters)
+ public:
+  /// Name of the superobbing algorithm.
+  /// Valid names are specified using a `SuperObMaker` in subclasses of SuperObBase in the
+  /// ufo/superob directory.
+  oops::RequiredParameter<std::string> superObName{"name", this};
 };
 
+/// \brief Concrete class containing the options specified by the SuperObParametersBase.
 class GenericSuperObParameters : public SuperObParametersBase {
   OOPS_CONCRETE_PARAMETERS(GenericSuperObParameters, SuperObParametersBase)
 };
-
 
 /// \brief SuperOb base class.
 ///
@@ -44,7 +49,7 @@ class GenericSuperObParameters : public SuperObParametersBase {
 class SuperObBase {
  public:
   explicit SuperObBase(const SuperObParametersBase &,
-                       ioda::ObsSpace &,
+                       const ObsFilterData &,
                        const std::vector<bool> &,
                        const Variables &,
                        const ioda::ObsDataVector<int> &,
@@ -54,7 +59,8 @@ class SuperObBase {
   /// Run the chosen superobbing algorithm on each record in the data set.
   void runAlgorithm() const;
 
-  /// Compute superob for each record.
+ protected:
+  /// Compute superob values and errors for each record.
   virtual void computeSuperOb(const std::vector<std::size_t> &,
                               const std::vector<float> &,
                               const std::vector<float> &,
@@ -62,8 +68,15 @@ class SuperObBase {
                               std::vector<float> &,
                               std::vector<bool> &) const = 0;
 
- private:
+  /// Save any auxiliary variables to the ObsSpace.
+  /// By default, no extra variables are saved.
+  /// The parameter `variableName` is the name of the filter variable.
+  virtual void saveAuxiliaryVariables(const std::string & variableName) const {}
+
+  const ObsFilterData & data_;
   ioda::ObsSpace & obsdb_;
+
+ private:
   const std::vector<bool> apply_;
   const Variables & filtervars_;
   const ioda::ObsDataVector<int> & flags_;
@@ -73,15 +86,19 @@ class SuperObBase {
 /// SuperOb factory.
 class SuperObFactory {
  public:
-  static std::unique_ptr<SuperObBase> create(const std::string &,
-                                             const SuperObParametersBase &,
-                                             ioda::ObsSpace &,
+  static std::unique_ptr<SuperObBase> create(const SuperObParametersBase &,
+                                             const ObsFilterData &,
                                              const std::vector<bool> &,
                                              const Variables &,
                                              const ioda::ObsDataVector<int> &,
                                              std::vector<std::vector<bool>> &);
 
   static std::unique_ptr<SuperObParametersBase> createParameters(const std::string &name);
+
+  /// \brief Return the names of all predictors that can be created by one of the registered makers.
+  static std::vector<std::string> getMakerNames() {
+    return oops::keys(getMakers());
+  }
 
   virtual ~SuperObFactory() = default;
 
@@ -90,7 +107,7 @@ class SuperObFactory {
 
  private:
   virtual std::unique_ptr<SuperObBase> make(const SuperObParametersBase &,
-                                            ioda::ObsSpace &,
+                                            const ObsFilterData &,
                                             const std::vector<bool> &,
                                             const Variables &,
                                             const ioda::ObsDataVector<int> &,
@@ -110,14 +127,14 @@ class SuperObMaker : public SuperObFactory {
     Parameters_;
 
   virtual std::unique_ptr<SuperObBase>make(const SuperObParametersBase & params,
-                                           ioda::ObsSpace & obsdb,
+                                           const ObsFilterData & data,
                                            const std::vector<bool> & apply,
                                            const Variables & filtervars,
                                            const ioda::ObsDataVector<int> & flags,
                                            std::vector<std::vector<bool>> & flagged) {
     const auto & stronglyTypedParams = dynamic_cast<const Parameters_&>(params);
     return std::unique_ptr<SuperObBase>
-      (new T(stronglyTypedParams, obsdb, apply, filtervars, flags, flagged));
+      (new T(stronglyTypedParams, data, apply, filtervars, flags, flagged));
   }
 
   std::unique_ptr<SuperObParametersBase> makeParameters() const override {

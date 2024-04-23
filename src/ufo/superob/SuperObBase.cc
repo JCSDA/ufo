@@ -16,12 +16,13 @@
 namespace ufo {
 
 SuperObBase::SuperObBase(const SuperObParametersBase & params,
-                         ioda::ObsSpace & obsdb,
+                         const ObsFilterData & data,
                          const std::vector<bool> & apply,
                          const Variables & filtervars,
                          const ioda::ObsDataVector<int> & flags,
                          std::vector<std::vector<bool>> & flagged)
-  : obsdb_(obsdb),
+  : data_(data),
+    obsdb_(data.obsspace()),
     apply_(apply),
     filtervars_(filtervars),
     flags_(flags),
@@ -29,6 +30,7 @@ SuperObBase::SuperObBase(const SuperObParametersBase & params,
 {}
 
 void SuperObBase::runAlgorithm() const {
+  oops::Log::trace() << "SuperObBase::runAlgorithm starting" << std::endl;
   const float missing = util::missingValue<float>();
   const std::size_t nlocs = obsdb_.nlocs();
   const std::vector<std::size_t> & recnums = obsdb_.recidx_all_recnums();
@@ -47,13 +49,17 @@ void SuperObBase::runAlgorithm() const {
     }
   }
 
+  Variables varhofx(filtervars_, "HofX");
+
   // Loop over each filter variable and compute superobs for each one.
+  // Also compute the associated superob errors, and potentially save any
+  // auxiliary variables in the algorithm.
   for (size_t jvar = 0; jvar < filtervars_.nvars(); ++jvar) {
     const std::string variableName = filtervars_[jvar].variable();
     std::vector<float> obs(nlocs);
     obsdb_.get_db("ObsValue", variableName, obs);
     std::vector<float> hofx(nlocs);
-    obsdb_.get_db("HofX", variableName, hofx);
+    data_.get(varhofx.variable(jvar), hofx);
     std::vector<float> superobs(nlocs, missing);
     // Set all entries in `flagged_` to true. One location in each record
     // will be set to `false` in order to indicate where the superob
@@ -63,8 +69,12 @@ void SuperObBase::runAlgorithm() const {
       computeSuperOb(locsToUse[recnum],
                      obs, hofx, flags_[jvar], superobs, flagged_[jvar]);
     }
+    // Save the superob values to the ObsSpace.
     obsdb_.put_db("DerivedObsValue", variableName, superobs);
+    // Save any auxiliary variables to the ObsSpace.
+    saveAuxiliaryVariables(variableName);
   }
+  oops::Log::trace() << "SuperObBase::runAlgorithm done" << std::endl;
 }
 
 SuperObFactory::SuperObFactory(const std::string & name) {
@@ -74,14 +84,14 @@ SuperObFactory::SuperObFactory(const std::string & name) {
 }
 
 std::unique_ptr<SuperObBase>
-SuperObFactory::create(const std::string & name,
-                       const SuperObParametersBase & params,
-                       ioda::ObsSpace & obsdb,
+SuperObFactory::create(const SuperObParametersBase & params,
+                       const ObsFilterData & data,
                        const std::vector<bool> & apply,
                        const Variables & filtervars,
                        const ioda::ObsDataVector<int> & flags,
                        std::vector<std::vector<bool>> & flagged) {
   oops::Log::trace() << "SuperObBase::create starting" << std::endl;
+  const std::string & name = params.superObName;
   typename std::map<std::string, SuperObFactory*>::iterator jloc = getMakers().find(name);
   if (jloc == getMakers().end()) {
     std::string makerNameList;
@@ -90,7 +100,7 @@ SuperObFactory::create(const std::string & name,
                               "Possible values:" + makerNameList, Here());
   }
   std::unique_ptr<SuperObBase> ptr =
-    jloc->second->make(params, obsdb, apply, filtervars, flags, flagged);
+    jloc->second->make(params, data, apply, filtervars, flags, flagged);
   oops::Log::trace() << "SuperObBase::create done" << std::endl;
   return ptr;
 }

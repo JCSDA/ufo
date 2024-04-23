@@ -27,7 +27,7 @@ namespace ufo {
 class SuperObMeanOmB : public SuperObBase {
  public:
   explicit SuperObMeanOmB(const GenericSuperObParameters &,
-                          ioda::ObsSpace &,
+                          const ObsFilterData &,
                           const std::vector<bool> &,
                           const Variables &,
                           const ioda::ObsDataVector<int> &,

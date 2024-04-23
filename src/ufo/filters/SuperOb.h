@@ -20,6 +20,8 @@
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
 
+#include "ufo/superob/SuperObBase.h"
+
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;
   class ObsSpace;
@@ -27,13 +29,21 @@ namespace ioda {
 
 namespace ufo {
 
-class SuperObParameters : public FilterParametersBase {
-  OOPS_CONCRETE_PARAMETERS(SuperObParameters, FilterParametersBase)
+class SuperObParametersWrapper : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(SuperObParametersWrapper, oops::Parameters)
  public:
   /// Name of the superobbing algorithm.
   /// Valid names are specified using a `SuperObMaker` in subclasses of SuperObBase in the
   /// ufo/superob directory.
-  oops::RequiredParameter<std::string> superObName{"algorithm", this};
+  oops::RequiredPolymorphicParameter<SuperObParametersBase, SuperObFactory>
+    superObName{"name", this};
+};
+
+class SuperObParameters : public FilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(SuperObParameters, FilterParametersBase)
+ public:
+  /// Parameter that contains details of the algorithm to use.
+  oops::RequiredParameter<SuperObParametersWrapper> algorithmParameters{"algorithm", this};
 };
 
 /// \brief Compute superobs using a specified algorithm.
