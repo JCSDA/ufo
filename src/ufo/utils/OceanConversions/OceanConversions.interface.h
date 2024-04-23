@@ -14,21 +14,21 @@ namespace ufo {
 
 extern "C" {
 // call Fortran code
-  const float gsw_rho_t_exact_f90(const float & sal,
-                                  const float & temp,
-                                  const float & pressure);
-  const float gsw_p_from_z_f90(const float & depth,
-                               const float & latitude);
-  const float gsw_pt_from_t_f90(const float & sal,
-                                const float & temp,
-                                const float & pressure);
-  const float gsw_ct_from_t_f90(const float & sal,
-                                const float & temp,
-                                const float & pressure);
-  const float gsw_sa_from_sp_f90(const float & sal,
-                                 const float & pressure,
-                                 const float & longitude,
-                                 const float & latitude);
+  float gsw_rho_t_exact_f90(const float & sal,
+                            const float & temp,
+                            const float & pressure);
+  float gsw_p_from_z_f90(const float & depth,
+                         const float & latitude);
+  float gsw_pt_from_t_f90(const float & sal,
+                          const float & temp,
+                          const float & pressure);
+  float gsw_ct_from_t_f90(const float & sal,
+                          const float & temp,
+                          const float & pressure);
+  float gsw_sa_from_sp_f90(const float & sal,
+                           const float & pressure,
+                           const float & longitude,
+                           const float & latitude);
 }  // extern C
 
 }  // namespace ufo
