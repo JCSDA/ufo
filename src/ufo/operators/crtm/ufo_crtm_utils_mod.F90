@@ -612,6 +612,7 @@ real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
 
 real(c_double)  :: missing_d
 real(kind_real) :: missing_r
+real(kind_real), parameter  :: lowest_albedo = 0.001
 
  ! Set missing values
  missing_d = missing_value(missing_d)
@@ -654,8 +655,14 @@ real(kind_real) :: missing_r
    ! (this can happen with generically coupled atm and ocean components if
    ! the land/sea masks don't match)
    if ((sfc(jprofile)%Water_Temperature == missing_r) .and.   &
-       (sfc(jprofile)%Water_Coverage > 0.0)) then
+       (sfc(jprofile)%Water_Coverage > 0.0) .and. (.not. Is_Vis_or_UV)) then
      Options(jprofile)%Skip_Profile = .TRUE.
+   endif
+
+   ! check for all channels in Vis/UV profiles that have ObsValue/albedo
+   ! that are below minimum threshold. Skip those.
+   if (Is_Vis_or_UV) then
+     Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) < lowest_albedo)
    endif
 
  end do profile_loop
