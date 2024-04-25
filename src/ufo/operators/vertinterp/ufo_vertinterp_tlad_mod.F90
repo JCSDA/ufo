@@ -394,15 +394,15 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
-        call nearestneighbor_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                                           & hofx(ivar,iobs), self%wi(iobs))
+          call nearestneighbor_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
+                                             & hofx(ivar,iobs), self%wi(iobs))
         end if
       enddo
     else
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
-        call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
-                                & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
+          call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
+                                  & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
         end if
       enddo
     end if
@@ -410,7 +410,9 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     ! Scaling to hofx
     if (self%hofx_scaling) then
       do iobs = 1, nlocs
-        hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+        if (hofx(ivar,iobs) /= missing) then
+          hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+        endif
       enddo
     endif
 
@@ -453,7 +455,9 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
     ! Scaling to hofx
     if (self%hofx_scaling) then
       do iobs = 1, nlocs
-        hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+        if (hofx(ivar,iobs) /= missing) then
+          hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+        endif
       enddo
     endif
 
