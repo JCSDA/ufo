@@ -171,6 +171,11 @@ observations:
       test:
         name: OneDVar/skinTemperature
       absTol: 1.0e-2
+    - reference:
+        name: TestReference/pressureAtTopOfCloudError
+      test:
+        name: OneDVar/pressureAtTopOfCloudError
+      relTol: 1.0e-2
 # Test the hyperspectral IR with skin T read from the obsspace
 - obs operator:
     <<: *ObsOperator

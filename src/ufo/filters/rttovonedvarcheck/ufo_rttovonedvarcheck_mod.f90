@@ -364,6 +364,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       if (self % store1dvartransmittance) obs % transmittance(:, jobs) = ob % transmittance(:)
       if (self % cloud_retrieval) obs % cloudtopp(jobs) = ob % cloudtopp
       if (self % cloud_retrieval) obs % cloudfrac(jobs) = ob % cloudfrac
+      if (self % cloud_retrieval) obs % cloudtopp_error(jobs) = ob % cloudtopp_error
       if (self % RecalculateBT) obs % recalc_BT(:, jobs) = ob % recalc_BT(:)
       obs % niter(jobs) = ob % niter
 

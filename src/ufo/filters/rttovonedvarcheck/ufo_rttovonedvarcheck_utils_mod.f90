@@ -10,11 +10,13 @@ module ufo_rttovonedvarcheck_utils_mod
 use fckit_log_module, only : fckit_log
 use kinds
 use missing_values_mod
-use ufo_constants_mod, only: min_q, zero, Pa_to_hPa
+use ufo_constants_mod, only: min_q, zero, one, two, half, Pa_to_hPa
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
+use ufo_rttovonedvarcheck_ob_mod
 use ufo_rttovonedvarcheck_obs_mod
 use ufo_rttovonedvarcheck_profindex_mod
+use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
 use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat, cmp_strings
@@ -29,6 +31,7 @@ public ufo_rttovonedvarcheck_check_ctp
 public ufo_rttovonedvarcheck_all_to_subset_by_channels
 public ufo_rttovonedvarcheck_subset_to_all_by_channels
 public ufo_rttovonedvarcheck_geovals_index_by_channels
+public ufo_rttovonedvarcheck_ctp_error
 
 character(len=max_string) :: message
 
@@ -540,5 +543,88 @@ end do used_loop
 end subroutine ufo_rttovonedvarcheck_subset_to_all_by_channels
 
 ! -------------------------------------------------------------
+!> Calculate the cloud-top pressure (CTP) error to output
+!! to obs space.
+!!
+!! \details Heritage: Ops_SatRad_CTP1DVarUncert.f90
+!!
+!! \author Met Office
+!!
+!! \date 27/02/2024: Created
+!!
+subroutine ufo_rttovonedvarcheck_ctp_error(geovals, r_matrix, profindex, h_matrix, ob)
+
+implicit none
+
+type(ufo_geovals), intent(in)                      :: geovals       !< model data at obs location
+type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix      !< observation error covariance
+type(ufo_rttovonedvarcheck_profindex), intent(in)  :: profindex     !< index array for x vector
+real(kind_real), intent(in)                        :: h_matrix(:,:) !< jacobian from the final iteration
+type(ufo_rttovonedvarcheck_ob), intent(inout)      :: ob            !< satellite metadata
+
+! Local declarations:
+integer                              :: nchans_1dvar
+real(kind_quad)                      :: Hessian(2,2)
+real(kind_quad)                      :: Identity(2,2)
+real(kind_quad)                      :: Eigenvalue(2)
+real(kind_quad)                      :: Eigenvectors(2,2)
+real(kind_quad)                      :: FirstEigenvector(2)
+real(kind_quad), allocatable         :: ChannelWeights(:)
+real(kind_quad)                      :: Determinant
+real(kind_quad)                      :: Trace
+real(kind_quad)                      :: Gap
+real(kind_quad)                      :: Normalisation
+
+nchans_1dvar = size(ob % channels_used)
+allocate(ChannelWeights(nchans_1dvar))
+Identity = reshape ((/ one, zero, zero, one /), shape (Identity))
+
+! Channel weights based upon observational errors
+ChannelWeights = one / r_matrix % diagonal(:)
+
+! Calculate the subarray of the Hessian with CTP and Cloud Fraction in
+! and then calculate the eigenvalues
+
+Hessian(1,1) = sum (two * H_matrix(:,profindex % cloudtopp) * ChannelWeights * H_matrix(:,profindex % cloudtopp))
+Hessian(1,2) = sum (two * H_matrix(:,profindex % cloudtopp) * ChannelWeights * H_matrix(:,profindex % cloudfrac))
+Hessian(2,1) = Hessian(1, 2)
+Hessian(2,2) = sum (two * H_matrix(:,profindex % cloudfrac) * ChannelWeights * H_matrix(:,profindex % cloudfrac))
+
+Determinant = Hessian(1,1) * Hessian(2,2) - Hessian(1,2) * Hessian(2,1)
+Trace = Hessian(1,1) + Hessian(2,2)
+Gap = sqrt (Trace ** two - 4_kind_real * Determinant)
+
+Eigenvalue(1) = (Trace + Gap) / two
+Eigenvalue(2) = (Trace - Gap) / two
+
+! Retrieve two copies of the least-constrained Eigenvector (one copy may have zero length)
+
+Eigenvectors(:,:) = Hessian(:,:) - (Identity(:,:) * Eigenvalue(1))
+
+! Pick the longest of the two
+
+if (Eigenvectors(2,1) ** two + Eigenvectors(2,2) ** two < & 
+  Eigenvectors(1,1) ** two + Eigenvectors(1,2) ** two) then
+  FirstEigenvector(:) = Eigenvectors(1,:)
+else
+  FirstEigenvector(:) = Eigenvectors(2,:)
+end if
+
+! Normalisation for First Eigenvector so that it corresponds to distance to where cost function reaches
+! unity for a quadratic cost function
+
+Normalisation = sum (FirstEigenvector ** two) * Eigenvalue(2) * half
+if (Normalisation > zero) then
+
+  ! The uncertainty in the CTP is the first component of this eigenvector (second component is Cloud Fraction)
+
+  ob % cloudtopp_error = abs (FirstEigenvector(1)) / sqrt (Normalisation)
+
+end if
+
+! Tidy up
+if(allocated(ChannelWeights)) deallocate(ChannelWeights)
+
+end subroutine ufo_rttovonedvarcheck_ctp_error
 
 end module ufo_rttovonedvarcheck_utils_mod

@@ -42,6 +42,7 @@ real(kind_real), allocatable :: sol_zen(:)      ! observation solar zenith angle
 real(kind_real), allocatable :: sol_azi(:)      ! observation solar azimuth angle
 real(kind_real), allocatable :: cloudtopp(:)    !< cloud top pressure (used in if cloudy retrieval used)
 real(kind_real), allocatable :: cloudfrac(:)    !< cloud fraction (used in if cloudy retrieval used)
+real(kind_real), allocatable :: cloudtopp_error(:)  !< cloud top pressure error calculated from retrieved profile
 integer, allocatable         :: surface_type(:) ! surface type
 integer, allocatable         :: satellite_identifier(:) ! WMO_ID
 integer, allocatable         :: niter(:)        ! number of iterations
@@ -235,8 +236,10 @@ end if
 if (config % cloud_retrieval) then
   allocate(self % cloudtopp(self % iloc))
   allocate(self % cloudfrac(self % iloc))
+  allocate(self % cloudtopp_error(self % iloc))
   self % cloudtopp(:) = 850.0_kind_real
   self % cloudfrac(:) = zero
+  self % cloudtopp_error(:) = missing_real
 
   variable_present = obsspace_has(config % obsdb, "MetaData", "pressureAtTopOfCloud")
   if (variable_present) then
@@ -367,6 +370,7 @@ if (allocated(self % sol_zen))        deallocate(self % sol_zen)
 if (allocated(self % sol_azi))        deallocate(self % sol_azi)
 if (allocated(self % cloudtopp))      deallocate(self % cloudtopp)
 if (allocated(self % cloudfrac))      deallocate(self % cloudfrac)
+if (allocated(self % cloudtopp_error)) deallocate(self % cloudtopp_error)
 if (allocated(self % surface_type))   deallocate(self % surface_type)
 if (allocated(self % satellite_identifier)) deallocate(self % satellite_identifier)
 if (allocated(self % niter))          deallocate(self % niter)
@@ -672,6 +676,12 @@ if (prof_index % cloudtopp > 0) then
     ctp = ctp / Pa_to_hPa ! hPa to Pa
   end where
   call put_1d_indb(self % output_to_db(:), obsdb, "pressureAtTopOfCloud", "OneDVar", ctp)
+  ! Add the error estimate
+  ctp(:) = self % cloudtopp_error(:)
+  where (ctp /= missing_real)
+    ctp = ctp / Pa_to_hPa ! hPa to Pa
+  end where
+  call put_1d_indb(self % output_to_db(:), obsdb, "pressureAtTopOfCloudError", "OneDVar", ctp)
   deallocate(ctp)
 end if
 
