@@ -31,13 +31,6 @@ namespace ufo {
                                Here());
       if (odb_.obs_sort_order() != "descending")
         throw eckit::UserError("Profiles must be sorted in descending order", Here());
-    } else {
-      oops::Log::warning() << "Warning: the requirement that pressures are sorted in "
-                           << "descending order has been disabled for this operator. "
-                           << "This could lead to incorrect behaviour. "
-                           << "If you did not intend to do this, ensure that the option "
-                           << "'require descending pressure sort' is set to 'true'."
-                           << std::endl;
     }
 
     // Check the ObsSpace has been extended. If this is not the case

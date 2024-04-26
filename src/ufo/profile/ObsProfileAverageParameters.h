@@ -53,7 +53,8 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
 
   oops::Parameter<bool> requireDescendingPressureSort{
     "require descending pressure sort",
-    "Require pressures to be sorted in descending order",
+    "Require pressures to be sorted in descending order. "
+    "Warning: setting this to `false` could lead to incorrect behaviour.",
     true,
     this};
 
