@@ -106,6 +106,11 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// Use RTTOV-Scatt interface to simulate microwave radiances affected by cloud and precipitation.
   oops::Parameter<bool> doMWScatt{"Do_MW_Scatt", false, this};
 
+  /// Use qc flags to decide whether a profile should be passed to rttov. This option
+  /// will switch on the profile by profile running
+  oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
+     "skip profiles if no channels are passed or passivated in the qc flag", false, this};
+
   /// Specify the profiles where further diagnostics are needed
   /// for debugging e.g. [1, 2, 3]
   /// Note this is numbering from 1 as it is Fortran that will provide output.

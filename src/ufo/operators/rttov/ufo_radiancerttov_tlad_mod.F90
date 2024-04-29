@@ -455,7 +455,7 @@ contains
     ! ------------------------------------
     self % ltraj = .true.
 
-end subroutine ufo_radiancerttov_tlad_settraj
+  end subroutine ufo_radiancerttov_tlad_settraj
 
   ! ------------------------------------------------------------------------------
   subroutine ufo_radiancerttov_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)

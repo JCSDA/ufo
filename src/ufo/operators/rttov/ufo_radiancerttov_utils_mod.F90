@@ -194,7 +194,8 @@ module ufo_radiancerttov_utils_mod
     logical                               :: UseQtsplitRain
     logical                               :: RTTOV_profile_checkinput
     logical                               :: Do_MW_Scatt
-    
+    logical                               :: UseQCFlagsToSkipHofX
+
     logical                               :: prof_by_prof
     logical                               :: RTTOV_scale_ref_ozone
     logical                               :: debug       ! debug output
@@ -434,7 +435,15 @@ contains
       conf % prof_by_prof = .true.
     end if
 
-    ! Populate RTTOV operator default options and overrides; read coefficients 
+    ! Decide whether to produce HofX when no channels are active for a profile
+    call f_confOpts % get_or_die("UseQCFlagsToSkipHofX", conf % UseQCFlagsToSkipHofX)
+    if (conf % UseQCFlagsToSkipHofX .and. .not. conf % prof_by_prof) then
+      message = 'UseQCFlagsToSkipHofX does not support batch processing. Setting prof_by_prof to TRUE'
+      call fckit_log%info(message)
+      conf % prof_by_prof = .true.
+    end if
+
+    ! Populate RTTOV operator default options and overrides; read coefficients
     if(.not. conf % rttov_is_setup) then
       call conf % setup(f_confOpts)
     end if

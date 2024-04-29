@@ -177,3 +177,48 @@ observations:
     action:
       name: reject
   passedBenchmark: 0   # no valid obs, so number passing QC is zero
+# (3) Test obs operator UseQCFlagsToSkipHofX option
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      WMO_ID: [225]
+      Sat_ID: [noaa_20]
+      Instrument_Name: ATMS
+      CoefficientPath: Data/
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: true
+      UseQCFlagsToSkipHofX: true
+  obs space:
+    name: atms_n20
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &all_channels 1-22
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/atms_n20_obs_20191230T0000_rttov_qc_out_test0.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs filters:
+### Remove high land
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-22
+    where:
+    - variable:
+        name: MetaData/heightOfSurface
+      maxvalue: 500.0
+  compareVariables:
+    - reference:
+        name: TestReference/brightnessTemperature_hofxqcflag
+      test:
+        name: hofx/brightnessTemperature
+      absTol: 1.0e-3
+

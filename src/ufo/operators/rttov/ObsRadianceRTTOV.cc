@@ -36,9 +36,13 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
   const oops::Variables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
+  // values for passed qc
+  std::vector<int> qc_passed = {QCflags::pass, QCflags::passive};
+
   // call Fortran setup routine
   ufo_radiancerttov_setup_f90(keyOperRadianceRTTOV_, parameters.toConfiguration(),
-                             channels_list.size(), channels_list[0], varin_);
+                             channels_list.size(), channels_list[0], varin_,
+                             qc_passed.size(), qc_passed[0]);
 
   // Remove ozone from varin_ if calculate from ref is switched on
   if (parameters.obsOptions.value().RTTOVScaleRefOzone.value())
@@ -61,7 +65,7 @@ void ObsRadianceRTTOV::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
                                   ObsDiagnostics & dvec, const QCFlags_t& qc_flags) const {
   ufo_radiancerttov_simobs_f90(keyOperRadianceRTTOV_, gom.toFortran(), odb_,
                           ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
-                          dvec.toFortran());
+                          dvec.toFortran(), reinterpret_cast<const void*>(&qc_flags));
   oops::Log::trace() << "ObsRadianceRTTOV simulateObs done." << std::endl;
 }
 

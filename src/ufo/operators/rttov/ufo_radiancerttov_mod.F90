@@ -31,6 +31,7 @@ module ufo_radiancerttov_mod
     private
     character(len=MAXVARLEN), public, allocatable :: varin(:)      ! variables requested from the model.
     integer, allocatable                          :: channels(:)   ! list of instrument channels to simulate.
+    integer, allocatable                          :: qc_passed(:)  ! list of values indicating passed qc
     integer, allocatable                          :: coefindex(:)  ! list of the coefindex for the channels to simulate.
     type(rttov_conf)                              :: conf
     type(ufo_rttov_io)                            :: RTProf
@@ -43,12 +44,13 @@ module ufo_radiancerttov_mod
 contains
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_setup(self, f_confOper, channels)
+  subroutine ufo_radiancerttov_setup(self, f_confOper, channels, qc_passed)
 
     implicit none
     class(ufo_radiancerttov), intent(inout) :: self
     type(fckit_configuration), intent(in)   :: f_confOper
     integer(c_int),            intent(in)   :: channels(:)  !List of channels to use
+    integer(c_int), optional,  intent(in)   :: qc_passed(:) !List of values indicating passed qc
 
     type(fckit_configuration)               :: f_confOpts ! RTcontrol
     integer                                 :: ind, j, jspec, ii, jj, jnew
@@ -89,6 +91,12 @@ contains
     allocate(self % coefindex(self % RTprof % nchan_inst))
     self % coefindex(:) = 0
     self % channels(:) = channels
+
+    ! Copy flags to fortran object
+    if (present(qc_passed)) then
+      allocate(self % qc_passed(size(qc_passed)))
+      self % qc_passed(:) = qc_passed(:)
+    end if
 
     jnew = 1
     coefloop: do ii = 1, self % RTprof % nchan_inst
@@ -143,19 +151,22 @@ contains
 
   ! ------------------------------------------------------------------------------
   subroutine ufo_radiancerttov_simobs(self, geovals, obss, nvars, nlocs,      &
-                                      hofx, hofxdiags, ob_info)
+                                      hofx, hofxdiags, qcf_p, ob_info)
     use fckit_mpi_module,   only: fckit_mpi_comm
+    use obsdatavector_mod,  only: obsdatavector_int
+    use iso_fortran_env,    only: int64
     use ufo_rttovonedvarcheck_ob_mod
 
     implicit none
 
-    class(ufo_radiancerttov), intent(inout) :: self
-    type(ufo_geovals),        intent(in)    :: geovals
-    type(c_ptr), value,       intent(in)    :: obss
-    integer,                  intent(in)    :: nvars, nlocs
+    class(ufo_radiancerttov), intent(inout)   :: self
+    type(ufo_geovals),        intent(in)      :: geovals
+    type(c_ptr), value,       intent(in)      :: obss
+    integer,                  intent(in)      :: nvars, nlocs
 
-    real(c_double),        intent(inout)    :: hofx(nvars,nlocs)
-    type(ufo_geovals),     intent(inout)    :: hofxdiags    !non-h(x) diagnostics
+    real(c_double),        intent(inout)      :: hofx(nvars,nlocs)
+    type(ufo_geovals),     intent(inout)      :: hofxdiags    !non-h(x) diagnostics
+    type(c_ptr), value, optional, intent(in)  :: qcf_p
     type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
 
     real(c_double)                          :: missing
@@ -173,13 +184,15 @@ contains
 
     integer                                 :: iprof_rttov, iprof, ichan, ichan_sim, jchan
     integer                                 :: nprof_sim, nprof_max_sim, nchan_total
-    integer                                 :: nchan_sim
+    integer                                 :: nchan_sim, qc_flag
+    integer(int64)                          :: ii, pp
     integer                                 :: prof_start, prof_end
     integer                                 :: sensor_index
     integer, allocatable                    :: prof_list(:,:)  ! store list of 'good' profiles
 
-    logical                                 :: jacobian_needed
+    logical                                 :: jacobian_needed, skip_profile
     real(kind_real), allocatable            :: sfc_emiss(:,:)
+    type(obsdatavector_int)                 :: qc_flags
 
     include 'rttov_direct.interface'
     include 'rttov_scatt.interface'
@@ -209,6 +222,11 @@ contains
     nlevels = geoval_temp % nval
     nullify(geoval_temp)
 
+    ! Setup qc flags will be run profile by profile
+    if (present(qcf_p)) then
+      if (self % conf % UseQCFlagsToSkipHofX) qc_flags % data_ptr = qcf_p
+    end if
+
     ! Sanity checks
     if (nprofiles == 0) return
 
@@ -219,7 +237,7 @@ contains
 
     call self % RTprof % alloc_profiles(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
 
-    !Assign the atmospheric and surface data from the GeoVaLs
+    ! Assign the atmospheric and surface data from the GeoVaLs
     message = trim(routine_name) // ': Creating RTTOV profiles from geovals'
     call fckit_log%debug(message)
     if(present(ob_info)) then
@@ -268,6 +286,28 @@ contains
     nchan_total = 0
 
     RTTOV_loop : do while (prof_start <= prof_end)
+      ! Check qc flags if requested and skip if no active channels
+      ! note prof_by_prof is set to true if UseQCFlagsToSkipHofX is true
+      if (present(qcf_p) .and. allocated(self % qc_passed)) then
+        if (self % conf % UseQCFlagsToSkipHofX) then
+          skip_profile = .true.
+          do ichan = 1, self % RTprof % nchan_inst
+            ii = ichan ! conversion to int64
+            pp = prof_start ! conversion to int64
+            qc_flag = qc_flags % get(ii, pp)
+            if (any(self % qc_passed == qc_flag)) then
+              skip_profile = .false.
+              exit
+            end if
+          end do
+          if (skip_profile) then
+            ! increment profile and channel counters and skip this one
+            nchan_total = nchan_total + nchan_sim
+            prof_start = prof_start + nprof_sim
+            cycle
+          end if
+        end if
+      end if
 
       ! Zero all k code variables.  These arrays are of size prof_end-prof_start
       if (jacobian_needed) call self % RTprof % zero_k(self % conf, reset_profiles_k=.false.)
@@ -288,7 +328,7 @@ contains
       !allocate list used to store 'good' profiles
       !initialise to -1, so no bad profile is given an emissivity
       allocate(prof_list(nprof_sim,2))
-      prof_list = -1 
+      prof_list = -1
 
       ! Build the list of profile/channel indices in chanprof
       do iprof_rttov = 1, nprof_sim
