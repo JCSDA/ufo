@@ -1,0 +1,89 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Radar scan edge filter
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_edge_flag.nc
+      obsgrouping:
+        group variables: [dateTime, beamTiltAngle, stationIdentification]
+    observed variables: [radialVelocity]
+    simulated variables: [radialVelocity]
+  obs pre filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/radarScanEdgeFlag
+      type: int
+      function:
+        name: IntObsFunction/RadarScanEdgeFlag
+        options:
+          Laplace filter threshold: 1.0
+          cleaning filter threshold: 5
+          double cleaning filter threshold: 2
+  # Assign arbitrary obs error.
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  compareVariables:
+  - test:
+      name: MetaData/radarScanEdgeFlag
+    reference:
+      name: TestReference/radarScanEdgeFlag
+
+- obs space:
+    name: Radar scan edge filter with where statement
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_edge_flag.nc
+      obsgrouping:
+        group variables: [dateTime, beamTiltAngle, stationIdentification]
+    observed variables: [radialVelocity]
+    simulated variables: [radialVelocity]
+  obs pre filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/radarScanEdgeFlag
+      type: int
+      function:
+        name: IntObsFunction/RadarScanEdgeFlag
+        options:
+          where:
+            - variable:
+                name: MetaData/gateRange
+              maxvalue: 45000
+          Laplace filter threshold: 1.0
+          cleaning filter threshold: 5
+          double cleaning filter threshold: 2
+  # Assign arbitrary obs error.
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  compareVariables:
+  - test:
+      name: MetaData/radarScanEdgeFlag
+    reference:
+      name: TestReference/radarScanEdgeFlagWhere
+
+- obs space:
+    name: Grouping not performed, throwing an exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_profilelevelcount.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/radarScanEdgeFlag
+      type: int
+      function:
+        name: IntObsFunction/RadarScanEdgeFlag
+  expectExceptionWithMessage: Group variables configuration is empty
+

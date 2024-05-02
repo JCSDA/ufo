@@ -342,6 +342,8 @@ set ( filters_files
       obsfunctions/FillAveragedProfileData.h
       obsfunctions/MetOfficeRelativeHumidityCorrection.cc
       obsfunctions/MetOfficeRelativeHumidityCorrection.h
+      obsfunctions/RadarScanEdgeFlag.cc
+      obsfunctions/RadarScanEdgeFlag.h
 )
 
 if( ${gsw_FOUND} )
