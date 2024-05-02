@@ -12,14 +12,13 @@ if [ "$#" -lt 2 ]; then
 fi
 
 generate=$1
-generate_dir=../../src/ufo/$2
-generate_path=ufo/$2
+generate_dir=$2
 
 example_lc=`echo ${example} | perl -ne 'print lc'`
 generate_lc=`echo ${generate} | perl -ne 'print lc'`
 
 example_cpp_define=`echo ${example_path}_OBS${example} | perl -ne 'print uc' | perl -pe "s/\//_/g"`
-generate_cpp_define=`echo ${generate_path}_OBS${generate} | perl -ne 'print uc' | perl -pe "s/\//_/g"`
+generate_cpp_define=`echo ${generate_dir}_OBS${generate} | perl -ne 'print uc' | perl -pe "s/\//_/g"`
 
 mkdir -p ${generate_dir}
 cp example/CMakeLists.txt ${generate_dir}
@@ -35,14 +34,12 @@ cp example/ufo_${example_lc}_mod.F90        ${generate_dir}/ufo_${generate_lc}_m
 cp example/ufo_${example_lc}_tlad_mod.F90   ${generate_dir}/ufo_${generate_lc}_tlad_mod.F90
 cp example/Obs${example}Parameters.h ${generate_dir}/Obs${generate}Parameters.h
 
-# replace the defines in *h files
-perl -p -i -e "s/${example_cpp_define}/${generate_cpp_define}/g" ${generate_dir}/Obs*.h
 # replace Example class name with new name
 perl -p -i -e "s/${example}/${generate}/g" ${generate_dir}/*
 # replace example struct and routine names in the Fortran calls
 perl -p -i -e "s/ufo_${example_lc}/ufo_${generate_lc}/g" ${generate_dir}/*
 # replace include headers in *cc and *h files
-perl -p -i -e "s#${example_path}#${generate_path}#g" ${generate_dir}/Obs*
+perl -p -i -e "s#${example_path}#${generate_dir}#g" ${generate_dir}/Obs*
 # replace example in the rest of the files
 perl -p -i -e "s/${example_lc}/${generate_lc}/g" ${generate_dir}/*
 
