@@ -497,7 +497,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
               processWhereIsDefined<float>(filterdata, varname, whereTest);
             } else if (dtype == ioda::ObsDtype::String) {
               processWhereIsDefined<std::string>(filterdata, varname, whereTest);
-            } else {
+            } else if (dtype != ioda::ObsDtype::Empty) {
               throw eckit::UserError(
                 "Only integer, float and string variables may be used for processWhere "
                 "'is_defined'",
@@ -519,7 +519,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             processWhereIsNotDefined<float>(filterdata, varname, whereTest);
           } else if (dtype == ioda::ObsDtype::String) {
             processWhereIsNotDefined<std::string>(filterdata, varname, whereTest);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only integer, float and string variables may be used for processWhere "
               "'is_not_defined'",
@@ -537,7 +537,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
           } else if (dtype == ioda::ObsDtype::Integer) {
             isInInteger(whereTest, currentParams.isIn.value()->as<std::set<int>>(),
                         filterdata, varname);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_in'",
               Here());
@@ -564,7 +564,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
                 "For 'is_close' one (and only one) tolerance is needed.",
                 Here());
             }
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only float variables may be used for processWhere 'is_close'",
               Here());
@@ -581,7 +581,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
           } else if (dtype == ioda::ObsDtype::Integer) {
             isNotInInteger(whereTest, currentParams.isNotIn.value()->as<std::set<int>>(),
                            filterdata, varname);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only integer and string variables may be used for processWhere 'is_not_in'",
               Here());
@@ -608,7 +608,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
                 "For 'is_close' one (and only one) tolerance is needed.",
                 Here());
             }
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only float variables may be used for processWhere 'is_not_close'",
               Here());
@@ -664,7 +664,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             const std::set<int> &bitIndices = *currentParams.anyBitUnsetOf.value();
             filterdata.get(varname, data);
             processWhereAnyBitUnsetOf(data, bitIndices, whereTest);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_unset_of'",
               Here());

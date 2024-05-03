@@ -444,7 +444,9 @@ ioda::ObsDtype ObsFilterData::dtype(const Variable & varname) const {
   const std::string grp = varname.group();
   // Default to float
   ioda::ObsDtype res = ioda::ObsDtype::Float;
-  if (obsdb_.has(grp, var)) {
+  if (obsdb_.empty()) {
+    res = ioda::ObsDtype::Empty;
+  } else if (obsdb_.has(grp, var)) {
     res = obsdb_.dtype(grp, var);
   } else if (hasDataVectorInt(varname.group(), varname.variable())) {
     res = ioda::ObsDtype::Integer;
