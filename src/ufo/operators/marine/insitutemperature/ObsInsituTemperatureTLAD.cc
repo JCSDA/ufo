@@ -57,7 +57,8 @@ ObsInsituTemperatureTLAD::~ObsInsituTemperatureTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                             const QCFlags_t & qc_flags) {
   ufo_insitutemperature_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsInsituTemperatureTLAD: trajectory set" << std::endl;
 }

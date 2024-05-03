@@ -62,7 +62,8 @@ ObsRadianceRTTOVCPPTLAD::~ObsRadianceRTTOVCPPTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                            const QCFlags_t & qc_flags) {
 //
   ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, CoefFileName, channels_,
                           nlevels, skip_profile);

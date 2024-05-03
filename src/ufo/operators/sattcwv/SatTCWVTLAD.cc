@@ -48,7 +48,8 @@ SatTCWVTLAD::~SatTCWVTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                const QCFlags_t & qc_flags) {
   // Get number of obs locations & number of model pressure levels
   nprofiles = geovals.nlocs();
   nlevels   = geovals.nlevs("air_pressure_levels");  // number of full (rho) levels

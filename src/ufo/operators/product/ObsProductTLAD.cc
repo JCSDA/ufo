@@ -67,7 +67,7 @@ ObsProductTLAD::~ObsProductTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsProductTLAD::setTrajectory(const GeoVaLs & gv, ObsDiagnostics &) {
+void ObsProductTLAD::setTrajectory(const GeoVaLs & gv, ObsDiagnostics &, const QCFlags_t &) {
   oops::Log::trace() << "ObsProductTLAD::setTrajectory starting" << std::endl;
 
   // Get variable that will scale h(x)

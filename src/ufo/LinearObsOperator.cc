@@ -49,7 +49,8 @@ LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configura
 
 // -----------------------------------------------------------------------------
 
-void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias) {
+void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bias,
+                                      const QCFlags_t & qc_flags) {
   typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
   oops::Variables vars;
@@ -63,7 +64,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
   auto locs = std::make_unique<SampledLocations>(lons, lats, times, odb_.distribution());
   ObsDiagnostics ydiags(odb_, SampledLocations_(std::move(locs)), vars);
   ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
-  oper_->setTrajectory(gvals, ydiags);
+  oper_->setTrajectory(gvals, ydiags, qc_flags);
   if (bias) {
     biasoper_.reset(new LinearObsBiasOperator(odb_));
     biasoper_->setTrajectory(gvals, bias, ydiags);

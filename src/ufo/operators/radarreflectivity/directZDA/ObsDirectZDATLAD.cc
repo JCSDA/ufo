@@ -41,7 +41,8 @@ ObsDirectZDATLAD::~ObsDirectZDATLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsDirectZDATLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsDirectZDATLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                     const QCFlags_t & qc_flags_t) {
   oops::Log::trace() << "ObsDirectZDATLAD::setTrajectory entering" << std::endl;
 
   ufo_directZDA_tlad_settraj_f90(keyOperDirectZDA_, geovals.toFortran(), obsspace() );

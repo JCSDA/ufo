@@ -48,7 +48,8 @@ ObsIdentityTLAD::~ObsIdentityTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::setTrajectory(const GeoVaLs &, ObsDiagnostics &) {
+void ObsIdentityTLAD::setTrajectory(const GeoVaLs &, ObsDiagnostics &,
+                                    const QCFlags_t & qc_flags) {
   // The trajectory is not needed because the observation operator is linear.
   oops::Log::trace() << "ObsIdentityTLAD: trajectory set" << std::endl;
 }

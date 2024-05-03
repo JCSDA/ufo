@@ -41,7 +41,8 @@ ObsAtmVertInterpLayTLAD::~ObsAtmVertInterpLayTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAtmVertInterpLayTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsAtmVertInterpLayTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                            const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsAtmVertInterpLayTLAD::setTrajectory entering" << std::endl;
 
   ufo_atmvertinterplay_tlad_settraj_f90(keyOperAtmVertInterpLay_, geovals.toFortran(), obsspace());

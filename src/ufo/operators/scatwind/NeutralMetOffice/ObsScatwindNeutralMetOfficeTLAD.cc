@@ -53,7 +53,8 @@ ObsScatwindNeutralMetOfficeTLAD::~ObsScatwindNeutralMetOfficeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsScatwindNeutralMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsScatwindNeutralMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                                    const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsScatwindNeutralMetOfficeTLAD::setTrajectory entering" << std::endl;
 
   ufo_scatwind_neutralmetoffice_tlad_settraj_f90(keyOperScatwindNeutralMetOffice_,

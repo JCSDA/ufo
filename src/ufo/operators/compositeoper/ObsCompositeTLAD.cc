@@ -50,11 +50,12 @@ ObsCompositeTLAD::~ObsCompositeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
+void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags,
+                                     const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory entered" << std::endl;
 
   for (const std::unique_ptr<LinearObsOperatorBase> &component : components_) {
-    component->setTrajectory(geovals, ydiags);
+    component->setTrajectory(geovals, ydiags, qc_flags);
   }
   oops::Log::trace() << "ObsCompositeTLAD: setTrajectory exit " <<  std::endl;
 }

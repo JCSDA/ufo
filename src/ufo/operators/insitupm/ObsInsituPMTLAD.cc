@@ -39,7 +39,8 @@ ObsInsituPMTLAD::~ObsInsituPMTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituPMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & d) {
+void ObsInsituPMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & d,
+                                    const QCFlags_t & qc_flags) {
   ufo_insitupm_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsInsituPMTLAD: trajectory set" << std::endl;
 }

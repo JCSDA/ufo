@@ -50,7 +50,8 @@ ObsRadianceRTTOVTLAD::~ObsRadianceRTTOVTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
+void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags,
+                                         const QCFlags_t & qc_flags) {
   ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), obsspace(),
                                     ydiags.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOVTLAD::setTrajectory done" << std::endl;

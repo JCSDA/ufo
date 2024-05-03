@@ -47,7 +47,8 @@ ObsAodLUTsTLAD::~ObsAodLUTsTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodLUTsTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsAodLUTsTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+  const QCFlags_t & qc_flags) {
   ufo_aodluts_tlad_settraj_f90(keyOperAodLUTs_, geovals.toFortran(), obsspace());
 }
 

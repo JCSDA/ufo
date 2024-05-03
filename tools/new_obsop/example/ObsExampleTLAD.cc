@@ -39,7 +39,8 @@ ObsExampleTLAD::~ObsExampleTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags) {
+void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags,
+                                   const QCFlags_t & qc_flags) {
   ufo_example_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace(), ydiags.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: trajectory set" << std::endl;
 }

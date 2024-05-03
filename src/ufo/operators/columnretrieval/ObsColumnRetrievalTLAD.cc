@@ -41,7 +41,8 @@ ObsColumnRetrievalTLAD::~ObsColumnRetrievalTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsColumnRetrievalTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsColumnRetrievalTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                           const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsColumnRetrievalTLAD::setTrajectory entering" << std::endl;
 
   ufo_columnretrieval_tlad_settraj_f90(keyOperColumnRetrieval_, geovals.toFortran(), obsspace());

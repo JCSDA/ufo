@@ -53,7 +53,8 @@ ObsADTTLAD::~ObsADTTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                               const QCFlags_t & qc_flags) {
 }
 
 // -----------------------------------------------------------------------------

@@ -45,12 +45,13 @@ ObsCategoricalTLAD::~ObsCategoricalTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsCategoricalTLAD::setTrajectory(const GeoVaLs & geovals,
-                                       ObsDiagnostics & ydiags) {
+                                       ObsDiagnostics & ydiags,
+                                       const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsCategoricalTLAD: setTrajectory entered" << std::endl;
 
   // Set trajectory for each operator.
   for (const auto& component : data_.components())
-    component.second->setTrajectory(geovals, ydiags);
+    component.second->setTrajectory(geovals, ydiags, qc_flags);
 
   oops::Log::trace() << "ObsCategoricalTLAD: setTrajectory finished" <<  std::endl;
 }

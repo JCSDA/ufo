@@ -56,7 +56,7 @@ class SatTCWVTLAD : public LinearObsOperatorBase,
   * \date Sept. 2021: Created by J. Hocking (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
+  void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) override;
 
   // -----------------------------------------------------------------------------
   /*! \brief Given an increment to the model state, calculate an increment to the

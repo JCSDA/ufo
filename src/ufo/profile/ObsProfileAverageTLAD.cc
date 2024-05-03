@@ -43,7 +43,8 @@ ObsProfileAverageTLAD::~ObsProfileAverageTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsProfileAverageTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsProfileAverageTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                          const QCFlags_t & qc_flags) {
   // Cache the model trajectory for use in the slant path location algorithm.
   data_.cacheGeoVaLs(geovals);
   oops::Log::trace() << "ObsProfileAverageTLAD: trajectory set" << std::endl;

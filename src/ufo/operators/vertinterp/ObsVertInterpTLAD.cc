@@ -54,7 +54,8 @@ ObsVertInterpTLAD::~ObsVertInterpTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                      const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsVertInterpTLAD::setTrajectory entering" << std::endl;
 
   ufo_vertinterp_tlad_settraj_f90(keyOperVertInterp_, geovals.toFortran(), obsspace());

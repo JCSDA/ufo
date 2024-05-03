@@ -41,7 +41,8 @@ ObsRadarDopplerWindTLAD::~ObsRadarDopplerWindTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsRadarDopplerWindTLAD::setTrajectory(const GeoVaLs & geovals,
-                                            ObsDiagnostics & ydiags) {
+                                            ObsDiagnostics & ydiags,
+                                            const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsRadarDopplerWindTLAD: setTrajectory entered" << std::endl;
 
   data_.cacheVertCoordGeoVaLs(geovals);

@@ -58,7 +58,7 @@ class LinearObsOperatorBase : public util::Printable,
   virtual ~LinearObsOperatorBase() {}
 
 /// Obs Operator
-  virtual void setTrajectory(const GeoVaLs &, ObsDiagnostics &) = 0;
+  virtual void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) = 0;
   virtual void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const = 0;
   virtual void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const = 0;
 

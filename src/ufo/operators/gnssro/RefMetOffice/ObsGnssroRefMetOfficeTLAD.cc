@@ -54,7 +54,8 @@ ObsGnssroRefMetOfficeTLAD::~ObsGnssroRefMetOfficeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRefMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsGnssroRefMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                              const QCFlags_t & qc_flags) {
   ufo_gnssro_refmetoffice_tlad_settraj_f90(keyOperGnssroRefMetOffice_, geovals.toFortran(),
                                            obsspace());
 }

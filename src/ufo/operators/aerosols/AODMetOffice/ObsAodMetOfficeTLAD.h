@@ -60,7 +60,7 @@ class ObsAodMetOfficeTLAD : public LinearObsOperatorBase,
   * \date Oct. 2021: Created by H. Lawrence (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
+  void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) override;
 
   // -----------------------------------------------------------------------------
   /*! \brief Given an increment to the model state (dust mass concentration), calculate

@@ -46,7 +46,8 @@ ObsCoolSkinTLAD::~ObsCoolSkinTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsCoolSkinTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                    const QCFlags_t & qc_flags) {
   ufo_CoolSkin_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsCoolSkinTLAD: trajectory set" << std::endl;
 }

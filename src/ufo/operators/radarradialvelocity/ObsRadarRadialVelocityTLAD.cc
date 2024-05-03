@@ -44,7 +44,8 @@ ObsRadarRadialVelocityTLAD::~ObsRadarRadialVelocityTLAD() {
 // -----------------------------------------------------------------------------
 
 void ObsRadarRadialVelocityTLAD::setTrajectory(const GeoVaLs & geovals,
-                                               ObsDiagnostics &) {
+                                               ObsDiagnostics &,
+                                               const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsRadarRadialVelocityTLAD::setTrajectory entering" << std::endl;
 
   ufo_radarradialvelocity_tlad_settraj_f90(keyOperRadarRadialVelocity_, geovals.toFortran(),

@@ -69,7 +69,8 @@ ObsAodMetOfficeTLAD::~ObsAodMetOfficeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                        const QCFlags_t & qc_flags) {
     // Get number of obs locations & number of model pressure levels:
     std::size_t nprofiles = geovals.nlocs();
     std::size_t nlevels   = geovals.nlevs("air_pressure_levels");  // number of full (rho) levels

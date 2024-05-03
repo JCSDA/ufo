@@ -44,7 +44,7 @@ class ObsCoolSkinTLAD : public LinearObsOperatorBase,
   virtual ~ObsCoolSkinTLAD();
 
   // Obs Operators
-  void setTrajectory(const GeoVaLs &, ObsDiagnostics &) override;
+  void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) override;
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 

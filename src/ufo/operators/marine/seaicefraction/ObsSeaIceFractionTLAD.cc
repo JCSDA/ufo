@@ -41,7 +41,8 @@ ObsSeaIceFractionTLAD::~ObsSeaIceFractionTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                          const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsSeaIceFractionTLAD: trajectory set" << std::endl;
 }
 

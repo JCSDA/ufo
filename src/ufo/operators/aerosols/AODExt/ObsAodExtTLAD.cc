@@ -40,7 +40,8 @@ ObsAodExtTLAD::~ObsAodExtTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsAodExtTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsAodExtTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                  const QCFlags_t & qc_flags) {
   oops::Log::trace() << "ObsAodExtTLAD:trajectory entering" <<std::endl;
   ufo_aodext_tlad_settraj_f90(keyOper_, geovals.toFortran(), obsspace());
   oops::Log::trace() << "ObsAodExtTLAD: set trajectory exiting" << std::endl;

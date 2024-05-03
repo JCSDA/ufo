@@ -47,7 +47,8 @@ ObsGnssroBndROPP1DTLAD::~ObsGnssroBndROPP1DTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndROPP1DTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsGnssroBndROPP1DTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                           const QCFlags_t & qc_flags) {
   ufo_gnssro_bndropp1d_tlad_settraj_f90(keyOperGnssroBndROPP1D_, geovals.toFortran(), obsspace());
 }
 

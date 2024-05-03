@@ -61,7 +61,8 @@ ObsGnssroBendMetOfficeTLAD::~ObsGnssroBendMetOfficeTLAD() {
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBendMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &) {
+void ObsGnssroBendMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
+                                               const QCFlags_t & qc_flags) {
   ufo_gnssro_bendmetoffice_tlad_settraj_f90(keyOperGnssroBendMetOffice_, geovals.toFortran(),
                                             obsspace());
 }
