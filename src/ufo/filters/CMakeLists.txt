@@ -283,6 +283,8 @@ set ( filters_files
       obsfunctions/ObsErrorFactorConventional.h
       obsfunctions/NearSSTRetCheckIR.cc
       obsfunctions/NearSSTRetCheckIR.h
+      obsfunctions/ObsFunctionElementMultiply.cc
+      obsfunctions/ObsFunctionElementMultiply.h
       obsfunctions/ObsFunctionExponential.cc
       obsfunctions/ObsFunctionExponential.h
       obsfunctions/ObsFunctionScattering.cc

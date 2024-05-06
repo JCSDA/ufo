@@ -1,0 +1,197 @@
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space: &ObsSpace
+    name: Aircraft
+    simulated variables: [airTemperature]
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [ 0, 0, 0, 0, 0, 0, 0 ]
+        lons: [ 0, 0, 0, 0, 0, 0, 0 ]
+        dateTimes:
+          - 240
+          - 250
+          - 260
+          - 270
+          - 280
+          - 290
+          - 300
+        epoch: "seconds since 2018-04-14T21:00:00Z"
+        obs errors: [1.0]
+        obs values: [288.]
+
+  obs filters:
+  # Variables to perform ElementMultiply on
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_1
+      type: float
+      value: 1.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_2
+      type: float
+      value: 2.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_3
+      type: float
+      value: 3.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_1
+      type: float
+      value: -1.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_0
+      type: float
+      value: 0.
+
+ # Test variables
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/product
+      type: float
+      value: 6.
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/exponents
+      type: float
+      value: 18.
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/divide0
+      type: float
+      value: missing
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/complex
+      type: float
+      value: missing
+
+  # ElementMultiply tests
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/product
+      type: float
+      function:
+        name: ObsFunction/ElementMultiply
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          - name: MetaData/variable_3
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/exponents
+      type: float
+      function:
+        name: ObsFunction/ElementMultiply
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          - name: MetaData/variable_3
+          exponents: [3.,1.,2.]
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/divide0
+      type: float
+      function:
+        name: ObsFunction/ElementMultiply
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          - name: MetaData/variable_0
+          exponents: [2.,3.,-1.]
+          abort if invalid operation: False
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/complex
+      type: float
+      function:
+        name: ObsFunction/ElementMultiply
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_minus_1
+          - name: MetaData/variable_0
+          exponents: [2.,3.5,1.]
+          abort if invalid operation: False
+
+  compareVariables:
+  - test:
+      name: MetaData/product
+    reference:
+      name: TestReference/product
+
+  - test:
+      name: MetaData/exponents
+    reference:
+      name: TestReference/exponents
+
+  - test:
+      name: MetaData/divide0
+    reference:
+      name: TestReference/divide0
+
+  - test:
+      name: MetaData/complex
+    reference:
+      name: TestReference/complex
+
+# Exception behaviour
+
+- obs space:
+    <<: *ObsSpace
+    name: Try producing complex number.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_2
+      type: float
+      value: -2
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/ElementMultiply
+        options:
+          variables:
+          - name: MetaData/variable_minus_2
+          exponents: [1.5]
+  expectExceptionWithMessage: Coefficient exponent error. Trying to raise a negative number to a non-integer exponent. Complex numbers are not currently supported. Variable is MetaData/variable_minus_2 at location 0.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try dividing by 0.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_2
+      type: float
+      value: 2
+    - name: MetaData/variable_0
+      type: float
+      value: 0
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/ElementMultiply
+        options:
+          variables:
+          - name: MetaData/variable_2
+          - name: MetaData/variable_0
+          exponents: [3, -1]
+  expectExceptionWithMessage: Div/0 error! Variable is MetaData/variable_0 at location 0.
