@@ -9,10 +9,9 @@ module ufo_atmvertinterplay_tlad_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_lay_mod
-  use missing_values_mod
+  use missing_values_mod, only: missing_value
   use, intrinsic :: iso_c_binding
   use kinds, only: kind_real
-  use missing_values_mod
 
 ! ------------------------------------------------------------------------------
 
@@ -141,6 +140,8 @@ subroutine atmvertinterplay_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hof
   character(len=MAXVARLEN) :: var_zdir
   type(ufo_geovals) :: geovals
   integer :: nsig
+  real(c_double) :: missing
+  missing = missing_value(missing)
   call ufo_geovals_copy(geovals_in, geovals)  ! dont want to change geovals_in
   do ivar = 1, nvars
     ! Get the name of input variable in geovals
@@ -148,8 +149,10 @@ subroutine atmvertinterplay_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hof
     call ufo_geovals_get_var(geovals, geovar, profile)
     nsig = self%nval-1
     do iobs = 1, nlocs
-       if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
-       call vert_interp_lay_apply_tl(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
+      if(hofx(ivar,iobs) /= missing) then
+        if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
+        call vert_interp_lay_apply_tl(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
+      endif
     enddo
   enddo
   call ufo_geovals_delete(geovals)
@@ -171,7 +174,8 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   character(len=MAXVARLEN) :: geovar
   character(len=MAXVARLEN) :: var_zdir
   integer :: nsig
-
+  real(c_double) :: missing
+  missing = missing_value(missing)
 
   do ivar = 1, nvars
     ! Get the name of input variable in geovals
@@ -179,9 +183,11 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
     call ufo_geovals_get_var(geovals, geovar, profile)
     nsig = self%nval-1
     do iobs = 1, nlocs
-       call vert_interp_lay_apply_ad(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
-       ! if the geovals come in as top2bottom (logic in traj part of code), make sure to output the adj in the same direction!
-       if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
+      if(hofx(ivar,iobs) /= missing) then
+        call vert_interp_lay_apply_ad(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
+        ! if the geovals come in as top2bottom (logic in traj part of code), make sure to output the adj in the same direction!
+        if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
+      endif
     enddo
   enddo
 
