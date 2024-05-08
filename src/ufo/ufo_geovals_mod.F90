@@ -1896,7 +1896,15 @@ allocate(ncid_var(self%nvar))
 call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
 ! TODO(wsmigaj): define a new format with nlocs replaced by nprofiles and stored
 ! separately for each variable
-call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%nlocs, dimid_nlocs))
+!------------------------------------------------------------------------------
+!call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%nlocs, dimid_nlocs))
+! This modification accounts for two scenarios: 
+! the number of observations (nlocs) for the trivial sampling method, where self%geovals(1)%nprofiles 
+! is equal to nlocs, thus not affecting previous cases; and the number of extended geovals required for non-trivial cases. 
+! Further refinement is needed for storing each variable separately.
+!------------------------------------------------------------------------------
+call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%geovals(1)%nprofiles, dimid_nlocs))
+
 dims(2) = dimid_nlocs
 
 do i = 1, self%nvar

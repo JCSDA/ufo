@@ -1,0 +1,30 @@
+time window:
+  begin: 2019-05-20T20:00:00Z
+  end: 2019-05-21T02:00:00Z
+
+
+observations:
+- obs operator:
+    name: Lightning
+    number of gridpoints: 5     # To match 15 km distance.
+  obs space:
+    name: Lightning_test
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs.goes16_glm.201905202300.nc
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: fed_hofx_201905202300.nc
+    simulated variables: [lightningFlashExtentDensity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geoval_goes16_glm_201905202300.nc
+    loc_multiplier: 25
+  vector ref: TestReference
+  tolerance: 1.0e-05
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 3
+    tolerance TL: 1.0e-12
+    tolerance AD: 1.0e-12
