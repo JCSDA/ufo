@@ -1,4 +1,5 @@
 /*
+ * (C) Copyright 2024 UCAR
  * (C) Crown Copyright 2024, the Met Office.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
@@ -20,20 +21,13 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
                                           const std::vector<int> & channels,
                                           const Eigen::MatrixXd & coeffs) {
   // dimensions
-  ioda::NewDimensionScales_t dims {
-      ioda::NewDimensionScale<int>("npredictors", predictors.size()),
-      ioda::NewDimensionScale<int>("nchannels", channels.size())
+  ioda::NewDimensionScales_t newDims {
+      ioda::NewDimensionScale<int>("Record", 1),
+      ioda::NewDimensionScale<int>("Channel", channels.size())
   };
-  // new ObsGroup
-  ioda::ObsGroup ogrp = ioda::ObsGroup::generate(parent, dims);
 
-  // save the predictors
-  ioda::Variable predsVar = ogrp.vars.createWithScales<std::string>(
-                            "predictors", {ogrp.vars["npredictors"]});
-  predsVar.write(predictors);
-  // and the variables
-  ioda::Variable chansVar = ogrp.vars.createWithScales<int>("channels", {ogrp.vars["nchannels"]});
-  chansVar.write(channels);
+  // new ObsGroup
+  ioda::ObsGroup ogrp = ioda::ObsGroup::generate(parent, newDims);
 
   // Set up the creation parameters for the bias coefficients variable
   ioda::VariableCreationParameters float_params;
@@ -42,10 +36,20 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
   const float missing_value = util::missingValue<float>();
   float_params.setFillValue<float>(missing_value);
 
-  // Create a variable for bias coefficients, save bias coeffs to the variable
-  ioda::Variable biasVar = ogrp.vars.createWithScales<float>("bias_coefficients",
-                           {ogrp.vars["npredictors"], ogrp.vars["nchannels"]}, float_params);
-  biasVar.writeWithEigenRegular(coeffs);
+  // Loop over predictors and create variables
+  for (size_t jpred = 0; jpred < predictors.size(); ++jpred) {
+    // create and write the bias coeffs
+    ioda::Variable biasVar = ogrp.vars.createWithScales<float>(
+                             "BiasCoefficients/"+predictors[jpred],
+                             {ogrp.vars["Record"], ogrp.vars["Channel"]}, float_params);
+    biasVar.writeWithEigenRegular(coeffs(jpred, Eigen::all));
+  }
+
+  // Save the Channel
+  // and the variables
+  ioda::Variable chansVar = ogrp.vars.createWithScales<int>("channels", {ogrp.vars["Channel"]});
+  chansVar.write(channels);
+
   return ogrp;
 }
 

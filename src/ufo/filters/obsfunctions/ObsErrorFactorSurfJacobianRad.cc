@@ -60,7 +60,7 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
 
   // Include list of optional data
   if (options_.useBiasTerm.value() != boost::none) {
-    invars_ += Variable(biastermgrp+"/cloud_liquid_water", channels_);
+    invars_ += Variable(biastermgrp+"/cloudWaterContent", channels_);
   }
 }
 
@@ -164,7 +164,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
 
     std::vector<float> clwbias(nlocs, 0.0);
     if (usebiasterm) {
-      in.get(Variable(biastermgrp+"/cloud_liquid_water", channels_)[ichan], clwbias);
+      in.get(Variable(biastermgrp+"/cloudWaterContent", channels_)[ichan], clwbias);
     }
 
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {

@@ -34,22 +34,22 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &amsr2tlap Data/ufo/testinput_tier_1/amsr2_gcom-w1_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *amsr2tlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
   obs filters:
   - filter: Bounds Check

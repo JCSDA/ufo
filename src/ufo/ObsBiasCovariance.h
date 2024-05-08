@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2024 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -98,8 +98,8 @@ class ObsBiasCovariance : public util::Printable,
 
   std::vector<std::string> prednames_;
 
-  /// number of records that are bias-corrected independently from each other
-  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  /// number of records that have separate bias-correction coefficients
+  /// (nrecs_ = 1 if all obs use the same coefficients)
   std::size_t nrecs_;
 
   /// variables for which bias correction coefficients will be updated

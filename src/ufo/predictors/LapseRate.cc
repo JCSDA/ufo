@@ -22,7 +22,7 @@
 
 namespace ufo {
 
-static PredictorMaker<LapseRate> makerFuncLapseRate_("lapse_rate");
+static PredictorMaker<LapseRate> makerFuncLapseRate_("lapseRate");
 
 // -----------------------------------------------------------------------------
 

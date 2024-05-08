@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2021 UCAR
+ * (C) Copyright 2017-2024 UCAR
  * 
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
@@ -78,8 +78,12 @@ class ObsBias : public util::Printable,
   /// Return the vector of variable predictors.
   std::vector<std::shared_ptr<const PredictorBase>> variablePredictors() const;
 
-  /// Return the number of records that are bias-corrected independently from each other,
-  /// or 1 if all obs are bias-corrected together
+  /// Return boolean that indicates whether different records have separate
+  /// bias-correction coefficients.
+  bool byRecord() const {return byRecord_;}
+
+  /// Return the number of records that have separate bias-correction coefficients,
+  /// or 1 if all obs use the same coefficients.
   const std::size_t & nrecs() const {return nrecs_;}
 
   /// Return the list of simulated variables.
@@ -120,9 +124,14 @@ class ObsBias : public util::Printable,
   /// number of variable predictors (i.e. predictors with variable coefficients)
   std::size_t numVariablePredictors_;
 
-  /// number of records that are bias-corrected independently from each other
-  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  /// bias-correct by record?
+  bool byRecord_;
+
+  /// number of records that have separate bias-correction coefficients
+  /// (nrecs_ = 1 if all obs use the same coefficients)
   std::size_t nrecs_;
+  /// vector of strings of record IDs
+  std::vector<std::string> recIds_;
 
   /// list of simulated variables
   oops::Variables vars_;

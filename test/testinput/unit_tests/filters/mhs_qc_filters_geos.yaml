@@ -34,19 +34,19 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &mhsmctlap Data/ufo/testinput_tier_1/geos.bc.mhs_metop-b.2020121500.tlapse.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *mhsmctlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
   obs filters:
   - filter: Bounds Check
     filter variables:

@@ -16,7 +16,7 @@
 namespace ufo {
 
 static PredictorMaker<CosineOfLatitudeTimesOrbitNode>
-       makerFuncCosineOfLatitudeTimesOrbitNode_("cosine_of_latitude_times_orbit_node");
+       makerFuncCosineOfLatitudeTimesOrbitNode_("cosineOfLatitudeTimesOrbitNode");
 
 // -----------------------------------------------------------------------------
 

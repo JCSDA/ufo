@@ -32,6 +32,8 @@ set ( predictor_files
   SineOfLatitude.cc
   Thickness.h
   Thickness.cc
+  ObsMetaDataPredictor.h
+  ObsMetaDataPredictor.cc
 )
 
 PREPEND( _p_predictor_files     "predictors"            ${predictor_files} )

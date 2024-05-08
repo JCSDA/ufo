@@ -15,9 +15,6 @@
 
 namespace ufo {
 
-/// Create ObsGroup with dimensions npredictors = size(predictors) and
-/// nchannels = size(channels), variables predictors, channels and
-/// bias_cooefficients (npredictors x nchannels)
 ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group &,
                                           const std::vector<std::string> &,
                                           const std::vector<int> &,

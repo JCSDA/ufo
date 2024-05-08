@@ -17,8 +17,7 @@
 namespace ufo {
 
 static PredictorMaker<SineOfLatitude>
-       makerFuncSineOfLatitude_("sine_of_latitude");
-
+       makerFuncSineOfLatitude_("sineOfLatitude");
 // -----------------------------------------------------------------------------
 
 SineOfLatitude::SineOfLatitude(const Parameters_ & parameters, const oops::Variables & vars)

@@ -17,7 +17,7 @@
 
 namespace ufo {
 
-static PredictorMaker<ScanAngle> makerFuncScanAngle_("scan_angle");
+static PredictorMaker<ScanAngle> makerFuncScanAngle_("sensorScanAngle");
 
 // -----------------------------------------------------------------------------
 

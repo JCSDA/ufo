@@ -25,23 +25,23 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &abi_g16_tlap Data/ufo/testinput_tier_1/instruments/radiance/abi_g16_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *abi_g16_tlap
-      - name: emissivity
+      - name: emissivityJacobian
 # The scan angle here actually is used as for scan positions in the input ioda file to replicate gsi
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
   vector ref: ObsValue
   tolerance: 1.e-1

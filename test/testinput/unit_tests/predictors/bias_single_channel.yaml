@@ -30,7 +30,7 @@ observations:
     variational bc:
       predictors:
         - name: constant
-        - name: sine_of_latitude
+        - name: sineOfLatitude
   rms ref: 188.80571
   tolerance: 1.0e-6
 # One static and one variable predictor
@@ -58,7 +58,7 @@ observations:
     static bc:
       # All static BC predictors have unit cofficients.
       predictors:
-      - name: sine_of_latitude
+      - name: sineOfLatitude
     variational bc:
       # The initial coefficients of predictors used in VarBC are loaded from the input file.
       predictors:
@@ -91,7 +91,7 @@ observations:
     static bc:
       predictors:
       - name: constant
-      - name: sine_of_latitude
+      - name: sineOfLatitude
   rms ref: 180.93765
   tolerance: 1.0e-6
 # Two static predictors; input file option absent
@@ -118,6 +118,6 @@ observations:
     static bc:
       predictors:
       - name: constant
-      - name: sine_of_latitude
+      - name: sineOfLatitude
   rms ref: 180.93765
   tolerance: 1.0e-6

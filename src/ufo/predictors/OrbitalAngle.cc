@@ -20,7 +20,7 @@ constexpr char FourierTermTypeParameterTraitsHelper::enumTypeName[];
 constexpr util::NamedEnumerator<FourierTermType>
   FourierTermTypeParameterTraitsHelper::namedValues[];
 
-static PredictorMaker<OrbitalAngle> makerFuncOrbitalAngle_("orbital_angle");
+static PredictorMaker<OrbitalAngle> makerFuncOrbitalAngle_("satelliteOrbitalAngle");
 
 // -----------------------------------------------------------------------------
 

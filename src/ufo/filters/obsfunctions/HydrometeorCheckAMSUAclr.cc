@@ -52,10 +52,10 @@ HydrometeorCheckAMSUAclr::HydrometeorCheckAMSUAclr(const eckit::LocalConfigurati
   invars_ += Variable("ObsValue/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(biastermgrp+"/constant"+biastermgrp, channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_4", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_3", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_2", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle_order_4", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle_order_3", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle_order_2", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle", channels_);
   invars_ += Variable(biaspredgrp+"/brightnessTemperature", channels_);
   invars_ += Variable("MetaData/sensorZenithAngle");
 
@@ -132,10 +132,10 @@ void HydrometeorCheckAMSUAclr::compute(const ObsFilterData & in,
   std::vector<float> values(nlocs);
   std::vector<std::string> scanterms(nangs);
   std::vector<float> bias_scanang238(nlocs, 0.0);
-  scanterms[0] = biastermgrp+"/scan_angle_order_4";
-  scanterms[1] = biastermgrp+"/scan_angle_order_3";
-  scanterms[2] = biastermgrp+"/scan_angle_order_2";
-  scanterms[3] = biastermgrp+"/scan_angle";
+  scanterms[0] = biastermgrp+"/sensorScanAngle_order_4";
+  scanterms[1] = biastermgrp+"/sensorScanAngle_order_3";
+  scanterms[2] = biastermgrp+"/sensorScanAngle_order_2";
+  scanterms[3] = biastermgrp+"/sensorScanAngle";
   for (size_t iang = 0; iang < nangs; ++iang) {
     in.get(Variable(scanterms[iang], channels_)[ich238], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2021 UCAR
+ * (C) Copyright 2017-2024 UCAR
  * (C) Crown Copyright 2024, the Met Office.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
@@ -35,14 +35,13 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
-  : numStaticPredictors_(0), numVariablePredictors_(0), vars_(odb.assimvariables()),
-    rank_(odb.distribution()->rank()), commTime_(odb.commTime())
-{
+  : numStaticPredictors_(0), numVariablePredictors_(0), byRecord_(),
+    vars_(odb.assimvariables()), rank_(odb.distribution()->rank()), commTime_(odb.commTime()) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   ObsBiasParameters params;
   params.validateAndDeserialize(config);
-
+  byRecord_ = params.BiasCorrectionByRecord;
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :
        params.staticBC.value().predictors.value()) {
@@ -55,7 +54,11 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
     ++numVariablePredictors_;
   }
 
-  nrecs_ = params.BiasCorrectionByRecord ? odb.nrecs() : 1;
+  nrecs_ = (byRecord_ && odb.obs_group_vars().size() > 0) ? odb.nrecs() : 1;
+  if (byRecord_ && odb.obs_group_vars().size() == 0) {
+    throw eckit::BadParameter("ObsBiasParameters: BiasCorrectionByRecord is turned on, "
+                              "but the observations are not grouped into records.");
+  }
   ASSERT(nrecs_ > 0);
 
   if (vars_.size() * prednames_.size() > 0) {
@@ -71,6 +74,11 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
   for (size_t ii = 0; ii < varsNoBC.size(); ++ii) {
     size_t index = vars_.find(varsNoBC[ii]);
     varIndexNoBC_.push_back(index);
+  }
+
+  // save record IDs for matching
+  if (byRecord_) {
+    odb.get_db("MetaData", "stationIdentification", recIds_);
   }
 
   if (prednames_.size() == 0) {
@@ -97,6 +105,7 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     prednames_(other.prednames_),
     numStaticPredictors_(other.numStaticPredictors_),
     numVariablePredictors_(other.numVariablePredictors_),
+    byRecord_(other.byRecord_),
     nrecs_(other.nrecs_),
     vars_(other.vars_), varIndexNoBC_(other.varIndexNoBC_),
     geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_),
@@ -128,6 +137,7 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     prednames_  = rhs.prednames_;
     numStaticPredictors_ = rhs.numStaticPredictors_;
     numVariablePredictors_ = rhs.numVariablePredictors_;
+    byRecord_   = rhs.byRecord_;
     nrecs_      = rhs.nrecs_;
     vars_       = rhs.vars_;
     geovars_    = rhs.geovars_;
@@ -160,25 +170,61 @@ void ObsBias::read(const eckit::Configuration & config) {
                    ioda::detail::DataLayoutPolicy::generate(
                          ioda::detail::DataLayoutPolicy::Policies::None));
 
-    // Read all coefficients into the Eigen array
-    ioda::Variable coeffvar = obsgroup.vars["bias_coefficients"];
-    Eigen::ArrayXXf allbiascoeffs;
-    coeffvar.readWithEigenRegular(allbiascoeffs);
+    // setup variables
+    std::vector<Eigen::ArrayXXf> allbiascoeffs;
+    std::vector<std::string> predictors;
+
+    // loop through list of coefficients, read them, and store in vector
+    for (size_t jpred = numStaticPredictors_; jpred < prednames_.size(); ++jpred) {
+      ioda::Variable coeffvar = obsgroup.vars["BiasCoefficients/"+prednames_[jpred]];
+      Eigen::ArrayXXf biascoeffs;
+      coeffvar.readWithEigenRegular(biascoeffs);
+      allbiascoeffs.push_back(biascoeffs);
+      predictors.push_back(prednames_[jpred]);
+    }
+
+    // Read all record names into the Eigen array
+    const bool rec_exists = obsgroup.exists("Record");
+    std::vector<std::string> allrecords;
+    if (rec_exists) {
+      ioda::Variable recvar = obsgroup.vars.open("Record");
+      recvar.read<std::string>(allrecords);
+    }
+
+    // TODO(corymartin-noaa) read in timestamp of last update
 
     // Find indices of predictors and variables/channels that we need in the data read from the file
-    const std::vector<int> pred_idx = getRequiredVariableIndices(obsgroup, "predictors",
-                                      prednames_.begin() + numStaticPredictors_, prednames_.end());
     const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
+    const std::vector<int> pred_idx = getAllStrIndices(predictors,
+                                      prednames_.begin() + numStaticPredictors_, prednames_.end());
+
+    // Determine if the records are in the input file, if not, add it to the list
+    std::vector<int> rec_idx;
+    if (byRecord_) {
+      bool throwexception = false;
+      rec_idx = getAllStrIndices(allrecords,
+                recIds_.begin(), recIds_.end(), throwexception);
+    } else {
+      rec_idx.push_back(0);
+    }
+    for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
+      if (rec_idx[jrec] == -1) {
+        allrecords.push_back(recIds_[jrec]);
+      }
+    }
 
     // Filter predictors and channels that we need
-    // FIXME: may be possible by indexing allbiascoeffs(pred_idx, chan_idx) when Eigen 3.4
-    // is available
-
     for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
         for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
-          // TODO(Someone): fix RHS to handle records
-          biascoeffs_[index(jrec, jvar, jpred)] = allbiascoeffs(pred_idx[jpred], var_idx[jvar]);
+          if (rec_idx[jrec] == -1) {
+            // coeffs are set to 0 if record not in input file
+            biascoeffs_[index(jrec, jvar, jpred)] = 0.0;
+          } else {
+            // use value from input file
+            biascoeffs_[index(jrec, jvar, jpred)] =
+                        allbiascoeffs[pred_idx[jpred]](rec_idx[jrec], var_idx[jvar]);
+          }
         }
       }
     }
@@ -201,11 +247,6 @@ void ObsBias::write(const eckit::Configuration & config) const {
   if (rank_ != 0 || commTime_.rank() != 0) return;
 
   if (params.outputFile.value() != boost::none) {
-    // FIXME: only implemented for channels currently
-    if (vars_.channels().size() == 0) {
-      throw eckit::NotImplemented("ObsBias::write not implemented for variables without channels",
-                                  Here());
-    }
     // Create a file, overwrite if exists
     const std::string output_filename = *params.outputFile.value();
     ioda::Group group = ioda::Engines::HH::createFile(output_filename,
@@ -214,11 +255,18 @@ void ObsBias::write(const eckit::Configuration & config) const {
     // put only variable bias predictors into the predictors vector
     std::vector<std::string> predictors(prednames_.begin() + numStaticPredictors_,
                                         prednames_.end());
+    if (byRecord_) {
+//  todo pjn implement this in next PR
+//      Eigen::Map<const Eigen::MatrixXd> coeffs(biascoeffs_.data(),
+//        numVariablePredictors_, nrecs_ * vars_.size());
+//      saveBiasCoeffsWithRecords(group, predictors, vars_, coeffs);
+      oops::Log::warning() << "by record saving of bias ceofficient not implemented yet\n";
+    } else {
+      Eigen::Map<const Eigen::MatrixXd>
+          coeffs(biascoeffs_.data(), numVariablePredictors_, nrecs_ * vars_.size());
+      saveBiasCoeffsWithChannels(group, predictors, vars_.channels(), coeffs);
+    }
     // map coefficients to 2D for saving
-    Eigen::Map<const Eigen::MatrixXd>
-        coeffs(biascoeffs_.data(), numVariablePredictors_, nrecs_ * vars_.size());
-    // TODO(Someone): change to relax the channels assumption and handle records when needed.
-    saveBiasCoeffsWithChannels(group, predictors, vars_.channels(), coeffs);
   } else {
     if (numVariablePredictors_ > 0) {
       oops::Log::warning() << "obs bias.output file is NOT available, bias coefficients "

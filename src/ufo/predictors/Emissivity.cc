@@ -21,7 +21,7 @@
 
 namespace ufo {
 
-static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivity");
+static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivityJacobian");
 
 // -----------------------------------------------------------------------------
 

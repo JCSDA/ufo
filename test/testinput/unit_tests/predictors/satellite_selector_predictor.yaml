@@ -21,11 +21,11 @@ observations:
     variational bc:
       predictors:
 # Predictors for 224 S-NPP
-      - name: satellite_selector
+      - name: satelliteSelector
         satellite id: 224
         owned predictor:
           name: constant
-      - name: satellite_selector
+      - name: satelliteSelector
         satellite id: 224
         owned predictor:
           name: thickness
@@ -34,11 +34,11 @@ observations:
           mean: 7.6
           standard deviation: 0.4
 # Predictors for 225 NOAA-20
-      - name: satellite_selector
+      - name: satelliteSelector
         satellite id: 225
         owned predictor:
           name: constant
-      - name: satellite_selector
+      - name: satelliteSelector
         satellite id: 225
         owned predictor:
           name: thickness

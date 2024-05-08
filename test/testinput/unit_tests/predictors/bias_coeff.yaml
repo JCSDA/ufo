@@ -21,8 +21,8 @@ observations:
     increment output file: Data/satbias_amsua_n19_increment_test1.nc4
     variational bc:
       predictors:
-      - name: cosine_of_latitude_times_orbit_node
-      - name: sine_of_latitude
+      - name: cosineOfLatitudeTimesOrbitNode
+      - name: sineOfLatitude
   obs bias test:
     norm: 0.0
     relative tolerance: 0.0
@@ -45,7 +45,7 @@ observations:
     increment output file: Data/satbias_amsua_n19_increment_test2.nc4
     variational bc:
       predictors:
-      - name: emissivity
+      - name: emissivityJacobian
   obs bias test:
     norm: 2.521706721918669
     relative tolerance: 1.e-7
@@ -68,7 +68,7 @@ observations:
     increment output file: Data/satbias_amsua_n19_increment_test3.nc4
     variational bc:
       predictors:
-      - name: emissivity
+      - name: emissivityJacobian
   obs bias test:
     norm: 0.9845241512216701
     relative tolerance: 1.e-7
@@ -91,7 +91,7 @@ observations:
     increment output file: Data/satbias_amsua_n19_increment_test4.nc4
     variational bc:
       predictors:
-      - name: emissivity
+      - name: emissivityJacobian
       - name: constant
   obs bias test:
     norm: 0.8470894100411567
@@ -116,7 +116,7 @@ observations:
     increment output file: Data/satbias_amsua_n19_increment_test5.nc4
     variational bc:
       predictors:
-      - name: emissivity
+      - name: emissivityJacobian
     static bc:
       predictors:
       - name: constant
@@ -143,21 +143,21 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cosine_of_latitude_times_orbit_node
-      - name: sine_of_latitude
-      - name: lapse_rate
+      - name: cosineOfLatitudeTimesOrbitNode
+      - name: sineOfLatitude
+      - name: lapseRate
         order: 2
         tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *amsua19tlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
   obs bias test:
     norm: 2.8888588267029465
     relative tolerance: 1.e-7

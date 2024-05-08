@@ -1,0 +1,27 @@
+time window:
+  begin: 2021-07-31T20:59:00Z
+  end: 2021-08-01T03:00:00Z
+# Test retrieval of aircraft airTemperature predictors: (1) ascent rate, (2) squared ascent rate
+observations:
+- obs space:
+    name: aircraft_airTemperature
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_20190801T0000Z_aircraft_predictors.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_20190801T0000Z_aircraft_predictors_out.nc4
+#
+    simulated variables: [airTemperature]
+  obs bias:
+    static bc:
+      predictors:
+      - name: obsMetadataPredictor
+        variable: aircraftVerticalVelocity
+        order: 1
+      - name: obsMetadataPredictor
+        variable: aircraftVerticalVelocity
+        order: 2
+  tolerance: 1.e-5

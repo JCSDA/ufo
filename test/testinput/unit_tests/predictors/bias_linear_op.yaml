@@ -31,13 +31,13 @@ observations:
     variational bc:
       predictors:
         - name: constant
-        - name: sine_of_latitude
+        - name: sineOfLatitude
   target obs bias:
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
     variational bc:
       predictors:
         - name: constant
-        - name: sine_of_latitude
+        - name: sineOfLatitude
   rms ref: 1.0222204
   relative tolerance: 1.0e-6
 
@@ -67,14 +67,14 @@ observations:
     variational bc:
       predictors:
         - name: constant
-        - name: sine_of_latitude
+        - name: sineOfLatitude
   target obs bias:
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
     variables without bc: [airTemperature, specificHumidity]
     variational bc:
       predictors:
         - name: constant
-        - name: sine_of_latitude
+        - name: sineOfLatitude
   rms ref: 0
   relative tolerance: 1.0e-6
 
@@ -104,7 +104,7 @@ observations:
     static bc:
       # All static BC predictors have unit cofficients.
       predictors:
-      - name: sine_of_latitude
+      - name: sineOfLatitude
     variational bc:
       # The initial coefficients of predictors used in VarBC are loaded from the input file.
       predictors:
@@ -115,7 +115,7 @@ observations:
     static bc:
     # All static BC predictors have unit cofficients.
       predictors:
-      - name: sine_of_latitude
+      - name: sineOfLatitude
       # The coefficients of variable predictors are loaded from the input file.
     variational bc:
       predictors:
@@ -149,13 +149,13 @@ observations:
     static bc:
       predictors:
       - name: constant
-      - name: sine_of_latitude
+      - name: sineOfLatitude
   target obs bias:
     # This file should effectively be ignored, since there are no variable coefficients
     input file: Data/ufo/testinput_tier_1/aircraft_artificial_bias_2.nc4
     static bc:
       predictors:
       - name: constant
-      - name: sine_of_latitude
+      - name: sineOfLatitude
   rms ref: 0
   relative tolerance: 1e-6

@@ -21,40 +21,40 @@ observations:
   obs bias:
     variational bc:
       predictors:
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 1
         component: "cos"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 1
         component: "sin"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 2
         component: "cos"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 2
         component: "sin"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 3
         component: "cos"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 3
         component: "sin"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 4
         component: "cos"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 4
         component: "sin"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 5
         component: "cos"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 5
         component: "sin"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 6
         component: "cos"
-      - name: orbital_angle
+      - name: satelliteOrbitalAngle
         order: 6
         component: "sin"
   tolerance: 1.e-5

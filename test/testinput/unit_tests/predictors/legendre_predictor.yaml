@@ -20,16 +20,16 @@ observations:
   obs bias:
     variational bc:
       predictors:
-      - name: Legendre
+      - name: legendre
         number of scan positions: 32
         order: 1
-      - name: Legendre
+      - name: legendre
         number of scan positions: 32
         order: 2
-      - name: Legendre
+      - name: legendre
         number of scan positions: 32
         order: 3
-      - name: Legendre
+      - name: legendre
         number of scan positions: 32
         order: 4
   tolerance: 1.0e-6

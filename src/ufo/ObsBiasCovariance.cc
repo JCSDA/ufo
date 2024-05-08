@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2018-2019 UCAR
+ * (C) Copyright 2018-2024 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -57,7 +57,11 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
     prednames_.push_back(pred->name());
   }
 
-  nrecs_ = params.BiasCorrectionByRecord ? odb.nrecs() : 1;
+  nrecs_ = (params.BiasCorrectionByRecord && odb.obs_group_vars().size() > 0) ? odb.nrecs() : 1;
+  if (params.BiasCorrectionByRecord && odb.obs_group_vars().size() == 0) {
+    throw eckit::BadParameter("ObsBiasParameters: BiasCorrectionByRecord is turned on, "
+                              "but the observations are not grouped into records.");
+  }
   ASSERT(nrecs_ > 0);
 
   if (vars_.size() * prednames_.size() > 0) {
@@ -164,20 +168,29 @@ void ObsBiasCovariance::read(const eckit::Configuration & config) {
                    ioda::detail::DataLayoutPolicy::generate(
                          ioda::detail::DataLayoutPolicy::Policies::None));
 
-    // Read coefficients error variances into the Eigen array
-    ioda::Variable bcerrvar = obsgroup.vars["bias_coeff_errors"];
-    Eigen::ArrayXXf allbcerrors;
-    bcerrvar.readWithEigenRegular(allbcerrors);
+    // setup variables
+    std::vector<Eigen::ArrayXXf> allbcerrors;
+    std::vector<std::string> predictors;
+
+    // loop through list of coefficients, read them, and store in vector
+    for (size_t jpred = 0; jpred < prednames_.size(); ++jpred) {
+      ioda::Variable bcerrvar = obsgroup.vars["BiasCoefficientErrors/"+prednames_[jpred]];
+      Eigen::ArrayXXf bcerrs;
+      bcerrvar.readWithEigenRegular(bcerrs);
+      allbcerrors.push_back(bcerrs);
+      predictors.push_back(prednames_[jpred]);
+    }
 
     // Read nobs into Eigen array
-    ioda::Variable nobsvar = obsgroup.vars["number_obs_assimilated"];
-    Eigen::ArrayXf nobsassim;
+    ioda::Variable nobsvar = obsgroup.vars["numberObservationsUsed"];
+    Eigen::ArrayXXf nobsassim;
     nobsvar.readWithEigenRegular(nobsassim);
 
     // Find indices of predictors and variables/channels that we need in the data read from the file
-    const std::vector<int> pred_idx = getRequiredVariableIndices(obsgroup, "predictors",
-                                              prednames_.begin(), prednames_.end());
+    // We will assume that at this stage we need all records in the file
     const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
+    const std::vector<int> pred_idx = getAllStrIndices(predictors,
+                                      prednames_.begin(), prednames_.end());
 
     // Filter predictors and channels that we need
     // FIXME: may be possible by indexing allbcerrors(pred_idx, chan_idx) when Eigen 3.4
@@ -189,7 +202,7 @@ void ObsBiasCovariance::read(const eckit::Configuration & config) {
         obs_num_[jrecvar] = nobsassim(var_idx[jvar]);
         for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
           analysis_variances_[jrecvar * pred_idx.size() + jpred] =
-               allbcerrors(pred_idx[jpred], var_idx[jvar]);
+               allbcerrors[pred_idx[jpred]](jrec, var_idx[jvar]);
         }
       }
     }
@@ -229,34 +242,30 @@ void ObsBiasCovariance::write(const eckit::Configuration & config) {
     ioda::Group group = ioda::Engines::HH::createFile(output_filename,
                         ioda::Engines::BackendCreateModes::Truncate_If_Exists);
 
+    ioda::ObsGroup ogrp;
+
     // put only variable bias predictors into the predictors vector
     std::vector<std::string> predictors(prednames_.begin(), prednames_.end());
-    // map coefficients to 2D for saving
-    Eigen::Map<const Eigen::MatrixXd>
-        allbcerrors(analysis_variances_.data(), prednames_.size(), nrecs_ * vars_.size());
-    const std::vector<int> channels = vars_.channels();
-    std::vector<int> obs_assimilated(obs_num_.begin(), obs_num_.end());
 
+    std::vector<int> obs_assimilated(obs_num_.begin(), obs_num_.end());
+    Eigen::Map<const Eigen::MatrixXd>
+       allbcerrors(analysis_variances_.data(), prednames_.size(), nrecs_ * vars_.size());
+    const std::vector<int> channels = vars_.channels();
     // dimensions
     ioda::NewDimensionScales_t dims {
-        ioda::NewDimensionScale<int>("npredictors", predictors.size()),
-        ioda::NewDimensionScale<int>("nchannels", channels.size())
+          ioda::NewDimensionScale<int>("Record", 1),
+          ioda::NewDimensionScale<int>("Channel", channels.size())
     };
     // new ObsGroup
-    ioda::ObsGroup ogrp = ioda::ObsGroup::generate(group, dims);
-
-    // save the predictors
-    ioda::Variable predsVar = ogrp.vars.createWithScales<std::string>(
-                              "predictors", {ogrp.vars["npredictors"]});
-    predsVar.write(predictors);
+    ogrp = ioda::ObsGroup::generate(group, dims);
     // and the variables
-    ioda::Variable chansVar = ogrp.vars.createWithScales<int>(
-                              "channels", {ogrp.vars["nchannels"]});
+    ioda::Variable chansVar = ogrp.vars.open("Channel");
     chansVar.write(channels);
 
-    // and the number_obs_assimilated
+    // write number_obs_assimilated
     ioda::Variable nobsVar = ogrp.vars.createWithScales<int>(
-                             "number_obs_assimilated", {ogrp.vars["nchannels"]});
+                             "numberObservationsUsed", {ogrp.vars["Record"], ogrp.vars["Channel"]});
+
     nobsVar.write(obs_assimilated);
 
     // Set up the creation parameters for the bias covariance coefficients variable
@@ -266,11 +275,14 @@ void ObsBiasCovariance::write(const eckit::Configuration & config) {
     const float missing_value = util::missingValue<float>();
     float_params.setFillValue<float>(missing_value);
 
-    // Create a variable for bias covariance coefficients,
-    // save bias covariance coeffs to the variable
-    ioda::Variable anvarVar = ogrp.vars.createWithScales<float>("bias_coeff_errors",
-                       {ogrp.vars["npredictors"], ogrp.vars["nchannels"]}, float_params);
-    anvarVar.writeWithEigenRegular(allbcerrors);
+    // Loop over predictors and create variables
+    for (size_t jpred = 0; jpred < predictors.size(); ++jpred) {
+      // create and write the bias covariance coeffs
+      ioda::Variable anvarVar = ogrp.vars.createWithScales<float>(
+                               "BiasCoefficientErrors/"+predictors[jpred],
+                               {ogrp.vars["Record"], ogrp.vars["Channel"]}, float_params);
+      anvarVar.writeWithEigenRegular(allbcerrors(jpred, Eigen::all));
+    }
   }
   oops::Log::trace() << "ObsBiasCovariance::write is done " << std::endl;
 }
@@ -279,6 +291,8 @@ void ObsBiasCovariance::write(const eckit::Configuration & config) {
 
 void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configuration & innerConf) {
   oops::Log::trace() << "ObsBiasCovariance::linearize starts" << std::endl;
+  ASSERT(nrecs_ == bias.nrecs());
+
   if (vars_.size() * prednames_.size() > 0) {
     const float missing = util::missingValue<float>();
     const int missing_int = util::missingValue<int>();
@@ -296,8 +310,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
         odb_.get_db(qc_group_name, vars[jvar], qc_flags);
         for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
           if (qc_flags[jloc] == 0) {
-            // TODO(Algo): map the location to the record number.
-            const size_t jrec = 0;
+            const std::size_t jrec = nrecs_ == 1 ? 0 : odb_.recnum()[jloc];
             obs_num_accumulator->addTerm(jloc, jrec * vars_.size() + jvar, 1);
           }
       } else {
@@ -339,8 +352,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       // only keep the diagnoal
       for (size_t vv = 0; vv < vars_.size(); ++vv) {
         for (size_t ii = 0; ii < predx.nlocs(); ++ii) {
-          // TODO(Algo): map the location to the record number.
-          const size_t jrec = 0;
+          const std::size_t jrec = nrecs_ == 1 ? 0 : odb_.recnum()[ii];
           ht_rinv_h_accumulator->addTerm(ii,
                                          jrec * (vars_.size() * prednames_.size())
                                            + vv * prednames_.size() + p,

@@ -43,9 +43,7 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
     variablePredictors[p]->compute(odb_, geovals, ydiags, bias, predData_[p]);
   }
 
-  // TODO(Algo): relax this assumption, update code in computeObsBiasTL/computeObsBiasAD
-  // to handle coefficients by records.
-  assert(bias.nrecs() == 1);
+  byRecord_ = bias.byRecord();
 
   const oops::Variables &simVars = bias.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
@@ -78,7 +76,11 @@ void LinearObsBiasOperator::computeObsBiasTL(const ObsBiasIncrement & biascoeffi
 
   ybiasinc.zero();
   for (size_t jpred = 0; jpred < npreds; ++jpred) {
-    ybiasinc.axpy(biascoeffinc.coefficients(jpred), predData_[jpred]);
+    if (byRecord_) {
+      ybiasinc.axpy_byrecord(biascoeffinc.coefficients(jpred), predData_[jpred]);
+    } else {
+      ybiasinc.axpy(biascoeffinc.coefficients(jpred), predData_[jpred]);
+    }
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasTL done." << std::endl;
@@ -93,7 +95,11 @@ void LinearObsBiasOperator::computeObsBiasAD(ObsBiasIncrement & biascoeffinc,
   const size_t npreds = predData_.size();
 
   for (std::size_t jpred = 0; jpred < npreds; ++jpred) {
-    biascoeffinc.updateCoeff(jpred, predData_[jpred].multivar_dot_product_with(ybiasinc));
+    if (byRecord_) {
+      biascoeffinc.updateCoeff(jpred, predData_[jpred].multivarrec_dot_product_with(ybiasinc));
+    } else {
+      biascoeffinc.updateCoeff(jpred, predData_[jpred].multivar_dot_product_with(ybiasinc));
+    }
   }
 
   oops::Log::trace() << "LinearObsBiasOperator::computeObsBiasAD done." << std::endl;

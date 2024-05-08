@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2020-2024 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -14,7 +14,7 @@
 
 namespace ufo {
 
-static PredictorMaker<Legendre> makerFuncLegendre_("Legendre");
+static PredictorMaker<Legendre> makerFuncLegendre_("legendre");
 
 // -----------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ void Legendre::compute(const ioda::ObsSpace & odb,
         LegPoly[iorder+1] = ((2*iorder+1)*xscan*LegPoly[iorder]
         -iorder*LegPoly[iorder-1])/(iorder+1);
     }
-    for (std::size_t iorder=0; iorder < order_+1; ++iorder) {
+    for (std::size_t iorder=0; iorder <= order_; ++iorder) {
         LegPoly[iorder] = sqrt(2*iorder+1)*LegPoly[iorder];
     }
     for (std::size_t jb = 0; jb < nvars; ++jb) {

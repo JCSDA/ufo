@@ -34,33 +34,33 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &gmigpmtlap Data/ufo/testinput_tier_1/gmi_gpm.tlapse.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *gmigpmtlap
-      - name: emissivity
-      - name: cloud_liquid_water
+      - name: emissivityJacobian
+      - name: cloudWaterContent
         sensor: GMI_GPM
         ch37v: 6
         ch37h: 7
         order: 2
         tlapse: *gmigpmtlap
-      - name: cloud_liquid_water
+      - name: cloudWaterContent
         sensor: GMI_GPM
         ch37v: 6
         ch37h: 7
         tlapse: *gmigpmtlap
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
   obs filters:
   - filter: Bounds Check

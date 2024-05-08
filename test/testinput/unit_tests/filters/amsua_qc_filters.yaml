@@ -32,23 +32,23 @@ observations:
     variational bc:
       predictors:
       - name: constant
-  #     - name: cloud_liquid_water
+  #     - name: cloudWaterContent
   #       clwret_ch238: 1
   #       clwret_ch314: 2
   #       clwret_types: [HofX]
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &amsua19tlap Data/ufo/testinput_tier_1/amsua_n19_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *amsua19tlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
   obs filters:
   - filter: BlackList
     filter variables:

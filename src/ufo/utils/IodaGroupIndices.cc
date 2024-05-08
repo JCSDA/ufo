@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021 UCAR
+ * (C) Copyright 2024 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -76,7 +76,19 @@ std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
                                                 bool throwexception) {
   if (vars_to_look_for.channels().empty()) {
     // Read all variables from the file into std vector
-    ioda::Variable variablesvar = obsgroup.vars.open("variables");
+    // todo : pjn - need to change this to Variable at some point
+    ioda::Variable variablesvar;
+    if ( obsgroup.vars.exists("variables") ) {
+       variablesvar = obsgroup.vars.open("variables");
+    } else {
+       if ( obsgroup.vars.exists("Variable") ) {
+        variablesvar = obsgroup.vars.open("Variable");
+       } else {
+        const std::string msg("no variables or Variable found!");
+        // todo pjn need to find the proper exception here
+        throw eckit::Exception(msg, Here());
+       }
+    }
     std::vector<std::string> variables;
     variablesvar.read<std::string>(variables);
 
@@ -88,13 +100,36 @@ std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
     ASSERT(vars_to_look_for.variables().size() == vars_to_look_for.channels().size());
 
     // Read all channels from the file into std vector
-    ioda::Variable channelsvar = obsgroup.vars.open("channels");
+    // todo: pjn need to change this to Channel at some point
+    ioda::Variable channelsvar;
+    if ( obsgroup.vars.exists("channels") ) {
+       channelsvar = obsgroup.vars.open("channels");
+    } else {
+       if ( obsgroup.vars.exists("Channel") ) {
+        channelsvar = obsgroup.vars.open("Channel");
+       } else {
+        const std::string msg("no channels or Channel found!");
+        // todo pjn need to find the proper exception here
+        throw eckit::Exception(msg, Here());
+       }
+    }
+
     std::vector<int> channels;
     channelsvar.read<int>(channels);
 
     // Find the indices of the ones we need
     return getAllIndices(channels, vars_to_look_for.channels(), throwexception);
   }
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<int> getAllStrIndices(const std::vector<std::string> & all_elements,
+                   typename std::vector<std::string>::const_iterator elements_to_look_for_begin,
+                   typename std::vector<std::string>::const_iterator elements_to_look_for_end,
+                   bool throwexception) {
+  return getAllIndices(all_elements, elements_to_look_for_begin, elements_to_look_for_end,
+                       throwexception);
 }
 
 // -----------------------------------------------------------------------------

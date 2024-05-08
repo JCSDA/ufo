@@ -31,7 +31,7 @@
 namespace ufo {
 
 static PredictorMaker<CloudLiquidWater>
-       makerFuncCloudLiquidWater_("cloud_liquid_water");
+       makerFuncCloudLiquidWater_("cloudWaterContent");
 
 // -----------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1)) {
   if (parameters.order.value() != boost::none) {
-    // override the predictor name by "cloud_liquid_water_order_2"
+    // override the predictor name by "cloudWaterContent_order_2"
     name() = name() + "_order_" + std::to_string(order_);
   }
 
@@ -376,15 +376,16 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
     // Indices of data at channeles 37v and 37h in the array "channels"
     const int jch37v = 0;
     const int jch37h = 1;
-//  Beginning constant and scan_angle terms
+    //  Beginning constant and scan_angle terms
     const std::size_t nlocs = bt_hofx_37vo.size();
     std::vector<float> bias_37v(nlocs), bias_37h(nlocs);
     const Predictors & predictors = biascoeffs.predictors();
     const std::size_t npreds = predictors.size();
     double beta1, beta2;
 
-    std::vector<std::string> predictors_part = {"constant", "lapse_rate_order_2", "lapse_rate",
-      "scan_angle_order_4", "scan_angle_order_3", "scan_angle_order_2", "scan_angle"};
+    std::vector<std::string> predictors_part = {"constant", "lapseRate_order_2", "lapseRate",
+      "sensorScanAngle_order_4", "sensorScanAngle_order_3", "sensorScanAngle_order_2",
+      "sensorScanAngle"};
     size_t id_preds = predictors_part.size();
     std::vector<int> id_pred(id_preds, -1);
     for (std::size_t kp = 0; kp < id_preds; ++kp) {

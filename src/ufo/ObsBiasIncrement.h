@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2021 UCAR
+ * (C) Copyright 2017-2024 UCAR
  * (C) Crown Copyright 2024, the Met Office.
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
@@ -33,7 +33,10 @@ class ObsBiasIncrement : public util::Printable {
  public:
   typedef ObsBiasParameters Parameters_;
 
+  static const std::string classname() {return "ufo::ObsBiasIncrement";}
+
   ObsBiasIncrement(const ioda::ObsSpace & odb, const eckit::Configuration &);
+
   ObsBiasIncrement(const ObsBiasIncrement &, const bool = true);
 
   // Linear algebra operators
@@ -83,9 +86,15 @@ class ObsBiasIncrement : public util::Printable {
   Eigen::VectorXd biascoeffsinc_;
   std::vector<std::string> prednames_;
 
-  /// Number of records that are bias-corrected independently from each other
-  /// (nrecs_ = 1 if all obs are bias-corrected together)
+  /// Bias-correct by record?
+  bool byRecord_;
+
+  /// Number of records that have separate bias-correction coefficients
+  /// (nrecs_ = 1 if all obs use the same coefficients)
   std::size_t nrecs_;
+
+  /// Vector of strings of record IDs
+  std::vector<std::string> recIds_;
 
   /// List of simulated variables
   oops::Variables vars_;

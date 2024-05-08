@@ -220,3 +220,13 @@ ufo_add_test( NAME    test_ufo_read_bias_predictor
               LIBS    ufo
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+ufo_add_test( NAME    test_ufo_obs_metadata_predictor
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obs_metadata_predictor.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

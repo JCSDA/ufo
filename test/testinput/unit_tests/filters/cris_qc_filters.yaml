@@ -63,19 +63,19 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &cris-fsr_npp-atlap Data/ufo/testinput_tier_1/cris-fsr_npp_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *cris-fsr_npp-atlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
   obs filters:
 #  Wavenumber Check
   - filter: BlackList

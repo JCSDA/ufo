@@ -18,7 +18,7 @@
 
 namespace ufo {
 
-static PredictorMaker<SatelliteSelector> makerFuncSatelliteSelector_("satellite_selector");
+static PredictorMaker<SatelliteSelector> makerFuncSatelliteSelector_("satelliteSelector");
 
 // -----------------------------------------------------------------------------
 

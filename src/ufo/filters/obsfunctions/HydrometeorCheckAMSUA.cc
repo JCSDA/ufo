@@ -52,10 +52,10 @@ HydrometeorCheckAMSUA::HydrometeorCheckAMSUA(const eckit::LocalConfiguration & c
   invars_ += Variable(biasgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(hofxgrp+"/brightnessTemperature", channels_);
   invars_ += Variable(biastermgrp+"/constant", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_4", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_3", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle_order_2", channels_);
-  invars_ += Variable(biastermgrp+"/scan_angle", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle_order_4", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle_order_3", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle_order_2", channels_);
+  invars_ += Variable(biastermgrp+"/sensorScanAngle", channels_);
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
@@ -117,10 +117,10 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
   std::vector<float> values(nlocs);
   std::vector<std::string> scanterms(nangs);
   std::vector<float> bias_scanang238(nlocs);
-  scanterms[0] = biastermgrp+"/scan_angle_order_4";
-  scanterms[1] = biastermgrp+"/scan_angle_order_3";
-  scanterms[2] = biastermgrp+"/scan_angle_order_2";
-  scanterms[3] = biastermgrp+"/scan_angle";
+  scanterms[0] = biastermgrp+"/sensorScanAngle_order_4";
+  scanterms[1] = biastermgrp+"/sensorScanAngle_order_3";
+  scanterms[2] = biastermgrp+"/sensorScanAngle_order_2";
+  scanterms[3] = biastermgrp+"/sensorScanAngle";
   for (size_t iang = 0; iang < nangs; ++iang) {
     in.get(Variable(scanterms[iang], channels_)[ich238], values);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {

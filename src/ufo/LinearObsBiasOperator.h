@@ -42,6 +42,9 @@ class LinearObsBiasOperator : public util::Printable {
   /// ObsSpace used for this bias correction
   ioda::ObsSpace & odb_;
 
+  /// do different records have separate bias-correction coefficients?
+  bool byRecord_;
+
   /// predictors values; set in setTrajectory
   std::vector<ioda::ObsVector> predData_;
 };

@@ -40,6 +40,11 @@ std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
                                                 const oops::Variables &vars_to_look_for,
                                                 bool throwexception = true);
 
+std::vector<int> getAllStrIndices(const std::vector<std::string> & all_elements,
+                   typename std::vector<std::string>::const_iterator elements_to_look_for_begin,
+                   typename std::vector<std::string>::const_iterator elements_to_look_for_end,
+                   bool throwexception = true);
+
 }  // namespace ufo
 
 #endif  // UFO_UTILS_IODAGROUPINDICES_H_

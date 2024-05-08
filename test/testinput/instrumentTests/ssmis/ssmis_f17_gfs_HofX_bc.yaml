@@ -29,7 +29,7 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cloud_liquid_water
+      - name: cloudWaterContent
         sensor: SSMIS
         ch19h: 12
         ch19v: 13
@@ -38,24 +38,24 @@ observations:
         ch37v: 16
         ch91v: 17
         ch91h: 18
-      - name: cosine_of_latitude_times_orbit_node
-      - name: sine_of_latitude
-      - name: lapse_rate
+      - name: cosineOfLatitudeTimesOrbitNode
+      - name: sineOfLatitude
+      - name: lapseRate
         order: 2
         tlapse: &ssmis_f17_tlap Data/ufo/testinput_tier_1/instruments/radiance/ssmis_f17_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *ssmis_f17_tlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
         var_name: sensorScanPosition
   vector ref: ObsValue
   tolerance: 1.5e-1
