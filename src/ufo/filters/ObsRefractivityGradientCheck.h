@@ -47,6 +47,9 @@ class ObsRefractivityGradientCheckParameters : public FilterParametersBase {
                        "If the absolute value of the second derivative is above this, "
                       "then the observation will be rejected. ",
                        0.0001, this};
+  oops::Parameter<float> maxCheckHeight{"max check height",
+                       "The height below what the check is applied (unit: meter). ",
+                        18000, this};
 };
 
 class ObsRefractivityGradientCheck : public FilterBase,

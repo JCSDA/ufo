@@ -53,8 +53,13 @@ void ObsRefractivityGradientCheck::applyFilter(
   const oops::Variables observed = obsdb_.obsvariables();
   const float missingFloat = util::missingValue<float>();
 
-  ioda::ObsDataVector<float> refractivity(obsdb_, "atmosphericRefractivity", "ObsValue");
-  ioda::ObsDataVector<float> height(obsdb_, "height", "MetaData");
+  // Read observation height and atmosphericRefractivity
+  Variable obsHeight = Variable("MetaData/height");
+  std::vector<float> height;
+  data_.get(obsHeight, height);
+  Variable obsRefractivity = Variable("ObsValue/atmosphericRefractivity");
+  std::vector<float> refractivity;
+  data_.get(obsRefractivity, refractivity);
 
   const std::vector<size_t> & record_numbers = obsdb_.recidx_all_recnums();
   oops::Log::debug() <<"Unique record numbers" << std::endl;
@@ -65,35 +70,44 @@ void ObsRefractivityGradientCheck::applyFilter(
   // Loop over the unique profiles
   for (size_t iProfile : record_numbers) {
     const std::vector<size_t> & obs_numbers = obsdb_.recidx_vector(iProfile);
+
+    // Find the set of indices which allow us to sort the variables by height
+    // decending
+    std::vector<size_t> idx(obs_numbers.size());
+    std::iota(idx.begin(), idx.end(), 0);
+    std::sort(idx.begin(), idx.end(),
+         [&height, &obs_numbers](size_t i1, size_t i2)
+         {return height[obs_numbers[i1]] > height[obs_numbers[i2]];});
+
     std::vector<float> refracProfile;
     std::vector<float> heightProfile;
-
-    for (size_t iobs : obs_numbers) {
-      refracProfile.push_back(refractivity[0][iobs]);
-      heightProfile.push_back(height[0][iobs]);
+    for (size_t isort : idx) {
+      refracProfile.push_back(refractivity[obs_numbers[isort]]);
+      heightProfile.push_back(height[obs_numbers[isort]]);
     }
-
     const std::vector<float> & gradient = calcVerticalGradient(refracProfile, heightProfile);
     const std::vector<float> & secondDeriv = calcVerticalGradient(gradient, heightProfile);
 
-    refracProfile.clear();
-    heightProfile.clear();
-
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
-      int jobs = 0;
       const size_t iv = observed.find(filtervars.variable(jv).variable());
-      for (size_t iobs : obs_numbers) {
-        if ( apply[iobs] && (*flags_)[iv][iobs] == QCflags::pass ) {
-          if ((gradient[jobs] <= parameters_.gradientMin.value() ||
-              gradient[jobs] >= parameters_.gradientMax.value() ||
-              gradient[jobs] == 0 ||
-              abs(secondDeriv[jobs]) >= parameters_.secondDerivative.value()) &&
-              (gradient[jobs] != missingFloat  && secondDeriv[jobs]!= missingFloat)) {
-            flagged[jv][iobs] = true;
+      for (size_t isort : idx) {
+        if ( apply[obs_numbers[isort]] && (*flags_)[iv][obs_numbers[isort]] == QCflags::pass ) {
+          if ((gradient[isort] <= parameters_.gradientMin.value() ||
+              gradient[isort] >= parameters_.gradientMax.value() ||
+              gradient[isort] == 0 ||
+              abs(secondDeriv[isort]) >= parameters_.secondDerivative.value()) &&
+              (gradient[isort] != missingFloat  && secondDeriv[isort]!= missingFloat) &&
+              height[obs_numbers[isort]] < parameters_.maxCheckHeight.value()) {
+            // reject all observations below isort
+            for (size_t jobs = isort; jobs < idx.size(); ++jobs) {
+              if (apply[obs_numbers[jobs]] && (*flags_)[iv][obs_numbers[jobs]] == QCflags::pass) {
+                flagged[jv][obs_numbers[jobs]] = true;
+              }
+            }
+            break;
           }
         }
-       jobs++;
-      }
+      }  //  end isort loop
     }  //  end jv loop
   }  //  end iProfile loop
 }
