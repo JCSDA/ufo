@@ -648,9 +648,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             const std::set<int> &bitIndices = *currentParams.anyBitSetOf.value();
             filterdata.get(varname, data);
             processWhereAnyBitSetOf(data, bitIndices, whereTest);
-          } else if (dtype == ioda::ObsDtype::Empty) {
-	    // do nothing
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only integer variables may be used for processWhere 'any_bit_set_of'",
               Here());
