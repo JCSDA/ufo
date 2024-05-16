@@ -1,0 +1,78 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Write record number to ObsSpace
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/write_recnum_obsspace.nc
+      obsgrouping:
+        group variables: [stationIdentification]
+    observed variables: [radialVelocity]
+    simulated variables: [radialVelocity]
+  obs pre filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/sequenceNumber
+      type: int
+      function:
+        name: IntObsFunction/RecordNumberToObsSpace
+  # Assign arbitrary obs error.
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  compareVariables:
+  - test:
+      name: MetaData/sequenceNumber
+    reference:
+      name: TestReference/recnum1PE
+
+- obs space:
+    name: Write record number to ObsSpace, inefficient distribution
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/write_recnum_obsspace.nc
+      obsgrouping:
+        group variables: [stationIdentification]
+    distribution:
+      name: InefficientDistribution
+    observed variables: [radialVelocity]
+    simulated variables: [radialVelocity]
+  obs pre filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/sequenceNumber
+      type: int
+      function:
+        name: IntObsFunction/RecordNumberToObsSpace
+  # Assign arbitrary obs error.
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  compareVariables:
+  - test:
+      name: MetaData/sequenceNumber
+    reference:
+      name: TestReference/recnum1PE
+
+- obs space:
+    name: Grouping not performed, throwing an exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/write_recnum_obsspace.nc
+    simulated variables: [radialVelocity]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/sequenceNumber
+      type: int
+      function:
+        name: IntObsFunction/RecordNumberToObsSpace
+  expectExceptionWithMessage: Group variables configuration is empty
