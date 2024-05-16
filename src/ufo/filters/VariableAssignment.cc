@@ -168,6 +168,10 @@ void assignNumericValues(const AssignmentParameters &params,
       assignVariable<int>(*params.sourceVariable.value(), params.skipDerived,
                           apply, data, values);
       break;
+    case ioda::ObsDtype::Empty:
+      oops::Log::info() << "ufo::VariableAssignment::assignNumericValues "
+                        << "not performed on empty MPI ranks " << std::endl;
+      break;
     default:
       throw eckit::BadParameter(params.sourceVariable.value()->fullName() +
                                 " is not a numeric variable", Here());
@@ -318,6 +322,10 @@ void assignToVariable(const ufo::Variable &variable,
     break;
   case ioda::ObsDtype::DateTime:
     assignToNonnumericVariable<util::DateTime>(variable, params, apply, data, obsdb);
+    break;
+  case ioda::ObsDtype::Empty:
+    oops::Log::info() << "ufo::VariableAssignment::assignToVariable "
+                      << "not performed on empty MPI ranks" << std::endl;
     break;
   default:
     ASSERT_MSG(false, "Unrecognized data type");

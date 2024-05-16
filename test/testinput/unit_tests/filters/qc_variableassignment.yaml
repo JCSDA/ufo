@@ -828,7 +828,7 @@ observations:
   # innermost exception is fairly clear (Requested data type not equal to storage datatype),
   # but the EXPECT_THROWS_MSG() macro sees only the outermost exception message, which is
   # rather generic and only includes the code location where the exception was thrown.
-  expectExceptionWithMessage: ::read
+  expectExceptionWithMessage: source_column
 
 - obs space: &ObsSpace
     <<: *ObsSpace
@@ -843,7 +843,7 @@ observations:
   # innermost exception is fairly clear (Requested data type not equal to storage datatype),
   # but the EXPECT_THROWS_MSG() macro sees only the outermost exception message, which is
   # rather generic and only includes the code location where the exception was thrown.
-  expectExceptionWithMessage: ::read
+  expectExceptionWithMessage: Reason
 
 - obs space:
     <<: *ObsSpace
