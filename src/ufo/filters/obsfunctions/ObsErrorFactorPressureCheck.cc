@@ -102,6 +102,7 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
 
     // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/geopotential_height");
+  invars_ += Variable("GeoVaLs/saturation_specific_humidity");
   invars_ += Variable("GeoVaLs/surface_pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
