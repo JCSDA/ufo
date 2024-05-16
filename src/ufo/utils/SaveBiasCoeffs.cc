@@ -47,7 +47,7 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
 
   // Save the Channel
   // and the variables
-  ioda::Variable chansVar = ogrp.vars.createWithScales<int>("channels", {ogrp.vars["Channel"]});
+  ioda::Variable chansVar = ogrp.vars.open("Channel");
   chansVar.write(channels);
 
   return ogrp;
