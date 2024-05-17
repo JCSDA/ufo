@@ -24,6 +24,7 @@ use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_basis_mod,     only: ufo_basis
 use obsspace_mod
 use oops_variables_mod
+use obs_variables_mod
 use missing_values_mod
 use fckit_log_module,  only : fckit_log
 use fckit_exception_module,  only : fckit_exception
@@ -37,7 +38,7 @@ implicit none
 type, public :: ufo_scatwind_neutralmetoffice_tlad
 private
     type(oops_variables), public     :: geovars
-    type(oops_variables), public     :: obsvars
+    type(obs_variables), public     :: obsvars
     integer, allocatable, public     :: channels(:)
     logical                          :: surface_type_check
     integer                          :: surface_type_sea

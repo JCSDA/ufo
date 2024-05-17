@@ -18,6 +18,7 @@
 #include <boost/make_unique.hpp>
 #include <boost/noncopyable.hpp>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/Parameters.h"
@@ -59,10 +60,10 @@ class EmptyPredictorParameters : public PredictorParametersBase {
 /// PredictorParametersBase encapsulating its configuration options. It should also provide
 /// a constructor with the following signature:
 ///
-///     PredictorBase(const Parameters_ &, const oops::Variables &);
+///     PredictorBase(const Parameters_ &, const oops::ObsVariables &);
 class PredictorBase : private boost::noncopyable {
  public:
-  explicit PredictorBase(const PredictorParametersBase &, const oops::Variables &);
+  explicit PredictorBase(const PredictorParametersBase &, const oops::ObsVariables &);
   virtual ~PredictorBase() = default;
 
   /// compute the predictor
@@ -76,16 +77,16 @@ class PredictorBase : private boost::noncopyable {
   const oops::Variables & requiredGeovars() const {return geovars_;}
 
   /// hdiags names required to compute the predictor
-  const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
+  const oops::ObsVariables & requiredHdiagnostics() const {return hdiags_;}
 
   /// predictor name
   std::string & name() {return func_name_;}
   const std::string & name() const {return func_name_;}
 
  protected:
-  oops::Variables vars_;         ///<  variables that will be bias-corrected using this predictor
+  oops::ObsVariables vars_;      ///<  variables that will be bias-corrected using this predictor
   oops::Variables geovars_;      ///<  required GeoVaLs
-  oops::Variables hdiags_;       ///<  required ObsDiagnostics
+  oops::ObsVariables hdiags_;    ///<  required ObsDiagnostics
 
  private:
   std::string func_name_;        ///<  predictor name
@@ -104,7 +105,7 @@ class PredictorFactory {
   /// \p parameters must be an instance of the subclass of PredictorParametersBase
   /// associated with that predictor type, otherwise an exception will be thrown.
   static std::unique_ptr<PredictorBase> create(const PredictorParametersBase &parameters,
-                                               const oops::Variables &vars);
+                                               const oops::ObsVariables &vars);
 
   /// \brief Create and return an instance of the subclass of PredictorParametersBase
   /// storing parameters of predictors of the specified type.
@@ -126,7 +127,7 @@ class PredictorFactory {
 
  private:
   virtual std::unique_ptr<PredictorBase> make(const PredictorParametersBase &,
-                                              const oops::Variables &) = 0;
+                                              const oops::ObsVariables &) = 0;
 
   virtual std::unique_ptr<PredictorParametersBase> makeParameters() const = 0;
 
@@ -143,7 +144,7 @@ class PredictorMaker : public PredictorFactory {
   typedef typename T::Parameters_ Parameters_;
 
   std::unique_ptr<PredictorBase> make(const PredictorParametersBase& parameters,
-                                      const oops::Variables & vars) override {
+                                      const oops::ObsVariables & vars) override {
     const auto &stronglyTypedParameters = dynamic_cast<const Parameters_&>(parameters);
     return boost::make_unique<T>(stronglyTypedParameters, vars);
   }

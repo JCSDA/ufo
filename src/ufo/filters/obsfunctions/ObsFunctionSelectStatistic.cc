@@ -69,7 +69,7 @@ void SelectStatistic::compute(const ObsFilterData & in, ioda::ObsDataVector<int>
   const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
   oops::Log::debug() << "validObsIds: " << validObsIds << std::endl;
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
-  ioda::ObsDataVector<float> varin(in.obsspace(), invars_[0].toOopsVariables());
+  ioda::ObsDataVector<float> varin(in.obsspace(), invars_[0].toOopsObsVariables());
   in.get(invars_[0], varin);
   oops::Log::debug() << "out.nvars(): " << out.nvars() << std::endl;
 

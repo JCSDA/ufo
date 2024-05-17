@@ -15,7 +15,7 @@ module ufo_seaicethickness_mod
  use ufo_basis_mod, only: ufo_basis
  use ufo_vars_mod
  use obsspace_mod
- use oops_variables_mod
+ use obs_variables_mod
  use missing_values_mod
 
  implicit none
@@ -25,7 +25,7 @@ module ufo_seaicethickness_mod
 
 !> Fortran derived type for the observation type
  type, extends(ufo_basis), public :: ufo_seaicethickness
-    type(oops_variables), public :: obsvars
+    type(obs_variables), public :: obsvars
     real(kind=kind_real) :: rho_ice  = 905.0 !< [kg/m3]
     real(kind=kind_real) :: rho_snow = 330.0 !< [kg/m3]
     real(kind=kind_real) :: rho_water= 1000.0!< [kg/m3]   

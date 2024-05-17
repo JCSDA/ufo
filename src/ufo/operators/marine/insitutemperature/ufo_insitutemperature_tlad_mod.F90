@@ -12,6 +12,7 @@ use kinds
 use missing_values_mod
 use obsspace_mod
 use oops_variables_mod
+use obs_variables_mod
 use ufo_basis_tlad_mod, only: ufo_basis_tlad
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_tpsp2ti_mod
@@ -25,7 +26,7 @@ private
  !> Fortran derived type for the tl/ad observation operator
  type, public :: ufo_insitutemperature_tlad
  private
-   type(oops_variables), public :: obsvars ! Variables to be simulated
+   type(obs_variables), public :: obsvars ! Variables to be simulated
    integer,              public :: obsvaridx
    type(oops_variables), public :: geovars
    integer                            :: nlocs       !< Number of observations

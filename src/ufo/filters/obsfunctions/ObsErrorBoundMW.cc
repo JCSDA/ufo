@@ -110,17 +110,17 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
 
   // Get error factor from ObsFunction
   const Variable &obserrlat = options_.obserrBoundLat.value();
-  ioda::ObsDataVector<float> errflat(in.obsspace(), obserrlat.toOopsVariables());
+  ioda::ObsDataVector<float> errflat(in.obsspace(), obserrlat.toOopsObsVariables());
   in.get(obserrlat, errflat);
 
   // Get error factor from ObsFunction
   const Variable &obserrtaotop = options_.obserrBoundTransmittop.value();
-  ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsVariables());
+  ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsObsVariables());
   in.get(obserrtaotop, errftaotop);
 
   // Get error factor from ObsFunction
   const Variable &obserrtopo = options_.obserrBoundTopo.value();
-  ioda::ObsDataVector<float> errftopo(in.obsspace(), obserrtopo.toOopsVariables());
+  ioda::ObsDataVector<float> errftopo(in.obsspace(), obserrtopo.toOopsObsVariables());
   in.get(obserrtopo, errftopo);
 
   // Get all-sky observation error from ObsFunction
@@ -128,7 +128,7 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
   if (options_.obserrFunction.value() != boost::none) {
     const boost::optional<Variable> &obserrvar = options_.obserrFunction.value();
     obserr.reset(new ioda::ObsDataVector<float>(in.obsspace(),
-                 (*obserrvar).toOopsVariables()));
+                 (*obserrvar).toOopsObsVariables()));
     in.get(*obserrvar, *obserr);
   }
 

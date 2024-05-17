@@ -17,7 +17,7 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-oops::Variables LinearObsOperatorBase::simulatedVars() const {
+oops::ObsVariables LinearObsOperatorBase::simulatedVars() const {
   return odb_.assimvariables();
 }
 

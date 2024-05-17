@@ -54,7 +54,7 @@ class Thickness : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef ThicknessParameters Parameters_;
 
-  Thickness(const Parameters_ &, const oops::Variables &);
+  Thickness(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

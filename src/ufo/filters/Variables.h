@@ -20,7 +20,7 @@ namespace eckit {
 }
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ufo {
@@ -34,6 +34,7 @@ class Variables: public util::Printable {
   Variables();
   explicit Variables(const std::vector<eckit::LocalConfiguration> &);
   explicit Variables(const oops::Variables &);
+  explicit Variables(const oops::ObsVariables &);
   Variables(const ufo::Variables &, const std::string &);
   explicit Variables(const std::vector<Variable> &);
   ~Variables();
@@ -55,8 +56,8 @@ class Variables: public util::Printable {
   Variable variable(const size_t) const;
 
   Variables allFromGroup(const std::string &) const;
+  oops::ObsVariables toOopsObsVariables() const;
   oops::Variables toOopsVariables() const;
-
   bool hasGroup(const std::string &) const;
   operator bool() const {return !vars_.empty();}
 

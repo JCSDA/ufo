@@ -19,6 +19,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/profile/ObsProfileAverageParameters.h"
+#include "ufo/utils/VariableNameMap.h"
 
 namespace ufo {
 
@@ -26,13 +27,14 @@ namespace ufo {
   class ObsProfileAverageData {
    public:
     ObsProfileAverageData(const ioda::ObsSpace & odb,
-                          const ObsProfileAverageParameters & parameters);
+                          const ObsProfileAverageParameters & parameters,
+                          const VariableNameMap & nameMap = VariableNameMap(boost::none));
 
     /// Return required variables for the operator.
     const oops::Variables & requiredVars() const;
 
     /// Return simulated variables for the operator.
-    const oops::Variables & simulatedVars() const;
+    const oops::ObsVariables & simulatedVars() const;
 
     /// Return operator variable indices for the operator.
     const std::vector<int> & operatorVarIndices() const;
@@ -82,7 +84,7 @@ namespace ufo {
     oops::Variables requiredVars_;
 
     /// Operator variables.
-    oops::Variables operatorVars_;
+    oops::ObsVariables operatorVars_;
 
     /// Indices of operator variables.
     std::vector<int> operatorVarIndices_;

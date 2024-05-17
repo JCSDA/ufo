@@ -37,7 +37,7 @@ class MWCLWCheckParameters : public FilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(MWCLWCheckParameters, FilterParametersBase)
 
  public:
-  oops::RequiredParameter<oops::Variables> clwVariables{"clw variables", this};
+  oops::RequiredParameter<oops::ObsVariables> clwVariables{"clw variables", this};
 
   oops::RequiredParameter<std::vector<float>> clwThresholds{"clw_thresholds", this};
 

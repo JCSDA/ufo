@@ -59,9 +59,9 @@ void ObsErrorFactorQuotient::compute(const ObsFilterData & data,
                      << "  and group: " << denominator.group() << std::endl;
 
   // Populate the arrays.
-  ioda::ObsDataVector<float> numer(data.obsspace(), numerator.toOopsVariables());
+  ioda::ObsDataVector<float> numer(data.obsspace(), numerator.toOopsObsVariables());
   data.get(numerator, numer);
-  ioda::ObsDataVector<float> denom(data.obsspace(), denominator.toOopsVariables());
+  ioda::ObsDataVector<float> denom(data.obsspace(), denominator.toOopsObsVariables());
   data.get(denominator, denom);
 
     // The 1st index of data should have size 1 and 2nd index should be size nlocs.

@@ -16,7 +16,7 @@
 
 #include "ioda/ObsVector.h"
 
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
@@ -145,7 +145,7 @@ class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
   /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
-  const oops::Variables vars_;
+  const oops::ObsVariables vars_;
   /// Correlations between variables
   Eigen::MatrixXd varcorrelations_;
 };

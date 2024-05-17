@@ -8,6 +8,7 @@
 
 module ufo_lightning_tlad_mod
 
+use obs_variables_mod
 use oops_variables_mod
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -18,7 +19,7 @@ use ufo_constants_mod, only: one, zero, half, grav ! Gravitational field strengt
  !> Fortran derived type for the tl/ad observation operator
  type, public :: ufo_lightning_tlad
  private
-  type(oops_variables), public :: obsvars
+  type(obs_variables), public  :: obsvars
   type(oops_variables), public :: geovars
 
   integer                       :: nlevdp, nlevq, nlocs

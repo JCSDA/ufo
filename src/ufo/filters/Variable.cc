@@ -16,6 +16,7 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/IntSetParser.h"
@@ -146,6 +147,15 @@ oops::Variables Variable::toOopsVariables() const {
   return vars;
 }
 
+// -----------------------------------------------------------------------------
+
+oops::ObsVariables Variable::toOopsObsVariables() const {
+  oops::ObsVariables vars;
+  for (size_t jj = 0; jj < this->size(); ++jj) {
+    vars.push_back(this->variable(jj));
+  }
+  return vars;
+}
 
 // -----------------------------------------------------------------------------
 

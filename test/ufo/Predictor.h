@@ -72,7 +72,7 @@ void testPredictor() {
     gval->setDefaultFormat(GeoVaLFormat::REDUCED);
 
     // initialize Obs diagnostics
-    oops::Variables diagvars;
+    oops::ObsVariables diagvars;
     diagvars += ybias.requiredHdiagnostics();
     std::vector<float> lons(ospace.nlocs());
     std::vector<float> lats(ospace.nlocs());
@@ -117,7 +117,7 @@ void testPredictor() {
     for (std::size_t jp = 0; jp < npreds; ++jp) {
       vars.push_back("predictor_" + predictor_names[jp]);
     }
-    const oops::Variables testvars = ospace.assimvariables();
+    const oops::ObsVariables testvars = ospace.assimvariables();
     const std::size_t nvars = testvars.size();
     if (!testvars.channels().empty()) {
       // At present we can label predictors with either the channel number or the variable

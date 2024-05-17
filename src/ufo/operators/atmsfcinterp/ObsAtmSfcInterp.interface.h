@@ -40,7 +40,7 @@ extern "C" {
   /// [windNorthward, windEastward], then \p operatorVarIndices should be set to [1, 2].
 
   void ufo_atmsfcinterp_setup_f90(F90hop &, const eckit::Configuration &,
-                                  const oops::Variables &operatorVars,
+                                  const oops::ObsVariables &operatorVars,
                                   const int *operatorVarIndices, const int numOperatorVarIndices,
                                   oops::Variables &requiredVars);
   void ufo_atmsfcinterp_delete_f90(F90hop &);

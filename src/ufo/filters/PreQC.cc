@@ -35,7 +35,7 @@ void PreQC::applyFilter(const std::vector<bool> & apply,
 
   // Read QC flags from pre-processing
   ioda::ObsDataVector<int> preqc(obsdb_,
-                                 filtervars.toOopsVariables(),
+                                 filtervars.toOopsObsVariables(),
                                  parameters_.inputQC);
   oops::Log::debug() << "PreQC::PreQC preqc: " << preqc;
 

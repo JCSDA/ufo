@@ -13,6 +13,7 @@
 #include <string>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 // TODO: modify the list of Parameter classes to include
@@ -85,7 +86,7 @@ class Example : public oops::interface::ObsFilterBase<ObsTraits>,
   void checkFilterData(const oops::FilterStage filterStage) override {};
 
   oops::Variables requiredVars() const override {return geovars_;}
-  oops::Variables requiredHdiagnostics() const override {return diagnostics_;}
+  oops::ObsVariables requiredHdiagnostics() const override {return diagnostics_;}
 
  private:
   void print(std::ostream &) const override;
@@ -93,7 +94,7 @@ class Example : public oops::interface::ObsFilterBase<ObsTraits>,
 
   ioda::ObsSpace & obsdb_;
   oops::Variables geovars_;
-  oops::Variables diagnostics_;
+  oops::ObsVariables diagnostics_;
   ioda::ObsDataVector<int> & flags_;
 };
 

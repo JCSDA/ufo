@@ -16,7 +16,7 @@
 #include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ioda {
@@ -50,7 +50,7 @@ class ScanAngle : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef ScanAngleParameters Parameters_;
 
-  ScanAngle(const Parameters_ &, const oops::Variables &);
+  ScanAngle(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

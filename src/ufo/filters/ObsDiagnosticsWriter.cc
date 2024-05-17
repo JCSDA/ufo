@@ -27,7 +27,7 @@ ObsDiagnosticsWriter::ObsDiagnosticsWriter(
   // read filter variables
     for (const Variable &var : *params.filterVariables.value())
       diagvars += var;
-    extradiagvars_ += Variables(diagvars, "ObsDiag").toOopsVariables();
+    extradiagvars_ += Variables(diagvars, "ObsDiag").toOopsObsVariables();
   }
 }
 

@@ -62,12 +62,12 @@ void CLWMatchIndexMW::compute(const ObsFilterData & in,
 
   // Get CLW retrieval based on observation from ObsFunction
   const Variable &clwobsvar = options_.clwobsFunction.value();
-  ioda::ObsDataVector<float> clwobs(in.obsspace(), clwobsvar.toOopsVariables());
+  ioda::ObsDataVector<float> clwobs(in.obsspace(), clwobsvar.toOopsObsVariables());
   in.get(clwobsvar, clwobs);
 
   // Get CLW retrieval based on simulated observation from ObsFunction
   const Variable &clwbkgvar = options_.clwbkgFunction.value();
-  ioda::ObsDataVector<float> clwbkg(in.obsspace(), clwbkgvar.toOopsVariables());
+  ioda::ObsDataVector<float> clwbkg(in.obsspace(), clwbkgvar.toOopsObsVariables());
   in.get(clwbkgvar, clwbkg);
 
   // Get parameters for observation errors from options

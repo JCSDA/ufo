@@ -41,7 +41,7 @@ void save(const ioda::ObsDataVector<float> &input, ioda::ObsVector &output) {
   }
 }
 
-std::set<std::string> getVariableNamesWithoutChannels(const oops::Variables &vars) {
+std::set<std::string> getVariableNamesWithoutChannels(const oops::ObsVariables &vars) {
   if (vars.channels().empty()) {
     return std::set<std::string>(vars.variables().begin(), vars.variables().end());
   } else {
@@ -58,7 +58,7 @@ std::set<std::string> getVariableNamesWithoutChannels(const oops::Variables &var
 static PredictorMaker<InterpolateDataFromFile> maker("interpolate_data_from_file");
 
 InterpolateDataFromFile::InterpolateDataFromFile(const Parameters_ & parameters,
-                                                 const oops::Variables & vars)
+                                                 const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars) {
   const std::set<std::string> channellessVariables = getVariableNamesWithoutChannels(vars_);
 
@@ -75,7 +75,7 @@ InterpolateDataFromFile::InterpolateDataFromFile(const Parameters_ & parameters,
     const DrawValueFromFile<float> &obsFunction = *varAndObsFunction.second;
     const ufo::Variables &requiredVariables = obsFunction.requiredVariables();
     geovars_ += requiredVariables.allFromGroup("GeoVaLs").toOopsVariables();
-    hdiags_ += requiredVariables.allFromGroup("ObsDiag").toOopsVariables();
+    hdiags_ += requiredVariables.allFromGroup("ObsDiag").toOopsObsVariables();
   }
 }
 
@@ -94,7 +94,7 @@ void InterpolateDataFromFile::compute(const ioda::ObsSpace & /*odb*/,
     const std::string &varName = varAndObsFunction.first;
     const DrawValueFromFile<float> &obsFunction = *varAndObsFunction.second;
 
-    oops::Variables currentVars({varName}, vars_.channels());
+    oops::ObsVariables currentVars({varName}, vars_.channels());
     ioda::ObsDataVector<float> obsFunctionResult(out.space(), currentVars);
     obsFunction.compute(obsFilterData, obsFunctionResult);
     save(obsFunctionResult, out);

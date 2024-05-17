@@ -10,6 +10,7 @@ module ufo_aodext_mod
  use iso_c_binding
  use kinds
  use oops_variables_mod
+ use obs_variables_mod
  use fckit_log_module, only : fckit_log
  use ufo_vars_mod
  use missing_values_mod
@@ -21,7 +22,7 @@ module ufo_aodext_mod
 
  type, public :: ufo_aodext
  private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars
    real(kind_real), public, allocatable :: wavelength(:)!(nprofiles)
    integer, public              :: nprofiles

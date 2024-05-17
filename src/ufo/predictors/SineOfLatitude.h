@@ -11,7 +11,7 @@
 #include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ioda {
@@ -28,7 +28,7 @@ class SineOfLatitude : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef EmptyPredictorParameters Parameters_;
 
-  SineOfLatitude(const Parameters_ &, const oops::Variables &);
+  SineOfLatitude(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

@@ -11,6 +11,7 @@ module ufo_insitupm_mod
  use kinds
  use PM_cmaq_mod
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
  use ufo_basis_mod, only: ufo_basis
 
@@ -21,7 +22,7 @@ module ufo_insitupm_mod
  type, public :: ufo_insitupm
  private
    type(oops_variables), public :: geovars
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    integer                      :: ntracers
    character(len=maxvarlen)     :: model, v_coord        
    logical                      :: scalefactor

@@ -12,6 +12,7 @@ use iso_c_binding
 use kinds
 use obsspace_mod
 use oops_variables_mod
+use obs_variables_mod
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_tpsp2ti_mod
 use ufo_vars_mod
@@ -23,7 +24,7 @@ private
 !> Fortran derived type for the observation type
 type, public :: ufo_insitutemperature
    type(oops_variables), public :: geovars
-   type(oops_variables), public :: obsvars ! Variables to be simulated
+   type(obs_variables), public :: obsvars ! Variables to be simulated
    integer,              public :: obsvaridx
 contains
    procedure :: setup  => ufo_insitutemperature_setup

@@ -29,9 +29,9 @@ static ObsOperatorMaker<ObsProfileAverage> obsProfileAverageMaker_("ProfileAvera
 ObsProfileAverage::ObsProfileAverage(const ioda::ObsSpace & odb,
                                      const Parameters_ & parameters)
   : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
-    odb_(odb), data_(odb, parameters)
+    odb_(odb), data_(odb, parameters, nameMap_)
 {
-  requiredVars_ += nameMap_.convertName(data_.requiredVars());
+  requiredVars_ += data_.requiredVars();
   oops::Log::trace() << "ObsProfileAverage constructed" << std::endl;
 }
 

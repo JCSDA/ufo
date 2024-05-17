@@ -45,7 +45,7 @@ void LinearObsBiasOperator::setTrajectory(const GeoVaLs & geovals, const ObsBias
 
   byRecord_ = bias.byRecord();
 
-  const oops::Variables &simVars = bias.simVars();
+  const oops::ObsVariables &simVars = bias.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
   // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
   ASSERT(simVars.channels().empty() ||

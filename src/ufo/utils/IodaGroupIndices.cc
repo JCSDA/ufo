@@ -9,7 +9,7 @@
 
 #include "eckit/exception/Exceptions.h"
 #include "ioda/ObsGroup.h"
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 
 namespace ufo {
 
@@ -72,7 +72,7 @@ std::vector<int> getRequiredVariableIndices(const ioda::ObsGroup &obsgroup,
 // -----------------------------------------------------------------------------
 
 std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
-                                                const oops::Variables &vars_to_look_for,
+                                                const oops::ObsVariables &vars_to_look_for,
                                                 bool throwexception) {
   if (vars_to_look_for.channels().empty()) {
     // Read all variables from the file into std vector

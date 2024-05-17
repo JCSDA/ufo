@@ -14,6 +14,7 @@ module ufo_insitupm_tlad_mod
  use ufo_constants_mod, only: rd
  use PM_cmaq_mod
  use oops_variables_mod
+ use obs_variables_mod
 
  implicit none
  private
@@ -24,7 +25,7 @@ module ufo_insitupm_tlad_mod
   integer :: nlocs, nlayers, nvars, ntracers
   character(len=maxvarlen)     :: model, v_coord
   logical :: scalefactor
-  type(oops_variables), public :: obsvars
+  type(obs_variables), public :: obsvars
   type(oops_variables), public :: geovars
   integer(kind=c_int), dimension(:), allocatable :: tracer_modes_cmaq(:)
   real(kind=kind_real), dimension(:,:), allocatable :: prs(:,:)

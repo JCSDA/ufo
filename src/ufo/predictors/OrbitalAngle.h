@@ -74,7 +74,7 @@ class OrbitalAngle : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef OrbitalAngleParameters Parameters_;
 
-  OrbitalAngle(const Parameters_ &, const oops::Variables &);
+  OrbitalAngle(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

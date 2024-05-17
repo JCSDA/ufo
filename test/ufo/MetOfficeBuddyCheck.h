@@ -76,7 +76,7 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
 
   SampledLocations_ locs(conf, obsSpace.comm());
   const eckit::LocalConfiguration diagConf = conf.getSubConfiguration("obs diagnostics");
-  oops::Variables diagVars;
+  oops::ObsVariables diagVars;
   for (const std::string &name : diagConf.keys())
     diagVars.push_back(name);
   ufo::ObsDiagnostics obsDiags(obsSpace, std::move(locs), diagVars);

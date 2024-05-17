@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "ufo/SampledLocations.h"
 
@@ -21,21 +22,21 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations_ & locs,
-                               const oops::Variables & vars)
-  : obsdb_(os), gdiags_(locs, vars)
+                               const oops::ObsVariables & vars)
+  : obsdb_(os), gdiags_(locs, oops::Variables(vars.variables()))
 {}
 
 // -----------------------------------------------------------------------------
 
 ObsDiagnostics::ObsDiagnostics(const eckit::Configuration & config, const ioda::ObsSpace & os,
-                               const oops::Variables & vars)
-  : obsdb_(os), gdiags_(config, os, vars)
+                               const oops::ObsVariables & vars)
+  : obsdb_(os), gdiags_(config, os, oops::Variables(vars.variables()))
 {}
 
 // -----------------------------------------------------------------------------
 
-void ObsDiagnostics::allocate(const int nlev, const oops::Variables & vars) {
-  gdiags_.allocate(nlev, vars);
+void ObsDiagnostics::allocate(const int nlev, const oops::ObsVariables & vars) {
+  gdiags_.allocate(nlev, oops::Variables(vars.variables()));
 }
 
 // -----------------------------------------------------------------------------

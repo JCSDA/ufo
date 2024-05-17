@@ -42,6 +42,7 @@ subroutine ufo_scatwind_neutralmetoffice_tlad_setup_c(c_key_self,         &
                                                       c_channels,         &
                                                       c_conf) bind(c,name='ufo_scatwind_neutralmetoffice_tlad_setup_f90')
 use oops_variables_mod
+use obs_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 logical(c_bool), intent(in)    :: surface_type_check !< Whether to check we are over sea before calculating H(x)
@@ -59,7 +60,7 @@ type(ufo_scatwind_NeutralMetOffice_tlad), pointer :: self
 
 call ufo_scatwind_neutralmetoffice_tlad_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
-self%obsvars = oops_variables(c_obsvars)
+self%obsvars = obs_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 
 call self%setup(c_channels, surface_type_check, surface_type_sea)

@@ -6,6 +6,7 @@
 module ufo_atmvertinterplay_tlad_mod
 
   use oops_variables_mod
+  use obs_variables_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_lay_mod
@@ -17,7 +18,7 @@ module ufo_atmvertinterplay_tlad_mod
 
   type, public :: ufo_atmvertinterplay_tlad
   private
-    type(oops_variables), public :: obsvars
+    type(obs_variables), public :: obsvars
     type(oops_variables), public :: geovars
     integer :: nval, nlocs
     logical :: flip_it

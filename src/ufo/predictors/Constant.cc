@@ -15,7 +15,7 @@ static PredictorMaker<Constant> makerFuncConstant_("constant");
 
 // -----------------------------------------------------------------------------
 
-Constant::Constant(const Parameters_ & parameters, const oops::Variables & vars)
+Constant::Constant(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars) {
 }
 

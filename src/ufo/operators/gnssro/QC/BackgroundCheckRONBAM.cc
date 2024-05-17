@@ -52,11 +52,11 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
                                         std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheckRONBAM postFilter" << std::endl;
 
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
   const float missing = util::missingValue<float>();
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsObsVariables(), "ObsBias", false);
   ioda::ObsDataVector<float> impactparameter(obsdb_, "impactParameterRO", "MetaData");
   ioda::ObsDataVector<float> latitude(obsdb_, "latitude", "MetaData");
   ioda::ObsDataVector<float> earthradius(obsdb_, "earthRadiusCurvature", "MetaData");

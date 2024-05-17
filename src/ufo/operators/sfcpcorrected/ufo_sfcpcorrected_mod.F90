@@ -9,6 +9,7 @@
 module ufo_sfcpcorrected_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
  use missing_values_mod
  use iso_c_binding
@@ -23,7 +24,7 @@ module ufo_sfcpcorrected_mod
 !> Fortran derived type for the observation type
  type, public :: ufo_sfcpcorrected
  private
-   type(oops_variables), public :: obsvars ! Variables to be simulated
+   type(obs_variables), public :: obsvars ! Variables to be simulated
    integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
                                                     ! simulated variables in the ObsSpace.
                                                     ! allocated/deallocated at interface layer

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/DiagnosticFlag.h"
@@ -29,8 +29,8 @@ CreateDiagnosticFlags::CreateDiagnosticFlags(ioda::ObsSpace &obsdb, const Parame
 {
   oops::Log::trace() << "CreateDiagnosticFlags constructor starts" << std::endl;
   if (parameters.filterVariables.value().is_initialized()) {
-    const oops::Variables &observedVariables = obsdb.obsvariables();
-    const oops::Variables filterVariables = getFilterVariables();
+    const oops::ObsVariables &observedVariables = obsdb.obsvariables();
+    const oops::ObsVariables filterVariables = getFilterVariables();
     for (size_t i = 0; i < filterVariables.size(); ++i)
       if (!observedVariables.has(filterVariables[i])) {
         throw eckit::UserError("Filter variable '" + filterVariables[i] +
@@ -48,12 +48,12 @@ CreateDiagnosticFlags::~CreateDiagnosticFlags() {
 
 // -----------------------------------------------------------------------------
 
-oops::Variables CreateDiagnosticFlags::getFilterVariables() const {
+oops::ObsVariables CreateDiagnosticFlags::getFilterVariables() const {
   if (parameters_.filterVariables.value().is_initialized()) {
     ufo::Variables vars;
     for (const Variable &var : *parameters_.filterVariables.value())
       vars += var;
-    return vars.toOopsVariables();
+    return vars.toOopsObsVariables();
   } else {
     return obsdb_.obsvariables();
   }
@@ -64,7 +64,7 @@ oops::Variables CreateDiagnosticFlags::getFilterVariables() const {
 void CreateDiagnosticFlags::doFilter() const {
   oops::Log::trace() << "CreateDiagnosticFlags doFilter starts" << std::endl;
 
-  const oops::Variables filterVars = getFilterVariables();
+  const oops::ObsVariables filterVars = getFilterVariables();
   // Loop over the names of flags we've been asked to create.
   for (const DiagnosticFlagParameters &params : parameters_.flags.value()) {
     const std::string &flagName = params.name;

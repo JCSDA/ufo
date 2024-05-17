@@ -38,6 +38,7 @@ contains
 subroutine ufo_lightning_setup_c(c_key_self, nhoriz_, c_obsvars, c_geovars) &
                                  bind(c,name='ufo_lightning_setup_f90')
 
+use obs_variables_mod
 use oops_variables_mod
 use ufo_vars_mod, only: MAXVARLEN, var_qg, var_delp
 implicit none
@@ -51,7 +52,7 @@ character(len=maxvarlen), dimension(2), parameter :: geovars_default = (/var_qg,
 type(ufo_lightning), pointer :: self
 call ufo_lightning_registry%setup(c_key_self, self)
 
-self%obsvars = oops_variables(c_obsvars)
+self%obsvars = obs_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 call self%geovars%push_back(geovars_default)
 

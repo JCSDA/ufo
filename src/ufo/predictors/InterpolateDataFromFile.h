@@ -77,7 +77,7 @@ class InterpolateDataFromFile : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef InterpolateDataFromFileParameters Parameters_;
 
-  InterpolateDataFromFile(const Parameters_ &, const oops::Variables &);
+  InterpolateDataFromFile(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &, const GeoVaLs &,
                const ObsDiagnostics &, const ObsBias &,

@@ -10,7 +10,7 @@ use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_geovals_mod
 use obsspace_mod
-use oops_variables_mod
+use obs_variables_mod
 use missing_values_mod
 use gnssro_mod_obserror
 use fckit_log_module, only : fckit_log
@@ -32,7 +32,7 @@ type :: ufo_roobserror
   character(len=max_string)    :: err_variable
   character(len=max_string)    :: average_temperature_name
   logical                      :: verbose_output       ! Whether to give extra output messages
-  type(oops_variables), public :: obsvar
+  type(obs_variables), public :: obsvar
   type(c_ptr)                  :: obsdb
   integer                      :: n_horiz              ! For ROPP-2D multiplier of the number of geovals
   logical                      :: allow_extrapolation  ! Allow errors to be extrapolated outside of range?
@@ -45,7 +45,7 @@ contains
 
 subroutine ufo_roobserror_create(self, obspace, f_conf)
 use iso_c_binding
-use oops_variables_mod
+use obs_variables_mod
 implicit none
 type(ufo_roobserror), intent(inout)   :: self
 type(c_ptr),  value,       intent(in) :: obspace

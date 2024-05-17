@@ -16,12 +16,12 @@
 namespace ufo {
 
 void getOperatorVariables(const boost::optional<std::vector<ufo::Variable>> &listofvariables,
-                          const oops::Variables &simulatedVariables,
-                          oops::Variables &operatorVariables,
+                          const oops::ObsVariables &simulatedVariables,
+                          oops::ObsVariables &operatorVariables,
                           std::vector<int> &operatorVariableIndices) {
   if (listofvariables.is_initialized() && (listofvariables.value().size() > 0)) {
     Variables optionalvariables(listofvariables.get());
-    operatorVariables = optionalvariables.toOopsVariables();
+    operatorVariables = optionalvariables.toOopsObsVariables();
 
     std::map<std::string, int> simulatedVariableIndices;
     for (size_t i = 0; i < simulatedVariables.size(); ++i)

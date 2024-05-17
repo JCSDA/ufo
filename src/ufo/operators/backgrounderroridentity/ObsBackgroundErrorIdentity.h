@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -89,7 +90,7 @@ class ObsBackgroundErrorIdentity : public ObsOperatorBase,
 
   const oops::Variables & requiredVars() const override;
 
-  oops::Variables simulatedVars() const override;
+  oops::ObsVariables simulatedVars() const override;
 
  private:
   void print(std::ostream &) const override;

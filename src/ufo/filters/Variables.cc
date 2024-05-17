@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
@@ -42,7 +43,7 @@ Variables::Variables(const std::vector<eckit::LocalConfiguration> & confs)
 
 // -----------------------------------------------------------------------------
 
-Variables::Variables(const oops::Variables & oopsvars)
+Variables::Variables(const oops::ObsVariables & oopsvars)
   : vars_() {
   oops::Log::trace() << "ufo::Variables(oops::Vars) start" << std::endl;
   if (oopsvars.channels().size() > 0) {
@@ -56,6 +57,17 @@ Variables::Variables(const oops::Variables & oopsvars)
       vars_.push_back(Variable(oopsvars[jvar]));
     }
   }
+}
+
+// -----------------------------------------------------------------------------
+
+Variables::Variables(const oops::Variables & oopsvars)
+  : vars_() {
+  oops::Log::trace() << "ufo::Variables(oops::Vars) start" << std::endl;
+  for (size_t jvar = 0; jvar < oopsvars.size(); ++jvar) {
+    vars_.push_back(Variable(oopsvars[jvar]));
+  }
+  oops::Log::trace() << "ufo::Variables(oops::Vars) end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -153,6 +165,18 @@ Variables Variables::allFromGroup(const std::string & group) const {
       ObsFunction<util::DateTime> obsfunc(vars_[ivar]);
       ufo::Variables funcvars = obsfunc.requiredVariables();
       vars += funcvars.allFromGroup(group);
+    }
+  }
+  return vars;
+}
+
+// -----------------------------------------------------------------------------
+
+oops::ObsVariables Variables::toOopsObsVariables() const {
+  oops::ObsVariables vars;
+  for (size_t ivar = 0; ivar < vars_.size(); ++ivar) {
+    for (size_t jj = 0; jj < vars_[ivar].size(); ++jj) {
+      vars.push_back(vars_[ivar].variable(jj));
     }
   }
   return vars;

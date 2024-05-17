@@ -28,6 +28,7 @@
 namespace oops {
   template <typename OBS> class Locations;
   class Variables;
+  class ObsVariables;
 }
 
 namespace ioda {
@@ -78,7 +79,7 @@ class ObsOperatorBase : public util::Printable,
 /// \brief List of variables simulated by this operator.
 ///
 /// The default implementation returns the list of all simulated variables in the ObsSpace.
-  virtual oops::Variables simulatedVars() const;
+  virtual oops::ObsVariables simulatedVars() const;
 
 /// \brief Convert values of model variables stored in the sampled format to the reduced format.
 ///

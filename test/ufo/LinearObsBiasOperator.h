@@ -64,7 +64,7 @@ CASE("ufo/LinearObsBiasOperator/testLinearObsBiasOperator") {
     geovals.setDefaultFormat(GeoVaLFormat::REDUCED);
 
     // set up obs diagnostics
-    oops::Variables requiredHdiagnostics;
+    oops::ObsVariables requiredHdiagnostics;
     requiredHdiagnostics += bias.requiredHdiagnostics();
     std::vector<float> lons(odb.nlocs());
     std::vector<float> lats(odb.nlocs());

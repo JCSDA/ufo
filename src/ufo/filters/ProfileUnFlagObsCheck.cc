@@ -144,7 +144,7 @@ void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
                                         const Variables & filtervars,
                                         std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProfileUnFlagObsCheck preProcess filter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
 
   // setup the calculation of the absolute tolerance to use a piecewise linear
   // function if specified.

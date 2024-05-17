@@ -65,12 +65,12 @@ void ObsComposite::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
 // -----------------------------------------------------------------------------
 
-oops::Variables ObsComposite::simulatedVars() const {
+oops::ObsVariables ObsComposite::simulatedVars() const {
   // Merge the lists of variables simulated by all components, ensuring that there are
   // no overlaps.
-  oops::Variables vars;
+  oops::ObsVariables vars;
   for (const std::unique_ptr<ObsOperatorBase> &component : components_) {
-    oops::Variables componentVars;
+    oops::ObsVariables componentVars;
     // We use += rather than = to make sure componentVars contains no duplicate entries.
     componentVars += component->simulatedVars();
     const size_t oldSize = vars.size();

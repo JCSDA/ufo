@@ -22,6 +22,7 @@
 #include "ioda/ObsGroup.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
@@ -69,7 +70,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
     this->read(config);
   }
 
-  oops::Variables varsNoBC = params.variablesNoBC;
+  oops::ObsVariables varsNoBC = params.variablesNoBC;
   varsNoBC.intersection(vars_);  // Safeguard to make sure that varsNoBC is a subset of vars_
   for (size_t ii = 0; ii < varsNoBC.size(); ++ii) {
     size_t index = vars_.find(varsNoBC[ii]);
@@ -351,11 +352,11 @@ void ObsBias::initPredictor(const PredictorParametersWrapper &params) {
     // name, but not both. So make sure there's only one multi-channel variable.
     ASSERT(vars_.size() == vars_.channels().size());
     for (auto & job : vars_.channels()) {
-      hdiags_ += oops::Variables({prednames_.back() + "_" + std::to_string(job)});
+      hdiags_ += oops::ObsVariables({prednames_.back() + "_" + std::to_string(job)});
     }
   } else {
     for (const std::string & variable : vars_.variables())
-      hdiags_ += oops::Variables({prednames_.back() + "_" + variable});
+      hdiags_ += oops::ObsVariables({prednames_.back() + "_" + variable});
   }
 }
 

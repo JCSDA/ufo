@@ -26,7 +26,7 @@ static PredictorMaker<LapseRate> makerFuncLapseRate_("lapseRate");
 
 // -----------------------------------------------------------------------------
 
-LapseRate::LapseRate(const Parameters_ & parameters, const oops::Variables & vars)
+LapseRate::LapseRate(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1))
 {
@@ -40,7 +40,7 @@ LapseRate::LapseRate(const Parameters_ & parameters, const oops::Variables & var
                                "air_pressure",
                                "average_surface_temperature_within_field_of_view"});
   if (vars.size() > 0) {
-    hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, vars.channels());
+    hdiags_ += oops::ObsVariables({"transmittances_of_atmosphere_layer"}, vars.channels());
   } else {
     oops::Log::error() << "Channels size is ZERO !" << std::endl;
     ABORT("Channels size is ZERO !");

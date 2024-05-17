@@ -69,12 +69,12 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProfileBackgroundCheck postFilter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
 
   oops::Log::debug() << "ProfileBackgroundCheck obserr: " << *obserr_;
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
-  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsVariables(), "ObsBias", false);
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsObsVariables(), "ObsBias", false);
 
   // Get the record numbers from the observation data.  These will be used to identify
   // which observations belong to which profile.

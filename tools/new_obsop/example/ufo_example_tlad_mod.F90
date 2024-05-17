@@ -8,6 +8,7 @@
 module ufo_example_tlad_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
 
  implicit none
@@ -18,7 +19,7 @@ module ufo_example_tlad_mod
  !       this type can hold information on trajectory, for example
  type, public :: ufo_example_tlad
  private
-  type(oops_variables), public :: obsvars
+  type(obs_variables), public :: obsvars
   type(oops_variables), public :: geovars
  contains
   procedure :: setup  => ufo_example_tlad_setup

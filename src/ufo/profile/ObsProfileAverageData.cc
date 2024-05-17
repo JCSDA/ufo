@@ -15,7 +15,8 @@
 namespace ufo {
 
   ObsProfileAverageData::ObsProfileAverageData(const ioda::ObsSpace & odb,
-                                               const ObsProfileAverageParameters & parameters)
+                                               const ObsProfileAverageParameters & parameters,
+                                               const VariableNameMap & nameMap)
     : odb_(odb),
       options_(parameters)
   {
@@ -48,7 +49,7 @@ namespace ufo {
     // Add any simulated variables to the list of variables used in this operator.
     getOperatorVariables(parameters.variables.value(), odb_.assimvariables(),
                          operatorVars_, operatorVarIndices_);
-    requiredVars_ += operatorVars_;
+    requiredVars_ += nameMap.convertName(operatorVars_);
 
     // If required, set up vectors for OPS comparison.
     if (options_.compareWithOPS.value())
@@ -59,7 +60,7 @@ namespace ufo {
     return requiredVars_;
   }
 
-  const oops::Variables & ObsProfileAverageData::simulatedVars() const {
+  const oops::ObsVariables & ObsProfileAverageData::simulatedVars() const {
     return operatorVars_;
   }
 

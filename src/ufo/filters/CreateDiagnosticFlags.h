@@ -99,7 +99,7 @@ class CreateDiagnosticFlags : public ObsProcessorBase,
 
   void print(std::ostream &) const override;
 
-  oops::Variables getFilterVariables() const;
+  oops::ObsVariables getFilterVariables() const;
 
   void createFlag(const std::string & flagName, const std::string & varName,
                   bool forceReinitialization, bool initialValue) const;

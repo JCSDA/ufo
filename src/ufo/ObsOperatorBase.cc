@@ -36,7 +36,7 @@ ObsOperatorBase::Locations_ ObsOperatorBase::locations() const {
 
 // -----------------------------------------------------------------------------
 
-oops::Variables ObsOperatorBase::simulatedVars() const {
+oops::ObsVariables ObsOperatorBase::simulatedVars() const {
   return odb_.assimvariables();
 }
 

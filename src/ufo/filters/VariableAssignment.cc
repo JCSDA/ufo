@@ -131,7 +131,7 @@ void assignVariable(const ufo::Variable &variable,
                     const std::vector<bool> &apply,
                     const ObsFilterData &data,
                     ioda::ObsDataVector<DestinationVariableType> &values) {
-  ioda::ObsDataVector<SourceVariableType> newValues(data.obsspace(), variable.toOopsVariables());
+  ioda::ObsDataVector<SourceVariableType> newValues(data.obsspace(), variable.toOopsObsVariables());
   data.get(variable, newValues, skipDerived);
   assignObsDataVector(apply, newValues, values);
 }
@@ -144,7 +144,7 @@ void assignFunction(const ufo::Variable &function,
                     const std::vector<bool> &apply,
                     const ObsFilterData &data,
                     ioda::ObsDataVector<VariableType> &values) {
-  ioda::ObsDataVector<FunctionValueType> newValues(data.obsspace(), variable.toOopsVariables());
+  ioda::ObsDataVector<FunctionValueType> newValues(data.obsspace(), variable.toOopsObsVariables());
   data.get(function, newValues);
   assignObsDataVector(apply, newValues, values);
 }
@@ -213,7 +213,7 @@ template <typename VariableType>
 ioda::ObsDataVector<VariableType> getCurrentValues(const ufo::Variable &variable,
                                                    ioda::ObsSpace &obsdb,
                                                    const bool skipDerived) {
-  ioda::ObsDataVector<VariableType> values(obsdb, variable.toOopsVariables());
+  ioda::ObsDataVector<VariableType> values(obsdb, variable.toOopsObsVariables());
   for (size_t ich = 0; ich < variable.size(); ++ich) {
     const std::string variableWithChannel = variable.variable(ich);
     if (obsdb.has(variable.group(), variableWithChannel)) {

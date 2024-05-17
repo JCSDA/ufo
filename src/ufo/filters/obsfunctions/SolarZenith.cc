@@ -26,7 +26,7 @@ namespace {
 /// variables at the ith location have been rejected.
 std::vector<bool> identifyRejectedObservations(const ObsFilterData &data) {
   const size_t nlocs = data.nlocs();
-  const oops::Variables &simulatedVars = data.obsspace().obsvariables();
+  const oops::ObsVariables &simulatedVars = data.obsspace().obsvariables();
   std::vector<bool> rejected(nlocs, true);
 
   std::vector<int> qcflags(nlocs);

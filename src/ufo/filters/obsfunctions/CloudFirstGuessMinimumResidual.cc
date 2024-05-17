@@ -73,10 +73,11 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   std::vector<std::vector<float>> airPressure(nlevs, std::vector<float>(nlocs));
   std::vector<std::vector<float>> costFunction(nlocs, std::vector<float>(nlevs, 0.0f));
   std::vector<bool> writeoutdata(nlocs, true);
-  ioda::ObsDataVector<float> obsVal(in.obsspace(), oops::Variables(vars, channels_));
-  ioda::ObsDataVector<float> obsError(in.obsspace(), oops::Variables(vars, channels_));
-  ioda::ObsDataVector<float> obsBias(in.obsspace(), oops::Variables(vars, channels_));
-  ioda::ObsDataVector<float> obsClearVal(in.obsspace(), oops::Variables(clearSkyName, channels_));
+  ioda::ObsDataVector<float> obsVal(in.obsspace(), oops::ObsVariables(vars, channels_));
+  ioda::ObsDataVector<float> obsError(in.obsspace(), oops::ObsVariables(vars, channels_));
+  ioda::ObsDataVector<float> obsBias(in.obsspace(), oops::ObsVariables(vars, channels_));
+  ioda::ObsDataVector<float> obsClearVal(in.obsspace(),
+                                         oops::ObsVariables(clearSkyName, channels_));
 
   /// Read data from filterdata - for RTTOV ObsDiags are not bias corrected and therefore the
   /// ObsBias needs to be read in.
@@ -158,7 +159,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   /// and effective cloud amount and save these to the ObsSpace.
   const std::vector<std::string> firstGuessNames = {options_.cloudTopPressureName.value(),
                                                     options_.cloudFractionName.value()};
-  ioda::ObsDataVector<float> firstGuessValues(in.obsspace(), oops::Variables(firstGuessNames));
+  ioda::ObsDataVector<float> firstGuessValues(in.obsspace(), oops::ObsVariables(firstGuessNames));
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     if (writeoutdata[iloc]) {
       size_t MinLevelIndex = std::min_element(costFunction[iloc].begin(), costFunction[iloc].end())

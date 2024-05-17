@@ -43,7 +43,7 @@ void CLWRetSymmetricMW::compute(const ObsFilterData & in,
 
   // Get CLW retrievals from function
   CLWRetMW clwretfunc(conf_);
-  oops::Variables clwvars(clwretfunc.clwVariableGroups());
+  oops::ObsVariables clwvars(clwretfunc.clwVariableGroups());
   ioda::ObsDataVector<float> clwret(in.obsspace(), clwvars, "ObsFunction", false);
   clwretfunc.compute(in, clwret);
 

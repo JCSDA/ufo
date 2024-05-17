@@ -26,7 +26,7 @@ ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), keyOperAodCRTM_(0), varin_()
 {
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.assimvariables();
+  const oops::ObsVariables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
   ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, params.toConfiguration(),

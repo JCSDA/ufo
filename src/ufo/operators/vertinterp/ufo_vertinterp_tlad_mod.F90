@@ -6,6 +6,7 @@
 module ufo_vertinterp_tlad_mod
 
   use oops_variables_mod
+  use obs_variables_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_mod
@@ -16,7 +17,7 @@ module ufo_vertinterp_tlad_mod
 
   type, public :: ufo_vertinterp_tlad
   private
-    type(oops_variables), public :: obsvars ! Variables to be simulated
+    type(obs_variables), public :: obsvars ! Variables to be simulated
     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
                                                      ! simulated variables in the ObsSpace.
                                                      ! allocated/deallocated at interface layer

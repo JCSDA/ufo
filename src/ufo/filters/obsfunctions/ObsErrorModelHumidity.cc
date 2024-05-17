@@ -137,7 +137,7 @@ void ObsErrorModelHumidity::compute(const ObsFilterData & data,
 
   // Populate the testdata array.  xstar is just the 0..nloc-1 value of testvar[iv]
   // At each nloc, find matching (x0,x1) and (y0,y1) pair for linear interp.
-  ioda::ObsDataVector<float> testdata(data.obsspace(), xvar.toOopsVariables());
+  ioda::ObsDataVector<float> testdata(data.obsspace(), xvar.toOopsObsVariables());
   data.get(xvar, testdata);
 
   // The 1st index of data should have size 1 and 2nd index should be size nlocs.

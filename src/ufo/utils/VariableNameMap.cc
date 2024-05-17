@@ -57,7 +57,7 @@ std::string VariableNameMap::convertName(const std::string & name) const {
   return alias;
 }
 
-oops::Variables VariableNameMap::convertName(const oops::Variables & vars) const {
+oops::Variables VariableNameMap::convertName(const oops::ObsVariables & vars) const {
   std::vector<std::string> newvars;
   for (size_t jv = 0; jv < vars.size(); ++jv) {
     std::string alias = convertName(vars[jv]);

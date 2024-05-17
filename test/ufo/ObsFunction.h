@@ -184,7 +184,7 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   inputs.associate(bias, "ObsBiasData");
 
 ///  Setup ObsDiags
-  const oops::Variables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsVariables();
+  const oops::ObsVariables diagvars = allfuncvars.allFromGroup("ObsDiag").toOopsObsVariables();
   std::unique_ptr<ObsDiagnostics> diags;
   if (diagvars.size() > 0) {
     const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
@@ -193,7 +193,7 @@ void doTestFunction(ioda::ObsSpace &ospace, const eckit::Configuration &conf) {
   }
 
 ///  Get output variable names
-  const oops::Variables outputvars(obsfuncconf, "variables");
+  const oops::ObsVariables outputvars(obsfuncconf, "variables");
 ///  Compute function result
   ioda::ObsDataVector<T> vals(ospace, outputvars, funcname.group(), false);
   if (!conf.has(expectComputeToThrow)) {

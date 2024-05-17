@@ -45,7 +45,7 @@ class ObsProductTLAD : public LinearObsOperatorBase,
 
   const oops::Variables & requiredVars() const override {return requiredVars_;}
 
-  oops::Variables simulatedVars() const override {return operatorVars_;}
+  oops::ObsVariables simulatedVars() const override {return operatorVars_;}
 
  private:
   void print(std::ostream &) const override;
@@ -55,7 +55,7 @@ class ObsProductTLAD : public LinearObsOperatorBase,
   oops::Variables requiredVars_;
 
   /// Operator variables.
-  oops::Variables operatorVars_;
+  oops::ObsVariables operatorVars_;
 
   /// Indices of operator variables.
   std::vector<int> operatorVarIndices_;

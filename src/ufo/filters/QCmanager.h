@@ -11,6 +11,7 @@
 #include <memory>
 #include <ostream>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/interface/ObsFilterBase.h"
@@ -53,14 +54,14 @@ class QCmanager : public oops::interface::ObsFilterBase<ObsTraits> {
   void checkFilterData(const oops::FilterStage filterStage) override {}
 
   oops::Variables requiredVars() const override {return nogeovals_;}
-  oops::Variables requiredHdiagnostics() const override {return nodiags_;}
+  oops::ObsVariables requiredHdiagnostics() const override {return nodiags_;}
 
  private:
   void print(std::ostream &) const override;
 
   ioda::ObsSpace & obsdb_;
   const oops::Variables nogeovals_;
-  const oops::Variables nodiags_;
+  const oops::ObsVariables nodiags_;
   std::shared_ptr<ioda::ObsDataVector<int>> flags_;
 };
 

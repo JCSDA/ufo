@@ -8,6 +8,7 @@
 module ufo_atmvertinterplay_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
  use vert_interp_lay_mod
  implicit none
@@ -15,7 +16,7 @@ module ufo_atmvertinterplay_mod
 
 !> Fortran derived type for the observation type
  type, public :: ufo_atmvertinterplay
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars
    integer, public, allocatable :: nlevels(:)
    real, public, allocatable :: coefficients(:) ! unit conversion from geoval to obs

@@ -51,7 +51,7 @@ extern "C" {
   /// [air_temperature, northward_wind, eastward_wind] and \p operatorVars is
   /// [northward_wind, eastward_wind], then \p operatorVarIndices should be set to [1, 2].
   void ufo_vertinterp_setup_f90(F90hop &, const eckit::Configuration &,
-                                   const oops::Variables &operatorVars,
+                                   const oops::ObsVariables &operatorVars,
                                    const int *operatorVarIndices, const int numOperatorVarIndices,
                                    oops::Variables &requiredVars);
   void ufo_vertinterp_delete_f90(F90hop &);

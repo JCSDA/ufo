@@ -11,7 +11,7 @@
 #include <set>
 
 #include "ioda/ObsDataVector.h"
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
@@ -84,7 +84,7 @@ void AssignError::apply(const Variables & vars,
   } else if (parameters_.errorFunction.value() != boost::none) {
     const Variable &errorvar = *parameters_.errorFunction.value();
     ASSERT(errorvar.size() == 1 || errorvar.size() == vars.nvars());
-    ioda::ObsDataVector<float> errors(data.obsspace(), errorvar.toOopsVariables(),
+    ioda::ObsDataVector<float> errors(data.obsspace(), errorvar.toOopsObsVariables(),
                                       errorvar.group(), false);
     data.get(errorvar, errors);
 

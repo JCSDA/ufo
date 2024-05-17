@@ -12,6 +12,7 @@
 #include <ostream>
 #include <vector>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilterBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
@@ -57,13 +58,13 @@ class ObsDiagnosticsWriter : public oops::interface::ObsFilterBase<ObsTraits> {
   void checkFilterData(const oops::FilterStage filterStage) override {}
 
   oops::Variables requiredVars() const override {return nogeovals_;}
-  oops::Variables requiredHdiagnostics() const override {return extradiagvars_;}
+  oops::ObsVariables requiredHdiagnostics() const override {return extradiagvars_;}
 
  private:
   void print(std::ostream &) const override;
   Parameters_ params_;
   const oops::Variables nogeovals_;
-  oops::Variables extradiagvars_;
+  oops::ObsVariables extradiagvars_;
 };
 
 }  // namespace ufo

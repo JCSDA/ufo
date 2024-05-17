@@ -12,6 +12,7 @@
 #include <string>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/ObsOperatorBase.h"
@@ -47,7 +48,7 @@ class ObsAtmSfcInterp : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
-  oops::Variables simulatedVars() const override {return operatorVars_;}
+  oops::ObsVariables simulatedVars() const override {return operatorVars_;}
 
   int & toFortran() {return keyOperAtmSfcInterp_;}
   const int & toFortran() const {return keyOperAtmSfcInterp_;}
@@ -57,7 +58,7 @@ class ObsAtmSfcInterp : public ObsOperatorBase,
   F90hop keyOperAtmSfcInterp_;
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
-  oops::Variables operatorVars_;
+  oops::ObsVariables operatorVars_;
 };
 
 // -----------------------------------------------------------------------------

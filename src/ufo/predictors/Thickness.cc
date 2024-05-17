@@ -20,7 +20,7 @@ static PredictorMaker<Thickness> makerFuncThickness_("thickness");
 
 // -----------------------------------------------------------------------------
 
-Thickness::Thickness(const Parameters_ & parameters, const oops::Variables & vars)
+Thickness::Thickness(const Parameters_ & parameters, const oops::ObsVariables & vars)
     : PredictorBase(parameters, vars) {
   // required variables
   geovars_ += oops::Variables({"air_temperature",

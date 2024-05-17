@@ -14,6 +14,7 @@
 
 #include "ioda/ObsDataVector.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -53,13 +54,13 @@ class ObsInsituTemperatureTLAD : public LinearObsOperatorBase,
 
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}
-  oops::Variables simulatedVars() const override { return operatorVars_; }
+  oops::ObsVariables simulatedVars() const override { return operatorVars_; }
 
  private:
   void print(std::ostream &) const override;
   F90hop keyOper_;
   oops::Variables varin_;
-  oops::Variables operatorVars_;
+  oops::ObsVariables operatorVars_;
 };
 
 // -----------------------------------------------------------------------------

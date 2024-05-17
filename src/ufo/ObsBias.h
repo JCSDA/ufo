@@ -16,6 +16,7 @@
 
 #include "eckit/mpi/Comm.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -69,7 +70,7 @@ class ObsBias : public util::Printable,
 
   // Required variables
   const oops::Variables & requiredVars() const {return geovars_;}
-  const oops::Variables & requiredHdiagnostics() const {return hdiags_;}
+  const oops::ObsVariables & requiredHdiagnostics() const {return hdiags_;}
   const std::vector<std::string> & requiredPredictors() const {return prednames_;}
 
   /// Return a reference to the vector of all (static and variable) predictors.
@@ -87,7 +88,7 @@ class ObsBias : public util::Printable,
   const std::size_t & nrecs() const {return nrecs_;}
 
   /// Return the list of simulated variables.
-  const oops::Variables & simVars() const {return vars_;}
+  const oops::ObsVariables & simVars() const {return vars_;}
 
   /// Return the indices of variables (or channels) that don't need bias correction
   const std::vector<int> & varIndexNoBC() const {return varIndexNoBC_;}
@@ -134,14 +135,14 @@ class ObsBias : public util::Printable,
   std::vector<std::string> recIds_;
 
   /// list of simulated variables
-  oops::Variables vars_;
+  oops::ObsVariables vars_;
   /// indices of variables (or channels) that don't need bias correction
   std::vector<int> varIndexNoBC_;
 
   /// Variables that need to be requested from the model (for computation of predictors)
   oops::Variables geovars_;
   /// Diagnostics that need to be requested from the obs operator (for computation of predictors)
-  oops::Variables hdiags_;
+  oops::ObsVariables hdiags_;
 
   /// MPI rank, used to determine whether the task should output bias coeffs to a file
   size_t rank_;

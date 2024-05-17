@@ -16,7 +16,7 @@
 
 #include "eckit/mpi/Comm.h"
 
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/Printable.h"
 
 #include "ufo/ObsBiasParameters.h"
@@ -97,7 +97,7 @@ class ObsBiasIncrement : public util::Printable {
   std::vector<std::string> recIds_;
 
   /// List of simulated variables
-  oops::Variables vars_;
+  oops::ObsVariables vars_;
 
   /// Name of the output file of the bias coeff increments
   std::string outputFile_;

@@ -21,7 +21,7 @@ namespace eckit {
 }
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ioda {
@@ -60,7 +60,7 @@ class SatelliteSelector : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef SatelliteSelectorParameters Parameters_;
 
-  SatelliteSelector(const Parameters_ &, const oops::Variables &);
+  SatelliteSelector(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

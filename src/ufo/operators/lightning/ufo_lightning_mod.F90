@@ -9,6 +9,7 @@ module ufo_lightning_mod
 
  use kinds
  use ufo_vars_mod
+ use obs_variables_mod
  use oops_variables_mod
  use ufo_constants_mod, only: one, zero, half, grav     ! Gravitational field strength
  use ufo_basis_mod,     only: ufo_basis
@@ -18,7 +19,7 @@ module ufo_lightning_mod
 ! TODO: fill in if needed
  type, public :: ufo_lightning
    private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public  :: obsvars
    type(oops_variables), public :: geovars
    !logical, public     ::  l_fed_nonlinear
    integer, public     ::  n_horiz

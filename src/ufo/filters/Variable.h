@@ -16,6 +16,7 @@
 #include "oops/util/Printable.h"
 
 namespace oops {
+  class ObsVariables;
   class Variables;
 }
 
@@ -46,7 +47,7 @@ class Variable: public util::Printable {
   std::string fullName() const;
 
   oops::Variables toOopsVariables() const;
-
+  oops::ObsVariables toOopsObsVariables() const;
   const eckit::LocalConfiguration & options() const {return options_;}
 
  private:

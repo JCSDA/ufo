@@ -42,9 +42,9 @@ ObsDomainErrCheck::~ObsDomainErrCheck() {}
 void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
   size_t nlocs = obsdb_.nlocs();
 
 // compute function

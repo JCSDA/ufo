@@ -24,7 +24,7 @@ static PredictorMaker<OrbitalAngle> makerFuncOrbitalAngle_("satelliteOrbitalAngl
 
 // -----------------------------------------------------------------------------
 
-OrbitalAngle::OrbitalAngle(const Parameters_ & parameters, const oops::Variables & vars)
+OrbitalAngle::OrbitalAngle(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order),
     component_(parameters.component) {

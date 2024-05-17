@@ -16,7 +16,7 @@
 
 #include "eckit/mpi/Comm.h"
 
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -103,7 +103,7 @@ class ObsBiasCovariance : public util::Printable,
   std::size_t nrecs_;
 
   /// variables for which bias correction coefficients will be updated
-  oops::Variables vars_;
+  oops::ObsVariables vars_;
 
   /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
   const size_t rank_;

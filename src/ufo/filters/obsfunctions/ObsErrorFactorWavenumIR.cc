@@ -84,7 +84,7 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
     }
   } else {
     ioda::ObsDataVector<float> buf(obsdb_, Variable("MetaData/sensorCentralWavenumber", channels_).
-                               toOopsVariables());
+                               toOopsObsVariables());
     in.get(Variable("MetaData/sensorCentralWavenumber", channels_), buf);
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       wavenumber.push_back(buf[ichan][0]);

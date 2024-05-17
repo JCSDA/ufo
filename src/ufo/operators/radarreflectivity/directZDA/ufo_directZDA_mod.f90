@@ -10,6 +10,7 @@ module ufo_directZDA_mod
  use kinds
  use ufo_vars_mod
  use oops_variables_mod
+ use obs_variables_mod
  
  implicit none
  private
@@ -18,7 +19,7 @@ module ufo_directZDA_mod
 
  type, public :: ufo_directZDA
  private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars 
 
    character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical 

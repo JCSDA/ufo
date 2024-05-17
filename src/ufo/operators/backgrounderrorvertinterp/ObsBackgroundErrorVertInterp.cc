@@ -36,13 +36,13 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
   requiredVars_.push_back(parameters_.verticalCoordinate);
 
   /// All simulated variables.
-  const oops::Variables & obsVars = odb.assimvariables();
+  const oops::ObsVariables & obsVars = odb.assimvariables();
 
   // If the `variables` option is specified, only the variables in that list will have
   // their background errors computed. Otherwise the background errors for all simulated
   // variables are calculated.
   std::vector<int> operatorVarIndices;
-  oops::Variables operatorVars;
+  oops::ObsVariables operatorVars;
   getOperatorVariables(parameters.variables.value(), obsVars,
                        operatorVars, operatorVarIndices);
   for (auto ivar : operatorVarIndices)
@@ -67,7 +67,7 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
   oops::Variables variables;
   if (parameters_.variables.value() != boost::none)
     for (const Variable &variable : *parameters_.variables.value())
-      variables += nameMap_.convertName(variable.toOopsVariables());
+      variables += nameMap_.convertName(variable.toOopsObsVariables());
   else
     variables = nameMap_.convertName(odb_.assimvariables());
 
@@ -88,9 +88,9 @@ const oops::Variables & ObsBackgroundErrorVertInterp::requiredVars() const {
   return requiredVars_;
 }
 
-oops::Variables ObsBackgroundErrorVertInterp::simulatedVars() const {
+oops::ObsVariables ObsBackgroundErrorVertInterp::simulatedVars() const {
   // This operator doesn't simulate any variables -- it only produces diagnostics.
-  return oops::Variables();
+  return oops::ObsVariables();
 }
 
 void ObsBackgroundErrorVertInterp::print(std::ostream & os) const {

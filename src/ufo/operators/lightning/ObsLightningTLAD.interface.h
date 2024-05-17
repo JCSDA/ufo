@@ -19,7 +19,7 @@ namespace ufo {
 extern "C" {
 
 // -----------------------------------------------------------------------------
-  void ufo_lightning_tlad_setup_f90(F90hop &, const int &, const oops::Variables &,
+  void ufo_lightning_tlad_setup_f90(F90hop &, const int &, const oops::ObsVariables &,
                                     oops::Variables &);
   void ufo_lightning_tlad_delete_f90(F90hop &);
   void ufo_lightning_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &);

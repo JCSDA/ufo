@@ -20,7 +20,7 @@ static PredictorMaker<ReadBias>
 
 // -----------------------------------------------------------------------------
 
-ReadBias::ReadBias(const Parameters_ & parameters, const oops::Variables & vars)
+ReadBias::ReadBias(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
   group_name_(parameters.groupName) {
 }

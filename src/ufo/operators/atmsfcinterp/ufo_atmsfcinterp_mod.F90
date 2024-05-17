@@ -8,6 +8,7 @@
 module ufo_atmsfcinterp_mod
 
   use oops_variables_mod
+  use obs_variables_mod
   use ufo_vars_mod
   use kinds
 
@@ -17,7 +18,7 @@ module ufo_atmsfcinterp_mod
   !> Fortran derived type for the observation type
   type, public :: ufo_atmsfcinterp
   private
-    type(oops_variables), public :: obsvars ! Variables to be simulated
+    type(obs_variables), public :: obsvars ! Variables to be simulated
     integer, allocatable, public :: obsvarindices(:) ! Indices of obsvars in the list of all
                                                      ! simulated variables in the ObsSpace.
                                                      ! allocated/deallocated in interface layer

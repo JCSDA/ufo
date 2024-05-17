@@ -8,6 +8,7 @@
 module ufo_example_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
 
  implicit none
@@ -17,7 +18,7 @@ module ufo_example_mod
 ! TODO: fill in if needed
  type, public :: ufo_example
  private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars
  contains
    procedure :: setup  => ufo_example_setup

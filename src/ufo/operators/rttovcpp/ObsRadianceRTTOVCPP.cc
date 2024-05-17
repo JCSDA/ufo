@@ -11,6 +11,7 @@
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/missingValues.h"
@@ -54,7 +55,7 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   }
 
   // get channels from observations
-  const oops::Variables & observed = odb.assimvariables();
+  const oops::ObsVariables & observed = odb.assimvariables();
   channels_ = observed.channels();  // set private data member channels_
 
   // get optical depth coef file name from yaml

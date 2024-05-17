@@ -73,7 +73,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   std::vector<eckit::LocalConfiguration> varconfs;
   conf.get("obs diagnostics variables", varconfs);
   const Variables diagvars(varconfs);
-  const ObsDiagnostics obsdiags(obsdiagconf, obsspace, diagvars.toOopsVariables());
+  const ObsDiagnostics obsdiags(obsdiagconf, obsspace, diagvars.toOopsObsVariables());
 
   std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
       obsspace, obsspace.obsvariables(), "ObsError"));

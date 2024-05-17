@@ -83,13 +83,13 @@ class TestFixture : private boost::noncopyable {
 };
 
 void testOperatorUtils(const testOperatorUtilsParameters &parameters) {
-  oops::Variables expectedOperatorVariables =
-    ufo::Variables(parameters.expectedOperatorVariables.value()).toOopsVariables();
+  oops::ObsVariables expectedOperatorVariables =
+    ufo::Variables(parameters.expectedOperatorVariables.value()).toOopsObsVariables();
 
   std::vector<int> expectedOperatorVariableIndices =
     parameters.expectedOperatorVariableIndices.value();
 
-  oops::Variables operatorVariables;
+  oops::ObsVariables operatorVariables;
   std::vector<int> operatorVariableIndices;
   ufo::getOperatorVariables(parameters.optionalVariables.value(),
                             TestFixture::obsspace().obsvariables(),

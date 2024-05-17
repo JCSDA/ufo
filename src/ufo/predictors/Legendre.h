@@ -55,7 +55,7 @@ class Legendre : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef LegendreParameters Parameters_;
 
-  Legendre(const Parameters_ &, const oops::Variables &);
+  Legendre(const Parameters_ &, const oops::ObsVariables &);
   ~Legendre() {}
 
   void compute(const ioda::ObsSpace &,

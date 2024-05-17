@@ -50,7 +50,7 @@ void ObsRefractivityGradientCheck::applyFilter(
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ObsRefractivityGradientCheck postFilter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
   const float missingFloat = util::missingValue<float>();
 
   // Read observation height and atmosphericRefractivity

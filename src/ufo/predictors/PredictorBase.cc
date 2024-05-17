@@ -19,7 +19,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 PredictorBase::PredictorBase(const PredictorParametersBase & parameters,
-                             const oops::Variables & vars)
+                             const oops::ObsVariables & vars)
   : vars_(vars), geovars_(), hdiags_(), func_name_(parameters.name) {
 }
 
@@ -37,7 +37,7 @@ PredictorFactory::PredictorFactory(const std::string & name) {
 // -----------------------------------------------------------------------------
 
 std::unique_ptr<PredictorBase> PredictorFactory::create(const PredictorParametersBase & parameters,
-                                                        const oops::Variables & vars) {
+                                                        const oops::ObsVariables & vars) {
   oops::Log::trace() << "PredictorBase::create starting" << std::endl;
   const std::string name = parameters.name;
   if (!predictorExists(name)) {

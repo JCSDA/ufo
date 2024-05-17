@@ -23,7 +23,7 @@ static PredictorMaker<ObsMetaDataPredictor> makerFuncObsMetaDataPredictor_(\
 // -----------------------------------------------------------------------------
 
 ObsMetaDataPredictor::ObsMetaDataPredictor(const Parameters_ & parameters,
-const oops::Variables & vars)
+const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1)),
     variable_(parameters.varName) {

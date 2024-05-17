@@ -40,7 +40,7 @@ PrintFilterData::PrintFilterData(ioda::ObsSpace & obsdb, const Parameters_ & par
 
 template <typename VariableType>
 void PrintFilterData::getData(const Variable & variable, identifier<VariableType>) const {
-  ioda::ObsDataVector<VariableType> variableData(obsdb_, variable.toOopsVariables());
+  ioda::ObsDataVector<VariableType> variableData(obsdb_, variable.toOopsObsVariables());
 
   // Treatment depends on whether channels are present.
   if (variable.channels().size() == 0) {
@@ -74,7 +74,7 @@ void PrintFilterData::getData(const Variable & variable, identifier<VariableType
 void PrintFilterData::getData(const Variable & variable, identifier<bool>) const {
   // todo(ctgh): Check whether this specialisation can be removed by adding
   // a bool implementation of allGatherv.
-  ioda::ObsDataVector<bool> variableData(obsdb_, variable.toOopsVariables());
+  ioda::ObsDataVector<bool> variableData(obsdb_, variable.toOopsObsVariables());
 
   // Treatment depends on whether channels are present.
   if (variable.channels().size() == 0) {

@@ -16,7 +16,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/QCflags.h"
@@ -54,9 +54,9 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
 
   ASSERT(qcflags);
 
-  const oops::Variables &allObservedVars = obsdb.obsvariables();
-  const oops::Variables &initialObservedVars = obsdb.initial_obsvariables();
-  const oops::Variables &derivedObservedVars = obsdb.derived_obsvariables();
+  const oops::ObsVariables &allObservedVars = obsdb.obsvariables();
+  const oops::ObsVariables &initialObservedVars = obsdb.initial_obsvariables();
+  const oops::ObsVariables &derivedObservedVars = obsdb.derived_obsvariables();
 
   ASSERT(allObservedVars.size() == initialObservedVars.size() + derivedObservedVars.size());
   ASSERT(flags_->nvars() == allObservedVars.size());
@@ -99,7 +99,7 @@ void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
   oops::Log::trace() << "QCmanager postFilter" << std::endl;
 
   const double missing = util::missingValue<double>();
-  const oops::Variables &allObservedVars = obsdb_.assimvariables();
+  const oops::ObsVariables &allObservedVars = obsdb_.assimvariables();
 
 
   for (size_t jv = 0; jv < allObservedVars.size(); ++jv) {
@@ -160,7 +160,7 @@ void QCmanager::print(std::ostream & os) const {
   const size_t nlocs = obsdb_.nlocs();
   const size_t gnlocs = obsdb_.globalNumLocs();
 
-  const oops::Variables &allObservedVars = obsdb_.obsvariables();
+  const oops::ObsVariables &allObservedVars = obsdb_.obsvariables();
 
   for (size_t jvar = 0; jvar < allObservedVars.size(); ++jvar) {
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> accumulator =

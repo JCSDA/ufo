@@ -34,6 +34,7 @@ contains
 
 subroutine ufo_directZDA_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_directZDA_tlad_setup_f90')
 use oops_variables_mod
+use obs_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
@@ -46,7 +47,7 @@ type(fckit_configuration) :: f_conf
 call ufo_directZDA_tlad_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-self%obsvars = oops_variables(c_obsvars)
+self%obsvars = obs_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 call self%setup(f_conf)
 

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "eckit/config/Configuration.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
@@ -48,7 +49,7 @@ class VariableNameMap {
     ~VariableNameMap();
 
   std::string convertName(const std::string &) const;
-  oops::Variables convertName(const oops::Variables &) const;
+  oops::Variables convertName(const oops::ObsVariables &) const;
 
  private:
   std::map<std::string, std::string> Aliases_;

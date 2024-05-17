@@ -187,7 +187,7 @@ void testObsFilterData() {
     varconfs.clear();
     confs[jconf].get("obs diagnostics variables", varconfs);
     const Variables diagvars(varconfs);
-    const ObsDiagnostics obsdiags(obsdiagconf, ospace, diagvars.toOopsVariables());
+    const ObsDiagnostics obsdiags(obsdiagconf, ospace, diagvars.toOopsObsVariables());
 
 ///  Setup H(x)
     const eckit::LocalConfiguration hofxconf(confs[jconf], "HofX");
@@ -199,7 +199,7 @@ void testObsFilterData() {
     varconfs.clear();
     obserrorconf.get("variables", varconfs);
     const Variables obserrorvars(varconfs);
-    ioda::ObsDataVector<float> obserrors(ospace, obserrorvars.toOopsVariables());
+    ioda::ObsDataVector<float> obserrors(ospace, obserrorvars.toOopsObsVariables());
     for (size_t i = 0; i < obserrors.nvars(); ++i)
       std::fill(obserrors[i].begin(), obserrors[i].end(), 0.1f * i);
 
@@ -208,7 +208,7 @@ void testObsFilterData() {
     varconfs.clear();
     qcflagsconf.get("variables", varconfs);
     const Variables qcflagsvars(varconfs);
-    ioda::ObsDataVector<int> qcflags(ospace, qcflagsvars.toOopsVariables());
+    ioda::ObsDataVector<int> qcflags(ospace, qcflagsvars.toOopsObsVariables());
     for (size_t i = 0; i < qcflags.nvars(); ++i)
       std::fill(qcflags[i].begin(), qcflags[i].end(), i);
 

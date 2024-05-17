@@ -15,6 +15,7 @@
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 
@@ -33,7 +34,7 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOperRadianceRTTOV_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.assimvariables();
+  const oops::ObsVariables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
   // values for passed qc

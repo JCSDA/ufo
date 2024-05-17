@@ -21,7 +21,7 @@ static PredictorMaker<CosineOfLatitudeTimesOrbitNode>
 // -----------------------------------------------------------------------------
 
 CosineOfLatitudeTimesOrbitNode::CosineOfLatitudeTimesOrbitNode(const Parameters_ & parameters,
-                                                               const oops::Variables & vars)
+                                                               const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars) {
 }
 

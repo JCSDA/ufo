@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "oops/base/Variables.h"
+
 #include "ufo/variabletransforms/Cal_SatZenithAngleCorrection.h"
 
 namespace ufo {
@@ -43,7 +45,7 @@ void Cal_SatZenithAngleCorrection::runTransform(const std::vector<bool> &apply) 
                      << variableToBeCorrected.fullName() << std::endl;
 
   // Read in variable to be corrected
-  oops::Variables varin(variableToBeCorrected.toOopsVariables());
+  oops::ObsVariables varin(variableToBeCorrected.toOopsObsVariables());
   ioda::ObsDataVector<float> varArray(obsdb_, varin);
   data_.get(variableToBeCorrected, varArray);
 

@@ -48,7 +48,7 @@ void StringManipulation::compute(const ObsFilterData & in,
   int cutLength;
 
   const std::string missing = util::missingValue<std::string>();
-  ioda::ObsDataVector<std::string> varin(in.obsspace(), invars_.toOopsVariables());
+  ioda::ObsDataVector<std::string> varin(in.obsspace(), invars_.toOopsObsVariables());
   in.get(invars_[0], varin);
 
   // apply string operation to all locations

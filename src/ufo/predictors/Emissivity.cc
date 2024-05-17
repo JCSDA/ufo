@@ -15,7 +15,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
@@ -25,12 +25,12 @@ static PredictorMaker<Emissivity> makerFuncEmissivity_("emissivityJacobian");
 
 // -----------------------------------------------------------------------------
 
-Emissivity::Emissivity(const Parameters_ & parameters, const oops::Variables & vars)
+Emissivity::Emissivity(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars) {
   // required variables
   geovars_ += oops::Variables({"water_area_fraction"});
   if (vars.size() > 0) {
-    hdiags_ += oops::Variables({"brightness_temperature_jacobian_surface_emissivity"},
+    hdiags_ += oops::ObsVariables({"brightness_temperature_jacobian_surface_emissivity"},
                                vars.channels());
   } else {
     oops::Log::error() << "Channels size is ZERO !" << std::endl;

@@ -16,7 +16,7 @@ namespace ioda {
 }
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ufo {
@@ -37,7 +37,7 @@ std::vector<int> getRequiredVariableIndices(const ioda::ObsGroup &obsgroup,
 /// If \p throwexception is set, throws an exception if at least one of the elements looked for is
 /// missing. Otherwise sets index as -1 for the missing elements.
 std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
-                                                const oops::Variables &vars_to_look_for,
+                                                const oops::ObsVariables &vars_to_look_for,
                                                 bool throwexception = true);
 
 std::vector<int> getAllStrIndices(const std::vector<std::string> & all_elements,

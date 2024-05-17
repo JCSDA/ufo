@@ -16,7 +16,7 @@ module ufo_seaicethickness_tlad_mod
  use ufo_vars_mod
  use obsspace_mod
  use missing_values_mod
- use oops_variables_mod
+ use obs_variables_mod
  use ufo_utils_mod, only: cmp_strings
 
  implicit none
@@ -27,7 +27,7 @@ module ufo_seaicethickness_tlad_mod
  !> Fortran derived type for the tl/ad observation operator
  type, extends(ufo_basis_tlad), public :: ufo_seaicethickness_tlad
  private
-  type(oops_variables), public :: obsvars
+  type(obs_variables), public :: obsvars
   character(max_string) :: thickness_sim_option
   type(ufo_geoval) :: icethick !< ice thickness (traj)
   type(ufo_geoval) :: icefrac  !< ice fraction  (traj)

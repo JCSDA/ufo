@@ -22,7 +22,8 @@ static PredictorMaker<SatelliteSelector> makerFuncSatelliteSelector_("satelliteS
 
 // -----------------------------------------------------------------------------
 
-SatelliteSelector::SatelliteSelector(const Parameters_ & parameters, const oops::Variables & vars)
+SatelliteSelector::SatelliteSelector(const Parameters_ & parameters,
+                                     const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars), predictor_(), satid_(parameters.satelliteId),
     metadata_name_(parameters.metadataName) {
   // Setup the predictor that will be run

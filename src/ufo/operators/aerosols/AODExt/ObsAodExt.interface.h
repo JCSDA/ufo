@@ -21,7 +21,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_aodext_setup_f90(F90hop &, const eckit::Configuration &,
-                             const oops::Variables &, oops::Variables &);
+                             const oops::ObsVariables &, oops::Variables &);
   void ufo_aodext_delete_f90(F90hop &);
   void ufo_aodext_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                const int &, const int &, double &);

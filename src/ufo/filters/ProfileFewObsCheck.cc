@@ -55,7 +55,7 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
                                      const Variables & filtervars,
                                      std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProfileFewObsCheck preProcess filter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
 
   // Check the number of channels and variables to process
   const size_t nChans = std::max(obsdb_.nchans(), 1LU);

@@ -40,7 +40,7 @@ void SIRetSymmetricMW::compute(const ObsFilterData & in,
 
   // Get SI retrievals from function
   SIRetMW siretfunc(conf_);
-  oops::Variables sivars(siretfunc.siVariableGroups());
+  oops::ObsVariables sivars(siretfunc.siVariableGroups());
   ioda::ObsDataVector<float> siret(in.obsspace(), sivars, "ObsFunction", false);
   siretfunc.compute(in, siret);
 

@@ -6,6 +6,7 @@
 module ufo_radarradialvelocity_tlad_mod
 
   use oops_variables_mod
+  use obs_variables_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_mod
@@ -16,7 +17,7 @@ module ufo_radarradialvelocity_tlad_mod
 
   type, public :: ufo_radarradialvelocity_tlad
   private
-    type(oops_variables), public :: obsvars
+    type(obs_variables), public :: obsvars
     type(oops_variables), public :: geovars
     integer :: nval, nlocs
     character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical

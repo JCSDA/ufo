@@ -8,6 +8,7 @@
 module ufo_directZDA_tlad_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
  use ufo_geovals_mod
  use kinds
@@ -24,7 +25,7 @@ module ufo_directZDA_tlad_mod
  !> Fortran derived type for the tl/ad observation operator
  type, public  :: ufo_directZDA_tlad
  private
-  type(oops_variables), public :: obsvars
+  type(obs_variables), public :: obsvars
   type(oops_variables), public :: geovars
   character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
   character(len=MAXVARLEN), public :: micro_option    ! Choice (enum) of microphysics option

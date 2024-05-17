@@ -13,6 +13,7 @@
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
@@ -52,7 +53,7 @@ ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_
 
   varin_.reset(new oops::Variables(vvin));
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.assimvariables();
+  const oops::ObsVariables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
   ufo_radianceoasim_setup_f90(keyOper_, params.toConfiguration(),

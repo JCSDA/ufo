@@ -50,7 +50,7 @@ template <typename OBS> class RunCRTM : public oops::Application {
 //  Setup observations
     ObsSpaces_ obsdb(fullConfig, this->getComm(), timeWindow);
 
-    oops::Variables diagvars;
+    oops::ObsVariables diagvars;
 
     std::vector<eckit::LocalConfiguration> conf;
     fullConfig.get("observations", conf);

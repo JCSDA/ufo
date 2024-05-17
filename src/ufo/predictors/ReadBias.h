@@ -16,7 +16,7 @@
 #include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ioda {
@@ -42,7 +42,7 @@ class ReadBias : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef ReadBiasParameters Parameters_;
 
-  ReadBias(const Parameters_ &, const oops::Variables &);
+  ReadBias(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

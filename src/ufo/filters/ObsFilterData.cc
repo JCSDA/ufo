@@ -177,7 +177,7 @@ void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values,
     values.resize(obsdb_.nvars());
     obsdb_.get_db(grp, var, values, {}, skipDerived);
   } else {
-    ioda::ObsDataVector<T> vec(obsdb_, varname.toOopsVariables(), grp, false);
+    ioda::ObsDataVector<T> vec(obsdb_, varname.toOopsObsVariables(), grp, false);
     this->get(varname, vec, skipDerived);
     values = vec[var];
   }

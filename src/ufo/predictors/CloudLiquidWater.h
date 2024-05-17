@@ -64,7 +64,7 @@ class CloudLiquidWater : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef CloudLiquidWaterParameters Parameters_;
 
-  CloudLiquidWater(const Parameters_ &, const oops::Variables &);
+  CloudLiquidWater(const Parameters_ &, const oops::ObsVariables &);
   ~CloudLiquidWater() {}
 
   void compute(const ioda::ObsSpace &,

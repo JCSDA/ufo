@@ -60,8 +60,8 @@ void Velocity<FunctionValue>::compute(const ObsFilterData & in,
 
   // compute wind speed
   const FunctionValue missing = util::missingValue<FunctionValue>();
-  ioda::ObsDataVector<FunctionValue> u(in.obsspace(), invars_[0].toOopsVariables());
-  ioda::ObsDataVector<FunctionValue> v(in.obsspace(), invars_[1].toOopsVariables());
+  ioda::ObsDataVector<FunctionValue> u(in.obsspace(), invars_[0].toOopsObsVariables());
+  ioda::ObsDataVector<FunctionValue> v(in.obsspace(), invars_[1].toOopsObsVariables());
   in.get(invars_[0], u);
   in.get(invars_[1], v);
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {

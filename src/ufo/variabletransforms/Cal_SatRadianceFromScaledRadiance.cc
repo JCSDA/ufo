@@ -10,6 +10,7 @@
 
 #include "ufo/variabletransforms/Cal_SatRadianceFromScaledRadiance.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
 namespace ufo {
@@ -49,7 +50,7 @@ void Cal_SatRadianceFromScaledRadiance::runTransform(const std::vector<bool> &ap
   size_t numScaleFactors = parameters_.numScaleFactors.value();
 
   // Read in radiance to be corrected
-  oops::Variables radianceVar(parameters_.transformVariable.value().toOopsVariables());
+  oops::ObsVariables radianceVar(parameters_.transformVariable.value().toOopsObsVariables());
   ioda::ObsDataVector<float> radiance(obsdb_, radianceVar);
   data_.get(parameters_.transformVariable.value(), radiance);
 

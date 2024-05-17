@@ -35,7 +35,7 @@ static PredictorMaker<CloudLiquidWater>
 
 // -----------------------------------------------------------------------------
 
-CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::Variables & vars)
+CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1)) {
   if (parameters.order.value() != boost::none) {
@@ -84,9 +84,9 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
     if (options_.order.value() != boost::none) {
       order_ = options_.order.value().get();
     }
-    hdiags_ += oops::Variables({"brightness_temperature"}, vars.channels());
-    hdiags_ += oops::Variables({"brightness_temperature_assuming_clear_sky"}, vars.channels());
-    hdiags_ += oops::Variables({"transmittances_of_atmosphere_layer"}, vars.channels());
+    hdiags_ += oops::ObsVariables({"brightness_temperature"}, vars.channels());
+    hdiags_ += oops::ObsVariables({"brightness_temperature_assuming_clear_sky"}, vars.channels());
+    hdiags_ += oops::ObsVariables({"transmittances_of_atmosphere_layer"}, vars.channels());
     geovars_ += oops::Variables({"water_area_fraction",
                                  "air_temperature",
                                  "air_pressure",
@@ -118,7 +118,7 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::V
   if (sensor == "AMSUA" || sensor == "ATMS") {
     geovars_ += oops::Variables({"water_area_fraction",
                                  "average_surface_temperature_within_field_of_view"});
-    hdiags_ += oops::Variables({"brightness_temperature"}, vars.channels());
+    hdiags_ += oops::ObsVariables({"brightness_temperature"}, vars.channels());
   }
 }
 

@@ -20,7 +20,7 @@ static PredictorMaker<SineOfLatitude>
        makerFuncSineOfLatitude_("sineOfLatitude");
 // -----------------------------------------------------------------------------
 
-SineOfLatitude::SineOfLatitude(const Parameters_ & parameters, const oops::Variables & vars)
+SineOfLatitude::SineOfLatitude(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars) {
 }
 

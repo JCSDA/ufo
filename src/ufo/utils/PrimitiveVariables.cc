@@ -14,7 +14,7 @@ namespace ufo {
 void PrimitiveVariablesIterator::loadCurrentVariable() {
   if (variableIndex_ < variables_.size()) {
     const Variable &variable = variables_[variableIndex_];
-    vector_.reset(new ioda::ObsDataVector<float>(data_.obsspace(), variable.toOopsVariables()));
+    vector_.reset(new ioda::ObsDataVector<float>(data_.obsspace(), variable.toOopsObsVariables()));
     if (eckit::StringTools::endsWith(variable.group(), "ObsFunction")) {
       data_.get(variable, *vector_);
     } else {

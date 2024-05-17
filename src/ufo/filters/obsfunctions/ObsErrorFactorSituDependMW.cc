@@ -112,22 +112,22 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
 
   // Get CLW retrieval based on observation from ObsFunction
   const Variable &clwobsvar = options_.clwobsFunction.value();
-  ioda::ObsDataVector<float> clwobs(in.obsspace(), clwobsvar.toOopsVariables());
+  ioda::ObsDataVector<float> clwobs(in.obsspace(), clwobsvar.toOopsObsVariables());
   in.get(clwobsvar, clwobs);
 
   // Get CLW retrieval based on simulated observation from ObsFunction
   const Variable &clwbkgvar = options_.clwbkgFunction.value();
-  ioda::ObsDataVector<float> clwbkg(in.obsspace(), clwbkgvar.toOopsVariables());
+  ioda::ObsDataVector<float> clwbkg(in.obsspace(), clwbkgvar.toOopsObsVariables());
   in.get(clwbkgvar, clwbkg);
 
   // Get Scattering Index retrieval based on observation from ObsFunction
   const Variable &scatobsvar = options_.scatobsFunction.value();
-  ioda::ObsDataVector<float> scatobs(in.obsspace(), scatobsvar.toOopsVariables());
+  ioda::ObsDataVector<float> scatobs(in.obsspace(), scatobsvar.toOopsObsVariables());
   in.get(scatobsvar, scatobs);
 
   // Get CLW match index from ObsFunction
   const Variable &clwmatchidxvar = options_.clwmatchidxFunction.value();
-  ioda::ObsDataVector<float> clwmatchidx(in.obsspace(), clwmatchidxvar.toOopsVariables());
+  ioda::ObsDataVector<float> clwmatchidx(in.obsspace(), clwmatchidxvar.toOopsObsVariables());
   in.get(clwmatchidxvar, clwmatchidx);
 
   // Get ObsErrorData (obs error from previous QC step) and convert to inverse of error variance
@@ -182,7 +182,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   if (options_.obserrFunction.value() != boost::none) {
     const boost::optional<Variable> &obserrvar = options_.obserrFunction.value();
     obserr0.reset(new ioda::ObsDataVector<float>(in.obsspace(),
-                 (*obserrvar).toOopsVariables()));
+                 (*obserrvar).toOopsObsVariables()));
     in.get(*obserrvar, *obserr0);
     // Calculate error factors (error_factors) for each channel
     // Loop through locations

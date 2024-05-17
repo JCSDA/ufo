@@ -31,7 +31,7 @@ MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters) {
   oops::Log::debug() << "MWCLWCheck: config = " << parameters_ << std::endl;
 
-  const oops::Variables &invars = parameters_.clwVariables.value();
+  const oops::ObsVariables &invars = parameters_.clwVariables.value();
   ASSERT(invars.size() == 2);
   const Variable var0("HofX/" + invars[0]);
   const Variable var1("HofX/" + invars[1]);
@@ -50,7 +50,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
 
-  const oops::Variables observed = obsdb_.assimvariables();
+  const oops::ObsVariables observed = obsdb_.assimvariables();
   const float missing = util::missingValue<float>();
   float amsua_clw(float, float, float);
 
@@ -61,7 +61,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
 //     2) Use calculated BTs
 //     3) Symmetric calculation
   const int clw_option = parameters_.clwOption;
-  const oops::Variables &invars = parameters_.clwVariables.value();
+  const oops::ObsVariables &invars = parameters_.clwVariables.value();
   oops::Log::debug() << "MWCLWCheck: config = " << parameters_ << std::endl;
 
 // Number of channels to be tested and number of thresholds needs to be the same
@@ -71,7 +71,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
     ASSERT(clw_thresholds[jv] != missing);
   }
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
   ioda::ObsDataVector<float> obs_for_calc(obsdb_, invars, "ObsValue");
   ioda::ObsDataVector<float> sza(obsdb_, "sensorZenithAngle", "MetaData");
   ioda::ObsDataVector<float> clw(obsdb_, "cloud_liquid_water", "Diagnostic", false);

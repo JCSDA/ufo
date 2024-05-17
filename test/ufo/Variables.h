@@ -17,7 +17,7 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "eckit/testing/Test.h"
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/runs/Test.h"
 #include "test/TestEnvironment.h"
 #include "ufo/filters/Variable.h"
@@ -55,7 +55,7 @@ void testConstructor() {
   ::test::TestEnvironment::config().get("oops variables", conf);
   for (std::size_t jj = 0; jj < conf.size(); ++jj) {
     // read variable from config
-    oops::Variables oopsvars(conf[jj], "variables");
+    oops::ObsVariables oopsvars(conf[jj], "variables");
     // read reference vector of strings
     std::vector<std::string> refvars(conf[jj].getStringVector("reference names"));
     // init ufo::Variables

@@ -34,7 +34,7 @@ ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & od
 
   // simulateObs() may be asked to interpolate the background errors of any simulated variables.
   // We need to assume the worst, i.e. that we'll need to interpolate all of them.
-  const oops::Variables &obsvars = odb.assimvariables();
+  const oops::ObsVariables &obsvars = odb.assimvariables();
   for (size_t ivar = 0; ivar < obsvars.size(); ++ivar)
     requiredVars_.push_back(nameMap_.convertName(obsvars[ivar]) + "_background_error");
 
@@ -53,7 +53,7 @@ void ObsBackgroundErrorIdentity::simulateObs(const GeoVaLs & geovals, ioda::ObsV
   oops::Variables variables;
   if (parameters_.variables.value() != boost::none)
     for (const Variable &variable : *parameters_.variables.value())
-      variables += nameMap_.convertName(variable.toOopsVariables());
+      variables += nameMap_.convertName(variable.toOopsObsVariables());
   else
     variables = nameMap_.convertName(odb_.assimvariables());
 
@@ -67,9 +67,9 @@ const oops::Variables & ObsBackgroundErrorIdentity::requiredVars() const {
   return requiredVars_;
 }
 
-oops::Variables ObsBackgroundErrorIdentity::simulatedVars() const {
+oops::ObsVariables ObsBackgroundErrorIdentity::simulatedVars() const {
   // This operator doesn't simulate any variables -- it only produces diagnostics.
-  return oops::Variables();
+  return oops::ObsVariables();
 }
 
 void ObsBackgroundErrorIdentity::print(std::ostream & os) const {

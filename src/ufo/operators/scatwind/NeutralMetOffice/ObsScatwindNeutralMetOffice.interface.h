@@ -27,7 +27,7 @@ extern "C" {
   void ufo_scatwind_neutralmetoffice_setup_f90(F90hop &,
                                                const bool &,
                                                const int &,
-                                               const oops::Variables &,
+                                               const oops::ObsVariables &,
                                                oops::Variables &,
                                                const size_t &,
                                                const int &,

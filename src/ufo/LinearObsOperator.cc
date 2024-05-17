@@ -14,6 +14,7 @@
 
 #include "ioda/ObsVector.h"
 #include "oops/base/Locations.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/interface/SampledLocations.h"
 #include "ufo/LinearObsBiasOperator.h"
 #include "ufo/LinearObsOperatorBase.h"
@@ -35,10 +36,10 @@ LinearObsOperator::LinearObsOperator(ioda::ObsSpace & os, const eckit::Configura
   params.validateAndDeserialize(config);
   oper_.reset(LinearObsOperatorFactory::create(os, params.operatorParameters));
   // We use += rather than = to make sure the Variables objects contain no duplicate entries.
-  oops::Variables operatorVars;
+  oops::ObsVariables operatorVars;
   operatorVars += oper_->simulatedVars();
   operatorVars.sort();
-  oops::Variables obsSpaceVars;
+  oops::ObsVariables obsSpaceVars;
   obsSpaceVars += os.assimvariables();
   obsSpaceVars.sort();
   if (!(operatorVars == obsSpaceVars))
@@ -53,7 +54,7 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
                                       const QCFlags_t & qc_flags) {
   typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
-  oops::Variables vars;
+  oops::ObsVariables vars;
   vars += bias.requiredHdiagnostics();
   std::vector<float> lons(odb_.nlocs());
   std::vector<float> lats(odb_.nlocs());

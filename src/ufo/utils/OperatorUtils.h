@@ -19,7 +19,7 @@ class Configuration;
 }
 
 namespace oops {
-class Variables;
+class ObsVariables;
 }
 
 namespace ioda {
@@ -42,8 +42,8 @@ namespace ufo {
   ///   Indices of the elements of \p simulatedVariables corresponding to the variables in
   ///   \p operatorVariables.
   void getOperatorVariables(const boost::optional<std::vector<ufo::Variable>> &listofvariables,
-                            const oops::Variables &simulatedVariables,
-                            oops::Variables &operatorVariables,
+                            const oops::ObsVariables &simulatedVariables,
+                            oops::ObsVariables &operatorVariables,
                             std::vector<int> &operatorVariableIndices);
 }  // namespace ufo
 

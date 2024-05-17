@@ -20,6 +20,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "eckit/types/FloatCompare.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"

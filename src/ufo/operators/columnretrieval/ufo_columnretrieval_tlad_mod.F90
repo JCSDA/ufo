@@ -7,6 +7,7 @@
 
 module ufo_columnretrieval_tlad_mod
   use oops_variables_mod
+  use obs_variables_mod
   use ufo_vars_mod
   use ufo_geovals_mod
   use missing_values_mod
@@ -21,7 +22,7 @@ module ufo_columnretrieval_tlad_mod
 
  type, public :: ufo_columnretrieval_tlad
  private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars
    integer :: nlayers_retrieval
    integer :: nlocs, nvars, nval

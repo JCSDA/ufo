@@ -27,6 +27,7 @@
 #include "ufo/utils/VariableNameMap.h"
 
 namespace oops {
+class ObsVariables;
 class Variables;
 }
 
@@ -68,7 +69,7 @@ class LinearObsOperatorBase : public util::Printable,
 /// \brief List of variables simulated by this operator.
 ///
 /// The default implementation returns the list of all simulated variables in the ObsSpace.
-  virtual oops::Variables simulatedVars() const;
+  virtual oops::ObsVariables simulatedVars() const;
 
 /// \brief The space containing the observations to be simulated by this operator.
   const ioda::ObsSpace &obsspace() const { return odb_; }

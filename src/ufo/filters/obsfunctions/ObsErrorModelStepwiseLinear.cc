@@ -108,7 +108,7 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
                      << "  and group: " << xvar.group() << std::endl;
   // Populate the testdata array.  xstar is just the 0..nloc-1 value of testvar[iv]
   // At each nloc, find matching (x0,x1) and (y0,y1) pair for linear interp.
-  ioda::ObsDataVector<float> testdata(data.obsspace(), xvar.toOopsVariables());
+  ioda::ObsDataVector<float> testdata(data.obsspace(), xvar.toOopsObsVariables());
   data.get(xvar, testdata);
 
   // Declare a unique_ptr, but keep it empty for now (don’t assign anything to it).
@@ -121,7 +121,7 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
                        << (*scale_factor_var).variable() << "  and group: "
                        << (*scale_factor_var).group() << std::endl;
     obvalues.reset(new ioda::ObsDataVector<float>(data.obsspace(),
-                                 (*scale_factor_var).toOopsVariables()));
+                                 (*scale_factor_var).toOopsObsVariables()));
     data.get(*scale_factor_var, *obvalues);
   }
 

@@ -55,7 +55,7 @@ void OceanPressureToDepth::compute(const ObsFilterData & in,
   const double param8 = 9.72659;
 
   // input pressure
-  ioda::ObsDataVector<float> pressure(in.obsspace(), invars_[0].toOopsVariables());
+  ioda::ObsDataVector<float> pressure(in.obsspace(), invars_[0].toOopsObsVariables());
   in.get(invars_[0], pressure);
   // Get latitude
   std::vector<float> lats(nlocs);

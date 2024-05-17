@@ -20,6 +20,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/base/Locations.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/ParameterTraitsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/mpi/mpi.h"
@@ -52,7 +53,7 @@ class ObsDiagnosticsParameters : public oops::Parameters {
 
  public:
   /// \brief List of obs diagnostics to be calculated.
-  oops::RequiredParameter<oops::Variables> variables{"variables", this};
+  oops::RequiredParameter<oops::ObsVariables> variables{"variables", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -110,7 +111,7 @@ void testObsDiagnostics() {
   bias.zero();
 
   // create diagnostics to hold HofX diags
-  const oops::Variables &diagvars = params.obsDiagnostics.value().variables;
+  const oops::ObsVariables &diagvars = params.obsDiagnostics.value().variables;
   EXPECT(diagvars.size() > 0);
   ObsDiagnostics diags(ospace, hop.locations(), diagvars);
   typedef ioda::ObsDataVector<int> QCFlags_t;

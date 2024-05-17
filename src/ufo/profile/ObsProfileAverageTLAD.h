@@ -51,7 +51,7 @@ class ObsProfileAverageTLAD : public LinearObsOperatorBase,
 
   const oops::Variables & requiredVars() const override { return requiredVars_; }
 
-  oops::Variables simulatedVars() const override { return data_.simulatedVars(); }
+  oops::ObsVariables simulatedVars() const override { return data_.simulatedVars(); }
 
  private:
   void print(std::ostream &) const override;

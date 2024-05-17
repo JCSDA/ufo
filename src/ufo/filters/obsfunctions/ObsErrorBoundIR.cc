@@ -72,12 +72,12 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
 
   // Get error factor from ObsFunction
   const Variable &obserrlat = options_.obserrBoundLat.value();
-  ioda::ObsDataVector<float> errflat(in.obsspace(), obserrlat.toOopsVariables());
+  ioda::ObsDataVector<float> errflat(in.obsspace(), obserrlat.toOopsObsVariables());
   in.get(obserrlat, errflat);
 
   // Get error factor from ObsFunction
   const Variable &obserrtaotop = options_.obserrBoundTransmittop.value();
-  ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsVariables());
+  ioda::ObsDataVector<float> errftaotop(in.obsspace(), obserrtaotop.toOopsObsVariables());
   in.get(obserrtaotop, errftaotop);
 
   // Get original observation error.  If not explicitly passed through the YAML, check the ObsSpace

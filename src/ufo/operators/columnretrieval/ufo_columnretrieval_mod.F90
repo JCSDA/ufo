@@ -8,6 +8,7 @@
 module ufo_columnretrieval_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
  use missing_values_mod
  use kinds
@@ -20,7 +21,7 @@ module ufo_columnretrieval_mod
 !> Fortran derived type for the observation type
  type, public :: ufo_columnretrieval
  private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars
    integer :: nlayers_retrieval
    character(kind=c_char,len=:), allocatable :: obskernelvar, obspressurevar

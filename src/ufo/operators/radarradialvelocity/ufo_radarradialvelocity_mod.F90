@@ -8,6 +8,7 @@
 module ufo_radarradialvelocity_mod
 
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
 
  implicit none
@@ -16,7 +17,7 @@ module ufo_radarradialvelocity_mod
 !> Fortran derived type for the observation type
  type, public :: ufo_radarradialvelocity
  private
-   type(oops_variables), public :: obsvars
+   type(obs_variables), public :: obsvars
    type(oops_variables), public :: geovars
    character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
  contains

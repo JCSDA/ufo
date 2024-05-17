@@ -13,6 +13,7 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Locations.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 
@@ -36,10 +37,10 @@ ObsOperator::ObsOperator(ioda::ObsSpace & os, const eckit::Configuration & confi
   params.validateAndDeserialize(config);
   oper_.reset(ObsOperatorFactory::create(os, params.operatorParameters));
   // We use += rather than = to make sure the Variables objects contain no duplicate entries.
-  oops::Variables operatorVars;
+  oops::ObsVariables operatorVars;
   operatorVars += oper_->simulatedVars();
   operatorVars.sort();
-  oops::Variables obsSpaceVars;
+  oops::ObsVariables obsSpaceVars;
   obsSpaceVars += os.assimvariables();
   obsSpaceVars.sort();
   if (!(operatorVars == obsSpaceVars))

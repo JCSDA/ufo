@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/ObsFilterBase.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -48,8 +49,8 @@ class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
 
   oops::Variables requiredVars() const override {
     return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}
-  oops::Variables requiredHdiagnostics() const override {
-    return allvars_.allFromGroup("ObsDiag").toOopsVariables();}
+  oops::ObsVariables requiredHdiagnostics() const override {
+    return allvars_.allFromGroup("ObsDiag").toOopsObsVariables();}
 
  protected:
   ioda::ObsSpace & obsdb_;

@@ -44,7 +44,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
     predictors[p]->compute(odb_, geovals, ydiags, biascoeffs, predData[p]);
   }
 
-  const oops::Variables &simVars = biascoeffs.simVars();
+  const oops::ObsVariables &simVars = biascoeffs.simVars();
   // At present we can label predictors with either the channel number or the variable name, but not
   // both. So if there are multiple channels, make sure there's only one (multi-channel) variable.
   ASSERT(simVars.channels().empty() ||
@@ -98,7 +98,7 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
         // Save ObsBiasOperatorTerms (bias_coeff * predictor) for QC
         const std::string varname = predictors[jp]->name() + "_" + predictorSuffix;
         if (ydiags.has(varname)) {
-          ydiags.allocate(1, oops::Variables({varname}));
+          ydiags.allocate(1, oops::ObsVariables({varname}));
           ydiags.save(biasTerm, varname, 0);
         } else {
           oops::Log::error() << varname << " is not reserved in ydiags !" << std::endl;

@@ -21,7 +21,7 @@ static PredictorMaker<ScanAngle> makerFuncScanAngle_("sensorScanAngle");
 
 // -----------------------------------------------------------------------------
 
-ScanAngle::ScanAngle(const Parameters_ & parameters, const oops::Variables & vars)
+ScanAngle::ScanAngle(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1)),
     var_name_(parameters.varName) {

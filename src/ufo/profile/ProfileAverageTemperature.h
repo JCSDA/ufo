@@ -12,6 +12,8 @@
 #include <cmath>
 #include <vector>
 
+#include "oops/base/Variables.h"
+
 #include "ufo/profile/ProfileAverageUtils.h"
 #include "ufo/profile/ProfileCheckBase.h"
 #include "ufo/profile/ProfileCheckValidator.h"

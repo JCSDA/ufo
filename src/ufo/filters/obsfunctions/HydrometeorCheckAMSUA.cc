@@ -145,12 +145,12 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
 
   // Get all-sky observation error from ObsFunction
   const Variable &obserrvar = options_.obserrFunction.value();
-  ioda::ObsDataVector<float> obserr(in.obsspace(), obserrvar.toOopsVariables());
+  ioda::ObsDataVector<float> obserr(in.obsspace(), obserrvar.toOopsObsVariables());
   in.get(obserrvar, obserr);
 
   // Get CLW retrieval based on observation from ObsFunction
   const Variable &clwretvar = options_.clwretFunction.value();
-  ioda::ObsDataVector<float> clwobs(in.obsspace(), clwretvar.toOopsVariables());
+  ioda::ObsDataVector<float> clwobs(in.obsspace(), clwretvar.toOopsObsVariables());
   in.get(clwretvar, clwobs);
 
   // Set parameters

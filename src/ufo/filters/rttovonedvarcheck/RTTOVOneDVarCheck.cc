@@ -133,7 +133,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // the oops::Observer saves to ObsBias.
   Variable obsbiasvar("ObsBiasData/brightnessTemperature",
                       obsdb_.obsvariables().channels());
-  ioda::ObsDataVector<float> obsbias(obsdb_, obsbiasvar.toOopsVariables());
+  ioda::ObsDataVector<float> obsbias(obsdb_, obsbiasvar.toOopsObsVariables());
   data_.get(obsbiasvar, obsbias);
   obsbias.save("ObsBias");
 

@@ -18,7 +18,7 @@ static PredictorMaker<Legendre> makerFuncLegendre_("legendre");
 
 // -----------------------------------------------------------------------------
 
-Legendre::Legendre(const Parameters_ & parameters, const oops::Variables & vars)
+Legendre::Legendre(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1)),
     nscan_(parameters.numScanPositions) {

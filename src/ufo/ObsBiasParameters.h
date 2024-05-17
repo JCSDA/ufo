@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "oops/base/ParameterTraitsVariables.h"
+#include "oops/base/ParameterTraitsObsVariables.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
@@ -98,7 +98,7 @@ class ObsBiasParameters : public oops::Parameters {
   /// Boolean determining whether records are bias-corrected independently from each other.
   oops::Parameter<bool> BiasCorrectionByRecord{"bc by record", false, this};
   /// List of variables (and channels) that is not bias corrected
-  oops::Parameter<oops::Variables> variablesNoBC{"variables without bc", {}, this};
+  oops::Parameter<oops::ObsVariables> variablesNoBC{"variables without bc", {}, this};
   /// Path to a NetCDF file containing initial values of the coefficients of predictors used
   /// in VarBC.
   oops::OptionalParameter<std::string> inputFile{"input file", this};

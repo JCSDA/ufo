@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "ioda/ObsSpace.h"
-#include "oops/base/Variables.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/QCflags.h"
@@ -40,7 +40,7 @@ FinalCheck::~FinalCheck() {
 void FinalCheck::doFilter() const {
   oops::Log::trace() << "FinalCheck doFilter starts" << std::endl;
 
-  const oops::Variables &derived = obsdb_.derived_obsvariables();
+  const oops::ObsVariables &derived = obsdb_.derived_obsvariables();
   for (size_t jv = 0; jv < derived.size(); ++jv) {
     if (!obsdb_.has("ObsValue", derived[jv]))
       throw eckit::UnexpectedState(

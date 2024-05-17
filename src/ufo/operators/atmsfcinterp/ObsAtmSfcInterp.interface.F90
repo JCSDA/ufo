@@ -40,6 +40,7 @@ contains
 subroutine ufo_atmsfcinterp_setup_c(c_key_self, c_conf, c_obsvars, c_obsvarindices, c_nobsvars, &
                                     c_geovars) bind(c,name='ufo_atmsfcinterp_setup_f90')
 use oops_variables_mod
+use obs_variables_mod
 implicit none
 integer(c_int), intent(inout)     :: c_key_self
 type(c_ptr), value, intent(in)    :: c_conf
@@ -54,7 +55,7 @@ type(fckit_configuration) :: f_conf
 call ufo_atmsfcinterp_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-self%obsvars = oops_variables(c_obsvars)
+self%obsvars = obs_variables(c_obsvars)
 allocate(self%obsvarindices(self%obsvars%nvars()))
 self%obsvarindices(:) = c_obsvarindices(:) + 1  ! Convert from C to Fortran indexing
 self%geovars = oops_variables(c_geovars)

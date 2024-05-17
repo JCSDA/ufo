@@ -43,7 +43,7 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
   oops::Log::trace() << "      --> obsName: " << obsName() << std::endl;
 
   // Read in radiance to be corrected
-  oops::Variables radianceVar(parameters_.transformVariable.value().toOopsVariables());
+  oops::ObsVariables radianceVar(parameters_.transformVariable.value().toOopsObsVariables());
   ioda::ObsDataVector<float> radiance(obsdb_, radianceVar);
   data_.get(parameters_.transformVariable.value(), radiance);
 
@@ -64,7 +64,8 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
       spectralVariable.push_back(buf[ichan]);
     }
   } else {
-    ioda::ObsDataVector<float> buf(obsdb_, parameters_.spectralVariable.value().toOopsVariables());
+    ioda::ObsDataVector<float> buf(obsdb_,
+                                   parameters_.spectralVariable.value().toOopsObsVariables());
     data_.get(parameters_.spectralVariable.value(), buf);
     for (size_t ichan = 0; ichan < nvars; ++ichan) {
       spectralVariable.push_back(buf[ichan][0]);

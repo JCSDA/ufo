@@ -67,7 +67,7 @@ void Exponential::compute(const ObsFilterData & in,
   ASSERT(nv == 1);  // currently only works with one (possibly multi-channel) x variable
   const float missing = util::missingValue<float>();
   for (size_t ivar = 0; ivar < nv; ++ivar) {
-    ioda::ObsDataVector<float> varin(in.obsspace(), invars_[ivar].toOopsVariables());
+    ioda::ObsDataVector<float> varin(in.obsspace(), invars_[ivar].toOopsObsVariables());
     in.get(invars_[ivar], varin);
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {

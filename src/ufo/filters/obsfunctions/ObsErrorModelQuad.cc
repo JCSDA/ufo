@@ -91,7 +91,7 @@ void ObsErrorModelQuad::compute(const ObsFilterData & in,
 
   // Compute x values
   const Variable &xvar = options_.xvar.value();
-  ioda::ObsDataVector<float> xvals(in.obsspace(), xvar.toOopsVariables());
+  ioda::ObsDataVector<float> xvals(in.obsspace(), xvar.toOopsObsVariables());
   in.get(xvar, xvals);
 
   // Optional save of the xfunc values

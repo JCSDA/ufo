@@ -12,6 +12,7 @@
 #include <string>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
@@ -47,14 +48,14 @@ class ObsADT : public ObsOperatorBase,
                    const QCFlags_t &) const override;
 
   const oops::Variables & requiredVars() const override {return requiredVars_;}
-  oops::Variables simulatedVars() const override { return operatorVars_; }
+  oops::ObsVariables simulatedVars() const override { return operatorVars_; }
 
  private:
   void print(std::ostream &) const override;
 
   oops::Variables requiredVars_;
   const ioda::ObsSpace& odb_;
-  oops::Variables operatorVars_;
+  oops::ObsVariables operatorVars_;
   int operatorVarIndex_;
 };
 

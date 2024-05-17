@@ -406,7 +406,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   filters.preProcess();
 /// call priorFilter and postFilter if hofx is available
   oops::Variables geovars = filters.requiredVars();
-  oops::Variables diagvars = filters.requiredHdiagnostics();
+  oops::ObsVariables diagvars = filters.requiredHdiagnostics();
 
 /// initialize zero bias
   ObsVector_ bias(obspace);
@@ -446,7 +446,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     vars += reducedVars;  // the reduced format is derived from the sampled format
     GeoVaLs_ gval(params.geovals.value(), obspace, vars);
     hop.computeReducedVars(reducedVars, gval);
-    oops::Variables diagvars;
+    oops::ObsVariables diagvars;
     diagvars += filters.requiredHdiagnostics();
     diagvars += ybias.requiredHdiagnostics();
     ObsDiags_ diags(obspace, hop.locations(), diagvars);

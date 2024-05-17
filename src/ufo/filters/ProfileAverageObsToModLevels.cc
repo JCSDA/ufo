@@ -66,8 +66,8 @@ void ProfileAverageObsToModLevels::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "ProfileAverageObsToModLevels postFilter" << std::endl;
   oops::Log::trace() << "ProfileAverageObsToModLevels obserr: " << *obserr_ << std::endl;
 
-  const oops::Variables observed = obsdb_.obsvariables();
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  const oops::ObsVariables observed = obsdb_.obsvariables();
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
 
   // Number of locations (including extended space)
   const size_t nlocs = obsdb_.nlocs();

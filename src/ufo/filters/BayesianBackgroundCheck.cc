@@ -98,11 +98,11 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BayesianBackgroundCheck postFilter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
 
   oops::Log::debug() << "BayesianBackgroundCheck obserr: " << *obserr_ << std::endl;
 
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
 
   Variables varhofx(filtervars_, "HofX");
   Variables varflags(filtervars_, "QCFlags");

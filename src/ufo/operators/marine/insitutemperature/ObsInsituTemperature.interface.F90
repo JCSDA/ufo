@@ -13,6 +13,7 @@ module ufo_insitutemperature_mod_c
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
   use oops_variables_mod
+  use obs_variables_mod
   implicit none
   private
 
@@ -50,7 +51,7 @@ subroutine ufo_insitutemperature_setup_c(c_key_self, c_conf, c_obsvars, c_obsvar
 
   ! assuming that there is only 1 variable
   if (c_nobsvars /= 1) call abor1_ftn("InsituTemperature only works on a single variable")
-  self%obsvars = oops_variables(c_obsvars)
+  self%obsvars = obs_variables(c_obsvars)
   self%obsvaridx = c_obsvarindices(1) + 1
   self%geovars = oops_variables(c_geovars)
 

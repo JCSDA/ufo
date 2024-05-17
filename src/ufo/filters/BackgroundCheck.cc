@@ -85,10 +85,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "BackgroundCheck postFilter" << std::endl;
-  const oops::Variables observed = obsdb_.obsvariables();
+  const oops::ObsVariables observed = obsdb_.obsvariables();
   const float missing = util::missingValue<float>();
   oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_ << std::endl;
-  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsVariables(), "ObsValue");
+  ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
 
   std::string test_hofx = parameters_.test_hofx.value();
   Variables varhofx(filtervars, test_hofx);
@@ -97,7 +97,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   if (parameters_.functionAbsoluteThreshold.value()) {
 //  Get function absolute threshold info from configuration
     const Variable &rtvar = parameters_.functionAbsoluteThreshold.value()->front();
-    ioda::ObsDataVector<float> function_abs_threshold(obsdb_, rtvar.toOopsVariables());
+    ioda::ObsDataVector<float> function_abs_threshold(obsdb_, rtvar.toOopsObsVariables());
     data_.get(rtvar, function_abs_threshold);
 
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {

@@ -31,7 +31,7 @@ extern "C" {
   /// \param[out] requiredVars
   ///   GeoVaLs required for the simulation of the variables \p operatorVars.
   void ufo_insitutemperature_tlad_setup_f90(F90hop &, const eckit::Configuration &,
-                                      const oops::Variables &operatorVars,
+                                      const oops::ObsVariables &operatorVars,
                                       const int *operatorVarIndices,
                                       const int numOperatorVarIndices,
                                       oops::Variables &requiredVars);

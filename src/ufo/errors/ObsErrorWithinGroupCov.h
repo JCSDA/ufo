@@ -15,7 +15,6 @@
 
 #include "ioda/ObsVector.h"
 
-#include "oops/base/Variables.h"
 #include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"

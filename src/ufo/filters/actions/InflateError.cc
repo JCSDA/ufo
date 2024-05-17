@@ -77,7 +77,7 @@ void InflateError::apply(const Variables & vars,
   } else if (parameters_.inflationVariable.value() != boost::none) {
     const Variable &factorvar = *parameters_.inflationVariable.value();
     ASSERT(factorvar.size() == 1 || factorvar.size() == vars.nvars());
-    ioda::ObsDataVector<float> factors(data.obsspace(), factorvar.toOopsVariables());
+    ioda::ObsDataVector<float> factors(data.obsspace(), factorvar.toOopsObsVariables());
     data.get(factorvar, factors);
 
     // if inflation factor is 1D variable, apply the same inflation factor to all variables

@@ -10,6 +10,7 @@ module ufo_aodext_tlad_mod
  use kinds
  use missing_values_mod
  use oops_variables_mod
+ use obs_variables_mod
  use ufo_vars_mod
 
  implicit none
@@ -17,7 +18,7 @@ module ufo_aodext_tlad_mod
 
  type, public :: ufo_aodext_tlad
  private
-  type(oops_variables), public :: obsvars
+  type(obs_variables), public :: obsvars
   type(oops_variables), public :: geovars
   real(kind_real),    allocatable :: airdens(:,:)      !(km, nlocs) airdens profile interp at obs loc [kg.m-3]
   real(kind_real),    allocatable :: delp(:,:)         !(km, nlocs) air pressure thickness profiles at obs loc[Pa]

@@ -17,7 +17,7 @@
 #include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
-  class Variables;
+  class ObsVariables;
 }
 
 namespace ioda {
@@ -51,7 +51,7 @@ class ObsMetaDataPredictor : public PredictorBase {
   /// This typedef is used by the PredictorFactory.
   typedef ObsMetaDataPredictorParameters Parameters_;
 
-  ObsMetaDataPredictor(const Parameters_ &, const oops::Variables &);
+  ObsMetaDataPredictor(const Parameters_ &, const oops::ObsVariables &);
 
   void compute(const ioda::ObsSpace &,
                const GeoVaLs &,

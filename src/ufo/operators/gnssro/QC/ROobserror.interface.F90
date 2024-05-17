@@ -33,7 +33,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_roobserror_create_c(c_self, c_obspace, c_conf, c_filtervar) bind(c,name='ufo_roobserror_create_f90')
-use oops_variables_mod
+use obs_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_self
 type(c_ptr), value, intent(in) :: c_obspace
@@ -45,7 +45,7 @@ type(fckit_configuration)      :: f_conf
 call ufo_roobserror_registry%setup(c_self, self)
 f_conf = fckit_configuration(c_conf)
 
-self%obsvar   = oops_variables(c_filtervar)
+self%obsvar   = obs_variables(c_filtervar)
 self%variable = self%obsvar%variable(1)
 
 call ufo_roobserror_create(self, c_obspace, f_conf)
