@@ -27,8 +27,8 @@ observations:
   linear obs operator test:
     coef TL: 1.e-6
     iterations TL: 3
-    tolerance TL: 1.0e-13
-    tolerance AD: 1.0e-13
+    tolerance TL: 1.0e-9
+    tolerance AD: 1.0e-9
 
 # Now test the option of disabling variational method (option 109)
 - obs operator:

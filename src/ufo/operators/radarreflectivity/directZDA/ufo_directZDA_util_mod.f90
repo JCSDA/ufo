@@ -195,11 +195,11 @@ subroutine coef4dbzfwrd(mphyopt,iret)
 
       WRITE(*,*)'*****************************************************************'
       write(*,*)'COEF4DBZFWRD: mphyopt==',mphyopt
-      write(*,*)'COEF4DBZFWRD: rain:    ',' Cr    =',Cr,    '  Pr    =',Pr
-      write(*,*)'COEF4DBZFWRD: snow:    ',' Cs_dry=',Cs_dry,'  Ps_dry=',Ps_dry
-      write(*,*)'COEF4DBZFWRD:          ',' Cs_wet=',Cs_wet,'  Ps_wet=',Ps_wet
-      write(*,*)'COEF4DBZFWRD: graupel: ',' Cg_dry=',Cg_dry,'  Pg_dry=',Pg_dry
-      write(*,*)'COEF4DBZFWRD:          ',' Cg_wet=',Cg_wet,'  Pg_wet=',Pg_wet
+      !rite(*,*)'COEF4DBZFWRD: rain:    ',' Cr    =',Cr,    '  Pr    =',Pr
+      !rite(*,*)'COEF4DBZFWRD: snow:    ',' Cs_dry=',Cs_dry,'  Ps_dry=',Ps_dry
+      !rite(*,*)'COEF4DBZFWRD:          ',' Cs_wet=',Cs_wet,'  Ps_wet=',Ps_wet
+      !rite(*,*)'COEF4DBZFWRD: graupel: ',' Cg_dry=',Cg_dry,'  Pg_dry=',Pg_dry
+      !rite(*,*)'COEF4DBZFWRD:          ',' Cg_wet=',Cg_wet,'  Pg_wet=',Pg_wet
       WRITE(*,*)'*****************************************************************'
 
       return

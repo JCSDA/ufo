@@ -255,23 +255,18 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real), allocatable :: vfields(:,:)  ! background fields interplated vertically to the observation height
 
   integer :: i_melt_snow, i_melt_graupel
-  real(kind_real) :: RHO
-  real(kind_real) :: qrexp, qsexp, qgexp, qhexp
-  real(kind_real) :: qnr1D, qns1D, qng1D, qnh1D
-  real(kind_real) :: qvg1D, qvh1D
-  real(kind_real) :: qrges, qsges, qgges, qhges, qnrges
+  real(kind_real) :: qrges, qsges, qgges, qhges
+  real(kind_real) :: qnrges, qnsges, qngges, qnhges
+  real(kind_real) :: qvgges, qvhges
   real(kind_real) :: rdBZ, rdBZr, rdBZs, rdBZg, rdBZh
-  real(kind_real) :: P1D, Q1D, T1D
+  real(kind_real) :: P1D, Q1D, T1D, RHO
   real(kind_real) :: Ze, Zer, Zes, Zeg, Zeh
   real(kind_real) :: wgt_dry, wgt_wet
   real(kind_real) :: Zeg_dry, Zeg_wet
-  real(kind_real) :: Cs_tmp, Cg_tmp
 
-  real(kind_real), parameter :: qr_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qs_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qg_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qh_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qnr_min = 1.0E-8_kind_real
+  real(kind_real), parameter :: qx_min = 1.0E-8_kind_real
+  real(kind_real), parameter :: qn_min = 1.0_kind_real
+  real(kind_real), parameter :: qb_min = 1.0E-8_kind_real
 
   real(kind_real), parameter :: rd=287.04_kind_real
   real(kind_real), parameter :: one=1._kind_real
@@ -290,6 +285,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real) :: smoz, alpha_const_tm_dry_snow
   real(kind_real) :: oams
 
+  integer :: idx_p, idx_t, idx_q
   integer :: iret_coef4dbzfwrd
 
 ! variables added for radarZ
@@ -354,120 +350,105 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
   do ivar = 1,1
     do iobs=1,nlocs 
-      qrges=vfields(1,iobs) ! qr
-      qsges=vfields(2,iobs) ! qs
-      qgges=vfields(3,iobs) ! qg
+
+      ! calculate RHO first
       if ( self%mphyopt .eq. 14 ) then
-         qhges=vfields(4,iobs) ! qh
-         qnr1D=vfields(5,iobs)   ! qnr
-         qns1D=vfields(6,iobs)   ! qns
-         qng1D=vfields(7,iobs)   ! qng
-         qnh1D=vfields(8,iobs)   ! qnh
-         qvg1D=vfields(9,iobs)   ! qng
-         qvh1D=vfields(10,iobs)  ! qnh
-         qhexp=qhges
-       else if ( self%mphyopt .eq. 108 ) then
-         qnrges=vfields(4,iobs)   ! qnr
-       end if
-
-! Treat minimum Qx in case of variational DA
-      if ( self%use_variational ) then
-         qrexp = max(qrges, qr_min)
-         qsexp = max(qsges, qs_min)
-         qgexp = max(qgges, qg_min)
-         if ( self%mphyopt .eq. 108 ) qnr1D=max(qnrges, qnr_min)
-      else
-         qrexp=qrges
-         qsexp=qsges
-         qgexp=qgges
-         if ( self%mphyopt .eq. 108 ) qnr1D=qnrges
-      end if
-! -------------------------------------------
-
-
-! calculate RHO here
-      if ( self%mphyopt .eq. 14 ) then
-         P1D=vfields(11,iobs) ! pressure (Pa)
-         T1D=vfields(12,iobs) ! temperature (K)
-         Q1D=vfields(13,iobs) ! specific humidity
+         idx_p = 11
+         idx_t = 12
+         idx_q = 13
       else if ( self%mphyopt .eq. 108 ) then
-         P1D=vfields(5,iobs) ! pressure (Pa)
-         T1D=vfields(6,iobs) ! temperature (K)
-         Q1D=vfields(7,iobs) ! specific humidity
+         idx_p = 5
+         idx_t = 6
+         idx_q = 7
       else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then
-         P1D=vfields(4,iobs) ! pressure (Pa)
-         T1D=vfields(5,iobs) ! temperature (K)
-         Q1D=vfields(6,iobs) ! specific humidity
+         idx_p = 4
+         idx_t = 5
+         idx_q = 6
       end if
-      Q1D=Q1D/(one-Q1D)   ! convert to mixing ratio
-      RHO=P1D/(rd*T1D*(one+D608*Q1D))
+      P1D = vfields(idx_p,iobs) ! pressure (Pa)
+      T1D = vfields(idx_t,iobs) ! temperature (K)
+      Q1D = vfields(idx_q,iobs) ! specific humidity
+      Q1D = Q1D/(one-Q1D)   ! convert from specific humidity to mixing ratio
+      RHO = P1D/(rd*T1D*(one+D608*Q1D))
 
-! maybe we do not need other mphyopt except for NSSL..  I think
-      if ( self%mphyopt .eq. 108 .or. self%mphyopt .eq. 14 ) then
-         qnr1D=qnr1D*RHO ! convert qnr to unit demanded by operators
-          if ( self%mphyopt .eq. 14 ) then
-             qns1D=qns1D*RHO ! convert qnr to unit demanded by operators
-             qng1D=qng1D*RHO ! convert qns to unit demanded by operators
-             qnh1D=qnh1D*RHO ! convert qng to unit demanded by operators
-             qvg1D=qvg1D*RHO ! convert qvg to unit demanded by operators
-             qvh1D=qvh1D*RHO ! convert qvh to unit demanded by operators
-          end if
+      ! Change MP variables from kg/kg to kg/m3, assume lower bound minimum values.
+      qrges = max(vfields(1,iobs)*RHO, qx_min)  ! qr
+      qsges = max(vfields(2,iobs)*RHO, qx_min)  ! qs
+      qgges = max(vfields(3,iobs)*RHO, qx_min)  ! qg
+
+      ! Some microphysics options have more species and double-moment.
+      if ( self%mphyopt .eq. 108 ) then
+         qnrges = max(vfields(4,iobs)*RHO, qn_min)  ! qnr
+      elseif ( self%mphyopt .eq. 14 ) then
+         qhges = max(vfields(4,iobs)*RHO, qx_min)   ! qh
+         qnrges = max(vfields(5,iobs)*RHO, qn_min)  ! qnr
+         qnsges = max(vfields(6,iobs)*RHO, qn_min)  ! qns
+         qngges = max(vfields(7,iobs)*RHO, qn_min)  ! qng
+         qnhges = max(vfields(8,iobs)*RHO, qn_min)  ! qnh
+         qvgges = max(vfields(9,iobs)*RHO, qb_min)  ! qvg
+         qvhges = max(vfields(10,iobs)*RHO, qb_min) ! qvh
       end if
 
       ! intialization
-      Zer = zero ;         Zes = zero ;          Zeg = zero ;
-      wgt_dry = zero ;     wgt_wet = zero ;
-      Zeg_dry = zero ;     Zeg_wet = zero ;
+      Zer = zero
+      Zes = zero
+      Zeg = zero
+      rdBZ = zero
+      rdBZr = zero
+      rdBZs = zero
+      rdBZg = zero
+      rdBZh = zero
+      wgt_dry = zero
+      wgt_wet = zero ;
+      Zeg_dry = zero
+      Zeg_wet = zero ;
 
 ! --------------- LIN operator code from GSI 'setupdbz.f90' --------------
       if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then ! LIN operator
-!      ! rain
-         Zer = Cr  * (RHO * qrexp)**(Pr)
+         ! rain
+         if (qrges > qx_min) then
+            Zer = Cr * qrges**Pr
+         end if
 
-       ! snow
-         if ( i_melt_snow < 0 ) then
-!        no melting: dry snow at any temperature
-            Zes = Cs_dry * (RHO * qsexp)**(Ps_dry)
-            Cs_tmp  = Cs_dry
-         else if ( i_melt_snow  .eq. 100 ) then
-!        melting: wet snow at any temperature
-            Zes = Cs_wet * (RHO * qsexp)**(Ps_wet)
-            Cs_tmp  = Cs_wet
-         else
-!        melting: depending on temperature
-            if (T1D < T_melt) then
-               Zes = Cs_dry * (RHO * qsexp)**(Ps_dry)
-               Cs_tmp  = Cs_dry
+         ! snow
+         if (qsges > qx_min) then
+            if ( i_melt_snow < 0 ) then
+               ! no melting: dry snow at any temperature
+               Zes = Cs_dry * qsges**Ps_dry
+            else if ( i_melt_snow  .eq. 100 ) then
+               ! melting: wet snow at any temperature
+               Zes = Cs_wet * qsges**Ps_wet
             else
-               Zes = Cs_wet * (RHO * qsexp)**(Ps_wet)
-               Cs_tmp  = Cs_wet
+               ! melting: depending on temperature
+               if (T1D < T_melt) then
+                  Zes = Cs_dry * qsges**Ps_dry
+               else
+                  Zes = Cs_wet * qsges**Ps_wet
+               end if
             end if
          end if
 
-!        ! graupel/hail
-         if ( i_melt_graupel < 0 ) then
-!        no melting: dry grauple/hail at any temperature
-            Zeg = Cg_dry * (RHO * qgexp)**(Pg_dry)
-            Cg_tmp  = Cg_dry
-         else if ( i_melt_graupel  .eq. 100 ) then
-!        melting: wet graupel at any temperature
-            Zeg = Cg_wet * (RHO * qgexp)**(Pg_wet)
-            Cg_tmp  = Cg_wet
-         else
-!        melting: depending on the temperature
-            if (T1D < (T_melt - 2.5_kind_real)) then
-               Zeg = Cg_dry * (RHO * qgexp)**(Pg_dry)
-               Cg_tmp  = Cg_dry
-            else if (T1D > (T_melt + 2.5_kind_real)) then
-               Zeg = Cg_wet * (RHO * qgexp)**(Pg_wet)
-               Cg_tmp  = Cg_wet
+         ! graupel/hail
+         if (qgges > qx_min) then
+            if ( i_melt_graupel < 0 ) then
+               ! no melting: dry grauple/hail at any temperature
+               Zeg = Cg_dry * qgges**Pg_dry
+            else if ( i_melt_graupel  .eq. 100 ) then
+               ! melting: wet graupel at any temperature
+               Zeg = Cg_wet * qgges**Pg_wet
             else
-               wgt_dry = abs(T1D - (T_melt + 2.5_kind_real))/5.0_kind_real
-               wgt_wet = abs(T1D - (T_melt - 2.5_kind_real))/5.0_kind_real
-               Zeg_dry = Cg_dry * (RHO * qgexp)**(Pg_dry)
-               Zeg_wet = Cg_wet * (RHO * qgexp)**(Pg_wet)
-               Zeg     = wgt_dry*Zeg_dry + wgt_wet*Zeg_wet
-               Cg_tmp  = wgt_dry*Cg_dry  + wgt_wet*Cg_wet
+               ! melting: depending on the temperature
+               if (T1D < (T_melt - 2.5_kind_real)) then
+                  Zeg = Cg_dry * qgges**Pg_dry
+               else if (T1D > (T_melt + 2.5_kind_real)) then
+                  Zeg = Cg_wet * qgges**Pg_wet
+               else
+                  wgt_dry = abs(T1D - (T_melt + 2.5_kind_real))/5.0_kind_real
+                  wgt_wet = abs(T1D - (T_melt - 2.5_kind_real))/5.0_kind_real
+                  Zeg_dry = Cg_dry * qgges**Pg_dry
+                  Zeg_wet = Cg_wet * qgges**Pg_wet
+                  Zeg     = wgt_dry*Zeg_dry + wgt_wet*Zeg_wet
+               end if
             end if
          end if
 
@@ -475,7 +456,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
 !        Zelim treatment
          if (Ze < 1.0_kind_real) then
-            Ze=Ze + 1.0_kind_real
+            Ze = Ze + 1.0_kind_real
          end if
 
 !        Convert to simulated radar reflectivity in units of dBZ
@@ -494,74 +475,74 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
          Pg_wet= 2.5_kind_real
 
        ! rain
-         if (  qrexp > 10E-7_kind_real .and. qnr1D > 20._kind_real  ) then
-            Zer = 720._kind_real *(RHO*qrexp)**2*ten**18/(pi**2*rhor**2*qnr1D)
-         else
-            Zer = 10E-8_kind_real
+         if (qrges .gt. qx_min*100. .and. qnrges .ge. qn_min*100.) then
+            Zer = 720._kind_real * qrges**2 / (pi**2*rhor**2*qnrges) * 1.E18
          endif
 
        ! snow
-         if (qsexp > 10E-7_kind_real) then
+         if (qsges > qx_min*100.) then
              if ( T1D > T_melt ) then
-                Zes = (1.47E+05_kind_real)*(qsexp*1000._kind_real)**2.67_kind_real
+                Zes = (1.47E+05_kind_real)*(qsges*1000._kind_real)**2.67_kind_real
              else
              ! calc coeffs for dry snow based on TM MP code 
                 call calc_coeffs_dry_snow_tm(T1D,a_dry_snow_tm,b_dry_snow_tm)
-                smoz = a_dry_snow_tm * (qsexp*RHO*oams)**b_dry_snow_tm
+                smoz = a_dry_snow_tm * (qsges*oams)**b_dry_snow_tm
                 Zes  = alpha_const_tm_dry_snow*smoz
              end if
-         else
-             Zes = 10E-8_kind_real
          endif
 
        ! graupel/hail
-         if ( qgexp > 10E-7_kind_real ) then
+         if (qgges > qx_min*100.) then
              if ( T1D > T_melt ) then
-                Zeg = Cg_wet*RHO**1.75_kind_real*qgexp**Pg_wet
+                Zeg = Cg_wet*RHO**1.75_kind_real * qgges**Pg_wet
              else
-                Zeg = Cg_dry*RHO**1.75_kind_real*qgexp**Pg_wet
+                Zeg = Cg_dry*RHO**1.75_kind_real * qgges**Pg_wet
              end if
-         else
-             Zeg=10E-8_kind_real
          endif
 
          Ze=Zer+Zes+Zeg
 
 !      Zelim treatment
-         if(Ze <1.0_kind_real) then
+         if(Ze < 1.0_kind_real) then
               Ze=Ze + 1.0_kind_real
          end if
 
 !      Convert to simulated radar reflectivity in units of dBZ
          rdBZ = ten * log10(Ze)
-         rdBZr = ten * log10(Zer)
-         rdBZs = ten * log10(Zes)
-         rdBZg = ten * log10(Zeg)
+         if (Zer .gt. zero) rdBZr = ten * log10(Zer)
+         if (Zes .gt. zero) rdBZs = ten * log10(Zes)
+         if (Zeg .gt. zero) rdBZg = ten * log10(Zeg)
 
       end if
 
+     !write(*,'(a,i5,3(a,f10.8,a,f6.2,a),a,f6.2,a)') 'iobs = ', iobs,  &
+     !              ' Rain = ', qrges, ", ", rdBZr, " dBZ",            &
+     !              ' Snow = ', qsges, ", ", rdBZs, " dBZ",            &
+     !              ' Graupel = ', qgges, ", ", rdBZg, " dBZ",         &
+     !              ' Total: ', rdBZ, " dBZ "
+
       if ( (self%mphyopt .eq. 108 .or. self%mphyopt .eq. 14 ) .and. &
-           (.not.(self%use_variational)                    )      ) then
+           (.not.(self%use_variational)) ) then
 
 ! NSSL operator for EnKF / use radarZ
           if ( self%mphyopt .eq. 108 ) then
-             if ( P_qr > 0 ) qscalar(P_qr) = qrexp
-             if ( P_qs > 0 ) qscalar(P_qs) = qsexp
-             if ( P_qg > 0 ) qscalar(P_qg) = qgexp
-             if ( P_nr > 0 ) qscalar(P_nr) = qnr1D
+             if ( P_qr > 0 ) qscalar(P_qr) = qrges
+             if ( P_qs > 0 ) qscalar(P_qs) = qsges
+             if ( P_qg > 0 ) qscalar(P_qg) = qgges
+             if ( P_nr > 0 ) qscalar(P_nr) = qnrges
 
           else if ( self%mphyopt .eq. 14 ) then
 ! NSSL operator for EnKF / use radarZ
-             if ( P_qr > 0 ) qscalar(P_qr) = qrexp
-             if ( P_qs > 0 ) qscalar(P_qs) = qsexp
-             if ( P_qg > 0 ) qscalar(P_qg) = qgexp
-             if ( P_qh > 0 ) qscalar(P_qh) = qhexp
-             if ( P_nr > 0 ) qscalar(P_nr) = qnr1D
-             if ( P_ns > 0 ) qscalar(P_ns) = qns1D
-             if ( P_ng > 0 ) qscalar(P_ng) = qng1D
-             if ( P_nh > 0 ) qscalar(P_nh) = qnh1D
-             if ( P_vg > 0 ) qscalar(P_vg) = qvg1D
-             if ( P_vh > 0 ) qscalar(P_vh) = qvh1D
+             if ( P_qr > 0 ) qscalar(P_qr) = qrges
+             if ( P_qs > 0 ) qscalar(P_qs) = qsges
+             if ( P_qg > 0 ) qscalar(P_qg) = qgges
+             if ( P_qh > 0 ) qscalar(P_qh) = qhges
+             if ( P_nr > 0 ) qscalar(P_nr) = qnrges
+             if ( P_ns > 0 ) qscalar(P_ns) = qnsges
+             if ( P_ng > 0 ) qscalar(P_ng) = qngges
+             if ( P_nh > 0 ) qscalar(P_nh) = qnhges
+             if ( P_vg > 0 ) qscalar(P_vg) = qvgges
+             if ( P_vh > 0 ) qscalar(P_vh) = qvhges
           end if
 
           call set_dsd_para()
@@ -575,9 +556,9 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
                             obs_dual, var_dsd, 1, 1)
           rdBZ = real(obs_dual%T_log_ref, kind=kind_real)
           Ze = 10._kind_real ** (rdBZ / 10._kind_real)
-       end if
+      end if
 
-       hofx(ivar,iobs) = rdBZ ! assign hofx
+      hofx(ivar,iobs) = rdBZ ! assign hofx
 
     end do
   end do

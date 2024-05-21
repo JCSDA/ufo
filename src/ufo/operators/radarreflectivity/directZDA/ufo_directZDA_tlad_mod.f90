@@ -185,24 +185,18 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
 
   integer :: i_melt_snow, i_melt_graupel
   real(kind_real) :: denom
-  real(kind_real) :: RHO
-  real(kind_real) :: qrexp, qsexp, qgexp, qnr1D
-  real(kind_real) :: P1D, Q1D, T1D
+  real(kind_real) :: P1D, Q1D, T1D, RHO
   real(kind_real) :: Ze, Zer, Zes, Zeg
   real(kind_real) :: wgt_dry, wgt_wet
   real(kind_real) :: Zeg_dry, Zeg_wet
-  real(kind_real) :: Cs_tmp, Cg_tmp
   real(kind_real) :: jqr_num,jqs_num,jqg_num, jqnr_num
   real(kind_real) :: jqg_num_dry, jqg_num_wet 
   real(kind_real) :: jqr, jqs, jqg, jqnr
   real(kind_real) :: qrges, qsges, qgges, qnrges
   real(kind_real) :: rdBZ, rdBZr, rdBZs, rdBZg
 
-  real(kind_real), parameter :: qr_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qs_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qg_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qh_min = 1.0E-8_kind_real
-  real(kind_real), parameter :: qnr_min = 1.0E-8_kind_real
+  real(kind_real), parameter :: qx_min = 1.0E-8_kind_real
+  real(kind_real), parameter :: qn_min = 1.0_kind_real
 
   real(kind_real), parameter :: rd=287.04_kind_real
   real(kind_real), parameter :: one=1._kind_real
@@ -296,25 +290,15 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
        call vert_interp_apply(qnr%nval, qnr%vals(:,iobs), qnrges, self%wi(iobs),self%wf(iobs))
     end if
 
-! Treat minimum Qx in case of variational DA
-    if ( self%use_variational ) then
-       qrexp = max(qrges, qr_min)
-       qsexp = max(qsges, qs_min)
-       qgexp = max(qgges, qg_min)
-       if ( self%mphyopt .eq. 108 ) qnr1D=max(qnrges, qnr_min)
-    else
-       qrexp=qrges
-       qsexp=qsges
-       qgexp=qgges
-       if ( self%mphyopt .eq. 108 ) qnr1D=qnrges
-    end if
-!
+    ! Compute air density from pressure, temp, water vapor
     Q1D=Q1D/(one-Q1D)   ! convert to mixing ratio
     RHO=P1D/(rd*T1D*(one+D608*Q1D))
 
-    if ( self%mphyopt  .eq. 108 ) then ! TM operator
-        qnr1D=qnr1D*RHO ! convert qnr to unit demanded by operators
-    end if
+    ! Ensure reasonable lower limit on MP variables.
+    qrges = max(qrges*RHO, qx_min)
+    qsges = max(qsges*RHO, qx_min)
+    qgges = max(qgges*RHO, qx_min)
+    if ( self%mphyopt .eq. 108 ) qnrges = max(qnrges*RHO, qn_min)
 
     ! intialization
     Zer = zero ;         Zes = zero ;          Zeg = zero ;
@@ -323,53 +307,50 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
 
 ! --------------- LIN operator code from GSI 'setupdbz.f90' --------------
     if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then ! LIN operator
-      ! rain
-        Zer = Cr  * (RHO * qrexp)**(Pr)
+        ! rain
+        if (qrges > qx_min) then
+           Zer = Cr * qrges**Pr
+        end if
 
-      ! snow
-        if ( i_melt_snow < 0 ) then
-!       no melting: dry snow at any temperature
-           Zes = Cs_dry * (RHO * qsexp)**(Ps_dry)
-           Cs_tmp  = Cs_dry
-        else if ( i_melt_snow  .eq. 100 ) then
-!       melting: wet snow at any temperature
-           Zes = Cs_wet * (RHO * qsexp)**(Ps_wet)
-           Cs_tmp  = Cs_wet
-        else
-!       melting: depending on temperature
-           if (T1D < T_melt) then
-              Zes = Cs_dry * (RHO * qsexp)**(Ps_dry)
-              Cs_tmp  = Cs_dry
+        ! snow
+        if (qsges > qx_min) then
+           if ( i_melt_snow < 0 ) then
+              ! no melting: dry snow at any temperature
+              Zes = Cs_dry * qsges**Ps_dry
+           else if ( i_melt_snow  .eq. 100 ) then
+              ! melting: wet snow at any temperature
+              Zes = Cs_wet * qsges**Ps_wet
            else
-              Zes = Cs_wet * (RHO * qsexp)**(Ps_wet)
-              Cs_tmp  = Cs_wet
+              ! melting: depending on temperature
+              if (T1D < T_melt) then
+                 Zes = Cs_dry * qsges**Ps_dry
+              else
+                 Zes = Cs_wet * qsges**Ps_wet
+              end if
            end if
         end if
 
-      ! graupel/hail
-        if ( i_melt_graupel < 0 ) then
-!       no melting: dry grauple/hail at any temperature
-           Zeg = Cg_dry * (RHO * qgexp)**(Pg_dry)
-           Cg_tmp  = Cg_dry
-        else if ( i_melt_graupel  .eq. 100 ) then
-!       melting: wet graupel at any temperature
-           Zeg = Cg_wet * (RHO * qgexp)**(Pg_wet)
-           Cg_tmp  = Cg_wet
-        else
-!       melting: depending on the temperature
-           if (T1D < (T_melt - 2.5_kind_real)) then
-              Zeg = Cg_dry * (RHO * qgexp)**(Pg_dry)
-              Cg_tmp  = Cg_dry
-           else if (T1D > (T_melt + 2.5_kind_real)) then
-              Zeg = Cg_wet * (RHO * qgexp)**(Pg_wet)
-              Cg_tmp  = Cg_wet
+        ! graupel/hail
+        if (qsges > qx_min) then
+           if ( i_melt_graupel < 0 ) then
+              ! no melting: dry grauple/hail at any temperature
+              Zeg = Cg_dry * qgges**Pg_dry
+           else if ( i_melt_graupel  .eq. 100 ) then
+              ! melting: wet graupel at any temperature
+              Zeg = Cg_wet * qgges**Pg_wet
            else
-              wgt_dry = abs(T1D - (T_melt + 2.5_kind_real))/5.0_kind_real
-              wgt_wet = abs(T1D - (T_melt - 2.5_kind_real))/5.0_kind_real
-              Zeg_dry = Cg_dry * (RHO * qgexp)**(Pg_dry)
-              Zeg_wet = Cg_wet * (RHO * qgexp)**(Pg_wet)
-              Zeg     = wgt_dry*Zeg_dry + wgt_wet*Zeg_wet
-              Cg_tmp  = wgt_dry*Cg_dry  + wgt_wet*Cg_wet
+              ! melting: depending on the temperature
+              if (T1D < (T_melt - 2.5_kind_real)) then
+                 Zeg = Cg_dry * qgges**Pg_dry
+              else if (T1D > (T_melt + 2.5_kind_real)) then
+                 Zeg = Cg_wet * qgges**Pg_wet
+              else
+                 wgt_dry = abs(T1D - (T_melt + 2.5_kind_real))/5.0_kind_real
+                 wgt_wet = abs(T1D - (T_melt - 2.5_kind_real))/5.0_kind_real
+                 Zeg_dry = Cg_dry * qgges**Pg_dry
+                 Zeg_wet = Cg_wet * qgges**Pg_wet
+                 Zeg     = wgt_dry*Zeg_dry + wgt_wet*Zeg_wet
+              end if
            end if
         end if
 
@@ -391,42 +372,42 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
 !   find dqr/ddBZ, dqs/ddBZ, dqg/ddBZ (used in inner loop routine)
 !   Jacobian used for TLM and ADM
 !       rain
-        jqr_num = ten*Cr*((RHO)**Pr)*Pr*((qrexp)**(Pr - one))
+        jqr_num = ten*Cr*(RHO**Pr)*Pr*(qrges**(Pr - one))
 
 !       snow
         if ( i_melt_snow < 0 ) then
 !          no melting: dry snow at any temperature
-           jqs_num = ten*Cs_dry*((RHO)**Ps_dry)*Ps_dry*((qsexp)**(Ps_dry - one))
+           jqs_num = ten*Cs_dry*(RHO**Ps_dry)*Ps_dry*(qsges**(Ps_dry - one))
         else if ( i_melt_snow  .eq. 100 ) then
 !          melting: wet snow at any temperature
-           jqs_num = ten*Cs_wet*((RHO)**Ps_wet)*Ps_wet*((qsexp)**(Ps_wet - one))
+           jqs_num = ten*Cs_wet*(RHO**Ps_wet)*Ps_wet*(qsges**(Ps_wet - one))
         else
 !          melting: depending on temperature
            if (T1D < T_melt) then
-              jqs_num = ten*Cs_dry*((RHO)**Ps_dry)*Ps_dry*((qsexp)**(Ps_dry - one))
+              jqs_num = ten*Cs_dry*(RHO**Ps_dry)*Ps_dry*(qsges**(Ps_dry - one))
            else
-              jqs_num = ten*Cs_wet*((RHO)**Ps_wet)*Ps_wet*((qsexp)**(Ps_wet - one))
+              jqs_num = ten*Cs_wet*(RHO**Ps_wet)*Ps_wet*(qsges**(Ps_wet - one))
            end if
         end if
 
 !       graupel/hail
         if ( i_melt_graupel < 0 ) then
 !          no melting: dry grauple/hail at any temperature
-           jqg_num = ten*Cg_dry*((RHO)**(Pg_dry))*(Pg_dry)*((qgexp**(Pg_dry - one)))
+           jqg_num = ten*Cg_dry*(RHO**Pg_dry)*Pg_dry*(qgges**(Pg_dry - one))
         else if ( i_melt_graupel  .eq. 100 ) then
 !          melting: wet graupel at any temperature
-           jqg_num = ten*Cg_wet*((RHO)**(Pg_wet))*(Pg_wet)*((qgexp**(Pg_wet - one)))
+           jqg_num = ten*Cg_wet*(RHO**Pg_wet)*Pg_wet*(qgges**(Pg_wet - one))
         else
 !          melting: depending on the temperature
            if (T1D < (T_melt - 2.5_kind_real)) then
-              jqg_num = ten*Cg_dry*((RHO)**(Pg_dry))*(Pg_dry)*((qgexp**(Pg_dry - one)))
+              jqg_num = ten*Cg_dry*(RHO**Pg_dry)*Pg_dry*(qgges**(Pg_dry - one))
            else if (T1D > (T_melt + 2.5_kind_real)) then
-              jqg_num = ten*Cg_wet*((RHO)**(Pg_wet))*(Pg_wet)*((qgexp**(Pg_wet - one)))
+              jqg_num = ten*Cg_wet*(RHO**Pg_wet)*Pg_wet*(qgges**(Pg_wet - one))
            else
               wgt_dry = abs(T1D - (T_melt + 2.5_kind_real))/5.0_kind_real
               wgt_wet = abs(T1D - (T_melt - 2.5_kind_real))/5.0_kind_real
-              jqg_num_dry = ten*Cg_dry*((RHO)**(Pg_dry))*(Pg_dry)*((qgexp**(Pg_dry - one)))
-              jqg_num_wet = ten*Cg_wet*((RHO)**(Pg_wet))*(Pg_wet)*((qgexp**(Pg_wet - one)))
+              jqg_num_dry = ten*Cg_dry*(RHO**Pg_dry)*Pg_dry*(qgges**(Pg_dry - one))
+              jqg_num_wet = ten*Cg_wet*(RHO**Pg_wet)*Pg_wet*(qgges**(Pg_wet - one))
               jqg_num = wgt_dry*jqg_num_dry + wgt_wet*jqg_num_wet
            end if
         end if
@@ -448,35 +429,29 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
          Pg_wet= 2.5_kind_real         ! used for both dry and wet
 
        ! rain
-         if (  qrexp > 10E-7_kind_real .and. qnr1D > 20._kind_real  ) then
-            Zer = 720._kind_real *(RHO*qrexp)**2*ten**18/(pi**2*rhor**2*qnr1D)
-         else
-            Zer = 10E-8_kind_real
+         if (  qrges .gt. qx_min*100. .and. qnrges .ge. qn_min*100. ) then
+            Zer = 720._kind_real * (RHO*qrges)**2*1.E18/(pi**2*rhor**2*qnrges)
          endif
 
        ! snow
-         if (qsexp > 10E-7_kind_real) then
+         if (qsges > qx_min*100.) then
             if ( T1D > T_melt ) then
-                Zes = (1.47E+05_kind_real)*(qsexp*1000._kind_real)**2.67_kind_real
+                Zes = (1.47E+05_kind_real)*(qsges*1000._kind_real)**2.67_kind_real
             else
              ! calc coeffs for dry snow based on TM MP code 
                 call calc_coeffs_dry_snow_tm(T1D,a_dry_snow_tm,b_dry_snow_tm)
-                smoz = a_dry_snow_tm * (qsexp*RHO*oams)**b_dry_snow_tm
+                smoz = a_dry_snow_tm * (qsges*oams)**b_dry_snow_tm
                 Zes  = alpha_const_tm_dry_snow*smoz
             end if
-         else
-            Zes = 10E-8_kind_real
          endif
 
        ! graupel/hail
-         if ( qgexp > 10E-7_kind_real ) then
+         if ( qgges > qx_min*100. ) then
              if ( T1D > T_melt ) then
-                Zeg = Cg_wet*RHO**1.75_kind_real*qgexp**Pg_wet
+                Zeg = Cg_wet*RHO**1.75_kind_real*qgges**Pg_wet
              else
-                Zeg = Cg_dry*RHO**1.75_kind_real*qgexp**Pg_wet
+                Zeg = Cg_dry*RHO**1.75_kind_real*qgges**Pg_wet
              end if
-         else
-             Zeg=10E-8_kind_real
          endif
 
          Ze=Zer+Zes+Zeg
@@ -495,25 +470,24 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
 !       find dqr/ddBZ, dqs/ddBZ, dqg/ddBZ (used in inner loop routine)
 !       Jacobian used for TLM and ADM
 !        rain
-         if ( qrexp > 10E-7_kind_real .and. qnr1D > 1._kind_real ) then
-             jqr_num = (2_kind_real*720_kind_real*RHO**2_kind_real*qrexp/&
-                       (pi**2_kind_real*rhor**2_kind_real*qnr1D))*ten**12_kind_real*ten**6_kind_real
-             jqnr_num = (-720_kind_real*RHO**2_kind_real*qrexp**2_kind_real/&
-                       (pi**2_kind_real*rhor**2_kind_real*qnr1D**2_kind_real))*ten**12_kind_real*ten &
-                       **6_kind_real
+         if ( qrges .gt. qx_min*100. .and. qnrges .ge. qn_min*100. ) then
+             jqr_num = (1440_kind_real*RHO*RHO*qrges / &
+                       (pi*pi*rhor*rhor*qnrges))*1.E18_kind_real
+             jqnr_num = (-720_kind_real*RHO*RHO*qrges*qrges / &
+                        (pi*pi*rhor*rhor*qnrges*qnrges))*1.E18_kind_real
          else
              jqr_num = 10E-8_kind_real
              jqnr_num = 10E-8_kind_real
          endif
 
 !        snow
-         if (qsexp > 10E-7_kind_real) then
+         if (qsges > qx_min*100.) then
             if ( T1D > T_melt ) then
                jqs_num= (1.47E+05_kind_real)*(1000._kind_real)**2.67_kind_real*(2.67_kind_real) &
-                        *(qsexp)**(2.67_kind_real-1.0_kind_real)
+                        *qsges**(2.67_kind_real-1.0_kind_real)
             else
                jqs_num= alpha_const_tm_dry_snow*a_dry_snow_tm*b_dry_snow_tm &
-                        *((RHO)**b_dry_snow_tm)*((oams)**b_dry_snow_tm)*((qsexp) &
+                        *(RHO**b_dry_snow_tm)*(oams**b_dry_snow_tm)*(qsges &
                         **(b_dry_snow_tm-1.0_kind_real))
             end if
          else
@@ -521,11 +495,11 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
          endif
 
 !        graupel/hail
-         if ( qgexp > 10E-7_kind_real ) then
+         if ( qgges > qx_min*100. ) then
             if ( T1D > T_melt ) then
-               jqg_num=Cg_wet*((RHO)**1.75_kind_real)*Pg_wet*((qgexp)**(Pg_wet-1.0_kind_real))
+               jqg_num=Cg_wet*(RHO**1.75_kind_real)*Pg_wet*(qgges**(Pg_wet-1.0_kind_real))
             else
-               jqg_num=Cg_dry*((RHO)**1.75_kind_real)*Pg_wet*((qgexp)**(Pg_wet-1.0_kind_real))
+               jqg_num=Cg_dry*(RHO**1.75_kind_real)*Pg_wet*(qgges**(Pg_wet-1.0_kind_real))
             end if
 
          else
