@@ -3,7 +3,7 @@ time window:
   end: 2018-04-15T03:00:00Z
 
 observations:
-- obs space:
+- obs space: &ObsSpace
     name: Radiosonde
     obsdatain:
       engine:
@@ -72,6 +72,21 @@ observations:
       value: 34395
   - filter: Variable Assignment
     assignments:
+    - name: TestReference/combined_arithmetic_w_logs
+      type: float
+      value: 26.66280617
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/combined_arithmetic_w_logs_exact
+      type: float
+      value: 304.125
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/combined_arithmetic_w_logs_exact_2
+      type: float
+      value: 4
+  - filter: Variable Assignment
+    assignments:
     - name: TestReference/large_total_exponent
       type: float
       value: 1
@@ -85,7 +100,7 @@ observations:
         name: MetaData/variable_3
       maxvalue: 1
 
-  # Arethemtic tests
+  # Arithemtic tests
   - filter: Variable Assignment
     assignments:
     - name: MetaData/sum
@@ -180,6 +195,60 @@ observations:
 
   - filter: Variable Assignment
     assignments:
+    - name: MetaData/combined_arithmetic_w_logs
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          - name: MetaData/variable_3
+          exponents: [3,1,2]
+          coefs: [2,3,1]
+          total exponent: 3
+          total coefficient: 7
+          intercept: 4
+          log bases: [e, "2", ""]  # mix e (string) and numbers
+          total log base: 10
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/combined_arithmetic_w_logs_exact
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          - name: MetaData/variable_3
+          exponents: [3,1,2]
+          coefs: [2,3,1]
+          total exponent: 3
+          total coefficient: 7
+          intercept: 4
+          log bases: [3, 4, 3]  # Just numbers
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/combined_arithmetic_w_logs_exact_2
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          coefs: [1,2]
+          total exponent: 3
+          total coefficient: 2
+          intercept: 4
+          log bases: [3, 4]
+          total log base: e  # String base
+
+  - filter: Variable Assignment
+    assignments:
     - name: MetaData/large_total_exponent
       type: float
       function:
@@ -257,6 +326,22 @@ observations:
       name: TestReference/combined_arithmetic
 
   - test:
+      name: MetaData/combined_arithmetic_w_logs
+    reference:
+      name: TestReference/combined_arithmetic_w_logs
+    absTol: 1.0e-4
+
+  - test:
+      name: MetaData/combined_arithmetic_w_logs_exact
+    reference:
+      name: TestReference/combined_arithmetic_w_logs_exact
+
+  - test:
+      name: MetaData/combined_arithmetic_w_logs_exact_2
+    reference:
+      name: TestReference/combined_arithmetic_w_logs_exact_2
+
+  - test:
       name: MetaData/large_total_exponent
     reference:
       name: TestReference/large_total_exponent
@@ -271,3 +356,111 @@ observations:
     reference:
       name: TestReference/missing
 
+- obs space:
+    <<: *ObsSpace
+    name: Try log base of f.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_1
+      type: float
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_2
+      type: float
+      value: 2
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          coefs: [1,2]
+          total exponent: 3
+          total coefficient: 2
+          intercept: 4
+          total log base: f  # Invalid string
+  expectExceptionWithMessage: Invalid log base 'f' for value '5'.  # 5 since exponent not yet taken
+
+# Exception behaviour:
+
+- obs space:
+    <<: *ObsSpace
+    name: Try log base of 1.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable
+      type: float
+      value: 2
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable
+          coefs: [2]
+          total exponent: 3
+          total coefficient: 2
+          intercept: 4
+          log bases: [1] # Invalid number
+  expectExceptionWithMessage: Invalid log base '1' for value '2'.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try log of 0 (value).
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable
+      type: float
+      value: 0  # zero value
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable
+          coefs: [2]
+          total exponent: 3
+          total coefficient: 2
+          intercept: 4
+          log bases: [2]
+  expectExceptionWithMessage: Invalid log value '0' for log base '2'.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try log of 0 (coeff).
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable
+      type: float
+      value: 2
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable
+          coefs: [0]  # coeff causes zero value
+          total exponent: 3
+          total coefficient: 2
+          intercept: 4
+          log bases: [3]
+          total log base: 2
+  expectExceptionWithMessage: Invalid log value '0' for log base '2'.

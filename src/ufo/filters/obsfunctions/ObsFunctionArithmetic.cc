@@ -7,6 +7,7 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionArithmetic.h"
 
+#include <string>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
@@ -53,7 +54,7 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
   if (options_.coefs.value() != boost::none)
     coefs = options_.coefs.value().get();
 
-  // get exponent coefficients
+  // get exponents
   std::vector<FunctionValue> exponents(nv, 1);
   if (options_.exponents.value() != boost::none)
     exponents = options_.exponents.value().get();
@@ -65,13 +66,23 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
 
   // get total multiplicative coefficient
   FunctionValue total_coeff = static_cast<FunctionValue>(1);
-    if (options_.total_coeff.value() != boost::none)
+  if (options_.total_coeff.value() != boost::none)
     total_coeff = options_.total_coeff.value().get();
 
   // set intercept
   FunctionValue intercept = static_cast<FunctionValue>(0);
   if (options_.intercept.value() != boost::none)
     intercept = options_.intercept.value().get();
+
+  // get total log base
+  std::string total_log_base;
+  if (options_.total_log_base.value() != boost::none)
+    total_log_base = options_.total_log_base.value().get();
+
+  // get log bases
+  std::vector<std::string> log_bases(nv, "");
+  if (options_.log_bases.value() != boost::none)
+    log_bases = options_.log_bases.value().get();
 
   // use channels not obs
   std::vector<int> channels;
@@ -83,6 +94,7 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
   // sanity checks
   ASSERT(coefs.size() == nv);
   ASSERT(exponents.size() == nv);
+  ASSERT(log_bases.size() == nv);
   std::vector<FunctionValue> abs_exponents;
   for (size_t ivar = 0; ivar < nv; ++ivar) {
     abs_exponents.push_back(std::abs(exponents[ivar]));
@@ -115,9 +127,15 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
                                     " set to missing." << std::endl;
         } else {
           if (options_.useChannelNumber) {
-            out[ichan][iloc] += coefs[ivar] * power(channels[ichan], exponents[ivar]);
+            out[ichan][iloc] += coefs[ivar] * logpower(
+              channels[ichan],
+              exponents[ivar],
+              log_bases[ivar]);
           } else {
-            out[ichan][iloc] += coefs[ivar] * power(varin[ichan][iloc], exponents[ivar]);
+            out[ichan][iloc] += coefs[ivar] * logpower(
+              varin[ichan][iloc],
+              exponents[ivar],
+              log_bases[ivar]);
           }
           if (ivar == nv - 1) {
             if (out[ichan][iloc] < 0 && static_cast<int>(total_exponent) != total_exponent
@@ -128,8 +146,10 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
                                         "exponent. Output for " << invars_[ivar] <<
                                         " at location " << iloc << " set to missing." << std::endl;
             } else {
-                out[ichan][iloc] = total_coeff*power(out[ichan][iloc], total_exponent)
-                                 + intercept;
+                out[ichan][iloc] = total_coeff*logpower(
+                  out[ichan][iloc],
+                  total_exponent,
+                  total_log_base) + intercept;
             }
           }
         }
@@ -143,6 +163,46 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
 template <typename FunctionValue>
 const ufo::Variables & Arithmetic<FunctionValue>::requiredVariables() const {
   return invars_;
+}
+
+// -----------------------------------------------------------------------------
+
+template <typename FunctionValue>
+FunctionValue Arithmetic<FunctionValue>::logpower(
+    FunctionValue value,
+    FunctionValue exponent,
+    std::string log_base) const {
+  if (log_base.empty()) {
+    return power(value, exponent);
+  } else {
+    // Multiply by exponent for numerical stability
+    return exponent * logbasen(value, log_base);
+  }
+}
+
+template <typename FunctionValue>
+FunctionValue Arithmetic<FunctionValue>::logbasen(FunctionValue value, std::string log_base) const {
+  if (value <= 0.0) {
+    std::stringstream msg;
+    msg << "Invalid log value '" << value << "' for log base '" + log_base + "'.";
+    throw eckit::BadValue(msg.str(), Here());
+  }
+  if (log_base == "e") {
+    return std::log(value);
+  }
+  if (std::isdigit(static_cast<unsigned char>(log_base[0]))) {
+    FunctionValue base = stof(log_base);
+    if (base == 2.0) {
+      return std::log2(value);
+    } else if (base == 10.0) {
+      return std::log10(value);
+    } else if (base != 1 && base != 0) {
+      return std::log(value) / std::log(base);
+    }
+  }
+  std::stringstream msg;
+  msg << "Invalid log base '" + log_base + "' for value '" << value << + "'.";
+  throw eckit::BadValue(msg.str(), Here());
 }
 
 // -----------------------------------------------------------------------------

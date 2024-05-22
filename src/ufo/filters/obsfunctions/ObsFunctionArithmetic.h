@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONARITHMETIC_H_
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONARITHMETIC_H_
 
+#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
@@ -38,10 +39,16 @@ class ArithmeticParameters : public oops::Parameters {
   oops::OptionalParameter<std::vector<FunctionValue>> exponents{"exponents", this};
   /// total exponent
   oops::OptionalParameter<FunctionValue> total_exponent{"total exponent", this};
-  /// total multiplicative coefficeint
+  /// total multiplicative coefficient
   oops::OptionalParameter<FunctionValue> total_coeff{"total coefficient", this};
   /// Adds the option to add an intercept or initial value
   oops::OptionalParameter<FunctionValue> intercept{"intercept", this};
+  /// total log base (can be empty string for no logarithm, or e for natural
+  /// logarithm)
+  oops::OptionalParameter<std::string> total_log_base{"total log base", this};
+  /// log bases associated with the above variables (can empty string for
+  /// no logarithm, or e for natural logarithm)
+  oops::OptionalParameter<std::vector<std::string>> log_bases{"log bases", this};
   /// Use channel number in the calculation not the value from the variable
   oops::Parameter<bool> useChannelNumber{"use channel numbers", false, this};
 };
@@ -60,13 +67,17 @@ class ArithmeticParameters : public oops::Parameters {
 ///                  ObsValue/variable3]
 ///      coefficients: [0.1, 0.2, 0.3]
 ///      exponents: [1, 2, 3]
+///      log bases: ["10", "", e]
 ///      total coefficient: 4
 ///      total exponent: 5
-///      additive constant: 6
+///      total log base: 2
+///      intercept: 6
 ///
-/// will return 4 * (0.1 * (ObsValue/variable1)^1 +
-///                  0.2 * (ObsValue/variable2)^2 +
-///                  0.3 * (ObsValue/variable3)^3)^5 + 6
+/// will return 4 * log2( (0.1 * log10(ObsValue/variable1^1) +
+///                        0.2 * (ObsValue/variable2)^2 +
+///                        0.3 * ln(ObsValue/variable3^3) )^5 ) + 6
+///
+/// For numerical stability log(val^exp) is calculated as exp*log(val).
 ///
 /// Can be also be used with the name LinearCombination
 /// to output a linear combination of variables
@@ -126,6 +137,8 @@ class Arithmetic : public ObsFunctionBase<FunctionValue> {
   FunctionValue power(FunctionValue, FunctionValue) const;
   const ufo::Variables & requiredVariables() const;
  private:
+  FunctionValue logpower(FunctionValue, FunctionValue, std::string) const;
+  FunctionValue logbasen(FunctionValue, std::string) const;
   ArithmeticParameters<FunctionValue> options_;
   ufo::Variables invars_;
 };
