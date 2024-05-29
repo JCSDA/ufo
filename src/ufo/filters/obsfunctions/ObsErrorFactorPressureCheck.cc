@@ -94,19 +94,23 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
   invars_ += Variable(errgrp+"/"+inflatevars);
   invars_ += Variable(flaggrp+"/"+inflatevars);
 
-    // Include list of required data from MetaData
+  // Include list of required data from MetaData
   invars_ += Variable("MetaData/height");
   invars_ += Variable("MetaData/stationElevation");
   invars_ += Variable("MetaData/latitude");
   invars_ += Variable("MetaData/pressure");
 
-    // Include list of required data from GeoVaLs
+  // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/geopotential_height");
-  invars_ += Variable("GeoVaLs/saturation_specific_humidity");
   invars_ += Variable("GeoVaLs/surface_pressure");
   invars_ += Variable("GeoVaLs/air_pressure");
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
   invars_ += Variable("GeoVaLs/" + geovar_sfc_geomz);
+
+  // Include list of optional data from GeoVaLs
+  if (options_->requestQSat.value()) {
+    invars_ += Variable("GeoVaLs/saturation_specific_humidity");
+  }
 }
 
 // -----------------------------------------------------------------------------

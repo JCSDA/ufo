@@ -42,6 +42,11 @@ class ObsErrorFactorPressureCheckParameters : public oops::Parameters {
   /// some datasets may have GeoVaLs/surface_geometric_height and GeoVaLs/geopotential_height
   /// in its place.
   oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz", "surface_altitude", this};
+
+  /// Request saturation specific humidity from geovals (default false)
+  /// Example: To request saturation specific humidity from geovals
+  ///          request_saturation_specific_humidity_geovals: true
+  oops::Parameter<bool> requestQSat{"request_saturation_specific_humidity_geovals", false, this};
 };
 
 /// This filter is to check an observation’s vertical relative positionn with
