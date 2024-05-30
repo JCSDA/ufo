@@ -75,7 +75,7 @@ integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int), intent(in) :: c_nlocs, c_nvars
-real(c_double), intent(inout) :: c_hofx(c_nlocs,c_nvars)
+real(c_double), intent(inout) :: c_hofx(c_nvars,c_nlocs)
 
 type(ufo_oasim), pointer :: self
 type(ufo_geovals), pointer :: geovals

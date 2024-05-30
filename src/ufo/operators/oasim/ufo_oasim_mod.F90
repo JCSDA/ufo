@@ -79,7 +79,7 @@ implicit none
     class(ufo_oasim),          intent(in)    :: self
     type(ufo_geovals),         intent(in)    :: geovals
     integer,                   intent(in)    :: nvars, nlocs
-    real(c_double),            intent(inout) :: hofx(nlocs,nvars )
+    real(c_double),            intent(inout) :: hofx(nvars,nlocs)
     type(c_ptr),  value,       intent(in)    :: obss
 
     character(len=*), parameter :: myname_="ufo_oasim_simobs"
@@ -92,7 +92,7 @@ implicit none
     type(ufo_geoval), pointer :: ta_in, wa_in, asym, dh, cdet, pic, cdc, diatom, chloro, cyano
     type(ufo_geoval), pointer :: cocco, dino, phaeo
 
-    real (kind_real), allocatable :: tirrq(:,:), cdomabsq(:,:), avgq(:,:), rlwnref(:,:)
+    real (kind_real), allocatable :: tirrq(:,:), cdomabsq(:,:), avgq(:,:)
     real (kind_real), allocatable ::cosz(:), Wave_Ch(:), Solar_Z(:)
     integer :: obss_nlocs, obss_nchans
     integer :: iobs
@@ -106,7 +106,7 @@ implicit none
     obss_nchans= obsspace_get_nchans(obss)
 
     !nlocs = size(hofx,1)
-    if (geovals%nlocs /= size(hofx,1)) then
+    if (geovals%nlocs /= nlocs) then
        write(err_msg,*) myname_, ' error: nobs inconsistent!'
        call abor1_ftn(err_msg)
     endif
@@ -147,11 +147,9 @@ implicit none
     day_of_year = 90
     cosz = cos(Solar_Z * pi/180)
     dt = 86400/2.0
-    
     allocate(tirrq(obss_nlocs,km))
     allocate(cdomabsq(obss_nlocs,km))
     allocate(avgq(obss_nlocs,km))
-    allocate(rlwnref(obss_nlocs,nvars))
     
     ! check if the aerosol variables are not 2D turn them to 2D, (nlt=33 bands (number of bands in oasim), nobs)
     if (size(asym%vals,dim=1) == 1) then
@@ -169,9 +167,8 @@ implicit none
                wa_in%vals(:,iobs), asym%vals(:,iobs), dh%vals(:,iobs),cdet%vals(:,iobs), &
                pic%vals(:,iobs), cdc%vals(:,iobs), diatom%vals(:,iobs), chloro%vals(:,iobs), &
                cyano%vals(:,iobs), cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), &
-               tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), rlwnref(iobs,:))
+               tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), hofx(:,iobs))
 
-          hofx(iobs,:)=rlwnref(iobs,:) 
        endif
     enddo
 
