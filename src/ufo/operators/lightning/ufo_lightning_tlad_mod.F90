@@ -322,6 +322,7 @@ INTEGER, INTENT(IN)            :: ilev2                     ! Ending layer
 INTEGER, INTENT(IN)            :: inc                       ! loop increment
 INTEGER, INTENT(IN)            :: ibot                      ! lowest layer including surface
 INTEGER, INTENT(IN)            :: isfc                      ! lowest level next to surface
+INTEGER, INTENT(IN)            :: n_horiz
 REAL(kind_real), INTENT(IN)    :: qg(1:nlevq,n_horiz)       ! graupel mixing ratio
 REAL(kind_real), INTENT(IN)    :: delp(1:nlevdP,n_horiz)    ! Model background pressure (Pa) at levels
 REAL(kind_real), INTENT(INOUT) :: dfed_dqg(1:nlevq,n_horiz) ! Partial deriv of HofX for precip water wrt layer water vapour
@@ -342,7 +343,6 @@ REAL(kind_real)                :: coeff3rdorder(4)
 !LOGICAL, INTENT(IN)            :: l_fed_nonlinear
 REAL(kind_real)                :: gridarea 
 REAL(kind_real), parameter     :: glmcoeff = 2.088e-8
-INTEGER, INTENT(IN)            :: n_horiz
 INTEGER                        :: i_horiz
 
 gridarea = 15000*15000/n_horiz !the representaive area for each partner point

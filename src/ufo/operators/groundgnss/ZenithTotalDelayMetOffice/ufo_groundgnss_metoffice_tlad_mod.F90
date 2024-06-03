@@ -87,6 +87,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   character(len=*), parameter :: myname_="ufo_groundgnss_metoffice_tlad_settraj"
 
 ! Local variables
+  integer, parameter                 :: max_string = 800
   character(max_string)        :: err_msg            ! Messages to be output to the user
   type(ufo_geoval), pointer    :: q                  ! The model geovals - specific humidity
   type(ufo_geoval), pointer    :: prs                ! The model geovals - atmospheric pressure
@@ -102,7 +103,6 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable :: za(:)              ! Model heights of rho levs (in pressure monotonic order)
   real(kind_real), allocatable :: zb(:)              ! Model heights of theta levs (in pressure monotonic order)
 
-  integer, parameter                 :: max_string = 800
   character(max_string)              :: message                 ! General message for output
 
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_tlad_settraj: begin"

@@ -59,10 +59,10 @@ subroutine ufo_ops_satrad_qsatwat(qs_out, t_in, p_in, nvals) &
                                   bind(C, name='ufo_ops_satrad_qsatwat_f90')
 
 implicit none
+integer(c_int), intent(in) :: nvals
 real(c_float), intent(out) :: qs_out(nvals) ! saturation mixing ratio (kg/kg)
 real(c_float), intent(in)  :: t_in(nvals)   ! temperature (K)
 real(c_float), intent(in)  :: p_in(nvals)   ! pressure (Pa)
-integer(c_int), intent(in) :: nvals
 
 real(kind_real) :: qs_out_kind_real(nvals)
 
@@ -82,10 +82,10 @@ subroutine ufo_ops_qsat(qs_out, t_in, p_in, nvals) &
      bind(C, name='ufo_ops_qsat_f90')
 
 implicit none
+integer(c_int), intent(in) :: nvals
 real(c_float), intent(out) :: qs_out(nvals) ! saturation mixing ratio (kg/kg)
 real(c_float), intent(in)  :: t_in(nvals)   ! temperature (K)
 real(c_float), intent(in)  :: p_in(nvals)   ! pressure (Pa)
-integer(c_int), intent(in) :: nvals
 
 real(kind_real) :: qs_out_kind_real(nvals)
 

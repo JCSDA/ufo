@@ -159,6 +159,7 @@ INTEGER, INTENT(IN)            :: ilev2                         ! Ending layer
 INTEGER, INTENT(IN)            :: inc                           ! loop increment
 INTEGER, INTENT(IN)            :: ibot                          ! lowest layer including surface
 INTEGER, INTENT(IN)            :: isfc                          ! lowest level next to surface
+INTEGER, INTENT(IN)            :: n_horiz
 REAL(kind_real), INTENT(IN)    :: delp(1:nlevdP,n_horiz)        ! Model background pressure (Pa) at levels
 REAL(kind_real), INTENT(IN)    :: qg(1:nlevq,n_horiz)           ! Model background graupel mixing ratio (kg/kg)
 REAL(kind_real), INTENT(INOUT) :: Model_Lightning               ! Model forecast of the observations (flash min^-1 pixel^-1)
@@ -168,7 +169,6 @@ REAL(kind_real), parameter     :: glmcoeff = 2.088e-8
 DOUBLE PRECISION               :: ag, answer
 REAL(kind_real)                :: coeff3rdorder(4)
 !LOGICAL, INTENT(IN)            :: l_fed_nonlinear
-INTEGER, INTENT(IN)            :: n_horiz
 !
 ! Local parameters
 !

@@ -160,9 +160,9 @@ end subroutine undo_layer_integral
 subroutine vert_interp_lay_apply_tl(modelozoned, layer_ozd, coefficient,  modelpressure, botpressure, toppressure, nsig)
 real(kind_real), intent(in)  ::modelozoned(:)
 real(kind_real),intent(in):: botpressure, toppressure
+integer,intent(in) :: nsig
 real(kind_real), intent(in), dimension(nsig+1) :: modelpressure 
 real(kind_real), intent(out) :: layer_ozd
-integer,intent(in) :: nsig
 real,intent(in) :: coefficient
 call apply_layer_integral(coefficient, modelozoned, modelpressure, botpressure, toppressure, nsig, layer_ozd)
 end subroutine vert_interp_lay_apply_tl 
@@ -170,9 +170,9 @@ end subroutine vert_interp_lay_apply_tl
 subroutine vert_interp_lay_apply_ad(modelozoneb, layer_ozb, coefficient,  modelpressure, botpressure, toppressure, nsig)
 real(kind_real), intent(out)  ::modelozoneb(:)
 real(kind_real),intent(in):: botpressure, toppressure
+integer,intent(in) :: nsig
 real(kind_real), intent(in), dimension(nsig+1) :: modelpressure 
 real(kind_real), intent(in) :: layer_ozb
-integer,intent(in) :: nsig
 real,intent(in) :: coefficient
 call undo_layer_integral(coefficient, modelozoneb, modelpressure, botpressure, toppressure, nsig, layer_ozb)
 end subroutine vert_interp_lay_apply_ad
