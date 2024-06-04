@@ -87,8 +87,6 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   character(len=*), parameter :: myname_="ufo_groundgnss_metoffice_tlad_settraj"
 
 ! Local variables
-  integer, parameter                 :: max_string = 800
-  character(max_string)        :: err_msg            ! Messages to be output to the user
   type(ufo_geoval), pointer    :: q                  ! The model geovals - specific humidity
   type(ufo_geoval), pointer    :: prs                ! The model geovals - atmospheric pressure
   type(ufo_geoval), pointer    :: rho_heights        ! The model geovals - heights of the pressure-levels
@@ -103,10 +101,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable :: za(:)              ! Model heights of rho levs (in pressure monotonic order)
   real(kind_real), allocatable :: zb(:)              ! Model heights of theta levs (in pressure monotonic order)
 
-  character(max_string)              :: message                 ! General message for output
-
-  write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_tlad_settraj: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%info("TRACE: ufo_groundgnss_metoffice_tlad_settraj: begin")
 
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
@@ -119,8 +114,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
 
 ! Check that the geovals are ordered top to bottom
   if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then
-    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
-    call fckit_exception%throw(err_msg)
+    call fckit_exception%throw('Geovals should be ordered top to bottom')
   endif
 
 ! Keep copy of dimensions
@@ -194,26 +188,22 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   integer                      :: nlocs         ! Number of observations
   integer                      :: ilev          ! Loop variable, pressure level number
   integer                      :: iflip         ! Index for vertical flip
-  character(max_string)        :: err_msg       ! Message to be output
   type(ufo_geoval), pointer    :: q_d           ! Increment to the specific humidity
   type(ufo_geoval), pointer    :: prs_d         ! Increment to the air pressure
   real(kind_real), allocatable :: pressure_d(:) ! Increment to the air pressure (monotonic order)
   real(kind_real), allocatable :: humidity_d(:) ! Increment to the specific humidity  (in pressure monotonic order)
   real(kind_real), allocatable :: x_d(:)        ! Increment to the complete state
 
-  write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%info("TRACE: ufo_groundgnss_metoffice_simobs_tl: begin")
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
-     call abor1_ftn(err_msg)
+     call abor1_ftn(trim(myname_) // ' trajectory wasnt set!')
   endif
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-     call abor1_ftn(err_msg)
+     call abor1_ftn(trim(myname_) // ' error: nlocs inconsistent!')
   endif
 
 ! Get variables from geovals
@@ -243,8 +233,7 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   deallocate(pressure_d)
   deallocate(humidity_d)
 
-  write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_tl: complete"
-  call fckit_log%info(err_msg)
+  call fckit_log%info("TRACE: ufo_groundgnss_metoffice_simobs_tl: complete")
 
   return
 
@@ -281,21 +270,17 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   real(kind_real), allocatable :: x_d(:)        ! Perturbation to the full model state
   real(kind_real), allocatable :: pressure_d(:) ! Perturbation to pressure (monotonic order)
   real(kind_real), allocatable :: humidity_d(:) ! Perturbation to specific humidity  (in pressure monotonic order)
-  character(max_string)        :: err_msg       ! Message to be output
 
-  write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+  call fckit_log%info("TRACE: ufo_groundgnss_metoffice_simobs_ad: begin")
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
-     call abor1_ftn(err_msg)
+     call abor1_ftn(trim(myname_) // ' trajectory wasnt set!')
   endif
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
-     call abor1_ftn(err_msg)
+     call abor1_ftn(trim(myname_) // ' error: nlocs inconsistent!')
   endif
 
 ! Get variables from geovals
@@ -318,8 +303,7 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
 
   deallocate(x_d)
 
-  write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs_ad: complete"
-  call fckit_log%info(err_msg)
+  call fckit_log%info("TRACE: ufo_groundgnss_metoffice_simobs_ad: complete")
 
   return
 
@@ -388,7 +372,6 @@ REAL(kind_real), ALLOCATABLE   :: refrac(:)             ! model refractivity on 
 INTEGER                      :: nstate             ! Number of levels in state vector
 REAL(kind_real)              :: x(1:nlevp+nlevq)   ! state vector
 LOGICAL                      :: refracerr          ! Whether we encountered an error in calculating the refractivity
-CHARACTER(LEN=200)           :: err_msg            ! Output message
 
 REAL(kind_real)              :: pN(nlevq)          ! Presure on theta levels
 
@@ -441,8 +424,7 @@ IF (.NOT. refracerr) THEN
                          K)
 ELSE
     K = 0
-    write(err_msg,*) "Error in refractivity calculation"
-    CALL fckit_log % warning(err_msg)
+    CALL fckit_log % warning("Error in refractivity calculation")
 END IF
 
 
@@ -530,9 +512,6 @@ REAL(kind_real), ALLOCATABLE :: x1(:,:)                ! Matrix placeholder
 REAL(kind_real), ALLOCATABLE :: x2(:)                  ! Matrix placeholder
 
 REAL(kind_real), PARAMETER   :: PressScale = 6000.0    ! Pressure scale height
-CHARACTER(LEN=200)           :: err_msg                ! Output message
-integer, parameter           :: max_string = 800
-character(max_string)        :: message                ! General message for output
 
 !----------------------------------------------------------------------
 
@@ -646,8 +625,7 @@ END DO
 DO Level = 1, Lowest_Level
   IF (refrac(Level) <= 0.0) THEN
 
-    write(err_msg,*) "Refractivity error. Refractivity < 0.0"
-    CALL fckit_log % warning(err_msg)
+    CALL fckit_log % warning("Refractivity error. Refractivity < 0.0")
 
     RETURN
 
