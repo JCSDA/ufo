@@ -1731,7 +1731,7 @@ end function uv_to_wdir
 
      j2 = 0
      j1 = 1
-     n_rh = 36    ! total number of RH in CRTM Default LUTs
+     n_rh = 35    ! total number of RH in CRTM Default LUTs
 
      IF ( rh <= aeroc%rh(1) ) THEN
         j1 = 1
