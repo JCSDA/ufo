@@ -13,6 +13,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
@@ -31,8 +32,9 @@ template < typename Type > std::string to_str(const Type & t)
   return os.str ();
 }
 
-std::string get_channel_name(int SatID, float centralFrequency, int satobchannel,
-                             const std::vector<SatIDRangeParameters> &SatIDRanges) {
+std::tuple<std::string, int> get_channel_info(int SatID, float centralFrequency, int satobchannel,
+                                              const std::vector<SatIDRangeParameters>
+                                              &SatIDRanges) {
   for (const SatIDRangeParameters &SatIDRange : SatIDRanges) {
     if (SatIDRange.minSatID <= SatID && SatID <= SatIDRange.maxSatID) {
       for (const FrequencyBandParameters &frequencyBand : SatIDRange.Satellite_comp.value()) {
@@ -40,12 +42,13 @@ std::string get_channel_name(int SatID, float centralFrequency, int satobchannel
             centralFrequency <= frequencyBand.maxFrequency &&
             (frequencyBand.satobchannel.value() == boost::none ||
             satobchannel == *frequencyBand.satobchannel.value())) {
-          return frequencyBand.windChannel;
+          return std::make_tuple(frequencyBand.windChannel,
+                                 frequencyBand.windChannelID);
         }
       }
     }
   }
-  return missing_value_string;
+  return std::make_tuple(missing_value_string, missing_value_int);
 }
 std::string get_sat_name(int SatID, const std::vector<SatIDRangeParameters> &SatIDRanges) {
   for (const SatIDRangeParameters &SatIDRange : SatIDRanges) {
@@ -95,7 +98,7 @@ SatName::~SatName() {}
  * This filter combines this channel information, together with the satellite name, to
  * create a string that defines the satellite/channel combination of each observation.
  * We also output a diagnostic variable which provides information on unidentified
- * satellites or channels.
+ * satellites or channels, plus an optional channel number integer.
  *
  * Required :
  * *  "MetaData", "sensorCentralFrequency"
@@ -105,6 +108,7 @@ SatName::~SatName() {}
  * Outputs:
  * *  "MetaData", "satwindIdentifier"
  * *  "Diag", "satwindIdentifier"
+ * *  "MetaData", "sensorChannelNumber"
  *
  * Example:
  * The following yaml will attempt to identify two infrared channels with computation method
@@ -115,9 +119,9 @@ SatName::~SatName() {}
  * the respective "Sat name" string.
  * This will fill MetaData/satwindIdentifier with values "GOES16ir112","GOES16ir38" if these are present
  * in the observations.
- * If either the satellite or channel are not identified, then MetaData/satwind_id is set to
+ * If either the satellite or channel are not identified, then MetaData/satwindIdentifier is set to
  * "MISSING". To help track down why observations are set to missing we also output a diagnostic
- * string variable, Diag/satwind_id. When the observation is not identified, this has the form:
+ * string variable, Diag/satwindIdentifier. When the observation is not identified, this has the form:
  *   id<satellite identifier>_comp<cloud motion method>_freq<central frequency>.
  * E.g. if the satellite is identified but the channel is not: "GOES16_comp3_freq0.484317e14",
  *      if the satellite is not identified but the channel is: "id270ir112".
@@ -133,10 +137,12 @@ SatName::~SatName() {}
  *        min frequency: 2.6e+13
  *        max frequency: 2.7e+13
  *        wind channel: ir112
+ *        wind channel id: 10
  *      - satobchannel: 1
  *        min frequency: 7.5e+13
  *        max frequency: 8.2e+13
  *        wind channel: ir38
+ *        wind channel id: 11
  *      Satellite_id:
  *      - Sat ID: 270
  *        Sat name: GOES16
@@ -151,8 +157,9 @@ void SatName::applyFilter(const std::vector<bool> & apply,
   std::vector<int> satid(obsdb_.nlocs());
   std::vector<int> compm(obsdb_.nlocs());
   // initialise output vectors to missing data string
-  std::vector<std::string> wind_id(obsdb_.nlocs(), missing_value_string);
+  std::vector<std::string> satwind_id(obsdb_.nlocs(), missing_value_string);
   std::vector<std::string> diag_id(obsdb_.nlocs(), missing_value_string);
+  std::vector<int> channel_id(obsdb_.nlocs(), missing_value_int);
   // get variables from ObsSpace
   obsdb_.get_db("MetaData", "sensorCentralFrequency", cfreq);
   obsdb_.get_db("MetaData", "satelliteIdentifier", satid);
@@ -165,14 +172,16 @@ void SatName::applyFilter(const std::vector<bool> & apply,
 
   for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
     std::string satellite_name;
-    std::string channel_name;
     satellite_name = get_sat_name(satid[jobs], parameters_.SatNameAssignments.value());
-    channel_name = get_channel_name(satid[jobs], cfreq[jobs], compm[jobs],
-                                    parameters_.SatNameAssignments.value());
-    // if both satellite and channel have been identified, then combine and fill wind_id
+    const auto[channel_name, channel_number] =
+      get_channel_info(satid[jobs], cfreq[jobs], compm[jobs],
+                       parameters_.SatNameAssignments.value());
+    // Fill channel number
+    channel_id[jobs] = channel_number;
+    // if both satellite and channel name have been identified, then combine and fill satwind_id
     if (satellite_name != missing_value_string &&
         channel_name != missing_value_string) {
-      wind_id[jobs] = satellite_name + channel_name;
+      satwind_id[jobs] = satellite_name + channel_name;
     }
     // if the satellite has not been identified then output the satid number to the diagnostic,
     // otherwise output the found satellite name
@@ -196,8 +205,9 @@ void SatName::applyFilter(const std::vector<bool> & apply,
     // combine diagnostic strings and fill diag_id
     diag_id[jobs] = satellite_diag + channel_diag;
   }
-  obsdb_.put_db("MetaData", "satwindIdentifier", wind_id);
+  obsdb_.put_db("MetaData", "satwindIdentifier", satwind_id);
   obsdb_.put_db("Diag", "satwindIdentifier", diag_id);
+  obsdb_.put_db("MetaData", "sensorChannelNumber", channel_id);
   // sum number of unidentified satellites and channels
   const std::size_t count_missing_sat = countSatAccumulator->computeResult();
   const std::size_t count_missing_chan = countChanAccumulator->computeResult();

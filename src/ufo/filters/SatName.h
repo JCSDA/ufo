@@ -28,6 +28,7 @@ namespace ioda {
 }
 namespace ufo {
   static const std::string missing_value_string = util::missingValue<std::string>();
+  static const int missing_value_int = util::missingValue<int>();
 //
 // table in yaml file to relate satellite name and wmo number label in yaml "Satellite_id"
 //
@@ -47,6 +48,7 @@ class FrequencyBandParameters : public oops::Parameters {
   oops::RequiredParameter<float> maxFrequency{"max frequency", this};
   oops::OptionalParameter<int> satobchannel{"satobchannel", this};
   oops::RequiredParameter<std::string> windChannel{"wind channel", this};
+  oops::Parameter<int> windChannelID{"wind channel id", missing_value_int, this};
 };
 //
 //  range of satellite wmo numbers "min obs type" and "max obs type"
