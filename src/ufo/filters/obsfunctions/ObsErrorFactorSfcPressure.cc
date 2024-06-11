@@ -137,7 +137,7 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
 
   // Get index of model bottom level
   int levbot = nlevs-1;
-  gvals->getAtLocation(pressure_gval, "air_pressure", 0);
+  gvals->getAtLocation(pressure_gval, oops::Variable{"air_pressure"}, 0);
   if (pressure_gval[0] > pressure_gval[nlevs-1]) levbot = 0;
 
   // Get GeoVaLs of altitude and virtual temperature at model bottom level
@@ -179,8 +179,8 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
       } else {
         // Get model temperature at obs_elevation (tges2)
         // Interpolate GeoVaLs of virtual_temperature to obs_elevation
-        gvals->getAtLocation(pressure_gval, "air_pressure", iloc);
-        gvals->getAtLocation(temperature_gval, "virtual_temperature", iloc);
+        gvals->getAtLocation(pressure_gval, oops::Variable{"air_pressure"}, iloc);
+        gvals->getAtLocation(temperature_gval, oops::Variable{"virtual_temperature"}, iloc);
         for (size_t ilev = 0; ilev < nlevs; ++ilev) logp[ilev] = std::log(pressure_gval[ilev]);
         ufo::PiecewiseLinearInterpolation vert_interp_model(logp, temperature_gval);
         logp_sfc = std::log(ob_pressure_sfc[iloc]);

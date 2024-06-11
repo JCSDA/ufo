@@ -45,7 +45,7 @@ ObsChlEuzIntegr::~ObsChlEuzIntegr() {
 void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                   ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   int nlocs = ovec.size();
-  int nlevs = gv.nlevs("mass_concentration_of_chlorophyll_in_sea_water");
+  int nlevs = gv.nlevs(oops::Variable{"mass_concentration_of_chlorophyll_in_sea_water"});
 
   const double missing = util::missingValue<double>();
 
@@ -56,9 +56,9 @@ void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   std::vector<std::vector<double>> chl;
   std::vector<std::vector<double>> h;
   for ( std::size_t k = 0; k < nlevs; ++k ) {
-    gv.getAtLevel(tmp, "sea_water_cell_thickness", k);
+    gv.getAtLevel(tmp, oops::Variable{"sea_water_cell_thickness"}, k);
     h.push_back(tmp);
-    gv.getAtLevel(tmp, "mass_concentration_of_chlorophyll_in_sea_water", k);
+    gv.getAtLevel(tmp, oops::Variable{"mass_concentration_of_chlorophyll_in_sea_water"}, k);
     chl.push_back(tmp);
   }
 

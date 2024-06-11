@@ -125,7 +125,7 @@ void FillAveragedProfileData<FunctionValue>::fillAverageProfile
                                  *gv,
                                  locsOriginal,
                                  options_.observation_vertical_coordinate,
-                                 options_.model_vertical_coordinate,
+                                 oops::Variable{options_.model_vertical_coordinate},
                                  options_.numIntersectionIterations.value() - 1);
 
     // Output values in original profile.

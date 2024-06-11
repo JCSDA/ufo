@@ -84,7 +84,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
 
   // retrieve the average surface temperature
   std::vector<float> tsavg5(nlocs, 0.0);
-  geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
+  geovals.get(tsavg5, oops::Variable{"average_surface_temperature_within_field_of_view"});
 
   // Retrieve the transmittances_of_atmosphere_layer from Hdiag
   std::vector<std::vector<std::vector<float>>> ptau5;
@@ -103,12 +103,12 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
 
   // Retrieve the temperature
   std::vector<std::vector<float>> tvp;
-  std::size_t nlevs = geovals.nlevs("air_temperature");
+  std::size_t nlevs = geovals.nlevs(oops::Variable{"air_temperature"});
   for (std::size_t js = 0; js < nlevs; ++js) {
-    geovals.getAtLevel(pred, "air_temperature", js);
+    geovals.getAtLevel(pred, oops::Variable{"air_temperature"}, js);
     tvp.push_back(pred);
   }
-  nlevs = geovals.nlevs("air_pressure");
+  nlevs = geovals.nlevs(oops::Variable{"air_pressure"});
   float tlapchn;
 
   // sort out the tlapmean based on vars

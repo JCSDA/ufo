@@ -38,8 +38,8 @@ namespace ufo {
        bool extended_obs_space,
        const std::string & average_name,
        const std::string & qcflags_name,
-       const std::string & geovals_testreference_name,
-       const std::string & geovals_qcflags_name);
+       const oops::Variable & geovals_testreference_name,
+       const oops::Variable & geovals_qcflags_name);
 
     /// Set values in a profile to missing.
     template <typename T>

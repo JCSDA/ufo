@@ -15,6 +15,7 @@
 
 #include "boost/variant.hpp"
 
+#include "oops/base/Variables.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/profile/ProfileDataHandler.h"
@@ -42,7 +43,7 @@ namespace ufo {
     void fill(const std::vector <std::string> &variableNamesInt,
               const std::vector <std::string> &variableNamesFloat,
               const std::vector <std::string> &variableNamesString,
-              const std::vector <std::string> &variableNamesGeoVaLs);
+              const oops::Variables &variableNamesGeoVaLs);
 
     /// Retrieve a vector if it is present. If not, throw an exception.
     template <typename T>
@@ -66,7 +67,7 @@ namespace ufo {
       }
 
     /// Retrieve a GeoVaL vector if it is present. If not, throw an exception.
-    std::vector <float>& getGeoVaLVector(const std::string& fullname);
+    std::vector <float>& getGeoVaLVector(const oops::Variable& fullname);
 
     /// Set values in a vector.
     template <typename T>
@@ -108,7 +109,7 @@ namespace ufo {
                          std::vector <bool>>> profileData_;
 
     /// Container of GeoVaLs in the current profile.
-    std::unordered_map <std::string, std::vector <float>> profileGeoVaLs_;
+    std::unordered_map <oops::Variable, std::vector <float>> profileGeoVaLs_;
 
     /// Profile data handler
     ProfileDataHandler &profileDataHandler_;
@@ -123,7 +124,7 @@ namespace ufo {
     std::vector <std::string> variableNamesString_;
 
     /// Names of GeoVaLs
-    std::vector <std::string> variableNamesGeoVaLs_;
+    oops::Variables variableNamesGeoVaLs_;
   };
 }  // namespace ufo
 

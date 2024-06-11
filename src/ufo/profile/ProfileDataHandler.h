@@ -19,6 +19,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/base/Variable.h"
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/missingValues.h"
 
@@ -151,7 +152,7 @@ namespace ufo {
     int getNumProfileLevels() const {return profileIndices_->getNumProfileLevels();}
 
     /// Get GeoVaLs for a particular profile.
-    std::vector <float>& getGeoVaLVector(const std::string &variableName);
+    std::vector <float>& getGeoVaLVector(const oops::Variable &variable);
 
     /// Get filter flags
     ioda::ObsDataVector<int>& getFilterFlags() const {return flags_;}
@@ -165,7 +166,7 @@ namespace ufo {
       (const std::vector <std::string> &variableNamesInt,
        const std::vector <std::string> &variableNamesFloat,
        const std::vector <std::string> &variableNamesString,
-       const std::vector <std::string> &variableNamesGeoVaLs);
+       const oops::Variables &variableNamesGeoVaLs);
 
     /// Read values from a collection of profiles and update information related to each one.
     void updateAllProfiles(std::vector <ProfileDataHolder> &profiles);
@@ -204,7 +205,7 @@ namespace ufo {
 
     /// Get the name of the vertical coordinate that is used to determine the slant path
     /// locations for the variable \p variableName.
-    std::string getAssociatedVerticalCoordinate(const std::string & variableName) const;
+    oops::Variable getAssociatedVerticalCoordinate(const oops::Variable & variable) const;
 
    private:  // members
     /// Container of each variable in the current profile.
@@ -215,7 +216,7 @@ namespace ufo {
                          std::vector <bool>>> profileData_;
 
     /// Container of GeoVaLs in the current profile.
-    std::unordered_map <std::string, std::vector <float>> GeoVaLData_;
+    std::unordered_map <oops::Variable, std::vector <float>> GeoVaLData_;
 
     /// Observation database.
     ioda::ObsSpace &obsdb_;

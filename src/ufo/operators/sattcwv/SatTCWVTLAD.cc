@@ -52,7 +52,7 @@ void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
                                 const QCFlags_t & qc_flags) {
   // Get number of obs locations & number of model pressure levels
   nprofiles = geovals.nlocs();
-  nlevels   = geovals.nlevs("air_pressure_levels");  // number of full (rho) levels
+  nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});  // number of full (rho) levels
 
   // (Re)initialise the Jacobian matrix
   if (!k_matrix.empty()) k_matrix.clear();
@@ -60,18 +60,18 @@ void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
   // Get 2-D surface pressure
   std::vector<float> ps(nprofiles);  // surface pressure (Pa)
-  geovals.get(ps, "surface_pressure");
+  geovals.get(ps, oops::Variable{"surface_pressure"});
 
   // Get 3-D air pressure on rho levels (Pa), one level at a time
   std::vector<std::vector<float>> plev(nlevels, std::vector<float>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels; ++lev) {
-    geovals.getAtLevel(plev[lev], "air_pressure_levels", lev);
+    geovals.getAtLevel(plev[lev], oops::Variable{"air_pressure_levels"}, lev);
   }
 
   // Get 3-D specific humidity on theta levels (kg/kg), one level at a time
   std::vector<std::vector<float>> q(nlevels-1, std::vector<float>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q[lev], "specific_humidity", lev);
+    geovals.getAtLevel(q[lev], oops::Variable{"specific_humidity"}, lev);
   }
 
   // Check model fields are top-down
@@ -106,7 +106,7 @@ void SatTCWVTLAD::simulateObsTL(
 
   // Check dimensions against trajectory
   ASSERT(geovals.nlocs() == nprofiles);
-  ASSERT(geovals.nlevs("air_pressure_levels") == nlevels);
+  ASSERT(geovals.nlevs(oops::Variable{"air_pressure_levels"}) == nlevels);
 
   // Check hofx size and initialise hofx to zero
   ASSERT(geovals.nlocs() == hofx.nlocs());
@@ -115,7 +115,7 @@ void SatTCWVTLAD::simulateObsTL(
   // Get 3-D specific humidity increments on theta levels (kg/kg), one level at a time
   std::vector<std::vector<double>> q_d(nlevels-1, std::vector<double>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q_d[lev], "specific_humidity", lev);
+    geovals.getAtLevel(q_d[lev], oops::Variable{"specific_humidity"}, lev);
   }
 
   // Loop through the obs, calculating the increment to the observation hofx
@@ -135,7 +135,7 @@ void SatTCWVTLAD::simulateObsAD(
 
   // Check dimensions against trajectory
   ASSERT(geovals.nlocs() == nprofiles);
-  ASSERT(geovals.nlevs("air_pressure_levels") == nlevels);
+  ASSERT(geovals.nlevs(oops::Variable{"air_pressure_levels"}) == nlevels);
 
   // Check hofx size
   ASSERT(geovals.nlocs() == hofx.nlocs());
@@ -143,7 +143,7 @@ void SatTCWVTLAD::simulateObsAD(
   // Get 3-D specific humidity increments on theta levels (kg/kg), one level at a time
   std::vector<std::vector<double>> q_d(nlevels-1, std::vector<double>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q_d[lev], "specific_humidity", lev);
+    geovals.getAtLevel(q_d[lev], oops::Variable{"specific_humidity"}, lev);
   }
 
   // Get the missing value indicator
@@ -160,7 +160,7 @@ void SatTCWVTLAD::simulateObsAD(
 
   // Store the updated model state increments
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.putAtLevel(q_d[lev], "specific_humidity", lev);
+    geovals.putAtLevel(q_d[lev], oops::Variable{"specific_humidity"}, lev);
   }
 }
 

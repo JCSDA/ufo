@@ -120,7 +120,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   float const min_press = options_.min_press.value();  // Pa
   std::string const profile = options_.profile.value();
   std::string const obs_vcoord = options_.obs_vcoord.value();
-  std::string const vcoord = options_.vcoord.value();
+  oops::Variable const vcoord{options_.vcoord.value()};
   oops::Log::debug() << "Wind profile for calculating observation errors is "
                      << profile << std::endl;
   oops::Log::debug() << "Observation vertical coordinate is " << obs_vcoord << std::endl;
@@ -135,15 +135,15 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
   }
 
   // check vcoord name matches air_pressure, air_pressure_levels, or air_pressure_levels_minus_one
-  if ( vcoord != "air_pressure" && vcoord != "air_pressure_levels" &&
-       vcoord != "air_pressure_levels_minus_one") {
+  if ( vcoord.name() != "air_pressure" && vcoord.name() != "air_pressure_levels" &&
+       vcoord.name() != "air_pressure_levels_minus_one") {
     errString << "Vertical coordinate not recognised" << std::endl;
     throw eckit::BadValue(errString.str(), Here());
   }
 
   // Get dimensions
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable("GeoVaLs/" + vcoord));
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/" + vcoord.name()));
 
   // local variables
   const float missing = util::missingValue<float>();
@@ -174,9 +174,9 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
     gvals->getAtLocation(cx_p, vcoord, iloc);
     // Temporary mapping for variable names
     if ( profile == "windEastward" ) {
-      gvals->getAtLocation(cx_windcomponent, "eastward_wind", iloc);
+      gvals->getAtLocation(cx_windcomponent, oops::Variable{"eastward_wind"}, iloc);
     } else if ( profile == "windNorthward" ) {
-      gvals->getAtLocation(cx_windcomponent, "northward_wind", iloc);
+      gvals->getAtLocation(cx_windcomponent, oops::Variable{"northward_wind"}, iloc);
     }
     // Check GeoVaLs are in correct vertical order
     if (cx_p.front() > cx_p.back()) {

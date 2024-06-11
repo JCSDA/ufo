@@ -77,7 +77,7 @@ void testGeoVaLs() {
     if (gconf.has("one location check")) {
       oops::Log::trace() << "Check that GeoVaLs constructor for one location works" << std::endl;
       const eckit::LocalConfiguration gconfone(gconf, "one location check");
-      const std::string var = gconfone.getString("variable");
+      const oops::Variable var{gconfone.getString("variable")};
       const std::vector<int> ind = gconfone.getIntVector("indices");
       const std::vector<float> values = gconfone.getFloatVector("values");
       const float oneloctol = gconfone.getFloat("tolerance");
@@ -158,7 +158,7 @@ enum class GetMethod {
 /// GeoVaLs.
 /// The reference GeoVaLs at indices (jlev, jprofile) are equal to seed + jlev + jprofile.
 void testPutAtLevelAndGetProfileOrGetAtLocation(
-    GeoVaLs &gval, const std::string &var, double seed, GetMethod getMethodToTest) {
+    GeoVaLs &gval, const oops::Variable &var, double seed, GetMethod getMethodToTest) {
   const size_t nprofiles = gval.nprofiles(var);
   const size_t nlevs = gval.nlevs(var);
   for (size_t jlev = 0; jlev < nlevs; ++jlev) {
@@ -211,7 +211,7 @@ enum class PutMethod {
 /// are transposed.
 /// This is done separately for each data type, using different fill values each time.
 void testPutProfileOrPutAtLocationAndGetAtLevel(
-    GeoVaLs &gval, const std::string &var, double seed, PutMethod putMethodToTest) {
+    GeoVaLs &gval, const oops::Variable &var, double seed, PutMethod putMethodToTest) {
   const size_t nprofiles = gval.nprofiles(var);
   const size_t nlevs = gval.nlevs(var);
 
@@ -293,8 +293,8 @@ void testGeoVaLsAllocatePutGet() {
   const eckit::LocalConfiguration testconf(conf, "geovals get test");
 
   /// Test 2D variables
-  const std::string var1 = "variable1";
-  const std::string var2 = "variable2";
+  const oops::Variable var1{"variable1"};
+  const oops::Variable var2{"variable2"};
   const oops::Variables testvars({var1, var2});
 
   /// Setup GeoVaLs that are not filled in or allocated; test that they are not allocated
@@ -404,8 +404,8 @@ void testGeoVaLsConstructor() {
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   const eckit::LocalConfiguration testconf(conf, "geovals get test");
 
-  const std::string var1 = "variable1";
-  const std::string var2 = "variable2";
+  const oops::Variable var1{"variable1"};
+  const oops::Variable var2{"variable2"};
   const oops::Variables testvars({var1, var2});
 
   /// Setup GeoVaLs; test that they are allocated
@@ -471,16 +471,16 @@ class MultipleSamplingMethodsTestParameters : public oops::Parameters {
 
 class Selector : public oops::SamplingMethodSelector {
  public:
-  explicit Selector(std::map<std::string, size_t> samplingMethodIndexByVar) :
+  explicit Selector(std::map<oops::Variable, size_t> samplingMethodIndexByVar) :
     samplingMethodIndexByVar_(std::move(samplingMethodIndexByVar))
   {}
 
-  size_t methodIndex(const std::string &varName) const override {
-    return samplingMethodIndexByVar_.at(varName);
+  size_t methodIndex(const oops::Variable &var) const override {
+    return samplingMethodIndexByVar_.at(var);
   }
 
  private:
-  std::map<std::string, size_t> samplingMethodIndexByVar_;
+  std::map<oops::Variable, size_t> samplingMethodIndexByVar_;
 };
 
 std::shared_ptr<ioda::Distribution> makeDistribution(size_t gnlocs) {
@@ -513,11 +513,12 @@ void testGeoVaLsWithMultipleSamplingMethods() {
 
   oops::Variables variables;
   std::vector<size_t> nlevels;
-  std::map<std::string, size_t> samplingMethodIndexByVar;
+  std::map<oops::Variable, size_t> samplingMethodIndexByVar;
   for (const GeoVaLParameters & geovalParams : params.geovals.value()) {
     variables.push_back(geovalParams.name);
     nlevels.push_back(geovalParams.nlevels);
-    samplingMethodIndexByVar[geovalParams.name] = geovalParams.samplingMethod;
+    samplingMethodIndexByVar.emplace(oops::Variable{geovalParams.name},
+                                     geovalParams.samplingMethod);
   }
 
   std::vector<SampledLocations_> sampledLocationsVec;
@@ -536,8 +537,8 @@ void testGeoVaLsWithMultipleSamplingMethods() {
   }
 
   // Reference values to compare against later
-  std::map<std::string, size_t> expectedNumProfilesByVar;
-  std::map<std::string, std::vector<util::Range<size_t>>> expectedGroupedProfileIndicesByVar;
+  std::map<oops::Variable, size_t> expectedNumProfilesByVar;
+  std::map<oops::Variable, std::vector<util::Range<size_t>>> expectedGroupedProfileIndicesByVar;
   for (size_t ivar = 0; ivar < variables.size(); ++ivar) {
     const SampledLocations &sampledLocations =
         sampledLocationsVec[samplingMethodIndexByVar.at(variables[ivar])].sampledLocations();
@@ -603,11 +604,11 @@ oops::Locations<ObsTraits> createLocationsForFormatsTest() {
                                              pathsGroupedByLocation));
   }
 
-  std::map<std::string, size_t> samplingMethodIndexByVar{
-    {"var1_sampled", 1},
-    {"var2_reduced", 0},
-    {"var3_sampled_aliased_with_reduced", 0},
-    {"var4_sampled_distinct_from_reduced", 1},
+  std::map<oops::Variable, size_t> samplingMethodIndexByVar{
+    {oops::Variable{"var1_sampled"}, 1},
+    {oops::Variable{"var2_reduced"}, 0},
+    {oops::Variable{"var3_sampled_aliased_with_reduced"}, 0},
+    {oops::Variable{"var4_sampled_distinct_from_reduced"}, 1},
   };
 
   return Locations_(std::move(sampledLocationsVec),
@@ -615,73 +616,81 @@ oops::Locations<ObsTraits> createLocationsForFormatsTest() {
 }
 
 void testSampledAndReducedFormats(const GeoVaLs &geovals) {
-  EXPECT(geovals.has("var1_sampled", GeoVaLFormat::SAMPLED));
-  EXPECT_NOT(geovals.has("var1_sampled", GeoVaLFormat::REDUCED));
-  EXPECT_NOT(geovals.has("var2_reduced", GeoVaLFormat::SAMPLED));
-  EXPECT(geovals.has("var2_reduced", GeoVaLFormat::REDUCED));
-  EXPECT(geovals.has("var3_sampled_aliased_with_reduced", GeoVaLFormat::SAMPLED));
-  EXPECT(geovals.has("var3_sampled_aliased_with_reduced", GeoVaLFormat::REDUCED));
-  EXPECT(geovals.has("var4_sampled_distinct_from_reduced", GeoVaLFormat::SAMPLED));
-  EXPECT(geovals.has("var4_sampled_distinct_from_reduced", GeoVaLFormat::REDUCED));
+  EXPECT(geovals.has(oops::Variable{"var1_sampled"}, GeoVaLFormat::SAMPLED));
+  EXPECT_NOT(geovals.has(oops::Variable{"var1_sampled"}, GeoVaLFormat::REDUCED));
+  EXPECT_NOT(geovals.has(oops::Variable{"var2_reduced"}, GeoVaLFormat::SAMPLED));
+  EXPECT(geovals.has(oops::Variable{"var2_reduced"}, GeoVaLFormat::REDUCED));
+  EXPECT(geovals.has(oops::Variable{"var3_sampled_aliased_with_reduced"}, GeoVaLFormat::SAMPLED));
+  EXPECT(geovals.has(oops::Variable{"var3_sampled_aliased_with_reduced"}, GeoVaLFormat::REDUCED));
+  EXPECT(geovals.has(oops::Variable{"var4_sampled_distinct_from_reduced"}, GeoVaLFormat::SAMPLED));
+  EXPECT(geovals.has(oops::Variable{"var4_sampled_distinct_from_reduced"}, GeoVaLFormat::REDUCED));
 
-  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased("var1_sampled"));
-  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased("var2_reduced"));
-  EXPECT(geovals.areReducedAndSampledFormatsAliased("var3_sampled_aliased_with_reduced"));
-  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased("var4_sampled_distinct_from_reduced"));
+  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased(oops::Variable{"var1_sampled"}));
+  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased(oops::Variable{"var2_reduced"}));
+  EXPECT(geovals.areReducedAndSampledFormatsAliased(oops::Variable
+                                                    {"var3_sampled_aliased_with_reduced"}));
+  EXPECT_NOT(geovals.areReducedAndSampledFormatsAliased(oops::Variable
+                                                        {"var4_sampled_distinct_from_reduced"}));
 
   {
-    size_t nprofiles = geovals.nprofiles("var1_sampled", GeoVaLFormat::SAMPLED);
+    size_t nprofiles = geovals.nprofiles(oops::Variable{"var1_sampled"}, GeoVaLFormat::SAMPLED);
     std::vector<double> expectedValues(nprofiles, 1.0);
-    geovals.putAtLevel(expectedValues, "var1_sampled", 0, GeoVaLFormat::SAMPLED);
+    geovals.putAtLevel(expectedValues, oops::Variable{"var1_sampled"}, 0, GeoVaLFormat::SAMPLED);
     std::vector<double> values(nprofiles, 0.0);
-    geovals.getAtLevel(values, "var1_sampled", 0, GeoVaLFormat::SAMPLED);
+    geovals.getAtLevel(values, oops::Variable{"var1_sampled"}, 0, GeoVaLFormat::SAMPLED);
     EXPECT(values == expectedValues);
   }
 
   {
-    size_t nprofiles = geovals.nprofiles("var2_reduced", GeoVaLFormat::REDUCED);
+    size_t nprofiles = geovals.nprofiles(oops::Variable{"var2_reduced"}, GeoVaLFormat::REDUCED);
     std::vector<double> expectedValues(nprofiles, 2.0);
-    geovals.putAtLevel(expectedValues, "var2_reduced", 0, GeoVaLFormat::REDUCED);
+    geovals.putAtLevel(expectedValues, oops::Variable{"var2_reduced"}, 0, GeoVaLFormat::REDUCED);
     std::vector<double> values(nprofiles, 0.0);
-    geovals.getAtLevel(values, "var2_reduced", 0, GeoVaLFormat::REDUCED);
+    geovals.getAtLevel(values, oops::Variable{"var2_reduced"}, 0, GeoVaLFormat::REDUCED);
     EXPECT(values == expectedValues);
   }
 
   {
     size_t nSampledProfiles =
-        geovals.nprofiles("var3_sampled_aliased_with_reduced", GeoVaLFormat::SAMPLED);
+        geovals.nprofiles(oops::Variable{"var3_sampled_aliased_with_reduced"},
+          GeoVaLFormat::SAMPLED);
     size_t nReducedProfiles =
-        geovals.nprofiles("var3_sampled_aliased_with_reduced", GeoVaLFormat::SAMPLED);
+        geovals.nprofiles(oops::Variable{"var3_sampled_aliased_with_reduced"},
+          GeoVaLFormat::SAMPLED);
     EXPECT_EQUAL(nSampledProfiles, nReducedProfiles);
 
     {
       std::vector<double> expectedValues(nSampledProfiles, 3.0);
-      geovals.putAtLevel(expectedValues, "var3_sampled_aliased_with_reduced", 0,
+      geovals.putAtLevel(expectedValues, oops::Variable{"var3_sampled_aliased_with_reduced"}, 0,
                          GeoVaLFormat::SAMPLED);
       {
         std::vector<double> values(nSampledProfiles, 0.0);
-        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::SAMPLED);
+        geovals.getAtLevel(values, oops::Variable{"var3_sampled_aliased_with_reduced"}, 0,
+          GeoVaLFormat::SAMPLED);
         EXPECT(values == expectedValues);
       }
       {
         std::vector<double> values(nReducedProfiles, 0.0);
-        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::REDUCED);
+        geovals.getAtLevel(values, oops::Variable{"var3_sampled_aliased_with_reduced"}, 0,
+          GeoVaLFormat::REDUCED);
         EXPECT(values == expectedValues);
       }
     }
 
     {
       std::vector<double> expectedValues(nReducedProfiles, 3.5);
-      geovals.putAtLevel(expectedValues, "var3_sampled_aliased_with_reduced", 0,
+      geovals.putAtLevel(expectedValues, oops::Variable{"var3_sampled_aliased_with_reduced"}, 0,
                          GeoVaLFormat::REDUCED);
       {
         std::vector<double> values(nSampledProfiles, 0.0);
-        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::SAMPLED);
+        geovals.getAtLevel(values, oops::Variable{"var3_sampled_aliased_with_reduced"}, 0,
+          GeoVaLFormat::SAMPLED);
         EXPECT(values == expectedValues);
       }
       {
         std::vector<double> values(nReducedProfiles, 0.0);
-        geovals.getAtLevel(values, "var3_sampled_aliased_with_reduced", 0, GeoVaLFormat::REDUCED);
+        geovals.getAtLevel(values, oops::Variable{"var3_sampled_aliased_with_reduced"}, 0,
+          GeoVaLFormat::REDUCED);
         EXPECT(values == expectedValues);
       }
     }
@@ -689,37 +698,43 @@ void testSampledAndReducedFormats(const GeoVaLs &geovals) {
 
   {
     size_t nSampledProfiles =
-        geovals.nprofiles("var4_sampled_distinct_from_reduced", GeoVaLFormat::SAMPLED);
+        geovals.nprofiles(oops::Variable{"var4_sampled_distinct_from_reduced"},
+          GeoVaLFormat::SAMPLED);
     size_t nReducedProfiles =
-        geovals.nprofiles("var4_sampled_distinct_from_reduced", GeoVaLFormat::REDUCED);
+        geovals.nprofiles(oops::Variable{"var4_sampled_distinct_from_reduced"},
+          GeoVaLFormat::REDUCED);
     EXPECT(nSampledProfiles != nReducedProfiles);
 
     std::vector<double> expectedSampledValues(nSampledProfiles, 4.0);
-    geovals.putAtLevel(expectedSampledValues, "var4_sampled_distinct_from_reduced", 0,
-                       GeoVaLFormat::SAMPLED);
+    geovals.putAtLevel(expectedSampledValues, oops::Variable{"var4_sampled_distinct_from_reduced"},
+                       0, GeoVaLFormat::SAMPLED);
     std::vector<double> expectedReducedValues(nReducedProfiles, 4.5);
-    geovals.putAtLevel(expectedReducedValues, "var4_sampled_distinct_from_reduced", 0,
-                       GeoVaLFormat::REDUCED);
+    geovals.putAtLevel(expectedReducedValues, oops::Variable{"var4_sampled_distinct_from_reduced"},
+                        0, GeoVaLFormat::REDUCED);
     {
       std::vector<double> values(nSampledProfiles, 0.0);
-      geovals.getAtLevel(values, "var4_sampled_distinct_from_reduced", 0, GeoVaLFormat::SAMPLED);
+      geovals.getAtLevel(values, oops::Variable{"var4_sampled_distinct_from_reduced"}, 0,
+        GeoVaLFormat::SAMPLED);
       EXPECT(values == expectedSampledValues);
     }
     {
       std::vector<double> values(nReducedProfiles, 0.0);
-      geovals.getAtLevel(values, "var4_sampled_distinct_from_reduced", 0, GeoVaLFormat::REDUCED);
+      geovals.getAtLevel(values, oops::Variable{"var4_sampled_distinct_from_reduced"}, 0,
+        GeoVaLFormat::REDUCED);
       EXPECT(values == expectedReducedValues);
     }
   }
 }
 
 void testSampledAndReducedFormatsAfterOneStageConstruction() {
-  oops::Variables variables({"var1_sampled", "var3_sampled_aliased_with_reduced",
-                             "var4_sampled_distinct_from_reduced"});
+  oops::Variables variables({oops::Variable{"var1_sampled"},
+                             oops::Variable{"var3_sampled_aliased_with_reduced"},
+                             oops::Variable{"var4_sampled_distinct_from_reduced"}});
   std::vector<size_t> nlevels{1, 1, 1};
   GeoVaLs geovals(createLocationsForFormatsTest(), variables, nlevels);
-  oops::Variables reducedVariables({"var2_reduced", "var3_sampled_aliased_with_reduced",
-                                    "var4_sampled_distinct_from_reduced"});
+  oops::Variables reducedVariables({oops::Variable{"var2_reduced"},
+                                    oops::Variable{"var3_sampled_aliased_with_reduced"},
+                                    oops::Variable{"var4_sampled_distinct_from_reduced"}});
   std::vector<size_t> nReducedLevels{1, 1, 1};
   geovals.addReducedVars(reducedVariables, nReducedLevels);
 
@@ -727,12 +742,14 @@ void testSampledAndReducedFormatsAfterOneStageConstruction() {
 }
 
 void testSampledAndReducedFormatsAfterTwoStageConstruction() {
-  oops::Variables variables({"var1_sampled", "var3_sampled_aliased_with_reduced",
-                             "var4_sampled_distinct_from_reduced"});
+  oops::Variables variables({oops::Variable{"var1_sampled"},
+                             oops::Variable{"var3_sampled_aliased_with_reduced"},
+                             oops::Variable{"var4_sampled_distinct_from_reduced"}});
   GeoVaLs geovals(createLocationsForFormatsTest(), variables);
   geovals.allocate(1, variables);
-  oops::Variables reducedVariables({"var2_reduced", "var3_sampled_aliased_with_reduced",
-                                    "var4_sampled_distinct_from_reduced"});
+  oops::Variables reducedVariables({oops::Variable{"var2_reduced"},
+                                    oops::Variable{"var3_sampled_aliased_with_reduced"},
+                                    oops::Variable{"var4_sampled_distinct_from_reduced"}});
   std::vector<size_t> nReducedLevels{1, 1, 1};
   geovals.addReducedVars(reducedVariables, nReducedLevels);
 

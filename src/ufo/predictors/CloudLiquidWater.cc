@@ -116,8 +116,8 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::O
 
   // required variables
   if (sensor == "AMSUA" || sensor == "ATMS") {
-    geovars_ += oops::Variables({"water_area_fraction",
-                                 "average_surface_temperature_within_field_of_view"});
+    geovars_ += oops::Variables({oops::Variable{"water_area_fraction"},
+                              oops::Variable{"average_surface_temperature_within_field_of_view"}});
     hdiags_ += oops::ObsVariables({"brightness_temperature"}, vars.channels());
   }
 }
@@ -204,9 +204,9 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
   std::vector<float> water_frac(nlocs, 0.0);
   std::vector<float> tsavg(nlocs, 0.0);
-  geovals.get(water_frac, "water_area_fraction");
+  geovals.get(water_frac, oops::Variable{"water_area_fraction"});
   if (sensor == "AMSUA" || sensor == "ATMS") {
-    geovals.get(tsavg, "average_surface_temperature_within_field_of_view");
+    geovals.get(tsavg, oops::Variable{"average_surface_temperature_within_field_of_view"});
   }
 
   // Compute cloud liquid water amount
@@ -244,7 +244,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     // retrieve the average surface temperature
     std::vector<float> tsavg5(nlocs, 0.0);
-    geovals.get(tsavg5, "average_surface_temperature_within_field_of_view");
+    geovals.get(tsavg5, oops::Variable{"average_surface_temperature_within_field_of_view"});
 
     std::vector<int> scanpos(nlocs, 0);
     odb.get_db("MetaData", "sensorScanPosition", scanpos);
@@ -268,9 +268,9 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     // Retrieve the temperature,tvp
     std::vector<std::vector<float>> tvp;
-    std::size_t nlevs = geovals.nlevs("air_temperature");
+    std::size_t nlevs = geovals.nlevs(oops::Variable{"air_temperature"});
     for (std::size_t js = 0; js < nlevs; ++js) {
-      geovals.getAtLevel(pred, "air_temperature", js);
+      geovals.getAtLevel(pred, oops::Variable{"air_temperature"}, js);
       tvp.push_back(pred);
     }
 

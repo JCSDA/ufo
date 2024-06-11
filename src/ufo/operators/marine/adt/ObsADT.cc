@@ -63,7 +63,7 @@ void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
 
   // get geovals
   std::vector<double> vec(ovec.nlocs());
-  geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
+  geovals.getAtLevel(vec, oops::Variable{"sea_surface_height_above_geoid"}, 0);
 
   // get obs
   std::vector<double> obs;

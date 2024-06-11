@@ -50,7 +50,7 @@ void Emissivity::compute(const ioda::ObsSpace & odb,
 
   std::vector<float> pred(nlocs, 0.0);
   std::vector<float> h2o_frac(nlocs, 0.0);
-  geovals.get(h2o_frac, "water_area_fraction");
+  geovals.get(h2o_frac, oops::Variable{"water_area_fraction"});
   std::string hdiags;
   out.zero();
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {

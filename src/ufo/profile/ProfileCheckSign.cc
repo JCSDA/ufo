@@ -50,7 +50,7 @@ namespace ufo {
 
     // Obtain air pressure GeoVals.
     const std::vector <float> &pressureGeoVaLs =
-      profileDataHandler.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+      profileDataHandler.getGeoVaLVector(oops::Variable{ufo::VariableNames::geovals_pressure});
     if (pressureGeoVaLs.empty())
       throw eckit::BadValue("Air pressure GeoVaLs vector is empty.", Here());
 

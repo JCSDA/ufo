@@ -28,13 +28,10 @@ static ObsOperatorMaker<ObsWindSpeed> makerWindSpeed_("WindSpeed");
 
 ObsWindSpeed::ObsWindSpeed(const ioda::ObsSpace & odb,
                  const Parameters_ &params)
-  : ObsOperatorBase(odb), odb_(odb), varin_()
+  : ObsOperatorBase(odb), model_surface_eastward_wind_{params.model_surface_eastward_wind.value()},
+    model_surface_northward_wind_{params.model_surface_northward_wind.value()},
+    varin_{{model_surface_eastward_wind_, model_surface_northward_wind_}}
 {
-  model_surface_eastward_wind_ = params.model_surface_eastward_wind;
-  model_surface_northward_wind_ = params.model_surface_northward_wind;
-
-  varin_.push_back(model_surface_eastward_wind_);
-  varin_.push_back(model_surface_northward_wind_);
   oops::Log::trace() << "ObsWindSpeed created." << std::endl;
 }
 

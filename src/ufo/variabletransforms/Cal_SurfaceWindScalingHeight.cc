@@ -62,7 +62,7 @@ namespace ufo {
     const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
     // Number of 'full' model levels
-    size_t nlevs = gvals->nlevs("geopotential_height");
+    size_t nlevs = gvals->nlevs(oops::Variable{"geopotential_height"});
 
 
     // Get observation height and pressure
@@ -81,8 +81,9 @@ namespace ufo {
     // -------------------------------------------------------------------------------------
     for (int iloc = 0; iloc < nlocs; ++iloc) {
       // Get the GeoVaLs at this location
-      gvals->getAtLocation(windReductionFactorAt10m, "wind_reduction_factor_at_10m", iloc);
-      gvals->getAtLocation(geopotentialHeight, "geopotential_height", iloc);
+      gvals->getAtLocation(windReductionFactorAt10m, oops::Variable{"wind_reduction_factor_at_10m"},
+                                                                    iloc);
+      gvals->getAtLocation(geopotentialHeight, oops::Variable{"geopotential_height"}, iloc);
 
       // For values above lowest model level the scaling factor is 1
       surfaceWindScalingHeight[iloc] = 1.0;

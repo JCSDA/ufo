@@ -23,8 +23,8 @@ static PredictorMaker<Thickness> makerFuncThickness_("thickness");
 Thickness::Thickness(const Parameters_ & parameters, const oops::ObsVariables & vars)
     : PredictorBase(parameters, vars) {
   // required variables
-  geovars_ += oops::Variables({"air_temperature",
-                                 "air_pressure"});
+  geovars_ += oops::Variables({oops::Variable{"air_temperature"},
+                               oops::Variable{"air_pressure"}});
   // required options
   parameters_ = parameters;
 
@@ -48,8 +48,8 @@ void Thickness::compute(const ioda::ObsSpace & odb,
   // assure shape of out
   ASSERT(out.nlocs() == nlocs);
 
-  const int t_levs = geovals.nlevs("air_temperature");
-  const int p_levs = geovals.nlevs("air_pressure");
+  const int t_levs = geovals.nlevs(oops::Variable{"air_temperature"});
+  const int p_levs = geovals.nlevs(oops::Variable{"air_pressure"});
   std::vector <double> p_prof(t_levs, 0.0);
   std::vector<double> t_prof(p_levs, 0.0);
   std::vector <double> thick(odb.nlocs(), 0.0);
@@ -60,8 +60,8 @@ void Thickness::compute(const ioda::ObsSpace & odb,
   const double pred_std_inv = 1.0/parameters_.stDev.value();;
 
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
-    geovals.getAtLocation(p_prof, "air_pressure", jl);
-    geovals.getAtLocation(t_prof, "air_temperature", jl);
+    geovals.getAtLocation(p_prof, oops::Variable{"air_pressure"}, jl);
+    geovals.getAtLocation(t_prof, oops::Variable{"air_temperature"}, jl);
 
     if (p_prof.front() > p_prof.back())
       throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());

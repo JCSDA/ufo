@@ -18,6 +18,7 @@
 namespace oops {
   class ObsVariables;
   class Variables;
+  class Variable;
 }
 
 namespace ufo {
@@ -38,6 +39,7 @@ class Variable: public util::Printable {
   size_t size() const;
   Variable operator[](const size_t) const;
   const std::string & variable() const;
+  oops::Variable toOopsVariable() const;
   std::string variable(const size_t) const;
   const std::string & group() const;
   const std::vector<int> & channels() const;

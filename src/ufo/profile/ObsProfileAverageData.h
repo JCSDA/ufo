@@ -52,7 +52,7 @@ namespace ufo {
     void print(std::ostream & os) const;
 
     /// Get the name of the model vertical coordinate.
-    std::string getModelVerticalCoord() const {return modelVerticalCoord_;}
+    oops::Variable getModelVerticalCoord() const {return modelVerticalCoord_;}
 
     /// Get the switch indicating if geovals are in the same direction as observations.
     /// (Beware, default 'false'!)
@@ -78,7 +78,7 @@ namespace ufo {
     ObsProfileAverageParameters options_;
 
     /// Name of model vertical coordinate.
-    std::string modelVerticalCoord_;
+    oops::Variable modelVerticalCoord_;
 
     /// Required variables.
     oops::Variables requiredVars_;

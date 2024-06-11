@@ -437,30 +437,33 @@ void GeoVaLs::print(std::ostream & os) const {
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return number of levels for a specified variable */
-size_t GeoVaLs::nlevs(const std::string & var, GeoVaLFormat format) const {
+size_t GeoVaLs::nlevs(const oops::Variable & var, GeoVaLFormat format) const {
   int nlevs;
-  ufo_geovals_nlevs_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format), nlevs);
+  ufo_geovals_nlevs_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                        explicitFormatAsInt(format), nlevs);
   return nlevs;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return the number of paths along which the specified variable has/will been
  *  interpolated. */
-size_t GeoVaLs::nprofiles(const std::string & var, GeoVaLFormat format) const {
+size_t GeoVaLs::nprofiles(const oops::Variable & var, GeoVaLFormat format) const {
   size_t nprofiles;
-  ufo_geovals_nprofiles_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
+  ufo_geovals_nprofiles_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                            explicitFormatAsInt(format),
                             nprofiles);
   return nprofiles;
 }
 // -----------------------------------------------------------------------------
-bool GeoVaLs::has(const std::string & var, GeoVaLFormat format) const {
+bool GeoVaLs::has(const oops::Variable & var, GeoVaLFormat format) const {
   if (explicitFormat(format) == GeoVaLFormat::SAMPLED)
     return vars_.has(var);
   else
     return reducedVars_.has(var);
 }
 // -----------------------------------------------------------------------------
-bool GeoVaLs::areReducedAndSampledFormatsAliased(const std::string & var) const {
-  return ufo_geovals_are_reduced_and_sampled_formats_aliased_f90(keyGVL_, var.size(), var.c_str());
+bool GeoVaLs::areReducedAndSampledFormatsAliased(const oops::Variable & var) const {
+  return ufo_geovals_are_reduced_and_sampled_formats_aliased_f90(keyGVL_,
+             var.name().size(), var.name().c_str());
 }
 // -----------------------------------------------------------------------------
 GeoVaLFormat GeoVaLs::defaultFormat() const {
@@ -481,8 +484,8 @@ int GeoVaLs::explicitFormatAsInt(GeoVaLFormat format) const {
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific 2D variable */
-void GeoVaLs::get(std::vector<float> & vals, const std::string & var, GeoVaLFormat format) const {
-  oops::Log::trace() << "GeoVaLs::get 2D for " << var
+void GeoVaLs::get(std::vector<float> & vals, const oops::Variable & var, GeoVaLFormat format) const
+{ oops::Log::trace() << "GeoVaLs::get 2D for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
   /// Call method to get double values (Fortran data structure stores data in double)
   /// and convert to floats
@@ -493,21 +496,22 @@ void GeoVaLs::get(std::vector<float> & vals, const std::string & var, GeoVaLForm
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and level */
-void GeoVaLs::getAtLevel(std::vector<double> & vals, const std::string & var, const int lev,
+void GeoVaLs::getAtLevel(std::vector<double> & vals, const oops::Variable & var, const int lev,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::getAtLevel(double) for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
   size_t nprofiles;
-  ufo_geovals_nprofiles_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
-                            nprofiles);
+  ufo_geovals_nprofiles_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                            explicitFormatAsInt(format), nprofiles);
   ASSERT(vals.size() == nprofiles);
-  ufo_geovals_getdouble_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format), lev,
+  ufo_geovals_getdouble_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                            explicitFormatAsInt(format), lev,
                             nprofiles, vals[0]);
   oops::Log::trace() << "GeoVaLs::getAtLevel(double) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and level and convert to float */
-void GeoVaLs::getAtLevel(std::vector<float> & vals, const std::string & var, const int lev,
+void GeoVaLs::getAtLevel(std::vector<float> & vals, const oops::Variable & var, const int lev,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::getAtLevel(float) for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
@@ -518,7 +522,7 @@ void GeoVaLs::getAtLevel(std::vector<float> & vals, const std::string & var, con
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and level and convert to int */
-void GeoVaLs::getAtLevel(std::vector<int> & vals, const std::string & var, const int lev,
+void GeoVaLs::getAtLevel(std::vector<int> & vals, const oops::Variable & var, const int lev,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::getAtLevel(int) for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
@@ -529,19 +533,19 @@ void GeoVaLs::getAtLevel(std::vector<int> & vals, const std::string & var, const
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific 2D variable */
-void GeoVaLs::get(std::vector<double> & vals, const std::string & var,
+void GeoVaLs::get(std::vector<double> & vals, const oops::Variable & var,
                   GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::get 2D for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
   const size_t nprofiles = this->nprofiles(var, format);
   ASSERT(vals.size() == nprofiles);
-  ufo_geovals_get2d_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
-                        nprofiles, vals[0]);
+  ufo_geovals_get2d_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                        explicitFormatAsInt(format), nprofiles, vals[0]);
   oops::Log::trace() << "GeoVaLs::get 2D(double) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific 2D variable */
-void GeoVaLs::get(std::vector<int> & vals, const std::string & var,
+void GeoVaLs::get(std::vector<int> & vals, const oops::Variable & var,
                   GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::get 2D for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
@@ -554,18 +558,18 @@ void GeoVaLs::get(std::vector<int> & vals, const std::string & var,
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::getProfile(std::vector<double> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int profileIndex,
                          GeoVaLFormat format) const {
   const size_t nlevs = this->nlevs(var, format);
   ASSERT(vals.size() == nlevs);
   ASSERT(profileIndex >= 0 && profileIndex < this->nprofiles(var, format));
-  ufo_geovals_get_profile_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
-                              profileIndex, nlevs, vals[0]);
+  ufo_geovals_get_profile_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                              explicitFormatAsInt(format), profileIndex, nlevs, vals[0]);
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::getProfile(std::vector<float> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int profileIndex,
                          GeoVaLFormat format) const {
   std::vector <double> doubleVals(vals.size());
@@ -574,7 +578,7 @@ void GeoVaLs::getProfile(std::vector<float> & vals,
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::getProfile(std::vector<int> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int profileIndex,
                          GeoVaLFormat format) const {
   std::vector <double> doubleVals(vals.size());
@@ -584,7 +588,7 @@ void GeoVaLs::getProfile(std::vector<int> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and location */
 void GeoVaLs::getAtLocation(std::vector<double> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int loc,
                             GeoVaLFormat format) const {
   ASSERT(this->nprofiles(var, format) == this->nlocs());
@@ -593,7 +597,7 @@ void GeoVaLs::getAtLocation(std::vector<double> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and location and convert to float */
 void GeoVaLs::getAtLocation(std::vector<float> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int loc,
                             GeoVaLFormat format) const {
   ASSERT(this->nprofiles(var, format) == this->nlocs());
@@ -602,7 +606,7 @@ void GeoVaLs::getAtLocation(std::vector<float> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Return all values for a specific variable and location and convert to int */
 void GeoVaLs::getAtLocation(std::vector<int> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int loc,
                             GeoVaLFormat format) const {
   ASSERT(this->nprofiles(var, format) == this->nlocs());
@@ -611,21 +615,22 @@ void GeoVaLs::getAtLocation(std::vector<int> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Put double values for a specific variable and level */
 void GeoVaLs::putAtLevel(const std::vector<double> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int lev,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::putAtLevel(double) for " << var
                      << " in " << explicitFormat(format) << " starting" << std::endl;
   const size_t np = this->nprofiles(var, format);
   ASSERT(vals.size() == np);
-  ufo_geovals_putdouble_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
+  ufo_geovals_putdouble_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                            explicitFormatAsInt(format),
                             lev, np, vals[0]);
   oops::Log::trace() << "GeoVaLs::putAtLevel(double) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Put float values for a specific variable and level */
 void GeoVaLs::putAtLevel(const std::vector<float> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int lev,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::putAtLevel(float) for " << var
@@ -637,7 +642,7 @@ void GeoVaLs::putAtLevel(const std::vector<float> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Put int values for a specific variable and level */
 void GeoVaLs::putAtLevel(const std::vector<int> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int lev,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::putAtLevel(int) for " << var
@@ -648,7 +653,7 @@ void GeoVaLs::putAtLevel(const std::vector<int> & vals,
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::putProfile(const std::vector<double> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int profileIndex,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::putProfile(double) for " << var
@@ -656,13 +661,13 @@ void GeoVaLs::putProfile(const std::vector<double> & vals,
   const size_t nlevs = this->nlevs(var, format);
   ASSERT(vals.size() == nlevs);
   ASSERT(profileIndex >= 0 && profileIndex < this->nprofiles(var, format));
-  ufo_geovals_put_profile_f90(keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
-                              profileIndex, nlevs, vals[0]);
+  ufo_geovals_put_profile_f90(keyGVL_, var.name().size(), var.name().c_str(),
+                              explicitFormatAsInt(format), profileIndex, nlevs, vals[0]);
   oops::Log::trace() << "GeoVaLs::putProfile(double) done" << std::endl;
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::putProfile(const std::vector<float> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int profileIndex,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::putProfile(float) for " << var
@@ -673,7 +678,7 @@ void GeoVaLs::putProfile(const std::vector<float> & vals,
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::putProfile(const std::vector<int> & vals,
-                         const std::string & var,
+                         const oops::Variable & var,
                          const int profileIndex,
                          GeoVaLFormat format) const {
   oops::Log::trace() << "GeoVaLs::putProfile(int) for " << var
@@ -685,7 +690,7 @@ void GeoVaLs::putProfile(const std::vector<int> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Put double values for a specific variable and location */
 void GeoVaLs::putAtLocation(const std::vector<double> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int loc,
                             GeoVaLFormat format) const {
   ASSERT(this->nprofiles(var, format) == this->nlocs());
@@ -694,7 +699,7 @@ void GeoVaLs::putAtLocation(const std::vector<double> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Put float values for a specific variable and location */
 void GeoVaLs::putAtLocation(const std::vector<float> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int loc,
                             GeoVaLFormat format) const {
   ASSERT(this->nprofiles(var, format) == this->nlocs());
@@ -703,7 +708,7 @@ void GeoVaLs::putAtLocation(const std::vector<float> & vals,
 // -----------------------------------------------------------------------------
 /*! \brief Put int values for a specific variable and location */
 void GeoVaLs::putAtLocation(const std::vector<int> & vals,
-                            const std::string & var,
+                            const oops::Variable & var,
                             const int loc,
                             GeoVaLFormat format) const {
   ASSERT(this->nprofiles(var, format) == this->nlocs());
@@ -711,16 +716,16 @@ void GeoVaLs::putAtLocation(const std::vector<int> & vals,
 }
 // -----------------------------------------------------------------------------
 void GeoVaLs::getProfileIndicesGroupedByLocation(
-    const std::string &var,
+    const oops::Variable &var,
     std::vector<util::Range<size_t>> &profileIndicesByLocation,
     GeoVaLFormat format) const {
   profileIndicesByLocation.resize(this->nlocs());
   ufo_geovals_get_profile_indices_grouped_by_loc_f90(
-        keyGVL_, var.size(), var.c_str(), explicitFormatAsInt(format),
+        keyGVL_, var.name().size(), var.name().c_str(), explicitFormatAsInt(format),
         profileIndicesByLocation.size(), profileIndicesByLocation.data());
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::fill(const std::string &name, const ConstVectorRef<size_t> &indx,
+void GeoVaLs::fill(const oops::Variable &var, const ConstVectorRef<size_t> &indx,
                    const ConstMatrixRef<double> &vals, const bool levelsTopDown) {
   oops::Log::trace() << "GeoVaLs::fill starting" << std::endl;
   const size_t npts = indx.size();
@@ -728,13 +733,13 @@ void GeoVaLs::fill(const std::string &name, const ConstVectorRef<size_t> &indx,
   std::vector<int> findx(indx.size());
   for (Eigen::Index jj = 0; jj < indx.size(); ++jj) findx[jj] = indx[jj];
 
-  ufo_geovals_fill_f90(keyGVL_, name.size(), name.data(),
+  ufo_geovals_fill_f90(keyGVL_, var.name().size(), var.name().data(),
                        npts, findx.data(), nlev, vals.data(), levelsTopDown);
 
   oops::Log::trace() << "GeoVaLs::fill done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::fillAD(const std::string &name, const ConstVectorRef<size_t> &indx,
+void GeoVaLs::fillAD(const oops::Variable &var, const ConstVectorRef<size_t> &indx,
                      MatrixRef<double> vals, const bool levelsTopDown) const {
   oops::Log::trace() << "GeoVaLs::fillAD starting" << std::endl;
   const size_t npts = indx.size();
@@ -742,7 +747,7 @@ void GeoVaLs::fillAD(const std::string &name, const ConstVectorRef<size_t> &indx
   std::vector<int> findx(indx.size());
   for (Eigen::Index jj = 0; jj < indx.size(); ++jj) findx[jj] = indx[jj];
 
-  ufo_geovals_fillad_f90(keyGVL_, name.size(), name.data(),
+  ufo_geovals_fillad_f90(keyGVL_, var.name().size(), var.name().data(),
                             npts, findx.data(), nlev, vals.data(), levelsTopDown);
 
   oops::Log::trace() << "GeoVaLs::fillAD done" << std::endl;

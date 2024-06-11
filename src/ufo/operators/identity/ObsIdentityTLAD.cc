@@ -61,12 +61,12 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
   oops::Log::trace() << "ObsIdentityTLAD: TL observation operator starting" << std::endl;
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string &varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+    const oops::Variable &var = nameMap_.convertName(dy.varnames().variables()[jvar]);
     // Fill dy with dx at the level closest to the Earth's surface.
     if (levelIndexZeroAtSurface_) {
-      dx.getAtLevel(vec, varname, 0);
+      dx.getAtLevel(vec, var, 0);
     } else {
-      dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
+      dx.getAtLevel(vec, var, dx.nlevs(var) - 1);
     }
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
@@ -87,12 +87,12 @@ void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string &varname = nameMap_.convertName(dy.varnames().variables()[jvar]);
+    const oops::Variable &var = nameMap_.convertName(dy.varnames().variables()[jvar]);
     // Get current value of dx at the level closest to the Earth's surface.
     if (levelIndexZeroAtSurface_) {
-      dx.getAtLevel(vec, varname, 0);
+      dx.getAtLevel(vec, var, 0);
     } else {
-      dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
+      dx.getAtLevel(vec, var, dx.nlevs(var) - 1);
     }
     // Increment dx with non-missing values of dy.
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
@@ -103,9 +103,9 @@ void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
     }
     // Store new value of dx.
     if (levelIndexZeroAtSurface_) {
-      dx.putAtLevel(vec, varname, 0);
+      dx.putAtLevel(vec, var, 0);
     } else {
-      dx.putAtLevel(vec, varname, dx.nlevs(varname) - 1);
+      dx.putAtLevel(vec, var, dx.nlevs(var) - 1);
     }
   }
 

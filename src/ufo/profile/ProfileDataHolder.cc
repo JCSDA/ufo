@@ -20,7 +20,7 @@ namespace ufo {
   void ProfileDataHolder::fill(const std::vector <std::string> &variableNamesInt,
                                const std::vector <std::string> &variableNamesFloat,
                                const std::vector <std::string> &variableNamesString,
-                               const std::vector <std::string> &variableNamesGeoVaLs)
+                               const oops::Variables &variableNamesGeoVaLs)
   {
     variableNamesInt_ = variableNamesInt;
     variableNamesFloat_ = variableNamesFloat;
@@ -37,13 +37,13 @@ namespace ufo {
       profileGeoVaLs_.emplace(variable, profileDataHandler_.getGeoVaLVector(variable));
   }
 
-  std::vector <float>& ProfileDataHolder::getGeoVaLVector(const std::string &fullname)
+  std::vector <float>& ProfileDataHolder::getGeoVaLVector(const oops::Variable &var)
   {
-    auto it_profileGeoVaLs = profileGeoVaLs_.find(fullname);
+    auto it_profileGeoVaLs = profileGeoVaLs_.find(var);
     if (it_profileGeoVaLs != profileGeoVaLs_.end()) {
       return it_profileGeoVaLs->second;
     } else {
-      throw eckit::BadValue("GeoVaL " + fullname + " not present in profile. "
+      throw eckit::BadValue("GeoVaL " + var.name() + " not present in profile. "
                             "Please add it to the relevant argument in the call "
                             "to produceProfileVector()", Here());
     }

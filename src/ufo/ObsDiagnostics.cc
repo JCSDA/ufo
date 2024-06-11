@@ -44,13 +44,13 @@ void ObsDiagnostics::allocate(const int nlev, const oops::ObsVariables & vars) {
 void ObsDiagnostics::save(const std::vector<double> & vals,
                           const std::string & var,
                           const int lev) {
-  gdiags_.putAtLevel(vals, var, lev);
+  gdiags_.putAtLevel(vals, oops::Variable(var), lev);
 }
 
 // -----------------------------------------------------------------------------
 
 size_t ObsDiagnostics::nlevs(const std::string & var) const {
-  return gdiags_.nlevs(var);
+  return gdiags_.nlevs(oops::Variable(var));
 }
 
 // -----------------------------------------------------------------------------

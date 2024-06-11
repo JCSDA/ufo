@@ -86,13 +86,13 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
 
   // Retrieve temperature increment in K
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.getAtLevel(tmpvar2d, "air_temperature", i);  // get one level T
+      dx.getAtLevel(tmpvar2d, oops::Variable{"air_temperature"}, i);  // get one level T
       dT.push_back(tmpvar2d);  // push one level T into 3D T
   }
 
   // Retrieve specific humidity increment in kg/kg
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.getAtLevel(tmpvar2d, "specific_humidity", i);  // get one level Q
+      dx.getAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, i);  // get one level Q
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
@@ -132,13 +132,13 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
 
   // Retrieve temperature increment in K
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.getAtLevel(tmpvar2d, "air_temperature", i);  // get one level T
+      dx.getAtLevel(tmpvar2d, oops::Variable{"air_temperature"}, i);  // get one level T
       dT.push_back(tmpvar2d);  // push one level T into 3D T
   }
 
   // Retrieve specific humidity increment in kg/kg
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.getAtLevel(tmpvar2d, "specific_humidity", i);  // get one level Q
+      dx.getAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, i);  // get one level Q
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
@@ -173,7 +173,7 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
       for (size_t p = 0; p < nprofiles; p++) {
           tmpvar2d[p] = dT[l][p];
       }
-      dx.putAtLevel(tmpvar2d, "air_temperature", l);  // put one level T
+      dx.putAtLevel(tmpvar2d, oops::Variable{"air_temperature"}, l);  // put one level T
   }
 
   // Put specific humidity increment in kg/kg
@@ -181,7 +181,7 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
       for (size_t p = 0; p < nprofiles; p++) {
           tmpvar2d[p] = dQ[l][p];
       }
-      dx.putAtLevel(tmpvar2d, "specific_humidity", l);  // put one level Q
+      dx.putAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, l);  // put one level Q
   }
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::simulateObsAD done" << std::endl;

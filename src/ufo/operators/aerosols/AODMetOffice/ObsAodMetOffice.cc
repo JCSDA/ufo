@@ -78,16 +78,17 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
 
   // Get number of obs locations & number of model pressure levels:
   std::size_t nprofiles = geovals.nlocs();
-  std::size_t nlevels   = geovals.nlevs("air_pressure_levels");  // number of full (rho) levels
+  // number of full (rho) levels
+  std::size_t nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});
 
   // Get 2-D surface pressure
   std::vector<double> ps(nprofiles);  // surface pressure (Pa)
-  geovals.get(ps, "surface_pressure");
+  geovals.get(ps, oops::Variable{"surface_pressure"});
 
   // Get 3-D air pressure on rho levels (Pa), one level at a time
   std::vector<std::vector<double>> plev(nlevels, std::vector<double>(nprofiles));
   for (std::size_t i = 0; i < nlevels; ++i) {
-        geovals.getAtLevel(plev[i], "air_pressure_levels", i);
+        geovals.getAtLevel(plev[i], oops::Variable{"air_pressure_levels"}, i);
         }
 
   // check model fields are from top-down, fail if not
@@ -97,15 +98,14 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
 
   double alpha;
   std::vector<double> mass(nlevels - 1);  // mass concentration on half (theta) levels
-  std::string dust_var_name;  // dust variable name in geovals
 
   // loop over profiles
   for (size_t p = 0; p < nprofiles; p++) {
     // loop over dust bins
     for (size_t d = 0; d < NDustBins_; d++) {
       // get mass concentration for dust bin d
-      dust_var_name = "mass_fraction_of_dust00" + std::to_string(d+1) + "_in_air";
-      geovals.getAtLocation(mass, dust_var_name, p);
+      oops::Variable dust_var{"mass_fraction_of_dust00" + std::to_string(d+1) + "_in_air"};
+      geovals.getAtLocation(mass, dust_var, p);
       // start with lowest model layer, using surface pressure
       // NB this assumes the first mass layer is the lowest layer just above the surface
       alpha = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 2][p]) * AodKExt_[d];

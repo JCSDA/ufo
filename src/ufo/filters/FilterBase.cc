@@ -101,13 +101,12 @@ void FilterBase::doFilter() const {
 
   ufo::Variables vars;
   if (post_) {
-    oops::Variables oopsfiltersimvars = filtersimvars_.toOopsVariables();
     vars += filtersimvars_;
     if (allvars_.hasGroup("HofX")) {
-      for (size_t jv = 0; jv < filtersimvars_.toOopsVariables().size(); ++jv) {
-        if (!obsdb_.assimvariables().has(filtersimvars_.toOopsVariables()[jv])) {
+      for (size_t jv = 0; jv < filtersimvars_.toOopsObsVariables().size(); ++jv) {
+        if (!obsdb_.assimvariables().has(filtersimvars_.toOopsObsVariables()[jv])) {
           throw eckit::UserError("Filter variable '"
-                                 + filtersimvars_.toOopsVariables()[jv] +
+                                 + filtersimvars_.toOopsObsVariables()[jv] +
                                  "' is not a simulated variable,"
                                  " but an HofX is required", Here());
         }

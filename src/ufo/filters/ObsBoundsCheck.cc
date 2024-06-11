@@ -123,7 +123,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
     ASSERT(filtervars.nvars() == flagged.size());
     // Convert to an oops variables which contains a simple list of variables
     // expanding out the channels and therefore it matches the testvars list
-    const oops::Variables filtervarslist = filtervars.toOopsVariables();
+    const oops::ObsVariables filtervarslist = filtervars.toOopsObsVariables();
     // Loop over all channels of all test variables and record all locations where any of these
     // channels is out of bounds.
     std::vector<bool> anyTestVarOutOfBounds(obsdb_.nlocs(), false);

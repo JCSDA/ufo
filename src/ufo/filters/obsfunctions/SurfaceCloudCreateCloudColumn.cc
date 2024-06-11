@@ -132,7 +132,7 @@ void SurfaceCloudCreateCloudColumn::compute(const ObsFilterData & in,
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     std::fill(cloudBaseHeight.begin(), cloudBaseHeight.end(), missing);
     std::vector<float> Height(nlevs);
-    gv->getAtLocation(Height, "height", iloc);
+    gv->getAtLocation(Height, oops::Variable{"height"}, iloc);
     cloudBaseHeight[0] = modelLevelCBH[iloc];
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       // Now check whether the Height of each model level is above or below

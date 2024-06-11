@@ -75,8 +75,8 @@ void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
   const double missingDouble = util::missingValue<double>();
 
   const std::size_t nlocs = odb_.nlocs();
-  const std::size_t nlevs_uv = dx.nlevs("eastward_wind");
-  const std::size_t nlevs_w = dx.nlevs("upward_air_velocity");
+  const std::size_t nlevs_uv = dx.nlevs(oops::Variable{"eastward_wind"});
+  const std::size_t nlevs_w = dx.nlevs(oops::Variable{"upward_air_velocity"});
 
   // Obtain beam geometry variables.
   // These must have been precomputed before running the observation operator.
@@ -104,9 +104,9 @@ void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
     }
 
     // Get existing increments.
-    dx.getAtLocation(inc_u, "eastward_wind", jloc);
-    dx.getAtLocation(inc_v, "northward_wind", jloc);
-    dx.getAtLocation(inc_w, "upward_air_velocity", jloc);
+    dx.getAtLocation(inc_u, oops::Variable{"eastward_wind"}, jloc);
+    dx.getAtLocation(inc_v, oops::Variable{"northward_wind"}, jloc);
+    dx.getAtLocation(inc_w, oops::Variable{"upward_air_velocity"}, jloc);
 
     // Update increment components.
     const std::vector<double> & vec_z_uv = data_.heightGeoVaLs_uv()[jloc];
@@ -127,9 +127,9 @@ void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
     inc_w[idx_w + 1] += dy[jloc] * sinTilt[jloc] * (1.0 - weight_w);
 
     // Store new increments.
-    dx.putAtLocation(inc_u, "eastward_wind", jloc);
-    dx.putAtLocation(inc_v, "northward_wind", jloc);
-    dx.putAtLocation(inc_w, "upward_air_velocity", jloc);
+    dx.putAtLocation(inc_u, oops::Variable{"eastward_wind"}, jloc);
+    dx.putAtLocation(inc_v, oops::Variable{"northward_wind"}, jloc);
+    dx.putAtLocation(inc_w, oops::Variable{"upward_air_velocity"}, jloc);
   }
 
   oops::Log::trace() << "ObsRadarDopplerWindTLAD: simulateObsAD finished" <<  std::endl;

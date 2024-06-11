@@ -307,7 +307,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if (inflatevars.compare("specificHumidity") == 0) {
             if ((itype[iloc] > 179 && itype[iloc] < 186) ||
                 (itype[iloc] == 199)) dpres = 1.0;
-            gvals->getAtLocation(q_profile, "saturation_specific_humidity", iloc);
+            gvals->getAtLocation(q_profile, oops::Variable{"saturation_specific_humidity"}, iloc);
             std::reverse(q_profile.begin(), q_profile.end());
 
             ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile);

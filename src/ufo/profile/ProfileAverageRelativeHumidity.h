@@ -59,8 +59,9 @@ namespace ufo {
 
     /// List of names of GeoVaLs used in check validation.
     oops::Variables getValidationGeoVaLNames() override {
-      return oops::Variables({ufo::VariableNames::geovals_testreference_relative_humidity,
-            ufo::VariableNames::geovals_testreference_relative_humidity_qcflags
+      return oops::Variables({oops::Variable
+                              {ufo::VariableNames::geovals_testreference_relative_humidity},
+            oops::Variable{ufo::VariableNames::geovals_testreference_relative_humidity_qcflags}
             });}
 
    private:

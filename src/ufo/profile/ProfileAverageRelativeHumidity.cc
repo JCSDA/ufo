@@ -46,8 +46,8 @@ namespace ufo {
        ufo::VariableNames::modellevels_logP_rho_derived,
        ufo::VariableNames::air_temperature_derived,
        ufo::VariableNames::relative_humidity_derived};
-    std::vector <std::string> variableNamesGeoVaLs =
-      {ufo::VariableNames::geovals_relative_humidity};
+    oops::Variables variableNamesGeoVaLs{
+      {oops::Variable{ufo::VariableNames::geovals_relative_humidity}}};
 
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
@@ -56,10 +56,10 @@ namespace ufo {
       variableNamesFloat.insert
         (variableNamesFloat.end(),
          {addOPSPrefix(ufo::VariableNames::relative_humidity_derived)});
-      variableNamesGeoVaLs.insert
-        (variableNamesGeoVaLs.end(),
-         {ufo::VariableNames::geovals_testreference_relative_humidity,
-             ufo::VariableNames::geovals_testreference_relative_humidity_qcflags});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                                     {ufo::VariableNames::geovals_testreference_relative_humidity});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                             {ufo::VariableNames::geovals_testreference_relative_humidity_qcflags});
     }
 
     std::vector <ProfileDataHolder> profiles =
@@ -95,8 +95,8 @@ namespace ufo {
            jprof >= halfnprofs,
            ufo::VariableNames::relative_humidity_derived,
            ufo::VariableNames::qcflags_relative_humidity,
-           ufo::VariableNames::geovals_testreference_relative_humidity,
-           ufo::VariableNames::geovals_testreference_relative_humidity_qcflags);
+           oops::Variable{ufo::VariableNames::geovals_testreference_relative_humidity},
+           oops::Variable{ufo::VariableNames::geovals_testreference_relative_humidity_qcflags});
       }
     }
 
@@ -160,7 +160,8 @@ namespace ufo {
 
     // Obtain GeoVaLs.
     std::vector <float> &geovals_relative_humidity =
-      profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_relative_humidity);
+      profileOriginal.getGeoVaLVector(oops::Variable
+                                                   {ufo::VariableNames::geovals_relative_humidity});
     if (geovals_relative_humidity.empty())
       throw eckit::BadValue("GeoVaLs vector is empty.", Here());
 

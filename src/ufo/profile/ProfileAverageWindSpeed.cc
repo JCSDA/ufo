@@ -48,8 +48,8 @@ namespace ufo {
        ufo::VariableNames::modellevels_logP_derived,
        ufo::VariableNames::eastward_wind_derived,
        ufo::VariableNames::northward_wind_derived};
-    std::vector <std::string> variableNamesGeoVaLs =
-      {ufo::VariableNames::geovals_surface_pressure};
+    oops::Variables variableNamesGeoVaLs{
+      {oops::Variable{ufo::VariableNames::geovals_surface_pressure}}};
 
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
@@ -60,12 +60,14 @@ namespace ufo {
         (variableNamesFloat.end(),
          {addOPSPrefix(ufo::VariableNames::eastward_wind_derived),
              addOPSPrefix(ufo::VariableNames::northward_wind_derived)});
-      variableNamesGeoVaLs.insert
-        (variableNamesGeoVaLs.end(),
-        {ufo::VariableNames::geovals_testreference_eastward_wind,
-            ufo::VariableNames::geovals_testreference_eastward_wind_qcflags,
-            ufo::VariableNames::geovals_testreference_northward_wind,
-            ufo::VariableNames::geovals_testreference_northward_wind_qcflags});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                                     {ufo::VariableNames::geovals_testreference_eastward_wind});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                                 {ufo::VariableNames::geovals_testreference_eastward_wind_qcflags});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                                     {ufo::VariableNames::geovals_testreference_northward_wind});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                                {ufo::VariableNames::geovals_testreference_northward_wind_qcflags});
     }
 
     std::vector <ProfileDataHolder> profiles =
@@ -106,15 +108,15 @@ namespace ufo {
            jprof >= halfnprofs,
            ufo::VariableNames::eastward_wind_derived,
            ufo::VariableNames::qcflags_eastward_wind,
-           ufo::VariableNames::geovals_testreference_eastward_wind,
-           ufo::VariableNames::geovals_testreference_eastward_wind_qcflags);
+           oops::Variable{ufo::VariableNames::geovals_testreference_eastward_wind},
+           oops::Variable{ufo::VariableNames::geovals_testreference_eastward_wind_qcflags});
         ProfileAverageUtils::fillValidationData
           (profiles[jprof],
            jprof >= halfnprofs,
            ufo::VariableNames::northward_wind_derived,
            ufo::VariableNames::qcflags_northward_wind,
-           ufo::VariableNames::geovals_testreference_northward_wind,
-           ufo::VariableNames::geovals_testreference_northward_wind_qcflags);
+           oops::Variable{ufo::VariableNames::geovals_testreference_northward_wind},
+           oops::Variable{ufo::VariableNames::geovals_testreference_northward_wind_qcflags});
       }
     }
 
@@ -195,7 +197,7 @@ namespace ufo {
 
     // Obtain GeoVaLs surface pressure and eastward wind speed.
     std::vector <float> &geovals_surface_pressure =
-      profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_surface_pressure);
+      profileOriginal.getGeoVaLVector(oops::Variable{ufo::VariableNames::geovals_surface_pressure});
     if (geovals_surface_pressure.empty())
       throw eckit::BadValue("Surface pressure GeoVaLs vector is empty.", Here());
 

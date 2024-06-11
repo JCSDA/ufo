@@ -27,7 +27,7 @@ Cal_SatZenithAngleCorrection::Cal_SatZenithAngleCorrection(
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
-      variables_(parameters_.transformVariable.value().toOopsVariables()) {
+      variables_({parameters_.transformVariable.value()}) {
   ASSERT(parameters_.coeffA.value().size() == parameters_.transformVariable.value().size());
   ASSERT(parameters_.coeffB.value().size() == parameters_.transformVariable.value().size());
   ASSERT(parameters_.coeffC.value().size() == parameters_.transformVariable.value().size());

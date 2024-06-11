@@ -61,7 +61,7 @@ namespace ufo {
     const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 
     // Number of 'full' model levels
-    size_t nlevs = gvals->nlevs("virtual_temperature");
+    size_t nlevs = gvals->nlevs(oops::Variable{"virtual_temperature"});
 
     // Get observation height and pressure
     std::vector<double> obsPressure(nlocs);
@@ -82,10 +82,11 @@ namespace ufo {
 
     for (int iloc = 0; iloc < nlocs; ++iloc) {
       // Get the GeoVaLs at this location
-      gvals->getAtLocation(windReductionFactorAt10m, "wind_reduction_factor_at_10m", iloc);
-      gvals->getAtLocation(surfacePressure, "surface_pressure", iloc);
-      gvals->getAtLocation(airPressure, "air_pressure", iloc);
-      gvals->getAtLocation(virtualTemperature, "virtual_temperature", iloc);
+      gvals->getAtLocation(windReductionFactorAt10m, oops::Variable{"wind_reduction_factor_at_10m"},
+                                                                    iloc);
+      gvals->getAtLocation(surfacePressure, oops::Variable{"surface_pressure"}, iloc);
+      gvals->getAtLocation(airPressure, oops::Variable{"air_pressure"}, iloc);
+      gvals->getAtLocation(virtualTemperature, oops::Variable{"virtual_temperature"}, iloc);
 
       // For values above lowest model level the scaling factor is 1
       surfaceWindScalingPressure[iloc] = 1.0;

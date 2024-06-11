@@ -74,8 +74,8 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
   in.get(Variable(options_.observation_vertical_coordinate.value()), vert_coord_obs);
 
   // Name of model vertical coordinate.
-  const std::string model_vertical_coordinate =
-    options_.model_vertical_coordinate.value();
+  const oops::Variable model_vertical_coordinate{
+    options_.model_vertical_coordinate.value()};
 
   // Vector holding model vertical coordinate at different locations.
   std::vector<double> var_gv(gv->nlevs(model_vertical_coordinate));
@@ -99,7 +99,7 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
                                  *gv,
                                  locsOriginal,
                                  options_.observation_vertical_coordinate,
-                                 options_.model_vertical_coordinate,
+                                 oops::Variable{options_.model_vertical_coordinate},
                                  options_.numIntersectionIterations.value() - 1);
 
     // Write out values to output vector

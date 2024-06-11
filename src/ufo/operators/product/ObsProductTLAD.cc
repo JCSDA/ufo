@@ -72,7 +72,7 @@ void ObsProductTLAD::setTrajectory(const GeoVaLs & gv, ObsDiagnostics &, const Q
 
   // Get variable that will scale h(x)
   if (variableGroupToScaleHofxBy_ == "GeoVaLs") {
-    gv.get(scalingVariable_, variableNameToScaleHofxBy_);
+    gv.get(scalingVariable_, oops::Variable{variableNameToScaleHofxBy_});
   } else {
     // Get from the observation space
     odb_.get_db(variableGroupToScaleHofxBy_, variableNameToScaleHofxBy_, scalingVariable_);
@@ -117,11 +117,11 @@ void ObsProductTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
   std::vector<double> vec(dy.nlocs());
   const double missing = util::missingValue<double>();
   for (int jvar : operatorVarIndices_) {
-      const std::string varname = (geovalName_ == "")?
+    const oops::Variable var = (geovalName_ == "")?
                         nameMap_.convertName(dy.varnames().variables()[jvar])
-                        : geovalName_;
+                        : oops::Variable{geovalName_};
     // Fill dy with dx at the level closest to the Earth's surface.
-    dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
+    dx.getAtLevel(vec, var, dx.nlevs(var) - 1);
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
       if (scalingVariable_[jloc] != missing) {
@@ -143,11 +143,11 @@ void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
 
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
-      const std::string varname = (geovalName_ == "")?
+      const oops::Variable var = (geovalName_ == "")?
                         nameMap_.convertName(dy.varnames().variables()[jvar])
-                        : geovalName_;
+                        : oops::Variable{geovalName_};
     // Get current value of dx at the level closest to the Earth's surface.
-    dx.getAtLevel(vec, varname, dx.nlevs(varname) - 1);
+    dx.getAtLevel(vec, var, dx.nlevs(var) - 1);
     // Increment dx with non-missing values of dy.
     for (size_t jloc = 0; jloc < dy.nlocs(); ++jloc) {
       const size_t idx = jloc * dy.nvars() + jvar;
@@ -155,7 +155,7 @@ void ObsProductTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
         vec[jloc] += dy[idx] * scalingVariable_[jloc];
     }
     // Store new value of dx.
-    dx.putAtLevel(vec, varname, dx.nlevs(varname) - 1);
+    dx.putAtLevel(vec, var, dx.nlevs(var) - 1);
   }
 
   oops::Log::trace() << "ObsProductTLAD: adjoint observation operator finished" << std::endl;

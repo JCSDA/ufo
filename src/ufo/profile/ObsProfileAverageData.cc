@@ -18,7 +18,8 @@ namespace ufo {
                                                const ObsProfileAverageParameters & parameters,
                                                const VariableNameMap & nameMap)
     : odb_(odb),
-      options_(parameters)
+      options_(parameters),
+      modelVerticalCoord_(oops::Variable{options_.modelVerticalCoordinate})
   {
     // Ensure observations have been grouped into profiles.
     if (odb_.obs_group_vars().empty())
@@ -42,8 +43,7 @@ namespace ufo {
 
     // Add model air pressure to the list of variables used in this operator.
     // This GeoVaL is used to determine the slant path locations.
-    modelVerticalCoord_ = options_.modelVerticalCoordinate;
-    requiredVars_ += oops::Variables({modelVerticalCoord_});
+    requiredVars_.push_back(modelVerticalCoord_);
     geovalsObsSameDir_ = options_.geovalsObsSameDir;
 
     // Add any simulated variables to the list of variables used in this operator.

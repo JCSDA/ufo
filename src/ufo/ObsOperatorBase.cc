@@ -61,9 +61,9 @@ void ObsOperatorBase::computeReducedVars(const oops::Variables & /*vars*/, GeoVa
   // same piece of memory as) the sampled version -- it means we're expected to fill it, but we
   // don't know how. (If reduction of this variable is really needed, the obs operator should
   // override this method appropriately.)
-  for (size_t i = 0; i < allVars.size(); ++i) {
-    if (!gvals.areReducedAndSampledFormatsAliased(allVars[i]))
-      throw eckit::NotImplemented("Unable to reduce variable " + allVars[i], Here());
+  for (const auto & var : allVars) {
+    if (!gvals.areReducedAndSampledFormatsAliased(var))
+      throw eckit::NotImplemented("Unable to reduce variable " + var.name(), Here());
   }
 }
 

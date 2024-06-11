@@ -32,15 +32,16 @@ namespace ufo {
   {
     if (data.getGeoVaLs() && data.getGeoVaLs()->nlocs() > 0) {
       geovals_.reset(new GeoVaLs(*(data.getGeoVaLs())));
-      if (geovals_->has(ufo::VariableNames::geovals_pressure)) {
-        std::vector<float> vec_gv(geovals_->nlevs(ufo::VariableNames::geovals_pressure));
-        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure, 0);
+      oops::Variable pres_var{ufo::VariableNames::geovals_pressure};
+      oops::Variable pres_rho_var{ufo::VariableNames::geovals_pressure_rho_minus_one};
+      if (geovals_->has(pres_var)) {
+        std::vector<float> vec_gv(geovals_->nlevs(pres_var));
+        geovals_->getAtLocation(vec_gv, pres_var, 0);
         if (vec_gv.front() > vec_gv.back())
           throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
-      } else if (geovals_->has(ufo::VariableNames::geovals_pressure_rho_minus_one)) {
-        std::vector<float> vec_gv
-          (geovals_->nlevs(ufo::VariableNames::geovals_pressure_rho_minus_one));
-        geovals_->getAtLocation(vec_gv, ufo::VariableNames::geovals_pressure_rho_minus_one, 0);
+      } else if (geovals_->has(pres_rho_var)) {
+        std::vector<float> vec_gv(geovals_->nlevs(pres_rho_var));
+        geovals_->getAtLocation(vec_gv, pres_rho_var, 0);
         if (vec_gv.front() > vec_gv.back())
           throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
       } else {
@@ -215,24 +216,24 @@ namespace ufo {
     }
   }
 
-  std::string ProfileDataHandler::getAssociatedVerticalCoordinate
-  (const std::string & variableName) const
+  oops::Variable ProfileDataHandler::getAssociatedVerticalCoordinate
+  (const oops::Variable & variable) const
   {
     // Obtain the map between non-default vertical coordinates and variable names.
     const auto & alternativeVerticalCoordinate = options_.alternativeVerticalCoordinate.value();
-    auto it_altCoord = alternativeVerticalCoordinate.find(variableName);
+    auto it_altCoord = alternativeVerticalCoordinate.find(variable.name());
     if (it_altCoord != alternativeVerticalCoordinate.end()) {
       // This variable has an associated alternative vertical coordinate.
-      return it_altCoord->second;
+      return oops::Variable{it_altCoord->second};
     } else {
       // This variable uses the default vertical coordinate.
-      return options_.defaultVerticalCoordinate.value();
+      return oops::Variable{options_.defaultVerticalCoordinate.value()};
     }
   }
 
-  std::vector <float>& ProfileDataHandler::getGeoVaLVector(const std::string &variableName)
+  std::vector <float>& ProfileDataHandler::getGeoVaLVector(const oops::Variable &variable)
   {
-    auto it_GeoVaLData = GeoVaLData_.find(variableName);
+    auto it_GeoVaLData = GeoVaLData_.find(variable);
     if (it_GeoVaLData != GeoVaLData_.end()) {
       // If the GeoVaL vector is already present, return it.
       return it_GeoVaLData->second;
@@ -242,43 +243,43 @@ namespace ufo {
       // and there is at least one observation location.
       if (geovals_ &&
           obsdb_.nlocs() > 0 &&
-          geovals_->has(variableName)) {
+          geovals_->has(variable)) {
         // Locations at which to retrieve the GeoVaL.
         const std::vector<std::size_t> slant_path_location =
           ufo::getSlantPathLocations(obsdb_,
                                      *geovals_,
                                      profileIndices_->getProfileIndices(),
                                      ufo::VariableNames::obs_air_pressure,
-                                     this->getAssociatedVerticalCoordinate(variableName));
+                                     this->getAssociatedVerticalCoordinate(variable));
         // Vector storing GeoVaL data for current profile.
-        vec_GeoVaL_column.assign(geovals_->nlevs(variableName), 0.0);
+        vec_GeoVaL_column.assign(geovals_->nlevs(variable), 0.0);
         // Check the number of entries in the slant path location vector is equal
         // to the number of entries in the GeoVaL for this variable.
         // If not, throw an exception if the number of levels is greater than one.
         if (slant_path_location.size() == vec_GeoVaL_column.size()) {
-          std::vector<float> vec_GeoVaL_loc(geovals_->nlevs(variableName));
+          std::vector<float> vec_GeoVaL_loc(geovals_->nlevs(variable));
           // Take the GeoVaL at each slant path location and copy the relevant
           // value from each GeoVaL into the output vector.
           for (std::size_t mlev = 0; mlev < slant_path_location.size(); ++mlev) {
             const std::size_t jloc = slant_path_location[mlev];
-            geovals_->getAtLocation(vec_GeoVaL_loc, variableName, jloc);
+            geovals_->getAtLocation(vec_GeoVaL_loc, variable, jloc);
             vec_GeoVaL_column[mlev] = vec_GeoVaL_loc[slant_path_location.size() - 1 - mlev];
           }
         } else {
           // Upper-air variables must be the correct length. Throw an exception if not.
           if (vec_GeoVaL_column.size() > 1)
-            throw eckit::UserError(std::string("Incorrect GeoVaL length for ") + variableName,
+            throw eckit::UserError(std::string("Incorrect GeoVaL length for ") + variable.name(),
                                    Here());
 
           // Take the GeoVaL at the first location for surface variables.
           const std::size_t jloc = profileIndices_->getProfileIndices()[0];
-          geovals_->getAtLocation(vec_GeoVaL_column, variableName, jloc);
+          geovals_->getAtLocation(vec_GeoVaL_column, variable, jloc);
           std::reverse(vec_GeoVaL_column.begin(), vec_GeoVaL_column.end());
         }
       }
       // Add GeoVaL vector to map (even if it is empty).
-      GeoVaLData_.emplace(variableName, std::move(vec_GeoVaL_column));
-      return GeoVaLData_[variableName];
+      GeoVaLData_.emplace(variable, std::move(vec_GeoVaL_column));
+      return GeoVaLData_[variable];
     }
   }
 
@@ -286,7 +287,7 @@ namespace ufo {
   (const std::vector <std::string> &variableNamesInt,
    const std::vector <std::string> &variableNamesFloat,
    const std::vector <std::string> &variableNamesString,
-   const std::vector <std::string> &variableNamesGeoVaLs)
+   const oops::Variables &variableNamesGeoVaLs)
   {
     profileIndices_->reset();
     std::vector <ProfileDataHolder> profiles;

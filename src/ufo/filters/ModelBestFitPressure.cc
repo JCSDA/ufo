@@ -91,15 +91,15 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
   const float tolerance_pressure = parameters_.tolerance_pressure.value();
   const bool calculate_best_fit_winds = parameters_.calculate_best_fit_winds.value();
   // get names of GeoVal variables
-  const std::string model_pressure_name = parameters_.model_pressure.value().variable();
-  const std::string model_eastvec_name = "eastward_wind";
-  const std::string model_northvec_name = "northward_wind";
+  const oops::Variable model_pressure_name = parameters_.model_pressure.value().toOopsVariable();
+  const oops::Variable model_eastvec_name{"eastward_wind"};
+  const oops::Variable model_northvec_name{"northward_wind"};
   const std::string obs_eastvec_name = "windEastward";
   const std::string obs_northvec_name = "windNorthward";
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
   // Get number of vertical levels in GeoVaLs
-  const size_t num_level = data_.nlevs(Variable("GeoVaLs/" + model_eastvec_name));
+  const size_t num_level = gvals->nlevs(model_eastvec_name);
 
   std::vector<float> satwind_best_fit_press(nlocs, missing);
   std::vector<float> satwind_best_fit_eastward_wind;

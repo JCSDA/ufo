@@ -21,7 +21,7 @@ namespace ufo {
                                                  const GeoVaLs & gv,
                                                  const std::vector<std::size_t> & locs,
                                                  const std::string & obsVerticalCoord,
-                                                 const std::string & modelVerticalCoord,
+                                                 const oops::Variable & modelVerticalCoord,
                                                  const int itermax) {
     const float missing = util::missingValue<float>();
 

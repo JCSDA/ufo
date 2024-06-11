@@ -28,7 +28,7 @@ Cal_SatRadianceFromScaledRadiance::Cal_SatRadianceFromScaledRadiance(
     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
-      variables_(parameters_.transformVariable.value().toOopsVariables()),
+      variables_({parameters_.transformVariable.value()}),
       channels_(parameters_.transformVariable.value().channels()) {
   size_t numScaleFactors = parameters_.numScaleFactors.value();
   for (std::size_t i = 0; i < numScaleFactors; ++i) {

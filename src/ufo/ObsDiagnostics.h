@@ -59,15 +59,15 @@ class ObsDiagnostics : public util::Printable,
   int & toFortran() {return gdiags_.toFortran();}
   const int & toFortran() const {return gdiags_.toFortran();}
 
-  bool has(const std::string & var) const {return gdiags_.has(var);}
+  bool has(const std::string & var) const {return gdiags_.has(oops::Variable(var));}
   size_t nlevs(const std::string &) const;
   template <typename T>
   void get(std::vector<T> & vals, const std::string & var, const int lev) const {
-    gdiags_.getAtLevel(vals, var, lev);
+    gdiags_.getAtLevel(vals, oops::Variable(var), lev);
   }
   template <typename T>
   void get(std::vector<T> & vals, const std::string & var) const {
-    gdiags_.get(vals, var);
+    gdiags_.get(vals, oops::Variable(var));
   }
 
   void write(const eckit::Configuration & config) const {

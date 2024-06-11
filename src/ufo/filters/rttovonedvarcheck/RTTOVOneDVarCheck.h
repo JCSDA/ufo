@@ -66,6 +66,7 @@ class RTTOVOneDVarCheck : public FilterBase,
 
   F90obfilter keyRTTOVOneDVarCheck_;
   std::vector<int> channels_;
+  // TODO(AS): Danger: below should be ObsVariables but need to figure out GeoVals vs ObsDiagnostics
   oops::Variables retrieved_vars_;
   oops::Variables hoxdiags_retrieved_vars_;
   Parameters_ parameters_;

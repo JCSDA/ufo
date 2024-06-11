@@ -46,7 +46,7 @@ ObsBackgroundErrorVertInterp::ObsBackgroundErrorVertInterp(const ioda::ObsSpace 
   getOperatorVariables(parameters.variables.value(), obsVars,
                        operatorVars, operatorVarIndices);
   for (auto ivar : operatorVarIndices)
-    requiredVars_.push_back(nameMap_.convertName(obsVars[ivar]) + "_background_error");
+    requiredVars_.push_back(nameMap_.convertName(obsVars[ivar]).name() + "_background_error");
 
   oops::Log::trace() << "ObsBackgroundErrorVertInterp created" << std::endl;
 }

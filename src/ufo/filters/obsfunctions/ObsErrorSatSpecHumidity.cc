@@ -88,8 +88,8 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
   std::vector<double> q_profile(nlevs, 0.0);
 
   for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-    gvals->getAtLocation(pressure_gval, "air_pressure", jobs);
-    gvals->getAtLocation(q_profile, "saturation_specific_humidity", jobs);
+    gvals->getAtLocation(pressure_gval, oops::Variable{"air_pressure"}, jobs);
+    gvals->getAtLocation(q_profile, oops::Variable{"saturation_specific_humidity"}, jobs);
 
     // Convert pressure to log(pressure)
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {

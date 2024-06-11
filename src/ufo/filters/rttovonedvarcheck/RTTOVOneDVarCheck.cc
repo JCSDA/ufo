@@ -60,12 +60,12 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
   // Create hofxdiags
   for (size_t jvar = 0; jvar < retrieved_vars_.size(); ++jvar) {
     for (size_t jch = 0; jch < channels_.size(); ++jch) {
-      if (retrieved_vars_[jvar] == "emissivity_pc") {
-        hoxdiags_retrieved_vars_.push_back("brightness_temperature_jacobian_surface_emissivity_" +
-                     std::to_string(channels_[jch]));
+      if (retrieved_vars_[jvar].name() == "emissivity_pc") {
+        hoxdiags_retrieved_vars_.push_back(oops::Variable{
+          "brightness_temperature_jacobian_surface_emissivity_" + std::to_string(channels_[jch])});
       } else {
-        hoxdiags_retrieved_vars_.push_back("brightness_temperature_jacobian_" +
-                     retrieved_vars_[jvar] + "_" + std::to_string(channels_[jch]));
+        hoxdiags_retrieved_vars_.push_back(oops::Variable{"brightness_temperature_jacobian_" +
+                     retrieved_vars_[jvar].name() + "_" + std::to_string(channels_[jch])});
       }
     }
   }
@@ -108,9 +108,9 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 
 // Get air_pressure for first ob to check they are top to bottom
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
-  const size_t nlevels = gvals->nlevs("air_pressure");
+  const size_t nlevels = gvals->nlevs(oops::Variable{"air_pressure"});
   std::vector<double> airPressureObOne(nlevels);
-  gvals->getAtLocation(airPressureObOne, "air_pressure", 0);
+  gvals->getAtLocation(airPressureObOne, oops::Variable{"air_pressure"}, 0);
   if (airPressureObOne.front() >= airPressureObOne.back())
     throw eckit::BadValue("GeoVaLs are not top to bottom => aborting");
 

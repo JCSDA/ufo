@@ -54,22 +54,23 @@ void SatTCWV::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
 
   // Get number of obs locations & number of model pressure levels
   std::size_t nprofiles = geovals.nlocs();
-  std::size_t nlevels   = geovals.nlevs("air_pressure_levels");  // number of full (rho) levels
+  // number of full (rho) levels
+  std::size_t nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});
 
   // Get 2-D surface pressure
   std::vector<float> ps(nprofiles);  // surface pressure (Pa)
-  geovals.get(ps, "surface_pressure");
+  geovals.get(ps, oops::Variable{"surface_pressure"});
 
   // Get 3-D air pressure on rho levels (Pa), one level at a time
   std::vector<std::vector<float>> plev(nlevels, std::vector<float>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels; ++lev) {
-    geovals.getAtLevel(plev[lev], "air_pressure_levels", lev);
+    geovals.getAtLevel(plev[lev], oops::Variable{"air_pressure_levels"}, lev);
   }
 
   // Get 3-D specific humidity on theta levels (kg/kg), one level at a time
   std::vector<std::vector<float>> q(nlevels-1, std::vector<float>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q[lev], "specific_humidity", lev);
+    geovals.getAtLevel(q[lev], oops::Variable{"specific_humidity"}, lev);
   }
 
   // Check model fields are top-down, fail if not

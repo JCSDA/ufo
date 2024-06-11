@@ -499,9 +499,10 @@ Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVari
                                                       const std::string &suffix,
                                                       const std::string &groupName) const {
   oops::Log::debug() << "BGE var: " << groupName + "/" +
-                        nameMap_.convertName(filterVariable.variable()) +
+                        nameMap_.convertName(filterVariable.variable()).name() +
                         suffix << std::endl;
-  return Variable(groupName + "/" + nameMap_.convertName(filterVariable.variable()) + suffix);
+  return Variable(groupName + "/" + nameMap_.convertName(filterVariable.variable()).name()
+                  + suffix);
 }
 
 MetOfficeBuddyCheck::MetaData MetOfficeBuddyCheck::collectMetaData(

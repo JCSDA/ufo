@@ -93,7 +93,8 @@ namespace ufo {
       }
 
       // Get the surface geometric height
-      gvals->getAtLocation(surfaceGeometricHeight, "surface_geometric_height", iloc);
+      gvals->getAtLocation(surfaceGeometricHeight, oops::Variable{"surface_geometric_height"},
+                           iloc);
 
       // Subtract off the scaled station elevation
       // When f is zero (near the station) subtract off the station elevation

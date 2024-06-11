@@ -88,16 +88,16 @@ void checkGeoVaLsGet(const ufo::ObsFilterData& data,
 ///  nlevs == 1: 2D geovals, could be retrieved with get(var)
   if (nlevs == 1) {
     data.get(variable, vec);
-    gval.get(ref, variable.variable());
+    gval.get(ref, variable.toOopsVariable());
     EXPECT(vec == ref);
-    gval.get(ref2, variable.variable());
+    gval.get(ref2, variable.toOopsVariable());
     compareMissingValues(ref, ref2);
 ///  otherwise need get(var, level) to retrieve
   } else {
     data.get(variable, nlevs - 1, vec);
-    gval.getAtLevel(ref, variable.variable(), nlevs - 1);
+    gval.getAtLevel(ref, variable.toOopsVariable(), nlevs - 1);
     EXPECT(vec == ref);
-    gval.getAtLevel(ref2, variable.variable(), nlevs - 1);
+    gval.getAtLevel(ref2, variable.toOopsVariable(), nlevs - 1);
     compareMissingValues(ref, ref2);
   }
 }
@@ -352,7 +352,7 @@ void testObsFilterData() {
     for (size_t jvar = 0; jvar < geovars.nvars(); ++jvar) {
       EXPECT(data.has(geovars.variable(jvar)));
       int nlevs = data.nlevs(geovars.variable(jvar));
-      int nlevs_ref = gval.nlevs(geovars.variable(jvar).variable());
+      int nlevs_ref = gval.nlevs(geovars.variable(jvar).toOopsVariable());
       EXPECT(nlevs == nlevs_ref);
       checkGeoVaLsGet(data, gval, geovars.variable(jvar), ospace.nlocs(), nlevs);
     }

@@ -44,11 +44,11 @@ ObsSeaIceFraction::~ObsSeaIceFraction() {
 void ObsSeaIceFraction::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                     ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
   size_t nlocs = ovec.size();
-  size_t nlevs = gv.nlevs("sea_ice_category_area_fraction");
+  size_t nlevs = gv.nlevs(oops::Variable{"sea_ice_category_area_fraction"});
 
   std::vector<double> aicen(nlocs);
   for ( std::size_t k = 0; k < nlevs; ++k ) {
-    gv.getAtLevel(aicen, "sea_ice_category_area_fraction", k);
+    gv.getAtLevel(aicen, oops::Variable{"sea_ice_category_area_fraction"}, k);
     for ( std::size_t i = 0; i < nlocs; ++i ) {
       ovec[i] += aicen[i];
     }

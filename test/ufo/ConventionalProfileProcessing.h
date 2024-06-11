@@ -327,17 +327,17 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     profileDataHolder.fill({ufo::VariableNames::extended_obs_space},
                            {ufo::VariableNames::obs_air_pressure},
                            {ufo::VariableNames::station_ID},
-                           {ufo::VariableNames::geovals_pressure});
+                           oops::Variables{{oops::Variable{ufo::VariableNames::geovals_pressure}}});
 
     // Get GeoVaLs
-    profileDataHolder.getGeoVaLVector(ufo::VariableNames::geovals_pressure);
+    profileDataHolder.getGeoVaLVector(oops::Variable{ufo::VariableNames::geovals_pressure});
 
     // Attempt to access data with incorrect type.
     EXPECT_THROWS(profileDataHolder.get<int>(ufo::VariableNames::obs_air_pressure));
 
     // Attempt to access nonexistent data.
     EXPECT_THROWS(profileDataHolder.get<int>("wrong@MetaData"));
-    EXPECT_THROWS(profileDataHolder.getGeoVaLVector("wrong@MetaData"));
+    EXPECT_THROWS(profileDataHolder.getGeoVaLVector(oops::Variable{"wrong@MetaData"}));
 
     // Check this profile has been marked as being in the correct section of the ObsSpace.
     profileDataHolder.checkObsSpaceSection(ufo::ObsSpaceSection::Original);

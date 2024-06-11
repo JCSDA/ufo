@@ -92,7 +92,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
 
   // 2. Allocate profiles
   //---------------------------------------------------------------------------------
-  nlevels   = geovals.nlevs("air_temperature");   // set private data member
+  nlevels   = geovals.nlevs(oops::Variable{"air_temperature"});   // set private data member
   std::size_t nprofiles = odb_.nlocs();
   std::size_t nchannels = aRttov_.getNchannels();
 
@@ -116,7 +116,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.1 Retrieve pressure in hPa
       std::vector<std::vector<double>> tmpvar3d;    // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, "air_pressure", i);  // get one level P
+         geovals.getAtLevel(tmpvar2d, oops::Variable{"air_pressure"}, i);  // get one level P
          tmpvar3d.push_back(tmpvar2d);  // push one level P into 3D P
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {
@@ -132,7 +132,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.2 Retrieve temperature in K
       std::vector<std::vector<double>> tmpvar3d_T;  // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, "air_temperature", i);  // get one level T
+         geovals.getAtLevel(tmpvar2d, oops::Variable{"air_temperature"}, i);  // get one level T
          tmpvar3d_T.push_back(tmpvar2d);   // push one level T into 3D T
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {
@@ -146,7 +146,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.3 Retrieve specific humidity in kg/kg
       std::vector<std::vector<double>> tmpvar3d_Q;  // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, "specific_humidity", i);
+         geovals.getAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, i);
          tmpvar3d_Q.push_back(tmpvar2d);
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {
@@ -170,14 +170,14 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
       std::vector<double> seaice_frac(nprofiles, 0.0);
 
     // Retrieve surface variables
-      geovals.get(ps, "surface_pressure");  // in Pa, get one level Ps
-      geovals.get(t2m, "surface_temperature");  // Kelvin
-      geovals.get(q2m, "specific_humidity_at_two_meters_above_surface");  // kg/kg
-      geovals.get(u10, "uwind_at_10m");
-      geovals.get(v10, "vwind_at_10m");
-      geovals.get(tskin, "skin_temperature");  // Kelvin
-      geovals.get(landmask, "landmask");  // 1: land, 0:ocean
-      geovals.get(seaice_frac, "seaice_fraction");
+      geovals.get(ps, oops::Variable{"surface_pressure"});  // in Pa, get one level Ps
+      geovals.get(t2m, oops::Variable{"surface_temperature"});  // Kelvin
+      geovals.get(q2m, oops::Variable{"specific_humidity_at_two_meters_above_surface"});  // kg/kg
+      geovals.get(u10, oops::Variable{"uwind_at_10m"});
+      geovals.get(v10, oops::Variable{"vwind_at_10m"});
+      geovals.get(tskin, oops::Variable{"skin_temperature"});  // Kelvin
+      geovals.get(landmask, oops::Variable{"landmask"});  // 1: land, 0:ocean
+      geovals.get(seaice_frac, oops::Variable{"seaice_fraction"});
 
     // 3.3 Obs metadata
     //-----------------------------------------------

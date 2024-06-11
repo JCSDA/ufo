@@ -84,7 +84,7 @@ void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   // Get variable that will scale h(x)
   std::vector<double> scalingVariable(ovec.nlocs());
   if (variableGroupToScaleHofxBy_ == "GeoVaLs") {
-    gv.get(scalingVariable, variableNameToScaleHofxBy_);
+    gv.get(scalingVariable, oops::Variable{variableNameToScaleHofxBy_});
   } else {
     // Get from the observation space
     odb_.get_db(variableGroupToScaleHofxBy_, variableNameToScaleHofxBy_, scalingVariable);
@@ -120,11 +120,11 @@ void ObsProduct::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   std::vector<double> vec(ovec.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string varname = (geovalName_ == "")?
+    const oops::Variable var = (geovalName_ == "")?
                       nameMap_.convertName(ovec.varnames().variables()[jvar])
-                      : geovalName_;
+                      : oops::Variable{geovalName_};
     // Get GeoVaL at the level closest to the Earth's surface.
-    gv.getAtLevel(vec, varname, gv.nlevs(varname) - 1);
+    gv.getAtLevel(vec, var, gv.nlevs(var) - 1);
     for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
       const size_t idx = jloc * ovec.nvars() + jvar;
       if (scalingVariable[jloc] != missing) {

@@ -48,11 +48,11 @@ class VariableNameMap {
     explicit VariableNameMap(const boost::optional<std::string> &);
     ~VariableNameMap();
 
-  std::string convertName(const std::string &) const;
+  oops::Variable convertName(const std::string &) const;
   oops::Variables convertName(const oops::ObsVariables &) const;
 
  private:
-  std::map<std::string, std::string> Aliases_;
+  std::map<std::string, oops::Variable> Aliases_;
 };
 
 }  // namespace ufo

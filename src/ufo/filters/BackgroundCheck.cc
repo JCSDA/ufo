@@ -75,7 +75,7 @@ BackgroundCheck::~BackgroundCheck() {
 
 Variable BackgroundCheck::backgrErrVariable(const Variable &filterVariable) const {
   return Variable("ObsDiag/" +
-                  nameMap_.convertName(filterVariable.variable()) +
+                  nameMap_.convertName(filterVariable.variable()).name() +
                   "_background_error");
 }
 

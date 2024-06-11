@@ -53,7 +53,7 @@ void ObsIdentity::simulateObs(const GeoVaLs &gv, ioda::ObsVector &ovec,
 
   std::vector<double> vec(ovec.nlocs());
   for (int jvar : operatorVarIndices_) {
-    const std::string varname = nameMap_.convertName(ovec.varnames().variables()[jvar]);
+    const oops::Variable varname = nameMap_.convertName(ovec.varnames().variables()[jvar]);
     // Get GeoVaL at the level closest to the Earth's surface.
     if (levelIndexZeroAtSurface_) {
       gv.getAtLevel(vec, varname, 0);

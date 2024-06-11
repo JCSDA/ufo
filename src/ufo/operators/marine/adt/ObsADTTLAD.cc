@@ -67,7 +67,7 @@ void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
 
   // get geovals
   std::vector<double> vec(ovec.nlocs());
-  geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
+  geovals.getAtLevel(vec, oops::Variable{"sea_surface_height_above_geoid"}, 0);
 
   // calculate global offsets
   double offset = 0;
@@ -105,7 +105,7 @@ void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
 
   // get geovals
   std::vector<double> vec(ovec.nlocs());
-  geovals.getAtLevel(vec, "sea_surface_height_above_geoid", 0);
+  geovals.getAtLevel(vec, oops::Variable{"sea_surface_height_above_geoid"}, 0);
 
   // calculate global offsets
   double offset = 0;
@@ -129,7 +129,7 @@ void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
     if (ovec[idx] != missing)
       vec[idx] += ovec[jloc] - offset;
   }
-  geovals.putAtLevel(vec, "sea_surface_height_above_geoid", 0);
+  geovals.putAtLevel(vec, oops::Variable{"sea_surface_height_above_geoid"}, 0);
 
   oops::Log::trace() << "ObsADTTLAD: simulateObsAD finished" << std::endl;
 }

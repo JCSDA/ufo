@@ -20,16 +20,16 @@ namespace ufo {
 ObsRadarDopplerWindData::ObsRadarDopplerWindData
 (const ioda::ObsSpace & odb, const Parameters_ & parameters)
   : odb_(odb),
-    verticalCoordinate_uv_(parameters.verticalCoordinate_uv.value()),
-    verticalCoordinate_w_(parameters.verticalCoordinate_w.value())
+    verticalCoordinate_uv_(oops::Variable{parameters.verticalCoordinate_uv.value()}),
+    verticalCoordinate_w_(oops::Variable{parameters.verticalCoordinate_w.value()})
 {
   const std::vector <std::string> GeoVaLnames{
       "eastward_wind",
       "northward_wind",
-      "upward_air_velocity",
-      verticalCoordinate_uv_,
-      verticalCoordinate_w_};
+      "upward_air_velocity"};
   requiredVars_ += oops::Variables(GeoVaLnames);
+  requiredVars_.push_back(verticalCoordinate_uv_);
+  requiredVars_.push_back(verticalCoordinate_w_);
 }
 
 // -----------------------------------------------------------------------------
@@ -64,8 +64,8 @@ void ObsRadarDopplerWindData::fillHofX(const ioda::ObsSpace & odb,
   const std::size_t nlocs = odb.nlocs();
   const std::size_t nvars = ovec.nvars();
   ASSERT(nvars == 1);  // Only one simulated variable (radialVelocity) is permitted.
-  const std::size_t nlevs_uv = gv.nlevs("eastward_wind");
-  const std::size_t nlevs_w = gv.nlevs("upward_air_velocity");
+  const std::size_t nlevs_uv = gv.nlevs(oops::Variable{"eastward_wind"});
+  const std::size_t nlevs_w = gv.nlevs(oops::Variable{"upward_air_velocity"});
 
   // Obtain beam geometry variables.
   // These must have been precomputed before running the observation operator.
@@ -83,9 +83,9 @@ void ObsRadarDopplerWindData::fillHofX(const ioda::ObsSpace & odb,
   std::vector<double> vec_v(nlevs_uv);
   std::vector<double> vec_w(nlevs_w);
   for (size_t jloc = 0; jloc < nlocs; ++jloc) {
-    gv.getAtLocation(vec_u, "eastward_wind", jloc);
-    gv.getAtLocation(vec_v, "northward_wind", jloc);
-    gv.getAtLocation(vec_w, "upward_air_velocity", jloc);
+    gv.getAtLocation(vec_u, oops::Variable{"eastward_wind"}, jloc);
+    gv.getAtLocation(vec_v, oops::Variable{"northward_wind"}, jloc);
+    gv.getAtLocation(vec_w, oops::Variable{"upward_air_velocity"}, jloc);
     const std::vector<double> & vec_z_uv = vec_z_uv_[jloc];
     const std::vector<double> & vec_z_w = vec_z_w_[jloc];
 

@@ -58,8 +58,8 @@ class FovSelector : public oops::SamplingMethodSelector {
  public:
   FovSelector(const bool do_fov) : do_fov_average_(do_fov) {}
 
-  size_t methodIndex(const std::string & varName) const override {
-    if (do_fov_average_ && vars_to_fov_average.has(varName)) {
+  size_t methodIndex(const oops::Variable & var) const override {
+    if (do_fov_average_ && vars_to_fov_average.has(var)) {
       // surface variables to average over FOV
       return 1;
     } else {
@@ -82,29 +82,29 @@ class FovSelector : public oops::SamplingMethodSelector {
 // So the actual values returned by this function, as long as reasonably physical, shouldn't matter.
 // For now, we return the CRTM's default values for surface fields. The different values are
 // collected into this single fallback function to help code readability.
-double valueOutsideMask(const std::string & varname) {
-  if (varname == "vegetation_type_index"
-      || varname == "soil_type"
-      || varname == "land_type_index_IGBP"
-      || varname == "land_type_index_NPOESS"
-      || varname == "land_type_index_USGS") {
+double valueOutsideMask(const oops::Variable & var) {
+  if (var.name() == "vegetation_type_index"
+      || var.name() == "soil_type"
+      || var.name() == "land_type_index_IGBP"
+      || var.name() == "land_type_index_NPOESS"
+      || var.name() == "land_type_index_USGS") {
     return 1.0;
-  } else if (varname == "leaf_area_index") {
+  } else if (var.name() == "leaf_area_index") {
     return 3.5;
-  } else if (varname == "soil_temperature"
-             || varname == "surface_temperature_where_sea"
-             || varname == "surface_temperature_where_land"
-             || varname == "surface_temperature_where_ice"
-             || varname == "surface_temperature_where_snow") {
+  } else if (var.name() == "soil_temperature"
+             || var.name() == "surface_temperature_where_sea"
+             || var.name() == "surface_temperature_where_land"
+             || var.name() == "surface_temperature_where_ice"
+             || var.name() == "surface_temperature_where_snow") {
     return 283.0;  // K
-  } else if (varname == "vegetation_area_fraction") {
+  } else if (var.name() == "vegetation_area_fraction") {
     return 0.3;
-  } else if (varname == "surface_snow_thickness") {
+  } else if (var.name() == "surface_snow_thickness") {
     return 50.0;  // mm
-  } else if (varname == "volume_fraction_of_condensed_water_in_soil") {
+  } else if (var.name() == "volume_fraction_of_condensed_water_in_soil") {
     return 0.05;  // g/cm3
   } else {
-    ABORT("Function valueOutsideMask doesn't yet provide a fallback for variable: " + varname);
+    ABORT("Function valueOutsideMask doesn't yet provide a fallback for variable: " + var.name());
     return util::missingValue<double>();
   }
 }
@@ -250,7 +250,7 @@ void ObsRadianceCRTM::computeReducedVars(const oops::Variables & vars, GeoVaLs &
   for (size_t i = 0; i < gvars.size(); ++i) {
     if (!detail::vars_to_fov_average.has(gvars[i])) {  // non-FOV var
       if (!geovals.areReducedAndSampledFormatsAliased(gvars[i])) {
-        ABORT("Internal logic error: expected aliased reduced variable " + gvars[i]);
+        ABORT("Internal logic error: expected aliased reduced variable " + gvars[i].name());
       }
     }
   }
@@ -292,33 +292,33 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedAveraging(GeoVaLs & geovals) const 
   // a particular surface type.
   const auto & maskHelper = [this, &nsamples, &nlocs, &sample_ranges,
                              &geovals, &field_counter](
-      const std::string & varname,
+      const oops::Variable & var,
       std::vector<double> & sample_values,
       std::vector<double> & average) -> void {
-    ASSERT(geovals.nprofiles(varname, GeoVaLFormat::SAMPLED) == nsamples);
+    ASSERT(geovals.nprofiles(var, GeoVaLFormat::SAMPLED) == nsamples);
     ASSERT(sample_values.size() == nsamples);
     ASSERT(average.size() == nlocs);
-    geovals.getAtLevel(sample_values, varname, 0, GeoVaLFormat::SAMPLED);
+    geovals.getAtLevel(sample_values, var, 0, GeoVaLFormat::SAMPLED);
     fov::average(average, sample_ranges, sample_values, sample_weights_);
-    geovals.putAtLevel(average, varname, 0, GeoVaLFormat::REDUCED);
+    geovals.putAtLevel(average, var, 0, GeoVaLFormat::REDUCED);
     field_counter++;
   };
 
   std::vector<double> water_mask(nsamples);
   std::vector<double> water_avg(nlocs);
-  maskHelper("water_area_fraction", water_mask, water_avg);
+  maskHelper(oops::Variable{"water_area_fraction"}, water_mask, water_avg);
 
   std::vector<double> land_mask(nsamples);
   std::vector<double> land_avg(nlocs);
-  maskHelper("land_area_fraction", land_mask, land_avg);
+  maskHelper(oops::Variable{"land_area_fraction"}, land_mask, land_avg);
 
   std::vector<double> ice_mask(nsamples);
   std::vector<double> ice_avg(nlocs);
-  maskHelper("ice_area_fraction", ice_mask, ice_avg);
+  maskHelper(oops::Variable{"ice_area_fraction"}, ice_mask, ice_avg);
 
   std::vector<double> snow_mask(nsamples);
   std::vector<double> snow_avg(nlocs);
-  maskHelper("surface_snow_area_fraction", snow_mask, snow_avg);
+  maskHelper(oops::Variable{"surface_snow_area_fraction"}, snow_mask, snow_avg);
 
   // Sanity check the area fractions add to 1 for each obs
   for (size_t i = 0; i < nlocs; ++i) {
@@ -331,55 +331,55 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedAveraging(GeoVaLs & geovals) const 
   // Helper to average over FOV using a mask
   const auto & averageHelper = [this, &nsamples, &nlocs, &sample_ranges,
                                 &geovals, &field_counter](
-      const std::string & varname,
+      const oops::Variable & var,
       const std::vector<double> mask,
       const std::vector<double> sample_mask) -> void {
     std::vector<double> sample_values(nsamples);
     std::vector<double> average(nlocs);
-    geovals.getAtLevel(sample_values, varname, 0, GeoVaLFormat::SAMPLED);
-    const double valueOutsideMask = detail::valueOutsideMask(varname);
+    geovals.getAtLevel(sample_values, var, 0, GeoVaLFormat::SAMPLED);
+    const double valueOutsideMask = detail::valueOutsideMask(var);
     fov::averageWithMask(average, sample_ranges, sample_values, sample_weights_,
                          mask, sample_mask, valueOutsideMask);
-    geovals.putAtLevel(average, varname, 0, GeoVaLFormat::REDUCED);
+    geovals.putAtLevel(average, var, 0, GeoVaLFormat::REDUCED);
     field_counter++;
   };
 
-  averageHelper("surface_temperature_where_sea", water_avg, water_mask);
-  averageHelper("surface_temperature_where_land", land_avg, land_mask);
-  averageHelper("surface_temperature_where_ice", ice_avg, ice_mask);
-  averageHelper("surface_temperature_where_snow", snow_avg, snow_mask);
+  averageHelper(oops::Variable{"surface_temperature_where_sea"}, water_avg, water_mask);
+  averageHelper(oops::Variable{"surface_temperature_where_land"}, land_avg, land_mask);
+  averageHelper(oops::Variable{"surface_temperature_where_ice"}, ice_avg, ice_mask);
+  averageHelper(oops::Variable{"surface_temperature_where_snow"}, snow_avg, snow_mask);
 
-  averageHelper("leaf_area_index", land_avg, land_mask);
-  averageHelper("soil_temperature", land_avg, land_mask);
-  averageHelper("vegetation_area_fraction", land_avg, land_mask);
-  averageHelper("volume_fraction_of_condensed_water_in_soil", land_avg, land_mask);
-  averageHelper("surface_snow_thickness", snow_avg, snow_mask);
+  averageHelper(oops::Variable{"leaf_area_index"}, land_avg, land_mask);
+  averageHelper(oops::Variable{"soil_temperature"}, land_avg, land_mask);
+  averageHelper(oops::Variable{"vegetation_area_fraction"}, land_avg, land_mask);
+  averageHelper(oops::Variable{"volume_fraction_of_condensed_water_in_soil"}, land_avg, land_mask);
+  averageHelper(oops::Variable{"surface_snow_thickness"}, snow_avg, snow_mask);
 
   // Helper to identify the dominant surface classification type using a mask
   const auto & surfaceTypeHelper = [this, &nsamples, &nlocs, &sample_ranges,
                                     &geovals, &field_counter](
-      const std::string & varname,
+      const oops::Variable & var,
       const std::vector<double> mask,
       const std::vector<double> sample_mask) -> void {
     std::vector<double> sample_int_values(nsamples);
     std::vector<double> dominant_int(nlocs);
-    geovals.getAtLevel(sample_int_values, varname, 0, GeoVaLFormat::SAMPLED);
-    const int valueOutsideMask = static_cast<int>(detail::valueOutsideMask(varname));
+    geovals.getAtLevel(sample_int_values, var, 0, GeoVaLFormat::SAMPLED);
+    const int valueOutsideMask = static_cast<int>(detail::valueOutsideMask(var));
     fov::dominantIntegerValue(dominant_int, sample_ranges, sample_int_values, sample_weights_,
                               mask, sample_mask, valueOutsideMask);
-    geovals.putAtLevel(dominant_int, varname, 0, GeoVaLFormat::REDUCED);
+    geovals.putAtLevel(dominant_int, var, 0, GeoVaLFormat::REDUCED);
     field_counter++;
   };
 
   if (varin_.has("vegetation_type_index") && varin_.has("soil_type")) {
-    surfaceTypeHelper("vegetation_type_index", land_avg, land_mask);
-    surfaceTypeHelper("soil_type", land_avg, land_mask);
+    surfaceTypeHelper(oops::Variable{"vegetation_type_index"}, land_avg, land_mask);
+    surfaceTypeHelper(oops::Variable{"soil_type"}, land_avg, land_mask);
   } else if (varin_.has("land_type_index_IGBP")) {
-    surfaceTypeHelper("land_type_index_IGBP", land_avg, land_mask);
+    surfaceTypeHelper(oops::Variable{"land_type_index_IGBP"}, land_avg, land_mask);
   } else if (varin_.has("land_type_index_NPOESS")) {
-    surfaceTypeHelper("land_type_index_NPOESS", land_avg, land_mask);
+    surfaceTypeHelper(oops::Variable{"land_type_index_NPOESS"}, land_avg, land_mask);
   } else if (varin_.has("land_type_index_USGS")) {
-    surfaceTypeHelper("land_type_index_USGS", land_avg, land_mask);
+    surfaceTypeHelper(oops::Variable{"land_type_index_USGS"}, land_avg, land_mask);
   } else {
     ABORT("Inconsistent or unsupported surface types");
   }
@@ -400,10 +400,14 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedCopy(GeoVaLs & geovals) const {
   std::vector<double> ice_area_fraction(nlocs);
   std::vector<double> snow_area_fraction(nlocs);
 
-  geovals.getAtLevel(water_area_fraction, "water_area_fraction", 0, GeoVaLFormat::SAMPLED);
-  geovals.getAtLevel(land_area_fraction, "land_area_fraction", 0, GeoVaLFormat::SAMPLED);
-  geovals.getAtLevel(ice_area_fraction, "ice_area_fraction", 0, GeoVaLFormat::SAMPLED);
-  geovals.getAtLevel(snow_area_fraction, "surface_snow_area_fraction", 0, GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(water_area_fraction, oops::Variable{"water_area_fraction"}, 0,
+                                                                             GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(land_area_fraction, oops::Variable{"land_area_fraction"}, 0,
+                                                                             GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(ice_area_fraction, oops::Variable{"ice_area_fraction"}, 0,
+                                                                             GeoVaLFormat::SAMPLED);
+  geovals.getAtLevel(snow_area_fraction, oops::Variable{"surface_snow_area_fraction"}, 0,
+                                                                             GeoVaLFormat::SAMPLED);
 
   // Helper to replace missing values with a fallback value
   //
@@ -418,41 +422,41 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedCopy(GeoVaLs & geovals) const {
   //   the two different model grids.
   // In cases like this, there is no way to fill the geovals with a trusted value, so we keep the
   // missing value and rely on QC filters to skip the obs.
-  const auto & maskHelper = [&geovals, &nlocs](const std::string & name,
+  const auto & maskHelper = [&geovals, &nlocs](const oops::Variable & var,
                                                const std::vector<double> & area_fraction) -> void {
     std::vector<double> vals(nlocs);
-    geovals.getAtLevel(vals, name, 0, GeoVaLFormat::SAMPLED);
+    geovals.getAtLevel(vals, var, 0, GeoVaLFormat::SAMPLED);
     bool fixed = false;
     constexpr double area_tol = 1e-9;  // allow tiny area fractions to count as zero
     for (size_t i = 0; i < nlocs; ++i) {
       if (area_fraction[i] < area_tol && vals[i] == util::missingValue<double>()) {
-        vals[i] = detail::valueOutsideMask(name);
+        vals[i] = detail::valueOutsideMask(var);
         fixed = true;
       }
     }
-    if (fixed) geovals.putAtLevel(vals, name, 0, GeoVaLFormat::REDUCED);
+    if (fixed) geovals.putAtLevel(vals, var, 0, GeoVaLFormat::REDUCED);
   };
 
-  maskHelper("surface_temperature_where_sea", water_area_fraction);
-  maskHelper("surface_temperature_where_land", land_area_fraction);
-  maskHelper("surface_temperature_where_ice", ice_area_fraction);
-  maskHelper("surface_temperature_where_snow", snow_area_fraction);
+  maskHelper(oops::Variable{"surface_temperature_where_sea"}, water_area_fraction);
+  maskHelper(oops::Variable{"surface_temperature_where_land"}, land_area_fraction);
+  maskHelper(oops::Variable{"surface_temperature_where_ice"}, ice_area_fraction);
+  maskHelper(oops::Variable{"surface_temperature_where_snow"}, snow_area_fraction);
 
-  maskHelper("leaf_area_index", land_area_fraction);
-  maskHelper("soil_temperature", land_area_fraction);
-  maskHelper("vegetation_area_fraction", land_area_fraction);
-  maskHelper("volume_fraction_of_condensed_water_in_soil", land_area_fraction);
-  maskHelper("surface_snow_thickness", snow_area_fraction);
+  maskHelper(oops::Variable{"leaf_area_index"}, land_area_fraction);
+  maskHelper(oops::Variable{"soil_temperature"}, land_area_fraction);
+  maskHelper(oops::Variable{"vegetation_area_fraction"}, land_area_fraction);
+  maskHelper(oops::Variable{"volume_fraction_of_condensed_water_in_soil"}, land_area_fraction);
+  maskHelper(oops::Variable{"surface_snow_thickness"}, snow_area_fraction);
 
   if (varin_.has("vegetation_type_index") && varin_.has("soil_type")) {
-    maskHelper("vegetation_type_index", land_area_fraction);
-    maskHelper("soil_type", land_area_fraction);
+    maskHelper(oops::Variable{"vegetation_type_index"}, land_area_fraction);
+    maskHelper(oops::Variable{"soil_type"}, land_area_fraction);
   } else if (varin_.has("land_type_index_IGBP")) {
-    maskHelper("land_type_index_IGBP", land_area_fraction);
+    maskHelper(oops::Variable{"land_type_index_IGBP"}, land_area_fraction);
   } else if (varin_.has("land_type_index_NPOESS")) {
-    maskHelper("land_type_index_NPOESS", land_area_fraction);
+    maskHelper(oops::Variable{"land_type_index_NPOESS"}, land_area_fraction);
   } else if (varin_.has("land_type_index_USGS")) {
-    maskHelper("land_type_index_USGS", land_area_fraction);
+    maskHelper(oops::Variable{"land_type_index_USGS"}, land_area_fraction);
   } else {
     ABORT("Inconsistent or unsupported surface types");
   }

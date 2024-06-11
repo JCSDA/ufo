@@ -12,24 +12,25 @@
 
 namespace ufo {
 VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile) {
-  Aliases_["airTemperature"] = "air_temperature";
-  Aliases_["windEastward"] = "eastward_wind";
-  Aliases_["windNorthward"] = "northward_wind";
-  Aliases_["specificHumidity"] = "specific_humidity";
-  Aliases_["relativeHumidity"] = "relative_humidity";
-  Aliases_["pressure"] = "air_pressure";
-  Aliases_["virtualTemperature"] = "virtual_temperature";
-  Aliases_["potentialTemperature"] = "potential_temperature";
-  Aliases_["stationPressure"] = "surface_pressure";
-  Aliases_["depthBelowWaterSurface"] = "ocean_depth";
-  Aliases_["waterTemperature"] = "ocean_temperature";
-  Aliases_["surfacePressure"] = "surface_pressure";
-  Aliases_["seaSurfaceTemperature"] = "sea_surface_temperature";
-  Aliases_["equivalentReflectivityFactor"] = "equivalent_reflectivity_factor";
-  Aliases_["salinity"] = "sea_water_salinity";
-  Aliases_["seaSurfaceSalinity"] = "sea_surface_salinity";
-  Aliases_["ozoneProfile"] = "mole_fraction_of_ozone_in_air";
-  Aliases_["seaIceFraction"] = "sea_ice_area_fraction";
+  Aliases_.emplace("airTemperature", oops::Variable{"air_temperature"});
+  Aliases_.emplace("windEastward", oops::Variable{"eastward_wind"});
+  Aliases_.emplace("windNorthward", oops::Variable{"northward_wind"});
+  Aliases_.emplace("specificHumidity", oops::Variable{"specific_humidity"});
+  Aliases_.emplace("relativeHumidity", oops::Variable{"relative_humidity"});
+  Aliases_.emplace("pressure", oops::Variable{"air_pressure"});
+  Aliases_.emplace("virtualTemperature", oops::Variable{"virtual_temperature"});
+  Aliases_.emplace("potentialTemperature", oops::Variable{"potential_temperature"});
+  Aliases_.emplace("stationPressure", oops::Variable{"surface_pressure"});
+  Aliases_.emplace("depthBelowWaterSurface", oops::Variable{"ocean_depth"});
+  Aliases_.emplace("waterTemperature", oops::Variable{"ocean_temperature"});
+  Aliases_.emplace("surfacePressure", oops::Variable{"surface_pressure"});
+  Aliases_.emplace("seaSurfaceTemperature", oops::Variable{"sea_surface_temperature"});
+  Aliases_.emplace("equivalentReflectivityFactor", oops::Variable
+                                                                {"equivalent_reflectivity_factor"});
+  Aliases_.emplace("salinity", oops::Variable{"sea_water_salinity"});
+  Aliases_.emplace("seaSurfaceSalinity", oops::Variable{"sea_surface_salinity"});
+  Aliases_.emplace("ozoneProfile", oops::Variable{"mole_fraction_of_ozone_in_air"});
+  Aliases_.emplace("seaIceFraction", oops::Variable{"sea_ice_area_fraction"});
 
 // The lines below (and yaml files) should be removed as all name are hard-wired because of
 // the obs and model naming conventions
@@ -39,31 +40,27 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
     mappingParams.validateAndDeserialize(conf);
 
     for (VariableNameParameters const& variableMap : *mappingParams.variableMap.value()) {
-      Aliases_[variableMap.name] = variableMap.alias;
+      Aliases_.insert_or_assign(variableMap.name, oops::Variable{variableMap.alias});
     }
   }
 }
 
 VariableNameMap::~VariableNameMap() {}
 
-std::string VariableNameMap::convertName(const std::string & name) const {
-  std::string alias;
+oops::Variable VariableNameMap::convertName(const std::string & name) const {
   const auto & it = Aliases_.find(name);
   if (it == Aliases_.end()) {
-    return name;
+    return oops::Variable{name};
   } else {
-    alias = it->second;
+    return it->second;
   }
-  return alias;
 }
 
 oops::Variables VariableNameMap::convertName(const oops::ObsVariables & vars) const {
-  std::vector<std::string> newvars;
+  oops::Variables aliasvars;
   for (size_t jv = 0; jv < vars.size(); ++jv) {
-    std::string alias = convertName(vars[jv]);
-    newvars.push_back(alias);
+    aliasvars.push_back(convertName(vars[jv]));
   }
-  oops::Variables aliasvars(newvars);
   return aliasvars;
 }
 }  // namespace ufo

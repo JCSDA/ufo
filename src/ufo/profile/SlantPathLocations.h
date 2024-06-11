@@ -41,8 +41,8 @@ namespace ufo {
   std::vector<std::size_t> getSlantPathLocations(const ioda::ObsSpace & odb,
                                                  const GeoVaLs & gv,
                                                  const std::vector<std::size_t> & locs,
-                                                 const std::string & modelVerticalCoord,
                                                  const std::string & obsVerticalCoord,
+                                                 const oops::Variable & modelVerticalCoord,
                                                  const int itermax = 3);
 }  // namespace ufo
 

@@ -36,7 +36,7 @@ ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & od
   // We need to assume the worst, i.e. that we'll need to interpolate all of them.
   const oops::ObsVariables &obsvars = odb.assimvariables();
   for (size_t ivar = 0; ivar < obsvars.size(); ++ivar)
-    requiredVars_.push_back(nameMap_.convertName(obsvars[ivar]) + "_background_error");
+    requiredVars_.push_back(nameMap_.convertName(obsvars[ivar]).name() + "_background_error");
 
   oops::Log::trace() << "ObsBackgroundErrorIdentity created" << std::endl;
 }

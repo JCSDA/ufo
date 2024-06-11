@@ -100,8 +100,10 @@ void ModelObThreshold::applyFilter(const std::vector<bool> & apply,
   oops::Log::debug() << "QC thresholds are " << thresholds << std::endl;
 
 // get names of GeoVal variables
-  const std::string model_profile_name = Variable(parameters_.model_profile).variable();
-  const std::string model_vcoord_name = Variable(parameters_.model_vcoord).variable();
+  const oops::Variable model_profile_name = oops::Variable
+                                                   (Variable(parameters_.model_profile).variable());
+  const oops::Variable model_vcoord_name = oops::Variable
+                                                    (Variable(parameters_.model_vcoord).variable());
 
   std::ostringstream errString;
 // Ensure same size vectors (coord_vals and threshold); Also ensure more than one value in each.

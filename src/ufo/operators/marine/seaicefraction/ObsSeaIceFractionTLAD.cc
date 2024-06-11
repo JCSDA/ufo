@@ -51,11 +51,11 @@ void ObsSeaIceFractionTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostic
 void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & ovec,
   const QCFlags_t& qc_flags) const {
   size_t nlocs = ovec.size();
-  size_t nlevs = gv.nlevs("sea_ice_category_area_fraction");
+  size_t nlevs = gv.nlevs(oops::Variable{"sea_ice_category_area_fraction"});
 
   std::vector<double> aicen(nlocs);
   for ( std::size_t k = 0; k < nlevs; ++k ) {
-    gv.getAtLevel(aicen, "sea_ice_category_area_fraction", k);
+    gv.getAtLevel(aicen, oops::Variable{"sea_ice_category_area_fraction"}, k);
     for ( std::size_t i = 0; i < nlocs; ++i ) {
       ovec[i] += aicen[i];
     }
@@ -68,7 +68,7 @@ void ObsSeaIceFractionTLAD::simulateObsTL(const GeoVaLs & gv, ioda::ObsVector & 
 void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & ovec,
                                           const QCFlags_t & qc_flags) const {
   size_t nlocs = ovec.size();
-  size_t nlevs = gv.nlevs("sea_ice_category_area_fraction");
+  size_t nlevs = gv.nlevs(oops::Variable{"sea_ice_category_area_fraction"});
   std::vector<double> aicen(nlocs);
   for ( std::size_t k = 0; k < nlevs; ++k ) {
     for ( std::size_t i = 0; i < nlocs; ++i ) {
@@ -77,7 +77,7 @@ void ObsSeaIceFractionTLAD::simulateObsAD(GeoVaLs & gv, const ioda::ObsVector & 
       else
         { aicen[i] = 0.0; }
     }
-    gv.putAtLevel(aicen, "sea_ice_category_area_fraction", k);
+    gv.putAtLevel(aicen, oops::Variable{"sea_ice_category_area_fraction"}, k);
   }
   oops::Log::trace() << "ObsSeaIceFractionTLAD: adjoint observation operator run" << std::endl;
 }

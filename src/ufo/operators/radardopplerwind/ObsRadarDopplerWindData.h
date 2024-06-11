@@ -79,10 +79,10 @@ class ObsRadarDopplerWindData  {
   mutable VertCoordGeoVaLs_ vec_z_w_;
 
   /// Name of vertical coordinate GeoVaL associated with horizontal wind.
-  const std::string verticalCoordinate_uv_;
+  const oops::Variable verticalCoordinate_uv_;
 
   /// Name of vertical coordinate GeoVaL associated with vertical wind.
-  const std::string verticalCoordinate_w_;
+  const oops::Variable verticalCoordinate_w_;
 };
 
 }  // namespace ufo

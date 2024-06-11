@@ -49,8 +49,8 @@ namespace ufo {
        ufo::VariableNames::modellevels_logP_derived,
        ufo::VariableNames::modellevels_air_temperature_derived,
        ufo::VariableNames::air_temperature_derived};
-    std::vector <std::string> variableNamesGeoVaLs =
-      {ufo::VariableNames::geovals_potential_temperature};
+    oops::Variables variableNamesGeoVaLs{
+      {oops::Variable{ufo::VariableNames::geovals_potential_temperature}}};
 
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
@@ -60,11 +60,11 @@ namespace ufo {
         (variableNamesFloat.end(),
          {addOPSPrefix(ufo::VariableNames::modellevels_air_temperature_derived),
              addOPSPrefix(ufo::VariableNames::air_temperature_derived)});
-      variableNamesGeoVaLs.insert
-        (variableNamesGeoVaLs.end(),
-        {ufo::VariableNames::geovals_air_temperature,
-            ufo::VariableNames::geovals_testreference_air_temperature,
-            ufo::VariableNames::geovals_testreference_air_temperature_qcflags});
+      variableNamesGeoVaLs.push_back(oops::Variable{ufo::VariableNames::geovals_air_temperature});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                                     {ufo::VariableNames::geovals_testreference_air_temperature});
+      variableNamesGeoVaLs.push_back(oops::Variable
+                               {ufo::VariableNames::geovals_testreference_air_temperature_qcflags});
     }
 
     std::vector <ProfileDataHolder> profiles =
@@ -100,13 +100,13 @@ namespace ufo {
            jprof >= halfnprofs,
            ufo::VariableNames::air_temperature_derived,
            ufo::VariableNames::qcflags_air_temperature,
-           ufo::VariableNames::geovals_testreference_air_temperature,
-           ufo::VariableNames::geovals_testreference_air_temperature_qcflags);
+           oops::Variable{ufo::VariableNames::geovals_testreference_air_temperature},
+           oops::Variable{ufo::VariableNames::geovals_testreference_air_temperature_qcflags});
         // Also fill validation values of model air temperature.
         if (jprof >= halfnprofs) {
           auto & profile = profiles[jprof];
           std::vector <float> & model_air_temperature =
-            profile.getGeoVaLVector(ufo::VariableNames::geovals_air_temperature);
+            profile.getGeoVaLVector(oops::Variable{ufo::VariableNames::geovals_air_temperature});
           // Ensure all vectors are the correct size to be saved to the ObsSpace.
           const size_t numModelLevels = profile.getNumProfileLevels();
           model_air_temperature.resize(numModelLevels, missingValueFloat);
@@ -176,7 +176,8 @@ namespace ufo {
 
     // Obtain GeoVaLs potential temperature.
     const std::vector <float> &potempGeoVaLs =
-      profileOriginal.getGeoVaLVector(ufo::VariableNames::geovals_potential_temperature);
+      profileOriginal.getGeoVaLVector(oops::Variable
+                                      {ufo::VariableNames::geovals_potential_temperature});
     if (potempGeoVaLs.empty())
       throw eckit::BadValue("Potential temperature GeoVaLs vector is empty.", Here());
     const size_t numTLevels = potempGeoVaLs.size();

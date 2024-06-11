@@ -47,7 +47,7 @@ ObsRadianceRTTOV::ObsRadianceRTTOV(const ioda::ObsSpace & odb,
 
   // Remove ozone from varin_ if calculate from ref is switched on
   if (parameters.obsOptions.value().RTTOVScaleRefOzone.value())
-      varin_ -= "mole_fraction_of_ozone_in_air";
+      varin_ -= oops::Variable{"mole_fraction_of_ozone_in_air"};
 
   oops::Log::info() << "ObsRadianceRTTOV channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsRadianceRTTOV created." << std::endl;

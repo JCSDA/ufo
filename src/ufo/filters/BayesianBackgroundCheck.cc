@@ -60,7 +60,7 @@ BayesianBackgroundCheck::~BayesianBackgroundCheck() {
 
 Variable BayesianBackgroundCheck::backgrErrVariable(const Variable &filterVariable) const {
   return Variable(parameters_.BkgErrGroup.value() + "/" +
-                  nameMap_.convertName(filterVariable.variable()) +
+                  nameMap_.convertName(filterVariable.variable()).name() +
                   parameters_.BkgErrSuffix.value());
 }
 

@@ -139,12 +139,15 @@ std::string Variable::fullName() const {
 
 // -----------------------------------------------------------------------------
 
+oops::Variable Variable::toOopsVariable() const {
+  ASSERT(grpname_ == "GeoVaLs");
+  return oops::Variable{varname_};
+}
+
+// -----------------------------------------------------------------------------
+
 oops::Variables Variable::toOopsVariables() const {
-  oops::Variables vars;
-  for (size_t jj = 0; jj < this->size(); ++jj) {
-    vars.push_back(this->variable(jj));
-  }
-  return vars;
+  return oops::Variables{{this->toOopsVariable()}};
 }
 
 // -----------------------------------------------------------------------------

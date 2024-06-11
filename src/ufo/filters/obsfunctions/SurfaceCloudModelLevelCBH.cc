@@ -51,7 +51,7 @@ void SurfaceCloudModelLevelCBH::compute(const ObsFilterData & in,
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     std::vector<float> Height(nlevs);
-    gv->getAtLocation(Height, "height", iloc);
+    gv->getAtLocation(Height, oops::Variable{"height"}, iloc);
     ZClear[iloc] = -1;
     for (size_t ilev = 0; ilev < nlevs; ilev++) {
       if (ilev == nlevs-1 && Height[ilev] >= CBH[iloc]) {

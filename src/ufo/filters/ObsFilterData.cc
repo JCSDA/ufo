@@ -80,7 +80,7 @@ bool ObsFilterData::has(const Variable & varname) const {
   const std::string var = varname.variable();
   const std::string grp = varname.group();
   if (grp == "GeoVaLs") {
-    return (gvals_ && gvals_->has(var));
+    return (gvals_ && gvals_->has(oops::Variable(var)));
   } else if (grp == ObsFunctionTraits<float>::groupName) {
     return ObsFunctionFactory<float>::functionExists(var);
   } else if (grp == ObsFunctionTraits<int>::groupName) {
@@ -196,7 +196,7 @@ void ObsFilterData::get(const Variable & varname, const int level,
 ///  For GeoVaLs read from GeoVaLs (should be available)
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
-    gvals_->getAtLevel(values, var, level);
+    gvals_->getAtLevel(values, oops::Variable(var), level);
 ///  For ObsDiag get from ObsDiagnostics
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
@@ -217,7 +217,7 @@ void ObsFilterData::get(const Variable & varname, const int level,
 ///  For GeoVaLs read from GeoVaLs (should be available)
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
-    gvals_->getAtLevel(values, var, level);
+    gvals_->getAtLevel(values, oops::Variable(var), level);
 ///  For ObsDiag get from ObsDiagnostics
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
@@ -237,7 +237,7 @@ void ObsFilterData::get(const Variable & varname, ioda::ObsDataVector<float> & v
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
     std::vector<float> vec(obsdb_.nlocs());
-    gvals_->get(vec, var);
+    gvals_->get(vec, oops::Variable(var));
     values[var] = vec;
   /// For Function call compute
   } else if (grp == ObsFunctionTraits<float>::groupName) {
@@ -366,7 +366,7 @@ size_t ObsFilterData::nlevs(const Variable & varname) const {
   const std::string grp = varname.group();
   if (grp == "GeoVaLs") {
     ASSERT(gvals_);
-    return gvals_->nlevs(var);
+    return gvals_->nlevs(oops::Variable(var));
   } else if (grp == "ObsDiag" || grp == "ObsBiasTerm") {
     ASSERT(diags_);
     return diags_->nlevs(var);
@@ -406,8 +406,8 @@ void ObsFilterData::print(std::ostream & os) const {
   os << std::endl;
   if (gvals_) {
     os << "Contents of GeoVaLs" << std::endl;
-    for (const std::string & varname : gvals_->getVars().variables()) {
-      os << "- " << varname << std::endl;
+    for (const auto & var : gvals_->getVars()) {
+      os << "- " << var.name() << std::endl;
     }
     os << std::endl;
   }

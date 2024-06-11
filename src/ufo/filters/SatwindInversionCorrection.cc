@@ -99,9 +99,9 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
   const float max_pressure = parameters_.max_pressure.value();
   const float inversion_temperature = parameters_.inversion_temperature.value();
 // get names of GeoVal variables
-  const std::string model_temp_name = "air_temperature";
-  const std::string model_rh_name = "relative_humidity";
-  const std::string model_vcoord_name = "air_pressure";
+  const oops::Variable model_temp_name{"air_temperature"};
+  const oops::Variable model_rh_name{"relative_humidity"};
+  const oops::Variable model_vcoord_name{"air_pressure"};
 
 // Get variables from ObsSpace
 // Get the observation pressure
@@ -123,7 +123,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
 // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
 // Get number of vertical levels in GeoVaLs
-  const size_t nlevs = data_.nlevs(Variable("GeoVaLs/"+model_vcoord_name));
+  const size_t nlevs = gvals->nlevs(model_vcoord_name);
 // Vectors storing GeoVaL column for current location.
   std::vector <double> model_temp_profile(gvals->nlevs(model_temp_name), 0.0);
   std::vector <double> model_rh_profile(gvals->nlevs(model_rh_name), 0.0);

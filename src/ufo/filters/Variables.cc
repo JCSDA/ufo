@@ -65,7 +65,7 @@ Variables::Variables(const oops::Variables & oopsvars)
   : vars_() {
   oops::Log::trace() << "ufo::Variables(oops::Vars) start" << std::endl;
   for (size_t jvar = 0; jvar < oopsvars.size(); ++jvar) {
-    vars_.push_back(Variable(oopsvars[jvar]));
+    vars_.push_back(Variable(oopsvars[jvar].name()));
   }
   oops::Log::trace() << "ufo::Variables(oops::Vars) end" << std::endl;
 }

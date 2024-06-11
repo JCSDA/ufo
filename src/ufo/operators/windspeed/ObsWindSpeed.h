@@ -70,10 +70,9 @@ class ObsWindSpeed : public ObsOperatorBase,
 
  private:
   void print(std::ostream &) const override;
-  const ioda::ObsSpace& odb_;
+  oops::Variable model_surface_eastward_wind_;
+  oops::Variable model_surface_northward_wind_;
   oops::Variables varin_;
-  std::string model_surface_eastward_wind_;
-  std::string model_surface_northward_wind_;
 };
 
 // -----------------------------------------------------------------------------
