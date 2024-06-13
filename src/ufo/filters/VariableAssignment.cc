@@ -403,7 +403,7 @@ VariableAssignment::VariableAssignment(ioda::ObsSpace & obsdb, const Parameters_
   }
 }
 
-void VariableAssignment::doFilter() const {
+void VariableAssignment::doFilter() {
   oops::Log::trace() << "VariableAssignment doFilter begin" << std::endl;
 
   // Select locations at which the filter will be applied

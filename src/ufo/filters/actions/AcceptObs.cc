@@ -27,7 +27,7 @@ AcceptObs::AcceptObs(const Parameters_ &)
 
 void AcceptObs::apply(const Variables & vars,
                       const std::vector<std::vector<bool>> & flagged,
-                      const ObsFilterData &,
+                      ObsFilterData &,
                       int /*filterQCflag*/,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {

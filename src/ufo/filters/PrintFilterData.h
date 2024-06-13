@@ -147,7 +147,7 @@ class PrintFilterData : public ObsProcessorBase,
 
  private:  // functions
   void print(std::ostream &) const override;
-  void doFilter() const override;
+  void doFilter() override;
 
   /// Get the name of multi-level data at a particular level.
   std::string getVariableNameAtLevel(const std::string & varname, const int level) const;

@@ -52,7 +52,7 @@ ProcessAMVQI::~ProcessAMVQI() {
  *
  *  \date 02/08/2021: Created
  */
-void ProcessAMVQI::doFilter() const {
+void ProcessAMVQI::doFilter() {
   oops::Log::trace() << "ProcessAMVQI doFilter" << std::endl;
 
   const float missing = util::missingValue<float>();

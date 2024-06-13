@@ -52,7 +52,7 @@ AssignError::AssignError(const Parameters_ & parameters)
 
 void AssignError::apply(const Variables & vars,
                         const std::vector<std::vector<bool>> &mask,
-                        const ObsFilterData & data,
+                        ObsFilterData & data,
                         int /*filterQCflag*/,
                         ioda::ObsDataVector<int> & qcFlags,
                         ioda::ObsDataVector<float> & obserr) const {

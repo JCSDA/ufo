@@ -47,7 +47,7 @@ SetFlag<value>::SetFlag(const SetFlagParameters &parameters)
 template <bool value>
 void SetFlag<value>::apply(const Variables &vars,
                            const std::vector<std::vector<bool>> &flagged,
-                           const ObsFilterData &data,
+                           ObsFilterData &data,
                            int,
                            ioda::ObsDataVector<int> &qcFlags,
                            ioda::ObsDataVector<float> &) const {

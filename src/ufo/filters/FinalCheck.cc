@@ -37,7 +37,7 @@ FinalCheck::~FinalCheck() {
 
 // -----------------------------------------------------------------------------
 
-void FinalCheck::doFilter() const {
+void FinalCheck::doFilter() {
   oops::Log::trace() << "FinalCheck doFilter starts" << std::endl;
 
   const oops::ObsVariables &derived = obsdb_.derived_obsvariables();

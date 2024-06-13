@@ -27,7 +27,7 @@ static FilterActionMaker<PassivateObs> makerPassivateObs_("passivate");
 
 void PassivateObs::apply(const Variables & vars,
                       const std::vector<std::vector<bool>> & flagged,
-                      const ObsFilterData &,
+                      ObsFilterData &,
                       int,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {

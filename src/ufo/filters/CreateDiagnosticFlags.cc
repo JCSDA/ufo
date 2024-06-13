@@ -61,7 +61,7 @@ oops::ObsVariables CreateDiagnosticFlags::getFilterVariables() const {
 
 // -----------------------------------------------------------------------------
 
-void CreateDiagnosticFlags::doFilter() const {
+void CreateDiagnosticFlags::doFilter() {
   oops::Log::trace() << "CreateDiagnosticFlags doFilter starts" << std::endl;
 
   const oops::ObsVariables filterVars = getFilterVariables();

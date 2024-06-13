@@ -46,7 +46,7 @@ class FinalCheck : public ObsProcessorBase,
              std::shared_ptr<ioda::ObsDataVector<float>> obserr);
   ~FinalCheck() override;
 
-  void doFilter() const override;
+  void doFilter() override;
 
  private:
   void print(std::ostream &) const override;

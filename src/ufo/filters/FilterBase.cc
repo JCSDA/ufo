@@ -93,7 +93,7 @@ FilterBase::~FilterBase() {
 
 // -----------------------------------------------------------------------------
 
-void FilterBase::doFilter() const {
+void FilterBase::doFilter() {
   oops::Log::trace() << "FilterBase doFilter begin" << std::endl;
 
 // Select locations to which the filter will be applied

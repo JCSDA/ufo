@@ -111,7 +111,7 @@ class SetFlag : public FilterActionBase {
 
   void apply(const Variables & vars,
              const std::vector<std::vector<bool>> & flagged,
-             const ObsFilterData & data,
+             ObsFilterData & data,
              int /*filterQCflag*/,
              ioda::ObsDataVector<int> & flags,
              ioda::ObsDataVector<float> & obserr) const override;

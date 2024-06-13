@@ -62,7 +62,7 @@ class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
   bool post_;
 
  private:
-  virtual void doFilter() const = 0;
+  virtual void doFilter() = 0;
 
   // Variables extracted from the filter parameters.
   bool deferToPost_;

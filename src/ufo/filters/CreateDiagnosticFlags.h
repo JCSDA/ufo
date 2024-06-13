@@ -95,7 +95,7 @@ class CreateDiagnosticFlags : public ObsProcessorBase,
 
  private:
   /// Creates a variable DiagnosticsFlags/
-  void doFilter() const override;
+  void doFilter() override;
 
   void print(std::ostream &) const override;
 

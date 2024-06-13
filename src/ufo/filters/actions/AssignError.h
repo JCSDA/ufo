@@ -47,7 +47,7 @@ class AssignError : public FilterActionBase {
   ~AssignError() {}
 
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
-             const ObsFilterData &, int,
+             ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
   bool modifiesQCFlags() const override { return false; }

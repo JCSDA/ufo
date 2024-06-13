@@ -171,6 +171,8 @@ set ( filters_files
       actions/InflateError.h
       actions/PassivateObs.cc
       actions/PassivateObs.h
+      actions/ReduceObsSpace.cc
+      actions/ReduceObsSpace.h
       actions/RejectObs.cc
       actions/RejectObs.h
       actions/SetFlag.cc

@@ -74,7 +74,7 @@ class FilterBase : public ObsProcessorBase {
   mutable VariableNameMap nameMap_;
 
  private:
-  void doFilter() const override;
+  void doFilter() override;
   void print(std::ostream &) const override = 0;
   virtual void applyFilter(const std::vector<bool> &, const Variables &,
                            std::vector<std::vector<bool>> &) const = 0;

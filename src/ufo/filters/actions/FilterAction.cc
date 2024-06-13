@@ -24,7 +24,7 @@ FilterAction::~FilterAction() {}
 // -----------------------------------------------------------------------------
 
 void FilterAction::apply(const Variables & vars, const std::vector<std::vector<bool>> & mask,
-                         const ObsFilterData & data, int filterQCflag,
+                         ObsFilterData & data, int filterQCflag,
                          ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & err) const {
   action_->apply(vars, mask, data, filterQCflag, flags, err);
 }

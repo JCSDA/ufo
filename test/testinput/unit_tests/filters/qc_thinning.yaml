@@ -19,4 +19,6 @@ observations:
     amount: 0.75
     random seed: 0
     member: 1
+    action:
+      name: reduce obs space
   passedBenchmark: 282

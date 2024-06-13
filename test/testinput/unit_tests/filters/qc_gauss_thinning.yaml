@@ -14,6 +14,8 @@ observations:
   obs filters:
   - filter: Gaussian Thinning
     horizontal_mesh:   1111.949266 #km = 10 deg at equator
+    action:
+      name: reduce obs space
   passedBenchmark: 10
 - obs space:
     name: Aircraft
@@ -41,6 +43,8 @@ observations:
   - filter: Gaussian Thinning
     horizontal_mesh: -1
     vertical_mesh: -1
+    action:
+      name: reduce obs space
   passedBenchmark: 1 # Only one observation should be preserved
 - obs space:
     name: Aircraft
@@ -65,6 +69,8 @@ observations:
       name: MetaData/round
     priority_variable:
       name: MetaData/priority
+    action:
+      name: reduce obs space
   passedBenchmark: 91
   passedObservationsBenchmark:
     - 349
@@ -182,6 +188,9 @@ observations:
       name: MetaData/id_and_round
     priority_variable:
       name: MetaData/priority
+    action:
+      name: reduce obs space
+
   passedBenchmark: 451
   passedObservationsBenchmark:
     - 286
@@ -660,6 +669,9 @@ observations:
       name: MetaData/round
     priority_variable:
       name: MetaData/priority
+    action:
+      name: reduce obs space
+
   passedBenchmark: 145
   passedObservationsBenchmark: &regularSpatialGridPassedObsIds
     - 223
@@ -834,6 +846,9 @@ observations:
       name: MetaData/round
     priority_variable:
       name: MetaData/priority
+    action:
+      name: reduce obs space
+
   passedBenchmark: 145
   passedObservationsBenchmark: *regularSpatialGridPassedObsIds
 # Same as above; a variable other than the category variable used to group observations into records
@@ -863,6 +878,9 @@ observations:
       name: MetaData/round
     priority_variable:
       name: MetaData/priority
+    action:
+      name: reduce obs space
+
   passedBenchmark: 145
   passedObservationsBenchmark: *regularSpatialGridPassedObsIds
 # Observations not grouped into records; inefficient distribution
@@ -892,6 +910,7 @@ observations:
       name: MetaData/round
     priority_variable:
       name: MetaData/priority
+
   passedBenchmark: 145
   passedObservationsBenchmark: *regularSpatialGridPassedObsIds
 # Observations not grouped into records; halo distribution

@@ -68,7 +68,7 @@ class ProcessAMVQI : public ObsProcessorBase,
 
  private:
   void print(std::ostream &) const override;
-  void doFilter() const override;
+  void doFilter() override;
 
   Parameters_ parameters_;
 };

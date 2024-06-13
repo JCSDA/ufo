@@ -27,7 +27,7 @@ RejectObs::RejectObs(const RejectObsParameters &parameters)
 
 void RejectObs::apply(const Variables & vars,
                       const std::vector<std::vector<bool>> & flagged,
-                      const ObsFilterData &,
+                      ObsFilterData &,
                       int filterQCflag,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {

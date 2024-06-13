@@ -326,7 +326,7 @@ void PrintFilterData::printAllData() const {
   }
 }
 
-void PrintFilterData::doFilter() const {
+void PrintFilterData::doFilter() {
   oops::Log::trace() << "PrintFilterData doFilter started" << std::endl;
   oops::Log::debug() << *this;
 

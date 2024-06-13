@@ -74,7 +74,7 @@ class FilterActionBase : private boost::noncopyable {
   /// \param obserr
   ///   Obs error estimates of all "simulated variables".
   virtual void apply(const ufo::Variables &vars, const std::vector<std::vector<bool>> &flagged,
-                     const ObsFilterData &data, int filterQCflag,
+                     ObsFilterData &data, int filterQCflag,
                      ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr) const = 0;
 
   /// \brief Return the list of variables required by the action.

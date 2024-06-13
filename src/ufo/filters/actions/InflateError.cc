@@ -57,7 +57,7 @@ InflateError::InflateError(const Parameters_ & parameters)
 /// \param obserr ObsError (for all "simulated variables")
 void InflateError::apply(const Variables & vars,
                          const std::vector<std::vector<bool>> & flagged,
-                         const ObsFilterData & data,
+                         ObsFilterData & data,
                          int /*filterQCflag*/,
                          ioda::ObsDataVector<int> & flags,
                          ioda::ObsDataVector<float> & obserr) const {
