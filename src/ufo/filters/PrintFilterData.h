@@ -112,6 +112,9 @@ class PrintFilterDataParameters : public oops::ObsFilterParametersBase {
   /// retrieved. If the Derived group is not present, data from the original group will then be
   /// retrieved.
   oops::Parameter<bool> skipDerived{"skip derived", true, this};
+
+  /// If set to true, output will appear in the oops `test` stream.
+  oops::Parameter<bool> outputToTest{"output to test stream", false, this};
 };
 
 /// Type identifier used in calls to getData.
@@ -144,6 +147,9 @@ class PrintFilterData : public ObsProcessorBase,
                               std::vector <std::string>,
                               std::vector <util::DateTime>,
                               std::vector <bool>>> filterData_;
+
+  /// Output stream.
+  std::ostream & os_;
 
  private:  // functions
   void print(std::ostream &) const override;

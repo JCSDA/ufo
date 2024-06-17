@@ -25,8 +25,13 @@ PrintFilterData::PrintFilterData(ioda::ObsSpace & obsdb, const Parameters_ & par
                                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : ObsProcessorBase(obsdb, parameters.deferToPost, std::move(flags), std::move(obserr)),
-    parameters_(parameters)
+    parameters_(parameters),
+    os_(parameters.outputToTest ? oops::Log::test() : oops::Log::info())
 {
+  // Ensure precision and format match those of the `info` stream.
+  os_.precision(oops::Log::info().precision());
+  os_.unsetf(std::ios::scientific);
+
   oops::Log::trace() << "PrintFilterData constructor" << std::endl;
   allvars_ += getAllWhereVariables(parameters.where);
 
@@ -59,8 +64,8 @@ void PrintFilterData::getData(const Variable & variable, identifier<VariableType
         obsdb_.get_db(variable.group(), variableWithChannel, variableData[ich],
                       {}, parameters_.skipDerived);
       } catch (...) {
-        oops::Log::info() << getVariableNameWithChannel(variable, ich)
-                          << " not present in filter data" << std::endl;
+        os_ << getVariableNameWithChannel(variable, ich)
+            << " not present in filter data" << std::endl;
         continue;
       }
       std::vector<VariableType> globalVariableData = variableData[ich];
@@ -94,8 +99,8 @@ void PrintFilterData::getData(const Variable & variable, identifier<bool>) const
         obsdb_.get_db(variable.group(), variableWithChannel, variableData[ich],
                       {}, parameters_.skipDerived);
       } catch (...) {
-        oops::Log::info() << getVariableNameWithChannel(variable, ich)
-                          << " not present in filter data" << std::endl;
+        os_ << getVariableNameWithChannel(variable, ich)
+            << " not present in filter data" << std::endl;
         continue;
       }
       std::vector<int> globalVariableData(variableData[ich].begin(), variableData[ich].end());
@@ -114,7 +119,7 @@ void PrintFilterData::getMultiLevelData(const Variable & variable,
       this->getVariableNameAtLevel(variable.fullName(), level);
     // Ensure the level is not out of bounds.
     if (level < 0 || level >= data_.nlevs(variable)) {
-      oops::Log::info() << MultiLevelVariableName << " not present in filter data" << std::endl;
+      os_ << MultiLevelVariableName << " not present in filter data" << std::endl;
       continue;
     }
     data_.get(variable, level, variableData);
@@ -127,13 +132,13 @@ void PrintFilterData::printVariable
 (const std::string & varname, const int loc, const std::vector<int> & apply,
  identifier<VariableType>) const {
   if (!apply[loc]) {
-    oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << "masked by where";
+    os_ << std::right << std::setw(parameters_.columnWidth) << "masked by where";
   } else {
     const VariableType value = boost::get<std::vector<VariableType>>(filterData_[varname])[loc];
     if (value == util::missingValue<VariableType>())
-      oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << "missing";
+      os_ << std::right << std::setw(parameters_.columnWidth) << "missing";
     else
-      oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << value;
+      os_ << std::right << std::setw(parameters_.columnWidth) << value;
   }
 }
 
@@ -141,10 +146,10 @@ void PrintFilterData::printVariable
 (const std::string & varname, const int loc, const std::vector<int> & apply,
  identifier<bool>) const {
   if (!apply[loc]) {
-    oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << "masked by where";
+    os_ << std::right << std::setw(parameters_.columnWidth) << "masked by where";
   } else {
     const int value = boost::get<std::vector<int>>(filterData_[varname])[loc];
-    oops::Log::info() << std::right << std::setw(parameters_.columnWidth) << value;
+    os_ << std::right << std::setw(parameters_.columnWidth) << value;
     // There is not currently a missing boolean value.
   }
 }
@@ -199,7 +204,7 @@ void PrintFilterData::getAllData() const {
         throw eckit::BadParameter("Invalid variable type for printing", Here());
       }
     } else {
-      oops::Log::info() << variable.fullName() << " not present in filter data" << std::endl;
+      os_ << variable.fullName() << " not present in filter data" << std::endl;
     }
   }
 }
@@ -262,15 +267,15 @@ void PrintFilterData::printAllData() const {
   // Loop over each group of locations and print the contents of each variable.
   for (int locgroup = locmin; locgroup < locmax; locgroup += nlocsPerRow) {
     // Print table header.
-    oops::Log::info() << std::setw(maxVariableNameLength) << "Location" << " | ";
+    os_ << std::setw(maxVariableNameLength) << "Location" << " | ";
     for (int loc = locgroup; loc < locgroup + nlocsPerRow && loc < locmax; ++loc)
-      oops::Log::info() << std::setw(columnWidth) << loc << " | ";
-    oops::Log::info() << std::endl;
+      os_ << std::setw(columnWidth) << loc << " | ";
+    os_ << std::endl;
     // Print division bar below header.
-    oops::Log::info() << std::string(maxVariableNameLength, '-') << "-+-";
+    os_ << std::string(maxVariableNameLength, '-') << "-+-";
     for (int loc = locgroup; loc < locgroup + nlocsPerRow && loc < locmax; ++loc)
-      oops::Log::info() << std::string(columnWidth, '-') << "-+-";
-    oops::Log::info() << std::endl;
+      os_ << std::string(columnWidth, '-') << "-+-";
+    os_ << std::endl;
     // Print each variable in turn.
     for (const VariablePrintParameters & variableParams : parameters_.variables.value()) {
       const Variable variable = variableParams.variable;
@@ -283,19 +288,19 @@ void PrintFilterData::printAllData() const {
             this->getVariableNameAtLevel(variable.fullName(), level);
           if (filterData_.find(MultiLevelVariableName) == filterData_.end())
             continue;
-          oops::Log::info() << std::setw(maxVariableNameLength) << MultiLevelVariableName << " | ";
+          os_ << std::setw(maxVariableNameLength) << MultiLevelVariableName << " | ";
           for (int loc = locgroup; loc < locgroup + nlocsPerRow && loc < locmax; ++loc) {
             this->printVariable<float>(MultiLevelVariableName, loc, globalApply);
-            oops::Log::info() << " | ";
+            os_ << " | ";
           }
-          oops::Log::info() << std::endl;
+          os_ << std::endl;
         }
       } else {
         for (size_t ich = 0; ich < variable.size(); ++ich) {
           const std::string varname = this->getVariableNameWithChannel(variable, ich);
           if (filterData_.find(varname) == filterData_.end())
             continue;
-          oops::Log::info() << std::setw(maxVariableNameLength) << varname << " | ";
+          os_ << std::setw(maxVariableNameLength) << varname << " | ";
           for (int loc = locgroup; loc < locgroup + nlocsPerRow && loc < locmax; ++loc) {
             switch (data_.dtype(variable)) {
             case ioda::ObsDtype::Integer:
@@ -316,13 +321,13 @@ void PrintFilterData::printAllData() const {
             default:
               break;
             }
-            oops::Log::info() << " | ";
+            os_ << " | ";
           }
-          oops::Log::info() << std::endl;
+          os_ << std::endl;
         }
       }
     }
-    oops::Log::info() << std::endl;
+    os_ << std::endl;
   }
 }
 
@@ -331,17 +336,17 @@ void PrintFilterData::doFilter() {
   oops::Log::debug() << *this;
 
   // Print welcome message.
-  oops::Log::info() << std::endl;
-  oops::Log::info() << "############################" << std::endl;
-  oops::Log::info() << "### Printing filter data ###" << std::endl;
-  oops::Log::info() << "############################" << std::endl;
-  oops::Log::info() << std::endl << std::endl;
+  os_ << std::endl;
+  os_ << "############################" << std::endl;
+  os_ << "### Printing filter data ###" << std::endl;
+  os_ << "############################" << std::endl;
+  os_ << std::endl << std::endl;
 
   if (parameters_.message.value() != boost::none)
-    oops::Log::info() << *parameters_.message.value() << std::endl << std::endl;
+    os_ << *parameters_.message.value() << std::endl << std::endl;
 
   if (parameters_.summary)
-    oops::Log::info() << data_;
+    os_ << data_;
 
   this->getAllData();
   this->printAllData();

@@ -170,4 +170,4 @@ observations:
   passedBenchmark: 2200
 
 test:
- reference filename: testref/unit_tests/filters/print_filter_data.ref
+ reference filename: testref/unit_tests/filters/print_filter_data_mpi.ref

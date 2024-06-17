@@ -174,6 +174,8 @@ class ObsFiltersParameters : public oops::Parameters {
   /// A list whose elements are used to configure tests running sequences of filters on
   /// observations from individual observation spaces.
   oops::Parameter<std::vector<ObsTypeParameters>> observations{"observations", {}, this};
+  /// Section required if comparing output in the oops test stream to a reference file.
+  oops::OptionalParameter<eckit::LocalConfiguration> test{"test", this};
 };
 
 // -----------------------------------------------------------------------------

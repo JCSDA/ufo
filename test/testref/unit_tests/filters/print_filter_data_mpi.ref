@@ -1,0 +1,338 @@
+############################
+### Printing filter data ###
+############################
+Printing filter data before Background Check
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+           Location |                    0 |                    1 |                    2 |                    3 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              279.264 |              279.264 |              279.264 |              279.026 | 
+           Location |                    4 |                    5 |                    6 |                    7 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              278.039 |              279.236 |              282.076 |               282.44 | 
+           Location |                    8 |                    9 |                   10 | 
+--------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              282.805 |              282.311 |               282.33 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data before Background Check, MPI rank 0 only
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+           Location |                 1735 |                 1736 |                 1737 |                 1738 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              221.245 |              221.234 |              221.228 |              221.217 | 
+           Location |                 1739 |                 1740 |                 1741 |                 1742 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              221.211 |                221.2 |              221.194 |              221.182 | 
+           Location |                 1743 |                 1744 |                 1745 |                 1746 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              221.177 |              221.165 |              221.154 |              221.148 | 
+           Location |                 1747 |                 1748 |                 1749 |                 1750 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              221.137 |              221.131 |              221.119 |              221.119 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data after Background Check
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+GeoVaLs/air_temperature (level 100) not present in filter data
+ObsValue/missing not present in filter data
+missing/air_temperature not present in filter data
+GeoVaLs/missing not present in filter data
+                         Location |                    0 |                    1 |                    2 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |                280.3 |                280.3 |              missing | 
+              HofX/airTemperature |              279.264 |              279.264 |              279.264 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |               101900 |               101900 |               101900 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 |   2019061506_01010_1 | 
+                         Location |                    3 |                    4 |                    5 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |                278.9 |                277.7 |                276.7 | 
+              HofX/airTemperature |              279.026 |              278.039 |              279.236 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |               101400 |               100000 |                97700 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 |   2019061506_01010_1 | 
+                         Location |                    6 |                    7 |                    8 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |                279.3 |                281.7 |                282.3 | 
+              HofX/airTemperature |              282.076 |               282.44 |              282.805 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |                96400 |                96100 |                95800 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 |   2019061506_01010_1 | 
+                         Location |                    9 |                   10 | 
+----------------------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |                282.1 |                281.7 | 
+              HofX/airTemperature |              282.311 |               282.33 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |                92500 |                91600 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data with masking after Background Check
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+                              Location |                    0 |                    1 |                    2 | 
+---------------------------------------+----------------------+----------------------+----------------------+-
+               ObsValue/airTemperature |                280.3 |                280.3 |              missing | 
+DiagnosticFlags/BkgFlag/airTemperature |                    1 |                    1 |                    1 | 
+                              Location |                    3 |                    4 |                    5 | 
+---------------------------------------+----------------------+----------------------+----------------------+-
+               ObsValue/airTemperature |      masked by where |      masked by where |      masked by where | 
+DiagnosticFlags/BkgFlag/airTemperature |      masked by where |      masked by where |      masked by where | 
+                              Location |                    6 |                    7 |                    8 | 
+---------------------------------------+----------------------+----------------------+----------------------+-
+               ObsValue/airTemperature |      masked by where |                281.7 |                282.3 | 
+DiagnosticFlags/BkgFlag/airTemperature |      masked by where |                    1 |                    1 | 
+                              Location |                    9 |                   10 | 
+---------------------------------------+----------------------+----------------------+-
+               ObsValue/airTemperature |                282.1 |                281.7 | 
+DiagnosticFlags/BkgFlag/airTemperature |                    1 |                    1 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data after Variable Assignment, skip derived true
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+                      Location |                    0 |                    1 |                    2 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                280.3 |                280.3 |              missing | 
+DerivedObsValue/airTemperature |                560.6 |                560.6 |              missing | 
+                      Location |                    3 |                    4 |                    5 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                278.9 |                277.7 |                276.7 | 
+DerivedObsValue/airTemperature |                557.8 |                555.4 |                553.4 | 
+                      Location |                    6 |                    7 |                    8 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                279.3 |                281.7 |                282.3 | 
+DerivedObsValue/airTemperature |                558.6 |                563.4 |                564.6 | 
+                      Location |                    9 |                   10 | 
+-------------------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                282.1 |                281.7 | 
+DerivedObsValue/airTemperature |                564.2 |                563.4 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data after Variable Assignment, skip derived false
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+                      Location |                    0 |                    1 |                    2 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                560.6 |                560.6 |              missing | 
+DerivedObsValue/airTemperature |                560.6 |                560.6 |              missing | 
+                      Location |                    3 |                    4 |                    5 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                557.8 |                555.4 |                553.4 | 
+DerivedObsValue/airTemperature |                557.8 |                555.4 |                553.4 | 
+                      Location |                    6 |                    7 |                    8 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                558.6 |                563.4 |                564.6 | 
+DerivedObsValue/airTemperature |                558.6 |                563.4 |                564.6 | 
+                      Location |                    9 |                   10 | 
+-------------------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |                564.2 |                563.4 | 
+DerivedObsValue/airTemperature |                564.2 |                563.4 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data
+Filter data: contains obs, ObsErrorData, QCflagsData
+Contents of ObsValue
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+############################
+### Printing filter data ###
+############################
+Printing ATMS channels
+Filter data: contains obs, ObsErrorData, QCflagsData
+Contents of ObsValue
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+Contents of ObsErrorData
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+Contents of QCflagsData
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+ObsValue/brightnessTemperature_23 not present in filter data
+ObsValue/brightnessTemperature_24 not present in filter data
+ObsValue/brightnessTemperature_25 not present in filter data
+ObsValue/brightnessTemperature_26 not present in filter data
+ObsValue/brightnessTemperature_27 not present in filter data
+ObsValue/brightnessTemperature_28 not present in filter data
+ObsValue/brightnessTemperature_100 not present in filter data
+                          Location |                    1 | 
+-----------------------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |               233.75 | 
+  ObsValue/brightnessTemperature_2 |               224.39 | 
+  ObsValue/brightnessTemperature_3 |               226.34 | 
+  ObsValue/brightnessTemperature_4 |               230.63 | 
+  ObsValue/brightnessTemperature_5 |               231.35 | 
+  ObsValue/brightnessTemperature_6 |               225.46 | 
+  ObsValue/brightnessTemperature_7 |               215.95 | 
+ ObsValue/brightnessTemperature_15 |                236.6 | 
+ ObsValue/brightnessTemperature_16 |               201.86 | 
+ ObsValue/brightnessTemperature_17 |               205.73 | 
+ ObsValue/brightnessTemperature_18 |               223.97 | 
+ ObsValue/brightnessTemperature_19 |               232.88 | 
+ ObsValue/brightnessTemperature_20 |               238.35 | 
+ ObsValue/brightnessTemperature_21 |               238.98 | 
+ ObsValue/brightnessTemperature_22 |               237.28 | 

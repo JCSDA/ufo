@@ -184,7 +184,7 @@ ufo_add_test( NAME    test_ufo_print_filter_data_mpi
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/print_filter_data.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/print_filter_data_mpi.yaml"
               MPI     2
               LIBS    ufo
               LABELS  filters

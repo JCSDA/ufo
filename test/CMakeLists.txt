@@ -118,6 +118,18 @@ ecbuild_add_resources( TARGET ufo_test_scripts
                        ${ufo_test_input}
                      )
 
+
+# Create Data directory for test reference files and symlink all files
+list( APPEND ufo_test_ref
+  testref/unit_tests/filters/print_filter_data.ref
+  testref/unit_tests/filters/print_filter_data_mpi.ref
+)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref/unit_tests)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref/unit_tests/filters)
+CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_ref} )
+
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
