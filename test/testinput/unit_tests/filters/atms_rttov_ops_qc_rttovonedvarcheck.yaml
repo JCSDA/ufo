@@ -397,7 +397,7 @@ observations:
   # To be replaced with DrawFromFile
   - filter: Variable Assignment
     assignments:
-    - name: VarMetaData/emissivity
+    - name: MetaData/emissivity
       channels: *ops_channels
       type: float
       function:
@@ -419,7 +419,7 @@ observations:
   # Setup surface emissivity error for test
   - filter: Variable Assignment
     assignments:
-    - name: VarMetaData/emissivityError
+    - name: MetaData/emissivityError
       channels: *ops_channels
       type: float
       function:
@@ -468,7 +468,7 @@ observations:
       emissivity to channel mapping: [1,2,3,16,17]
       channel to emissivity mapping: [1,2,3,3,3,3,3,3,3,3,3,
                                       3,3,3,3,4,5,5,5,5,5,5]
-      group in obs space: VarMetaData
+      group in obs space: MetaData
     nlevels: 70
     qtotal: true
     RetrievedErrorFactor: -1.0
