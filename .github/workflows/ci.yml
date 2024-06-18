@@ -155,16 +155,6 @@ jobs:
         if: github.event_name == 'pull_request'
         run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/ops-um-jedi
 
-      - name: Checkout lfric-lite-jedi
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/lfric-lite-jedi
-          repository: JCSDA-internal/lfric-lite-jedi
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for lfric-lite-jedi ${{ github.head_ref }}
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/lfric-lite-jedi
-
       - name: Checkout lfric-jedi
         uses: actions/checkout@v4
         with:
@@ -193,7 +183,7 @@ jobs:
             --env OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
             --env MOBB_DATA=${MOBB_DATA} \
             --env ATLAS_DATA_PATH=${MOBB_DATA} \
-            --env LFRICLITE_TEST_TIER=1 \
+            --env LFRICJEDI_TEST_TIER=0 \
             --workdir=${WORKDIR} \
             --entrypoint=${WORKDIR}/build-and-test.sh \
             'ngmssboxjediacr.azurecr.io/jedibase:alma9'
