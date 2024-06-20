@@ -179,12 +179,14 @@ ObsRadianceCRTM::Locations_ ObsRadianceCRTM::locations() const {
           lons, lats, times, odb_.distribution())));
 
   if (do_fov_average_) {
-    // Get attributes needed for GSI calls
-    const ioda::ObsGroup og = odb_.getObsGroup();
-    ASSERT(og.atts.exists("sensor"));
-    ASSERT(og.atts.exists("platform"));
-    const std::string & sensor = og.atts.read<std::string>("sensor");
-    const std::string & platform = og.atts.read<std::string>("platform");
+    // Get sensor and platform from sensorID in yaml
+    const std::string & sensorID = parameters_.obsOptions.value().Sensor_ID;
+    const std::size_t lastPos = sensorID.find_last_of('_');
+    if (lastPos == std::string::npos) {
+      throw eckit::BadParameter("Can not infer sensor and platform from yaml");
+    }
+    const std::string sensor = sensorID.substr(0, lastPos);
+    const std::string platform = sensorID.substr(lastPos + 1);
 
     // Get observation data that will defined the field-of-view
     std::vector<int> scan_positions(nlocs);
