@@ -69,14 +69,15 @@ void Cal_SatRadianceFromScaledRadiance::runTransform(const std::vector<bool> &ap
                             endChannelScale[i]);
     }
   } else {
-    std::string var = parameters_.scalingVariable.value().fullName();
-    int scaleDims = obsdb_.getObsGroup().vars[var].getDimensions().numElements;
-    ASSERT(scaleDims == numScaleFactors);
-    channelScaleFactor = obsdb_.getObsGroup().vars[var].readAsVector<int>();
-    var = parameters_.scalingStartChannel.value().fullName();
-    startChannelScale = obsdb_.getObsGroup().vars[var].readAsVector<int>();
-    var = parameters_.scalingEndChannel.value().fullName();
-    endChannelScale = obsdb_.getObsGroup().vars[var].readAsVector<int>();
+    Variable var = parameters_.scalingVariable.value();
+    obsdb_.get_db(var.group(), var.variable(), channelScaleFactor);
+    ASSERT(channelScaleFactor.size() == numScaleFactors);
+    var = parameters_.scalingStartChannel.value();
+    obsdb_.get_db(var.group(), var.variable(), startChannelScale);
+    ASSERT(startChannelScale.size() == numScaleFactors);
+    var = parameters_.scalingEndChannel.value();
+    obsdb_.get_db(var.group(), var.variable(), endChannelScale);
+    ASSERT(endChannelScale.size() == numScaleFactors);
   }
 
   // Setup Variables
