@@ -1,0 +1,689 @@
+############################
+### Printing filter data ###
+############################
+Printing filter data before Background Check, rank 0 only
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+           Location |                    0 |                    1 |                    2 |                    3 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              279.264 |              279.264 |              279.264 |              279.026 | 
+           Location |                    4 |                    5 |                    6 |                    7 | 
+--------------------+----------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              278.039 |              279.236 |              282.076 |              282.440 | 
+           Location |                    8 |                    9 |                   10 | 
+--------------------+----------------------+----------------------+----------------------+-
+HofX/airTemperature |              282.805 |              282.311 |              282.330 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data after Background Check, rank 0 only
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+GeoVaLs/air_temperature (level 100) not present in filter data
+ObsValue/missing not present in filter data
+missing/air_temperature not present in filter data
+GeoVaLs/missing not present in filter data
+                         Location |                    0 |                    1 |                    2 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |              280.300 |              280.300 |              missing | 
+              HofX/airTemperature |              279.264 |              279.264 |              279.264 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |           101900.000 |           101900.000 |           101900.000 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 |   2019061506_01010_1 | 
+                         Location |                    3 |                    4 |                    5 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |              278.900 |              277.700 |              276.700 | 
+              HofX/airTemperature |              279.026 |              278.039 |              279.236 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |           101400.000 |           100000.000 |            97700.000 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 |              278.096 | 
+ :                  MetaData/ObsType |                50101 |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 |   2019061506_01010_1 | 
+                         Location |                    6 |                    7 |                    8 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |              279.300 |              281.700 |              282.300 | 
+              HofX/airTemperature |              282.076 |              282.440 |              282.805 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |            96400.000 |            96100.000 |            95800.000 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 |   2019061506_01010_1 | 
+                         Location |                    9 |                   10 | 
+----------------------------------+----------------------+----------------------+-
+          ObsValue/airTemperature |              282.100 |              281.700 | 
+              HofX/airTemperature |              282.311 |              282.330 | 
+                MetaData/dateTime | 2019-06-15T00:00:00Z | 2019-06-15T00:00:00Z | 
+                MetaData/pressure |            92500.000 |            91600.000 | 
+GeoVaLs/air_temperature (level 0) |              166.584 |              166.584 | 
+GeoVaLs/air_temperature (level 2) |              211.278 |              211.278 | 
+GeoVaLs/air_temperature (level 3) |              252.756 |              252.756 | 
+GeoVaLs/air_temperature (level 4) |              278.096 |              278.096 | 
+                 MetaData/ObsType |                50101 |                50101 | 
+   MetaData/stationIdentification |   2019061506_01010_1 |   2019061506_01010_1 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data with `where` statement after Background Check, rank 0 only
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+                              Location |                    0 |                    1 |                    2 | 
+---------------------------------------+----------------------+----------------------+----------------------+-
+               ObsValue/airTemperature |              280.300 |              280.300 |              missing | 
+DiagnosticFlags/BkgFlag/airTemperature |                    1 |                    1 |                    1 | 
+                              Location |                    7 |                    8 |                    9 | 
+---------------------------------------+----------------------+----------------------+----------------------+-
+               ObsValue/airTemperature |              281.700 |              282.300 |              282.100 | 
+DiagnosticFlags/BkgFlag/airTemperature |                    1 |                    1 |                    1 | 
+                              Location |                   10 | 
+---------------------------------------+----------------------+-
+               ObsValue/airTemperature |              281.700 | 
+DiagnosticFlags/BkgFlag/airTemperature |                    1 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data after Variable Assignment, skip derived true, rank 0 only
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+                      Location |                    0 |                    1 |                    2 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              280.300 |              280.300 |              missing | 
+DerivedObsValue/airTemperature |              560.600 |              560.600 |              missing | 
+                      Location |                    3 |                    4 |                    5 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              278.900 |              277.700 |              276.700 | 
+DerivedObsValue/airTemperature |              557.800 |              555.400 |              553.400 | 
+                      Location |                    6 |                    7 |                    8 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              279.300 |              281.700 |              282.300 | 
+DerivedObsValue/airTemperature |              558.600 |              563.400 |              564.600 | 
+                      Location |                    9 |                   10 | 
+-------------------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              282.100 |              281.700 | 
+DerivedObsValue/airTemperature |              564.200 |              563.400 | 
+############################
+### Printing filter data ###
+############################
+Printing filter data after Variable Assignment, skip derived false, rank 0 only
+Filter data: contains obs, geovals, HofX, ObsBiasData, ObsErrorData, QCflagsData, diags
+Contents of ObsValue
+- airTemperature
+Contents of GeoVaLs
+- air_temperature
+- air_pressure
+Contents of HofX
+- airTemperature
+Contents of ObsBiasData
+- airTemperature
+Contents of ObsErrorData
+- airTemperature
+Contents of QCflagsData
+- airTemperature
+                      Location |                    0 |                    1 |                    2 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              560.600 |              560.600 |              missing | 
+DerivedObsValue/airTemperature |              560.600 |              560.600 |              missing | 
+                      Location |                    3 |                    4 |                    5 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              557.800 |              555.400 |              553.400 | 
+DerivedObsValue/airTemperature |              557.800 |              555.400 |              553.400 | 
+                      Location |                    6 |                    7 |                    8 | 
+-------------------------------+----------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              558.600 |              563.400 |              564.600 | 
+DerivedObsValue/airTemperature |              558.600 |              563.400 |              564.600 | 
+                      Location |                    9 |                   10 | 
+-------------------------------+----------------------+----------------------+-
+       ObsValue/airTemperature |              564.200 |              563.400 | 
+DerivedObsValue/airTemperature |              564.200 |              563.400 | 
+############################
+### Printing filter data ###
+############################
+Printing ATMS channels, rank 0 only
+Filter data: contains obs, ObsErrorData, QCflagsData
+Contents of ObsValue
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+Contents of ObsErrorData
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+Contents of QCflagsData
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+ObsValue/brightnessTemperature_23 not present in filter data
+ObsValue/brightnessTemperature_24 not present in filter data
+ObsValue/brightnessTemperature_25 not present in filter data
+ObsValue/brightnessTemperature_26 not present in filter data
+ObsValue/brightnessTemperature_27 not present in filter data
+ObsValue/brightnessTemperature_28 not present in filter data
+ObsValue/brightnessTemperature_100 not present in filter data
+                          Location |                    0 |                    2 |                    4 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              226.830 |              233.750 |              236.720 | 
+  ObsValue/brightnessTemperature_2 |              218.320 |              224.390 |              227.590 | 
+  ObsValue/brightnessTemperature_3 |              227.090 |              226.340 |              227.200 | 
+  ObsValue/brightnessTemperature_4 |              231.000 |              230.630 |              231.380 | 
+  ObsValue/brightnessTemperature_5 |              230.420 |              231.350 |              232.470 | 
+  ObsValue/brightnessTemperature_6 |              223.590 |              225.460 |              227.030 | 
+  ObsValue/brightnessTemperature_7 |              214.510 |              215.950 |              217.220 | 
+ ObsValue/brightnessTemperature_15 |              241.880 |              236.600 |              234.990 | 
+ ObsValue/brightnessTemperature_16 |              204.510 |              201.860 |              204.780 | 
+ ObsValue/brightnessTemperature_17 |              213.360 |              205.730 |              205.850 | 
+ ObsValue/brightnessTemperature_18 |              233.380 |              223.970 |              221.960 | 
+ ObsValue/brightnessTemperature_19 |              239.850 |              232.880 |              230.930 | 
+ ObsValue/brightnessTemperature_20 |              241.610 |              238.350 |              237.150 | 
+ ObsValue/brightnessTemperature_21 |              239.510 |              238.980 |              239.190 | 
+ ObsValue/brightnessTemperature_22 |              236.960 |              237.280 |              238.310 | 
+                          Location |                    6 |                    8 |                   10 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              239.910 |              243.560 |              245.600 | 
+  ObsValue/brightnessTemperature_2 |              230.420 |              233.960 |              236.060 | 
+  ObsValue/brightnessTemperature_3 |              228.140 |              229.260 |              230.890 | 
+  ObsValue/brightnessTemperature_4 |              232.330 |              233.510 |              235.130 | 
+  ObsValue/brightnessTemperature_5 |              233.510 |              235.050 |              236.640 | 
+  ObsValue/brightnessTemperature_6 |              228.380 |              229.650 |              231.330 | 
+  ObsValue/brightnessTemperature_7 |              218.050 |              218.850 |              219.930 | 
+ ObsValue/brightnessTemperature_15 |              234.350 |              233.200 |              233.240 | 
+ ObsValue/brightnessTemperature_16 |              206.460 |              207.600 |              208.550 | 
+ ObsValue/brightnessTemperature_17 |              206.280 |              209.660 |              211.360 | 
+ ObsValue/brightnessTemperature_18 |              223.370 |              230.400 |              234.130 | 
+ ObsValue/brightnessTemperature_19 |              232.520 |              238.480 |              241.840 | 
+ ObsValue/brightnessTemperature_20 |              238.410 |              242.030 |              244.290 | 
+ ObsValue/brightnessTemperature_21 |              239.860 |              241.120 |              242.430 | 
+ ObsValue/brightnessTemperature_22 |              238.640 |              238.700 |              239.330 | 
+                          Location |                   12 |                   14 |                   16 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              248.930 |              248.850 |              249.440 | 
+  ObsValue/brightnessTemperature_2 |              242.160 |              240.670 |              241.100 | 
+  ObsValue/brightnessTemperature_3 |              236.770 |              234.360 |              234.990 | 
+  ObsValue/brightnessTemperature_4 |              239.430 |              238.390 |              239.090 | 
+  ObsValue/brightnessTemperature_5 |              239.450 |              239.610 |              240.190 | 
+  ObsValue/brightnessTemperature_6 |              233.030 |              233.700 |              234.250 | 
+  ObsValue/brightnessTemperature_7 |              220.610 |              221.170 |              221.420 | 
+ ObsValue/brightnessTemperature_15 |              232.350 |              231.990 |              232.300 | 
+ ObsValue/brightnessTemperature_16 |              214.090 |              209.640 |              211.770 | 
+ ObsValue/brightnessTemperature_17 |              219.420 |              218.530 |              221.440 | 
+ ObsValue/brightnessTemperature_18 |              239.600 |              240.840 |              242.630 | 
+ ObsValue/brightnessTemperature_19 |              245.110 |              245.820 |              246.480 | 
+ ObsValue/brightnessTemperature_20 |              245.940 |              245.780 |              245.660 | 
+ ObsValue/brightnessTemperature_21 |              243.050 |              242.110 |              241.670 | 
+ ObsValue/brightnessTemperature_22 |              239.330 |              238.070 |              237.260 | 
+                          Location |                   18 |                   20 |                   22 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              248.070 |              247.720 |              247.150 | 
+  ObsValue/brightnessTemperature_2 |              238.580 |              234.610 |              235.930 | 
+  ObsValue/brightnessTemperature_3 |              232.860 |              228.250 |              231.660 | 
+  ObsValue/brightnessTemperature_4 |              238.250 |              235.700 |              238.040 | 
+  ObsValue/brightnessTemperature_5 |              240.310 |              239.270 |              240.090 | 
+  ObsValue/brightnessTemperature_6 |              234.530 |              234.040 |              233.480 | 
+  ObsValue/brightnessTemperature_7 |              221.440 |              221.030 |              219.890 | 
+ ObsValue/brightnessTemperature_15 |              233.670 |              234.890 |              235.790 | 
+ ObsValue/brightnessTemperature_16 |              205.730 |              202.590 |              206.990 | 
+ ObsValue/brightnessTemperature_17 |              219.660 |              220.510 |              226.390 | 
+ ObsValue/brightnessTemperature_18 |              242.990 |              244.510 |              249.210 | 
+ ObsValue/brightnessTemperature_19 |              246.960 |              247.580 |              250.170 | 
+ ObsValue/brightnessTemperature_20 |              245.790 |              246.240 |              247.680 | 
+ ObsValue/brightnessTemperature_21 |              241.880 |              242.170 |              243.050 | 
+ ObsValue/brightnessTemperature_22 |              237.890 |              238.160 |              238.580 | 
+                          Location |                   24 |                   26 |                   28 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              244.760 |              245.330 |              238.780 | 
+  ObsValue/brightnessTemperature_2 |              236.060 |              239.050 |              229.010 | 
+  ObsValue/brightnessTemperature_3 |              232.460 |              237.740 |              235.790 | 
+  ObsValue/brightnessTemperature_4 |              238.780 |              241.860 |              240.140 | 
+  ObsValue/brightnessTemperature_5 |              240.200 |              240.620 |              238.250 | 
+  ObsValue/brightnessTemperature_6 |              232.680 |              231.360 |              228.270 | 
+  ObsValue/brightnessTemperature_7 |              218.420 |              216.220 |              213.410 | 
+ ObsValue/brightnessTemperature_15 |              238.090 |              240.540 |              244.620 | 
+ ObsValue/brightnessTemperature_16 |              209.430 |              217.240 |              211.130 | 
+ ObsValue/brightnessTemperature_17 |              229.910 |              238.700 |              227.340 | 
+ ObsValue/brightnessTemperature_18 |              250.690 |              254.390 |              249.140 | 
+ ObsValue/brightnessTemperature_19 |              250.510 |              252.140 |              250.280 | 
+ ObsValue/brightnessTemperature_20 |              247.290 |              248.060 |              247.290 | 
+ ObsValue/brightnessTemperature_21 |              242.180 |              242.430 |              241.530 | 
+ ObsValue/brightnessTemperature_22 |              237.380 |              237.650 |              236.300 | 
+                          Location |                   30 |                   32 |                   34 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              224.550 |              226.030 |              234.070 | 
+  ObsValue/brightnessTemperature_2 |              213.300 |              218.210 |              224.390 | 
+  ObsValue/brightnessTemperature_3 |              234.970 |              228.440 |              227.060 | 
+  ObsValue/brightnessTemperature_4 |              239.720 |              232.030 |              231.240 | 
+  ObsValue/brightnessTemperature_5 |              235.800 |              230.710 |              231.700 | 
+  ObsValue/brightnessTemperature_6 |              224.230 |              223.700 |              225.640 | 
+  ObsValue/brightnessTemperature_7 |              209.960 |              214.500 |              216.000 | 
+ ObsValue/brightnessTemperature_15 |              249.090 |              241.050 |              236.630 | 
+ ObsValue/brightnessTemperature_16 |              198.260 |              208.570 |              203.930 | 
+ ObsValue/brightnessTemperature_17 |              226.920 |              216.660 |              207.620 | 
+ ObsValue/brightnessTemperature_18 |              249.620 |              234.850 |              224.880 | 
+ ObsValue/brightnessTemperature_19 |              248.040 |              240.680 |              233.580 | 
+ ObsValue/brightnessTemperature_20 |              243.670 |              242.270 |              238.970 | 
+ ObsValue/brightnessTemperature_21 |              237.950 |              240.110 |              239.530 | 
+ ObsValue/brightnessTemperature_22 |              232.680 |              237.250 |              237.600 | 
+                          Location |                   36 |                   38 |                   40 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              237.760 |              241.690 |              244.730 | 
+  ObsValue/brightnessTemperature_2 |              227.590 |              231.340 |              236.080 | 
+  ObsValue/brightnessTemperature_3 |              226.590 |              227.200 |              230.360 | 
+  ObsValue/brightnessTemperature_4 |              231.420 |              231.970 |              234.470 | 
+  ObsValue/brightnessTemperature_5 |              232.730 |              233.750 |              235.610 | 
+  ObsValue/brightnessTemperature_6 |              227.220 |              228.630 |              230.090 | 
+  ObsValue/brightnessTemperature_7 |              217.110 |              218.070 |              219.030 | 
+ ObsValue/brightnessTemperature_15 |              234.770 |              234.530 |              233.280 | 
+ ObsValue/brightnessTemperature_16 |              203.850 |              204.110 |              208.850 | 
+ ObsValue/brightnessTemperature_17 |              204.530 |              205.970 |              211.760 | 
+ ObsValue/brightnessTemperature_18 |              221.300 |              227.090 |              232.670 | 
+ ObsValue/brightnessTemperature_19 |              230.860 |              236.210 |              240.300 | 
+ ObsValue/brightnessTemperature_20 |              237.520 |              240.810 |              243.180 | 
+ ObsValue/brightnessTemperature_21 |              239.470 |              240.310 |              241.550 | 
+ ObsValue/brightnessTemperature_22 |              238.320 |              237.930 |              238.460 | 
+                          Location |                   42 |                   44 |                   46 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              247.820 |              249.700 |              248.630 | 
+  ObsValue/brightnessTemperature_2 |              238.950 |              242.720 |              239.190 | 
+  ObsValue/brightnessTemperature_3 |              231.920 |              237.280 |              233.090 | 
+  ObsValue/brightnessTemperature_4 |              235.930 |              239.970 |              237.840 | 
+  ObsValue/brightnessTemperature_5 |              237.360 |              239.990 |              239.670 | 
+  ObsValue/brightnessTemperature_6 |              231.740 |              233.400 |              233.900 | 
+  ObsValue/brightnessTemperature_7 |              220.090 |              220.850 |              221.360 | 
+ ObsValue/brightnessTemperature_15 |              231.790 |              232.010 |              232.290 | 
+ ObsValue/brightnessTemperature_16 |              209.340 |              215.320 |              208.650 | 
+ ObsValue/brightnessTemperature_17 |              213.090 |              222.210 |              219.700 | 
+ ObsValue/brightnessTemperature_18 |              235.770 |              241.210 |              242.130 | 
+ ObsValue/brightnessTemperature_19 |              242.940 |              245.800 |              246.500 | 
+ ObsValue/brightnessTemperature_20 |              245.000 |              246.170 |              245.830 | 
+ ObsValue/brightnessTemperature_21 |              242.640 |              242.710 |              241.780 | 
+ ObsValue/brightnessTemperature_22 |              239.420 |              238.750 |              237.620 | 
+                          Location |                   48 |                   50 |                   52 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              250.290 |              249.090 |              249.850 | 
+  ObsValue/brightnessTemperature_2 |              241.650 |              239.670 |              239.310 | 
+  ObsValue/brightnessTemperature_3 |              234.950 |              233.720 |              232.330 | 
+  ObsValue/brightnessTemperature_4 |              239.350 |              238.990 |              238.190 | 
+  ObsValue/brightnessTemperature_5 |              240.710 |              240.760 |              240.230 | 
+  ObsValue/brightnessTemperature_6 |              234.610 |              234.870 |              234.290 | 
+  ObsValue/brightnessTemperature_7 |              221.700 |              221.620 |              221.060 | 
+ ObsValue/brightnessTemperature_15 |              232.330 |              233.160 |              234.180 | 
+ ObsValue/brightnessTemperature_16 |              214.100 |              208.940 |              211.000 | 
+ ObsValue/brightnessTemperature_17 |              224.550 |              223.080 |              228.700 | 
+ ObsValue/brightnessTemperature_18 |              243.830 |              243.000 |              247.340 | 
+ ObsValue/brightnessTemperature_19 |              247.070 |              246.180 |              248.720 | 
+ ObsValue/brightnessTemperature_20 |              246.240 |              245.560 |              246.990 | 
+ ObsValue/brightnessTemperature_21 |              241.650 |              241.470 |              242.450 | 
+ ObsValue/brightnessTemperature_22 |              237.110 |              237.730 |              238.510 | 
+                          Location |                   54 |                   56 |                   58 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              247.680 |              246.550 |              243.780 | 
+  ObsValue/brightnessTemperature_2 |              236.270 |              234.820 |              238.610 | 
+  ObsValue/brightnessTemperature_3 |              230.850 |              230.980 |              238.980 | 
+  ObsValue/brightnessTemperature_4 |              237.630 |              238.030 |              242.600 | 
+  ObsValue/brightnessTemperature_5 |              239.930 |              239.760 |              240.880 | 
+  ObsValue/brightnessTemperature_6 |              233.580 |              232.690 |              231.380 | 
+  ObsValue/brightnessTemperature_7 |              219.810 |              218.370 |              216.260 | 
+ ObsValue/brightnessTemperature_15 |              235.770 |              237.150 |              240.840 | 
+ ObsValue/brightnessTemperature_16 |              206.820 |              208.610 |              216.420 | 
+ ObsValue/brightnessTemperature_17 |              226.260 |              230.650 |              239.090 | 
+ ObsValue/brightnessTemperature_18 |              249.430 |              251.610 |              254.530 | 
+ ObsValue/brightnessTemperature_19 |              250.310 |              251.280 |              252.220 | 
+ ObsValue/brightnessTemperature_20 |              248.050 |              248.090 |              248.290 | 
+ ObsValue/brightnessTemperature_21 |              242.900 |              242.400 |              242.500 | 
+ ObsValue/brightnessTemperature_22 |              238.420 |              237.540 |              237.290 | 
+                          Location |                   60 |                   62 |                   64 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              239.240 |              226.210 |              225.840 | 
+  ObsValue/brightnessTemperature_2 |              229.550 |              216.490 |              218.990 | 
+  ObsValue/brightnessTemperature_3 |              235.370 |              236.350 |              229.940 | 
+  ObsValue/brightnessTemperature_4 |              240.040 |              240.180 |              232.680 | 
+  ObsValue/brightnessTemperature_5 |              238.510 |              235.900 |              231.120 | 
+  ObsValue/brightnessTemperature_6 |              228.480 |              224.380 |              223.910 | 
+  ObsValue/brightnessTemperature_7 |              213.330 |              209.890 |              214.430 | 
+ ObsValue/brightnessTemperature_15 |              244.270 |              249.400 |              241.130 | 
+ ObsValue/brightnessTemperature_16 |              207.830 |              201.960 |              211.800 | 
+ ObsValue/brightnessTemperature_17 |              223.560 |              221.910 |              219.650 | 
+ ObsValue/brightnessTemperature_18 |              247.280 |              247.270 |              236.640 | 
+ ObsValue/brightnessTemperature_19 |              250.040 |              247.810 |              241.870 | 
+ ObsValue/brightnessTemperature_20 |              247.940 |              244.050 |              242.720 | 
+ ObsValue/brightnessTemperature_21 |              242.130 |              237.950 |              240.850 | 
+ ObsValue/brightnessTemperature_22 |              236.660 |              232.300 |              237.870 | 
+                          Location |                   66 |                   68 |                   70 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              233.860 |              238.700 |              243.060 | 
+  ObsValue/brightnessTemperature_2 |              224.540 |              228.680 |              232.970 | 
+  ObsValue/brightnessTemperature_3 |              227.230 |              225.960 |              226.990 | 
+  ObsValue/brightnessTemperature_4 |              231.580 |              231.130 |              232.000 | 
+  ObsValue/brightnessTemperature_5 |              232.030 |              232.820 |              234.080 | 
+  ObsValue/brightnessTemperature_6 |              225.740 |              227.420 |              228.830 | 
+  ObsValue/brightnessTemperature_7 |              215.960 |              217.070 |              218.160 | 
+ ObsValue/brightnessTemperature_15 |              237.110 |              235.020 |              234.580 | 
+ ObsValue/brightnessTemperature_16 |              204.110 |              202.510 |              202.940 | 
+ ObsValue/brightnessTemperature_17 |              208.560 |              203.210 |              205.750 | 
+ ObsValue/brightnessTemperature_18 |              227.250 |              223.300 |              229.230 | 
+ ObsValue/brightnessTemperature_19 |              235.980 |              233.520 |              238.430 | 
+ ObsValue/brightnessTemperature_20 |              240.650 |              239.610 |              242.230 | 
+ ObsValue/brightnessTemperature_21 |              240.840 |              240.430 |              241.030 | 
+ ObsValue/brightnessTemperature_22 |              238.830 |              238.580 |              238.170 | 
+                          Location |                   72 |                   74 |                   76 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              245.530 |              249.040 |              249.180 | 
+  ObsValue/brightnessTemperature_2 |              238.090 |              241.370 |              241.540 | 
+  ObsValue/brightnessTemperature_3 |              232.010 |              234.450 |              236.790 | 
+  ObsValue/brightnessTemperature_4 |              235.420 |              237.620 |              239.770 | 
+  ObsValue/brightnessTemperature_5 |              236.100 |              238.090 |              239.880 | 
+  ObsValue/brightnessTemperature_6 |              230.330 |              232.100 |              233.470 | 
+  ObsValue/brightnessTemperature_7 |              218.920 |              220.060 |              220.830 | 
+ ObsValue/brightnessTemperature_15 |              232.840 |              231.690 |              231.730 | 
+ ObsValue/brightnessTemperature_16 |              211.400 |              213.360 |              214.630 | 
+ ObsValue/brightnessTemperature_17 |              214.750 |              218.750 |              222.490 | 
+ ObsValue/brightnessTemperature_18 |              234.990 |              238.960 |              242.300 | 
+ ObsValue/brightnessTemperature_19 |              241.800 |              244.550 |              246.340 | 
+ ObsValue/brightnessTemperature_20 |              243.920 |              245.620 |              246.230 | 
+ ObsValue/brightnessTemperature_21 |              241.880 |              242.980 |              242.480 | 
+ ObsValue/brightnessTemperature_22 |              238.900 |              239.550 |              238.650 | 
+                          Location |                   78 |                   80 |                   82 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              249.640 |              250.800 |              249.400 | 
+  ObsValue/brightnessTemperature_2 |              240.170 |              241.040 |              240.960 | 
+  ObsValue/brightnessTemperature_3 |              234.530 |              234.730 |              235.100 | 
+  ObsValue/brightnessTemperature_4 |              238.810 |              239.260 |              239.500 | 
+  ObsValue/brightnessTemperature_5 |              240.170 |              240.750 |              241.060 | 
+  ObsValue/brightnessTemperature_6 |              234.230 |              234.850 |              234.770 | 
+  ObsValue/brightnessTemperature_7 |              221.320 |              221.600 |              221.430 | 
+ ObsValue/brightnessTemperature_15 |              232.060 |              232.610 |              233.370 | 
+ ObsValue/brightnessTemperature_16 |              213.350 |              213.830 |              214.750 | 
+ ObsValue/brightnessTemperature_17 |              224.010 |              224.770 |              228.540 | 
+ ObsValue/brightnessTemperature_18 |              244.000 |              244.660 |              244.590 | 
+ ObsValue/brightnessTemperature_19 |              247.620 |              247.940 |              246.520 | 
+ ObsValue/brightnessTemperature_20 |              246.420 |              246.850 |              245.390 | 
+ ObsValue/brightnessTemperature_21 |              242.150 |              242.530 |              241.650 | 
+ ObsValue/brightnessTemperature_22 |              237.680 |              238.230 |              238.060 | 
+                          Location |                   84 |                   86 |                   88 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              250.140 |              248.690 |              248.790 | 
+  ObsValue/brightnessTemperature_2 |              240.890 |              237.290 |              235.940 | 
+  ObsValue/brightnessTemperature_3 |              235.650 |              231.560 |              231.180 | 
+  ObsValue/brightnessTemperature_4 |              240.240 |              238.230 |              238.220 | 
+  ObsValue/brightnessTemperature_5 |              240.980 |              240.300 |              239.800 | 
+  ObsValue/brightnessTemperature_6 |              234.430 |              233.670 |              232.600 | 
+  ObsValue/brightnessTemperature_7 |              221.000 |              219.810 |              218.190 | 
+ ObsValue/brightnessTemperature_15 |              235.130 |              235.990 |              237.450 | 
+ ObsValue/brightnessTemperature_16 |              221.430 |              208.130 |              210.130 | 
+ ObsValue/brightnessTemperature_17 |              238.630 |              227.990 |              233.160 | 
+ ObsValue/brightnessTemperature_18 |              250.240 |              249.790 |              252.700 | 
+ ObsValue/brightnessTemperature_19 |              249.980 |              250.570 |              252.050 | 
+ ObsValue/brightnessTemperature_20 |              247.630 |              247.840 |              248.470 | 
+ ObsValue/brightnessTemperature_21 |              243.110 |              243.240 |              243.220 | 
+ ObsValue/brightnessTemperature_22 |              239.140 |              238.810 |              238.470 | 
+                          Location |                   90 |                   92 |                   94 | 
+-----------------------------------+----------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              245.720 |              242.190 |              229.020 | 
+  ObsValue/brightnessTemperature_2 |              237.700 |              232.180 |              221.310 | 
+  ObsValue/brightnessTemperature_3 |              237.250 |              236.420 |              238.000 | 
+  ObsValue/brightnessTemperature_4 |              241.550 |              240.990 |              240.760 | 
+  ObsValue/brightnessTemperature_5 |              240.500 |              238.890 |              235.820 | 
+  ObsValue/brightnessTemperature_6 |              231.260 |              228.600 |              224.220 | 
+  ObsValue/brightnessTemperature_7 |              216.200 |              213.300 |              209.680 | 
+ ObsValue/brightnessTemperature_15 |              240.460 |              244.960 |              248.570 | 
+ ObsValue/brightnessTemperature_16 |              215.460 |              209.380 |              210.440 | 
+ ObsValue/brightnessTemperature_17 |              239.270 |              224.900 |              223.250 | 
+ ObsValue/brightnessTemperature_18 |              255.360 |              248.470 |              245.180 | 
+ ObsValue/brightnessTemperature_19 |              253.410 |              251.280 |              247.540 | 
+ ObsValue/brightnessTemperature_20 |              249.540 |              248.840 |              244.480 | 
+ ObsValue/brightnessTemperature_21 |              244.050 |              242.740 |              238.400 | 
+ ObsValue/brightnessTemperature_22 |              239.250 |              237.080 |              232.850 | 
+                          Location |                   96 |                   98 | 
+-----------------------------------+----------------------+----------------------+-
+  ObsValue/brightnessTemperature_1 |              226.400 |              232.690 | 
+  ObsValue/brightnessTemperature_2 |              220.340 |              223.610 | 
+  ObsValue/brightnessTemperature_3 |              230.560 |              226.860 | 
+  ObsValue/brightnessTemperature_4 |              233.290 |              231.520 | 
+  ObsValue/brightnessTemperature_5 |              231.590 |              232.210 | 
+  ObsValue/brightnessTemperature_6 |              224.180 |              225.910 | 
+  ObsValue/brightnessTemperature_7 |              214.550 |              215.990 | 
+ ObsValue/brightnessTemperature_15 |              240.950 |              237.550 | 
+ ObsValue/brightnessTemperature_16 |              212.540 |              203.710 | 
+ ObsValue/brightnessTemperature_17 |              220.180 |              206.740 | 
+ ObsValue/brightnessTemperature_18 |              237.110 |              226.900 | 
+ ObsValue/brightnessTemperature_19 |              242.440 |              236.350 | 
+ ObsValue/brightnessTemperature_20 |              243.460 |              241.270 | 
+ ObsValue/brightnessTemperature_21 |              241.450 |              241.800 | 
+ ObsValue/brightnessTemperature_22 |              238.460 |              239.740 | 
+############################
+### Printing filter data ###
+############################
+Printing ATMS channels with `where` statement, rank 0 only
+Filter data: contains obs, ObsErrorData, QCflagsData
+Contents of ObsValue
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+Contents of ObsErrorData
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+Contents of QCflagsData
+- brightnessTemperature_1
+- brightnessTemperature_2
+- brightnessTemperature_3
+- brightnessTemperature_4
+- brightnessTemperature_5
+- brightnessTemperature_6
+- brightnessTemperature_7
+- brightnessTemperature_8
+- brightnessTemperature_9
+- brightnessTemperature_10
+- brightnessTemperature_11
+- brightnessTemperature_12
+- brightnessTemperature_13
+- brightnessTemperature_14
+- brightnessTemperature_15
+- brightnessTemperature_16
+- brightnessTemperature_17
+- brightnessTemperature_18
+- brightnessTemperature_19
+- brightnessTemperature_20
+- brightnessTemperature_21
+- brightnessTemperature_22
+                         Location |                   24 |                   26 |                   28 | 
+----------------------------------+----------------------+----------------------+----------------------+-
+                MetaData/latitude |               67.026 |               67.259 |               67.434 | 
+ ObsValue/brightnessTemperature_1 |              244.760 |              245.330 |              238.780 | 
+ ObsValue/brightnessTemperature_2 |              236.060 |              239.050 |              229.010 | 
+ ObsValue/brightnessTemperature_3 |              232.460 |              237.740 |              235.790 | 
+ ObsValue/brightnessTemperature_4 |              238.780 |              241.860 |              240.140 | 
+ ObsValue/brightnessTemperature_5 |              240.200 |              240.620 |              238.250 | 
+ ObsValue/brightnessTemperature_6 |              232.680 |              231.360 |              228.270 | 
+ ObsValue/brightnessTemperature_7 |              218.420 |              216.220 |              213.410 | 
+ ObsValue/brightnessTemperature_8 |              208.590 |              206.670 |              204.300 | 
+ ObsValue/brightnessTemperature_9 |              201.840 |              200.290 |              198.760 | 
+ObsValue/brightnessTemperature_10 |              193.450 |              192.700 |              191.590 | 
+ObsValue/brightnessTemperature_11 |              190.340 |              189.860 |              189.380 | 
+ObsValue/brightnessTemperature_12 |              190.730 |              190.810 |              191.140 | 
+ObsValue/brightnessTemperature_13 |              197.340 |              198.460 |              199.190 | 
+ObsValue/brightnessTemperature_14 |              212.740 |              214.800 |              217.460 | 
+ObsValue/brightnessTemperature_15 |              238.090 |              240.540 |              244.620 | 
+ObsValue/brightnessTemperature_16 |              209.430 |              217.240 |              211.130 | 
+ObsValue/brightnessTemperature_17 |              229.910 |              238.700 |              227.340 | 
+ObsValue/brightnessTemperature_18 |              250.690 |              254.390 |              249.140 | 
+ObsValue/brightnessTemperature_19 |              250.510 |              252.140 |              250.280 | 
+ObsValue/brightnessTemperature_20 |              247.290 |              248.060 |              247.290 | 
+ObsValue/brightnessTemperature_21 |              242.180 |              242.430 |              241.530 | 
+ObsValue/brightnessTemperature_22 |              237.380 |              237.650 |              236.300 | 
+                         Location |                   30 | 
+----------------------------------+----------------------+-
+                MetaData/latitude |               67.427 | 
+ ObsValue/brightnessTemperature_1 |              224.550 | 
+ ObsValue/brightnessTemperature_2 |              213.300 | 
+ ObsValue/brightnessTemperature_3 |              234.970 | 
+ ObsValue/brightnessTemperature_4 |              239.720 | 
+ ObsValue/brightnessTemperature_5 |              235.800 | 
+ ObsValue/brightnessTemperature_6 |              224.230 | 
+ ObsValue/brightnessTemperature_7 |              209.960 | 
+ ObsValue/brightnessTemperature_8 |              202.120 | 
+ ObsValue/brightnessTemperature_9 |              197.340 | 
+ObsValue/brightnessTemperature_10 |              190.580 | 
+ObsValue/brightnessTemperature_11 |              188.810 | 
+ObsValue/brightnessTemperature_12 |              191.840 | 
+ObsValue/brightnessTemperature_13 |              202.010 | 
+ObsValue/brightnessTemperature_14 |              221.630 | 
+ObsValue/brightnessTemperature_15 |              249.090 | 
+ObsValue/brightnessTemperature_16 |              198.260 | 
+ObsValue/brightnessTemperature_17 |              226.920 | 
+ObsValue/brightnessTemperature_18 |              249.620 | 
+ObsValue/brightnessTemperature_19 |              248.040 | 
+ObsValue/brightnessTemperature_20 |              243.670 | 
+ObsValue/brightnessTemperature_21 |              237.950 | 
+ObsValue/brightnessTemperature_22 |              232.680 | 

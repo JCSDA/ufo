@@ -40,7 +40,17 @@ class VariablePrintParameters : public oops::Parameters {
 
  public:
   /// Variable information (name and optional channels).
-  /// See ufo/utils/ParameterTraitsVariable.h for information on the syntax required.
+  /// This can either be a string containing the variable name, e.g.
+  ///
+  ///       - variable: ObsValue/airTemperature
+  ///
+  /// or list both the name and channels to print, e.g.
+  ///
+  ///       - variable:
+  ///           name: ObsValue/brightnessTemperature
+  ///           channels: 1-7, 15-28
+  ///
+  /// See ufo/utils/parameters/ParameterTraitsVariable.h for further information.
   oops::RequiredParameter<Variable>
   variable{"variable",
             "Variable information (name and optional channels)",
@@ -68,31 +78,36 @@ class PrintFilterDataParameters : public oops::ObsFilterParametersBase {
   /// List of variables to print.
   oops::Parameter<std::vector<VariablePrintParameters>> variables{"variables", {}, this};
 
-  /// The filter data will be printed for all locations whose values are greater than
-  /// or equal to this value.
+  /// The filter data will be printed for all locations whose global unique ObsSpace indices
+  /// are greater than or equal to this value.
   /// This option can be used in combination with `maximum location` to control which
   /// locations are printed.
   oops::Parameter<int> locmin{"minimum location", 0, this, {oops::minConstraint(0)}};
 
-  /// The filter data will be printed for all locations whose values are less than
-  /// or equal to this value.
+  /// The filter data will be printed for all locations whose global unique ObsSpace indices
+  /// are less than this value.
   /// This option can be used in combination with `minimum location` to control which
   /// locations are printed.
-  /// If this is set to zero then it will be redefined as the number of locations - 1
-  /// (where the number of locations depends on the value of the `print only rank 0` parameter).
+  /// If this is set to zero then it will be redefined as the number of locations - 1.
   /// If the maximum location is less than the minimum location then an exception will be thrown.
   oops::Parameter<int> locmax{"maximum location", 0, this, {oops::minConstraint(0)}};
 
   /// Only get and print data from rank 0. The precise consequence of this being set to `true`
-  /// depends on the ObsSpace distribution that is used.
+  /// depends on the ObsSpace distribution that is used (round robin, inefficient, etc.).
   /// If this option is `false`, data from all ranks are gathered and printed on rank 0.
-  oops::Parameter<bool> printRank0 {"print only rank 0", false, this};
+  oops::Parameter<bool> printRank0{"print only rank 0", false, this};
 
   /// The maximum width (in characters) of the output text.
-  oops::Parameter<int> maxTextWidth {"maxmimum text width", 120, this, {oops::minConstraint(0)}};
+  oops::Parameter<int> maxTextWidth{"maxmimum text width", 120, this, {oops::minConstraint(0)}};
 
-  /// The width of the columns in the output table.
-  oops::Parameter<int> columnWidth {"column width", 20, this, {oops::minConstraint(0)}};
+  /// The width (in characters) of the columns in the output table.
+  oops::Parameter<int> columnWidth{"column width", 20, this, {oops::minConstraint(0)}};
+
+  /// The precision of floating-point numbers.
+  oops::Parameter<int> floatPrecision{"float precision", 3, this, {oops::minConstraint(0)}};
+
+  /// Whether or not to use scientific notation. If false, fixed format is used.
+  oops::Parameter<bool> scientificNotation {"scientific notation", false, this};
 
   /// Conditions used to select locations at which the filter data should be printed.
   /// If not specified, printing will be performed at all required locations.
@@ -164,7 +179,7 @@ class PrintFilterData : public ObsProcessorBase,
   /// Determine the maximum variable name length.
   int getMaxVariableNameLength() const;
 
-  /// Determine whether a variable can exist multiple levels.
+  /// Determine whether a variable can exist on multiple levels at each location (e.g. GeoVaLs).
   bool isMultiLevelData(Variable variable) const;
 
   /// Get all requested data.
@@ -191,16 +206,14 @@ class PrintFilterData : public ObsProcessorBase,
   /// Specialisation to bool is required because ioda::Distribution does not handle that type.
   template <typename VariableType>
   void printVariable
-  (const std::string & varname, const int loc, const std::vector<int> & apply) const {
-    this->printVariable(varname, loc, apply, identifier<VariableType>());
+  (const std::string & varname, const int loc) const {
+    this->printVariable(varname, loc, identifier<VariableType>());
   }
   template <typename VariableType>
   void printVariable
-  (const std::string & varname, const int loc, const std::vector<int> & apply,
-   identifier<VariableType>) const;
+  (const std::string & varname, const int loc, identifier<VariableType>) const;
   void printVariable
-  (const std::string & varname, const int loc, const std::vector<int> & apply,
-   identifier<bool>) const;
+  (const std::string & varname, const int loc, identifier<bool>) const;
 };
 
 }  // namespace ufo

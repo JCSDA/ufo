@@ -34,7 +34,8 @@ observations:
   obs post filters:
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing filter data before Background Check
+    print only rank 0: true
+    message: Printing filter data before Background Check, rank 0 only
     minimum location: 0
     maximum location: 11
     variables:
@@ -54,7 +55,8 @@ observations:
     - name: reject
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing filter data after Background Check
+    print only rank 0: true
+    message: Printing filter data after Background Check, rank 0 only
     minimum location: 0
     maximum location: 11
     variables:
@@ -71,7 +73,8 @@ observations:
     - variable: GeoVaLs/missing
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing filter data with `where` statement after Background Check
+    print only rank 0: true
+    message: Printing filter data with `where` statement after Background Check, rank 0 only
     where:
     - variable:
        name: ObsValue/airTemperature
@@ -92,7 +95,8 @@ observations:
           coefs: [2.0]
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing filter data after Variable Assignment, skip derived true
+    print only rank 0: true
+    message: Printing filter data after Variable Assignment, skip derived true, rank 0 only
     minimum location: 0
     maximum location: 11
     variables:
@@ -101,7 +105,8 @@ observations:
     skip derived: true
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing filter data after Variable Assignment, skip derived false
+    print only rank 0: true
+    message: Printing filter data after Variable Assignment, skip derived false, rank 0 only
     minimum location: 0
     maximum location: 11
     variables:
@@ -111,27 +116,6 @@ observations:
 
   # The number of non-missing observations
   passedBenchmark: 1531
-
-- obs space:
-    name: minimum location > maximum location, throwing an exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_temperature_obs.nc4
-      obsgrouping:
-        group variables: [ "stationIdentification" ]
-        sort variable: "pressure"
-        sort order: "descending"
-    simulated variables: [airTemperature]
-  obs filters:
-  - filter: Print Filter Data
-    output to test stream: true
-    message: Printing filter data
-    minimum location: 2
-    maximum location: 1
-    variables:
-    - variable: ObsValue/airTemperature
-  expectExceptionWithMessage: Minimum location cannot be larger than maximum location
 
 - obs space:
     name: atms
@@ -144,14 +128,16 @@ observations:
   obs filters:
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing ATMS channels
+    print only rank 0: true
+    message: Printing ATMS channels, rank 0 only
     variables:
     - variable:
         name: ObsValue/brightnessTemperature
         channels: 1-7, 15-28, 100
   - filter: Print Filter Data
     output to test stream: true
-    message: Printing ATMS channels with `where` statement
+    print only rank 0: true
+    message: Printing ATMS channels with `where` statement, rank 0 only
     where:
     - variable:
        name: MetaData/latitude
@@ -161,43 +147,8 @@ observations:
     - variable:
         name: ObsValue/brightnessTemperature
         channels: 1-22
-  - filter: Print Filter Data
-    summary: false
-    output to test stream: true
-    message: Printing ATMS channels with scientific notation and the default floating-point precision
-    scientific notation: true
-    minimum location: 0
-    maximum location: 10
-    variables:
-    - variable:
-        name: ObsValue/brightnessTemperature
-        channels: 6
-  - filter: Print Filter Data
-    summary: false
-    output to test stream: true
-    message: Printing ATMS channels with the default format and a floating-point precision of 2
-    scientific notation: false
-    float precision: 2
-    minimum location: 0
-    maximum location: 10
-    variables:
-    - variable:
-        name: ObsValue/brightnessTemperature
-        channels: 6
-  - filter: Print Filter Data
-    summary: false
-    output to test stream: true
-    message: Printing ATMS channels with scientific notation and a floating-point precision of 7
-    scientific notation: true
-    float precision: 7
-    minimum location: 0
-    maximum location: 10
-    variables:
-    - variable:
-        name: ObsValue/brightnessTemperature
-        channels: 6
 
   passedBenchmark: 2200
 
 test:
- reference filename: testref/unit_tests/filters/print_filter_data.ref
+ reference filename: testref/unit_tests/filters/print_filter_data_MPI2_rank0.ref

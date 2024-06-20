@@ -18,6 +18,8 @@ observations:
 #       type: H5File
 #       obsfile: Data/met_office_conventional_profile_processing_average_temperature_obs_printfilterdata_out.nc4
     simulated variables: [airTemperature]
+    distribution:
+      name: InefficientDistribution
 
   obs operator:
     name: VertInterp
@@ -141,6 +143,9 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-22
+    distribution:
+      name: InefficientDistribution
+
   obs filters:
   - filter: Print Filter Data
     output to test stream: true

@@ -122,7 +122,7 @@ ecbuild_add_resources( TARGET ufo_test_scripts
 # Create Data directory for test reference files and symlink all files
 list( APPEND ufo_test_ref
   testref/unit_tests/filters/print_filter_data.ref
-  testref/unit_tests/filters/print_filter_data_mpi.ref
+  testref/unit_tests/filters/print_filter_data_MPI2_rank0.ref
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref)
