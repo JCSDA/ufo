@@ -74,7 +74,7 @@ module ufo_radiancerttov_utils_mod
   ! copy of ABSORBER_ID_NAME defined in rttov_const
   character(len=*), parameter :: &
     RTTOV_Absorbers(ngases_max+2) = &
-    [gas_name(1:ngases_max),'CLW', &
+    [character(len=12) :: gas_name(1:ngases_max),'CLW', &
      'CIW']
 
   integer, parameter :: &
@@ -98,7 +98,7 @@ module ufo_radiancerttov_utils_mod
 
   character(len=MAXVARLEN), parameter :: &
     UFO_Absorbers(ngases_max+2) = &
-    [ null_str, var_q, var_oz, null_str, var_co2, 'mole_fraction_of_nitrous_oxide_in_air', &
+    [character(len=MAXVARLEN) :: null_str, var_q, var_oz, null_str, var_co2, 'mole_fraction_of_nitrous_oxide_in_air', &
     'mole_fraction_of_carbon_monoxide_in_air', 'mole_fraction_of_methane_in_air', &
     'mole_fraction_of_sulfur_dioxide_in_air', var_clw, var_cli]
 

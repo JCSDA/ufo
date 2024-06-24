@@ -1310,8 +1310,8 @@ SUBROUTINE partialRefRain(N0,alpha,alp_a,alp_b,beta_a,beta_b,lamda,    &
 
   !N0_units = (1.e-3_kind_real)**(4.0_kind_real+alpha)
 
-  lamda_units_h = (1.e-3_kind_real)**-(alpha+2.0_kind_real*dble(beta_a)+1.0_kind_real)
-  lamda_units_v = (1.e-3_kind_real)**-(alpha+2.0_kind_real*dble(beta_b)+1.0_kind_real)
+  lamda_units_h = (1.e-3_kind_real)**(-(alpha+2.0_kind_real*dble(beta_a)+1.0_kind_real))
+  lamda_units_v = (1.e-3_kind_real)**(-(alpha+2.0_kind_real*dble(beta_b)+1.0_kind_real))
   N0_units = (1.e-3_kind_real)**(4.0_kind_real+alpha)
 
   gamma_h = gamma((alpha+2.0_kind_real*dble(beta_a)+1.0_kind_real)/(3.0_kind_real*mu_x))
@@ -1367,7 +1367,7 @@ SUBROUTINE partialRhoRain(N0,alpha,alp_a,alp_b,beta_a,beta_b,         &
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  lamda_units_hv = (1.e-3_kind_real)**-(alpha+2.0_kind_real*dble(beta_a)+1.0_kind_real)
+  lamda_units_hv = (1.e-3_kind_real)**(-(alpha+2.0_kind_real*dble(beta_a)+1.0_kind_real))
   N0_units = (1.e-3_kind_real)**(4.0_kind_real+alpha)
 
   gamma_hv = gamma((dble(beta_a)+dble(beta_b)+alpha+1.0_kind_real)/(3.0_kind_real*mu_x))

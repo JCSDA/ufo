@@ -72,7 +72,7 @@ integer, parameter, public :: &
   ufo_metoffice_fieldtype_cf         = 19      !< cloud fraction profile - not currently setup
 
 character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_ukmo) = &
-  (/ var_ts,                 &
+  [character(len=MAXVARLEN) :: var_ts,                 &
      var_q,                  &
      var_sfc_t2m,            &
      var_sfc_q2m,            &
@@ -90,7 +90,7 @@ character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_
      'cloud top pressure  ', &
      'cloud fraction      ', &
      'emissivity pcs      ', &
-     var_cldfrac_vol /)
+     var_cldfrac_vol ]
 
 contains
 
