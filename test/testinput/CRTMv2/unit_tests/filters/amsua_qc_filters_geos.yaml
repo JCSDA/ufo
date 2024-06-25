@@ -33,23 +33,23 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: cloud_liquid_water
+      - name: cloudWaterContent
         sensor: AMSUA
         clwdif_ch238: 1
         clwdif_ch314: 2
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &amsua19tlap Data/ufo/testinput_tier_1/geos_amsua_n19_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *amsua19tlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
   obs filters:
 # Window and surface-sensitive channels check
   - filter: Bounds Check
@@ -82,7 +82,7 @@ observations:
       options:
         sensor: *Sensor_ID
         channels: 1-15
-        test_biaspredictor: cloud_liquid_waterPredictor
+        test_biaspredictor: cloudWaterContentPredictor
     maxvalue: 0.0
     action:
       name: reject

@@ -31,19 +31,19 @@ observations:
     variational bc:
       predictors:
       - name: constant
-      - name: lapse_rate
+      - name: lapseRate
         order: 2
         tlapse: &atms_npp_tlap Data/ufo/testinput_tier_1/instruments/radiance/atms_npp_tlapmean.txt
-      - name: lapse_rate
+      - name: lapseRate
         tlapse: *atms_npp_tlap
-      - name: emissivity
-      - name: scan_angle
+      - name: emissivityJacobian
+      - name: sensorScanAngle
         order: 4
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 3
-      - name: scan_angle
+      - name: sensorScanAngle
         order: 2
-      - name: scan_angle
+      - name: sensorScanAngle
   obs filters:
   - filter: BlackList
     filter variables:
