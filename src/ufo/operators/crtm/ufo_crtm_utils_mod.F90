@@ -605,10 +605,9 @@ type(CRTM_Options_type),    intent(inout) :: Options(:)
 
 integer :: jprofile, jchannel, jlevel
 character(len=MAXVARLEN) :: varname
+character(len=64) :: obsGroupName
 character(len=max_string) :: message
 real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
-!real(kind_real) :: EffObsErr(n_Profiles,n_Channels)
-!integer         :: EffQC(n_Profiles,n_Channels)
 
 real(c_double)  :: missing_d
 real(kind_real) :: missing_r
@@ -619,28 +618,27 @@ real(kind_real), parameter  :: lowest_albedo = 0.001
  missing_r = missing_value(missing_r)
 
  ObsVal = missing_d
-! EffObsErr = missing_d
-! EffQC = 0
+
+ ! Do a quick test to set the group name for ObsValue
+ call get_var_name(channels(1),varname, Is_Active_Sensor, Is_Vis_or_UV)
+ if (obsspace_has(obss, "DerivedObsValue", varname)) then
+   obsGroupName = "DerivedObsValue"
+ elseif (obsspace_has(obss, "ObsValue", varname)) then
+   obsGroupName = "ObsValue"
+ else
+   write(message,*) 'Group name for observed values is neither ObsValue nor DerivedObsValue'
+   call abor1_ftn(message)
+ endif
 
  do jchannel = 1, n_Channels
    call get_var_name(channels(jchannel),varname, Is_Active_Sensor, Is_Vis_or_UV)
-   if (obsspace_has(obss, "ObsValue", varname)) then
-     call obsspace_get_db(obss, "ObsValue", varname, ObsVal(:,jchannel))
-   else
-     write(message,'(a,a,a,i6,a)') ' in ufo_crtm_skip_profiles ' //  &
-                   'obsspace_has failed for varname: ', varname
-     call abor1_ftn(message)
-   endif
-!   call obsspace_get_db(obss, "EffectiveError", varname, EffObsErr(:,jchannel))
-!   call obsspace_get_db(obss, "EffectiveQC{iter}", varname, EffQC(:,jchannel))
+   call obsspace_get_db(obss, trim(obsGroupName), varname, ObsVal(:,jchannel))
  enddo
 
  !Loop over all n_Profiles, i.e. number of locations
  profile_loop: do jprofile = 1, n_Profiles
    ! check whether observations for all channels are missing in the input file
    Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) == missing_d)
-!                       .OR. all(EffObsErr(jprofile,:) == missing_d) &
-!                       .OR. all(EffQC(jprofile,:) /= 0)
 
    ! check for pressure monotonicity
    do jlevel = atm(jprofile)%n_layers, 1, -1
@@ -856,22 +854,28 @@ logical :: use_mw_vegtyp_soiltyp_data, use_visir_landtyp_data
 
 character(len=MAXVARLEN) :: varname
 character(len=max_string) :: message
+character(len=64) :: obsGroupName
 
 real(kind_real), allocatable :: ObsTb(:,:)
 
   allocate(ObsTb(n_profiles, n_channels))
   ObsTb = 0.0_kind_real
 
+  ! Do a quick test to set the group name for ObsValue
+  call get_var_name(channels(1),varname, Is_Active_Sensor, Is_Vis_or_UV)
+  if (obsspace_has(obss, "ObsValue", varname)) then
+    obsGroupName = "ObsValue"
+  elseif (obsspace_has(obss, "DerivedObsValue", varname)) then
+    obsGroupName = "DerivedObsValue"
+  else
+    write(message,*) 'Group name for observed values is neither ObsValue nor DerivedObsValue'
+    call abor1_ftn(message)
+  endif
+
   if (.not. Is_Active_Sensor) then
     do n1 = 1, n_Channels
       call get_var_name(channels(n1),varname, Is_Active_Sensor, Is_Vis_or_UV)
-      if (obsspace_has(obss, "ObsValue", varname)) then
-        call obsspace_get_db(obss, "ObsValue", varname, ObsTb(:, n1))
-      else
-        write(message,'(a,a,a,i6,a)') ' UFO Load_Sfc_Data, ' //  &
-                      'obsspace_has failed for varname: ', varname
-        call abor1_ftn(message)
-      endif
+      call obsspace_get_db(obss, trim(obsGroupName), varname, ObsTb(:, n1))
     enddo
   end if
 
