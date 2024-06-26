@@ -126,12 +126,12 @@ class SuperObMaker : public SuperObFactory {
   typedef oops::TParameters_IfAvailableElseFallbackType_t<T, GenericSuperObParameters>
     Parameters_;
 
-  virtual std::unique_ptr<SuperObBase> make(const SuperObParametersBase & params,
-                                            const ObsFilterData & data,
-                                            const std::vector<bool> & apply,
-                                            const Variables & filtervars,
-                                            const ioda::ObsDataVector<int> & flags,
-                                            std::vector<std::vector<bool>> & flagged) override {
+  std::unique_ptr<SuperObBase> make(const SuperObParametersBase & params,
+                                    const ObsFilterData & data,
+                                    const std::vector<bool> & apply,
+                                    const Variables & filtervars,
+                                    const ioda::ObsDataVector<int> & flags,
+                                    std::vector<std::vector<bool>> & flagged) override {
     const auto & stronglyTypedParams = dynamic_cast<const Parameters_&>(params);
     return std::unique_ptr<SuperObBase>
       (new T(stronglyTypedParams, data, apply, filtervars, flags, flagged));
