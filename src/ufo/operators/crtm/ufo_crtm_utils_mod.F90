@@ -1093,6 +1093,8 @@ integer :: nlocs
 
  call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", TmpVar)
  geo(:)%Sensor_Zenith_Angle = abs(TmpVar(:)) ! needs to be absolute value
+ where (geo(:)%Sensor_Zenith_Angle > 80.0_kind_real) &
+    geo(:)%Sensor_Zenith_Angle = 80.0_kind_real
 
  call obsspace_get_db(obss, "MetaData", "solarZenithAngle", TmpVar)
  geo(:)%Source_Zenith_Angle = TmpVar(:)
