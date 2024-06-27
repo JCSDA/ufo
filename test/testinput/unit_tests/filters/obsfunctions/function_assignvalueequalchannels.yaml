@@ -1,0 +1,88 @@
+time window:
+  begin: 2021-07-01T09:00:00Z
+  end: 2021-07-01T15:00:00Z
+
+observations:
+- obs space: &ObsSpace
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_20210701T1200Z_profile.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: gnssro_obs_20210701T1200Z_profile_out.nc4
+    simulated variables: [bendingAngle]
+    channels: &all_levels 1-375
+  obs operator:
+    name: GnssroBendMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+    channels: *all_levels
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_20210701T1200Z_profile.nc4
+  obs post filters:
+  #
+  # Run the impact height check for observations south of 30 degrees, allowing
+  # observations up to 60km impact height.
+  #
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bendingAngle
+      channels: *all_levels
+    gradient threshold: -0.08
+    maximum height: 60000
+    sharp gradient offset: 600
+    surface offset: 500
+    verbose output: true
+    where:
+    - variable:
+        name: MetaData/latitude
+      maxvalue: 30
+  #
+  # Run the impact height check for observations south of 30 degrees, allowing
+  # observations up to 50km impact height.
+  #
+  - filter: GNSSRO Impact Height Check
+    filter variables:
+    - name: bendingAngle
+      channels: *all_levels
+    gradient threshold: -0.08
+    maximum height: 50000
+    sharp gradient offset: 600
+    surface offset: 500
+    verbose output: true
+    where:
+    - variable:
+        name: MetaData/latitude
+      minvalue: 30
+  #
+  # Calculate the probability of gross error, based on the QC flags
+  #
+  - filter: Variable Assignment
+    assignments:
+    - name: GrossErrorProbability/bendingAngle
+      channels: *all_levels
+      type: float
+      function:
+        name: ObsFunction/AssignValueEqualChannels
+        options:
+          variable:
+            name: QCflagsData/bendingAngle
+            channels: *all_levels
+          testValue: 13
+          assignEqual: 0.9
+          assignNotEqual: 0.2
+  #
+  # Check that the output is the same as the reference
+  #
+  compareVariables:
+    - test:
+        name: GrossErrorProbability/bendingAngle
+      reference:
+        name: MetOfficeGrossErrorProbability/bendingAngle
+      relTol: 0.05
