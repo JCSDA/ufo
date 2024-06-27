@@ -57,6 +57,7 @@ void processWhereMinMax(const std::vector<T> & data,
                         std::vector<bool> & mask,
                         bool minExclusive,
                         bool maxExclusive) {
+  ASSERT(data.size() == mask.size());
   const T missing = util::missingValue<T>();
   if (vmin != missing || vmax != missing) {
     for (size_t jj = 0; jj < data.size(); ++jj) {
@@ -75,6 +76,7 @@ void processWhereMinMax(const std::vector<util::DateTime> & data,
                         std::vector<bool> & mask,
                         bool minExclusive,
                         bool maxExclusive) {
+  ASSERT(data.size() == mask.size());
   const util::PartialDateTime not_set_value {};
   const util::DateTime missing = util::missingValue<util::DateTime>();
   if (vmin != not_set_value || vmax != not_set_value) {
@@ -96,6 +98,7 @@ void processWhereIsDefined(const ObsFilterData & filterdata,
   const T missing = util::missingValue<T>();
   std::vector<T> data;
   filterdata.get(varname, data);
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] == missing) mask[jj] = false;
   }
@@ -109,6 +112,7 @@ void processWhereIsNotDefined(const ObsFilterData & filterdata,
   const T missing = util::missingValue<T>();
   std::vector<T> data;
   filterdata.get(varname, data);
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] != missing) mask[jj] = false;
   }
@@ -119,6 +123,7 @@ template <class T>
 void processWhereIsIn(const std::vector<T> & data,
                       const std::set<T> & whitelist,
                       std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (!oops::contains(whitelist, data[jj])) mask[jj] = false;
   }
@@ -129,6 +134,7 @@ void processWhereIsClose(const std::vector<float> & data,
                          const float tolerance, const bool relative,
                          const std::vector<float> & whitelist,
                          std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     bool inlist = false;
     for (auto testvalue : whitelist) {
@@ -154,6 +160,7 @@ template <class T>
 void processWhereIsNotIn(const std::vector<T> & data,
                          const std::set<T> & blacklist,
                          std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   const T missing = util::missingValue<T>();
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj] == missing || oops::contains(blacklist, data[jj])) mask[jj] = false;
@@ -164,6 +171,7 @@ void processWhereIsNotIn(const std::vector<T> & data,
 void processWhereIsNotIn(const std::vector<std::string> & data,
                          const std::set<std::string> & blacklist,
                          std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (oops::contains(blacklist, data[jj])) mask[jj] = false;
   }
@@ -174,6 +182,7 @@ void processWhereIsNotClose(const std::vector<float> & data,
                             const float tolerance, const bool relative,
                             const std::vector<float> & blacklist,
                             std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   const float missing = util::missingValue<float>();
   for (size_t jj = 0; jj < data.size(); ++jj) {
     for (auto testvalue : blacklist) {
@@ -199,6 +208,7 @@ void processWhereIsNotClose(const std::vector<float> & data,
 /// Clear the `mask` wherever `data` is `false`.
 void processWhereIsTrue(const std::vector<DiagnosticFlag> & data,
                         std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (!data[jj]) mask[jj] = false;
   }
@@ -208,6 +218,7 @@ void processWhereIsTrue(const std::vector<DiagnosticFlag> & data,
 /// Clear the `mask` wherever `data` is `true`.
 void processWhereIsFalse(const std::vector<DiagnosticFlag> & data,
                          std::vector<bool> & mask) {
+  ASSERT(data.size() == mask.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (data[jj]) mask[jj] = false;
   }
@@ -269,6 +280,7 @@ void applyMinMax<util::DateTime>(std::vector<bool> & where, WhereParameters cons
 void processWhereAnyBitSetOf(const std::vector<int> & data,
                              const std::set<int> & bitIndices,
                              std::vector<bool> & where) {
+  ASSERT(data.size() == where.size());
   std::bitset<32> mask_bs;
   for (const int &bitIndex : bitIndices) {
     mask_bs[bitIndex] = 1;
@@ -298,6 +310,7 @@ void processWhereAnyBitSetOf(const std::vector<int> & data,
 void processWhereAnyBitUnsetOf(const std::vector<int> & data,
                                const std::set<int> & bitIndices,
                                std::vector<bool> & where) {
+  ASSERT(data.size() == where.size());
   std::bitset<32> mask_bs;
   for (const int &bitIndex : bitIndices) {
     mask_bs[bitIndex] = 1;
@@ -321,6 +334,7 @@ void processWhereAnyBitUnsetOf(const std::vector<int> & data,
 void processWhereMatchesRegex(const std::vector<std::string> & data,
                               const std::string & pattern,
                               std::vector<bool> & where) {
+  ASSERT(data.size() == where.size());
   REGEX_NAMESPACE::regex regex(pattern);
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (where[jj] && !REGEX_NAMESPACE::regex_match(data[jj], regex))
@@ -336,6 +350,7 @@ void processWhereMatchesRegex(const std::vector<std::string> & data,
 void processWhereMatchesRegex(const std::vector<int> & data,
                               const std::string & pattern,
                               std::vector<bool> & where) {
+  ASSERT(data.size() == where.size());
   REGEX_NAMESPACE::regex regex(pattern);
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (where[jj] && !REGEX_NAMESPACE::regex_match(std::to_string(data[jj]), regex))
@@ -366,6 +381,7 @@ bool stringMatchesAnyWildcardPattern(const std::string &string,
 void processWhereMatchesAnyWildcardPattern(const std::vector<std::string> & data,
                                            const std::vector<std::string> & patterns,
                                            std::vector<bool> & where) {
+  ASSERT(data.size() == where.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (where[jj] && !stringMatchesAnyWildcardPattern(data[jj], patterns))
       where[jj] = false;
@@ -377,6 +393,7 @@ void processWhereMatchesAnyWildcardPattern(const std::vector<std::string> & data
 void processWhereMatchesAnyWildcardPattern(const std::vector<int> & data,
                                            const std::vector<std::string> & patterns,
                                            std::vector<bool> & where) {
+  ASSERT(data.size() == where.size());
   for (size_t jj = 0; jj < data.size(); ++jj) {
     if (where[jj] && !stringMatchesAnyWildcardPattern(std::to_string(data[jj]), patterns))
       where[jj] = false;
@@ -464,7 +481,6 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
   for (const WhereParameters &currentParams : params) {
     const Variable &var = currentParams.variable;
     for (size_t jvar = 0; jvar < var.size(); ++jvar) {
-      if (var.group() != "VarMetaData") {
         const Variable varname = var[jvar];
         ioda::ObsDtype dtype = filterdata.dtype(varname);
 
@@ -739,7 +755,6 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
           applyWhereOperator(whereOperator, whereTest, where);
         }
       }
-    }
   }
 //  Print diagnostics for debug
   int ii = 0;

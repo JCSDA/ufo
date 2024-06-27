@@ -90,6 +90,8 @@ obs filter data:
     float variables:
     - name: ObsValue/brightnessTemperature_1
     - name: MetaData/longitude
+    float variables vector only:
+    - name: MetaData/sensorCentralFrequency
     integer variables:
     - name: PreQC/brightnessTemperature_12
     bool variables:

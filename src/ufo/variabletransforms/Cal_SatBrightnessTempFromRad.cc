@@ -57,12 +57,9 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
   std::vector<float> spectralVariable;
   // This if clause is only true if the specal variable is of size Channel.  If it not then the
   // variables are stored in the obsspace as var_channel e.g. sensorWavenumber_16 size Location
-  if (obsdb_.getObsGroup().vars.exists(parameters_.spectralVariable.value().fullName())) {
-    std::vector<float> buf;
-    obsdb_.getObsGroup().vars[parameters_.spectralVariable.value().fullName()].read<float>(buf);
-    for (size_t ichan = 0; ichan < nvars; ++ichan) {
-      spectralVariable.push_back(buf[ichan]);
-    }
+  const ufo::Variable & var = parameters_.spectralVariable.value();
+  if (obsdb_.has(var.group(), var.variable())) {
+    data_.get(var, spectralVariable);
   } else {
     ioda::ObsDataVector<float> buf(obsdb_,
                                    parameters_.spectralVariable.value().toOopsObsVariables());

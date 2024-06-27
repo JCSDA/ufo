@@ -38,7 +38,6 @@ void testHasDtypeAndGet(const ufo::ObsFilterData& data, ioda::ObsSpace &ospace,
                         const bool skipDerived = false) {
   EXPECT(data.has(var));
   EXPECT(data.dtype(var) == expectedDtype);
-
   // Extract variable into an std::vector
   {
     std::vector<T> vec;
@@ -53,6 +52,22 @@ void testHasDtypeAndGet(const ufo::ObsFilterData& data, ioda::ObsSpace &ospace,
     EXPECT_EQUAL(vec.nvars(), 1);
     EXPECT(vec[0] == expectedValues);
   }
+}
+
+// -----------------------------------------------------------------------------
+
+template <typename T>
+void testHasDtypeAndGetVector(const ufo::ObsFilterData& data, ioda::ObsSpace &ospace,
+                              const ufo::Variable &var,
+                              ioda::ObsDtype expectedDtype, const std::vector<T> &expectedValues,
+                              const bool skipDerived = false) {
+  EXPECT(data.has(var));
+  EXPECT(data.dtype(var) == expectedDtype);
+
+  // Extract variable into an std::vector
+  std::vector<T> vec;
+  data.get(var, vec, skipDerived);
+  EXPECT(vec == expectedValues);
 }
 
 // -----------------------------------------------------------------------------
@@ -237,6 +252,20 @@ void testObsFilterData() {
 
       std::vector<double> double_ref(ospace.nlocs());
       ospace.get_db(var.group(), var.variable(), double_ref);
+    }
+
+///  Check that has(), get() and dtype() work on variables in ObsSpace
+///  for vectors only (e.g. metadata on Channels dimension)
+    varconfs.clear();
+    dataconf.get("float variables vector only", varconfs);
+    ufo::Variables floatvecvars(varconfs);
+    for (size_t jvar = 0; jvar < floatvecvars.nvars(); ++jvar) {
+      const ufo::Variable &var = floatvecvars.variable(jvar);
+
+      std::vector<float> ref;
+      ospace.get_db(var.group(), var.variable(), ref);
+
+      testHasDtypeAndGetVector(data, ospace, var, ioda::ObsDtype::Float, ref);
     }
 
 ///  Check that has(), get() and dtype() work on integer variables in ObsSpace:

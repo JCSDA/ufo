@@ -76,12 +76,8 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
 
   // Get sensor band central radiation wavenumber
   std::vector<float> wavenumber;
-  if (obsdb_.getObsGroup().vars.exists("MetaData/sensorCentralWavenumber")) {
-    std::vector<float> buf;
-    obsdb_.getObsGroup().vars["MetaData/sensorCentralWavenumber"].read<float>(buf);
-    for (size_t ichan = 0; ichan < nchans; ++ichan) {
-      wavenumber.push_back(buf[ichan]);
-    }
+  if (obsdb_.has("MetaData", "sensorCentralWavenumber")) {
+    in.get(Variable("MetaData/sensorCentralWavenumber"), wavenumber);
   } else {
     ioda::ObsDataVector<float> buf(obsdb_, Variable("MetaData/sensorCentralWavenumber", channels_).
                                toOopsObsVariables());

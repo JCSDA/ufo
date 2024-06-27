@@ -110,7 +110,7 @@ observations:
     skip derived: false
 
   # The number of non-missing observations
-  passedBenchmark: 1531
+  passedBenchmark: 58
 
 - obs space:
     name: minimum location > maximum location, throwing an exception

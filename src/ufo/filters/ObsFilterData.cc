@@ -170,11 +170,9 @@ void ObsFilterData::get(const Variable & varname, std::vector<DiagnosticFlag> & 
 template <typename T>
 void ObsFilterData::getVector(const Variable & varname, std::vector<T> & values,
                               bool skipDerived) const {
-  const std::string var = varname.variable(0);
+  const std::string var = varname.variable();
   const std::string grp = varname.group();
-
-  if (grp == "VarMetaData") {
-    values.resize(obsdb_.nvars());
+  if (obsdb_.has(grp, var, skipDerived)) {
     obsdb_.get_db(grp, var, values, {}, skipDerived);
   } else {
     ioda::ObsDataVector<T> vec(obsdb_, varname.toOopsObsVariables(), grp, false);
