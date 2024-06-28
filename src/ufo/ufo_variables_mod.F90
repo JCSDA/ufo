@@ -108,6 +108,7 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_geomz   = "surface_altitu
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
 character(len=MAXVARLEN), public, parameter :: var_sfc_t       = "surface_temperature"
 character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction_factor_at_10m"
+character(len=MAXVARLEN), public, parameter :: var_observable_domain_mask = "observable_domain_mask"
 character(len=MAXVARLEN), public, parameter :: var_sfc_emiss   = "surface_emissivity"
 character(len=MAXVARLEN), public, parameter :: var_sfc_sss     = "sea_surface_salinity"
 character(len=MAXVARLEN), public, parameter :: var_opt_depth   = "optical_thickness_of_atmosphere_layer"
