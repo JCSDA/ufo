@@ -12,6 +12,7 @@ observations:
       - air_temperature
       - specific_humidity
       - mass_content_of_cloud_liquid_water_in_atmosphere_layer
+      - mass_content_of_cloud_ice_in_atmosphere_layer
     obs options: &rttov_options
       RTTOV_default_opts: UKMO_PS44
       SatRad_compatibility: true
@@ -19,13 +20,16 @@ observations:
       UseRHwaterForQC: &UseRHwaterForQC true # default
       UseColdSurfaceCheck: &UseColdSurfaceCheck true # not default but reqd for PS44
       Do_MW_Scatt: true
-      WMO_ID: &wmo_id [3]
-      Sat_ID: &sat_id [metop_1]
+      # nooa_18 added just to test RTTOV coefficient reading
+      # regardless its data presence in the obsfile
+      WMO_ID: &wmo_id [3,209]
+      Sat_ID: &sat_id [metop_1,noaa_18]
       Instrument_Name: &inst_name AMSUAMHS
       CoefficientPath: &coef_path Data/
       InspectProfileNumber: [1]
       MW_Scatt_zero_hydro_tlad: false
       MW_Scatt_hydro_cfrac_tlad: true
+      MW_Scatt_zero_jac_press: 300.0
   obs space:
     name: metop_1_amsua_mhs
     obsdatain:

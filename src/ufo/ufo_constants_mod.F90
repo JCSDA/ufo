@@ -67,6 +67,8 @@ real(kind_real), parameter, public :: g_to_kg = 0.001_kind_real
 real(kind_real), parameter, public :: m_to_km = 0.001_kind_real
 real(kind_real), parameter, public :: Pa_to_hPa = 0.01_kind_real
 real(kind_real), parameter, public :: min_q = 3.0e-6_kind_real
+real(kind_real), parameter, public :: min_clw = zero
+real(kind_real), parameter, public :: min_ciw = zero
 real(kind_real), parameter, public :: RTTOV_ToA = 0.0001_kind_real ! hPa 
 
 ! constants used in Ops_QSat and Ops_QSatWat

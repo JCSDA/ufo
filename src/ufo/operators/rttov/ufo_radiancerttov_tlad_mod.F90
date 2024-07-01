@@ -15,7 +15,7 @@ module ufo_radiancerttov_tlad_mod
 
   use obsspace_mod
 
-  use ufo_constants_mod, only : zero, g_to_kg, min_q
+  use ufo_constants_mod, only : zero, g_to_kg
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, ufo_geovals_print
   use ufo_vars_mod
   use ufo_radiancerttov_utils_mod
@@ -92,10 +92,6 @@ contains
     ! channels contains a list of instrument channels. From this we need to work out the coefindex
     ! which RTTOV needs to index the entry in the coefficient file.  This allows cut down
     ! coefficient files to be used.
-    if (self % conf % nSensors /= 1) then
-      message = 'ufo_radiancerttov_setup error: more than 1 sensor => coef indexing will not work'
-      call abor1_ftn(message)
-    end if
 
     ! Number of channels to be simulated for this instrument (from the configuration, not necessarily the full instrument complement)
     self % RTprof_k % nchan_inst = size(channels)
@@ -166,14 +162,14 @@ contains
 
     integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan, ilev, localchan
     integer                                      :: nprof_sim, nprof_max_sim, nchan_total
-    integer                                      :: nchan_sim
+    integer                                      :: nchan_sim, ivar
     integer                                      :: prof_start, prof_end
     integer                                      :: sensor_index
     integer, allocatable                         :: prof_list(:,:)  ! store list of 'good' profiles
 
     logical                                      :: jacobian_needed
     real(kind_real), allocatable                 :: sfc_emiss(:,:)
-    real(kind_real)                              :: minimum_q
+    character(len = MAXVARLEN)                   :: varname
 
     include 'rttov_k.interface'
     include 'rttov_scatt_ad.interface'
@@ -364,23 +360,23 @@ contains
       ! --------------------------------------------------------------------------
 
       if (self % conf % do_mw_scatt) then
-        call rttov_scatt_ad(                                                            &
-          errorstatus,                                                                  &! out   error flag
-          self % conf % mw_scatt % opts,                                                &! in    options structure
-          int (self % nlevels, KIND = jpim),                                                   &
-          chanprof(1:nchan_sim),                                                        &! in    LOCAL channel and profile index structure
-          self % RTprof_K % mw_scatt % freq_indices(1:nchan_sim),                       &! in    frequency indices
-          self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1),             &! in    profile array
-          self % RTProf_K % mw_scatt % profiles(prof_start:prof_start + nprof_sim -1),  &! in    scattering profile array
-          self % conf % rttov_coef_array(sensor_index),                                 &! in    coefficients structure
-          self % conf % mw_scatt % coef,                                                &! in    scatt coefficients structure
-          self % RTProf_K % calcemis(1:nchan_sim),                                      &! in    flag for internal emissivity calcs
-          self % RTProf_K % emissivity(1:nchan_sim),                                    &! inout input/output emissivities per channel
-          self % RTProf_K % profiles_k(1:nchan_sim),                                    &! inout
-          self % RTProf_K % mw_scatt % profiles_k(1:nchan_sim),                         &! inout
-          self % RTProf_K % emissivity_k(1:nchan_sim),                                  &! inout input/output emissivity jacs per channel
-          self % RTProf_K % radiance,                                                   &! inout computed radiances
-          self % RTProf_K % radiance_k)                                                  ! inout computed radiance jacobians
+        call rttov_scatt_ad(                                                                  &
+          errorstatus,                                                                        &! out   error flag
+          self % conf % mw_scatt % opts,                                                      &! in    options structure
+          int (self % nlevels, KIND = jpim),                                                  &
+          chanprof(1:nchan_sim),                                                              &! in    LOCAL channel and profile index structure
+          self % RTprof_K % mw_scatt % freq_indices(1:nchan_sim),                             &! in    frequency indices
+          self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1),                   &! in    profile array
+          self % RTProf_K % mw_scatt % profiles(prof_start:prof_start + nprof_sim -1),        &! in    scattering profile array
+          self % conf % rttov_coef_array(sensor_index),                                       &! in    coefficients structure
+          self % conf % mw_scatt % coef,                                                      &! in    scatt coefficients structure
+          self % RTProf_K % calcemis(1:nchan_sim),                                            &! in    flag for internal emissivity calcs
+          self % RTProf_K % emissivity(1:nchan_sim),                                          &! inout input/output emissivities per channel
+          self % RTProf_K % profiles_k(nchan_total + 1 : nchan_total + nchan_sim),            &! inout
+          self % RTProf_K % mw_scatt % profiles_k(nchan_total + 1 : nchan_total + nchan_sim), &! inout
+          self % RTProf_K % emissivity_k(1:nchan_sim),                                        &! inout input/output emissivity jacs per channel
+          self % RTProf_K % radiance,                                                         &! inout computed radiances
+          self % RTProf_K % radiance_k)                                                        ! inout computed radiance jacobians
       else
         call rttov_k(                                                                   &
           errorstatus,                                                                  &! out   error flag
@@ -398,19 +394,97 @@ contains
           emissivity_k = self % RTprof_K % emissivity_k(1:nchan_sim))                    ! inout input/output emissivities gradients per channel
       end if
 
-      ! Zero jacobians if the humidity had been set to the minimum threshold
-      if(self % conf % SatRad_compatibility .and. self % conf % UseMinimumQ) then
-        minimum_q = min_q * self % conf % scale_fac(gas_id_watervapour)
-        do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
-          iprof = prof_start + chanprof(ichan) % prof - 1
-          ! Humidity profile
-          do ilev = 1, self % nlevels
-            if (self % RTProf_K % q_profile_reset(iprof, ilev)) then
-              do localchan = 1, self % RTprof_K % nchan_inst
-                self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) % q(ilev) = zero
-              end do
-            end if
+      if(self % conf % SatRad_compatibility) then
+        ! Zero jacobians if the humidity had been set to the minimum threshold
+        if (self % conf % UseMinimumQ) then
+          do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+            iprof = prof_start + chanprof(ichan) % prof - 1
+            ! Humidity profile
+            do ilev = 1, self % nlevels
+              if (self % RTProf_K % q_profile_reset(iprof, ilev)) then
+                do localchan = 1, self % RTprof_K % nchan_inst
+                  self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) % q(ilev) = zero
+                end do
+              end if
+            end do
           end do
+        end if
+
+        ! Zero jacobians if selected variables had been set to the minimum threshold
+        do ivar = 1, size(self % varin)
+          varname = self % varin(ivar)
+          select case (trim(varname))
+
+            ! cloud liquid water
+            case(var_clw)
+              if (self % conf % UseMinimumClw .or. self % conf % MWScattZeroJacPress > 0.0) then
+                if (self % conf % do_mw_scatt) then
+                  do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+                    iprof = prof_start + chanprof(ichan) % prof - 1
+                    do ilev = 1, self % nlevels
+                      if (self % RTProf_K % clw_profile_reset(iprof, ilev)) then
+                        do localchan = 1, self % RTprof_K % nchan_inst
+                          self % RTprof_K % mw_scatt &
+                            % profiles_k(nchan_total + ichan + localchan - 1) &
+                            % clw(ilev) = zero
+                        end do
+                      end if
+                    end do
+                  end do
+                else if (self % conf % rttov_opts % rt_mw % clw_data) then
+                  do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+                    iprof = prof_start + chanprof(ichan) % prof - 1
+                    do ilev = 1, self % nlevels
+                      if (self % RTProf_K % clw_profile_reset(iprof, ilev)) then
+                        do localchan = 1, self % RTprof_K % nchan_inst
+                          self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
+                            % clw(ilev) = zero
+                        end do
+                      end if
+                    end do
+                  end do
+                end if ! self % conf % rttov_opts % rt_ir % addclouds option not included yet
+              end if
+
+            ! cloud ice
+            case(var_cli)
+              if (self % conf % UseMinimumCiw .or. self % conf % MWScattZeroJacPress > 0.0) then
+                if (self % conf % do_mw_scatt) then
+                  if (self % conf % mw_scatt % use_totalice) then
+                    do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+                      iprof = prof_start + chanprof(ichan) % prof - 1
+                      do ilev = 1, self % nlevels
+                        if (self % RTProf_K % ciw_profile_reset(iprof, ilev)) then
+                          do localchan = 1, self % RTprof_K % nchan_inst
+                            self % RTprof_K % mw_scatt &
+                              % profiles_k(nchan_total + ichan + localchan - 1) &
+                              % totalice(ilev) = zero
+                          end do
+                        end if
+                      end do
+                    end do
+                  else
+                    do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+                      iprof = prof_start + chanprof(ichan) % prof - 1
+                      do ilev = 1, self % nlevels
+                        if (self % RTProf_K % ciw_profile_reset(iprof, ilev)) then
+                          do localchan = 1, self % RTprof_K % nchan_inst
+                            self % RTprof_K % mw_scatt &
+                              % profiles_k(nchan_total + ichan + localchan - 1) &
+                              % ciw(ilev) = zero
+                          end do
+                        end if
+                      end do
+                    end do
+                  end if
+                else
+                  message = &
+                    'ufo_radiancerttov_tlad_settraj: Cloud Ice Water only supported for RTTOV-SCATT'
+                  call abor1_ftn(message)
+                end if
+              end if
+
+          end select
         end do
       end if
 
@@ -497,7 +571,7 @@ contains
       varname = self % varin(ivar)
       select case (trim(varname))
         ! Variables with nlevels
-        case (var_ts, var_q, var_mixr, var_clw)
+        case (var_ts, var_q, var_mixr, var_clw, var_cli)
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           ! Check model levels is consistent in geovals
@@ -531,10 +605,25 @@ contains
                   hofx(jchan, prof) = hofx(jchan, prof) + &
                     sum(self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % clw(:) * &
                         geoval_d % vals(1:geoval_d % nval, prof))
-                else
+                else if (self % conf % rttov_opts % rt_mw % clw_data) then
                   hofx(jchan, prof) = hofx(jchan, prof) + &
                     sum(self % RTprof_K % profiles_k(ichan+jchan-1) % clw(:) * &
                         geoval_d % vals(1:geoval_d % nval, prof))
+                end if
+              else if (trim(varname) == var_cli) then
+                if (self % conf % do_mw_scatt) then
+                  if (self % conf % mw_scatt % use_totalice) then
+                    hofx(jchan, prof) = hofx(jchan, prof) + &
+                      sum(self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % totalice(:) * &
+                          geoval_d % vals(1:geoval_d % nval, prof))
+                  else
+                    hofx(jchan, prof) = hofx(jchan, prof) + &
+                      sum(self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % ciw(:) * &
+                          geoval_d % vals(1:geoval_d % nval, prof))
+                  end if
+                else
+                  message = 'ufo_radiancerttov_simobs_tl: Cloud Ice Water only supported for RTTOV-SCATT'
+                  call abor1_ftn(message)
                 end if
               end if
             end do
@@ -617,7 +706,7 @@ contains
       varname = self % varin(ivar)
       select case (trim(varname))
         ! Variables with nlevels
-        case (var_ts, var_q, var_mixr, var_clw)
+        case (var_ts, var_q, var_mixr, var_clw, var_cli)
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           do ichan = 1, self % nchan_total, size(self % channels)
@@ -644,9 +733,22 @@ contains
                   if (self % conf % do_mw_scatt) then
                     geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
                       self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % clw(:) * hofx(jchan, prof)
-                  else
+                  else if (self % conf % rttov_opts % rt_mw % clw_data) then
                     geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
                       self % RTprof_K % profiles_k(ichan+jchan-1) % clw(:) * hofx(jchan, prof)
+                  end if
+                else if (trim(varname) == var_cli) then
+                  if (self % conf % do_mw_scatt) then
+                    if (self % conf % mw_scatt % use_totalice) then
+                      geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
+                        self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % totalice(:) * hofx(jchan, prof)
+                    else
+                      geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
+                        self % RTprof_K % mw_scatt % profiles_k(ichan+jchan-1) % ciw(:) * hofx(jchan, prof)
+                    end if
+                  else
+                    message = 'ufo_radiancerttov_simobs_ad: Cloud Ice Water only supported for RTTOV-SCATT'
+                    call abor1_ftn(message)
                   end if
                 end if
               endif

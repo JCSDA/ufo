@@ -5,7 +5,7 @@ time window:
 observations:
 - obs operator:
      name: RTTOV
-     Absorbers: &rttov_absorbers [CLW, CIW]
+     Absorbers: &rttov_absorbers [CLW]
      obs options:
        RTTOV_default_opts: UKMO_PS45
        SatRad_compatibility: true

@@ -84,6 +84,17 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// Only used when SatRad_compatibility is true.
   oops::Parameter<bool> UseMinimumQ{"UseMinimumQ", true, this};
 
+  /// Check the cloud liquid water profile is not less than min_clw.
+  /// Only used when SatRad_compatibility is true.
+  oops::Parameter<bool> UseMinimumClw{"UseMinimumClw", true, this};
+
+  /// Check the cloud ice profile is not less than min_ciw.
+  /// Only used when SatRad_compatibility is true.
+  oops::Parameter<bool> UseMinimumCiw{"UseMinimumCiw", true, this};
+
+  /// pressure (in hPa) of model level above which cloud jacobians are set to zero
+  oops::Parameter<double> MWScattZeroJacPress{"MW_Scatt_zero_jac_press", 0.0, this};
+
   /// Maximum number of profiles to be processed by RTTOV per pass.  If this is true then
   /// one profile is run at a time.  This will be slow but useful for debugging.  The normal number
   /// of profiles per pass is nchan_max_sim / nchan_inst.

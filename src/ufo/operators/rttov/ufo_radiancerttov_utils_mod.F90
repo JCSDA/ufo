@@ -37,7 +37,8 @@ module ufo_radiancerttov_utils_mod
 
   use ufo_geovals_mod, only : ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_utils_mod, only : Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat, cmp_strings, getindex, upper2lower
-  use ufo_constants_mod, only : zero, half, one, deg2rad, min_q, m_to_km, g_to_kg, pa_to_hpa, RTTOV_ToA
+  use ufo_constants_mod, only : zero, half, one, deg2rad, min_q, min_clw, min_ciw, m_to_km, &
+                                g_to_kg, pa_to_hpa, RTTOV_ToA
 
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &
@@ -134,6 +135,8 @@ module ufo_radiancerttov_utils_mod
     real(kind_real), allocatable     :: ciw(:,:)        ! pointer to either ice from RTTOV-SCATT or diagnosed ice from Qsplit
     real(kind_real), allocatable     :: tc_ozone(:)     ! total column ozone
     logical, allocatable             :: q_profile_reset(:,:)    ! flag to say if the humidity has been reset to a minimum value
+    logical, allocatable             :: clw_profile_reset(:,:)  ! flag to say if cloud liquid water has been reset to a minimum value
+    logical, allocatable             :: ciw_profile_reset(:,:)  ! flag to say if cloud ice has been reset to a minimum value
 
     integer, allocatable             :: sensor_index_array(:)
 
@@ -190,6 +193,8 @@ module ufo_radiancerttov_utils_mod
     logical                               :: UseColdSurfaceCheck  ! to replicate pre-PS45 results
     logical                               :: BoundQToSaturation  ! keep values of q equal or below to saturation
     logical                               :: UseMinimumQ ! apply a lower threshold to the humidity
+    logical                               :: UseMinimumClw ! apply a lower threshold to cloud liquid water
+    logical                               :: UseMinimumCiw ! apply a lower threshold to cloud ice
     logical                               :: SplitQtotal
     logical                               :: UseQtsplitRain
     logical                               :: RTTOV_profile_checkinput
@@ -205,6 +210,8 @@ module ufo_radiancerttov_utils_mod
 
     character(len=255)                    :: surface_emissivity_group
     character(len=MAXVARLEN), allocatable :: variablesFromObsSpace(:)
+
+    real(kind_real)                       :: MWScattZeroJacPress ! zero cloud jacobian above threshold pressure level
 
   contains
 
@@ -409,6 +416,9 @@ contains
     call f_confOpts % get_or_die("BoundQToSaturation",conf % BoundQToSaturation) ! default = true
     call f_confOpts % get_or_die("UseRHwaterForQC",conf % UseRHwaterForQC) ! default = true
     call f_confOpts % get_or_die("UseMinimumQ",conf % UseMinimumQ) ! default = true
+    call f_confOpts % get_or_die("UseMinimumClw",conf % UseMinimumClw) ! default = true
+    call f_confOpts % get_or_die("UseMinimumCiw",conf % UseMinimumCiw) ! default = true
+    call f_confOpts % get_or_die("MW_Scatt_zero_jac_press",conf % MWScattZeroJacPress) ! default = 0.0
 
     ! Settings that control the batching
     call f_confOpts % get_or_die("prof_by_prof",conf % prof_by_prof)
@@ -802,6 +812,18 @@ contains
         call f_confOpts % get_or_die("MW_Scatt_cc_threshold", self % mw_scatt % opts % cc_threshold)
       end if
 
+      !< Hydrometeor TL/AD/K sensitivity includes the indirect effect
+      !< through the effective cloud fraction (default is true, but false when PS_configuration is true)
+      if ( f_ConfOpts % has("MW_Scatt_hydro_cfrac_tlad")) then
+        call f_confOpts % get_or_die("MW_Scatt_hydro_cfrac_tlad", self % mw_scatt % opts % hydro_cfrac_tlad)
+      end if
+
+      !< !< Switch for hydrometeor TL/AD sensitivity in layers with zero hydrometeor concentration
+      !< (default is false, but true when PS_configuration is true)
+      if ( f_ConfOpts % has("MW_Scatt_zero_hydro_tlad")) then
+        call f_confOpts % get_or_die("MW_Scatt_zero_hydro_tlad", self % mw_scatt % opts % zero_hydro_tlad)
+      end if
+
     end if
 
     call rttov_print_opts(self % rttov_opts,lu = stderr)
@@ -1107,12 +1129,28 @@ contains
           do iprof = 1, nProfiles
             profiles_scatt(iprof)%clw(top_level:bottom_level:stride) = geoval%vals(:, iprof)
           end do
-        else
+        else if (conf % rttov_opts % rt_mw % clw_data) then
           if (associated(profiles(1)%clw)) then
             do iprof = 1, nprofiles
               profiles(iprof)%clw(top_level:bottom_level:stride) = geoval%vals(:, iprof) ! always kg/kg
             end do
           end if
+        end if
+      case (var_cli)
+        call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
+        if (conf % do_mw_scatt) then
+          if (conf % mw_scatt % use_totalice) then
+            do iprof = 1, nProfiles
+              profiles_scatt(iprof)%totalice(top_level:bottom_level:stride) = geoval%vals(:, iprof)
+            end do
+          else
+            do iprof = 1, nProfiles
+              profiles_scatt(iprof)%ciw(top_level:bottom_level:stride) = geoval%vals(:, iprof)
+            end do
+          end if
+        else
+          message = 'ufo_rttov_setup_rtprof: Cloud Ice Water only supported for RTTOV-SCATT'
+          call abor1_ftn(message)
         end if
       case default
 
@@ -1281,6 +1319,10 @@ contains
     if(conf % SatRad_compatibility) then
       allocate(self % q_profile_reset(nProfiles, nlevels))
       self % q_profile_reset(:, :) = .false.
+      allocate(self % clw_profile_reset(nProfiles, nlevels))
+      self % clw_profile_reset(:, :) = .false.
+      allocate(self % ciw_profile_reset(nProfiles, nlevels))
+      self % ciw_profile_reset(:, :) = .false.
       do iprof = 1, nProfiles
         !----
         ! Reset low level temperatures over seaice and cold, low land as per Ops_SatRad_SetUpRTprofBg.F90
@@ -1367,6 +1409,57 @@ contains
           if(profiles(iprof)%s2m%q < min_q * conf%scale_fac(gas_id_watervapour)) profiles(iprof)%s2m%q = min_q * conf%scale_fac(gas_id_watervapour)
         end if
 
+        if(conf % UseMinimumClw) then
+          if (conf % do_mw_scatt) then
+            ! Constrain small values to min_clw for clw profile
+            do ilev = 1, nlevels
+              if (profiles_scatt(iprof) % clw(ilev) < min_clw) then
+                profiles_scatt(iprof) % clw(ilev) = min_clw
+                self % clw_profile_reset(iprof, ilev) = .true.
+              end if
+            end do
+          else if (conf % rttov_opts % rt_mw % clw_data) then
+            ! Constrain small values to min_clw for clw profile
+            do ilev = 1, nlevels
+              if (profiles(iprof) % clw(ilev) < min_clw) then
+                profiles(iprof) % clw(ilev) = min_clw
+                self % clw_profile_reset(iprof, ilev) = .true.
+              end if
+            end do
+          end if
+        end if
+
+        if(conf % UseMinimumCiw .and. conf % do_mw_scatt) then
+          ! Cloud Ice Water only supported for RTTOV-SCATT
+          if (conf % mw_scatt % use_totalice) then
+            ! Constrain small values to min_ciw for totalice profile
+            do ilev = 1, nlevels
+              if (profiles_scatt(iprof) % totalice(ilev) < min_ciw) then
+                profiles_scatt(iprof) % totalice(ilev) = min_ciw
+                self % ciw_profile_reset(iprof, ilev) = .true.
+              end if
+            end do
+          else
+            ! Constrain small values to min_ciw for ciw profile
+            do ilev = 1, nlevels
+              if (profiles_scatt(iprof) % ciw(ilev) < min_ciw) then
+                profiles_scatt(iprof) % ciw(ilev) = min_ciw
+                self % ciw_profile_reset(iprof, ilev) = .true.
+              end if
+            end do
+          end if
+        end if
+
+        if(conf % MWScattZeroJacPress > 0.0 .and. conf % do_mw_scatt) then
+          ! set cloud jacobians to zero above MWScattZeroJacPress
+          do ilev = 1, nlevels
+            if (profiles(iprof) % p(ilev) < conf % MWScattZeroJacPress) then
+              self % clw_profile_reset(iprof, ilev) = .true.
+              self % ciw_profile_reset(iprof, ilev) = .true.
+            end if
+          end do
+        end if
+
       enddo
     end if
 
@@ -1389,7 +1482,7 @@ contains
                         profiles_scatt(iprof) % clw(:) + &
                         profiles_scatt(iprof) % ciw(:)
           end if
-        else
+        else if (conf % rttov_opts % rt_mw % clw_data) then
           Qtotal(:) = Qtotal(:) + profiles(iprof) % clw(:)
         end if
 
@@ -1413,7 +1506,7 @@ contains
           else
             profiles_scatt(iprof) % ciw(:) = ciw_temp(:)
           end if
-        else
+        else if (conf % rttov_opts % rt_mw % clw_data) then
           profiles(iprof) % clw(:) = clw_temp(:)
         end if
 
@@ -1704,6 +1797,8 @@ contains
       if (allocated(self % ciw))                      deallocate(self % ciw)
       if (allocated(self % tc_ozone))                 deallocate(self % tc_ozone)
       if (allocated(self % q_profile_reset))          deallocate(self % q_profile_reset)
+      if (allocated(self % clw_profile_reset))          deallocate(self % clw_profile_reset)
+      if (allocated(self % ciw_profile_reset))          deallocate(self % ciw_profile_reset)
     end if
 
   end subroutine ufo_rttov_alloc_direct
@@ -1858,6 +1953,8 @@ contains
       if (allocated(self % ciw))                      deallocate(self % ciw)
       if (allocated(self % tc_ozone))                 deallocate(self % tc_ozone)
       if (allocated(self % q_profile_reset))          deallocate(self % q_profile_reset)
+      if (allocated(self % clw_profile_reset))          deallocate(self % clw_profile_reset)
+      if (allocated(self % ciw_profile_reset))          deallocate(self % ciw_profile_reset)
     end if
 
   end subroutine ufo_rttov_alloc_profiles
@@ -2406,7 +2503,7 @@ contains
                 if (conf % do_mw_scatt) then
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % mw_scatt % profiles_k(ichan) % clw(:)
-                else
+                else if (conf % rttov_opts % rt_mw % clw_data) then
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % profiles_k(ichan) % clw(:)
                 end if
