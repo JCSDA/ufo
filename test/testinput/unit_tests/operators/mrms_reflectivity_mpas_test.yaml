@@ -1,0 +1,30 @@
+time window:
+  begin: 2022-02-15T21:00:00Z
+  end: 2022-02-16T03:00:00Z
+
+# Test Thompson microphysics reflectivity operator with variational method (option 108)
+observations:
+- obs operator:
+    name: DirectZDA
+    #microphysics option: Thompson
+    microphysics option: GFDL
+    use variational method: false
+    vertical coordinate: geopotential_height
+    var_rain_mixing_ratio: rain_water
+    var_snow_mixing_ratio: snow_water
+    var_graupel_mixing_ratio: graupel
+  obs space:
+    name: Radar_Reflectivity
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs.mrms_reflectivity.20220216T000000Z_s.nc
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: hofx-mpas.mrms_reflectivity.202202160000.nc
+    simulated variables: [reflectivity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals-mpas.mrms_reflectivity.20220216T000000Z_s.nc
+  vector ref: TestReference
+  tolerance: 1.e-6
