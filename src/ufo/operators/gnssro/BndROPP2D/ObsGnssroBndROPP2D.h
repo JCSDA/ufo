@@ -30,6 +30,7 @@ namespace ufo {
 class GnssroBndROPP2DOptionsParameters: public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(GnssroBndROPP2DOptionsParameters, Parameters)
  public:
+  oops::Parameter<int> useCompress{"use_compress", 0, this};
   oops::Parameter<size_t> nHoriz{"n_horiz", 31, this};
   oops::Parameter<double> res{"res", 40.0, this};
   oops::Parameter<double> top2D{"top_2d", 20.0, this};

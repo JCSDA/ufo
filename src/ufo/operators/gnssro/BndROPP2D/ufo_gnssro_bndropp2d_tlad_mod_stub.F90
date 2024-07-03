@@ -118,8 +118,10 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 ! hack - set local geopotential height to zero for ropp routines
   integer                       :: n_horiz
+  integer                       :: use_compress
 
   n_horiz = self%roconf%n_horiz
+  use_compress = self%roconf%use_compress
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: begin"
   call fckit_log%debug(err_msg)

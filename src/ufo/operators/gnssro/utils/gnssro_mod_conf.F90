@@ -34,6 +34,7 @@ type gnssro_conf
 end type gnssro_conf
 
 !--------- ropp2d location default parameters-----------------
+integer(c_int),  parameter, public :: use_compress = 0   !0 or 1
 integer(c_int),  parameter, public :: n_horiz_2d = 31   !should be odd number
 real(kind_real), parameter, public :: res_2d     = 40.0 !km
 real(kind_real), parameter, public :: top_2d     = 20.0 !km; maximum height the 2d operator is applied
@@ -48,7 +49,8 @@ type(fckit_configuration), intent(in) :: f_conf
 
 character(len=:), allocatable :: str
 
-roconf%use_compress = 1
+roconf%use_compress = use_compress !0: Coefficient to calculate dry refractivity contribution for ideal gas
+                       !1: non ideal gas, use adjusted coefficients for refractivity computation
 if (f_conf%has("use_compress")) call f_conf%get_or_die("use_compress",roconf%use_compress)
 roconf%n_horiz = n_horiz_2d
 if (f_conf%has("n_horiz")) call f_conf%get_or_die("n_horiz",roconf%n_horiz)

@@ -33,7 +33,8 @@ contains
 ! ------------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------------
 
-subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_sfc,x, iflip)
+subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_sfc,x, &
+                                 iflip, non_ideal)
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
 !     model background fields: Temperature, pressure, specific
@@ -64,7 +65,13 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
   real(kind=kind_real)               :: rlon_local
   integer ::  n,i,j,k
   integer, optional, intent(in)  :: iflip
-  x%non_ideal     = .FALSE.
+  integer, intent(in)                :: non_ideal
+
+  if (non_ideal .eq. 1) then
+    x%non_ideal     = .TRUE.
+  else
+    x%non_ideal     = .FALSE.
+  endif
   x%direct_ion    = .FALSE.
   x%state_ok      = .TRUE.
   x%new_bangle_op = .TRUE.     ! activate ROPP v8 new interpolation scheme

@@ -33,7 +33,6 @@ type, extends(ufo_basis) :: ufo_gnssro_BndROPP2D
   type(gnssro_conf)  :: roconf
   real(kind_real), allocatable  :: obsLon2d(:), obsLat2d(:)  !2d location
   contains
-
     procedure :: setup     => ufo_gnssro_bndropp2d_setup
     procedure :: simobs    => ufo_gnssro_bndropp2d_simobs
 end type ufo_gnssro_BndROPP2D
@@ -86,6 +85,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
   real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
   real(kind_real), allocatable  :: obsLonnh(:),obsLatnh(:)                      !n_horiz
+  integer                       :: use_compress
   integer                       :: n_horiz
   real(kind_real)               :: dtheta
   real(kind_real)                    :: ob_time
@@ -96,6 +96,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
   ro_type = self%roconf%ro_type
+  use_compress = self%roconf%use_compress
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
   call fckit_log%debug(err_msg)
@@ -103,11 +104,11 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 #ifndef ropp_aro
 ! airborne ro_type can only be used with the ROPP ropp_fm_bangle_2d_aro routine.
 ! This routine is only avaible in certain ROPP distributions. When this code
-! is available, the compilation must include the -Dropp_aro argument 
+! is available, the compilation must include the -Dropp_aro argument
 ! in the command line, to link with the ropp_fm_bangle_2d_aro routine.
 ! Abort now if ro_type is airborne but the routine is not available
   if ( ro_type .eq. "airborne" ) then
-     write(err_msg,*) myname_, ' ERROR: option "ro_type = airborne"',& 
+     write(err_msg,*) myname_, ' ERROR: option "ro_type = airborne"',&
    ' requires compiling UFO with the "-Dropp_aro" cpp argument'
      call abor1_ftn(err_msg)
   endif
@@ -180,7 +181,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call fckit_log%debug(err_msg)
 
 ! loop through the obs
-  obs_loop: do iobs = 1, nlocs  
+  obs_loop: do iobs = 1, nlocs
 
     if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
            obsAzim(iobs) /= missing ) then
@@ -192,8 +193,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
                       q%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                     prs%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                     gph%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
-                    nlev,x,n_horiz,dtheta,iflip)
-     
+                    nlev,x,n_horiz,dtheta,iflip,use_compress)
       call init_ropp_2d_obvec(nvprof,      &
                     obsImpP(iobs),         &
                      obsLat(iobs),         &
@@ -225,7 +225,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
                                gph%vals(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
                                nlev,                                             &
                                gph_sfc%vals(1,(iobs-1)*n_horiz+1+(n_horiz-1)/2), &
-                               x1d, iflip)
+                               x1d, iflip, use_compress)
 
       call init_ropp_1d_obvec(nvprof,          &
                               obsImpP(iobs),   &
@@ -240,16 +240,16 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
     end if
 
-!   hack -- handling ropp missing value 
+!   hack -- handling ropp missing value
     if (y%bangle(nvprof) .lt. -900.0_wp ) then
        hofx(iobs) = missing
        y%bangle(nvprof) = missing
     else
        hofx(iobs) = y%bangle(nvprof)  ! nvprof is just one point
     end if
-!   hack -- handling ropp missing value 
+!   hack -- handling ropp missing value
 
-!   deallocate ropp structures  
+!   deallocate ropp structures
     if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
            obsAzim(iobs) /= missing ) then
       call ropp_tidy_up_2d(x,y)
@@ -275,7 +275,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: complete"
   call fckit_log%debug(err_msg)
-     
+
 end subroutine ufo_gnssro_bndropp2d_simobs
 ! ------------------------------------------------------------------------------
 

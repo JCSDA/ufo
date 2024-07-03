@@ -5,6 +5,8 @@ time window:
 observations:
 - obs operator:
     name: GnssroBndROPP1D
+#    obs options:
+#      use_compress: 1
   obs space:
     name: GnssroBnd
     obsdatain:

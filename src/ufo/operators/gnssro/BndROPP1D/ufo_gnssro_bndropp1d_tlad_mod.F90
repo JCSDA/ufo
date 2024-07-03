@@ -8,7 +8,8 @@
 
 module ufo_gnssro_bndropp1d_tlad_mod
 
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration
+!use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -30,8 +31,10 @@ integer, parameter         :: max_string=800
 type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP1D_tlad
   private
   integer                       :: nval, nlocs, iflip
+  type(gnssro_conf)             :: roconf       ! ro configuration
   real(kind_real), allocatable  :: prs(:,:), t(:,:), q(:,:), gph(:,:), gph_sfc(:,:)
   contains
+    procedure :: setup      => ufo_gnssro_bndropp1d_tlad_setup
     procedure :: delete     => ufo_gnssro_bndropp1d_tlad_delete
     procedure :: settraj    => ufo_gnssro_bndropp1d_tlad_settraj
     procedure :: simobs_tl  => ufo_gnssro_bndropp1d_simobs_tl
@@ -41,6 +44,14 @@ end type ufo_gnssro_bndropp1d_tlad
 contains
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp1d_tlad_setup(self, f_conf)
+  implicit none
+  class(ufo_gnssro_BndROPP1D_tlad), intent(inout) :: self
+  type(fckit_configuration), intent(in)           :: f_conf
+
+  call gnssro_conf_setup(self%roconf,f_conf)
+
+end subroutine ufo_gnssro_bndropp1d_tlad_setup
 ! ------------------------------------------------------------------------------    
 subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
        
@@ -121,6 +132,10 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable :: gph_d_zero(:)
   real(kind_real)              :: gph_sfc_d_zero 
   real(kind_real), allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
+  integer                      :: use_compress
+
+  use_compress = self%roconf%use_compress
+
 ! hack - set local geopotential height to zero for ropp routines
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: begin"
@@ -178,7 +193,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
                            self%gph(:,iobs),      &
                                       nlev,       &
                            self%gph_sfc(1,iobs),  &
-                                 x, self%iflip)
+                                 x, self%iflip, use_compress)
    !  hack -- make non zero humidity to avoid zero denominator in tangent linear
    !          see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
        where(x%shum .le. 1e-8)        x%shum = 1e-8
@@ -193,7 +208,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
                            gph_d_zero(:),          &
                                       nlev,        &
                            gph_sfc_d_zero,         &
-                           x_tl, self%iflip)
+                           x_tl, self%iflip, use_compress)
    !   set both y and y_tl structures    
        call init_ropp_1d_obvec_tlad(iobs, nvprof, &
                          obsImpP(iobs),           &
@@ -256,6 +271,9 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   real(kind=dp)                   :: ob_time
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp1d_simobs_ad"
   character(max_string)           :: err_msg
+  integer                         :: use_compress
+
+  use_compress = self%roconf%use_compress
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: begin"
   call fckit_log%debug(err_msg)
@@ -314,7 +332,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
                              self%gph(:,iobs),    &
                                         nlev,     &
                              self%gph_sfc(1,iobs),&
-                                   x, self%iflip)
+                                   x, self%iflip, use_compress)
 
            call init_ropp_1d_statevec( ob_time,  &
                                obsLon(iobs),     &
@@ -325,7 +343,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
                                gph_d_zero(:),    &
                                         nlev,    &
                               gph_sfc_d_zero,    &
-                             x_ad, self%iflip)
+                             x_ad, self%iflip, use_compress)
 
     !      x_ad is local so initialise to 0.0
            x_ad%temp(:) = 0.0_wp

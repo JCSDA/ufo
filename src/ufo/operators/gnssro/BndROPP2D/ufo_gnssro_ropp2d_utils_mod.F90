@@ -32,7 +32,8 @@ contains
 
 ! ------------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------------
-subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dtheta, iflip)
+subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x,  &
+                                 n_horiz, dtheta, iflip,non_ideal)
 
 !  Description:
 !     subroutine to fill a ROPP state vector structure with
@@ -55,7 +56,7 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dt
   implicit none
 ! Output state vector
   type(State2dFM),      intent(out)   :: x
-  integer,              intent(in)    :: lm, n_horiz
+  integer,              intent(in)    :: lm, n_horiz,non_ideal
   real(kind=kind_real), intent(in)    :: dtheta
   real(kind=kind_real), dimension(n_horiz), intent(in)     ::   rlon, rlat
   real(kind=kind_real), dimension(lm,n_horiz), intent(in)  :: temp,shum,pres,phi
@@ -66,7 +67,11 @@ subroutine init_ropp_2d_statevec(rlon,rlat,temp,shum,pres,phi,lm, x, n_horiz, dt
 ! number of profiles in plane
   x%n_horiz = n_horiz
   x%dtheta  = dtheta
-
+  if (non_ideal .eq. 1) then
+    x%non_ideal = .TRUE.
+  else
+    x%non_ideal = .FALSE.
+  endif
 ! Number of levels in background profile.  What about (lm+1) field ?
   x%n_lev=lm
 

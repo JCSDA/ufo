@@ -8,7 +8,8 @@
 
 module ufo_gnssro_bndropp1d_mod
 
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration
+!use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -20,6 +21,7 @@ use obsspace_mod
 use missing_values_mod
 use ufo_gnssro_ropp1d_utils_mod
 use fckit_log_module,  only : fckit_log
+use gnssro_mod_conf
 
 implicit none
 public             :: ufo_gnssro_bndropp1d
@@ -27,12 +29,23 @@ private
 
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BndROPP1D
+  type(gnssro_conf)  :: roconf
   contains
+    procedure :: setup     => ufo_gnssro_bndropp1d_setup
     procedure :: simobs    => ufo_gnssro_bndropp1d_simobs
 end type ufo_gnssro_BndROPP1D
 
 contains
 
+! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp1d_setup(self, f_conf)
+  implicit none
+  class(ufo_gnssro_BndROPP1D), intent(inout) :: self
+  type(fckit_configuration),   intent(in)    :: f_conf
+
+  call gnssro_conf_setup(self%roconf,f_conf)
+
+end subroutine ufo_gnssro_bndropp1d_setup
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
@@ -61,6 +74,10 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
   integer                            :: iflip 
+  integer                            :: use_compress
+
+  use_compress = self%roconf%use_compress
+
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
   call fckit_log%debug(err_msg)
 
@@ -124,7 +141,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
                                   gph%vals(:,iobs),     &
                                   nlev,                 &
                                   gph_sfc%vals(1,iobs), &
-                                  x, iflip)
+                                  x, iflip, use_compress)
 
        call init_ropp_1d_obvec(nvprof,          &
                                obsImpP(iobs),   &

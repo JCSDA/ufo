@@ -8,7 +8,8 @@
 
 module ufo_gnssro_bndropp1d_tlad_mod
 
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration
+!use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -26,8 +27,10 @@ integer, parameter         :: max_string=800
 type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP1D_tlad
   private
   integer                       :: nval, nlocs
+  type(gnssro_conf)             :: roconf       ! ro configuration
   real(kind_real), allocatable  :: prs(:,:), t(:,:), q(:,:), gph(:,:), gph_sfc(:,:)
   contains
+    procedure :: setup      => ufo_gnssro_bndropp1d_tlad_setup
     procedure :: delete     => ufo_gnssro_bndropp1d_tlad_delete
     procedure :: settraj    => ufo_gnssro_bndropp1d_tlad_settraj
     procedure :: simobs_tl  => ufo_gnssro_bndropp1d_simobs_tl
@@ -37,6 +40,14 @@ end type ufo_gnssro_bndropp1d_tlad
 contains
 
 ! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp1d_tlad_setup(self, f_conf)
+  implicit none
+  class(ufo_gnssro_BndROPP1D_tlad), intent(inout) :: self
+  type(fckit_configuration), intent(in) :: f_conf
+
+  call gnssro_conf_setup(self%roconf,f_conf)
+
+end subroutine ufo_gnssro_bndropp1d_tlad_setup
 ! ------------------------------------------------------------------------------    
 subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
        
@@ -96,6 +107,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp1d_simobs_tl"
   character(max_string)        :: err_msg
   type(ufo_geoval), pointer    :: t_d, q_d, prs_d 
+  integer                       :: use_compress
 
 ! hack - set local geopotential height to zero for ropp routines
   real(kind_real), allocatable :: gph_d_zero(:)
@@ -103,6 +115,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 ! hack - set local geopotential height to zero for ropp routines
 
+  use_compress = self%roconf%use_compress
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: begin"
   call fckit_log%debug(err_msg)
 

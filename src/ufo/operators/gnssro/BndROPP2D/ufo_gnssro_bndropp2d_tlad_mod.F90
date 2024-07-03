@@ -175,6 +175,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable  :: obsImpP(:),obsLocR(:),obsGeoid(:),obsAzim(:) !nlocs
   real(kind_real), allocatable  :: obsLat(:),obsLon(:)                          !nlocs
   integer                       :: n_horiz
+  integer                       :: use_compress
   real(kind_real)               :: dtheta
   real(kind_real)               :: ob_time
   character(len=20)             :: ro_type
@@ -186,6 +187,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
   ro_type = self%roconf%ro_type
+  use_compress = self%roconf%use_compress
+
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_tl: begin"
   call fckit_log%debug(err_msg)
@@ -260,7 +263,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                                   self%q(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
                                   self%prs(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
                                   self%gph(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                                  nlev, x, n_horiz, dtheta, self%iflip)
+                                  nlev, x, n_horiz, dtheta, self%iflip, use_compress)
 
 !      hack -- make non zero humidity to avoid zero denominator in tangent linear
 !              see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
@@ -273,7 +276,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                                   q_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
                                   prs_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
                                   gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                                  nlev, x_tl, n_horiz, dtheta, self%iflip)
+                                  nlev, x_tl, n_horiz, dtheta, self%iflip, use_compress)
 
 !      set both y and y_tl structures    
        call init_ropp_2d_obvec_tlad(iobs, nvprof, &
@@ -314,7 +317,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                                 self%gph(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
                                 nlev,                                             &
                                 self%gph_sfc(1,(iobs-1)*n_horiz+1+(n_horiz-1)/2), &
-                                x1d, self%iflip)
+                                x1d, self%iflip, use_compress)
 
        where(x1d%shum .le. 1e-8)        x1d%shum = 1e-8
 
@@ -327,7 +330,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                          gph_d_zero(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
                                    nlev,         &
                          gph_sfc_d_zero,         &
-                         x1d_tl, self%iflip)
+                         x1d_tl, self%iflip, use_compress)
 
 !      y and y_tl structures    
        call init_ropp_1d_obvec_tlad(iobs, nvprof, &
@@ -404,10 +407,12 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   character(len=20)               :: ro_type
   real(kind_real), allocatable    :: obsAlt(:),obsRef(:),geop(:)                  !nlocs
   integer                         :: i
+  integer                         :: use_compress
 
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
   ro_type = self%roconf%ro_type
+  use_compress = self%roconf%use_compress
 
   write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs_ad: begin"
   call fckit_log%debug(err_msg)
@@ -485,7 +490,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                                    self%q(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                                    self%prs(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
                                    self%gph(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
-                                   nlev, x, n_horiz, dtheta, self%iflip)
+                                   nlev, x, n_horiz, dtheta, self%iflip, use_compress)
 
         call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
                                    self%obsLat2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
@@ -493,7 +498,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                                    q_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),    &
                                    prs_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
                                    gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
-                                   nlev, x_ad, n_horiz, dtheta, self%iflip)
+                                   nlev, x_ad, n_horiz, dtheta, self%iflip, use_compress)
 
  !      x_ad is local so initialise to 0.0
         x_ad%temp(:,:) = 0.0_wp
@@ -533,7 +538,6 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           q_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                         prs_d%vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                         gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
-
                         nlev, x_ad, n_horiz,self%iflip)
 
 !     tidy up - deallocate ropp structures  
@@ -551,7 +555,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           self%gph(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),     &
                           nlev,                                             &
                           self%gph_sfc(1,(iobs-1)*n_horiz+1+(n_horiz-1)/2), &
-                          x1d, self%iflip)
+                          x1d, self%iflip, use_compress)
 
         call init_ropp_1d_statevec( ob_time,  &
                           obsLon(iobs),     &
@@ -562,7 +566,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                           gph_d_zero(:,(iobs-1)*n_horiz+1+(n_horiz-1)/2),       &
                           nlev,    &
                           gph_sfc_d_zero,    &
-                          x1d_ad, self%iflip)
+                          x1d_ad, self%iflip, use_compress)
 
 
  !      x_ad is local so initialise to 0.0

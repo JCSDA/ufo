@@ -8,7 +8,8 @@
 
 module ufo_gnssro_bndropp1d_mod
 
-use iso_c_binding
+use fckit_configuration_module, only: fckit_configuration
+!use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -19,6 +20,7 @@ use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod   
 use missing_values_mod
 use fckit_log_module,  only : fckit_log
+use gnssro_mod_conf
 
 implicit none
 public             :: ufo_gnssro_bndropp1d
@@ -26,12 +28,23 @@ private
 
   !> Fortran derived type for gnssro trajectory
 type, extends(ufo_basis) :: ufo_gnssro_BndROPP1D
+  type(gnssro_conf)  :: roconf
   contains
+    procedure :: setup     => ufo_gnssro_bndropp1d_setup
     procedure :: simobs    => ufo_gnssro_bndropp1d_simobs
 end type ufo_gnssro_BndROPP1D
 
 contains
 
+! ------------------------------------------------------------------------------
+subroutine ufo_gnssro_bndropp1d_setup(self, f_conf )
+  implicit none
+  class(ufo_gnssro_BndROPP2D), intent(inout) :: self
+  type(fckit_configuration), intent(in)      :: f_conf
+
+  call gnssro_conf_setup(self%roconf,f_conf)
+
+end subroutine ufo_gnssro_bndropp1d_setup
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)

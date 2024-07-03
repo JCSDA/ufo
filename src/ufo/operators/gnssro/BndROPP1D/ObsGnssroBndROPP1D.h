@@ -27,10 +27,16 @@ namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
 
+class GnssroBndROPP1DOptionsParameters: public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(GnssroBndROPP1DOptionsParameters, Parameters)
+ public:
+  oops::Parameter<int> useCompress{"use_compress", 0, this};
+};
+
 class GnssroBndROPP1DParameters: public ObsOperatorParametersBase {
   OOPS_CONCRETE_PARAMETERS(GnssroBndROPP1DParameters, ObsOperatorParametersBase)
  public:
-  // no options
+  oops::Parameter<GnssroBndROPP1DOptionsParameters> options{"obs options", {}, this};
 };
 
 // -----------------------------------------------------------------------------
