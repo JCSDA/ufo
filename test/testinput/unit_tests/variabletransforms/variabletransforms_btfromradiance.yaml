@@ -125,7 +125,7 @@ observations:
     action:
       name: assign error
       error parameter: 10.0
-  passedBenchmark: 92
+  passedBenchmark: 91
 
 - obs space:
     name: Test radiance to BT for wavenumber conversion

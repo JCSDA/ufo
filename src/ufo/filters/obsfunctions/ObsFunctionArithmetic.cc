@@ -111,12 +111,17 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
 
   // compute linear combination of input variables
   const FunctionValue missing = util::missingValue<FunctionValue>();
+  const int missing_int = util::missingValue<int>();
   for (size_t ivar = 0; ivar < nv; ++ivar) {
     ioda::ObsDataVector<FunctionValue> varin(in.obsspace(), invars_[ivar].toOopsObsVariables());
     in.get(invars_[ivar], varin);
     ASSERT(varin.nvars() == out.nvars());
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       for (size_t ichan = 0; ichan < out.nvars(); ++ichan) {
+        if (options_.useChannelNumber) {
+          varin[ichan][iloc] = (channels[ichan] == missing_int) ?
+                      missing : static_cast<float>(channels[ichan]);
+        }
         if ( varin[ichan][iloc] == missing || out[ichan][iloc] == missing ) {
           out[ichan][iloc] = missing;
         } else if (varin[ichan][iloc] < 0 && static_cast<int>(exponents[ivar]) != exponents[ivar]) {
@@ -126,17 +131,10 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
                                     "Output for " << invars_[ivar] << " at location " << iloc <<
                                     " set to missing." << std::endl;
         } else {
-          if (options_.useChannelNumber) {
-            out[ichan][iloc] += coefs[ivar] * logpower(
-              channels[ichan],
-              exponents[ivar],
-              log_bases[ivar]);
-          } else {
-            out[ichan][iloc] += coefs[ivar] * logpower(
-              varin[ichan][iloc],
-              exponents[ivar],
-              log_bases[ivar]);
-          }
+          out[ichan][iloc] += coefs[ivar] * logpower(
+            varin[ichan][iloc],
+            exponents[ivar],
+            log_bases[ivar]);
           if (ivar == nv - 1) {
             if (out[ichan][iloc] < 0 && static_cast<int>(total_exponent) != total_exponent
                 && out[ichan][iloc] != missing) {

@@ -54,19 +54,33 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
   float maxval = parameters_.maxvalue.value().value_or(missingValueFloat);
 
   // Read in the spectral variable
-  std::vector<float> spectralVariable;
-  // This if clause is only true if the specal variable is of size Channel.  If it not then the
-  // variables are stored in the obsspace as var_channel e.g. sensorWavenumber_16 size Location
   const ufo::Variable & var = parameters_.spectralVariable.value();
+  std::vector<float> spectralVariable(nvars, missingValueFloat);
+  bool spectralVariableCreated = false;
+  // If variable is size `Channel`
   if (obsdb_.has(var.group(), var.variable())) {
-    data_.get(var, spectralVariable);
-  } else {
-    ioda::ObsDataVector<float> buf(obsdb_,
-                                   parameters_.spectralVariable.value().toOopsObsVariables());
-    data_.get(parameters_.spectralVariable.value(), buf);
-    for (size_t ichan = 0; ichan < nvars; ++ichan) {
-      spectralVariable.push_back(buf[ichan][0]);
+    std::vector<float> bufr;
+    data_.get(var, bufr);
+    if (bufr.size() == nvars) {
+      for (size_t ichan = 0; ichan < nvars; ++ichan) {
+        spectralVariable[ichan] = bufr[ichan];
+      }
+      spectralVariableCreated = true;
     }
+  }
+  // If variable includes `Location` dimension
+  if (!spectralVariableCreated) {
+    ioda::ObsDataVector<float> bufr(obsdb_,
+                                    parameters_.spectralVariable.value().toOopsObsVariables());
+    data_.get(parameters_.spectralVariable.value(), bufr);
+    for (size_t ichan = 0; ichan < nvars; ++ichan) {
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        if (bufr[ichan][iloc] != missingValueFloat) {
+          spectralVariable[ichan] = bufr[ichan][iloc];
+          break;
+        }
+      }  // ivar
+    }  // ichan
   }
 
   // Create output array
