@@ -39,7 +39,7 @@ contains
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_setup(self, f_conf )
   implicit none
-  class(ufo_gnssro_BndROPP2D), intent(inout) :: self
+  class(ufo_gnssro_BndROPP1D), intent(inout) :: self
   type(fckit_configuration), intent(in)      :: f_conf
 
   call gnssro_conf_setup(self%roconf,f_conf)
