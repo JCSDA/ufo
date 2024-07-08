@@ -13,7 +13,6 @@
 
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
-#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
@@ -28,8 +27,8 @@ class RadarScanEdgeFlagParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(RadarScanEdgeFlagParameters, Parameters)
 
  public:
-  /// Conditions used to select locations at which the profile level count
-  /// obsfunction should be applied.
+  /// Conditions used to select locations at which the RadarScanEdgeFlag
+  /// ObsFunction should be applied.
   /// If not specified, all locations will be selected.
   oops::Parameter<std::vector<WhereParameters>> where{"where", {}, this};
 
@@ -48,6 +47,11 @@ class RadarScanEdgeFlagParameters : public oops::Parameters {
   /// Double cleaning filter threshold.
   /// If this value is zero or negative, do not apply the filter.
   oops::Parameter<int> thresholdDoubleCleanFilter{"double cleaning filter threshold", 0, this};
+
+  /// OPS compatibility mode.
+  /// If true, the wrapping of the observation value count and count arrays are wrapped
+  /// in different ways in the azimuthal direction.
+  oops::Parameter<bool> opsCompatibilityMode{"OPS compatibility mode", false, this};
 };
 
 // -----------------------------------------------------------------------------

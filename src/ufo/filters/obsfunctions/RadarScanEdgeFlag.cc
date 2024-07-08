@@ -107,6 +107,11 @@ void RadarScanEdgeFlag::compute(const ObsFilterData & in,
     Eigen::ArrayXXi location = Eigen::ArrayXXi::Zero(imax, jmax);
 
     for (int jloc : locs) {
+      // Do not proceed if this location has been excluded by the `where` clause.
+      if (!apply[jloc]) {
+        continue;
+      }
+
       // Determine coordinates of this observation in the 2D superobbing arrays.
       const int rangeIndex =
         std::round((gateRange[jloc] - scanMinGateRange +
@@ -119,14 +124,21 @@ void RadarScanEdgeFlag::compute(const ObsFilterData & in,
       location(rangeIndex, azimIndex) = jloc;
     }
 
-    // Wrap arrays at edges.
+    // Wrap arrays in azimuthal direction. j-indices 0, 1 and (jmax - 1) are filled
+    // from corresponding entries (jmax - 3), (jmax - 2) and 2.
     for (size_t i = 0; i < imax; ++i) {
       obsArray(i, 0) = obsArray(i, jmax - 3);
       obsArray(i, 1) = obsArray(i, jmax - 2);
       obsArray(i, jmax - 1) = obsArray(i, 2);
       countArray(i, 0) = countArray(i, jmax - 3);
       countArray(i, 1) = countArray(i, jmax - 2);
-      countArray(i, jmax - 1) = countArray(i, 2);
+      // In OPS, the wrapping between obsArray and countArray
+      // is not consistent.
+      if (options_.opsCompatibilityMode) {
+        countArray(i, jmax - 1) = countArray(i, 1);
+      } else {
+        countArray(i, jmax - 1) = countArray(i, 2);
+      }
     }
 
     // Compute integral image of observations and counts.
