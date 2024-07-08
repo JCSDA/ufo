@@ -460,10 +460,10 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
          end if
 
 !        Convert to simulated radar reflectivity in units of dBZ
-         rdBZ = ten * log10(Ze) ! hofx
-         rdBZr = ten * log10(Zer)
-         rdBZs = ten * log10(Zes)
-         rdBZg = ten * log10(Zeg)
+         if (Ze > 0) rdBZ = ten * log10(Ze) ! hofx
+         if (Zer > 0) rdBZr = ten * log10(Zer)
+         if (Zes > 0) rdBZs = ten * log10(Zes)
+         if (Zeg > 0) rdBZg = ten * log10(Zeg)
 
       end if
 
