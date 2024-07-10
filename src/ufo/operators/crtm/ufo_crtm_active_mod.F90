@@ -44,7 +44,7 @@ type(CRTM_Options_type),  intent(in) :: Options(:)
 type(c_ptr), value,       intent(in) :: obss         !ObsSpace
 
 real(c_double) :: missing
-integer        :: l, m, ilayer
+integer        :: l, m, jlayer
 integer, allocatable   :: obs_layer(:)
 
 ! allocate observation elevation for reflectivity profiles
@@ -64,10 +64,12 @@ hofx = missing
 call obsspace_get_db(obss, "MetaData", "Layer", obs_layer)
 
 do m = 1, n_Profiles
-   ilayer = obs_layer(m)
    if (.not.Options(m)%Skip_Profile) then
+      jlayer = obs_layer(m)
       do l = 1, n_Channels
-        hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(ilayer)
+        if (abs(rts(l,m)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
+           hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(jlayer)
+        endif
       end do
    end if
 end do
@@ -108,12 +110,22 @@ integer, intent(out)  :: err_stat
 character(max_string) :: err_msg
 !integer        :: err_stat, alloc_stat
 !integer        :: l, m, n
-integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
+integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec, jlayer
 real(c_double) :: missing
 real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
 real(kind_real), allocatable :: Wfunc(:)
+integer, allocatable   :: obs_layer(:)
+
+! allocate observation elevation for reflectivity profiles
+allocate( obs_layer( n_Profiles ))
+
+! Set missing value
+missing = missing_value(missing)
+
+! Get the level number for reflectivity profiles
+call obsspace_get_db(obss, "MetaData", "Layer", obs_layer)
 
 ! Put simulated diagnostics into hofxdiags
 ! We need to call the routines for passive instrument as well when dealing with active obs
@@ -143,6 +155,8 @@ do jvar = 1, hofxdiags%nvar
    if (allocated(hofxdiags%geovals(jvar)%vals)) &
       deallocate(hofxdiags%geovals(jvar)%vals)
 
+   hofxdiags%geovals(jvar)%nval = n_Layers
+
    !============================================
    ! Diagnostics used for QC and bias correction
    !============================================
@@ -151,28 +165,36 @@ do jvar = 1, hofxdiags%nvar
       select case(ystr_diags(jvar))
          ! variable: reflectivity_CH Non attenuated
          case (var_rad_refl)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
+            hofxdiags%geovals(jvar)%nval = 1 !n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
+                  jlayer = obs_layer(jprofile)
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                         rts(jchannel,jprofile) % Reflectivity(jlevel)
+                     if (abs(rts(jchannel,jprofile)%Reflectivity(jlayer)) < threshold_reflectivity) then 
+                          hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                              rts(jchannel,jprofile) % Reflectivity(jlayer)
+                     endif
                   end do
                end if
             end do
 
          ! variable: attenuated_reflectivity_CH
          case (var_rad_refl_att)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
+            hofxdiags%geovals(jvar)%nval = 1 !n_Layers
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
+                  jlayer = obs_layer(jprofile)
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        rts(jchannel,jprofile) % Reflectivity_Attenuated(jlevel)
+                     if (abs(rts(jchannel,jprofile)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
+                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
+                             rts(jchannel,jprofile) % Reflectivity_Attenuated(jlayer)
+                     endif
                   end do
                end if
             end do
@@ -181,24 +203,23 @@ do jvar = 1, hofxdiags%nvar
             write(err_msg,*) 'ufo_crtm_active_diags: //&
                               & ObsDiagnostic is unsupported, ', &
                               & hofxdiags%variables(jvar)
-            ! call abor1_ftn(err_msg)
+            ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
             hofxdiags%geovals(jvar)%nval = 1
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
       end select
-   else if (ystr_diags(jvar) == var_rad_refl) then
+   else if ((ystr_diags(jvar) == var_rad_refl) .or. (ystr_diags(jvar) == var_rad_refl_att)) then
       ! var_rad_refl jacobians
       select case (xstr_diags(jvar))
          ! variable: reflectivity_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
          case (var_clw_wp)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clw_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                  do jlevel = 1, n_Layers
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -206,14 +227,13 @@ do jvar = 1, hofxdiags%nvar
             end do
          ! variable: reflectivity_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
          case (var_cli_wp)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cli_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                  do jlevel = 1, n_Layers 
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -221,14 +241,13 @@ do jvar = 1, hofxdiags%nvar
             end do
          ! variable: reflectivity_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
          case (var_clr_wp)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clr_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                  do jlevel = 1, n_Layers 
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -236,14 +255,13 @@ do jvar = 1, hofxdiags%nvar
             end do
          ! variable: reflectivity_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
          case (var_cls_wp)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cls_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                  do jlevel = 1, n_Layers 
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -251,14 +269,13 @@ do jvar = 1, hofxdiags%nvar
             end do
          ! variable: reflectivity_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
          case (var_clg_wp)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clg_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                  do jlevel = 1, n_Layers 
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -266,14 +283,13 @@ do jvar = 1, hofxdiags%nvar
             end do
          ! variable: reflectivity_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
          case (var_clh_wp)
-            hofxdiags%geovals(jvar)%nval = n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
+            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing
             jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clh_wp)
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
+                  do jlevel = 1, n_Layers 
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do

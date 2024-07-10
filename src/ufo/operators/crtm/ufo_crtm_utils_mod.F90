@@ -40,7 +40,7 @@ public calculate_aero_layer_factor
 PUBLIC :: qsmith
 PUBLIC :: upper2lower
 
-PUBLIC :: grav,rv_rd,&
+PUBLIC :: grav,rv_rd, threshold_reflectivity, &
      &aerosol_concentration_minvalue,aerosol_concentration_minvalue_layer
 
 REAL(kind_real), PARAMETER :: &
@@ -56,6 +56,7 @@ REAL(kind_real), PARAMETER :: &
      &ozone_default_value=1.e-3_kind_real ! in ppmv in crtm
 
 integer, parameter, public :: max_string=800
+real(kind_real), parameter  :: threshold_reflectivity = 100.0
 
 !Type for general config
 type crtm_conf
@@ -663,6 +664,12 @@ real(kind_real), parameter  :: lowest_albedo = 0.001
      Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) < lowest_albedo)
    endif
 
+   ! check for all channels in active profiles that have ObsValue/Reflectivity
+   ! that are beyond threshold. Skip those.
+   if (Is_Active_Sensor) then
+     ! the second dimension is for channels so if any channel is missing then skip it
+     Options(jprofile)%Skip_Profile = any(abs(ObsVal(jprofile,:)) >= threshold_reflectivity)
+   endif
  end do profile_loop
 
 end subroutine ufo_crtm_skip_profiles
