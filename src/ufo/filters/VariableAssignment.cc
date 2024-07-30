@@ -38,17 +38,40 @@ namespace {
 /// missingOut. If the value to be returned is too large to be represented by an int, throw an
 /// exception.
 int safeCast(float x, float missingIn, int missingOut) {
-  if (x == missingIn)
+  if (x == missingIn) {
     return missingOut;
+  }
   // Throws boost::math::rounding_error if x is outside the range representable by ints
   return boost::math::iround(x);
 }
 
 /// Cast an int \p x to a float. If \p is equal to \p missingIn, return \p missingOut.
 float safeCast(int x, int missingIn, float missingOut) {
-  if (x == missingIn)
+  if (x == missingIn) {
     return missingOut;
+  }
   return x;
+}
+
+/// Convert a util::DateTime \p x to a numeric type DestinationVariableType by computing the number
+/// of seconds relative to a chosen epoch. If \p x is equal to \p missingIn, return \p missingOut.
+/// If the number of seconds is too large to be represented by DestinationVariableType,
+/// throw an exception. A more appropriate epoch should be chosen in such cases.
+template <typename VariableType>
+VariableType secondsFromEpoch(const util::DateTime & x,
+                              const util::DateTime & missingIn,
+                              VariableType missingOut,
+                              const util::DateTime & epoch,
+                              int64_t minVariableType,
+                              int64_t maxVariableType) {
+  if (x == missingIn) {
+    return missingOut;
+  }
+  const int64_t nSeconds = (x - epoch).toSeconds();
+  if (nSeconds < minVariableType || nSeconds > maxVariableType) {
+    throw eckit::BadCast("Invalid epoch causing overflow.", Here());
+  }
+  return static_cast<VariableType>(nSeconds);
 }
 
 /// Convert \p valueAsString to `VariableType` and for each vector in \p values assign that value
@@ -61,16 +84,18 @@ void assignValue(const std::string &valueAsString,
   if (valueAsString == "missing") {
     newValue = util::missingValue<VariableType>();
   } else {
-    if (!boost::conversion::try_lexical_convert(valueAsString, newValue))
+    if (!boost::conversion::try_lexical_convert(valueAsString, newValue)) {
       throw eckit::BadCast("Value '" + valueAsString +
                            "' could not be converted to the required type", Here());
+    }
   }
 
   for (size_t ival = 0; ival < values.nvars(); ++ival) {
     std::vector<VariableType> &currentValues = values[ival];
     for (size_t iloc = 0; iloc < apply.size(); ++iloc)
-      if (apply[iloc])
+      if (apply[iloc]) {
         currentValues[iloc] = newValue;
+      }
   }
 }
 
@@ -95,6 +120,40 @@ void assignObsDataVector(const std::vector<bool> &apply,
     for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
       if (apply[iloc]) {
         currentDestination[iloc] = safeCast(currentSource[iloc], missingSource, missingDestination);
+      }
+    }
+  }
+}
+
+/// For each location selected by the `where` statement, copy the corresponding element of
+/// \p source to \p destination. Used when converting util::DateTimes to numerical values.
+template <typename VariableType>
+void assignObsDataVector(const std::vector<bool> &apply,
+                         const ioda::ObsDataVector<util::DateTime> &source,
+                         ioda::ObsDataVector<VariableType> &destination,
+                         const util::DateTime & epoch) {
+  ASSERT(source.nvars() == destination.nvars());
+
+  const util::DateTime missingSource = util::missingValue<util::DateTime>();
+  const VariableType missingDestination = util::missingValue<VariableType>();
+  // Minimum and maximum destination type cast to int64_t.
+  // This ensures that out-of-bounds values (caused by an inappropriate epoch)
+  // are not silenty stored in the output vector.
+  const int64_t minVariableType =
+    static_cast<int64_t>(std::numeric_limits<VariableType>::lowest());
+  const int64_t maxVariableType =
+    static_cast<int64_t>(std::numeric_limits<VariableType>::max());
+  for (size_t ival = 0; ival < source.nvars(); ++ival) {
+    const ioda::ObsDataRow<util::DateTime> &currentSource = source[ival];
+    ioda::ObsDataRow<VariableType> &currentDestination = destination[ival];
+    for (size_t iloc = 0; iloc < apply.size(); ++iloc) {
+      if (apply[iloc]) {
+        currentDestination[iloc] = secondsFromEpoch(currentSource[iloc],
+                                                    missingSource,
+                                                    missingDestination,
+                                                    epoch,
+                                                    minVariableType,
+                                                    maxVariableType);
       }
     }
   }
@@ -136,6 +195,19 @@ void assignVariable(const ufo::Variable &variable,
   assignObsDataVector(apply, newValues, values);
 }
 
+/// Assign util::DateTimes to numerical values relative to an epoch.
+template <typename VariableType>
+void assignVariable(const ufo::Variable &variable,
+                    const util::DateTime &epoch,
+                    const bool skipDerived,
+                    const std::vector<bool> &apply,
+                    const ObsFilterData &data,
+                    ioda::ObsDataVector<VariableType> &values) {
+  ioda::ObsDataVector<util::DateTime> newValues(data.obsspace(), variable.toOopsObsVariables());
+  data.get(variable, newValues, skipDerived);
+  assignObsDataVector(apply, newValues, values, epoch);
+}
+
 /// Evaluate the ObsFunction \p function and assign the vectors it produced to successive vectors
 /// in \p values (only at locations selected by the `where` statement).
 template <typename FunctionValueType, typename VariableType>
@@ -168,6 +240,17 @@ void assignNumericValues(const AssignmentParameters &params,
       assignVariable<int>(*params.sourceVariable.value(), params.skipDerived,
                           apply, data, values);
       break;
+    case ioda::ObsDtype::DateTime:
+      if (params.epoch.value() != boost::none) {
+        assignVariable(*params.sourceVariable.value(),
+                       *params.epoch.value(),
+                       params.skipDerived,
+                       apply, data, values);
+      } else {
+        throw eckit::UserError("Converting a DateTime to a numeric value requires the "
+                               "`epoch` parameter to be set", Here());
+      }
+      break;
     case ioda::ObsDtype::Empty:
       oops::Log::info() << "ufo::VariableAssignment::assignNumericValues "
                         << "not performed on empty MPI ranks " << std::endl;
@@ -178,13 +261,14 @@ void assignNumericValues(const AssignmentParameters &params,
     }
   } else {
     ASSERT(params.function.value() != boost::none);
-    if (params.function.value()->group() == ObsFunctionTraits<float>::groupName)
+    if (params.function.value()->group() == ObsFunctionTraits<float>::groupName) {
       assignFunction<float>(*params.function.value(), variable, apply, data, values);
-    else if (params.function.value()->group() == ObsFunctionTraits<int>::groupName)
+    } else if (params.function.value()->group() == ObsFunctionTraits<int>::groupName) {
       assignFunction<int>(*params.function.value(), variable, apply, data, values);
-    else
+    } else {
       throw eckit::BadParameter(params.function.value()->fullName() +
                                 " is not a function producing numeric values", Here());
+    }
   }
 }
 
@@ -246,10 +330,11 @@ void updateQCFlags(const ioda::ObsDataVector<float> &obsvalues, ioda::ObsDataVec
       const ioda::ObsDataRow<float> &currentValues = obsvalues[ivar];
       ioda::ObsDataRow<int> &currentFlags = qcflags[obsvalues.varnames()[ivar]];
       for (size_t iloc = 0; iloc < obsvalues.nlocs(); ++iloc) {
-        if (currentFlags[iloc] == QCflags::missing && currentValues[iloc] != missing)
+        if (currentFlags[iloc] == QCflags::missing && currentValues[iloc] != missing) {
           currentFlags[iloc] = QCflags::pass;
-        else if (currentFlags[iloc] == QCflags::pass && currentValues[iloc] == missing)
+        } else if (currentFlags[iloc] == QCflags::pass && currentValues[iloc] == missing) {
           currentFlags[iloc] = QCflags::missing;
+        }
       }
     }
   }
@@ -282,8 +367,9 @@ void assignToFloatVariable(const ufo::Variable &variable,
     getCurrentValues<float>(variable, obsdb, params.skipDerived);
   assignNumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
-  if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue")
+  if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue") {
     updateQCFlags(values, qcflags);
+  }
 }
 
 /// Retrieve the current values of a non-numeric variable \p variable from \p obsdb (or if it
@@ -337,9 +423,10 @@ ufo::Variable getVariable(const AssignmentParameters &params) {
   const std::set<int> setChannels = oops::parseIntSet(params.channels);
   std::vector<int> vecChannels(setChannels.begin(), setChannels.end());
   const ufo::Variable variable(params.name, vecChannels);
-  if (variable.group() == "ObsValue")
+  if (variable.group() == "ObsValue") {
     throw eckit::BadValue("Assignment to variables from the ObsValue group is not allowed",
                           Here());
+  }
   return variable;
 }
 
@@ -355,8 +442,9 @@ ioda::ObsDtype getDataType(boost::optional<ioda::ObsDtype> dtypeParam,
     // exists and if so, return its data type.
     for (size_t ich = 0; ich < variable.size(); ++ich) {
       const std::string variableWithChannel = variable.variable(ich);
-      if (obsdb.has(variable.group(), variableWithChannel))
+      if (obsdb.has(variable.group(), variableWithChannel)) {
         return obsdb.dtype(variable.group(), variableWithChannel);
+      }
     }
     // The variable doesn't exist yet.
     throw eckit::BadParameter("You need to specify the type of the variable to be created "
@@ -377,10 +465,11 @@ void AssignmentParameters::deserialize(util::CompositePath &path,
   const int numOptionsSet = static_cast<int>(value_.value() != boost::none) +
                             static_cast<int>(sourceVariable.value() != boost::none) +
                             static_cast<int>(function.value() != boost::none);
-  if (numOptionsSet != 1)
+  if (numOptionsSet != 1) {
     throw eckit::UserError(path.path() +
                            ": Exactly one of the 'value', 'source variable' and 'function' options "
                            "must be present");
+  }
 }
 
 

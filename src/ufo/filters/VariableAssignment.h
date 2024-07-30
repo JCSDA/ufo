@@ -70,6 +70,10 @@ class AssignmentParameters : public oops::Parameters {
   /// otherwise an exception will be thrown.
   oops::OptionalParameter<ioda::ObsDtype> type{"type", this};
 
+  /// DateTime epoch required for the conversion of DateTimes to numerical values.
+  /// If this is not set, an exception will be thrown.
+  oops::OptionalParameter<util::DateTime> epoch{"epoch", this};
+
   /// This function is overridden to check that mutually exclusive options aren't specified
   /// together, throwing an exception otherwise.
   void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;

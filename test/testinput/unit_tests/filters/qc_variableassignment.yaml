@@ -1056,3 +1056,61 @@ observations:
     reference:
       name: TestReference/missing_float
 
+- obs space:
+    <<: *ObsSpace
+    name: Copy a datetime variable to an int variable using an epoch
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/datetime_as_integer
+      type: int
+      source variable:
+        name: TestReference/assigned_dateTime_variable_1  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+      epoch: 2010-01-01T00:00:00Z
+  compareVariables:
+  - test:
+      name: MetaData/datetime_as_integer
+    reference:
+      name: TestReference/assigned_int_variable_6  # 261468000, -315521755, -315521755, -315521755, 261813600
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy a datetime variable to a float variable using an epoch
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/datetime_as_float
+      type: float
+      source variable:
+        name: TestReference/assigned_dateTime_variable_1  # ["2018-04-15T06:00:00Z", "2000-01-02T03:04:05Z", "2000-01-02T03:04:05Z", 2000-01-02T03:04:05Z", "2018-04-19T06:00:00Z"]
+      epoch: 2010-01-01T00:00:00Z
+  compareVariables:
+  - test:
+      name: MetaData/datetime_as_float
+    reference:
+      name: TestReference/assigned_float_variable_8
+
+- obs space:
+    <<: *ObsSpace
+    name: Attempt to copy a datetime variable to an integer variable without defining an epoch
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/datetime_as_integer
+      type: int
+      source variable:
+        name: TestReference/assigned_dateTime_variable_1
+  expectExceptionWithMessage: Converting a DateTime to a numeric value requires the `epoch` parameter to be set
+
+- obs space:
+    <<: *ObsSpace
+    name: Invalid epoch used when converting a DateTime to an integer, throwing an exception
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/datetime_as_integer
+      type: int
+      source variable:
+        name: TestReference/assigned_dateTime_variable_1
+      epoch: 1001-01-01T00:00:00Z
+  expectExceptionWithMessage: Invalid epoch causing overflow.
