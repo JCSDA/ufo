@@ -49,6 +49,15 @@ class ArithmeticParameters : public oops::Parameters {
   /// log bases associated with the above variables (can empty string for
   /// no logarithm, or e for natural logarithm)
   oops::OptionalParameter<std::vector<std::string>> log_bases{"log bases", this};
+  /// Take absolute value of each variable (true/false).
+  /// If true, the absolute value is taken before any other operation is performed.
+  oops::OptionalParameter<std::vector<bool>> absolute_value{"absolute value", this};
+  /// Truncate (round towards zero) each variable to the nearest integer multiple of
+  /// the corresponding entry in this vector.
+  /// If the value is zero or negative, no truncation is performed.
+  /// If the value is positive, truncation is performed before any other operation apart from
+  /// taking the absolute value.
+  oops::OptionalParameter<std::vector<int>> truncate{"truncate", this};
   /// Use channel number in the calculation not the value from the variable
   oops::Parameter<bool> useChannelNumber{"use channel numbers", false, this};
 };
@@ -57,7 +66,22 @@ class ArithmeticParameters : public oops::Parameters {
 
 /// \brief Outputs an arithmetic combination of variables
 ///
-/// Example
+/// Can be also be used with the name LinearCombination
+/// to output a linear combination of variables
+///
+/// Example 1:
+///
+///  obs function:
+///    name: ObsFunction/LinearCombination
+///    options:
+///      variables: [GeoVaLs/representation_error,
+///                  ObsError/waterTemperature]
+///      coefs: [0.1, 1.0]
+///
+/// will return 0.1 * GeoVaLs/representation_error +
+///             1.0 * ObsError/waterTemperature
+///
+/// Example 2:
 ///
 ///  obs function:
 ///    name: ObsFunction/Arithmetic
@@ -79,22 +103,7 @@ class ArithmeticParameters : public oops::Parameters {
 ///
 /// For numerical stability log(val^exp) is calculated as exp*log(val).
 ///
-/// Can be also be used with the name LinearCombination
-/// to output a linear combination of variables
-///
-/// Example 1
-///
-///  obs function:
-///    name: ObsFunction/LinearCombination
-///    options:
-///      variables: [GeoVaLs/representation_error,
-///                  ObsError/waterTemperature]
-///      coefs: [0.1, 1.0]
-///
-/// will return 0.1 * GeoVaLs/representation_error +
-///             1.0 * ObsError/waterTemperature
-///
-/// Example 2 - multi-channel
+/// Example 3 - multi-channel:
 ///
 ///  obs function:
 ///    name: ObsFunction/LinearCombination
@@ -110,7 +119,7 @@ class ArithmeticParameters : public oops::Parameters {
 /// will return 1.0 * ObsValue/brightnessTemperature[channel] +
 ///             0.5 * ObsError/brightnessTemperature[channel]
 ///
-/// Example 3 - multi-channel with intercept and using channel numbers
+/// Example 4 - multi-channel with intercept and using channel numbers:
 ///
 ///  obs function:
 ///    name: ObsFunction/LinearCombination
@@ -126,6 +135,19 @@ class ArithmeticParameters : public oops::Parameters {
 /// will return 3.6 +
 ///             0.5 * channels
 ///
+/// Example 5:
+///
+///  obs function:
+///    name: ObsFunction/Arithmetic
+///    options:
+///      variables: [ObsValue/variable1,
+///                  ObsValue/variable2]
+///      absolute value: [true, false]
+///      truncate: [0, 3]
+///
+/// will return |ObsValue/variable1| + trunc(ObsValue/variable2, 3)
+/// where trunc(x, y) returns x truncated to the nearest integer multiple of y.
+/// Truncation is always performed towards zero, e.g. trunc(17, 3) = 15, trunc(-13, 3) = -12.
 ///
 template <typename FunctionValue>
 class Arithmetic : public ObsFunctionBase<FunctionValue> {

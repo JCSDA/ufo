@@ -84,6 +84,16 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
   if (options_.log_bases.value() != boost::none)
     log_bases = options_.log_bases.value().get();
 
+  // take absolute value
+  std::vector<bool> absolute_value(nv, false);
+  if (options_.absolute_value.value() != boost::none)
+    absolute_value = options_.absolute_value.value().get();
+
+  // truncate to nearest integer multiple
+  std::vector<int> truncate(nv, 0);
+  if (options_.truncate.value() != boost::none)
+    truncate = options_.truncate.value().get();
+
   // use channels not obs
   std::vector<int> channels;
   if (options_.useChannelNumber) {
@@ -95,6 +105,8 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
   ASSERT(coefs.size() == nv);
   ASSERT(exponents.size() == nv);
   ASSERT(log_bases.size() == nv);
+  ASSERT(absolute_value.size() == nv);
+  ASSERT(truncate.size() == nv);
   std::vector<FunctionValue> abs_exponents;
   for (size_t ivar = 0; ivar < nv; ++ivar) {
     abs_exponents.push_back(std::abs(exponents[ivar]));
@@ -131,8 +143,15 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
                                     "Output for " << invars_[ivar] << " at location " << iloc <<
                                     " set to missing." << std::endl;
         } else {
+          FunctionValue value = varin[ichan][iloc];
+          if (absolute_value[ivar]) {
+            value = std::abs(value);
+          }
+          if (truncate[ivar] > 0) {
+            value = std::trunc(value / truncate[ivar]) * truncate[ivar];
+          }
           out[ichan][iloc] += coefs[ivar] * logpower(
-            varin[ichan][iloc],
+            value,
             exponents[ivar],
             log_bases[ivar]);
           if (ivar == nv - 1) {

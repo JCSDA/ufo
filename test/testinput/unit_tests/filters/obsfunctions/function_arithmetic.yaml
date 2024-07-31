@@ -30,9 +30,19 @@ observations:
       value: 3
   - filter: Variable Assignment
     assignments:
+    - name: MetaData/variable_17
+      type: float
+      value: 17
+  - filter: Variable Assignment
+    assignments:
     - name: MetaData/variable_minus_1
       type: float
       value: -1
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_11
+      type: float
+      value: -11
 
  # Test variables
   - filter: Variable Assignment
@@ -99,6 +109,36 @@ observations:
     - variable:
         name: MetaData/variable_3
       maxvalue: 1
+
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/absolutevalue_false
+      type: float
+      value: 0
+    - name: TestReference/absolutevalue_true
+      type: float
+      value: 2
+
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/truncate_to_nearest_5
+      type: float
+      value: 5
+    - name: TestReference/truncate_to_nearest_4_3
+      type: float
+      value: 7
+    - name: TestReference/truncate_to_nearest_3_2_no_remainder
+      type: float
+      value: 5
+    - name: TestReference/truncate_to_nearest_5_absolutevalue
+      type: float
+      value: 25
+
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/absolutevalue_log
+      type: float
+      value: 0
 
   # Arithemtic tests
   - filter: Variable Assignment
@@ -289,6 +329,93 @@ observations:
     minimum location: 0
     maximum location: 10
 
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/absolutevalue_false
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_minus_1
+          absolute value: [false, false]
+          coefs: [1, 1]
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/absolutevalue_true
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_minus_1
+          absolute value: [true, true]
+          coefs: [1, 1]
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/truncate_to_nearest_5
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_17
+          - name: MetaData/variable_minus_11
+          truncate: [5, 5]
+          coefs: [1, 1]
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/truncate_to_nearest_4_3
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_17
+          - name: MetaData/variable_minus_11
+          truncate: [4, 3]
+          coefs: [1, 1]
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/truncate_to_nearest_3_2_no_remainder
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_3
+          - name: MetaData/variable_2
+          truncate: [3, 2]
+          coefs: [1, 1]
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/truncate_to_nearest_5_absolutevalue
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_17
+          - name: MetaData/variable_minus_11
+          absolute value: [true, true]
+          truncate: [5, 5]
+          coefs: [1, 1]
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/absolutevalue_log
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_minus_1
+          absolute value: [true]
+          log bases: [e]
+
   compareVariables:
   - test:
       name: MetaData/sum
@@ -356,6 +483,43 @@ observations:
     reference:
       name: TestReference/missing
 
+  - test:
+      name: MetaData/absolutevalue_false
+    reference:
+      name: TestReference/absolutevalue_false
+
+  - test:
+      name: MetaData/absolutevalue_true
+    reference:
+      name: TestReference/absolutevalue_true
+
+  - test:
+      name: MetaData/truncate_to_nearest_5
+    reference:
+      name: TestReference/truncate_to_nearest_5
+
+  - test:
+      name: MetaData/truncate_to_nearest_4_3
+    reference:
+      name: TestReference/truncate_to_nearest_4_3
+
+  - test:
+      name: MetaData/truncate_to_nearest_3_2_no_remainder
+    reference:
+      name: TestReference/truncate_to_nearest_3_2_no_remainder
+
+  - test:
+      name: MetaData/truncate_to_nearest_5_absolutevalue
+    reference:
+      name: TestReference/truncate_to_nearest_5_absolutevalue
+
+  - test:
+      name: MetaData/absolutevalue_log
+    reference:
+      name: TestReference/absolutevalue_log
+
+# Exception behaviour:
+
 - obs space:
     <<: *ObsSpace
     name: Try log base of f.
@@ -386,8 +550,6 @@ observations:
           intercept: 4
           total log base: f  # Invalid string
   expectExceptionWithMessage: Invalid log base 'f' for value '5'.  # 5 since exponent not yet taken
-
-# Exception behaviour:
 
 - obs space:
     <<: *ObsSpace
