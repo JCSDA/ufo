@@ -52,8 +52,17 @@ class CreateDiagnosticFlagsParameters : public oops::ObsFilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(CreateDiagnosticFlagsParameters, ObsFilterParametersBase)
 
  public:
+  /// Flag to use bitmap diagnostic flags (if it's set, "flags" option is ignored)
+  oops::Parameter<bool> bitMap{"bitmap diagnostic flags", false, this};
+
+  /// Determines what happens if the bitmap flag already exists.
+  ///
+  /// By default, the flag is not reinitialized, i.e. its current value is preserved.
+  /// Set `force reinitialization` to `true` to reset the flag to `initial value`.
+  oops::Parameter<bool> forceReinitialization{"force bitmap reinitialization", false, this};
+
   /// The list of flags to create.
-  oops::RequiredParameter<std::vector<DiagnosticFlagParameters>> flags{"flags", this};
+  oops::Parameter<std::vector<DiagnosticFlagParameters>> flags{"flags", {}, this};
 
   /// Simulated variables (and channels) for which the flags will be created.
   /// If not specified, defaults to all simulated variables in the ObsSpace.
@@ -101,8 +110,9 @@ class CreateDiagnosticFlags : public ObsProcessorBase,
 
   oops::ObsVariables getFilterVariables() const;
 
+  template<class T>
   void createFlag(const std::string & flagName, const std::string & varName,
-                  bool forceReinitialization, bool initialValue) const;
+                  bool forceReinitialization, T initialValue) const;
 
  private:
   Parameters_ parameters_;

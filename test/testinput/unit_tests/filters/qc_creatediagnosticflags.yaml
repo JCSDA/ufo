@@ -172,3 +172,150 @@ observations:
   - name: DiagnosticFlags/FlagA/variable2
   - name: DiagnosticFlags/FlagB/variable2
 
+  # Tests the bitmap option
+- obs space:
+    name: Test data 6
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/filters_testdata_6.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/variable1
+    reference:
+      name: TestReference/zeroes        # no bits were set -> all values zero
+  - test:
+      name: DiagnosticFlags/variable2
+    reference:
+      name: TestReference/zeroes        # no bits were set -> all values zero
+
+# Tests the bitmap option with set flag bit
+- obs space:
+    name: Test data 7
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/filters_testdata_7.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+  - filter: Perform Action
+    filter variables: [variable1]
+    where:
+    - variable:
+        name: MetaData/var1
+      minvalue: 0 # everywhere
+    action:
+      name: set flag bit
+      bit: 0
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/variable1
+    reference:
+      name: TestReference/ones            # 0-th bit was set for variable1 -> all values one
+  - test:
+      name: DiagnosticFlags/variable2
+    reference:
+      name: TestReference/zeroes          # no bits were set for variable2 -> all values zero
+
+# Tests the bitmap option with set flag bit
+- obs space:
+    name: Test data 8
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/filters_testdata_8.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+  - filter: Perform Action
+    filter variables: [variable1]
+    where:
+    - variable:
+        name: MetaData/var1
+      minvalue: 0 # everywhere
+    action:
+      name: set flag bit
+      bit: 0
+  - filter: Perform Action
+    filter variables: [variable1, variable2]
+    where:
+    - variable:
+        name: MetaData/var1
+      minvalue: 0 # everywhere
+    action:
+      name: set flag bit
+      bit: 1
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/variable1
+    reference:
+      name: TestReference/threes       # 0-th and 1st bit were set for variable1 -> all values three
+  - test:
+      name: DiagnosticFlags/variable2
+    reference:
+      name: TestReference/twos         # only 1st bit was set for variable2 -> all values two
+
+# Tests the bitmap option together with flags option
+- obs space:
+    name: Test data 9
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/filters_testdata_9.nc4
+    simulated variables: [variable1, variable2]
+  obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+    flags:
+    - name: FlagA
+      initial value: true
+    - name: FlagB
+      initial value: false
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/variable1
+    reference:
+      name: TestReference/zeroes       # no bits were set -> all values zero
+  - test:
+      name: DiagnosticFlags/variable2
+    reference:
+      name: TestReference/zeroes       # no bits were set -> all values zero
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagA/variable2
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagB/variable1
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/variable2
+    reference:
+      name: TestReference/falses
