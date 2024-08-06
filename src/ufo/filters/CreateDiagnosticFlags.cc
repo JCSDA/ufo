@@ -64,30 +64,29 @@ oops::ObsVariables CreateDiagnosticFlags::getFilterVariables() const {
 void CreateDiagnosticFlags::doFilter() {
   oops::Log::trace() << "CreateDiagnosticFlags doFilter starts" << std::endl;
 
-  const oops::ObsVariables filterVars = getFilterVariables();
   // Create bitmap if needed
   if (parameters_.bitMap) {
-    const std::string groupName = "DiagnosticFlags";
+    const Variables filterVars(Variables(getFilterVariables()), "DiagnosticFlags");
     // Loop over observed variables.
     for (size_t jv = 0; jv < filterVars.size(); ++jv) {
-      const std::string &varName = filterVars[jv];
-      createFlag<int>(groupName, varName,
+      createFlag<int>(filterVars[jv],
                       parameters_.forceReinitialization.value(), 0);
     }
   }
   // Loop over the names of flags we've been asked to create.
   for (const DiagnosticFlagParameters &params : parameters_.flags.value()) {
-    const std::string groupName = "DiagnosticFlags/" + params.name.value();
+    const Variables filterVars(Variables(getFilterVariables()),
+                               "DiagnosticFlags/" + params.name.value());
     // Loop over observed variables.
     for (size_t jv = 0; jv < filterVars.size(); ++jv) {
-      const std::string &varName = filterVars[jv];
-      createFlag<DiagnosticFlag>(groupName, varName, params.forceReinitialization,
+      createFlag<DiagnosticFlag>(filterVars[jv], params.forceReinitialization,
                                  params.initialValue);
     }
     // Create observation report flags if required.
     if (parameters_.observationReportFlags) {
-      const std::string varName = "observationReport";
-      createFlag<DiagnosticFlag>(groupName, varName, params.forceReinitialization,
+      const Variable obsReportVar("DiagnosticFlags/" + params.name.value() +
+                                  "/observationReport");
+      createFlag<DiagnosticFlag>(obsReportVar, params.forceReinitialization,
                                  params.initialValue);
     }
   }
@@ -102,18 +101,20 @@ void CreateDiagnosticFlags::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 template<class T>
-void CreateDiagnosticFlags::createFlag(const std::string & groupName, const std::string & varName,
+void CreateDiagnosticFlags::createFlag(const Variable & var,
                                        bool forceReinitialization, T initialValue) const {
   bool createOrReinitializeVar = true;
-  if (obsdb_.has(groupName, varName)) {
+  if (obsdb_.has(var.group(), var.variable())) {
     if (!forceReinitialization)
       createOrReinitializeVar = false;
   }
   if (createOrReinitializeVar) {
-    // We need to create or reinitialize the Boolean variable corresponding to the
+    // We need to create or reinitialize the variable corresponding to the
     // current flag and observed variable.
-    obsdb_.put_db(groupName, varName,
-                  std::vector<T>(obsdb_.nlocs(), initialValue));
+    for (size_t jv = 0; jv < var.size(); ++jv) {
+      obsdb_.put_db(var.group(), var.variable(jv),
+                    std::vector<T>(obsdb_.nlocs(), initialValue));
+    }
   }
 }
 

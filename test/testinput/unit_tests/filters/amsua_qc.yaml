@@ -28,18 +28,36 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-15
+    flags:
+    - name: FlagA
+      initial value: true
   - filter: Bounds Check
     filter variables:
     - name: brightnessTemperature
       channels: 1
     minvalue: 50.0
     maxvalue: 400.0
+    actions:
+    - name: set
+      flag: FlagA
+    - name: set flag bit
+      bit: 0
+    - name: reject
   - filter: Bounds Check
     filter variables:
     - name: brightnessTemperature
       channels: 2-15
     minvalue: 100.0
     maxvalue: 500.0
+    actions:
+    - name: set flag bit
+      bit: 1
+    - name: reject
   - filter: DomainErr Check
     filter variables:
     - name: brightnessTemperature
