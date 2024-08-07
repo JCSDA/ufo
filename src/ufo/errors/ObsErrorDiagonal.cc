@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <stdexcept>
+
 #include "ufo/errors/ObsErrorDiagonal.h"
 
 #include "eckit/config/Configuration.h"
@@ -48,6 +50,18 @@ void ObsErrorDiagonal::multiply(ioda::ObsVector & dy) const {
 
 void ObsErrorDiagonal::inverseMultiply(ioda::ObsVector & dy) const {
   dy *= inverseVariance_;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsErrorDiagonal::sqrtMultiply(ioda::ObsVector & dy) const {
+  dy *= stddev_;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsErrorDiagonal::invSqrtMultiply(ioda::ObsVector & dy) const {
+  dy /= stddev_;
 }
 
 // -----------------------------------------------------------------------------

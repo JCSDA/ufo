@@ -71,6 +71,12 @@ class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
   ///       C - correlations
   void inverseMultiply(ioda::ObsVector & y) const override;
 
+  /// Multiply \p y by \f$R^{1/2}\f$
+  void sqrtMultiply(ioda::ObsVector & y) const override;
+
+  /// Multiply \p y by \f$R^{-1/2}\f$
+  void invSqrtMultiply(ioda::ObsVector & y) const override;
+
   /// Generate \p y as a random perturbation
   void randomize(ioda::ObsVector & y) const override;
 

@@ -55,6 +55,12 @@ class ObsErrorDiagonal : public oops::interface::ObsErrorBase<ObsTraits> {
 /// Multiply a Departure by \f$R^{-1}\f$
   void inverseMultiply(ioda::ObsVector &) const override;
 
+/// Multiply \p y by \f$R^{1/2}\f$
+  void sqrtMultiply(ioda::ObsVector & y) const override;
+
+/// Multiply \p y by \f$R^{-1/2}\f$
+  void invSqrtMultiply(ioda::ObsVector & y) const override;
+
 /// Generate random perturbation
   void randomize(ioda::ObsVector &) const override;
 
