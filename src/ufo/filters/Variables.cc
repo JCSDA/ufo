@@ -175,7 +175,9 @@ Variables Variables::allFromGroup(const std::string & group) const {
 oops::ObsVariables Variables::toOopsObsVariables() const {
   oops::ObsVariables vars;
   for (size_t ivar = 0; ivar < vars_.size(); ++ivar) {
-    vars += oops::ObsVariables({vars_[ivar].variable()}, vars_[ivar].channels());
+    for (size_t jj = 0; jj < vars_[ivar].size(); ++jj) {
+      vars.push_back(vars_[ivar].variable(jj));
+    }
   }
   return vars;
 }
