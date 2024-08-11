@@ -1,0 +1,70 @@
+time window:
+  begin: 2000-10-12T23:30:00Z
+  end: 2030-10-13T00:30:00Z
+
+observations:
+- obs space:
+    name: Radar reflectivity
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_obs.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/radar_reflectivity_metoffice_opr_out.nc4
+    simulated variables: [reflectivity]
+    observed variables: [reflectivity]
+  obs operator:
+    name: RadarReflectivity
+    algorithm:
+      name: Met Office reflectivity
+      rain multiplier: 1000.0
+      rain exponent: 1.1
+      ice multiplier: 0.1
+      ice additive constant: 2.0
+      ice exponent: 2.0
+      lower bound: 1.0
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_geovals.nc4
+  vector ref: TestReference
+  tolerance: 1.0e-8
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+
+- obs space:
+    name: Incorrect variable used in the RadarReflectivity operator, throwing an exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_obs.nc4
+    simulated variables: [reflectivity, airTemperature]
+    observed variables: [reflectivity]
+    derived variables: [airTemperature]
+  obs operator:
+    name: Composite
+    components:
+    - name: RadarReflectivity
+      variables:
+      - name: airTemperature
+      algorithm:
+        name: Met Office reflectivity
+        rain multiplier: 1000.0
+        rain exponent: 1.1
+        ice multiplier: 0.1
+        ice additive constant: 2.0
+        ice exponent: 2.0
+        lower bound: 1.0
+    - name: VertInterp
+      variables:
+      - name: reflectivity
+      observation vertical coordinate: height
+      vertical coordinate: height
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_geovals.nc4
+  expect constructor to throw exception with message: This operator can only be used to simulate reflectivity.
+  vector ref: TestReference
+  tolerance: 1.0e-8
+

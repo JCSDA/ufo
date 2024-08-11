@@ -939,6 +939,26 @@ ufo_add_test( NAME    test_ufo_opr_reflectivity_mpas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
+ufo_add_test( NAME    test_ufo_opr_radar_reflectivity_metoffice
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_reflectivity_metoffice.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_opr_radar_reflectivity_metoffice_composite
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_reflectivity_metoffice_composite.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_opr_radar_doppler_wind
               TIER    1
               ECBUILD
@@ -954,6 +974,16 @@ ufo_add_test( NAME    test_ufo_linopr_radar_doppler_wind
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_doppler_wind.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_linopr_radar_reflectivity_metoffice
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_reflectivity_metoffice.yaml"
               MPI     1
               LIBS    ufo
               LABELS  operators

@@ -1,0 +1,45 @@
+time window:
+  begin: 2000-10-12T23:30:00Z
+  end: 2030-10-13T00:30:00Z
+
+observations:
+- obs space:
+    name: Radar reflectivity as part of the Composite operator
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_obs.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/radar_reflectivity_metoffice_composite_opr_out.nc4
+    simulated variables: [reflectivity, airTemperature]
+    observed variables: [reflectivity, airTemperature]
+  obs operator:
+    name: Composite
+    components:
+    - name: RadarReflectivity
+      variables:
+      - name: reflectivity
+      algorithm:
+        name: Met Office reflectivity
+        rain multiplier: 1000.0
+        rain exponent: 1.1
+        ice multiplier: 0.1
+        ice additive constant: 2.0
+        ice exponent: 2.0
+        lower bound: 1.0
+    - name: VertInterp
+      variables:
+      - name: airTemperature
+      observation vertical coordinate: height
+      vertical coordinate: height
+      interpolation method: linear
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_geovals.nc4
+  vector ref: TestReference
+  tolerance: 1.0e-6
+  linear obs operator test:
+    coef TL: 1.0e-5
+    tolerance TL: 1.0e-4
+    tolerance AD: 1.0e-13
