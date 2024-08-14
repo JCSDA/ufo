@@ -35,11 +35,11 @@ MetOfficeReflectivity::MetOfficeReflectivity(const Parameters_ & params,
     ({"air_pressure",
       "air_temperature",
       "height",
-      "mass_content_of_cloud_ice_in_atmosphere_layer",
+      "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water",
       "qrain"});
 
   // Required variables for the TL/AD operator.
-  std::vector<std::string> rvTL{"mass_content_of_cloud_ice_in_atmosphere_layer",
+  std::vector<std::string> rvTL{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water",
       "qrain"};
   reqvarsTL += oops::Variables(rvTL);
 }
@@ -97,7 +97,7 @@ void MetOfficeReflectivity::simulateObsImpl(const GeoVaLs & gv,
     gv.getAtLocation(vec_z, oops::Variable{"height"}, jloc);
     gv.getAtLocation(vec_qrain, oops::Variable{"qrain"}, jloc);
     gv.getAtLocation(vec_qice,
-                     oops::Variable{"mass_content_of_cloud_ice_in_atmosphere_layer"},
+                     oops::Variable{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"},
                      jloc);
 
     // Interpolate each GeoVaL to the observation location.
@@ -174,7 +174,7 @@ void MetOfficeReflectivity::setTrajectoryImpl(const GeoVaLs & gv,
       gv.getAtLocation(vec_T, oops::Variable{"air_temperature"}, jloc);
       gv.getAtLocation(vec_qrain, oops::Variable{"qrain"}, jloc);
       gv.getAtLocation(vec_qice,
-                       oops::Variable{"mass_content_of_cloud_ice_in_atmosphere_layer"}, jloc);
+         oops::Variable{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"}, jloc);
       vec_interp_T_[jloc] = ufo::PiecewiseLinearInterpolation::interpolate(vec_z, vec_T, z_ob);
       vec_interp_p_[jloc] = ufo::PiecewiseLinearInterpolation::interpolate(vec_z, vec_p, z_ob);
       vec_interp_qrain_[jloc] =
@@ -259,7 +259,7 @@ void MetOfficeReflectivity::simulateObsTLImpl(const GeoVaLs & dx,
     // Retrieve vectors of model rain and ice increments.
     dx.getAtLocation(vec_dqrain, oops::Variable{"qrain"}, jloc);
     dx.getAtLocation(vec_dqice,
-                     oops::Variable{"mass_content_of_cloud_ice_in_atmosphere_layer"},
+                     oops::Variable{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"},
                      jloc);
     // Interpolate increments to observation height.
     const double dqrain =
@@ -360,7 +360,7 @@ void MetOfficeReflectivity::simulateObsADImpl(GeoVaLs & dx,
     // Get existing increments.
     dx.getAtLocation(inc_qrain, oops::Variable{"qrain"}, jloc);
     dx.getAtLocation(inc_qice,
-                     oops::Variable{"mass_content_of_cloud_ice_in_atmosphere_layer"}, jloc);
+       oops::Variable{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"}, jloc);
 
     const auto[idx_interp, weight_interp] =
       ufo::PiecewiseLinearInterpolation::interpolationIndexAndWeight(vec_z, z_ob);
@@ -379,7 +379,7 @@ void MetOfficeReflectivity::simulateObsADImpl(GeoVaLs & dx,
 
     // Update dx.
     dx.putAtLocation(inc_qice,
-                     oops::Variable{"mass_content_of_cloud_ice_in_atmosphere_layer"}, jloc);
+       oops::Variable{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"}, jloc);
     dx.putAtLocation(inc_qrain, oops::Variable{"qrain"}, jloc);
   }
 

@@ -62,8 +62,9 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
   invars_ += Variable("MetaData/latitude");
   if (options_.qtotal_lnq_gkg.value()) {
     invars_ += Variable("GeoVaLs/specific_humidity");
-    invars_ += Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer");
-    invars_ += Variable("GeoVaLs/mass_content_of_cloud_ice_in_atmosphere_layer");
+    invars_ +=
+      Variable("GeoVaLs/cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water");
+    invars_ += Variable("GeoVaLs/cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water");
     invars_ += Variable("GeoVaLs/air_pressure");
     invars_ += Variable("GeoVaLs/air_temperature");
     invars_ += Variable("GeoVaLs/surface_pressure");
@@ -94,8 +95,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   rMatrixConf.set("RMatrix", options_.rmatrix_filepath.value());
   MetOfficeRMatrixRadiance staticR(rMatrixConf);
 
-  const std::string clw_name = "mass_content_of_cloud_liquid_water_in_atmosphere_layer";
-  const std::string ciw_name = "mass_content_of_cloud_ice_in_atmosphere_layer";
+  const std::string clw_name = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water";
+  const std::string ciw_name = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water";
 
   size_t skinTempIndex = 0;  // position of skin temperature element in B- and H-matrices
   if (options_.skinTempError.value() != boost::none) {

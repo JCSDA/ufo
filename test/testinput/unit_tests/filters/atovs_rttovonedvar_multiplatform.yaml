@@ -101,8 +101,8 @@ observations:
     retrieval variables from geovals:
     - air_temperature # 1
     - specific_humidity  # 10
-    - mass_content_of_cloud_liquid_water_in_atmosphere_layer
-    - mass_content_of_cloud_ice_in_atmosphere_layer
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
     - surface_temperature # 3
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5

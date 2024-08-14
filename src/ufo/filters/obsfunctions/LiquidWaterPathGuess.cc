@@ -20,7 +20,7 @@ static ObsFunctionMaker<LiquidWaterPathGuess> makerLiquidWaterPathGuess_("Liquid
 LiquidWaterPathGuess::LiquidWaterPathGuess(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer");
+  invars_ += Variable("GeoVaLs/cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water");
   invars_ += Variable("GeoVaLs/air_pressure");
 }
 
@@ -49,14 +49,14 @@ void LiquidWaterPathGuess::compute(const ObsFilterData & in,
 
   // initialise  p, clw for top of first layer
   in.get(Variable("GeoVaLs/air_pressure"), 0, p_leveli);
-  in.get(Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer"),
+  in.get(Variable("GeoVaLs/cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water"),
     0, clw_leveli);
 
   // perform LWP (kg/m^2) calculation
   // = sum over layers ( (pi+1-pi) * 0.5* (clwi+clwi+1) / g)
   for (size_t ilev = 0; ilev < nlevs-1; ++ilev) {
     in.get(Variable("GeoVaLs/air_pressure"), ilev+1, p_levelipone);
-    in.get(Variable("GeoVaLs/mass_content_of_cloud_liquid_water_in_atmosphere_layer"),
+    in.get(Variable("GeoVaLs/cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water"),
       ilev+1, clw_levelipone);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       dp = std::abs(p_levelipone[iloc] - p_leveli[iloc]);

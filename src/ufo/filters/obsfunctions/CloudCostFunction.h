@@ -49,8 +49,8 @@ class CloudCostFunctionParameters : public oops::Parameters {
   /// Setting this flag for qtotal requires that the following are all present
   /// in the parameter list "background fields":
   /// - specific_humidity
-  /// - mass_content_of_cloud_liquid_water_in_atmosphere_layer
-  /// - mass_content_of_cloud_ice_in_atmosphere_layer
+  /// - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+  /// - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
   oops::Parameter<bool> qtotal_lnq_gkg{"qtotal", false, this};
 
   /// Include treatment of rain when splitting total humidity into constituent phases

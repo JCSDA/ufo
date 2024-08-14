@@ -2356,7 +2356,7 @@ contains
           ! variable: optical_thickness_of_atmosphere_layer_CH
           ! variable: transmittances_of_atmosphere_layer_CH
           ! variable: weightingfunction_of_atmosphere_layer_CH
-          ! variable: mass_content_of_cloud_ice_in_atmosphere_layer
+          ! variable: cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
           ! variable: brightness_temperature_overcast_of_atmosphere_layer_CH
         case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_cli, var_tb_overcast)
 

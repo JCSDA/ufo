@@ -229,8 +229,8 @@ end if
 ! and ice water content just water vapour which is consistent with the
 ! profile loaded from GeoVaLs.
 ! var_q    = "specific_humidity"     ! kg/kg
-! var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer"
-! var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer"
+! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water"
+! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"
 ! Note : RTTOV jacobian is TOA -> surface same as prof_x
 if (profindex % qt(1) > 0) then
 

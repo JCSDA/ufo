@@ -106,8 +106,8 @@ if (profindex % q(1) > 0) then
 end if
 
 ! var_q - specific_humidity - kg/kg
-! var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer" - kg/kg
-! var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer" - kg/kg
+! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
+! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
 ! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
   allocate(humidity_total(nlevels))
@@ -283,8 +283,8 @@ if (profindex % q(1) > 0) then
 end if
 
 ! var_q = "specific_humidity" ! kg/kg
-! var_clw  = "mass_content_of_cloud_liquid_water_in_atmosphere_layer" - kg/kg
-! var_cli  = "mass_content_of_cloud_ice_in_atmosphere_layer" - kg/kg
+! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
+! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
 ! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
   nlevels = profindex % nlevels
