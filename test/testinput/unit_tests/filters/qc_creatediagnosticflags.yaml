@@ -319,3 +319,100 @@ observations:
       name: DiagnosticFlags/FlagB/variable2
     reference:
       name: TestReference/falses
+
+# Tests with channel variables
+- obs space:
+    name: Test data 10
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata_channels.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/filters_testdata_10.nc4
+    simulated variables: [variable1, variable2]
+    channels: 3, 5
+  obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+    flags:
+    - name: FlagA
+      initial value: true
+    - name: FlagB
+      initial value: false
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/variable1
+    reference:
+      name: TestReference/zeroes       # no bits were set -> all values zero
+  - test:
+      name: DiagnosticFlags/variable2
+    reference:
+      name: TestReference/zeroes       # no bits were set -> all values zero
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagA/variable2
+    reference:
+      name: TestReference/trues
+  - test:
+      name: DiagnosticFlags/FlagB/variable1
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagB/variable2
+    reference:
+      name: TestReference/falses
+
+# Test with channel variables and setting flags only for some variables
+- obs space:
+    name: Test data 11
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata_channels.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/filters_testdata_11.nc4
+    simulated variables: [variable1, variable2]
+    channels: 3, 5
+  obs filters:
+  - filter: Create Diagnostic Flags
+    bitmap diagnostic flags: true
+    flags:
+    - name: FlagA
+      initial value: false
+  - filter: Perform Action
+    filter variables:
+    - name: variable2
+      channels: 5
+    where:
+    - variable:
+        name: MetaData/latitude
+      minvalue: 0 # everywhere
+    actions:
+    - name: set flag bit
+      bit: 0
+    - name: set
+      flag: FlagA
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/variable1
+    reference:
+      name: TestReference/zeroes       # no bits were set -> all values zero
+  - test:
+      name: DiagnosticFlags/variable2
+    reference:
+      name: TestReference/zeroes_ones  # 0-th bit was set only for the second channel (channel 5)
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: TestReference/falses
+  - test:
+      name: DiagnosticFlags/FlagA/variable2
+    reference:
+      name: TestReference/falses_trues

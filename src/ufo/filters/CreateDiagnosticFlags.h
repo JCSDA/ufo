@@ -111,7 +111,7 @@ class CreateDiagnosticFlags : public ObsProcessorBase,
   oops::ObsVariables getFilterVariables() const;
 
   template<class T>
-  void createFlag(const std::string & flagName, const std::string & varName,
+  void createFlag(const Variable & var,
                   bool forceReinitialization, T initialValue) const;
 
  private:

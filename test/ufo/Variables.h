@@ -154,11 +154,76 @@ void testHasGroup() {
 }
 
 // -----------------------------------------------------------------------------
+// Test operator== for ufo::Variables and ufo::Variable
+void testCompare() {
+  ufo::Variable var1("MetaData/var1", {1, 3});
+  ufo::Variable var2("MetaData/var1", {1, 2});
+  ufo::Variable var3("MetaData/var2");
+  ufo::Variable var4("ObsValue/var1", {1, 3});
+  ufo::Variable var5(var1, "MetaData");
+  EXPECT(var1 != var2);
+  EXPECT(var1 != var3);
+  EXPECT(var1 != var4);
+  EXPECT(var1 == var5);
+
+  ufo::Variables vars1({var1, var2, var3});
+  ufo::Variables vars2({var2, var3, var1});
+  ufo::Variables vars3({var1, var2});
+  ufo::Variables vars4;
+  ufo::Variables vars5 = vars3;
+  EXPECT(vars1 == vars2);
+  EXPECT(vars1 != vars3);
+  EXPECT(vars4 != vars2);
+  EXPECT(vars5 == vars3);
+  vars5 += var3;
+  EXPECT(vars5 != vars3);
+  EXPECT(vars5 == vars1);
+}
+
+// -----------------------------------------------------------------------------
+// Test ufo::Variables::toOopsVariables and ctor from oops::ObsVariables
+void testToFromOopsObsVariables() {
+  // single variable with channels
+  ufo::Variable uVar("windEastward", {1, 2, 3});
+  oops::ObsVariables uVar_oops = uVar.toOopsObsVariables();
+  ufo::Variables ufoVars({uVar});
+  oops::ObsVariables ufoVars_oops = ufoVars.toOopsObsVariables();
+  oops::ObsVariables ufoVars_ref({"windEastward"}, {1, 2, 3});
+  ufo::Variables ufoVars_from(ufoVars_ref);
+  oops::Log::info() << "One-var channel ufo variable: " << uVar << std::endl;
+  oops::Log::info() << "One-var channel ufo variables: " << ufoVars << std::endl;
+  oops::Log::info() << "One-var channel ufo variable to oops vars: " <<
+                       uVar.toOopsObsVariables() << std::endl;
+  oops::Log::info() << "One-var channel ufo variables to oops vars: " <<
+                       ufoVars.toOopsObsVariables() << std::endl;
+  oops::Log::info() << "Expected oops vars: " << ufoVars_ref << std::endl;
+  oops::Log::info() << "One-var channel ufo variables from oops vars: " <<
+                       ufoVars_from << std::endl;
+  EXPECT(ufoVars_oops == ufoVars_ref);
+  EXPECT(ufoVars == ufoVars_from);
+
+  ufo::Variable vVar("windNorthward", {1, 2, 3});
+  ufoVars += vVar;
+  oops::ObsVariables ufoVars_oops2 = ufoVars.toOopsObsVariables();
+  oops::ObsVariables ufoVars_ref2({"windEastward", "windNorthward"}, {1, 2, 3});
+  ufo::Variables ufoVars_from2(ufoVars_ref2);
+  oops::Log::info() << "Two-var channel ufo variables: " << ufoVars << std::endl;
+  oops::Log::info() << "Two-var channel ufo variables to oops vars: " <<
+                       ufoVars_oops2 << std::endl;
+  oops::Log::info() << "Expected oops vars: " << ufoVars_ref2 << std::endl;
+  oops::Log::info() << "Two-var channel ufo variables from oops vars: " <<
+                       ufoVars_from2 << std::endl;
+  EXPECT(ufoVars_oops2 == ufoVars_ref2);
+  EXPECT(ufoVars == ufoVars_from2);
+}
+
+// -----------------------------------------------------------------------------
 
 class Variables : public oops::Test {
  public:
   Variables() {}
   virtual ~Variables() {}
+
  private:
   std::string testid() const override {return "ufo::test::Variables";}
 
@@ -176,6 +241,12 @@ class Variables : public oops::Test {
 
     ts.emplace_back(CASE("ufo/Variables/testHasGroup")
       { testHasGroup(); });
+
+    ts.emplace_back(CASE("ufo/Variables/testCompare")
+      { testCompare(); });
+
+    ts.emplace_back(CASE("ufo/Variables/testToFromOopsObsVariables")
+      { testToFromOopsObsVariables(); });
   }
 
   void clear() const override {}

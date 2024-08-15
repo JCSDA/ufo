@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "eckit/exception/Exceptions.h"
+
 #include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
@@ -47,11 +49,19 @@ Variables::Variables(const oops::ObsVariables & oopsvars)
   : vars_() {
   oops::Log::trace() << "ufo::Variables(oops::Vars) start" << std::endl;
   if (oopsvars.channels().size() > 0) {
-    // note: for variables with channels will use only the first variable
-    // should work for all current cases
-    // find string before channel:
-    size_t pos = oopsvars[0].find_last_of('_');
-    vars_.push_back(Variable(oopsvars[0].substr(0, pos), oopsvars.channels()));
+    const auto & channels = oopsvars.channels();
+    const size_t nvars = oopsvars.size() / channels.size();
+    ASSERT(oopsvars.size() % channels.size() == 0);
+    std::vector<std::string> varnames(nvars);
+    for (size_t joopsvar = 0, jvar = 0;
+         joopsvar < oopsvars.size(), jvar < nvars; ++joopsvar) {
+      const size_t pos = oopsvars[joopsvar].find_last_of('_');
+      const std::string varname = oopsvars[joopsvar].substr(0, pos);
+      if (std::find(varnames.begin(), varnames.end(), varname) == varnames.end()) {
+        varnames[jvar++] = varname;
+        vars_.push_back(Variable(varname, channels));
+      }
+    }
   } else {
     for (size_t jvar = 0; jvar < oopsvars.size(); ++jvar) {
       vars_.push_back(Variable(oopsvars[jvar]));
@@ -90,6 +100,24 @@ Variables::Variables(const std::vector<ufo::Variable> & vars)
 // -----------------------------------------------------------------------------
 
 Variables::~Variables() {
+}
+
+// -----------------------------------------------------------------------------
+
+bool Variables::operator==(const Variables & other) const {
+  if (other.size() != vars_.size()) return false;
+  for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+    if (std::find(other.vars_.begin(), other.vars_.end(), vars_[jvar]) == other.vars_.end()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// -----------------------------------------------------------------------------
+
+bool Variables::operator!=(const Variables & other) const {
+  return !(*this == other);
 }
 
 // -----------------------------------------------------------------------------
@@ -175,9 +203,7 @@ Variables Variables::allFromGroup(const std::string & group) const {
 oops::ObsVariables Variables::toOopsObsVariables() const {
   oops::ObsVariables vars;
   for (size_t ivar = 0; ivar < vars_.size(); ++ivar) {
-    for (size_t jj = 0; jj < vars_[ivar].size(); ++jj) {
-      vars.push_back(vars_[ivar].variable(jj));
-    }
+    vars += vars_[ivar].toOopsObsVariables();
   }
   return vars;
 }

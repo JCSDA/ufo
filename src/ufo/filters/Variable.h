@@ -36,6 +36,9 @@ class Variable: public util::Printable {
   Variable(const Variable &, const std::string &);
   ~Variable();
 
+  bool operator==(const Variable &) const;
+  bool operator!=(const Variable &) const;
+
   size_t size() const;
   Variable operator[](const size_t) const;
   const std::string & variable() const;

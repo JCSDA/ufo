@@ -75,6 +75,20 @@ Variable::~Variable() {
 
 // -----------------------------------------------------------------------------
 
+bool Variable::operator==(const Variable & other) const {
+  return ((varname_ == other.varname_) && (grpname_ == other.grpname_) &&
+          (channels_ == other.channels_));
+}
+
+// -----------------------------------------------------------------------------
+
+bool Variable::operator!=(const Variable & other) const {
+  return ((varname_ != other.varname_) || (grpname_ != other.grpname_) ||
+          (channels_ != other.channels_));
+}
+
+// -----------------------------------------------------------------------------
+
 size_t Variable::size() const {
   if (channels_.size() == 0) {
     return 1;
@@ -153,11 +167,7 @@ oops::Variables Variable::toOopsVariables() const {
 // -----------------------------------------------------------------------------
 
 oops::ObsVariables Variable::toOopsObsVariables() const {
-  oops::ObsVariables vars;
-  for (size_t jj = 0; jj < this->size(); ++jj) {
-    vars.push_back(this->variable(jj));
-  }
-  return vars;
+  return oops::ObsVariables({varname_}, channels_);
 }
 
 // -----------------------------------------------------------------------------

@@ -42,6 +42,9 @@ class Variables: public util::Printable {
   Variables & operator+=(const Variables &);
   Variables & operator+=(const Variable &);
 
+  bool operator==(const Variables &) const;
+  bool operator!=(const Variables &) const;
+
   /// \brief Return the number of constituent Variable objects (some of which may contain multiple
   /// channels).
   size_t size() const;
