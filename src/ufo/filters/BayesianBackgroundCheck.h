@@ -39,9 +39,15 @@ class BayesianBackgroundCheckParameters : public FilterParametersBase {
  public:
   /// Parameters related to PGE calculations
   ProbabilityOfGrossErrorParameters PGEParameters{this};
+
   // Probability density of observation being bad:
-  oops::RequiredParameter<float> PdBad{"prob density bad obs", this,
-                                       {oops::exclusiveMinConstraint(0.0f)}};
+  oops::OptionalParameter<float> PdBad{"prob density bad obs", this,
+                             {oops::exclusiveMinConstraint(0.0f)}};
+
+  // Optional name of variable to hold probdensbadobs.
+  // Variable is expected to reside in MetaData group.
+  // If this option is set overrides fixed value PdBad.
+  oops::OptionalParameter<std::string> pdBadObsVectorName{"prob density bad obs vector name", this};
 
   // constant background error term (optional):
   oops::OptionalParameter<float> BkgErr{"bg error", this};

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <limits>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -108,8 +109,51 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
   Variables varflags(filtervars_, "QCFlags");
   const float missingValueFloat = util::missingValue<float>();
 
-  // Probability density of bad observations, PdBad:
-  const std::vector<float> PdBad(obsdb_.nlocs(), parameters_.PdBad.value());
+  // User input checks on filter variables Pdbad and pdBadObsVectorName
+  //  a) Check that both PdBad  or pdBadObsVectorName are not set.
+  //  if this is true throw an error as one is required.
+  if (parameters_.PdBad.value() == boost::none &&
+      parameters_.pdBadObsVectorName.value() == boost::none) {
+    std::ostringstream errorMsg;
+    errorMsg << "BayesianBackgroundCheck:" << std::endl
+             << "One of the following must be specified:" << std::endl
+             << "  prob density bad obs" << std::endl
+             << "  prob density bad obs vector name" << std::endl;
+    throw eckit::UserError(errorMsg.str(), Here());
+  }
+  //  b) check that both PdBad and pdBadObsVectorName are set.
+  //  if this is true throw an error as only one is required.
+  if (parameters_.PdBad.value() != boost::none &&
+      parameters_.pdBadObsVectorName.value() != boost::none) {
+    std::ostringstream errorMsg;
+    errorMsg << "BayesianBackgroundCheck:" << std::endl
+             << "Only one of the following must be specified:" << std::endl
+             << "  prob density bad obs" << std::endl
+             << "  prob density bad obs vector name" << std::endl;
+    throw eckit::UserError(errorMsg.str(), Here());
+  }
+
+  // Set probability density of bad obs
+  std::vector<float> PdBad(obsdb_.nlocs());
+
+  // If pdBadObsVectorName is set and exists in obsspace then set pdBad to this vector
+  if (parameters_.pdBadObsVectorName.value() != boost::none) {
+    const std::string pdBadObsVectorName = *parameters_.pdBadObsVectorName.value();
+    if (obsdb_.has("MetaData", pdBadObsVectorName)) {
+      oops::Log::debug() << "BayesianBackgroundCheck: "
+      << " Setting prob density bad obs to values in vector: "
+      << pdBadObsVectorName << std::endl;
+      obsdb_.get_db("MetaData", pdBadObsVectorName, PdBad);
+    } else {
+      std::ostringstream errorMsg;
+      errorMsg << "BayesianBackgroundCheck: " << std::endl
+               << "variable " << pdBadObsVectorName << " not found in MetaData" << std::endl;
+      throw eckit::BadParameter(errorMsg.str(), Here());
+    }
+  } else {
+      // Fill prob density of bad obs vector with fixed filter value
+      std::fill(PdBad.begin(), PdBad.end(), *parameters_.PdBad.value());
+  }
 
   bool previousVariableWasFirstComponentOfTwo = false;
   // Loop through all filter variables. .yaml will say if it's 2-component.
