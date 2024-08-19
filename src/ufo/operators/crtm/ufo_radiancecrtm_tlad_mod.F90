@@ -148,10 +148,12 @@ end subroutine ufo_radiancecrtm_tlad_delete
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss, hofxdiags)
+subroutine ufo_radiancecrtm_tlad_settraj(self, geovals, obss, hofxdiags, qcf_p)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
+use obsdatavector_mod,  only: obsdatavector_int
 use ieee_arithmetic,    only: ieee_is_nan
+use iso_fortran_env,    only: int64
 use ufo_utils_mod,      only: cmp_strings
 use CRTM_SpcCoeff, only: SC, &
                          SpcCoeff_IsMicrowaveSensor , &
@@ -165,13 +167,16 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
 type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 type(ufo_geovals),        intent(inout) :: hofxdiags    !non-h(x) diagnostics
+type(c_ptr), value,       intent(in) :: qcf_p
+type(obsdatavector_int) :: qc_flags
 
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_tlad_settraj'
 character(255) :: message, version
-character(max_string) :: err_msg
+character(max_string) :: err_msg, dbg_msg
 integer        :: err_stat, alloc_stat
-integer        :: n
+integer        :: l, m, n
+integer(int64) :: ll,ml
 type(ufo_geoval), pointer :: temp
 integer :: jvar, ichannel, jchannel, jprofile, jlevel, jspec
 real(c_double) :: missing
@@ -204,7 +209,9 @@ integer :: lch
 character(len=MAXVARLEN) :: varstr
 character(10), parameter :: jacobianstr = "_jacobian_"
 integer(c_size_t) :: nvars, nlocs
-logical :: qc_ff
+integer :: n_skipped, n_good
+integer :: qc_ff
+logical:: skip_prof
 
 ! set a local boolean variable for whether we are in vis or ultraviolet channels
 logical :: Is_Vis_or_UV = .false.
@@ -217,6 +224,8 @@ logical :: Is_Vis_or_UV = .false.
  call ufo_geovals_get_var(geovals, var_ts, temp)
  self%n_Layers = temp%nval
  nullify(temp)
+
+ qc_flags%data_ptr = qcf_p
 
  ! Program header
  ! --------------
@@ -378,6 +387,38 @@ logical :: Is_Vis_or_UV = .false.
 
    call ufo_crtm_skip_profiles(self%n_Profiles,self%n_Channels,self%channels,obss,atm,sfc, &
                                SC(n)%Is_Active_Sensor, Is_Vis_or_UV, self%Options)
+
+   if ( self%use_qc_flags ) then
+   ! eliminate remaining profiles that are "QCed" out
+     n_skipped = 0
+     n_good = 0
+     do m = 1, self%n_Profiles
+       n_good = n_good + 1
+       if (.not.self%Options(m)%Skip_Profile) then
+         ml = m
+         skip_prof = .true.
+! can't use all here since the qc flags are out of order and not an array
+         do l = 1, size(self%channels)
+           ll = l
+           qc_ff = qc_flags%get(ll,ml)
+           if ( qc_ff < 2) then
+             skip_prof = .false.
+             exit
+           end if
+         end do
+         if ( skip_prof ) then
+           n_skipped = n_skipped + 1
+           n_good = n_good - 1
+         end if
+         self%Options(m)%Skip_Profile = skip_prof
+       else
+         n_skipped = n_skipped + 1
+         n_good = n_good - 1
+       end if
+     end do
+     write(dbg_msg,'(a,i9,a,i9,a)') 'DEBUG (TLAD), total of ', n_skipped, ' profiles being skipped. Using ', n_good, ' good profiles'
+     call fckit_log%debug(dbg_msg)
+   end if
 
    ! Call the K-matrix model
    ! -----------------------
@@ -587,7 +628,7 @@ end subroutine ufo_radiancecrtm_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, nvars, nlocs, hofx, qc_flags_ptr)
+subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, nvars, nlocs, hofx, qcf_p)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(in)    :: self
@@ -595,8 +636,7 @@ type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 integer,                  intent(in)    :: nvars, nlocs
 real(c_double),           intent(inout) :: hofx(nvars, nlocs)
-type(c_ptr), value, intent(in) :: qc_flags_ptr
-type(obsdatavector_int) :: qc_flags
+type(c_ptr), value,       intent(in)    :: qcf_p
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec
@@ -617,7 +657,6 @@ type(ufo_geoval), pointer :: geoval_d
    call abor1_ftn(err_msg)
  endif
 
- qc_flags%data_ptr = qc_flags_ptr
  ! Initialize hofx
  ! ---------------
  hofx(:,:) = 0.0_kind_real
@@ -634,7 +673,6 @@ type(ufo_geoval), pointer :: geoval_d
    call abor1_ftn(err_msg)
  endif
 
- if ( .not.  self%use_qc_flags) then
    ! Multiply by Jacobian and add to hofx
    do jprofile = 1, self%n_Profiles
      if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -647,29 +685,10 @@ type(ufo_geoval), pointer :: geoval_d
        enddo
      end if
    enddo
- else
-   ! Multiply by Jacobian and add to hofx
-   do jprofile = 1, self%n_Profiles
-     if (.not.self%Options(jprofile)%Skip_Profile) then
-       do jchannel = 1, size(self%channels) 
-         if ( qc_flags%get(int(jchannel,int64),int(jprofile,int64)) > 1 ) then
-           cycle 
-         end if
-         do jlevel = 1, geoval_d%nval
-           hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                      self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                      geoval_d%vals(jlevel,jprofile)
-         enddo
-       enddo
-     end if
-   enddo
- end if
 
  ! Absorbers
  ! ---------
 
- if ( .not.  self%use_qc_flags) then
-
    do jspec = 1, self%conf%n_Absorbers
      ! Get Absorber from geovals
      call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
@@ -712,54 +731,6 @@ type(ufo_geoval), pointer :: geoval_d
        end if
      enddo
    end do
-
- else
-   do jspec = 1, self%conf%n_Absorbers
-     ! Get Absorber from geovals
-     call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
-
-     ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
-
-     ! Multiply by Jacobian and add to hofx
-     do jprofile = 1, self%n_Profiles
-       if (.not.self%Options(jprofile)%Skip_Profile) then
-         do jchannel = 1, size(self%channels)
-           if ( qc_flags%get(int(jchannel,int64),int(jprofile,int64)) > 1) cycle
-           do jlevel = 1, geoval_d%nval
-             hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                        self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                        geoval_d%vals(jlevel,jprofile)
-           enddo
-         enddo
-       end if
-     enddo
-   end do
-
-   ! Clouds (mass content only)
-   ! --------------------------
-
-   do jspec = 1, self%conf%n_Clouds
-     ! Get Cloud from geovals
-     call ufo_geovals_get_var(geovals, self%conf%Clouds(jspec,1), geoval_d)
-
-     ispec = ufo_vars_getindex(self%conf_traj%Clouds(:,1), self%conf%Clouds(jspec,1))
-
-     ! Multiply by Jacobian and add to hofx
-     do jprofile = 1, self%n_Profiles
-       if (.not.self%Options(jprofile)%Skip_Profile) then
-         do jchannel = 1, size(self%channels)
-           if ( qc_flags%get(int(jchannel,int64),int(jprofile,int64)) > 1) cycle
-           do jlevel = 1, geoval_d%nval
-             hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
-                        self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
-                        geoval_d%vals(jlevel,jprofile)
-           enddo
-         enddo
-       end if
-     enddo
-   end do
- end if
-
 
  ! Surface Variables
  ! --------------------------
@@ -883,7 +854,7 @@ end subroutine ufo_radiancecrtm_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, nvars, nlocs, hofx, qc_flags_ptr)
+subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, nvars, nlocs, hofx, qcf_p)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(in)    :: self
@@ -891,8 +862,7 @@ type(ufo_geovals),        intent(inout) :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 integer,                  intent(in)    :: nvars, nlocs
 real(c_double),           intent(in)    :: hofx(nvars, nlocs)
-type(c_ptr), value,       intent(in) :: qc_flags_ptr
-type(obsdatavector_int) :: qc_flags
+type(c_ptr), value,       intent(in)    :: qcf_p
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec
@@ -918,15 +888,12 @@ real(c_double) :: missing
  ! Set missing value
  missing = missing_value(missing)
 
- qc_flags%data_ptr = qc_flags_ptr
  ! Temperature
  ! -----------
 
  ! Get t from geovals
  call ufo_geovals_get_var(geovals, var_ts, geoval_d)
 
- if (.not. self%use_qc_flags) then
-
    ! Multiply by Jacobian and add to hofx (adjoint)
    do jprofile = 1, self%n_Profiles
      if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -991,77 +958,7 @@ real(c_double) :: missing
        end if
      enddo
    end do
- else
-
-   ! Multiply by Jacobian and add to hofx (adjoint)
-   do jprofile = 1, self%n_Profiles
-     if (.not.self%Options(jprofile)%Skip_Profile) then
-       do jchannel = 1, size(self%channels)
-         if (qc_flags%get(int(jchannel,int64),int(jprofile,int64))>1) cycle
-         if (hofx(jchannel, jprofile) /= missing) then
-           do jlevel = 1, geoval_d%nval
-               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                          self%atm_K(jchannel,jprofile)%Temperature(jlevel) * &
-                                          hofx(jchannel, jprofile)
-           enddo
-         endif
-       enddo
-     end if
-   enddo
-
-   ! Absorbers
-   ! ---------
-
-   do jspec = 1, self%conf%n_Absorbers
-   ! Get Absorber from geovals
-     call ufo_geovals_get_var(geovals, self%conf%Absorbers(jspec), geoval_d)
-
-     ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
-
-     ! Multiply by Jacobian and add to hofx (adjoint)
-     do jprofile = 1, self%n_Profiles
-       if (.not.self%Options(jprofile)%Skip_Profile) then
-         do jchannel = 1, size(self%channels)
-           if (qc_flags%get(int(jchannel,int64),int(jprofile,int64))>1) cycle
-           if (hofx(jchannel, jprofile) /= missing) then
-             do jlevel = 1, geoval_d%nval
-               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                            self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                                            hofx(jchannel, jprofile)
-             enddo
-           endif
-         enddo
-       end if
-     enddo
-   end do
-
-   ! Clouds (mass content only)
-   ! --------------------------
-
-   do jspec = 1, self%conf%n_Clouds
-     ! Get Cloud from geovals
-     call ufo_geovals_get_var(geovals, self%conf%Clouds(jspec,1), geoval_d)
-
-     ispec = ufo_vars_getindex(self%conf_traj%Clouds(:,1), self%conf%Clouds(jspec,1))
-
-     ! Multiply by Jacobian and add to hofx (adjoint)
-     do jprofile = 1, self%n_Profiles
-       if (.not.self%Options(jprofile)%Skip_Profile) then
-         do jchannel = 1, size(self%channels)
-           if (qc_flags%get(int(jchannel,int64),int(jprofile,int64))>1) cycle
-           if (hofx(jchannel, jprofile) /= missing) then
-             do jlevel = 1, geoval_d%nval
-               geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
-                                            self%atm_K(jchannel,jprofile)%Cloud(ispec)%Water_Content(jlevel) * &
-                                            hofx(jchannel, jprofile)
-             enddo
-           endif
-         enddo
-       end if
-     enddo
-   end do
- end if 
-
+ 
  ! Surface Variables
  ! --------------------------
  do jspec = 1, self%conf%n_Surfaces

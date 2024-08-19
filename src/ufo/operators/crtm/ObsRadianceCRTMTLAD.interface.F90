@@ -79,14 +79,15 @@ end subroutine ufo_radiancecrtm_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofxdiags) &
-                                       bind(c,name='ufo_radiancecrtm_tlad_settraj_f90')
+subroutine ufo_radiancecrtm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofxdiags, c_qc_flags) &
+                                      bind(c,name='ufo_radiancecrtm_tlad_settraj_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int),     intent(in) :: c_key_hofxdiags
+type(c_ptr), value, intent(in) :: c_qc_flags
 
 type(ufo_radiancecrtm_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -98,14 +99,14 @@ call ufo_radiancecrtm_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_geovals_registry%get(c_key_hofxdiags,hofxdiags)
 
-call self%settraj(geovals, c_obsspace, hofxdiags)
+call self%settraj(geovals, c_obsspace, hofxdiags, c_qc_flags)
 
 end subroutine ufo_radiancecrtm_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-	c_hofx, c_qc_flags) bind(c,name='ufo_radiancecrtm_simobs_tl_f90')
+               c_hofx, c_qc_flags) bind(c,name='ufo_radiancecrtm_simobs_tl_f90')
 implicit none
 integer(c_int),     intent(in)    :: c_key_self
 integer(c_int),     intent(in)    :: c_key_geovals
@@ -128,7 +129,7 @@ end subroutine ufo_radiancecrtm_simobs_tl_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-	c_hofx, c_qc_flags) bind(c,name='ufo_radiancecrtm_simobs_ad_f90')
+               c_hofx, c_qc_flags) bind(c,name='ufo_radiancecrtm_simobs_ad_f90')
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self

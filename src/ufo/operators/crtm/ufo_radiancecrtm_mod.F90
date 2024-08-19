@@ -220,6 +220,9 @@ end subroutine ufo_radiancecrtm_delete
 
 subroutine ufo_radiancecrtm_simobs(self, geovals, obss, nvars, nlocs, hofx, hofxdiags, qcf_p)
 use fckit_mpi_module,   only: fckit_mpi_comm
+use fckit_log_module,  only : fckit_log
+use obsdatavector_mod,  only: obsdatavector_int
+use iso_fortran_env,    only: int64
 use ufo_utils_mod,      only: cmp_strings
 use CRTM_SpcCoeff, only: SC, &
                          SpcCoeff_IsMicrowaveSensor , &
@@ -240,14 +243,14 @@ type(obsdatavector_int) :: qc_flags
 ! Local Variables
 character(*), parameter :: PROGRAM_NAME = 'ufo_radiancecrtm_simobs'
 character(255) :: message, version
-character(max_string) :: err_msg
+character(max_string) :: err_msg, dbg_msg
 integer        :: err_stat, alloc_stat
 integer        :: l, m, n
 type(ufo_geoval), pointer :: temp
 integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec
 real(c_double) :: missing
 type(fckit_mpi_comm)  :: f_comm
-integer :: n_skipped
+integer :: n_skipped, n_good
 integer :: qc_ff
 real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
@@ -461,7 +464,9 @@ logical        :: Is_Vis_or_UV = .false.
    if ( self%use_qc_flags ) then
    ! eliminate remaining profiles that are "QCed" out
      n_skipped = 0
+     n_good = 0
      do m = 1, n_Profiles
+       n_good = n_good + 1
        if (.not.Options(m)%Skip_Profile) then
          ml = m
          skip_prof = .true.
@@ -476,10 +481,16 @@ logical        :: Is_Vis_or_UV = .false.
          end do
          if ( skip_prof ) then
            n_skipped = n_skipped + 1
+           n_good = n_good - 1
          end if
          Options(m)%Skip_Profile = skip_prof
+       else
+         n_skipped = n_skipped + 1
+         n_good = n_good - 1
        end if
      end do
+     write(dbg_msg,'(a,i9,a,i9,a)') 'DEBUG, total of ', n_skipped, ' profiles being skipped. Using ', n_good, ' good profiles'
+     call fckit_log%debug(dbg_msg)
    end if
    
    if (jacobian_needed) then

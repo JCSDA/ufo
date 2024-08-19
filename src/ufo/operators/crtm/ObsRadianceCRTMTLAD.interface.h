@@ -41,7 +41,7 @@ extern "C" {
                                        oops::Variables &, const eckit::mpi::Comm &);
   void ufo_radiancecrtm_tlad_delete_f90(F90hop &);
   void ufo_radiancecrtm_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                         const F90goms &);
+                                         const F90goms &, const void*);
   void ufo_radiancecrtm_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                   const int &, const int &, double &, const void*);
   void ufo_radiancecrtm_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
