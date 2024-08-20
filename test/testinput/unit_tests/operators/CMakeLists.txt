@@ -554,6 +554,26 @@ ufo_add_test( NAME    test_ufo_linopr_identity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    test_ufo_opr_logarithm
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/logarithm.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_linopr_logarithm
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/logarithm.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_opr_product
               TIER    1
               ECBUILD

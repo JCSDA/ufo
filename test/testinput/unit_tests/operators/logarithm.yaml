@@ -1,0 +1,316 @@
+time window:
+  begin: 2000-10-12T23:30:00Z
+  end: 2030-10-13T00:30:00Z
+
+observations:
+
+# As well as testing the behaviour of the observation operator itself, these
+# tests contain convergence checks for the linear operator (TL): for a given
+# `coef TL` we expect `tolerance TL` to vary quadratically. This ought to be
+# added to the general linear operator tests: here I've found a tolerance that
+# passes for one value of `coef TL` and then used that for following tests to
+# check that the tolerance scales as expected.
+
+# Base 10 ---------------------------------------------------------------------
+- obs space:
+    name: Test Logarithm Base 10 (coef 0.1)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/logarithm_out.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    base: 10
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-2 # this passes, so setting coef to 0.01 should require a tolerance of 1e-4, 0.001 should require 1e-6, etc.
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog10
+  tolerance: 1.0e-8
+
+- obs space:
+    name: Test Logarithm Base 10 (coef 0.01)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    base: 10
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.01
+    tolerance TL: 1.0e-4
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog10
+  tolerance: 1.0e-8
+
+- obs space:
+    name: Test Logarithm Base 10 (coef 0.001)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    base: 10
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.001
+    tolerance TL: 1.0e-6
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog10
+  tolerance: 1.0e-8
+
+
+# Base e ----------------------------------------------------------------------
+- obs space:
+    name: Test Logarithm Base e (default base)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-1  # empirical value - 1e-2 is too tight
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLn
+  tolerance: 1.0e-8
+
+- obs space:
+    name: Test Logarithm Base e (linear convergence check)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.01
+    tolerance TL: 1.0e-3  # should pass based on expected quadratic convergence
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLn
+  tolerance: 1.0e-8
+
+
+# Base 2 ----------------------------------------------------------------------
+- obs space:
+    name: Test Logarithm Base 2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    base: 2
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-1 # empirical value - 1e-2 is too tight
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog2
+  tolerance: 1.0e-8
+
+- obs space:
+    name: Test Logarithm Base 2 (linear convergence rate check)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    base: 2
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.01
+    tolerance TL: 1.0e-3 # should pass based on expected quadratic convergence
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog2
+  tolerance: 1.0e-8
+
+
+# Base 1.5 --------------------------------------------------------------------
+- obs space:
+    name: Test Logarithm Base 1.5
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    base: 1.5
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-1  # empirical value - 1e-2 is too tight
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog1p5
+  tolerance: 1.0e-8
+
+- obs space:
+    name: Test Logarithm Base 1.5 (linear rate convergence)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    base: 1.5
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.01
+    tolerance TL: 1.0e-3  # should pass based on expected quadratic convergence
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceLog1p5
+  tolerance: 1.0e-8
+
+
+# Exception throwing ----------------------------------------------------------
+- obs space:
+    name: Check zero base throws exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    base: 0
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  expect constructor to throw exception with message: "Invalid log base: 0"
+
+- obs space:
+    name: Check negative base throws exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    simulated variables: [airTemperature, pressure, surfacePressure]
+    observed variables: [airTemperature, pressure, surfacePressure]
+  obs operator:
+    name: Logarithm
+    base: -0.1
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  expect constructor to throw exception with message: "Invalid log base: -0.1"
+
+
+# Composite -------------------------------------------------------------------
+- obs space:
+    name: Test Composite with Logarithm Base 10
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/logarithm_out.nc4
+    simulated variables: [airTemperature, pressure, relativeHumidity, surfacePressure]
+    observed variables: [airTemperature, pressure, relativeHumidity, surfacePressure]
+  obs operator:
+    name: Composite
+    components:
+      - name: Logarithm
+        base: 10
+        observation alias file: ../resources/namemap/test_name_map.yaml
+        variables:
+        - name: airTemperature
+        - name: pressure
+        - name: surfacePressure
+      - name: Identity
+        observation alias file: ../resources/namemap/test_name_map.yaml
+        variables:
+        - name: relativeHumidity
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-2
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceComposite
+  tolerance: 1.0e-8
+
+- obs space:
+    name: Test Composite with Logarithm Base 10 (linear convergence check)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_obs.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/logarithm_out.nc4
+    simulated variables: [airTemperature, pressure, relativeHumidity, surfacePressure]
+    observed variables: [airTemperature, pressure, relativeHumidity, surfacePressure]
+  obs operator:
+    name: Composite
+    components:
+      - name: Logarithm
+        base: 10
+        observation alias file: ../resources/namemap/test_name_map.yaml
+        variables:
+        - name: airTemperature
+        - name: pressure
+        - name: surfacePressure
+      - name: Identity
+        observation alias file: ../resources/namemap/test_name_map.yaml
+        variables:
+        - name: relativeHumidity
+  geovals:
+    filename: Data/ufo/testinput_tier_1/logarithm_geovals.nc4
+  linear obs operator test:
+    coef TL: 0.01
+    tolerance TL: 1.0e-4
+    tolerance AD: 1.0e-13
+  vector ref: TestReferenceComposite
+  tolerance: 1.0e-8

@@ -31,6 +31,7 @@ add_subdirectory( operators/gnssro )
 add_subdirectory( operators/groundgnss )
 add_subdirectory( operators/identity )
 add_subdirectory( operators/insitupm )
+add_subdirectory( operators/logarithm )
 add_subdirectory( operators/marine )
 if(oasim_FOUND)
     add_subdirectory( operators/oasim)
@@ -112,6 +113,7 @@ list( APPEND ufo_src_files
     ${predictor_src_files}
     ${obslocalization_src_files}
     ${identity_src_files}
+    ${logarithm_src_files}
     ${product_src_files}
     ${vertinterp_src_files}
     ${atmvertinterplay_src_files}
