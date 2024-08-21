@@ -354,6 +354,8 @@ set ( filters_files
       obsfunctions/RadarScanEdgeFlag.h
       obsfunctions/RecordNumberToObsSpace.cc
       obsfunctions/RecordNumberToObsSpace.h
+      obsfunctions/ModelLevelIndex.cc
+      obsfunctions/ModelLevelIndex.h
 )
 
 if( ${gsw_FOUND} )

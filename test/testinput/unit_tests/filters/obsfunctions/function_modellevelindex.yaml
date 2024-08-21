@@ -1,0 +1,47 @@
+# There are 20 locations in the test data set.
+#
+# The height GeoVaLs have 11 levels.
+# For the first 10 locations, the GeoVaLs span 0-10 in unit steps;
+# for the second 10 locations, they span 10-0 in descending unit steps.
+#
+# The height observation values are the same in each group of 10 locations:
+# -1.0, 0.0, 0.5, 1.0, 1.1, 4.9, 9.9, 10.0, 11.0, missing.
+#
+# The expected level indices are as follows:
+# missing, 0, 0, 1, 1, 4, 9, 9, missing, missing,
+# missing, 9, 9, 9, 8, 5, 0, 0, missing, missing.
+#
+# This demonstrates how values on level boundaries are treated.
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+- obs space:
+    name: Model level index
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/model_level_index_obs.nc4
+    simulated variables: [reflectivity]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/function_modellevelindex_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/model_level_index_geovals.nc
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/modelLevelIndex
+      type: int
+      function:
+        name: IntObsFunction/ModelLevelIndex
+        options:
+          observation vertical coordinate: height
+          model vertical coordinate: height
+  compareVariables:
+  - test:
+      name: MetaData/modelLevelIndex
+    reference:
+      name: TestReference/modelLevelIndex
