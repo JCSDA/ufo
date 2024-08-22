@@ -33,8 +33,7 @@ ObsGroundgnssMetOfficeTLAD::ObsGroundgnssMetOfficeTLAD(const ioda::ObsSpace & od
 {
   ufo_groundgnss_metoffice_tlad_setup_f90(keyOperGroundgnssMetOffice_,
                                           parameters.toConfiguration());
-  const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
-                                    "geopotential_height", "geopotential_height_levels"};
+  const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity"};
 
   varin_.reset(new oops::Variables(vv));
   oops::Log::info() << "ObsGroundgnssMetOfficeTLAD vars: " << *varin_ << std::endl;
