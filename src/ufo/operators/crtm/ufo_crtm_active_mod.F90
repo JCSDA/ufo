@@ -82,6 +82,7 @@ subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, O
              channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags,&
              ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
+use fckit_log_module,   only: fckit_log
 use ufo_utils_mod,      only: cmp_strings
 
 implicit none
@@ -203,6 +204,7 @@ do jvar = 1, hofxdiags%nvar
             write(err_msg,*) 'ufo_crtm_active_diags: //&
                               & ObsDiagnostic is unsupported, ', &
                               & hofxdiags%variables(jvar)
+            call fckit_log%info(err_msg)
             ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
@@ -300,6 +302,7 @@ do jvar = 1, hofxdiags%nvar
             write(err_msg,*) 'ufo_crtm_active_diags: //&
                               & ObsDiagnostic is unsupported, ', &
                               & hofxdiags%variables(jvar)
+            call fckit_log%info(err_msg)
             !call abor1_ftn(err_msg)
             err_stat = 1
       end select
@@ -307,6 +310,7 @@ do jvar = 1, hofxdiags%nvar
       write(err_msg,*) 'ufo_crtm_active_diags: //&
                         & ObsDiagnostic is unsupported, ', &
                         & hofxdiags%variables(jvar)
+      call fckit_log%info(err_msg)
       !call abor1_ftn(err_msg)
       err_stat = 1
    end if
