@@ -1,0 +1,276 @@
+time window:
+  begin: 2000-10-12T23:30:00Z
+  end: 2030-10-13T00:30:00Z
+
+observations:
+
+- obs space:
+    name: Logarithm base e (default)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/logarithm_out.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: airTemperature
+    group: ObsValue
+  compareVariables:
+  - test:
+      name: DerivedObsValue/airTemperature
+    reference:
+      name: TestReferenceLn/airTemperature
+    relTol: 1.0e-6
+
+
+# Check method agnostic
+- obs space:
+    name: Logarithm base 2 UKMO
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: airTemperature
+    group: ObsValue
+    base: 2
+    Method: UKMO
+  compareVariables:
+  - test:
+      name: DerivedObsValue/airTemperature
+    reference:
+      name: TestReferenceLog2/airTemperature
+    relTol: 1.0e-6
+
+- obs space:
+    name: Logarithm base 2 NCAR
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: airTemperature
+    group: ObsValue
+    base: 2
+    Method: NCAR
+  compareVariables:
+  - test:
+      name: DerivedObsValue/airTemperature
+    reference:
+      name: TestReferenceLog2/airTemperature
+    relTol: 1.0e-6
+
+
+# other log bases and variables in other groups
+- obs space:
+    name: Logarithm base 10 - MetaData/logMe
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: logMe
+    group: MetaData
+    base: 10
+  compareVariables:
+  - test:
+      name: DerivedMetaData/logMe
+    reference:
+      name: TestReferenceLog10/logMe
+    relTol: 1.0e-6
+
+- obs space:
+    name: Logarithm base 1.5 - MetaData/logMe
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: logMe
+    group: MetaData
+    base: 1.5
+  compareVariables:
+  - test:
+      name: DerivedMetaData/logMe
+    reference:
+      name: TestReferenceLog1p5/logMe
+    relTol: 1.0e-6
+
+
+# Correctly uses DerivedObsValue when ObsValue group specified
+- obs space:
+    name: Logarithm base 1.5 - DerivedObsValue/pressure
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: pressure
+    group: ObsValue
+    base: 1.5
+  compareVariables:
+  - test:
+      name: DerivedObsValue/pressure
+    reference:
+      name: TestReferenceLog1p5/pressure
+    relTol: 1.0e-6
+
+
+# Output group and variable name behaviour
+- obs space:
+    name: Logarithm base 1.5 - output group and variable
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: pressure
+    group: ObsValue
+    base: 1.5
+    output group: TestGroup
+    output variable: logPressure
+  compareVariables:
+  - test:
+      name: TestGroup/logPressure
+    reference:
+      name: TestReferenceLog1p5/pressure
+    relTol: 1.0e-6
+
+- obs space:
+    name: Logarithm base 1.5 - output group only
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: pressure
+    group: ObsValue
+    base: 1.5
+    output group: TestGroup
+  compareVariables:
+  - test:
+      name: TestGroup/pressure
+    reference:
+      name: TestReferenceLog1p5/pressure
+    relTol: 1.0e-6
+
+- obs space:
+    name: Logarithm base 1.5 - output variable only
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: pressure
+    group: ObsValue
+    base: 1.5
+    output variable: logPressure
+  compareVariables:
+  - test:
+      name: DerivedObsValue/logPressure
+    reference:
+      name: TestReferenceLog1p5/pressure
+    relTol: 1.0e-6
+
+# where masking works
+- obs space:
+    name: Logarithm base 1.5 - all masked out
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    where:
+    - variable:
+        name: MetaData/latitude
+      minvalue: 1
+      maxvalue: 2  # All are defined to be at 0.0, so nothing should pass
+    Transform: Logarithm
+    variable: airTemperature
+    group: ObsValue
+    base: 1.5
+  compareVariables:
+  - test:
+      name: DerivedObsValue/airTemperature
+    reference:
+      name: AllMissing/allMissing
+    relTol: 1.0e-6
+  passedBenchmark: 6 # 6 values of airTemperature are non-missing
+
+
+# errors for invalid bases
+- obs space:
+    name: Logarithm base 0 - MetaData/logMe
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: logMe
+    group: MetaData
+    base: 0
+  expectExceptionWithMessage: "Invalid logarithm base: 0"
+
+- obs space:
+    name: Logarithm base -2 - ObsValue/airTemperature
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: airTemperature
+    group: ObsValue
+    base: -2
+  expectExceptionWithMessage: "Invalid logarithm base: -2"
+
+- obs space:
+    name: Logarithm base 1 - ObsValue/airTemperature
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/logarithm_transform_obs.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: Logarithm
+    variable: airTemperature
+    group: ObsValue
+    base: 1
+  expectExceptionWithMessage: "Invalid logarithm base: 1"

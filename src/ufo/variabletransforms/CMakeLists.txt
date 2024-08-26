@@ -12,6 +12,8 @@ set ( variabletransforms_files
       Cal_HeightFromPressure.cc
       Cal_Humidity.h
       Cal_Humidity.cc
+      Cal_Logarithm.h
+      Cal_Logarithm.cc
       Cal_PotentialTFromT.h
       Cal_PotentialTFromT.cc
       Cal_PressureFromHeight.h
