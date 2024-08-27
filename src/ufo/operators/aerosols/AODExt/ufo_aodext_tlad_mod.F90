@@ -7,6 +7,7 @@
 
 module ufo_aodext_tlad_mod
 
+ use iso_c_binding
  use kinds
  use missing_values_mod
  use oops_variables_mod
@@ -23,8 +24,11 @@ module ufo_aodext_tlad_mod
   real(kind_real),    allocatable :: airdens(:,:)      !(km, nlocs) airdens profile interp at obs loc [kg.m-3]
   real(kind_real),    allocatable :: delp(:,:)         !(km, nlocs) air pressure thickness profiles at obs loc[Pa]
   real(kind_real),    allocatable :: ext(:,:,:)        !(km, nlocs, nch) extinction profiles at obs loc [km-1]
-  real(kind_real),    allocatable :: obss_wavelength(:)!(nvars) observed AOD wavelengths [nm]
+  real(kind_real),    allocatable :: obss_wavelength(:)!(nobs_wav) observed AOD wavelengths [nm]
+  integer, public,           allocatable :: channels(:)!(nvars) selected observed wavelengths from config [nm]
   real(kind_real), public, allocatable :: wavelength(:)!(nch) background extinction profile's wavelengths[nm]
+  logical, public                 :: doing_log         ! doing log transform aod 
+  real(kind_real), public         :: eps ! offset for log transform aod 
   integer :: nlayers,  nprofiles
 
  contains
@@ -81,13 +85,15 @@ integer :: j
    return
 end function b_channel 
 !-----------------------------------
-subroutine ufo_aodext_tlad_setup(self, f_conf)
+subroutine ufo_aodext_tlad_setup(self, f_conf, channels)
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_aodext_tlad), intent(inout) :: self
 type(fckit_configuration), intent(in)  :: f_conf
+integer(c_int), intent(in) :: channels(:) ! List of observed wavelengths to use
 
 !Locals
+
 integer n
 character(len=maxvarlen) :: err_msg
   
@@ -114,7 +120,21 @@ character(len=maxvarlen) :: err_msg
          call abor1_ftn(err_msg)
       endif
       n = n + 1
-   enddo 
+   enddo
+
+  ! save obs wavelengths to use 
+   allocate(self%channels(size(channels)))
+   if (size(channels) >0 ) then
+           self%channels(:) = channels(:)
+   else
+           write(err_msg,*) ' ufo_aodext_tlad_setup: obs wavelengths index missing in yaml file'
+           call abor1_ftn(err_msg)
+   endif
+          
+  ! Option for doing log
+   call f_conf%get_or_die("doing_log_transform_aod", self%doing_log)
+   if (self%doing_log) call f_conf%get_or_die("eps_for_log_transform_aod", self%eps)
+
 end subroutine ufo_aodext_tlad_setup
 
 ! ------------------------------------------------------------------------------
@@ -127,6 +147,7 @@ type(ufo_aodext_tlad), intent(inout) :: self
    if (allocated(self%ext))             deallocate(self%ext)
    if (allocated(self%obss_wavelength)) deallocate(self%obss_wavelength)
    if (allocated(self%wavelength))      deallocate(self%wavelength)
+   if (allocated(self%channels))        deallocate(self%channels)
 
 end subroutine destructor
 
@@ -142,7 +163,7 @@ type(c_ptr), value,      intent(in)    :: obss
 
 !locals
  character(len=MAXVARLEN) :: geovar
- integer :: nch, nvars, nlocs
+ integer :: nch, nvars, nlocs, nobs_wavelength
 
 type(ufo_geoval), pointer :: ext_profile
 type(ufo_geoval), pointer :: delp_profile
@@ -151,7 +172,7 @@ type(ufo_geoval), pointer :: airdens_profile
  ! Get number of locations
  nlocs = obsspace_get_nlocs(obss)
 
- ! Get the number of obs type, for AOD it is the number of wavelengths
+ ! Get the number of obs type, for AOD it is the number of wavelengths to be assimilated
  nvars = self%obsvars%nvars()
 
  ! Get airdens, delp, ext and number of layers from geovals
@@ -172,10 +193,12 @@ type(ufo_geoval), pointer :: airdens_profile
     self%ext(:,:,nch) = ext_profile%vals
  enddo    
 
+
  ! Get some metadata from obsspace, observed AOD wavelengths
  ! -----------------------
- allocate(self%obss_wavelength(nvars))  
- call obsspace_get_db(obss,"MetaData", "obs_wavelength", self%obss_wavelength)
+ nobs_wavelength = obsspace_get_nchans(obss) ! number of wavelengths in obs file
+ allocate(self%obss_wavelength(nobs_wavelength))
+ call obsspace_get_db(obss, "MetaData",'obs_wavelength',self%obss_wavelength)
 
 end subroutine ufo_aodext_tlad_settraj
 
@@ -243,32 +266,37 @@ real(c_double) :: missing
  allocate(logm(nvars,nlocs))
 
  missing =missing_value(missing)
- hofx = zero
+ hofx = missing
  angstrom_tl = zero
 
  do nobs = 1, nlocs
-    do ic = 1, nvars
+    do ic = 1, size(self%channels)
        
-       if(self%obss_wavelength(ic) < self%wavelength(1) .or.&
-          self%obss_wavelength(ic) > self%wavelength(self%nprofiles)) then
-          hofx(ic, nobs) = missing
-       else
-          i = b_channel(1, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
-          j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
+       if(self%obss_wavelength(self%channels(ic)) >= self%wavelength(1) .or.&
+          self%obss_wavelength(self%channels(ic)) <= self%wavelength(self%nprofiles)) then
+          
+              i = b_channel(1, self%nprofiles, self%wavelength, self%obss_wavelength(self%channels(ic)))
+              j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(self%channels(ic)))
      
-          logm(ic, nobs) = log(self%wavelength(i)/self%wavelength(j))
-          tmp = aod_bkg(nobs, i) / aod_bkg(nobs, j)
-          arg1_tl = (aod_bkg_tl(nobs, i)-tmp*aod_bkg_tl(nobs,j))/aod_bkg(nobs,j) 
-          arg1 = tmp
+              logm(ic, nobs) = log(self%wavelength(i)/self%wavelength(j))
+              tmp = aod_bkg(nobs, i) / aod_bkg(nobs, j)
+              arg1_tl = (aod_bkg_tl(nobs, i)-tmp*aod_bkg_tl(nobs,j))/aod_bkg(nobs,j) 
+              arg1 = tmp
       
-          angstrom_tl(ic, nobs) = arg1_tl/(logm(ic, nobs) * arg1)
-          angstrom(ic, nobs) = log(arg1)/logm(ic,nobs)
+              angstrom_tl(ic, nobs) = arg1_tl/(logm(ic, nobs) * arg1)
+              angstrom(ic, nobs) = log(arg1)/logm(ic,nobs)
 
-          coef = (self%wavelength(i)/self%wavelength(j))**angstrom(ic, nobs)
-          coef_tl = coef * log(self%wavelength(i)/self%wavelength(j))*angstrom_tl(ic,nobs)
-          hofx(ic, nobs) = coef * aod_bkg_tl(nobs, i) + aod_bkg(nobs, i)* coef_tl
-       endif 
-   enddo
+              coef = (self%obss_wavelength(self%channels(ic))/self%wavelength(i))**angstrom(ic, nobs)
+              coef_tl = coef * log(self%obss_wavelength(self%channels(ic))/self%wavelength(i))*angstrom_tl(ic,nobs)
+          
+          if (self%doing_log) then
+                  hofx(ic, nobs) = (coef * aod_bkg_tl(nobs, i) + aod_bkg(nobs, i)* coef_tl)&
+                           /(aod_bkg(nobs,i) * coef + self%eps)
+          else
+                  hofx(ic, nobs) = coef * aod_bkg_tl(nobs, i) + aod_bkg(nobs, i)* coef_tl
+          endif 
+        endif
+    enddo
  enddo
  deallocate( angstrom_tl, angstrom, aod_bkg, aod_bkg_tl, ext_tl, logm)
 
@@ -323,19 +351,21 @@ real(c_double) :: missing
  allocate(angstrom(nvars,nlocs))
  allocate(logm(nvars,nlocs))
  do nobs = 1, nlocs
-    do ic = 1, nvars
-       
-       if(self%obss_wavelength(ic) < self%wavelength(1) .or.&
-          self%obss_wavelength(ic) > self%wavelength(self%nprofiles)) then     
-          angstrom(ic, nobs) = missing
-       else
- 
-       i = b_channel(1, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
-       j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
+    do ic = 1, size(self%channels)
+        
+       if(self%obss_wavelength(self%channels(ic)) >= self%wavelength(1) .or.&
+          self%obss_wavelength(self%channels(ic)) <= self%wavelength(self%nprofiles)) then
+    
+       i = b_channel(1, self%nprofiles, self%wavelength, self%obss_wavelength(self%channels(ic)))
+       j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(self%channels(ic)))
 
        logm(ic, nobs) = log(self%wavelength(i)/self%wavelength(j))
 
        angstrom(ic, nobs) = log(aod_bkg(nobs,i)/aod_bkg(nobs,j))/logm(ic, nobs)
+
+       else 
+       angstrom(ic, nobs) = missing
+
        endif
     enddo
  enddo
@@ -346,21 +376,25 @@ real(c_double) :: missing
  angstrom_ad = zero
 
  do nobs = nlocs, 1, -1
-    do ic = nvars, 1, -1
+    do ic = size(self%channels), 1, -1
       
        if( hofx(ic,nobs)/=missing.and.angstrom(ic,nobs)/=missing )then
 
-       i = b_channel(1, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
-       j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
+       i = b_channel(1, self%nprofiles, self%wavelength, self%obss_wavelength(self%channels(ic)))
        
-       coef = (self%wavelength(i)/self%wavelength(j))**angstrom(ic, nobs)
-       aod_bkg_ad(nobs, i) = aod_bkg_ad(nobs, i) + coef * hofx(ic, nobs)
-
-       angstrom_ad(ic, nobs) = angstrom_ad(ic,nobs) + coef * log(self%wavelength(i)/self%wavelength(j)) &
-                               * aod_bkg(nobs, i) * hofx(ic, nobs)
-  
-       j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(ic))
-
+       coef = (self%obss_wavelength(self%channels(ic))/self%wavelength(i))**angstrom(ic, nobs)
+       if (self%doing_log) then
+                aod_bkg_ad(nobs, i) = aod_bkg_ad(nobs, i) + coef * hofx(ic, nobs)/(aod_bkg(nobs,i) * coef + self%eps) 
+                angstrom_ad(ic, nobs) = angstrom_ad(ic,nobs) + coef * &
+                        log(self%obss_wavelength(self%channels(ic))/self%wavelength(i)) &
+                        * aod_bkg(nobs, i) * hofx(ic, nobs)/(aod_bkg(nobs,i) * coef + self%eps)
+       else
+                aod_bkg_ad(nobs, i) = aod_bkg_ad(nobs, i) + coef * hofx(ic, nobs) 
+                angstrom_ad(ic, nobs) = angstrom_ad(ic,nobs) + coef * &
+                        log(self%obss_wavelength(self%channels(ic))/self%wavelength(i)) &
+                        * aod_bkg(nobs, i) * hofx(ic, nobs)
+       endif
+       j = b_channel(2, self%nprofiles, self%wavelength, self%obss_wavelength(self%channels(ic)))
        tmp = aod_bkg(nobs, i) / aod_bkg(nobs, j)
        tmp_ad = angstrom_ad(ic, nobs)/(aod_bkg(nobs,j)*tmp*logm(ic, nobs))
        angstrom_ad = zero

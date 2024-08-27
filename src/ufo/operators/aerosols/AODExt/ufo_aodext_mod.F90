@@ -26,6 +26,9 @@ module ufo_aodext_mod
    type(oops_variables), public :: geovars
    real(kind_real), public, allocatable :: wavelength(:)!(nprofiles)
    integer, public              :: nprofiles
+   integer, public, allocatable :: channels(:) !List of observed wavelengths to use (specified in yaml)
+   logical, public              :: doing_log
+   real(kind_real), public      :: eps ! offset for log transform aod
  contains
    procedure :: setup  => ufo_aodext_setup
    procedure :: simobs => ufo_aodext_simobs
@@ -79,11 +82,12 @@ integer :: j
 end function b_channel
 
 ! ------------------------------------------------------------------------------
-subroutine ufo_aodext_setup(self, f_conf)
+subroutine ufo_aodext_setup(self, f_conf, channels)
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_aodext), intent(inout)     :: self
 type(fckit_configuration), intent(in) :: f_conf
+integer(c_int), intent(in) :: channels(:) ! List of observed wavelengths to use
 
 !Locals
 integer n
@@ -112,6 +116,19 @@ character(len=maxvarlen) :: err_msg
       n = n + 1
    enddo
 
+   ! save obs wavelengths to use 
+   allocate(self%channels(size(channels)))
+   if (size(channels) >0 ) then
+           self%channels(:) = channels(:)
+   else
+           write(err_msg,*) ' ufo_aodext_setup: obs wavelengths index missing in yaml file'
+           call abor1_ftn(err_msg)
+   endif
+   
+   ! Option for doing log
+   call f_conf%get_or_die("doing_log_transform_aod", self%doing_log)
+   if (self%doing_log) call f_conf%get_or_die("eps_for_log_transform_aod", self%eps)
+
 end subroutine ufo_aodext_setup
 
 ! ------------------------------------------------------------------------------
@@ -120,6 +137,7 @@ implicit none
 type(ufo_aodext), intent(inout) :: self
 
  if (allocated(self%wavelength)) deallocate(self%wavelength)
+ if (allocated(self%channels)) deallocate(self%channels)
 
 end subroutine destructor
 ! ------------------------------------------------------------------------------
@@ -146,16 +164,17 @@ real(kind_real), dimension(:,:,:), allocatable :: ext      !(km, nlocs, nch) ext
 real(kind_real), dimension(:,:),   allocatable :: airdens  !(km, nlocs) airdens profiles interp at obs loc  [kg.m-3]
 real(kind_real), dimension(:,:),   allocatable :: delp     !(km, nlocs) air pressure thickness profiles at obs loc[Pa]
 real(kind_real), dimension(:,:),   allocatable :: aod_bkg  !(nlocs, nch) AOD computed from modeled ext profiles
-real(kind_real), dimension(:), allocatable :: obss_wavelength ! (nvars) observed AOD wavelengths [nm]
+real(kind_real), dimension(:),     allocatable :: obss_wavelength ! (nobs_wav) observed AOD wavelengths [nm]
 
 real(kind_real) :: angstrom ! (Angstrom coefficient calculated from bkg AOD and wavelengths)
 real(kind_real) :: logm
+real(kind_real) :: aod
 
 character(len=MAXVARLEN) :: geovar
 real(c_double) :: missing
 
 character(len=MAXVARLEN) :: message
-integer :: nlayers
+integer :: nlayers, id, nobs_wavelength
 integer :: km, nobs, nch, ic, i, j, k
 
  ! Get airdens and delp and number of layers from geovals
@@ -183,17 +202,19 @@ integer :: km, nobs, nch, ic, i, j, k
 
  ! Get some metadata from obsspace, observed AOD wavelengths
  ! -----------------------
- allocate(obss_wavelength(nvars))
- call obsspace_get_db(obss,"MetaData", "obs_wavelength", obss_wavelength)
+ nobs_wavelength = obsspace_get_nchans(obss) ! number of wavelengths in obs file
+ allocate(obss_wavelength(nobs_wavelength))
+ call obsspace_get_db(obss, "MetaData",'obs_wavelength',obss_wavelength)
 
  ! Check if observed wavelength AOD is within the range of bkg wavelength to apply angstrom law
- ! else hofx set to missing value
- do ic = 1, nvars
-    if(obss_wavelength(ic) < self%wavelength(1) .or. obss_wavelength(ic) > self%wavelength(self%nprofiles)) then
-       write(message,*) 'ufo_aodext_simobs: observed wavelength outside of bkg wavelengths range', obss_wavelength(ic)
+ ! else hofx set to missing value (have the message only once and not for all obs)
+ do ic = 1, size(self%channels)
+    if(obss_wavelength(self%channels(ic)) < self%wavelength(1) .or. obss_wavelength(self%channels(ic)) > self%wavelength(self%nprofiles)) then
+       write(message,*) 'ufo_aodext_simobs: observed wavelength outside of bkg wavelengths range', obss_wavelength(self%channels(ic))
        call fckit_log%info(message)
     endif
  enddo
+ 
  ! Observation operator
  ! ------------------
 
@@ -212,19 +233,22 @@ integer :: km, nobs, nch, ic, i, j, k
  ! hofx: angstrom law
  ! ------------------
  missing =missing_value(missing)
- hofx = zero
+ hofx = missing
  do nobs = 1, nlocs
-    do ic = 1, nvars
-       if(obss_wavelength(ic) < self%wavelength(1) .or. obss_wavelength(ic) > self%wavelength(self%nprofiles)) then
-           hofx(ic,nobs) = missing
-       else
-           i = b_channel(1, self%nprofiles, self%wavelength, obss_wavelength(ic))
-           j = b_channel(2, self%nprofiles, self%wavelength, obss_wavelength(ic))
-           logm = log(self%wavelength(i)/self%wavelength(j))
-           angstrom = log(aod_bkg(nobs,i)/aod_bkg(nobs,j))/logm
-           hofx(ic,nobs) = aod_bkg(nobs,i) * (obss_wavelength(ic)/self%wavelength(i))**angstrom
-       endif
-    enddo
+       do ic = 1, (size(self%channels)) 
+           if(obss_wavelength(self%channels(ic)) >= self%wavelength(1) .and. obss_wavelength(self%channels(ic)) <= self%wavelength(self%nprofiles)) then
+              i = b_channel(1, self%nprofiles, self%wavelength, obss_wavelength(self%channels(ic)))
+              j = b_channel(2, self%nprofiles, self%wavelength, obss_wavelength(self%channels(ic)))
+              logm = log(self%wavelength(i)/self%wavelength(j))
+              angstrom = log(aod_bkg(nobs,i)/aod_bkg(nobs,j))/logm
+              aod = aod_bkg(nobs,i) * (obss_wavelength(self%channels(ic))/self%wavelength(i))**angstrom
+              if (self%doing_log) then
+                     hofx(ic,nobs) = log(aod + self%eps)
+              else       
+                     hofx(ic,nobs) = aod
+              endif        
+            endif
+       enddo
  enddo
  deallocate(ext, airdens, delp, aod_bkg, obss_wavelength)
 

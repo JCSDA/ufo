@@ -8,6 +8,7 @@
 #include "ufo/operators/aerosols/AODExt/ObsAodExtTLAD.h"
 
 #include <ostream>
+#include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -25,7 +26,11 @@ ObsAodExtTLAD::ObsAodExtTLAD(const ioda::ObsSpace & odb,
                                const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
+  // parse channels from the config and create variable names
+  const std::vector<int> channels_list = odb.assimvariables().channels();
+
   ufo_aodext_tlad_setup_f90(keyOper_, params.toConfiguration(),
+                            channels_list.size(), channels_list[0],
                             odb.assimvariables(), varin_);
 
   oops::Log::trace() << "ObsAodExtTLAD created" << std::endl;

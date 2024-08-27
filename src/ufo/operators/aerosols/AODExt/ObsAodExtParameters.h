@@ -35,6 +35,17 @@ class ObsAodExtParameters : public ObsOperatorParametersBase {
     {"bkg_wavelengths",
      "list of background wavelengths",
      this};
+
+  oops::Parameter<bool> doing_log
+    {"doing_log_transform_aod",
+     "doing log transform aod",
+     false,
+     this};
+
+  oops::OptionalParameter<double> eps
+    {"eps_for_log_transform_aod",
+     "offset of log transform AOD",
+     this};
 };
 
 }  // namespace ufo

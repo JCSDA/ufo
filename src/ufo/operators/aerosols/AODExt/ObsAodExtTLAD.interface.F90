@@ -29,7 +29,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodext_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_aodext_tlad_setup_f90')
+subroutine ufo_aodext_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_obsvars, c_geovars) bind(c,name='ufo_aodext_tlad_setup_f90')
 use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 use obs_variables_mod
@@ -38,6 +38,8 @@ integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
 type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
 type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
+integer(c_int), intent(in)     :: c_nchan
+integer(c_int), intent(in)     :: c_channels(c_nchan) ! obs wavelengths to use
 
 type(ufo_aodext_tlad), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -48,7 +50,7 @@ f_conf = fckit_configuration(c_conf)
 self%obsvars = obs_variables(c_obsvars)
 self%geovars = oops_variables(c_geovars)
 
-call self%setup(f_conf)
+call self%setup(f_conf,c_channels)
 
 end subroutine ufo_aodext_tlad_setup_c
 
