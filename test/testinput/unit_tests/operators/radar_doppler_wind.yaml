@@ -3,11 +3,7 @@ time window:
   end: 2030-10-13T00:30:00Z
 
 observations:
-- obs operator:
-    name: RadarDopplerWind
-    vertical coordinate for horizontal wind: height_levels
-    vertical coordinate for vertical wind: height
-  obs space:
+- obs space:
     name: Radar
     obsdatain:
       engine:
@@ -26,3 +22,27 @@ observations:
     coef TL: 0.1
     tolerance TL: 1.0e-14
     tolerance AD: 1.0e-12
+  obs operator:
+    name: RadarDopplerWind
+    vertical coordinate for horizontal wind: height_levels_minus_one
+    vertical coordinate for vertical wind: height
+
+- obs space:
+    name: Incorrect simulated variable used, throwing an exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_doppler_wind_obs.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/radar_doppler_wind_obs_opr_out.nc4
+    observed variables: [airTemperature]
+    simulated variables: [airTemperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_doppler_wind_geovals.nc4
+  obs operator:
+    name: RadarDopplerWind
+    vertical coordinate for horizontal wind: height_levels_minus_one
+    vertical coordinate for vertical wind: height
+  expect constructor to throw exception with message: This operator can only be used to simulate radialVelocity

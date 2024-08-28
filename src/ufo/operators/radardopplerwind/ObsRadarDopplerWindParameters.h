@@ -31,5 +31,15 @@ class ObsRadarDopplerWindParameters : public ObsOperatorParametersBase {
       this};
 };
 
+template <typename comparatorType>
+  bool anyEqualTo(const comparatorType comparator, const comparatorType x) {
+  return x == comparator;
+}
+
+template <typename comparatorType, typename... Args>
+  bool anyEqualTo(const comparatorType comparator, const comparatorType x, const Args... y) {
+  return x == comparator || anyEqualTo(comparator, y...);
+}
+
 }  // namespace ufo
 #endif  // UFO_OPERATORS_RADARDOPPLERWIND_OBSRADARDOPPLERWINDPARAMETERS_H_

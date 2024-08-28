@@ -6,8 +6,6 @@
 set ( radardopplerwind_files
     ObsRadarDopplerWind.h
     ObsRadarDopplerWind.cc
-    ObsRadarDopplerWindData.cc
-    ObsRadarDopplerWindData.h
     ObsRadarDopplerWindParameters.h
     ObsRadarDopplerWindTLAD.h
     ObsRadarDopplerWindTLAD.cc

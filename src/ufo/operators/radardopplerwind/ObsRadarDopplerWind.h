@@ -12,7 +12,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/operators/radardopplerwind/ObsRadarDopplerWindData.h"
+#include "ufo/operators/radardopplerwind/ObsRadarDopplerWindParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -62,17 +62,19 @@ class ObsRadarDopplerWind : public ObsOperatorBase,
   void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsDiagnostics &,
                    const QCFlags_t&) const override;
 
-  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
+  const oops::Variables & requiredVars() const override { return requiredVars_; };
 
  private:
   void print(std::ostream &) const override;
 
  private:
+  const Parameters_ params_;
+
   /// ObsSpace.
   const ioda::ObsSpace& odb_;
 
-  /// Data handler for the RadarDopplerWind operator and TL/AD code.
-  ObsRadarDopplerWindData data_;
+  /// GeoVaLs required by this operator.
+  oops::Variables requiredVars_;
 };
 
 // -----------------------------------------------------------------------------

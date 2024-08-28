@@ -9,13 +9,14 @@
 #define UFO_OPERATORS_RADARDOPPLERWIND_OBSRADARDOPPLERWINDTLAD_H_
 
 #include <string>
+#include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/radardopplerwind/ObsRadarDopplerWindData.h"
+#include "ufo/operators/radardopplerwind/ObsRadarDopplerWindParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -45,17 +46,25 @@ class ObsRadarDopplerWindTLAD : public LinearObsOperatorBase,
   void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
   void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
 
-  const oops::Variables & requiredVars() const override { return data_.requiredVars(); }
+  const oops::Variables & requiredVars() const override { return requiredVars_; }
 
  private:
   void print(std::ostream &) const override;
 
  private:
+  const Parameters_ params_;
+
   /// ObsSpace.
   const ioda::ObsSpace& odb_;
 
-  /// Data handler for the RadarDopplerWind operator and TL/AD code.
-  ObsRadarDopplerWindData data_;
+  /// GeoVaLs required by this linear operator.
+  oops::Variables requiredVars_;
+
+  /// Stored GeoVaLs for height associated with horizontal wind.
+  mutable std::vector<std::vector<double>> vec_z_uv_;
+
+  /// Stored GeoVaLs for height associated with vertical wind.
+  mutable std::vector<std::vector<double>> vec_z_w_;
 };
 
 // -----------------------------------------------------------------------------
