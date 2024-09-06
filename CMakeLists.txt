@@ -141,11 +141,11 @@ endif( ${oasim_FOUND} )
 
 if( ${crtm_FOUND} )
   if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-	  #https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.0.2.tgz
+	  #https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.1.2.tgz
   	  set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM")
-    set (crtm_data_tag "fix_REL-3.1.0.2")  #this should work with all v3.0 and v3.1 
+    set (crtm_data_tag "fix_REL-3.1.1.2")  #this may cause problems with older CRTM
 	  set (crtm_data_tag_postfix "fix/") #used in test/CMakeLists.txt and permits compatibility with older methods
-    set (crtm_data_tarball_hash "730883a9b1f80a5fb6bf93d9b244321f")
+    set (crtm_data_tarball_hash "58e0a5c698a438a31dc4914fcda39846")
     set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput" )
 	  set (crtm_data_tarball_name ${crtm_data_tag}.tgz)  #tarball name structure changed with the 3.1.0 release
   elseif( crtm_VERSION VERSION_EQUAL 2.4.1 )
