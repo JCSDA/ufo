@@ -147,7 +147,6 @@ character(len=MAXVARLEN), public :: var_ocn_lay_thick   = "sea_water_cell_thickn
 character(len=MAXVARLEN), public :: var_ocn_depth       = "sea_water_depth"
 character(len=MAXVARLEN), public :: var_ocn_sst         = "sea_surface_temperature"
 character(len=MAXVARLEN), public :: var_sea_td          = "sea_surface_foundation_temperature"
-character(len=MAXVARLEN), public :: var_latent_vap      = "latent_heat_vaporization"
 character(len=MAXVARLEN), public :: var_sw_rad          = "net_downwelling_shortwave_radiation"
 character(len=MAXVARLEN), public :: var_latent_heat     = "upward_latent_heat_flux_in_air"
 character(len=MAXVARLEN), public :: var_sens_heat       = "upward_sensible_heat_flux_in_air"
