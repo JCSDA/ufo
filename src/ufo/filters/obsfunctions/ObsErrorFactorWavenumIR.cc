@@ -66,6 +66,9 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
   size_t nchans = channels_.size();
   size_t nlevs = in.nlevs(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[0]);
 
+  // If no observations on this processor then nothing to do
+  if (nlocs == 0) return;
+
   // Get surface geopotential height
   std::vector<float> water_frac(nlocs);
   in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
