@@ -920,11 +920,11 @@ contains
     integer                            :: jspec, isensor, ivar, iprof, ilev
     integer                            :: nlevels
     integer                            :: nprofiles
-
+    character(MAXVARLEN)               :: ilevString
     character(MAXVARLEN)               :: varname
     character(len=max_string)          :: message
 
-    real(kind_real), allocatable       :: TmpVar(:), windsp(:), p(:), ph(:)
+    real(kind_real), allocatable       :: TmpVar(:), windsp(:), p(:), ph(:), clw(:,:)
     real(kind_real)                    :: s2m_t(1), s2m_p(1)
 
     logical                            :: variable_present
@@ -932,6 +932,7 @@ contains
     integer                            :: skinTIndexFromObsSpace
     integer                            :: ctpIndexFromObsSpace
     integer                            :: ecaIndexFromObsSpace
+    integer                            :: clwIndexFromObsSpace
 
     integer                            :: top_level, bottom_level, stride
     integer                            :: level_1000hPa, level_950hpa
@@ -967,6 +968,7 @@ contains
     skinTIndexFromObsSpace = 0 ! initialise
     ctpIndexFromObsSpace = 0 ! initialise
     ecaIndexFromObsSpace = 0 ! initialise
+    clwIndexFromObsSpace = 0 ! initialise
     do ivar = 1, size(conf % variablesFromObsSpace)
       if (index(conf % variablesFromObsSpace(ivar), "skinTemperature") > 0) then
         skinTIndexFromObsSpace = ivar
@@ -974,6 +976,8 @@ contains
         ctpIndexFromObsSpace = ivar
       else if (index(conf % variablesFromObsSpace(ivar), "cloudAmount") > 0) then
         ecaIndexFromObsSpace = ivar
+      else if (index(conf % variablesFromObsSpace(ivar), "liquidWaterContent") > 0) then
+        clwIndexFromObsSpace = ivar
       else
         message = 'ERROR: ' // trim(conf % variablesFromObsSpace(ivar)) // &
                   ' not setup to be read from ObsSpace => Aborting'
@@ -1256,6 +1260,21 @@ contains
                              obss, profiles(1:nprofiles) % cfraction)
     else
       profiles(1:nprofiles) % cfraction = zero
+    end if
+
+    ! liquidWaterContent - clw - first draft
+    if (clwIndexFromObsSpace > 0) then
+      allocate(clw(nprofiles, nlevels))
+      ! read in level by level
+      do ilev = 1, nlevels
+        write(ilevString, "(I0)") ilev
+        varname = trim(conf % variablesFromObsSpace(clwIndexFromObsSpace)) // "/lev" // trim(ilevString)
+        call get_from_obsspace(trim(varname), obss, clw(:,ilev))
+      end do
+      do iprof = 1, nprofiles
+        profiles(iprof)%clw(:) = clw(iprof,:)
+      end do
+      deallocate(clw)
     end if
 
 !RTTOV-Scatt profile setup

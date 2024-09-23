@@ -1960,6 +1960,16 @@ if( ${rttov_FOUND} )
               LIBS    ufo
               LABELS  rttov operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    test_ufo_opr_ssmis_rttov_ops
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_rttov_ops.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  rttov operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 endif( ${rttov_FOUND} )
 

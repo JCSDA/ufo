@@ -1,0 +1,63 @@
+time window:
+  begin: 2021-07-01T00:00:00Z
+  end: 2021-07-01T23:59:00Z
+
+## --------------------------------------------------------
+## The below tests are for testing the observation operator
+## for using output liquidWaterContent from the 1d-Var
+## --------------------------------------------------------
+
+observations:
+- obs operator: &ObsOperatorConf
+     name: RTTOV
+     Absorbers: &rttov_absorbers [CLW]
+     linear obs operator:
+       increment variables: 
+       - air_temperature
+       - specific_humidity
+       - uwind_at_10m
+       - vwind_at_10m 
+     variables to use from obsspace: [TestReferenceOneDVar/liquidWaterContent]
+     obs options:
+       RTTOV_default_opts: UKMO_PS45
+       SatRad_compatibility: true
+       UseRHwaterForQC: &UseRHwaterForQC true
+       QtSplitRain: false   #ssmis seems to be the only instrument to do this
+       RTTOV_GasUnitConv: true
+       UseColdSurfaceCheck: &UseColdSurfaceCheck false
+       WMO_ID: &wmo_id [285]
+       Sat_ID: &sat_id [dmsp_17]
+       Instrument_Name: &inst_name SSMIS
+       CoefficientPath: Data/
+  obs space: &ObsSpaceConf
+    name: SSMIS test reading cloud liquid water
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ssmis_f17_obs_20210701T1200_rttov.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/ssmis_f17_obs_20210701T1200_rttov_clw_out.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &all_channels 1-24
+  geovals: &GeoVaLsConf
+    filename: Data/ufo/testinput_tier_1/geovals_ssmis_onedvar_20210701T1200Z.nc4
+  rms ref: 242.42593
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 1.0e-4
+    tolerance AD: 1.0e-11
+
+# This tests the error handling when the variable doesn't exist in the given group.
+# Note this only tests the forward operator not tl/ad. The Linear test just stops when it finds the error.
+- obs operator:
+    <<: *ObsOperatorConf
+    variables to use from obsspace: [OneDVar/liquidWaterContent]
+  obs space:
+    <<: *ObsSpaceConf
+    name: SSMIS test input error handling from reading from ObsSpace
+  geovals:
+    <<: *GeoVaLsConf
+  expect simulateObs to throw exception with message: Requested variable OneDVar/liquidWaterContent/lev1 not in ObsSpace
