@@ -103,7 +103,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & options,
     oops::Log::warning() << "ObsErrorCrossVarCov: Obs error correlations not provided for "
                          << count_noErrCorrect << " of " << count_ttl_vars
                          << " channels/variables in file: " << options.inputFile.value()
-                         << ". To see which channels, turn on OOPS_TRACE\n";
+                         << ". To see which channels, turn on OOPS_TRACE\n" << std::endl;
   }
 
   // Checking valid reconditioning options if reconditioning specified.
