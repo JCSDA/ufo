@@ -29,7 +29,7 @@ static ObsOperatorMaker<ObsRadianceOASIM> makerOASIM_("OASIM");
 ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_ & params)
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_(), parameters_(params)
 {
-  const std::vector<std::string> vvin{"surface_pressure_at_mean_sea_level",
+  const std::vector<std::string> vvin{"surface_pressure",
                                       "surface_wind_speed",
                                       "ozone_thickness",
                                       "water_vapor",

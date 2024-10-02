@@ -88,7 +88,7 @@ implicit none
     logical :: is_midnight 
     integer :: km, day_of_year
     real(kind_real) :: dt
-    type(ufo_geoval), pointer :: slp, wspd, ozone, wvapor, rh, cov, clwp
+    type(ufo_geoval), pointer :: ps,  wspd, ozone, wvapor, rh, cov, clwp
     type(ufo_geoval), pointer :: ta_in, wa_in, asym, dh, cdet, pic, cdc, diatom, chloro, cyano
     type(ufo_geoval), pointer :: cocco, dino, phaeo
 
@@ -120,7 +120,8 @@ implicit none
     call obsspace_get_db(obss, "MetaData", "solarZenithAngle", Solar_Z)
 
     ! check if oasim input variables are in geovals and get them
-    call ufo_geovals_get_var(geovals, var_pmsl , slp )
+
+    call ufo_geovals_get_var(geovals, var_ps , ps )
     call ufo_geovals_get_var(geovals, var_sfc_wspeed , wspd ) 
     call ufo_geovals_get_var(geovals, var_oz_thick , ozone )
     call ufo_geovals_get_var(geovals, var_water_vapor , wvapor )
@@ -162,7 +163,7 @@ implicit none
        ! check if the ocean thickness is positive (valid)
        if (dh%vals(1,iobs) > 0) then
           call self%oasim_%run(km, dt, is_midnight, day_of_year, cosz(iobs), Wave_Ch(self%channels), &
-               slp%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
+               ps%vals(1,iobs), wspd%vals(1,iobs), ozone%vals(1,iobs), wvapor%vals(1,iobs), &
                rh%vals(1,iobs), cov%vals(1,iobs), clwp%vals(1,iobs), ta_in%vals(:,iobs), &
                wa_in%vals(:,iobs), asym%vals(:,iobs), dh%vals(:,iobs),cdet%vals(:,iobs), &
                pic%vals(:,iobs), cdc%vals(:,iobs), diatom%vals(:,iobs), chloro%vals(:,iobs), &
