@@ -43,7 +43,7 @@ module ufo_radiancerttov_utils_mod
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &
     var_sfc_q2m, var_sfc_tskin, var_prsi, var_clw, var_cli, var_cldfrac_vol, &
-    var_q, var_mixr, var_oz, var_co2, &
+    var_q, var_oz, var_co2, &
     var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit, &
     var_sfc_wdir, var_sfc_wspeed, &
     var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_tb_overcast, &
@@ -1076,11 +1076,6 @@ contains
       scale_fac = conf%scale_fac(conf%absorber_id(jspec))
 
       select case (conf%Absorbers(jspec))
-      case (var_mixr) ! mixr assumed to be in g/kg
-        call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
-        do iprof = 1, nProfiles
-          profiles(iprof)%q(top_level:bottom_level:stride) = geoval%vals(:, iprof) * scale_fac * g_to_kg
-        end do
       case (var_q)
         call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
         do iprof = 1, nProfiles
@@ -2494,7 +2489,7 @@ contains
         ! var_tb jacobians
         select case (trim(self % xstr_diags(jvar)))
 
-        case (var_ts,var_mixr,var_q,var_clw,var_cli)
+        case (var_ts,var_q,var_clw,var_cli)
 
           hofxdiags%geovals(jvar)%nval = nlevels
           if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
@@ -2512,9 +2507,6 @@ contains
               if(self % xstr_diags(jvar) == var_ts) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % t(:)
-              else if(self % xstr_diags(jvar) == var_mixr) then
-                hofxdiags%geovals(jvar)%vals(:,prof) = &
-                  RTProf % profiles_k(ichan) % q(:) * conf%scale_fac(gas_id_watervapour) / g_to_kg
               else if(self % xstr_diags(jvar) == var_q) then
                 hofxdiags%geovals(jvar)%vals(:,prof) = &
                   RTProf % profiles_k(ichan) % q(:) * conf%scale_fac(gas_id_watervapour)

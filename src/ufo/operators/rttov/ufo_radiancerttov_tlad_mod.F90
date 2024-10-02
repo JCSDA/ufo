@@ -77,8 +77,7 @@ contains
     call rttov_conf_setup(self%conf, f_confOpts, f_confOper)
 
     !DAR what is the RTTOV equivalant of making sure that humidity and ozone data are present
-    if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) < 1 .and. &
-      ufo_vars_getindex(self%conf%Absorbers, var_q)    < 1 ) then
+    if ( ufo_vars_getindex(self%conf%Absorbers, var_q) < 1 ) then
       message = 'ufo_radiancerttov_setup error: H2O must be included in RTTOV Absorbers'
       call abor1_ftn(message)
     end if
@@ -571,7 +570,7 @@ contains
       varname = self % varin(ivar)
       select case (trim(varname))
         ! Variables with nlevels
-        case (var_ts, var_q, var_mixr, var_clw, var_cli)
+        case (var_ts, var_q, var_clw, var_cli)
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           ! Check model levels is consistent in geovals
@@ -593,13 +592,6 @@ contains
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(:) * &
                       geoval_d % vals(1:geoval_d % nval, prof)) * self%conf%scale_fac(gas_id_watervapour)
-              else if (trim(varname) == var_mixr) then
-                ! scale_fac = 1 if Jacobain is in kg/kg
-                ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
-                ! humidity_mixing_ratio (var_mixr) is in g/kg therefore need additional conversion factor
-                hofx(jchan, prof) = hofx(jchan, prof) + &
-                  sum(self % RTprof_K % profiles_k(ichan+jchan-1) % q(:) * &
-                      geoval_d % vals(1:geoval_d % nval, prof)) * self%conf%scale_fac(gas_id_watervapour) / g_to_kg
               else if (trim(varname) == var_clw) then
                 if (self % conf % do_mw_scatt) then
                   hofx(jchan, prof) = hofx(jchan, prof) + &
@@ -706,7 +698,7 @@ contains
       varname = self % varin(ivar)
       select case (trim(varname))
         ! Variables with nlevels
-        case (var_ts, var_q, var_mixr, var_clw, var_cli)
+        case (var_ts, var_q, var_clw, var_cli)
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           do ichan = 1, self % nchan_total, size(self % channels)
@@ -722,13 +714,6 @@ contains
                   geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
                     self % RTprof_K % profiles_k(ichan+jchan-1) % q(:) * hofx(jchan, prof) * &
                     self%conf%scale_fac(gas_id_watervapour)
-                else if (trim(varname) == var_mixr) then
-                  ! scale_fac = 1 if Jacobain is in kg/kg
-                  ! scale_fac converts from ppmv to kg/kg if Jacobain wrt ppmv
-                  ! humidity_mixing_ratio (var_mixr) is in g/kg therefore need additional conversion factor
-                  geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
-                    (self % RTprof_K % profiles_k(ichan+jchan-1) % q(:) * hofx(jchan, prof)) * &
-                    self%conf%scale_fac(gas_id_watervapour) / g_to_kg
                 else if (trim(varname) == var_clw) then
                   if (self % conf % do_mw_scatt) then
                     geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
