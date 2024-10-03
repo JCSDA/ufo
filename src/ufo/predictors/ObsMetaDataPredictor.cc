@@ -27,13 +27,11 @@ const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
     order_(parameters.order.value().value_or(1)),
     variable_(parameters.varName) {
+  // predictor name is a variable name
+  name() = variable_;
   if (parameters.order.value() != boost::none) {
     // override the predictor name to distinguish between predictors of different orders
-    // since this is a generalized function for any obs MetaData variable, it is prudent
-    // to include the variable-name here as well to distinguish between different
-    // variables that may be retrieved for the same bias correction task
-    name() = name() + "_order_" + std::to_string(order_) + "_" +
-             variable_;
+    name() = name() + "_order_" + std::to_string(order_);
   }
 }
 

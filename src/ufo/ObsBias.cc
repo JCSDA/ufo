@@ -43,6 +43,7 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
   ObsBiasParameters params;
   params.validateAndDeserialize(config);
   byRecord_ = params.BiasCorrectionByRecord;
+
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :
        params.staticBC.value().predictors.value()) {
@@ -62,14 +63,6 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
   }
   ASSERT(nrecs_ > 0);
 
-  if (vars_.size() * prednames_.size() > 0) {
-    // Initialize the coefficients of variable predictors to 0. (Coefficients of static predictors
-    // are not stored; they are always equal to 1.)
-    biascoeffs_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * numVariablePredictors_);
-    // Read or initialize bias coefficients
-    this->read(config);
-  }
-
   oops::ObsVariables varsNoBC = params.variablesNoBC;
   varsNoBC.intersection(vars_);  // Safeguard to make sure that varsNoBC is a subset of vars_
   for (size_t ii = 0; ii < varsNoBC.size(); ++ii) {
@@ -79,7 +72,19 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
 
   // save record IDs for matching
   if (byRecord_) {
-    odb.get_db("MetaData", "stationIdentification", recIds_);
+    recIds_.resize(nrecs_);
+    // get all ids and obs types (for the hack to be removed)
+    std::vector<std::string> allids;
+    odb.get_db("MetaData", "stationIdentification", allids);
+    // save station ids for all records
+    size_t jrec = 0;
+    for (auto irec = odb.recidx_begin(); irec != odb.recidx_end(); ++irec, ++jrec) {
+      // all the identifiers will be the same for the same record, use the first one
+      const size_t iloc = odb.recidx_vector(irec)[0];
+      // remove trailing whitespaces (should really be done in files)
+      const size_t strEnd = allids[iloc].find_last_not_of(" \t");
+      recIds_[jrec] = allids[iloc].substr(0, strEnd+1);
+    }
   }
 
   if (prednames_.size() == 0) {
@@ -94,6 +99,14 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
     oops::Log::info()
             << "The following variables / channels for this ObsSpace are not bias-corrected: "
             << varsNoBC << std::endl;
+  }
+
+  if (vars_.size() * prednames_.size() > 0) {
+    // Initialize the coefficients of variable predictors to 0. (Coefficients of static predictors
+    // are not stored; they are always equal to 1.)
+    biascoeffs_ = Eigen::VectorXd::Zero(nrecs_ * vars_.size() * numVariablePredictors_);
+    // Read or initialize bias coefficients
+    this->read(config);
   }
 
   oops::Log::trace() << "ObsBias::create done." << std::endl;
@@ -185,10 +198,9 @@ void ObsBias::read(const eckit::Configuration & config) {
     }
 
     // Read all record names into the Eigen array
-    const bool rec_exists = obsgroup.exists("Record");
     std::vector<std::string> allrecords;
-    if (rec_exists) {
-      ioda::Variable recvar = obsgroup.vars.open("Record");
+    if (obsgroup.vars.exists("stationIdentification")) {
+      ioda::Variable recvar = obsgroup.vars.open("stationIdentification");
       recvar.read<std::string>(allrecords);
     }
 
@@ -198,7 +210,6 @@ void ObsBias::read(const eckit::Configuration & config) {
     const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
     const std::vector<int> pred_idx = getAllStrIndices(predictors,
                                       prednames_.begin() + numStaticPredictors_, prednames_.end());
-
     // Determine if the records are in the input file, if not, add it to the list
     std::vector<int> rec_idx;
     if (byRecord_) {
@@ -207,11 +218,6 @@ void ObsBias::read(const eckit::Configuration & config) {
                 recIds_.begin(), recIds_.end(), throwexception);
     } else {
       rec_idx.push_back(0);
-    }
-    for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
-      if (rec_idx[jrec] == -1) {
-        allrecords.push_back(recIds_[jrec]);
-      }
     }
 
     // Filter predictors and channels that we need

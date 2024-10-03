@@ -1,0 +1,73 @@
+time window:
+  begin: 2021-07-31T20:59:00Z
+  end: 2021-08-01T03:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
+  obs space:
+    name: aircraft
+    obsdatain:
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraftBCOffline_obs.nc4
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/aircraftBCOffline_obs_out.nc4
+    simulated variables: [airTemperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aircraftBCOffline_geoval.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/aircraft_bias_20210731T18Z.nc4
+    bc by record: true
+    variational bc:
+      predictors:
+      - name: constant
+      - name: obsMetadataPredictor
+        variable: aircraftAscentRate
+      - name: obsMetadataPredictor
+        variable: aircraftAscentRate
+        order: 2
+    covariance: # TODO: all of this section needs revisiting by experts, this is copy-paste from amsua yaml
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.0]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        input file: Data/ufo/testinput_tier_1/aircraft_bias_20210731T18Z.nc4
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
+  obs filters:
+    # Reassign any AIREP/PIREP (type=130) airTemperature MetaData/stationIdentification to 'KX130   '
+    - filter: Variable Assignment
+      where:
+      - variable:
+          name: ObsType/airTemperature
+        is_in: 130 
+      assignments:
+      - name: MetaData/stationIdentification
+        value: 'KX130   '
+    # Reassign any airTemperature MetaData/windUpward >30. to a value of 30.
+    - filter: Variable Assignment
+      where:
+      - variable:
+          name: MetaData/aircraftAscentRate
+        minvalue: 30.
+      assignments:
+      - name: MetaData/aircraftAscentRate
+        value: 30.
+  compareVariables:
+  - test:
+      name: hofx/airTemperature
+    reference:
+      name: GsiHofXBc/airTemperature
+    absTol: 1.0e-4

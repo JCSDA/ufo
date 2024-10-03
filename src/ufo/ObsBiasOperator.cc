@@ -76,6 +76,8 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
    */
 
   std::vector<double> biasTerm(nlocs);
+  // get all global records for bias correction by record
+  const std::vector<size_t> recnums = odb_.recidx_all_recnums();
   //  For each channel: ( nlocs X 1 ) =  ( nlocs X npreds ) * (  npreds X 1 )
   for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
     if (std::find(varIndexNoBC.begin(), varIndexNoBC.end(), jvar) == varIndexNoBC.end()) {
@@ -89,7 +91,13 @@ void ObsBiasOperator::computeObsBias(const GeoVaLs & geovals, ioda::ObsVector & 
         // axpy
         for (std::size_t jl = 0; jl < nlocs; ++jl) {
           if (predData[jp][jl * nvars + jvar] != missing) {
-            const std::size_t jrec = biascoeffs.nrecs() == 1 ? 0 : odb_.recnum()[jl];
+            std::size_t jrec = 0;
+            if (biascoeffs.nrecs() > 1) {
+              std::size_t jrec_global = odb_.recnum()[jl];
+              // find the index for this record on the local task
+              jrec = std::find(recnums.begin(), recnums.end(), jrec_global) -
+                               recnums.begin();
+            }
             const double beta = biascoeffs(jrec, jvar, jp);
             biasTerm[jl] = predData[jp][jl * nvars + jvar] * beta;
             ybias[jl * nvars + jvar] += biasTerm[jl];

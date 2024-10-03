@@ -119,6 +119,27 @@ ufo_add_test( NAME    test_ufo_bias_linear_op
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+# Test for application of bias prediction by record
+ufo_add_test( NAME    test_ufo_aircraft_bc
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aircraft_bc.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+ufo_add_test( NAME    test_ufo_aircraft_bc_mpi
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aircraft_bc.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_bias_single_channel
               TIER    1
               ECBUILD

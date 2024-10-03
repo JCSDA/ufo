@@ -32,10 +32,10 @@ observations:
     - filter: Variable Assignment
       where:
       - variable:
-          name: MetaData/windUpward
+          name: MetaData/aircraftAscentRate
         minvalue: 30.
       assignments:
-      - name: MetaData/windUpward
+      - name: MetaData/aircraftAscentRate
         value: 30.
     # The BiasCorrectionTerm/constantPredictor can be pulled directly
     # from the BiasCoefficientValue/constantPredictor, since the
@@ -97,7 +97,7 @@ observations:
           name: ObsFunction/AircraftBiasCorrectionTerm
           options:
             coeff_grpvarname: BiasCoefficientValue/ascentPredictor
-            predi_grpvarname: MetaData/windUpward
+            predi_grpvarname: MetaData/aircraftAscentRate
             predi_order: 1.
       defer to post: true
     # Compute the BiasCorrectionTerm/ascentSquaredPredictor as
@@ -110,7 +110,7 @@ observations:
           name: ObsFunction/AircraftBiasCorrectionTerm
           options:
             coeff_grpvarname: BiasCoefficientValue/ascentSquaredPredictor
-            predi_grpvarname: MetaData/windUpward
+            predi_grpvarname: MetaData/aircraftAscentRate
             predi_order: 2.
       defer to post: true
     # Use ObsFunction/LinearCombination to combine ObsValue/airTemperature with the

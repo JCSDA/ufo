@@ -81,10 +81,10 @@ std::vector<int> getRequiredVarOrChannelIndices(const ioda::ObsGroup &obsgroup,
     if ( obsgroup.vars.exists("variables") ) {
        variablesvar = obsgroup.vars.open("variables");
     } else {
-       if ( obsgroup.vars.exists("Variable") ) {
-        variablesvar = obsgroup.vars.open("Variable");
+       if ( obsgroup.vars.exists("Variables") ) {
+        variablesvar = obsgroup.vars.open("Variables");
        } else {
-        const std::string msg("no variables or Variable found!");
+        const std::string msg("no variables or Variables found!");
         // todo pjn need to find the proper exception here
         throw eckit::Exception(msg, Here());
        }
