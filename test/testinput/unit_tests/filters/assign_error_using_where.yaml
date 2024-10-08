@@ -39,7 +39,7 @@ observations:
   #..In the end, there should be a blend of some points with the larger value mixed with the orig value.
   compareVariables:                #  test output matches precalculated values
     - reference:
-        name: TestReference/surface_pressure_obserr
+        name: TestReference/air_pressure_at_surface_obserr
       test:
         name: EffectiveError/stationPressure
       absTol: 1.0e-4

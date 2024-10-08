@@ -30,7 +30,8 @@ ObsGroundgnssROPP::ObsGroundgnssROPP(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOperGroundgnssROPP_(0), odb_(odb), varin_()
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height", "surface_altitude"};
+                                    "geopotential_height",
+                                    "height_above_mean_sea_level_at_surface"};
   varin_.reset(new oops::Variables(vv));
 
   ufo_groundgnss_ropp_setup_f90(keyOperGroundgnssROPP_, params.toConfiguration());

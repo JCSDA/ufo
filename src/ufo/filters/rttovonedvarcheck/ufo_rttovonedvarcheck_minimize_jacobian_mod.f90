@@ -355,7 +355,7 @@ if (profindex % q2 > 0) then
   end do
 end if
 
-! 2.3) Surface pressure - var_ps = "surface_pressure" ! (Pa)
+! 2.3) Surface pressure - var_ps = "air_pressure_at_surface" ! (Pa)
 if (profindex % pstar > 0) then
   write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_ps), "_"
   call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &

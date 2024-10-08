@@ -47,7 +47,7 @@ observations:
        - name: stationPressure
        da_psfc_scheme: GSI
        geovar_geomz: geopotential_height
-       geovar_sfc_geomz: surface_geometric_height
+       geovar_sfc_geomz: height_above_mean_sea_level_at_surface
        station_altitude: height
 
      # Specific humidity is using the lowest model level (identity)
@@ -145,7 +145,7 @@ observations:
         name: ObsFunction/ObsErrorFactorSfcPressure
         options:
           geovar_geomz: geopotential_height
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
           station_altitude: height
   # assign TempObsErrorData/stationPressure <--- ObsErrorData before changing its Min and Max
   - filter: Variable Assignment

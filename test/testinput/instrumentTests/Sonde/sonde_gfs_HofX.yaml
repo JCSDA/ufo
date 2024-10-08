@@ -37,7 +37,7 @@ observations:
        - name: stationPressure
        da_psfc_scheme: UKMO
        geovar_geomz: geopotential_height
-       geovar_sfc_geomz: surface_geopotential_height
+       geovar_sfc_geomz: geopotential_height_at_surface
   # The reference value is calculated as
   #     sqrt( (rms(airTemperature)^2 + rms(specificHumidity)^2 + rms(windEastward)^2
   #            rms(windNorthward)^2 + rms(stationPressure)^2) / 5)

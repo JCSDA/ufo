@@ -49,7 +49,7 @@ namespace ufo {
        ufo::VariableNames::eastward_wind_derived,
        ufo::VariableNames::northward_wind_derived};
     oops::Variables variableNamesGeoVaLs{
-      {oops::Variable{ufo::VariableNames::geovals_surface_pressure}}};
+      {oops::Variable{ufo::VariableNames::geovals_air_pressure_at_surface}}};
 
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
@@ -196,9 +196,10 @@ namespace ufo {
     }
 
     // Obtain GeoVaLs surface pressure and eastward wind speed.
-    std::vector <float> &geovals_surface_pressure =
-      profileOriginal.getGeoVaLVector(oops::Variable{ufo::VariableNames::geovals_surface_pressure});
-    if (geovals_surface_pressure.empty())
+    std::vector <float> &geovals_air_pressure_at_surface =
+      profileOriginal.getGeoVaLVector(oops::Variable{
+          ufo::VariableNames::geovals_air_pressure_at_surface});
+    if (geovals_air_pressure_at_surface.empty())
       throw eckit::BadValue("Surface pressure GeoVaLs vector is empty.", Here());
 
     // Obtain vectors that were produced in the AveragePressure routine.
@@ -225,7 +226,7 @@ namespace ufo {
     // Create concatenated vector of log(pressure) on both surface and upper-air levels
     // for use in the wind speed averaging.
     std::vector <float> LogPWB = LogPB;
-    LogPWB.insert(LogPWB.begin(), std::log(geovals_surface_pressure[0]));
+    LogPWB.insert(LogPWB.begin(), std::log(geovals_air_pressure_at_surface[0]));
 
     // Flag reported value if the probability of gross error is too large.
     // Values which have been flagged here, or previously, are not used in the averaging routines.

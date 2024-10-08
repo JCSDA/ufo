@@ -46,7 +46,7 @@ character(kind=c_char,len=:), allocatable :: coord_name
 
   call yaml_conf%get_or_die("VertCoord",coord_name)
   self%v_coord = coord_name
-  if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_zm ) then
+  if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_geomz ) then
       call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
   endif
 

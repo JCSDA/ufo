@@ -20,7 +20,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/osw_cygnss_geovals_2020121500.nc4
   obs operator:
     name: VertInterp
-    vertical coordinate: height
+    vertical coordinate: height_above_mean_sea_level
     observation vertical coordinate: height
     interpolation method: linear
   obs filters:

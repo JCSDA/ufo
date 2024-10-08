@@ -67,17 +67,17 @@ class ObsSfcPCorrectedParameters : public ObsOperatorParametersBase {
      "Scheme used for surface pressure correction (UKMO or WRFDA)",
      SfcPCorrectionType::UKMO, this};
 
-  /// Note: "height" default value has to be consistent with var_geomz defined
-  /// in ufo_variables_mod.F90
+  /// Note: "height_above_mean_sea_level" default value has to be consistent with var_geomz
+  /// defined in ufo_variables_mod.F90
   oops::Parameter<std::string> geovarGeomZ{"geovar_geomz",
      "Model variable for height of vertical levels",
-     "height", this};
+     "height_above_mean_sea_level", this};
 
-  /// Note: "surface_altitude" default value has to be consistent with var_sfc_geomz
-  /// in ufo_variables_mod.F90
+  /// Note: "height_above_mean_sea_level_at_surface" default value has to be consistent with
+  /// var_sfc_geomz in ufo_variables_mod.F90
   oops::Parameter<std::string> geovarSfcGeomZ{"geovar_sfc_geomz",
      "Model variable for surface height",
-     "surface_altitude", this};
+     "height_above_mean_sea_level_at_surface", this};
 
   /// Note: "station_altitude" default value is "stationElevation"
   oops::Parameter<std::string> ObsHeightName{"station_altitude", "stationElevation", this};

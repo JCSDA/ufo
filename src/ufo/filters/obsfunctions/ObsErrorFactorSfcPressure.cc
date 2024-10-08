@@ -53,7 +53,7 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   invars_ += Variable("MetaData/stationElevation");
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVaLs/surface_pressure");
+  invars_ += Variable("GeoVaLs/air_pressure_at_surface");
   invars_ += Variable("GeoVaLs/air_pressure");
   invars_ += Variable("GeoVaLs/virtual_temperature");
   const std::string geovar_geomz = options_->geovar_geomz.value();
@@ -128,7 +128,7 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
     }
   }
   std::vector<float> model_pres_sfc(nlocs);
-  data.get(Variable("GeoVaLs/surface_pressure"), model_pres_sfc);
+  data.get(Variable("GeoVaLs/air_pressure_at_surface"), model_pres_sfc);
 
   // Get GeoVaLs pointer for retrieving vertical profiles
   const ufo::GeoVaLs * gvals = data.getGeoVaLs();

@@ -100,7 +100,7 @@ observations:
         - surface_temperature
         - specific_humidity_at_two_meters_above_surface
         - skin_temperature
-        - surface_pressure
+        - air_pressure_at_surface
         qtotal: true
         qtotal split rain: true
     maxvalue: 69.8        # example value
@@ -170,7 +170,7 @@ observations:
         - surface_temperature
         - specific_humidity_at_two_meters_above_surface
         - skin_temperature
-        - surface_pressure
+        - air_pressure_at_surface
         qtotal: true
         qtotal split rain: true
     maxvalue: 69.8        # example value

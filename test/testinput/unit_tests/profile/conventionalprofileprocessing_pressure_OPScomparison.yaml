@@ -30,4 +30,4 @@ Sondes:
     PrintStationID: true
     Comparison_Tol: 0.1
     alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
-    "height_levels_minus_one": "air_pressure_levels_minus_one"}
+    "height_above_mean_sea_level_levels_minus_one": "air_pressure_levels_minus_one"}

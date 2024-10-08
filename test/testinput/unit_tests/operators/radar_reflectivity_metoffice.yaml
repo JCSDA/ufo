@@ -61,7 +61,7 @@ observations:
       variables:
       - name: reflectivity
       observation vertical coordinate: height
-      vertical coordinate: height
+      vertical coordinate: height_above_mean_sea_level
   geovals:
     filename: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_geovals.nc4
   expect constructor to throw exception with message: This operator can only be used to simulate reflectivity.

@@ -29,7 +29,7 @@ ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const Parameters_
   : ObsOperatorBase(odb), keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
 {
   std::vector<std::string> vv{"air_temperature", "specific_humidity",
-                              "surface_altitude"};
+                              "height_above_mean_sea_level_at_surface"};
 
   if ( params.options.value().vertLayer.value() == "mass" ) {
     vv.push_back("air_pressure");

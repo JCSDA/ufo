@@ -140,7 +140,7 @@ observations:
     - surface_temperature # 3
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5
-    - surface_pressure # 6
+    - air_pressure_at_surface # 6
     retrieval variables not from geovals:
     - cloud_top_pressure # 16
     - cloud_fraction # 17
@@ -259,7 +259,7 @@ observations:
     - surface_temperature # 3
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5
-    - surface_pressure # 6
+    - air_pressure_at_surface # 6
     retrieval variables not from geovals:
     - cloud_top_pressure # 16
     - cloud_fraction # 17
@@ -324,7 +324,7 @@ observations:
     - surface_temperature # 3
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5
-    - surface_pressure # 6
+    - air_pressure_at_surface # 6
     retrieval variables not from geovals:
     - cloud_top_pressure # 16
     - cloud_fraction # 17

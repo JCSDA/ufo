@@ -102,7 +102,7 @@ observations:
       channels: *all_channels
     where:
     - variable:
-        name: GeoVaLs/surface_geopotential_height
+        name: GeoVaLs/geopotential_height_at_surface
       maxvalue: 1000.0
 # Gross check
   - filter: Background Check

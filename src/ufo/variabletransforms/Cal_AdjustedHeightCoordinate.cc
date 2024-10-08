@@ -33,7 +33,7 @@ namespace ufo {
   TransformBase(options, data, flags, obserr), gvals_() {
     oops::Log::trace() << "Cal_AdjustedHeightCoordinate::Constructor start" << std::endl;
     // List of GeoVaLs this transform will need access to
-    gvals_ += Variable("GeoVaLs/surface_geometric_height");
+    gvals_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
     oops::Log::trace() << "Cal_AdjustedHeightCoordinate::Constructor done" << std::endl;
   }
 
@@ -93,7 +93,8 @@ namespace ufo {
       }
 
       // Get the surface geometric height
-      gvals->getAtLocation(surfaceGeometricHeight, oops::Variable{"surface_geometric_height"},
+      gvals->getAtLocation(surfaceGeometricHeight,
+                           oops::Variable{"height_above_mean_sea_level_at_surface"},
                            iloc);
 
       // Subtract off the scaled station elevation

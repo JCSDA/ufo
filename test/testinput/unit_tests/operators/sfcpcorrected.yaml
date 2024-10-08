@@ -69,13 +69,14 @@ observations:
     coef TL: 0.1
     tolerance TL: 1.0e-13
     tolerance AD: 1.0e-11
-# New additions to test nc-diag file output variables that are not height and surface_altitude,
-# which can be overriden with new optional parameters geovar_geomz and geovar_sfc_geomz
+# New additions to test nc-diag file output variables that are not height and
+# height_above_mean_sea_level_at_surface, which can be overriden with new optional parameters
+# geovar_geomz and geovar_sfc_geomz
 - obs operator:
     name: SfcPCorrected
     da_psfc_scheme: UKMO
     geovar_geomz: geopotential_height               # height (default, delete option)
-    geovar_sfc_geomz: surface_geopotential_height   # surface_altitude (default, delete option)
+    geovar_sfc_geomz: geopotential_height_at_surface   # height_above_mean_sea_level_at_surface (default, delete option)
   obs space:
     name: SfcPCorrected
     obsdatain:
@@ -95,7 +96,7 @@ observations:
     name: SfcPCorrected
     da_psfc_scheme: WRFDA
     geovar_geomz: geopotential_height
-    geovar_sfc_geomz: surface_geopotential_height
+    geovar_sfc_geomz: geopotential_height_at_surface
   obs space:
     name: SfcPCorrected
     obsdatain:
@@ -115,7 +116,7 @@ observations:
     name: SfcPCorrected
     da_psfc_scheme: GSI
     geovar_geomz: geopotential_height
-    geovar_sfc_geomz: surface_geopotential_height
+    geovar_sfc_geomz: geopotential_height_at_surface
   obs space:
     name: SfcPCorrected
     obsdatain:

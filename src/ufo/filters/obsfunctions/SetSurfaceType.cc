@@ -31,7 +31,7 @@ namespace ufo {
 
     // Include list of required data from GeoVaLs
     invars_ += Variable("GeoVaLs/ice_area_fraction");
-    invars_ += Variable("GeoVaLs/surface_altitude");
+    invars_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
 
     if (options_.UseModelLandFraction.value()) {
       invars_ += Variable("GeoVaLs/land_area_fraction");
@@ -75,7 +75,7 @@ namespace ufo {
     // mandatory variables
     in.get(Variable("GeoVaLs/ice_area_fraction"), ice_area_frac);
     in.get(Variable("MetaData/latitude"), latitude);
-    in.get(Variable("GeoVaLs/surface_altitude"), model_height);
+    in.get(Variable("GeoVaLs/height_above_mean_sea_level_at_surface"), model_height);
 
     int surftype_land_   = options_.SurfaceTypeLand.value();
     int surftype_sea_    = options_.SurfaceTypeSea.value();

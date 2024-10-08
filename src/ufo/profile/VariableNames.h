@@ -143,17 +143,18 @@ struct VariableNames
 
   // GeoVaLs
 
-  static constexpr const char* const geovals_orog = "surface_altitude";
+  static constexpr const char* const geovals_orog = "height_above_mean_sea_level_at_surface";
   static constexpr const char* const geovals_pressure = "air_pressure";
   static constexpr const char* const geovals_pressure_rho = "air_pressure_levels";
   static constexpr const char* const geovals_pressure_rho_minus_one =
     "air_pressure_levels_minus_one";
-  static constexpr const char* const geovals_height = "height";
-  static constexpr const char* const geovals_height_rho = "height_levels";
-  static constexpr const char* const geovals_height_rho_minus_one = "height_levels_minus_one";
+  static constexpr const char* const geovals_height = "height_above_mean_sea_level";
+  static constexpr const char* const geovals_height_rho = "height_above_mean_sea_level_levels";
+  static constexpr const char* const geovals_height_rho_minus_one =
+    "height_above_mean_sea_level_levels_minus_one";
   static constexpr const char* const geovals_potential_temperature = "potential_temperature";
   static constexpr const char* const geovals_air_temperature = "air_temperature";
-  static constexpr const char* const geovals_surface_pressure = "surface_pressure";
+  static constexpr const char* const geovals_air_pressure_at_surface = "air_pressure_at_surface";
   static constexpr const char* const geovals_relative_humidity = "relative_humidity";
 
   // GeoVaLs used in validation

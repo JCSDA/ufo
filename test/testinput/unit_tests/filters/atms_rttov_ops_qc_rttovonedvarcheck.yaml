@@ -71,7 +71,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     surface emissivity:
       type: fixed # default
       EmissSeaDefault: 0.0 # default
@@ -138,7 +138,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     surface emissivity:
       type: fixed # default
       EmissSeaDefault: 0.0 # default
@@ -213,7 +213,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     nlevels: 70
     qtotal: true
     UseQtSplitRain: false
@@ -273,7 +273,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     nlevels: 70
     qtotal: true
     UseQtSplitRain: false
@@ -335,7 +335,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     nlevels: 70
     qtotal: true
     RetrievedErrorFactor: -1.0
@@ -367,7 +367,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     nlevels: 70
     qtotal: true
     RetrievedErrorFactor: -1.0
@@ -458,7 +458,7 @@ observations:
     - surface_temperature
     - specific_humidity_at_two_meters_above_surface
     - skin_temperature
-    - surface_pressure
+    - air_pressure_at_surface
     retrieval variables not from geovals:
     - surface_emissivity
     surface emissivity:

@@ -48,7 +48,7 @@ ObsAodMetOfficeTLAD::ObsAodMetOfficeTLAD(const ioda::ObsSpace & odb, const Param
   // 2. Define which model fields will be needed
   // pressure fields:
   varin_.push_back("air_pressure_levels");
-  varin_.push_back("surface_pressure");
+  varin_.push_back("air_pressure_at_surface");
 
   // dust mass concentration:
   std::string dust_var_name;  // dust variable name in geovals
@@ -78,7 +78,7 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
 
     // Get 2-D surface pressure
     std::vector<double> ps(nprofiles);  // surface pressure (Pa)
-    geovals.get(ps, oops::Variable{"surface_pressure"});
+    geovals.get(ps, oops::Variable{"air_pressure_at_surface"});
 
     // Get 3-D air pressure on rho levels (Pa), one level at a time
     std::vector<std::vector<double>> plev(nlevels, std::vector<double>(nprofiles));

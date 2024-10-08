@@ -291,8 +291,8 @@ subroutine check_adjustment_function(adjustment_function, observation_vertical_c
       ! If the adjustment function is subtract scaled station elevation check that the
       ! observation vertical coordinate is station elevation
       if (trim(adjustment_function) == "subtract scaled station elevation") then
-        ! Add surface_geometric_height to the list of geovars
-        if (present(geovars)) call geovars%push_back('surface_geometric_height')
+        ! Add height_above_mean_sea_level_at_surface to the list of geovars
+        if (present(geovars)) call geovars%push_back('height_above_mean_sea_level_at_surface')
         ! Check that height is the observation vertical coordinate
         if (trim(observation_vertical_coordinate) .ne. "height") &
           call abor1_ftn('Observation vertical coordinate adjustment using ' // &
@@ -334,7 +334,7 @@ allocate(stationElevation(nlocs))
 call obsspace_get_db(obss, 'MetaData', 'stationElevation', stationElevation)
 
 ! This function needs the surface geometric height from the geovals
-call ufo_geovals_get_var(geovals, "surface_geometric_height", sgh)
+call ufo_geovals_get_var(geovals, "height_above_mean_sea_level_at_surface", sgh)
 
 ! Subtract off combination of surface station elevation and station elevation depending on how close
 ! to surface

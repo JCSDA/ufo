@@ -20,10 +20,10 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
   Aliases_.emplace("pressure", oops::Variable{"air_pressure"});
   Aliases_.emplace("virtualTemperature", oops::Variable{"virtual_temperature"});
   Aliases_.emplace("potentialTemperature", oops::Variable{"potential_temperature"});
-  Aliases_.emplace("stationPressure", oops::Variable{"surface_pressure"});
+  Aliases_.emplace("stationPressure", oops::Variable{"air_pressure_at_surface"});
   Aliases_.emplace("depthBelowWaterSurface", oops::Variable{"ocean_depth"});
   Aliases_.emplace("waterTemperature", oops::Variable{"ocean_temperature"});
-  Aliases_.emplace("surfacePressure", oops::Variable{"surface_pressure"});
+  Aliases_.emplace("surfacePressure", oops::Variable{"air_pressure_at_surface"});
   Aliases_.emplace("seaSurfaceTemperature", oops::Variable{"sea_surface_temperature"});
   Aliases_.emplace("equivalentReflectivityFactor", oops::Variable
                                                                 {"equivalent_reflectivity_factor"});

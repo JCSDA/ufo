@@ -27,7 +27,7 @@ ModelHeightAdjustedAirTemperature::ModelHeightAdjustedAirTemperature(
   // Required observation data
   invars_ += Variable("ObsValue/airTemperatureAt2M");
   // Required model surface altitude
-  invars_ += Variable("GeoVaLs/surface_altitude");
+  invars_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
 
   // Required observation station height
   parameters_.validateAndDeserialize(conf);
@@ -45,7 +45,7 @@ void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
   std::vector<float> StationHeight(nlocs);
 
   in.get(Variable("ObsValue/airTemperatureAt2M"), t2);
-  in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
+  in.get(Variable("GeoVaLs/height_above_mean_sea_level_at_surface"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
   const float missing = util::missingValue<float>();

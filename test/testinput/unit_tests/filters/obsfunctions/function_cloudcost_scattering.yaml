@@ -53,7 +53,7 @@ observations:
           - surface_temperature
           - specific_humidity_at_two_meters_above_surface
           - skin_temperature
-          - surface_pressure
+          - air_pressure_at_surface
           - surface_emissivity
           qtotal: true                          # not default
           qtotal split rain: false              # default

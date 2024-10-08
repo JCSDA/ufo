@@ -12,21 +12,21 @@ obs space:
 #     engine:
 #       type: H5File
 #       obsfile: Data/sondes_obs_2018041500_s_opr_utils_out.nc4
-  simulated variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
-  observed variables: [eastward_wind, surface_pressure, northward_wind, air_temperature]
+  simulated variables: [eastward_wind, air_pressure_at_surface, northward_wind, air_temperature]
+  observed variables: [eastward_wind, air_pressure_at_surface, northward_wind, air_temperature]
 cases:
   without variables:
     expected operator variables:
     - name: eastward_wind
-    - name: surface_pressure
+    - name: air_pressure_at_surface
     - name: northward_wind
     - name: air_temperature
     expected indices: [0, 1, 2, 3]
   with variables:
     variables:
     - name: air_temperature
-    - name: surface_pressure
+    - name: air_pressure_at_surface
     expected operator variables:
     - name: air_temperature
-    - name: surface_pressure
+    - name: air_pressure_at_surface
     expected indices: [3, 1]

@@ -27,8 +27,9 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 
  public:
   oops::Parameter<std::string> original_obserr{"original_obserr", "ObsErrorData", this};
-  oops::Parameter<std::string> geovar_geomz{"geovar_geomz", "height", this};
-  oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz", "surface_altitude", this};
+  oops::Parameter<std::string> geovar_geomz{"geovar_geomz", "height_above_mean_sea_level", this};
+  oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz",
+                                                "height_above_mean_sea_level_at_surface", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -42,9 +43,9 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 /// The starting obserror is then altered by this code with the "inflate error" action,
 /// For testing purposes, the optional parameter of original_obserr group name such as ObsError
 /// to override the default ObsErrorData can be used for tolerance check of reference results.
-/// Internally, the code expects to find GeoVals/surface_altitude and GeoVaLs/height, however,
-/// some datasets may have GeoVaLs/surface_geopotential_height and GeoVaLs/geopotential_height
-/// in its place.
+/// Internally, the code expects to find GeoVals/height_above_mean_sea_level_at_surface
+/// and GeoVaLs/height, however, some datasets may have GeoVaLs/geopotential_height_at_surface
+/// and GeoVaLs/geopotential_height in its place.
 ///
 /// ~~~~
 ///
@@ -58,8 +59,10 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///         inflation variable:
 ///           name: ObsFunction/ObsErrorFactorSfcPressure
 ///           options:
-///             geovar_geomz: geopotential_height     # default is height
-///             geovar_sfc_geomz: surface_geopotential_height     # default is surface_altitude
+///             # default is height
+///             geovar_geomz: geopotential_height
+///             # default is height_above_mean_sea_level_at_surface
+///             geovar_sfc_geomz: geopotential_height_at_surface
 ///
 class ObsErrorFactorSfcPressure : public ObsFunctionBase<float> {
  public:

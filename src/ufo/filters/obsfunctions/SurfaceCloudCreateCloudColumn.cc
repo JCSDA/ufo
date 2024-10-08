@@ -50,8 +50,9 @@ SurfaceCloudCreateCloudColumn::SurfaceCloudCreateCloudColumn(
   invars_ += Variable(options_.modelLevelCloudBaseHeightDCC1.value());
   invars_ += Variable(options_.modelLevelCloudBaseHeightDCC2.value());
   invars_ += Variable(options_.modelLevelCloudBaseHeightDCC3.value());
-  // Required model geopotenial height
-  invars_ += Variable("GeoVaLs/height");
+  // Required model height
+  // TODO(model variable naming sprint): which height is it?
+  invars_ += Variable("GeoVaLs/height_above_mean_sea_level");
 }
 
 // -----------------------------------------------------------------------------
@@ -59,7 +60,8 @@ SurfaceCloudCreateCloudColumn::SurfaceCloudCreateCloudColumn(
 void SurfaceCloudCreateCloudColumn::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable("GeoVaLs/height"));
+  // TODO(model variable naming sprint): which height is it?
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/height_above_mean_sea_level"));
   const GeoVaLs * const gv(in.getGeoVaLs());
 
   // Cloud fraction at base
@@ -132,7 +134,7 @@ void SurfaceCloudCreateCloudColumn::compute(const ObsFilterData & in,
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     std::fill(cloudBaseHeight.begin(), cloudBaseHeight.end(), missing);
     std::vector<float> Height(nlevs);
-    gv->getAtLocation(Height, oops::Variable{"height"}, iloc);
+    gv->getAtLocation(Height, oops::Variable{"height_above_mean_sea_level"}, iloc);
     cloudBaseHeight[0] = modelLevelCBH[iloc];
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       // Now check whether the Height of each model level is above or below

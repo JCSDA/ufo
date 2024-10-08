@@ -29,7 +29,8 @@ SurfaceCloudModelLevelCBH::SurfaceCloudModelLevelCBH(
   // Required cloud base height above mean sea level
   invars_ += Variable(options_.cloud_base_height.value());
   // Required model geopotenial height
-  invars_ += Variable("GeoVaLs/height");
+  // Required model height
+  invars_ += Variable("GeoVaLs/height_above_mean_sea_level");
 }
 
 // -----------------------------------------------------------------------------
@@ -37,7 +38,7 @@ SurfaceCloudModelLevelCBH::SurfaceCloudModelLevelCBH(
 void SurfaceCloudModelLevelCBH::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
   const size_t nlocs = in.nlocs();
-  const size_t nlevs = in.nlevs(Variable("GeoVaLs/height"));
+  const size_t nlevs = in.nlevs(Variable("GeoVaLs/height_above_mean_sea_level"));
   const GeoVaLs * const gv(in.getGeoVaLs());
 
   // Cloud Base Height
@@ -51,7 +52,7 @@ void SurfaceCloudModelLevelCBH::compute(const ObsFilterData & in,
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     std::vector<float> Height(nlevs);
-    gv->getAtLocation(Height, oops::Variable{"height"}, iloc);
+    gv->getAtLocation(Height, oops::Variable{"height_above_mean_sea_level"}, iloc);
     ZClear[iloc] = -1;
     for (size_t ilev = 0; ilev < nlevs; ilev++) {
       if (ilev == nlevs-1 && Height[ilev] >= CBH[iloc]) {

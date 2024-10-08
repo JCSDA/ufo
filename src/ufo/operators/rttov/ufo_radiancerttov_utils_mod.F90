@@ -1571,8 +1571,8 @@ contains
         call obsspace_get_db(obss, "MetaData", "heightOfSurface", TmpVar)
         profiles(1:nprofiles)%elevation = TmpVar(1:nprofiles) * m_to_km !for RTTOV
         message = 'Using MetaData/surface_height for profile elevation'
-      else if (ufo_vars_getindex(geovals%variables, "surface_altitude") > 0) then
-        call ufo_geovals_get_var(geovals, "surface_altitude", geoval)
+      else if (ufo_vars_getindex(geovals%variables, "height_above_mean_sea_level_at_surface") > 0) then
+        call ufo_geovals_get_var(geovals, "height_above_mean_sea_level_at_surface", geoval)
         profiles(1:nprofiles)%elevation = geoval%vals(1, 1:nprofiles) * m_to_km
         message = 'Using surf_altitude from GeoVaLs for profile elevation'
       else

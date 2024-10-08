@@ -67,7 +67,7 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
     invars_ += Variable("GeoVaLs/cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water");
     invars_ += Variable("GeoVaLs/air_pressure");
     invars_ += Variable("GeoVaLs/air_temperature");
-    invars_ += Variable("GeoVaLs/surface_pressure");
+    invars_ += Variable("GeoVaLs/air_pressure_at_surface");
     invars_ += Variable("GeoVaLs/surface_temperature");
     invars_ += Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface");
   }
@@ -207,7 +207,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
 
         if (fields_[ifield] == "specific_humidity_at_two_meters_above_surface"
             && options_.qtotal_lnq_gkg.value()) {
-          in.get(Variable("GeoVaLs/surface_pressure"), level_gv, gv_pres);
+          in.get(Variable("GeoVaLs/air_pressure_at_surface"), level_gv, gv_pres);
           in.get(Variable("GeoVaLs/surface_temperature"), level_gv, gv_temp);
           in.get(Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface"),
                  level_gv, gv_qgas);

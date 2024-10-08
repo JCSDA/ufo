@@ -35,7 +35,7 @@ observations:
        da_psfc_scheme: UKMO
        # Remove the next two lines when using geoval from JEDI, not GSI.
        geovar_geomz: geopotential_height
-       geovar_sfc_geomz: surface_geopotential_height
+       geovar_sfc_geomz: geopotential_height_at_surface
   rms ref: 670118.56258
   tolerance: 1.e-05
 

@@ -54,7 +54,7 @@ geovals:
 obs diagnostics:
   variables:
   - northward_wind_background_error
-  - surface_pressure_background_error
+  - air_pressure_at_surface_background_error
   - specific_humidity_background_error
 reference obs diagnostics:
   filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_obsdiag_2018041500_s.nc4

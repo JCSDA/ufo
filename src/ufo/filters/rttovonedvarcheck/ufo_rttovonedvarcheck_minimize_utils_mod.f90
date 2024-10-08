@@ -144,7 +144,7 @@ if (profindex % q2 > 0) then
   prof_x(profindex % q2) = log (geoval%vals(1, 1) * 1000.0_kind_real) ! ln(g/kg)
 end if
 
-! var_ps = "surface_pressure" ! (Pa)
+! var_ps = "air_pressure_at_surface" ! (Pa)
 if (profindex % pstar > 0) then
   call ufo_geovals_get_var(geovals, var_ps, geoval)
   prof_x(profindex % pstar) = geoval%vals(1, 1) / 100.0_kind_real  ! Pa to hPa
@@ -362,7 +362,7 @@ if (profindex % q2 > 0) then
   geovals%geovals(gv_index)%vals(1,1) = EXP (prof_x(profindex % q2)) / 1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
-! var_ps = "surface_pressure" ! (Pa)
+! var_ps = "air_pressure_at_surface" ! (Pa)
 if (profindex % pstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar

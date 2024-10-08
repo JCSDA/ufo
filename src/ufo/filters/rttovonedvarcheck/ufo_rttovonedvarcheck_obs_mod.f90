@@ -264,8 +264,8 @@ end if
 ! Read in elevation for all obs
 if (obsspace_has(config % obsdb, "MetaData", "heightOfSurface")) then
   call obsspace_get_db(config % obsdb, "MetaData", "heightOfSurface", self % elevation(:))
-else if (ufo_vars_getindex(geovals % variables, 'surface_altitude') > 0) then
-  call ufo_geovals_get_var(geovals, 'surface_altitude', geoval)
+else if (ufo_vars_getindex(geovals % variables, 'height_above_mean_sea_level_at_surface') > 0) then
+  call ufo_geovals_get_var(geovals, 'height_above_mean_sea_level_at_surface', geoval)
   self % elevation(:) = geoval%vals(1, :)
 else
   self % elevation(:) = zero

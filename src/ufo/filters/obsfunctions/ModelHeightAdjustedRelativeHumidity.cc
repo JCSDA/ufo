@@ -28,7 +28,7 @@ ModelHeightAdjustedRelativeHumidity::ModelHeightAdjustedRelativeHumidity(
   // Retrieve observation data  // Required observation data
   invars_ += Variable("ObsValue/relativeHumidityAt2M");
   // Required model surface altitude
-  invars_ += Variable("GeoVaLs/surface_altitude");
+  invars_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
 
   // Required observation station height and temperature
   parameters_.validateAndDeserialize(conf);
@@ -50,7 +50,7 @@ void ModelHeightAdjustedRelativeHumidity::compute(const ObsFilterData & in,
 
   in.get(Variable("ObsValue/relativeHumidityAt2M"), rh);
   in.get(parameters_.temperature.value(), T);
-  in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
+  in.get(Variable("GeoVaLs/height_above_mean_sea_level_at_surface"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
   const float missing = util::missingValue<float>();

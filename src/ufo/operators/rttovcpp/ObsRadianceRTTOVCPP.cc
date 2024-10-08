@@ -39,7 +39,7 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
     "air_pressure",
     "air_temperature",
     "specific_humidity",
-    "surface_pressure",
+    "air_pressure_at_surface",
     "surface_temperature",   // this is actually var_sfc_t2m
     "specific_humidity_at_two_meters_above_surface",
     "uwind_at_10m",
@@ -47,7 +47,7 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
     "skin_temperature",
     "seaice_fraction",
     "landmask",
-    "surface_geopotential_height"
+    "geopotential_height_at_surface"
   };
 
   for (size_t jvar = 0; jvar < vv.size(); ++jvar) {

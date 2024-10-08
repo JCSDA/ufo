@@ -33,7 +33,7 @@ observations:
       variables:
       - name: airTemperature
       observation vertical coordinate: height
-      vertical coordinate: height
+      vertical coordinate: height_above_mean_sea_level
       interpolation method: linear
   geovals:
     filename: Data/ufo/testinput_tier_1/radar_reflectivity_metoffice_geovals.nc4

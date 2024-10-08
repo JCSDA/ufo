@@ -26,5 +26,5 @@ observations:
       error_min: 100         # 1 mb
       error_max: 300         # 3 mb
       error_gross: 360       # 3.6 mb
-    variables: [surface_pressure_obserr]
+    variables: [air_pressure_at_surface_obserr]
     tolerance: 1.0

@@ -158,7 +158,7 @@ observations:
           variable: windEastward
           inflation factor: 4.0
           adjusted_error_name: GsiAdjustObsError
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
   - filter: Perform Action
     filter variables:
     - name: windNorthward
@@ -174,7 +174,7 @@ observations:
           variable: windNorthward
           inflation factor: 4.0
           adjusted_error_name: GsiAdjustObsError
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
   #Gross Check
   - filter: Background Check
     filter variables:

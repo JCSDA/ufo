@@ -36,7 +36,8 @@ ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
     nhoriz_(params.options.value().nHoriz)
 {
   const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height", "surface_altitude"};
+                                    "geopotential_height",
+                                    "height_above_mean_sea_level_at_surface"};
   varin_.reset(new oops::Variables(vv));
 
   ufo_gnssro_bndropp2d_setup_f90(keyOperGnssroBndROPP2D_,

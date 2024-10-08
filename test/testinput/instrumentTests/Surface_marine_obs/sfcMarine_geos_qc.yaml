@@ -47,7 +47,7 @@ observations:
        - name: stationPressure
        da_psfc_scheme: GSI
        geovar_geomz: geopotential_height
-       geovar_sfc_geomz: surface_geometric_height
+       geovar_sfc_geomz: height_above_mean_sea_level_at_surface
        station_altitude: height
 
      # Specific humidity is using the lowest model level (identity)
@@ -143,7 +143,7 @@ observations:
         name: ObsFunction/ObsErrorFactorSfcPressure
         options:
           geovar_geomz: geopotential_height
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
           station_altitude: height
   # assign TempObsErrorData/stationPressure <--- ObsErrorData before changing its Min and Max
   - filter: Variable Assignment
@@ -341,7 +341,7 @@ observations:
         options:
           variable: airTemperature
           inflation factor: 8.0
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
     defer to post: true
   # assign TempObsErrorData/airTemperature  <--- ObsErrorData before changing its Min and Max
   - filter: Variable Assignment
@@ -546,7 +546,7 @@ observations:
         options:
           variable: virtualTemperature
           inflation factor: 8.0
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
     defer to post: true
 
   # assign TempObsErrorData/virtualTemperature  <--- ObsErrorData before changing its Min and Max
@@ -712,7 +712,7 @@ observations:
 #          variable: specificHumidity
 #          inflation factor: 8
 #          adjusted_error_name: GsiAdjustObsError
-#          geovar_sfc_geomz: surface_geometric_height
+#          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
 
   # Background  check
   # ratio threshold 8.0 PreQC /= 3
@@ -828,7 +828,7 @@ observations:
           variable: windEastward
           inflation factor: 4.0
           adjusted_error_name: GsiAdjustObsError
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
 
   # Pressure check
   - filter: BlackList
@@ -842,7 +842,7 @@ observations:
           variable: windNorthward
           inflation factor: 4.0
           adjusted_error_name: GsiAdjustObsError
-          geovar_sfc_geomz: surface_geometric_height
+          geovar_sfc_geomz: height_above_mean_sea_level_at_surface
 
   # Background  check
   # ratio threshold 6.0 if PreQC /= 3

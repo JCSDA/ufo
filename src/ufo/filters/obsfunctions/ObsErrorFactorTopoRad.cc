@@ -63,7 +63,7 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   invars_ += Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_);
 
   // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVaLs/surface_geopotential_height");
+  invars_ += Variable("GeoVaLs/geopotential_height_at_surface");
 }
 
 // -----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
 
   // Get surface geopotential height
   std::vector<float> zsges(nlocs);
-  in.get(Variable("GeoVaLs/surface_geopotential_height"), zsges);
+  in.get(Variable("GeoVaLs/geopotential_height_at_surface"), zsges);
 
   // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
   if (inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3" ||

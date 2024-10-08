@@ -119,7 +119,7 @@ observations:
     - surface_temperature # 3
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5
-    - surface_pressure # 6
+    - air_pressure_at_surface # 6
     - uwind_at_10m # 11 - windspeed
     - vwind_at_10m # 11 - windspeed
     surface emissivity:

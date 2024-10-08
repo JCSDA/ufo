@@ -35,7 +35,7 @@ class ObsRadarRadialVelocityParameters : public ObsOperatorParametersBase  {
   OOPS_CONCRETE_PARAMETERS(ObsRadarRadialVelocityParameters, ObsOperatorParametersBase )
  public:
   /// Vertical Coordinate
-  oops::Parameter<std::string> VertCoord{"VertCoord", "geometric_height", this};
+  oops::Parameter<std::string> VertCoord{"VertCoord", "height_above_mean_sea_level", this};
 };
 
 /// RadarRadialVelocity observation operator class

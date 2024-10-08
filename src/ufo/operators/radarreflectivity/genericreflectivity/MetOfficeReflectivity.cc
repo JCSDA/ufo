@@ -34,7 +34,7 @@ MetOfficeReflectivity::MetOfficeReflectivity(const Parameters_ & params,
   reqvars += oops::Variables
     ({"air_pressure",
       "air_temperature",
-      "height",
+      "height_above_mean_sea_level",
       "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water",
       "qrain"});
 
@@ -56,7 +56,7 @@ void MetOfficeReflectivity::simulateObsImpl(const GeoVaLs & gv,
   oops::Log::trace() << "MetOfficeReflectivity::simulateObsImpl starting" << std::endl;
 
   const std::size_t nlocs = obsdb_.nlocs();
-  const std::size_t nlevs = gv.nlevs(oops::Variable{"height"});
+  const std::size_t nlevs = gv.nlevs(oops::Variable{"height_above_mean_sea_level"});
   const float missingFloat = util::missingValue<float>();
   const float missingDouble = util::missingValue<double>();
 
@@ -94,7 +94,7 @@ void MetOfficeReflectivity::simulateObsImpl(const GeoVaLs & gv,
 
     gv.getAtLocation(vec_p, oops::Variable{"air_pressure"}, jloc);
     gv.getAtLocation(vec_T, oops::Variable{"air_temperature"}, jloc);
-    gv.getAtLocation(vec_z, oops::Variable{"height"}, jloc);
+    gv.getAtLocation(vec_z, oops::Variable{"height_above_mean_sea_level"}, jloc);
     gv.getAtLocation(vec_qrain, oops::Variable{"qrain"}, jloc);
     gv.getAtLocation(vec_qice,
                      oops::Variable{"cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"},
@@ -141,7 +141,7 @@ void MetOfficeReflectivity::setTrajectoryImpl(const GeoVaLs & gv,
   oops::Log::trace() << "MetOfficeReflectivity::setTrajectoryImpl starting" << std::endl;
 
   const std::size_t nlocs = obsdb_.nlocs();
-  const std::size_t nlevs = gv.nlevs(oops::Variable{"height"});
+  const std::size_t nlevs = gv.nlevs(oops::Variable{"height_above_mean_sea_level"});
   const float missingFloat = util::missingValue<float>();
   const float missingDouble = util::missingValue<double>();
 
@@ -162,7 +162,7 @@ void MetOfficeReflectivity::setTrajectoryImpl(const GeoVaLs & gv,
   std::vector<double> vec_qice(nlevs);
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     const float z_ob = height[jloc];
-    gv.getAtLocation(vec_z, oops::Variable{"height"}, jloc);
+    gv.getAtLocation(vec_z, oops::Variable{"height_above_mean_sea_level"}, jloc);
     vec_gv_z_[jloc] = vec_z;
     if (z_ob == missingFloat) {
       vec_interp_T_[jloc] = missingDouble;

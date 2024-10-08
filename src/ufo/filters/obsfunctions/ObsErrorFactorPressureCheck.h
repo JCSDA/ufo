@@ -37,11 +37,13 @@ class ObsErrorFactorPressureCheckParameters : public oops::Parameters {
   /// Name of the data group to which the QC flag is applied  (default is QCflagsData)
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
 
-  /// Alternative name of GeoVaLs variable: surface altitude
-  /// The code expects to find GeoVaLs/surface_altitude and GeoVaLs/height, however,
-  /// some datasets may have GeoVaLs/surface_geometric_height and GeoVaLs/geopotential_height
-  /// in its place.
-  oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz", "surface_altitude", this};
+  /// Alternative name of GeoVaLs variable: height_above_mean_sea_level_at_surface
+  /// The code expects to find GeoVaLs/height_above_mean_sea_level_at_surface
+  /// and GeoVaLs/height_above_mean_sea_level, however,
+  /// some datasets may have GeoVaLs/height_above_mean_sea_level_at_surface
+  /// and GeoVaLs/geopotential_height in its place.
+  oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz",
+                                                "height_above_mean_sea_level_at_surface", this};
 
   /// Request saturation specific humidity from geovals (default false)
   /// Example: To request saturation specific humidity from geovals

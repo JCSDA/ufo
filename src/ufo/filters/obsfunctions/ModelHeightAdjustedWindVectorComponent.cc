@@ -37,7 +37,7 @@ ModelHeightAdjustedWindVectorComponent<northwardWind>::ModelHeightAdjustedWindVe
   }
 
   // Required model surface altitude
-  invars_ += Variable("GeoVaLs/surface_altitude");
+  invars_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
 
   // Required observation station height
   parameters_.validateAndDeserialize(conf);
@@ -60,7 +60,7 @@ void ModelHeightAdjustedWindVectorComponent<northwardWind>::compute(const ObsFil
   } else {
     in.get(Variable("ObsValue/windEastwardAt10M"), WindComponent);
   }
-  in.get(Variable("GeoVaLs/surface_altitude"), ModelHeight);
+  in.get(Variable("GeoVaLs/height_above_mean_sea_level_at_surface"), ModelHeight);
   in.get(parameters_.elevation.value(), StationHeight);
 
   const float missing = util::missingValue<float>();

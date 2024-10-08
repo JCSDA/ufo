@@ -44,8 +44,8 @@ namespace ufo {
 /// An example yaml configuration is as follows:
 ///  obs operator:
 ///    name: RadarDopplerWind
-///    vertical coordinate for horizontal wind: height_levels
-///    vertical coordinate for vertical wind: height
+///    vertical coordinate for horizontal wind: height_above_mean_sea_level_levels
+///    vertical coordinate for vertical wind: height_above_mean_sea_level
 ///
 class ObsRadarDopplerWind : public ObsOperatorBase,
   private util::ObjectCounter<ObsRadarDopplerWind> {

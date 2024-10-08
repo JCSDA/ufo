@@ -33,7 +33,7 @@ SatTCWVTLAD::SatTCWVTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), varin_(), k_matrix(), traj_init(false)
 {
   const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
-                                    "surface_pressure"};
+                                    "air_pressure_at_surface"};
   varin_.reset(new oops::Variables(vv));
 
   oops::Log::trace() << "SatTCWVTLAD created" << std::endl;
@@ -60,7 +60,7 @@ void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
   // Get 2-D surface pressure
   std::vector<float> ps(nprofiles);  // surface pressure (Pa)
-  geovals.get(ps, oops::Variable{"surface_pressure"});
+  geovals.get(ps, oops::Variable{"air_pressure_at_surface"});
 
   // Get 3-D air pressure on rho levels (Pa), one level at a time
   std::vector<std::vector<float>> plev(nlevels, std::vector<float>(nprofiles));

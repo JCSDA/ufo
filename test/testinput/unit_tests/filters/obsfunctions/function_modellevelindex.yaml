@@ -39,7 +39,7 @@ observations:
         name: IntObsFunction/ModelLevelIndex
         options:
           observation vertical coordinate: height
-          model vertical coordinate: height
+          model vertical coordinate: height_above_mean_sea_level
   compareVariables:
   - test:
       name: MetaData/modelLevelIndex
