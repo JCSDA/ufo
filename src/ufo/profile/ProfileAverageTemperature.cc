@@ -50,7 +50,7 @@ namespace ufo {
        ufo::VariableNames::modellevels_air_temperature_derived,
        ufo::VariableNames::air_temperature_derived};
     oops::Variables variableNamesGeoVaLs{
-      {oops::Variable{ufo::VariableNames::geovals_potential_temperature}}};
+      {oops::Variable{ufo::VariableNames::geovals_air_potential_temperature}}};
 
     if (options_.compareWithOPS.value()) {
       variableNamesInt.insert
@@ -177,7 +177,7 @@ namespace ufo {
     // Obtain GeoVaLs potential temperature.
     const std::vector <float> &potempGeoVaLs =
       profileOriginal.getGeoVaLVector(oops::Variable
-                                      {ufo::VariableNames::geovals_potential_temperature});
+                                      {ufo::VariableNames::geovals_air_potential_temperature});
     if (potempGeoVaLs.empty())
       throw eckit::BadValue("Potential temperature GeoVaLs vector is empty.", Here());
     const size_t numTLevels = potempGeoVaLs.size();

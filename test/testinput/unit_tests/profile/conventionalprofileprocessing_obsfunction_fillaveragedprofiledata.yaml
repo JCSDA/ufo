@@ -126,6 +126,6 @@ observations:
           name: ObsFunction/FillAveragedProfileData
           options:
             variable to copy: MetaData/latitude
-            model vertical coordinate: potential_temperature
+            model vertical coordinate: air_potential_temperature
             observation vertical coordinate: MetaData/pressure
   expectExceptionWithMessage: Model vertical coordinate must be a pressure

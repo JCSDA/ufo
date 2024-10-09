@@ -138,7 +138,7 @@ constexpr const char* const ufo::VariableNames::geovals_pressure_rho_minus_one;
 constexpr const char* const ufo::VariableNames::geovals_height;
 constexpr const char* const ufo::VariableNames::geovals_height_rho;
 constexpr const char* const ufo::VariableNames::geovals_height_rho_minus_one;
-constexpr const char* const ufo::VariableNames::geovals_potential_temperature;
+constexpr const char* const ufo::VariableNames::geovals_air_potential_temperature;
 constexpr const char* const ufo::VariableNames::geovals_air_temperature;
 constexpr const char* const ufo::VariableNames::geovals_air_pressure_at_surface;
 constexpr const char* const ufo::VariableNames::geovals_relative_humidity;

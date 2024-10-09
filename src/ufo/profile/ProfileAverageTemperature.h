@@ -58,7 +58,7 @@ namespace ufo {
 
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
-      return oops::Variables({ufo::VariableNames::geovals_potential_temperature});}
+      return oops::Variables({ufo::VariableNames::geovals_air_potential_temperature});}
 
     /// List of names of GeoVaLs used in check validation.
     oops::Variables getValidationGeoVaLNames() override {
