@@ -103,7 +103,7 @@ obs filter data:
     - name: GeoVaLs/surface_temperature_where_snow
     - name: GeoVaLs/soil_temperature
     - name: GeoVaLs/volume_fraction_of_condensed_water_in_soil
-    - name: GeoVaLs/surface_wind_speed
+    - name: GeoVaLs/wind_speed_at_surface
     - name: GeoVaLs/soil_type
     - name: GeoVaLs/air_temperature
     - name: GeoVaLs/air_pressure

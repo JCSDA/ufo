@@ -120,8 +120,8 @@ observations:
     - specific_humidity_at_two_meters_above_surface # 4
     - skin_temperature # 5
     - air_pressure_at_surface # 6
-    - uwind_at_10m # 11 - windspeed
-    - vwind_at_10m # 11 - windspeed
+    - eastward_wind_at_10m # 11 - windspeed
+    - northward_wind_at_10m # 11 - windspeed
     surface emissivity:
       type: fixed # default
       EmissSeaDefault: 0.0 # default

@@ -173,8 +173,8 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
       geovals.get(ps, oops::Variable{"air_pressure_at_surface"});  // in Pa, get one level Ps
       geovals.get(t2m, oops::Variable{"surface_temperature"});  // Kelvin
       geovals.get(q2m, oops::Variable{"specific_humidity_at_two_meters_above_surface"});  // kg/kg
-      geovals.get(u10, oops::Variable{"uwind_at_10m"});
-      geovals.get(v10, oops::Variable{"vwind_at_10m"});
+      geovals.get(u10, oops::Variable{"eastward_wind_at_10m"});
+      geovals.get(v10, oops::Variable{"northward_wind_at_10m"});
       geovals.get(tskin, oops::Variable{"skin_temperature"});  // Kelvin
       geovals.get(landmask, oops::Variable{"landmask"});  // 1: land, 0:ocean
       geovals.get(seaice_frac, oops::Variable{"seaice_fraction"});

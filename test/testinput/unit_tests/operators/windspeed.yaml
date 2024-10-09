@@ -5,8 +5,8 @@ time window:
 observations: 
 - obs operator: 
     name: WindSpeed
-    model_surface_eastward_wind: eastward_wind_10m
-    model_surface_northward_wind: northward_wind_10m
+    model_surface_eastward_wind: eastward_wind_at_10m
+    model_surface_northward_wind: northward_wind_at_10m
   obs space: 
     name: WindSpeed
     obsdatain: 

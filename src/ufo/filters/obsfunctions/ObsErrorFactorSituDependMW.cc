@@ -62,7 +62,7 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
-  invars_ += Variable("GeoVaLs/surface_wind_speed");
+  invars_ += Variable("GeoVaLs/wind_speed_at_surface");
 
   // Include required variables from ObsFunction
   const Variable &clwobs = options_.clwobsFunction.value();
@@ -160,8 +160,8 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
 
   // Get variables from GeoVaLs
   // Get surface wind speed
-  std::vector<float> surface_wind_speed(nlocs);
-  in.get(Variable("GeoVaLs/surface_wind_speed"), surface_wind_speed);
+  std::vector<float> wind_speed_at_surface(nlocs);
+  in.get(Variable("GeoVaLs/wind_speed_at_surface"), wind_speed_at_surface);
 
   // Load area fraction of each surface type
   std::vector<float> water_frac(nlocs);
@@ -195,7 +195,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
           size_t channel = ichan + 1;
           if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
             float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
-            term = term + std::min(0.002 * pow(surface_wind_speed[iloc], 2) *
+            term = term + std::min(0.002 * pow(wind_speed_at_surface[iloc], 2) *
                           (*obserr0)[ichan][iloc], 0.5 * (*obserr0)[ichan][iloc]);
             float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
             term = term + std::min(13.0 * clwtmp * (*obserr0)[ichan][iloc], 3.5 *
@@ -231,7 +231,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
           size_t channel = ichan + 1;
           if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
             float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
-            term = term + std::min(0.002 * pow(surface_wind_speed[iloc], 2) *
+            term = term + std::min(0.002 * pow(wind_speed_at_surface[iloc], 2) *
                           obserr0[ichan][iloc], 0.5 * obserr0[ichan][iloc]);
             float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
             term = term + std::min(13.0 * clwtmp * obserr0[ichan][iloc], 3.5 *

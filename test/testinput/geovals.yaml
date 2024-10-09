@@ -55,8 +55,8 @@ observations:
     - surface_temperature_where_snow
     - surface_snow_thickness
     - vegetation_area_fraction
-    - surface_wind_speed
-    - surface_wind_from_direction
+    - wind_speed_at_surface
+    - wind_from_direction_at_surface
     - leaf_area_index
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil

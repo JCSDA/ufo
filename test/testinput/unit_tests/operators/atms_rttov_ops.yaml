@@ -18,8 +18,8 @@ observations:
        - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
        - surface_temperature
        - specific_humidity_at_two_meters_above_surface
-       - uwind_at_10m
-       - vwind_at_10m
+       - eastward_wind_at_10m
+       - northward_wind_at_10m
        - skin_temperature
      obs options:
        WMO_ID: [225]

@@ -366,8 +366,8 @@ if (profindex % pstar > 0) then
   end do
 end if
 
-! 2.4) Windspeed - var_sfc_u10 = "uwind_at_10m"
-!                - var_sfc_v10 = "vwind_at_10m"
+! 2.4) Windspeed - var_sfc_u10 = "eastward_wind_at_10m"
+!                - var_sfc_v10 = "northward_wind_at_10m"
 !                - windsp = sqrt (u*u + v*v)
 if (profindex % windspeed > 0) then
   call ufo_geovals_get_var(geovals, trim(var_sfc_u10), geoval)
