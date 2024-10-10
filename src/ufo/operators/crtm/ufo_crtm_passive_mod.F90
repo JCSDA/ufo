@@ -512,8 +512,8 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_surface_temperature_CH (nval=1)
-         case (var_sfc_t)
+         ! variable: brightness_temperature_jacobian_skin_temperature_at_surface_CH (nval=1)
+         case (var_sfc_tskin)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
             hofxdiags%geovals(jvar)%vals = missing

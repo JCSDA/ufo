@@ -171,11 +171,11 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
 
     // Retrieve surface variables
       geovals.get(ps, oops::Variable{"air_pressure_at_surface"});  // in Pa, get one level Ps
-      geovals.get(t2m, oops::Variable{"surface_temperature"});  // Kelvin
+      geovals.get(t2m, oops::Variable{"air_temperature_at_2m"});  // Kelvin
       geovals.get(q2m, oops::Variable{"specific_humidity_at_two_meters_above_surface"});  // kg/kg
       geovals.get(u10, oops::Variable{"eastward_wind_at_10m"});
       geovals.get(v10, oops::Variable{"northward_wind_at_10m"});
-      geovals.get(tskin, oops::Variable{"skin_temperature"});  // Kelvin
+      geovals.get(tskin, oops::Variable{"skin_temperature_at_surface"});  // Kelvin
       geovals.get(landmask, oops::Variable{"landmask"});  // 1: land, 0:ocean
       geovals.get(seaice_frac, oops::Variable{"seaice_fraction"});
 
@@ -221,7 +221,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
          // 0:land, 1:sea, 2:sea-ice, (sea, fresh water) temporary
          profiles[i].setSurfType(surftype, 0);
 
-         // Ps (hPa), t2m (k), q2m (kg/kg), u10/v10 (m/s), wind fetch
+         // Ps (hPa), t2m (K), q2m (kg/kg), u10/v10 (m/s), wind fetch
          profiles[i].setS2m(ps[i]*0.01, t2m[i], q2m[i], u10[i], v10[i], 100000.);
 
          // tskin (k), salinity (35), snow_fraction, foam_fraction, fastem_coef_1-5, specularity

@@ -137,9 +137,9 @@ observations:
     retrieval variables from geovals:
     - air_temperature # 1
     - specific_humidity  # 2
-    - surface_temperature # 3
+    - air_temperature_at_2m # 3
     - specific_humidity_at_two_meters_above_surface # 4
-    - skin_temperature # 5
+    - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     retrieval variables not from geovals:
     - cloud_top_pressure # 16
@@ -229,7 +229,7 @@ observations:
         name: ObsFunction/LinearCombination
         options:
           variables:
-          - name: GeoVaLs/skin_temperature
+          - name: GeoVaLs/skin_temperature_at_surface
           - name: MetaData/skinTemperatureBias
           coefs: [1, 1]
 ### 1D-Var check ###
@@ -256,9 +256,9 @@ observations:
     retrieval variables from geovals:
     - air_temperature # 1
     - specific_humidity  # 2
-    - surface_temperature # 3
+    - air_temperature_at_2m # 3
     - specific_humidity_at_two_meters_above_surface # 4
-    - skin_temperature # 5
+    - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     retrieval variables not from geovals:
     - cloud_top_pressure # 16
@@ -321,9 +321,9 @@ observations:
     retrieval variables from geovals:
     - air_temperature # 1
     - specific_humidity  # 2
-    - surface_temperature # 3
+    - air_temperature_at_2m # 3
     - specific_humidity_at_two_meters_above_surface # 4
-    - skin_temperature # 5
+    - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     retrieval variables not from geovals:
     - cloud_top_pressure # 16

@@ -55,7 +55,7 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
     // Include list of required data from GeoVaLs
     invars_ += Variable("GeoVaLs/average_surface_temperature_within_field_of_view");
     invars_ += Variable("GeoVaLs/water_area_fraction");
-    invars_ += Variable("GeoVaLs/surface_temperature_where_sea");
+    invars_ += Variable("GeoVaLs/skin_temperature_at_surface_where_sea");
 
   } else if (options_.ch37v.value() != boost::none && options_.ch37h.value() != boost::none) {
     // For cloud index like GMI's.

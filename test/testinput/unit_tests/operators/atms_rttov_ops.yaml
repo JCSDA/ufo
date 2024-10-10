@@ -16,11 +16,11 @@ observations:
        - air_temperature
        - specific_humidity
        - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
-       - surface_temperature
+       - air_temperature_at_2m
        - specific_humidity_at_two_meters_above_surface
        - eastward_wind_at_10m
        - northward_wind_at_10m
-       - skin_temperature
+       - skin_temperature_at_surface
      obs options:
        WMO_ID: [225]
        Sat_ID: [noaa_20]

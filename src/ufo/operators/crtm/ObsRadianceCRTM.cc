@@ -37,10 +37,10 @@ static const oops::Variables vars_to_fov_average(std::vector<std::string>{{
   "land_area_fraction",
   "ice_area_fraction",
   "surface_snow_area_fraction",
-  "surface_temperature_where_sea",
-  "surface_temperature_where_land",
-  "surface_temperature_where_ice",
-  "surface_temperature_where_snow",
+  "skin_temperature_at_surface_where_sea",
+  "skin_temperature_at_surface_where_land",
+  "skin_temperature_at_surface_where_ice",
+  "skin_temperature_at_surface_where_snow",
   "vegetation_area_fraction",
   "leaf_area_index",
   "volume_fraction_of_condensed_water_in_soil",
@@ -92,10 +92,10 @@ double valueOutsideMask(const oops::Variable & var) {
   } else if (var.name() == "leaf_area_index") {
     return 3.5;
   } else if (var.name() == "soil_temperature"
-             || var.name() == "surface_temperature_where_sea"
-             || var.name() == "surface_temperature_where_land"
-             || var.name() == "surface_temperature_where_ice"
-             || var.name() == "surface_temperature_where_snow") {
+             || var.name() == "skin_temperature_at_surface_where_sea"
+             || var.name() == "skin_temperature_at_surface_where_land"
+             || var.name() == "skin_temperature_at_surface_where_ice"
+             || var.name() == "skin_temperature_at_surface_where_snow") {
     return 283.0;  // K
   } else if (var.name() == "vegetation_area_fraction") {
     return 0.3;
@@ -346,10 +346,10 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedAveraging(GeoVaLs & geovals) const 
     field_counter++;
   };
 
-  averageHelper(oops::Variable{"surface_temperature_where_sea"}, water_avg, water_mask);
-  averageHelper(oops::Variable{"surface_temperature_where_land"}, land_avg, land_mask);
-  averageHelper(oops::Variable{"surface_temperature_where_ice"}, ice_avg, ice_mask);
-  averageHelper(oops::Variable{"surface_temperature_where_snow"}, snow_avg, snow_mask);
+  averageHelper(oops::Variable{"skin_temperature_at_surface_where_sea"}, water_avg, water_mask);
+  averageHelper(oops::Variable{"skin_temperature_at_surface_where_land"}, land_avg, land_mask);
+  averageHelper(oops::Variable{"skin_temperature_at_surface_where_ice"}, ice_avg, ice_mask);
+  averageHelper(oops::Variable{"skin_temperature_at_surface_where_snow"}, snow_avg, snow_mask);
 
   averageHelper(oops::Variable{"leaf_area_index"}, land_avg, land_mask);
   averageHelper(oops::Variable{"soil_temperature"}, land_avg, land_mask);
@@ -439,10 +439,10 @@ void ObsRadianceCRTM::fillReducedVarsByMaskedCopy(GeoVaLs & geovals) const {
     if (fixed) geovals.putAtLevel(vals, var, 0, GeoVaLFormat::REDUCED);
   };
 
-  maskHelper(oops::Variable{"surface_temperature_where_sea"}, water_area_fraction);
-  maskHelper(oops::Variable{"surface_temperature_where_land"}, land_area_fraction);
-  maskHelper(oops::Variable{"surface_temperature_where_ice"}, ice_area_fraction);
-  maskHelper(oops::Variable{"surface_temperature_where_snow"}, snow_area_fraction);
+  maskHelper(oops::Variable{"skin_temperature_at_surface_where_sea"}, water_area_fraction);
+  maskHelper(oops::Variable{"skin_temperature_at_surface_where_land"}, land_area_fraction);
+  maskHelper(oops::Variable{"skin_temperature_at_surface_where_ice"}, ice_area_fraction);
+  maskHelper(oops::Variable{"skin_temperature_at_surface_where_snow"}, snow_area_fraction);
 
   maskHelper(oops::Variable{"leaf_area_index"}, land_area_fraction);
   maskHelper(oops::Variable{"soil_temperature"}, land_area_fraction);

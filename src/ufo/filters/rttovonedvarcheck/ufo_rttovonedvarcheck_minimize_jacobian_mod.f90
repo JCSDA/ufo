@@ -330,7 +330,7 @@ end if
 ! 2.) Single-valued variables
 !----
 
-! 2.1) Surface Temperature - var_sfc_t2m = "surface_temperature"
+! 2.1) Surface Temperature - var_sfc_t2m = "air_temperature_at_2m"
 if (profindex % t2 > 0) then
   write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_t2m), "_"
   call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &
@@ -402,7 +402,7 @@ if (profindex % windspeed > 0) then
   deallocate(hofxdiag_index_2)
 end if
 
-! 2.5) Skin temperature - var_sfc_tskin = "skin_temperature"  ! (K)
+! 2.5) Skin temperature - var_sfc_tskin = "skin_temperature_at_surface"  ! (K)
 if (profindex % tstar > 0) then
   write(basename,"(3a)") "brightness_temperature_jacobian_", trim(var_sfc_tskin), "_"
   call ufo_rttovonedvarcheck_geovals_index_by_channels(channels, trim(basename), &

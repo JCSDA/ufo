@@ -5,9 +5,9 @@ MetOfficeRadianceErrorMatrices:
   - specific_humidity
   - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
   - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
-  - surface_temperature
+  - air_temperature_at_2m
   - specific_humidity_at_two_meters_above_surface
-  - skin_temperature
+  - skin_temperature_at_surface
   - air_pressure_at_surface
   qtotal: true
   RMatrix: ../resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4

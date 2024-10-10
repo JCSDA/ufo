@@ -45,7 +45,8 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
   const std::string &biastermgrp = options_.testBiasTerm.value();
 
   // Include required variables from ObsDiag
-  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
+             channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_emissivity", channels_);
 
   // Include list of required data from ObsSpace
@@ -155,7 +156,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
     usebiasterm = options_.useBiasTerm.value().get();
   }
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature",
+    in.get(Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
                      channels_)[ichan], dbtdts);
     in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_emissivity",
                      channels_)[ichan], dbtdes);

@@ -36,7 +36,7 @@ observations:
     - name: brightnessTemperature
       channels: *all_channels
     test variables:
-    - name: ObsDiag/brightness_temperature_jacobian_surface_temperature
+    - name: ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface
       channels: *all_channels
     maxvalue: 0.2
   passedBenchmark: 754       # number of passed obs #(m_unittest)

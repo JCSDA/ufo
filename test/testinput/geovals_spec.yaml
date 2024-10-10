@@ -35,7 +35,7 @@ geovals test:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   geovals test:
     state variables:
-    - surface_temperature_where_snow
+    - skin_temperature_at_surface_where_snow
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil
     - wind_speed_at_surface

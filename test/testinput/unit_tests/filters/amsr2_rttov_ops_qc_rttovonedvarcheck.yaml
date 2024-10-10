@@ -65,9 +65,9 @@ observations:
     - specific_humidity  # 10
     - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water # required for qtotal
     - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water # required for qtotal
-    - surface_temperature # 3
+    - air_temperature_at_2m # 3
     - specific_humidity_at_two_meters_above_surface # 4
-    - skin_temperature # 5
+    - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     - eastward_wind_at_10m # 11 - required for windspeed retrieval
     - northward_wind_at_10m # 11 - required for windspeed retrieval
@@ -132,9 +132,9 @@ observations:
     - specific_humidity  # 10
     - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water # required for qtotal
     - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water # required for qtotal
-    - surface_temperature # 3
+    - air_temperature_at_2m # 3
     - specific_humidity_at_two_meters_above_surface # 4
-    - skin_temperature # 5
+    - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     - eastward_wind_at_10m # 11 - required for windspeed retrieval
     - northward_wind_at_10m # 11 - required for windspeed retrieval

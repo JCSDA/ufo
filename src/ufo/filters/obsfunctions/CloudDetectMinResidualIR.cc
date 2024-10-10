@@ -46,7 +46,8 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
-  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
+             channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_jacobian_air_temperature", channels_);
   invars_ += Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_);
   invars_ += Variable("ObsDiag/pressure_level_at_peak_of_weightingfunction", channels_);
@@ -101,7 +102,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
   // Load surface temperature jacobian
   std::vector<std::vector<float>> dbtdts(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature",
+    in.get(Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
                      channels_)[ichan], dbtdts[ichan]);
   }
 

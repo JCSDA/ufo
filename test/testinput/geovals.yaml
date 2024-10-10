@@ -49,10 +49,10 @@ observations:
     - land_area_fraction
     - ice_area_fraction
     - surface_snow_area_fraction
-    - surface_temperature_where_sea
-    - surface_temperature_where_land
-    - surface_temperature_where_ice
-    - surface_temperature_where_snow
+    - skin_temperature_at_surface_where_sea
+    - skin_temperature_at_surface_where_land
+    - skin_temperature_at_surface_where_ice
+    - skin_temperature_at_surface_where_snow
     - surface_snow_thickness
     - vegetation_area_fraction
     - wind_speed_at_surface

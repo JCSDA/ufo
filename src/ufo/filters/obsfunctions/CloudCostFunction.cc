@@ -68,7 +68,7 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
     invars_ += Variable("GeoVaLs/air_pressure");
     invars_ += Variable("GeoVaLs/air_temperature");
     invars_ += Variable("GeoVaLs/air_pressure_at_surface");
-    invars_ += Variable("GeoVaLs/surface_temperature");
+    invars_ += Variable("GeoVaLs/air_temperature_at_2m");
     invars_ += Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface");
   }
 }
@@ -100,7 +100,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
 
   size_t skinTempIndex = 0;  // position of skin temperature element in B- and H-matrices
   if (options_.skinTempError.value() != boost::none) {
-    if (std::find(fields_.begin(), fields_.end(), "skin_temperature") == fields_.end())
+    if (std::find(fields_.begin(), fields_.end(), "skin_temperature_at_surface") == fields_.end())
       throw eckit::UserError("List of B-matrix fields must contain skin temperature when "
                              "supplying skin temperature error parameter", Here());
     // Scale B-matrix rows/columns for Tskin error covariances
@@ -108,7 +108,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
       // Cloud hydrometeors are part of B-matrix qtotal along with specific humidity
       if (options_.qtotal_lnq_gkg.value() &&
             (fields_[ifield] == clw_name || fields_[ifield] == ciw_name)) continue;
-      if (fields_[ifield] == "skin_temperature") break;
+      if (fields_[ifield] == "skin_temperature_at_surface") break;
       skinTempIndex += in.nlevs(Variable(
                       "ObsDiag/brightness_temperature_jacobian_"+fields_[ifield], channels_)[0]);
     }
@@ -208,7 +208,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
         if (fields_[ifield] == "specific_humidity_at_two_meters_above_surface"
             && options_.qtotal_lnq_gkg.value()) {
           in.get(Variable("GeoVaLs/air_pressure_at_surface"), level_gv, gv_pres);
-          in.get(Variable("GeoVaLs/surface_temperature"), level_gv, gv_temp);
+          in.get(Variable("GeoVaLs/air_temperature_at_2m"), level_gv, gv_temp);
           in.get(Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface"),
                  level_gv, gv_qgas);
           std::vector<float> qsaturated(nlocs);

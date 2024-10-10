@@ -44,7 +44,8 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   const std::string &hofxgrp = options_.testHofX.value();
 
   // Include required variables from ObsDiag
-  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature", channels_);
+  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
+             channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_jacobian_air_temperature", channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_jacobian_humidity_mixing_ratio", channels_);
 
@@ -58,7 +59,7 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
-  invars_ += Variable("GeoVaLs/surface_temperature_where_sea");
+  invars_ += Variable("GeoVaLs/skin_temperature_at_surface_where_sea");
 }
 
 // -----------------------------------------------------------------------------
@@ -97,7 +98,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   // Get surface temperature jacobian
   std::vector<std::vector<float>> dbtdts(nchans, std::vector<float>(nlocs));
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
-    in.get(Variable("ObsDiag/brightness_temperature_jacobian_surface_temperature",
+    in.get(Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
                      channels_)[ichan], dbtdts[ichan]);
   }
 
@@ -181,7 +182,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
 
   // Get water temperature
   std::vector<float> tzbgr(nlocs);
-  in.get(Variable("GeoVaLs/surface_temperature_where_sea"), tzbgr);
+  in.get(Variable("GeoVaLs/skin_temperature_at_surface_where_sea"), tzbgr);
 
   // Get area fraction of each surface type
   std::vector<float> water_frac(nlocs);

@@ -69,7 +69,7 @@ observations:
       maxvalue: 0.99
 #      maxvalue: 0.01
     test variables:
-    - name: ObsDiag/brightness_temperature_jacobian_surface_temperature
+    - name: ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface
       channels: *all_channels
     maxvalue: 0.2
   passedBenchmark: 3755  # number of passed obs (m_unittest)

@@ -46,7 +46,7 @@ subroutine atmsfcinterp_setup_(self, f_conf)
   !> add geopotential height
   call self%geovars%push_back(var_z)
   !> need skin temperature for near-surface interpolations
-  call self%geovars%push_back(var_sfc_t)
+  call self%geovars%push_back(var_sfc_t2m)
   !> need surface geopotential height to get difference from phi
   call self%geovars%push_back(var_sfc_z)
   !> need surface roughness
@@ -129,7 +129,7 @@ subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
   ! profiles of tsen, q, u, v, and surface land fraction
   call ufo_geovals_get_var(geovals, var_z, phi)
   call ufo_geovals_get_var(geovals, var_sfc_z, hgt)
-  call ufo_geovals_get_var(geovals, var_sfc_t, tsfc)
+  call ufo_geovals_get_var(geovals, var_sfc_t2m, tsfc)
   call ufo_geovals_get_var(geovals, var_sfc_rough, roughlen)
   call ufo_geovals_get_var(geovals, var_ps, psfc)
   call ufo_geovals_get_var(geovals, var_prs, prs)

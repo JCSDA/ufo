@@ -72,16 +72,16 @@ character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_cldfrac = "cloud_area_fraction_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_cldfrac_vol = "cloud_volume_fraction_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
-character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "surface_temperature" ! (K)
-character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature"  ! (K)
+character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "air_temperature_at_2m" ! (K)
+character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature_at_surface"  ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_wfrac = "water_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_lfrac = "land_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_ifrac = "ice_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_sfrac = "surface_snow_area_fraction"
-character(len=MAXVARLEN), public, parameter :: var_sfc_wtmp  = "surface_temperature_where_sea"
-character(len=MAXVARLEN), public, parameter :: var_sfc_ltmp  = "surface_temperature_where_land"
-character(len=MAXVARLEN), public, parameter :: var_sfc_itmp  = "surface_temperature_where_ice"
-character(len=MAXVARLEN), public, parameter :: var_sfc_stmp  = "surface_temperature_where_snow"
+character(len=MAXVARLEN), public, parameter :: var_sfc_wtmp  = "skin_temperature_at_surface_where_sea"
+character(len=MAXVARLEN), public, parameter :: var_sfc_ltmp  = "skin_temperature_at_surface_where_land"
+character(len=MAXVARLEN), public, parameter :: var_sfc_itmp  = "skin_temperature_at_surface_where_ice"
+character(len=MAXVARLEN), public, parameter :: var_sfc_stmp  = "skin_temperature_at_surface_where_snow"
 character(len=MAXVARLEN), public, parameter :: var_sfc_sdepth  = "surface_snow_thickness"
 character(len=MAXVARLEN), public, parameter :: var_sfc_vegfrac = "vegetation_area_fraction"
 character(len=MAXVARLEN), public, parameter :: var_sfc_wspeed  = "wind_speed_at_surface"
@@ -101,7 +101,6 @@ character(len=MAXVARLEN), public, parameter :: var_sfc_soiltyp = "soil_type"
 character(len=MAXVARLEN), public, parameter :: var_geomz       = "height_above_mean_sea_level"
 character(len=MAXVARLEN), public, parameter :: var_sfc_geomz   = "height_above_mean_sea_level_at_surface"
 character(len=MAXVARLEN), public, parameter :: var_sfc_rough   = "surface_roughness_length"
-character(len=MAXVARLEN), public, parameter :: var_sfc_t       = "surface_temperature"
 character(len=MAXVARLEN), public, parameter :: var_sfc_fact10  = "wind_reduction_factor_at_10m"
 character(len=MAXVARLEN), public, parameter :: var_observable_domain_mask = "observable_domain_mask"
 character(len=MAXVARLEN), public, parameter :: var_sfc_emiss   = "surface_emissivity"

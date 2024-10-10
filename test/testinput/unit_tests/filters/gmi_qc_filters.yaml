@@ -95,7 +95,7 @@ observations:
         name: GeoVaLs/water_area_fraction
       minvalue: 0.99
     - variable:
-        name: GeoVaLs/surface_temperature_where_sea
+        name: GeoVaLs/skin_temperature_at_surface_where_sea
       minvalue: 275
   - filter: BlackList
     filter variables:

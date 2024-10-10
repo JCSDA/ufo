@@ -40,11 +40,11 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
     "air_temperature",
     "specific_humidity",
     "air_pressure_at_surface",
-    "surface_temperature",   // this is actually var_sfc_t2m
+    "air_temperature_at_2m",
     "specific_humidity_at_two_meters_above_surface",
     "eastward_wind_at_10m",
     "northward_wind_at_10m",
-    "skin_temperature",
+    "skin_temperature_at_surface",
     "seaice_fraction",
     "landmask",
     "geopotential_height_at_surface"

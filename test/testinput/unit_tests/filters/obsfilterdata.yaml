@@ -100,7 +100,7 @@ obs filter data:
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   geovals variables:
-    - name: GeoVaLs/surface_temperature_where_snow
+    - name: GeoVaLs/skin_temperature_at_surface_where_snow
     - name: GeoVaLs/soil_temperature
     - name: GeoVaLs/volume_fraction_of_condensed_water_in_soil
     - name: GeoVaLs/wind_speed_at_surface

@@ -131,7 +131,7 @@ end if
 ! 3. Single-valued variables
 !----------------------------
 
-! var_sfc_t2m = "surface_temperature"
+! var_sfc_t2m = "air_temperature_at_2m"
 if (profindex % t2 > 0) then
   call ufo_geovals_get_var(geovals, var_sfc_t2m, geoval)
   prof_x(profindex % t2) = geoval%vals(1, 1)
@@ -150,7 +150,7 @@ if (profindex % pstar > 0) then
   prof_x(profindex % pstar) = geoval%vals(1, 1) / 100.0_kind_real  ! Pa to hPa
 end if
 
-! var_sfc_tskin = "skin_temperature"  ! (K)
+! var_sfc_tskin = "skin_temperature_at_surface"  ! (K)
 if (profindex % tstar > 0) then
   call ufo_geovals_get_var(geovals, var_sfc_tskin, geoval)
   prof_x(profindex % tstar) = geoval%vals(1, 1)
@@ -343,7 +343,7 @@ end if
 ! 3. Single-valued variables
 !----------------------------
 
-! var_sfc_t2m = "surface_temperature"
+! var_sfc_t2m = "air_temperature_at_2m"
 if (profindex % t2 > 0) then
   gv_index = 0
   do i=1,geovals%nvar
@@ -371,7 +371,7 @@ if (profindex % pstar > 0) then
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % pstar) * 100.0_kind_real
 end if
 
-! var_sfc_tskin = "skin_temperature"  ! (K)
+! var_sfc_tskin = "skin_temperature_at_surface"  ! (K)
 if (profindex % tstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar
