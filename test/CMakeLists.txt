@@ -501,6 +501,8 @@ EmisCoeff/VIS_Water/SEcategory/Little_Endian/NPOESS.VISwater.EmisCoeff.bin
 EmisCoeff/IR_Water/Little_Endian/Nalli.IRwater.EmisCoeff.bin
 EmisCoeff/IR_Land/SEcategory/Little_Endian/USGS.IRland.EmisCoeff.bin
 EmisCoeff/VIS_Land/SEcategory/Little_Endian/USGS.VISland.EmisCoeff.bin
+EmisCoeff/IR_Land/SEcategory/Little_Endian/IGBP.IRland.EmisCoeff.bin
+EmisCoeff/VIS_Land/SEcategory/Little_Endian/IGBP.VISland.EmisCoeff.bin
 SpcCoeff/Little_Endian/hirs4_metop-a.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/hirs4_metop-a.TauCoeff.bin
 SpcCoeff/Little_Endian/amsr2_gcom-w1.SpcCoeff.bin
