@@ -26,7 +26,7 @@ obs operator:
 geovals:
   filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
 obs diagnostics:
-  variables: [brightness_temperature_jacobian_surface_emissivity, brightness_temperature_jacobian_skin_temperature_at_surface, brightness_temperature_jacobian_air_temperature, brightness_temperature_jacobian_humidity_mixing_ratio]
+  variables: [brightness_temperature_jacobian_surface_emissivity, brightness_temperature_jacobian_skin_temperature_at_surface, brightness_temperature_jacobian_air_temperature, brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air]
   channels: *all_channels
 reference obs diagnostics:
   filename: Data/ufo/testinput_tier_1/amsua_n19_obsdiag_2018041500_m_qc.nc4

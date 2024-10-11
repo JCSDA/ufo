@@ -62,6 +62,9 @@ real(kind_real), parameter, public :: m_ratio= 0.003449787      ! gravity ratio
 real(kind_real), parameter, public :: n_alpha = 0.776           ! Refractivity constant a
 real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity constant b
 
+! constants used in CRTM interface
+real(kind_real), parameter, public :: kg_to_g = 1000.0_kind_real
+
 ! constants used in RTTOV interface
 real(kind_real), parameter, public :: g_to_kg = 0.001_kind_real
 real(kind_real), parameter, public :: m_to_km = 0.001_kind_real

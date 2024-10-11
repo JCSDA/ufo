@@ -108,7 +108,7 @@ obs filter data:
     - name: GeoVaLs/air_temperature
     - name: GeoVaLs/air_pressure
     - name: GeoVaLs/air_pressure_levels
-    - name: GeoVaLs/humidity_mixing_ratio
+    - name: GeoVaLs/water_vapor_mixing_ratio_wrt_dry_air
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m.nc4
   obs diagnostics variables:

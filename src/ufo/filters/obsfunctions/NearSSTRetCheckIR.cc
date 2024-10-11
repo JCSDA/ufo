@@ -47,7 +47,8 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   invars_ += Variable("ObsDiag/brightness_temperature_jacobian_skin_temperature_at_surface",
              channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_jacobian_air_temperature", channels_);
-  invars_ += Variable("ObsDiag/brightness_temperature_jacobian_humidity_mixing_ratio", channels_);
+  invars_ += Variable(
+      "ObsDiag/brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air", channels_);
 
   // Include list of required data from ObsSpace
   invars_ += Variable(flaggrp+"/brightnessTemperature", channels_);
@@ -119,8 +120,9 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
   for (size_t ichan = 0; ichan < nchans; ++ichan) {
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level = nlevs - ilev - 1;
-      in.get(Variable("ObsDiag/brightness_temperature_jacobian_humidity_mixing_ratio",
-                       channels_)[ichan], level, dbtdq[ichan][ilev]);
+      in.get(Variable(
+            "ObsDiag/brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air",
+            channels_)[ichan], level, dbtdq[ichan][ilev]);
     }
   }
 

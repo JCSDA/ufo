@@ -23,7 +23,7 @@ static ObsFunctionMaker<TotalColumnVaporGuess> makerTotalColumnVaporGuess_("Tota
 TotalColumnVaporGuess::TotalColumnVaporGuess(const eckit::LocalConfiguration & conf)
   : invars_() {
   // Include list of required data from GeoVaLs
-  invars_ += Variable("GeoVaLs/humidity_mixing_ratio");
+  invars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_dry_air");
   invars_ += Variable("GeoVaLs/air_pressure_levels");
 }
 
@@ -48,10 +48,8 @@ void TotalColumnVaporGuess::compute(const ObsFilterData & in,
   in.get(Variable("GeoVaLs/air_pressure_levels"), 0, pre_lev0);
   for (size_t ilev = 1; ilev < nlevs; ++ilev) {
     in.get(Variable("GeoVaLs/air_pressure_levels"), ilev, pre_levl);
-    in.get(Variable("GeoVaLs/humidity_mixing_ratio"), ilev - 1, q_mixrati);
+    in.get(Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_dry_air"), ilev - 1, q_mixrati);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      // Change the unit of q_mixing g/kg => kg/kg.
-      q_mixrati[iloc] *= 0.001;
       tcwv[iloc] = tcwv[iloc] + q_mixrati[iloc]/(q_mixrati[iloc]+1)
                    * fabs(pre_levl[iloc] - pre_lev0[iloc]);
     }

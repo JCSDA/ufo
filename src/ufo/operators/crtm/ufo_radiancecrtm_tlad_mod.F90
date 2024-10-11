@@ -22,7 +22,8 @@ module ufo_radiancecrtm_tlad_mod
  use ufo_vars_mod
  use ufo_crtm_utils_mod
 
- use ufo_constants_mod, only: deg2rad
+ use ufo_constants_mod, only: deg2rad, kg_to_g
+ use ufo_utils_mod, only: cmp_strings
  use ufo_crtm_passive_mod
  use ufo_crtm_active_mod
 
@@ -641,6 +642,7 @@ character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec
 type(ufo_geoval), pointer :: geoval_d
+real(kind_real) :: geoval_unit_rescale
 
  ! Initial checks
  ! --------------
@@ -695,6 +697,12 @@ type(ufo_geoval), pointer :: geoval_d
 
      ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
 
+     geoval_unit_rescale = one
+     if (cmp_strings(self%conf%Absorbers(ispec), var_mixr)) then
+       ! NOTE if "water_vapor_mixing_ratio_wrt_dry_air", convert from JEDI's kg/kg to CRTM's g/kg
+       geoval_unit_rescale = kg_to_g
+     end if
+
      ! Multiply by Jacobian and add to hofx
      do jprofile = 1, self%n_Profiles
        if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -702,7 +710,7 @@ type(ufo_geoval), pointer :: geoval_d
            do jlevel = 1, geoval_d%nval
              hofx(jchannel, jprofile) = hofx(jchannel, jprofile) + &
                         self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                        geoval_d%vals(jlevel,jprofile)
+                        geoval_unit_rescale * geoval_d%vals(jlevel,jprofile)
            enddo
          enddo
        end if
@@ -868,7 +876,7 @@ character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec
 type(ufo_geoval), pointer :: geoval_d
 real(c_double) :: missing
-
+real(kind_real) :: geoval_unit_rescale
 
  ! Initial checks
  ! --------------
@@ -918,6 +926,12 @@ real(c_double) :: missing
 
      ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
 
+     geoval_unit_rescale = one
+     if (cmp_strings(self%conf%Absorbers(ispec), var_mixr)) then
+       ! NOTE if "water_vapor_mixing_ratio_wrt_dry_air", convert from JEDI's kg/kg to CRTM's g/kg
+       geoval_unit_rescale = kg_to_g
+     end if
+
      ! Multiply by Jacobian and add to hofx (adjoint)
      do jprofile = 1, self%n_Profiles
        if (.not.self%Options(jprofile)%Skip_Profile) then
@@ -926,7 +940,7 @@ real(c_double) :: missing
              do jlevel = 1, geoval_d%nval
                geoval_d%vals(jlevel,jprofile) = geoval_d%vals(jlevel,jprofile) + &
                                             self%atm_K(jchannel,jprofile)%Absorber(jlevel,ispec) * &
-                                            hofx(jchannel, jprofile)
+                                            geoval_unit_rescale * hofx(jchannel, jprofile)
              enddo
            endif
          enddo

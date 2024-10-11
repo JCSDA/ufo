@@ -17,6 +17,7 @@ use crtm_module
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
 use ufo_vars_mod
 use obsspace_mod
+use ufo_constants_mod, only: kg_to_g
 use ufo_utils_mod, only: cmp_strings
 use CRTM_SpcCoeff, only: CRTM_SpcCoeff_Load, SC
 
@@ -280,6 +281,8 @@ logical :: message_flag = .true.
    end if
    conf%Absorbers(jspec) = UFO_Absorbers(ivar)
    conf%Absorber_Id(jspec) = CRTM_Absorber_Id(ivar)
+   ! NOTE JEDI's units for the "water_vapor_mixing_ratio_wrt_dry_air" is kg/kg,
+   ! but here we're passing CRTM's g/kg
    conf%Absorber_Units(jspec) = CRTM_Absorber_Units(ivar)
  end do
 
@@ -690,6 +693,7 @@ integer :: k1, jspec, jlevel
 type(ufo_geoval), pointer :: geoval
 character(max_string) :: err_msg
 logical :: IsActiveSensor
+real(kind_real) :: geoval_unit_rescale
 
   if (present(Is_Active_Sensor)) then
      IsActiveSensor = Is_Active_Sensor
@@ -741,9 +745,14 @@ logical :: IsActiveSensor
         atm(k1)%Absorber(1:n_Layers, jspec) = ozone_default_value
       end do
     else
+      geoval_unit_rescale = one
+      if (cmp_strings(conf%Absorbers(jspec), var_mixr)) then
+        ! NOTE if "water_vapor_mixing_ratio_wrt_dry_air", convert from JEDI's kg/kg to CRTM's g/kg
+        geoval_unit_rescale = kg_to_g
+      end if
       call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
       do k1 = 1, n_Profiles
-        atm(k1)%Absorber(1:n_Layers, jspec) = geoval%vals(:, k1)
+        atm(k1)%Absorber(1:n_Layers, jspec) = geoval_unit_rescale * geoval%vals(:, k1)
       end do
     end if
     do k1 = 1, n_Profiles

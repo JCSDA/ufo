@@ -43,7 +43,7 @@ geovals test:
     - air_temperature
     - air_pressure
     - air_pressure_levels
-    - humidity_mixing_ratio
+    - water_vapor_mixing_ratio_wrt_dry_air
     tolerance: 0.001
     one location check:
       variable: air_temperature

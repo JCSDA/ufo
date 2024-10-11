@@ -38,7 +38,7 @@ observations:
     - air_temperature
     - air_pressure
     - air_pressure_levels
-    - humidity_mixing_ratio
+    - water_vapor_mixing_ratio_wrt_dry_air
     - mole_fraction_of_ozone_in_air
     - mole_fraction_of_carbon_dioxide_in_air
     - mass_content_of_cloud_liquid_water_in_atmosphere_layer
@@ -61,4 +61,4 @@ observations:
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil
     - soil_type
-    norm: 5948559.5381
+    norm: 5948559.5277

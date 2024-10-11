@@ -18,7 +18,7 @@ integer, parameter, public :: n_aerosols_gocart_default=14,&
 integer, parameter, public :: MAXVARLEN=100
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
-character(len=MAXVARLEN), public, parameter :: var_mixr = "humidity_mixing_ratio" ! g/kg
+character(len=MAXVARLEN), public, parameter :: var_mixr = "water_vapor_mixing_ratio_wrt_dry_air" ! kg/kg
 character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"     ! kg/kg
 character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"
 character(len=MAXVARLEN), public, parameter :: var_v    = "northward_wind"

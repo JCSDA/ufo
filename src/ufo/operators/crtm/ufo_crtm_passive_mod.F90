@@ -377,7 +377,8 @@ do jvar = 1, hofxdiags%nvar
                   end do
                end if
             end do
-         ! variable: brightness_temperature_jacobian_humidity_mixing_ratio_CH (nval==n_Layers) --> requires MAXVARLEN=58
+         ! variable: brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air_CH
+         ! (nval==n_Layers) --> requires MAXVARLEN=71
          case (var_mixr)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
