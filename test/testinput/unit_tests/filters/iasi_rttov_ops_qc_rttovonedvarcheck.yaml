@@ -136,9 +136,9 @@ observations:
       channels: *1dvarchannels
     retrieval variables from geovals:
     - air_temperature # 1
-    - specific_humidity  # 2
+    - water_vapor_mixing_ratio_wrt_moist_air  # 2
     - air_temperature_at_2m # 3
-    - specific_humidity_at_two_meters_above_surface # 4
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m # 4
     - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     retrieval variables not from geovals:
@@ -255,9 +255,9 @@ observations:
       channels: *1dvarchannels
     retrieval variables from geovals:
     - air_temperature # 1
-    - specific_humidity  # 2
+    - water_vapor_mixing_ratio_wrt_moist_air  # 2
     - air_temperature_at_2m # 3
-    - specific_humidity_at_two_meters_above_surface # 4
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m # 4
     - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     retrieval variables not from geovals:
@@ -320,9 +320,9 @@ observations:
       channels: *1dvarchannels
     retrieval variables from geovals:
     - air_temperature # 1
-    - specific_humidity  # 2
+    - water_vapor_mixing_ratio_wrt_moist_air  # 2
     - air_temperature_at_2m # 3
-    - specific_humidity_at_two_meters_above_surface # 4
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m # 4
     - skin_temperature_at_surface # 5
     - air_pressure_at_surface # 6
     retrieval variables not from geovals:

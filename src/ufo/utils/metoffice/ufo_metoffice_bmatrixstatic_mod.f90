@@ -635,7 +635,7 @@ do jvar = 1, nmvars
       fields_in(counter) = ufo_metoffice_fieldtype_t2 ! 2m air_temperature
 
     case(var_sfc_q2m)
-      fields_in(counter) = ufo_metoffice_fieldtype_q2 ! 2m specific_humidity
+      fields_in(counter) = ufo_metoffice_fieldtype_q2 ! 2m water_vapor_mixing_ratio_wrt_moist_air
 
     case(var_sfc_tskin)
       fields_in(counter) = ufo_metoffice_fieldtype_tstar ! surface skin temperature

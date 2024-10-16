@@ -14,10 +14,10 @@ observations:
      linear obs operator:
        increment variables:
        - air_temperature
-       - specific_humidity
+       - water_vapor_mixing_ratio_wrt_moist_air
        - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
        - air_temperature_at_2m
-       - specific_humidity_at_two_meters_above_surface
+       - water_vapor_mixing_ratio_wrt_moist_air_at_2m
        - eastward_wind_at_10m
        - northward_wind_at_10m
        - skin_temperature_at_surface
@@ -111,7 +111,7 @@ observations:
     Debug: false # default
     Absorbers: []
     linear obs operator:
-      increment variables: [air_temperature, specific_humidity]
+      increment variables: [air_temperature, water_vapor_mixing_ratio_wrt_moist_air]
     obs options:
       RTTOV_default_opts: UKMO_PS43 # non-default
       RTTOV_apply_reg_limits: true # for compatibility
@@ -157,7 +157,7 @@ observations:
     Debug: false # default
     Absorbers: []
     linear obs operator:
-      increment variables: [air_temperature, specific_humidity]
+      increment variables: [air_temperature, water_vapor_mixing_ratio_wrt_moist_air]
     variables to use from obsspace: [TestReferenceOneDVar/skinTemperature]
     obs options:
       RTTOV_default_opts: UKMO_PS43 # non-default

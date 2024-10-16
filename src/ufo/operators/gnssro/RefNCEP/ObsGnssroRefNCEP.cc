@@ -28,8 +28,8 @@ static ObsOperatorMaker<ObsGnssroRefNCEP> makerGnssroRefNCEP_("GnssroRefNCEP");
 ObsGnssroRefNCEP::ObsGnssroRefNCEP(const ioda::ObsSpace & odb, const Parameters_ & params)
   : ObsOperatorBase(odb), keyOperGnssroRefNCEP_(0), odb_(odb), varin_()
 {
-  const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height"};
+  const std::vector<std::string> vv{"air_temperature", "water_vapor_mixing_ratio_wrt_moist_air",
+                                    "air_pressure", "geopotential_height"};
   varin_.reset(new oops::Variables(vv));
 
   ufo_gnssro_refncep_setup_f90(keyOperGnssroRefNCEP_,

@@ -97,7 +97,7 @@ if (profindex % t(1) > 0) then
   prof_x(profindex % t(1):profindex % t(2)) = geoval%vals(:, 1) ! K
 end if
 
-! var_q - specific_humidity - kg/kg
+! var_q - water_vapor_mixing_ratio_wrt_moist_air - kg/kg
 ! for retrieval is ln(g/kg)
 if (profindex % q(1) > 0) then
   call ufo_geovals_get_var(geovals, var_q, geoval)
@@ -105,9 +105,9 @@ if (profindex % q(1) > 0) then
          log (geoval%vals(:, 1) * 1000.0_kind_real) ! ln(g/kg)
 end if
 
-! var_q - specific_humidity - kg/kg
-! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
-! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
+! var_q - water_vapor_mixing_ratio_wrt_moist_air - kg/kg
+! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air" - kg/kg
+! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air" - kg/kg
 ! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
   allocate(humidity_total(nlevels))
@@ -137,7 +137,7 @@ if (profindex % t2 > 0) then
   prof_x(profindex % t2) = geoval%vals(1, 1)
 end if
 
-! var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" (kg/kg)
+! var_sfc_q2m = "water_vapor_mixing_ratio_wrt_moist_air_at_2m" (kg/kg)
 ! for retrieval is ln(g/kg)
 if (profindex % q2 > 0) then
   call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval)
@@ -271,7 +271,7 @@ if (profindex % t(1) > 0) then
   geovals%geovals(gv_index)%vals(:,1) = prof_x(profindex % t(1):profindex % t(2)) ! K
 end if
 
-! var_q = "specific_humidity" ! kg/kg
+! var_q = "water_vapor_mixing_ratio_wrt_moist_air" ! kg/kg
 ! for retrieval is ln(g/kg)
 if (profindex % q(1) > 0) then
   gv_index = 0
@@ -282,9 +282,9 @@ if (profindex % q(1) > 0) then
                                              1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
 
-! var_q = "specific_humidity" ! kg/kg
-! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
-! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water" - kg/kg
+! var_q = "water_vapor_mixing_ratio_wrt_moist_air" ! kg/kg
+! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air" - kg/kg
+! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air" - kg/kg
 ! for retrieval is ln(g/kg)
 if (profindex % qt(1) > 0) then
   nlevels = profindex % nlevels
@@ -352,7 +352,7 @@ if (profindex % t2 > 0) then
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % t2) ! K
 end if
 
-! var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
+! var_sfc_q2m = "water_vapor_mixing_ratio_wrt_moist_air_at_2m" ! (kg/kg)
 ! for retrieval is ln(g/kg)
 if (profindex % q2 > 0) then
   gv_index = 0

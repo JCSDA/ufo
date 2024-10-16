@@ -29,8 +29,8 @@ ObsGnssGBRefROPP1D::ObsGnssGBRefROPP1D(const ioda::ObsSpace & odb,
                                        const Parameters_ & params)
   : ObsOperatorBase(odb), keyOperGnssGBRefROPP1D_(0), odb_(odb), varin_()
 {
-  const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height",
+  const std::vector<std::string> vv{"air_temperature", "water_vapor_mixing_ratio_wrt_moist_air",
+                                    "air_pressure", "geopotential_height",
                                     "height_above_mean_sea_level_at_surface"};
   varin_.reset(new oops::Variables(vv));
 

@@ -146,7 +146,8 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // 3.1.3 Retrieve specific humidity in kg/kg
       std::vector<std::vector<double>> tmpvar3d_Q;  // [nlevels][nprofiles]
       for (std::size_t i = 0; i < nlevels; ++i) {
-         geovals.getAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, i);
+         geovals.getAtLevel(tmpvar2d, oops::Variable{
+             "water_vapor_mixing_ratio_wrt_moist_air"}, i);
          tmpvar3d_Q.push_back(tmpvar2d);
       }
       for (std::size_t i = 0; i < nprofiles; ++i) {
@@ -172,7 +173,8 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
     // Retrieve surface variables
       geovals.get(ps, oops::Variable{"air_pressure_at_surface"});  // in Pa, get one level Ps
       geovals.get(t2m, oops::Variable{"air_temperature_at_2m"});  // Kelvin
-      geovals.get(q2m, oops::Variable{"specific_humidity_at_two_meters_above_surface"});  // kg/kg
+      geovals.get(q2m, oops::Variable{
+          "water_vapor_mixing_ratio_wrt_moist_air_at_2m"});  // kg/kg
       geovals.get(u10, oops::Variable{"eastward_wind_at_10m"});
       geovals.get(v10, oops::Variable{"northward_wind_at_10m"});
       geovals.get(tskin, oops::Variable{"skin_temperature_at_surface"});  // Kelvin

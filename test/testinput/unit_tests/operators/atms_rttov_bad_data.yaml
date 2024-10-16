@@ -12,7 +12,7 @@ observations:
      Debug: false # default
      Absorbers: []
      linear obs operator:
-       increment variables: [air_temperature, specific_humidity]
+       increment variables: [air_temperature, water_vapor_mixing_ratio_wrt_moist_air]
      obs options:
        WMO_ID: [225]
        Sat_ID: [noaa_20]

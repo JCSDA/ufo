@@ -31,10 +31,11 @@ class MetOfficeRelativeHumidityCorrectionParameters : public oops::Parameters {
      "Name of model pressure.",
      this};
 
-  oops::RequiredParameter<std::string> model_specific_humidity
-    {"model specific humidity",
-     "Name of model specific humidity.",
-     this};
+  oops::RequiredParameter<std::string>
+    model_water_vapor_mixing_ratio_wrt_moist_air{
+      "model specific humidity",
+      "Name of model specific humidity.",
+      this};
 
   oops::RequiredParameter<std::string> model_relative_humidity
     {"model relative humidity",

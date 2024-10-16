@@ -38,10 +38,10 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   const std::vector<std::string> vv{
     "air_pressure",
     "air_temperature",
-    "specific_humidity",
+    "water_vapor_mixing_ratio_wrt_moist_air",
     "air_pressure_at_surface",
-    "air_temperature_at_2m",
-    "specific_humidity_at_two_meters_above_surface",
+    "air_temperature_at_2m",   // this is actually var_sfc_t2m
+    "water_vapor_mixing_ratio_wrt_moist_air_at_2m",
     "eastward_wind_at_10m",
     "northward_wind_at_10m",
     "skin_temperature_at_surface",

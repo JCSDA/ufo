@@ -30,7 +30,7 @@ ObsGnssroBndNBAMTLAD::ObsGnssroBndNBAMTLAD(const ioda::ObsSpace & odb,
                                            const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOperGnssroBndNBAM_(0), varin_()
 {
-  std::vector<std::string> vv{"air_temperature", "specific_humidity"};
+  std::vector<std::string> vv{"air_temperature", "water_vapor_mixing_ratio_wrt_moist_air"};
 
   if ( params.options.value().vertLayer.value() == "mass" ) {
     vv.push_back("air_pressure");

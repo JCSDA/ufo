@@ -14,9 +14,9 @@ observations:
      linear obs operator:
        increment variables:
        - air_temperature
-       - specific_humidity
+       - water_vapor_mixing_ratio_wrt_moist_air
        - eastward_wind_at_10m
-       - northward_wind_at_10m
+       - northward_wind_at_10m 
      variables to use from obsspace: [TestReferenceOneDVar/liquidWaterContent]
      obs options:
        RTTOV_default_opts: UKMO_PS45

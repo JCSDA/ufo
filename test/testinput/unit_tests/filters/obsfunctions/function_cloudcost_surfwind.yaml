@@ -42,11 +42,11 @@ observations:
           BMatrix: ../resources/bmatrix/rttov/gmihigh_bmatrix_70_test.dat
           background fields:
           - air_temperature
-          - specific_humidity
+          - water_vapor_mixing_ratio_wrt_moist_air
           - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
           - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
           - air_temperature_at_2m
-          - specific_humidity_at_two_meters_above_surface
+          - water_vapor_mixing_ratio_wrt_moist_air_at_2m
           - skin_temperature_at_surface
           - air_pressure_at_surface
           - eastward_wind_at_10m # 11 - required for windspeed retrieval

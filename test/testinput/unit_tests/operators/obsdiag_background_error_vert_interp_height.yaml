@@ -29,7 +29,7 @@ obs operator:
 geovals:
   filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_height_geoval_2018041500_s.nc4
 obs diagnostics:
-  variables: [northward_wind_background_error, specific_humidity_background_error]
+  variables: [northward_wind_background_error, water_vapor_mixing_ratio_wrt_moist_air_background_error]
 reference obs diagnostics:
   filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_height_obsdiag_2018041500_s.nc4
 tolerance: 1.e-6

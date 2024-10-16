@@ -217,7 +217,7 @@ subroutine atmsfcinterp_simobs_(self, geovals_in, obss, nvars, nlocs, hofx)
                                    tsfc%vals(1,iobs), z0, landmask%vals(1,iobs), redfac)
             hofx(ivar,iobs) = profile%vals(1,iobs) * redfac
           end if
-        case("specific_humidity")
+        case("water_vapor_mixing_ratio_wrt_moist_air")
           ust = max(0.01_kind_real, von_karman * sqrt(V2) / (gzsoz0 - psim))
           psiq = log(von_karman*ust*zbot/ka + zbot/zq0) - psih
           psiqz = log(von_karman*ust*agl/ka + agl/zq0) - psihz

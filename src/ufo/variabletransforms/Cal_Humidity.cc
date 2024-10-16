@@ -376,7 +376,8 @@ void Cal_RelativeHumidity::methodDEFAULT(const std::vector<bool> &apply) {
                                                     pressure)
                          << std::endl;
     throw eckit::BadValue("At least one vector is the wrong size or empty out of "
-                          "specific_humidity, air_temperature and pressure", Here());
+                          "water_vapor_mixing_ratio_wrt_moist_air, "
+                          "air_temperature and pressure", Here());
   }
 
   // Initialise this vector with missing value
@@ -595,7 +596,8 @@ void Cal_VirtualTemperature::methodDEFAULT(const std::vector<bool> &apply) {
                          << oops::listOfVectorSizes(specificHumidity, airTemperature)
                          << std::endl;
     throw eckit::BadValue("At least one vector is the wrong size or empty out of "
-                          "specific_humidity and air_temperature", Here());
+                          "water_vapor_mixing_ratio_wrt_moist_air "
+                          "and air_temperature", Here());
   }
 
   // Initialise this vector with missing value

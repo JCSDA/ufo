@@ -31,7 +31,8 @@ SatTCWV::SatTCWV(const ioda::ObsSpace & odb,
                  const Parameters_ & params)
         : ObsOperatorBase(odb), varin_()
 {
-  const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
+  const std::vector<std::string> vv{"air_pressure_levels",
+                                    "water_vapor_mixing_ratio_wrt_moist_air",
                                     "air_pressure_at_surface"};
   varin_.reset(new oops::Variables(vv));
 
@@ -70,7 +71,8 @@ void SatTCWV::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
   // Get 3-D specific humidity on theta levels (kg/kg), one level at a time
   std::vector<std::vector<float>> q(nlevels-1, std::vector<float>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q[lev], oops::Variable{"specific_humidity"}, lev);
+    geovals.getAtLevel(q[lev], oops::Variable{
+        "water_vapor_mixing_ratio_wrt_moist_air"}, lev);
   }
 
   // Check model fields are top-down, fail if not

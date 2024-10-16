@@ -35,8 +35,8 @@ ObsGnssroBndROPP2D::ObsGnssroBndROPP2D(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOperGnssroBndROPP2D_(0), odb_(odb), varin_(),
     nhoriz_(params.options.value().nHoriz)
 {
-  const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure",
-                                    "geopotential_height",
+  const std::vector<std::string> vv{"air_temperature", "water_vapor_mixing_ratio_wrt_moist_air",
+                                    "air_pressure", "geopotential_height",
                                     "height_above_mean_sea_level_at_surface"};
   varin_.reset(new oops::Variables(vv));
 

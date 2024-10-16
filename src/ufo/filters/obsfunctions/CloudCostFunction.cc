@@ -61,7 +61,7 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
   invars_ += Variable(options_.HofXGroup.value() + "/brightnessTemperature", channels_);
   invars_ += Variable("MetaData/latitude");
   if (options_.qtotal_lnq_gkg.value()) {
-    invars_ += Variable("GeoVaLs/specific_humidity");
+    invars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air");
     invars_ +=
       Variable("GeoVaLs/cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water");
     invars_ += Variable("GeoVaLs/cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water");
@@ -69,7 +69,7 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
     invars_ += Variable("GeoVaLs/air_temperature");
     invars_ += Variable("GeoVaLs/air_pressure_at_surface");
     invars_ += Variable("GeoVaLs/air_temperature_at_2m");
-    invars_ += Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface");
+    invars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air_at_2m");
   }
 }
 
@@ -137,7 +137,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
   for (size_t ifield = 0; ifield < fields_.size(); ++ifield) {
     if (options_.qtotal_lnq_gkg.value() &&
             (fields_[ifield] == clw_name || fields_[ifield] == ciw_name)) {
-      // qtotal ln(g/kg) Jacobian calculated when "specific_humidity" is reached in field list
+      // qtotal ln(g/kg) Jacobian calculated when
+      // "water_vapor_mixing_ratio_wrt_moist_air" is reached in field list
       continue;
     }
     std::string jac_name = "ObsDiag/brightness_temperature_jacobian_"+fields_[ifield];
@@ -146,10 +147,12 @@ void CloudCostFunction::compute(const ObsFilterData & in,
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
       const int level_gv = (p_ascending ? ilev : nlevs-ilev-1);
       const int level_jac = (options_.reverse_Jacobian.value() ? nlevs-level_gv-1 : level_gv);
-      if (fields_[ifield] == "specific_humidity" && options_.qtotal_lnq_gkg.value()) {
+      if (fields_[ifield] == "water_vapor_mixing_ratio_wrt_moist_air" &&
+          options_.qtotal_lnq_gkg.value()) {
         in.get(Variable("GeoVaLs/air_pressure"), level_gv, gv_pres);
         in.get(Variable("GeoVaLs/air_temperature"), level_gv, gv_temp);
-        in.get(Variable("GeoVaLs/specific_humidity"), level_gv, gv_qgas);
+        in.get(Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air"),
+               level_gv, gv_qgas);
         in.get(Variable("GeoVaLs/"+clw_name), level_gv, gv_clw);
         in.get(Variable("GeoVaLs/"+ciw_name), level_gv, gv_ciw);
         std::vector<float> qsaturated(nlocs);
@@ -159,7 +162,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           // Ensure specific humidity is within limits
           gv_qgas[iloc] = std::max(gv_qgas[iloc], options_.min_q.value());
           gv_qgas[iloc] = std::min(gv_qgas[iloc], qsaturated[iloc]);
-          humidity_total[iloc] = gv_qgas[iloc] + gv_clw[iloc];  // ice is neglected for partitioning
+          humidity_total[iloc] = gv_qgas[iloc] + gv_clw[iloc];  // ice is ignored for partitioning
         }
         int qsplit_partition_mode = 1;  // partition total water into vapour, liquid and ice
         std::vector<float> qsplit_gas(nlocs), qsplit_clw(nlocs), qsplit_ciw(nlocs);
@@ -179,7 +182,8 @@ void CloudCostFunction::compute(const ObsFilterData & in,
       for (size_t ichan = 0; ichan < nchans; ++ichan) {
         in.get(Variable(jac_name, channels_)[ichan], level_jac, jac_store);
 
-        if (fields_[ifield] == "specific_humidity" && options_.qtotal_lnq_gkg.value()) {
+        if (fields_[ifield] == "water_vapor_mixing_ratio_wrt_moist_air" &&
+            options_.qtotal_lnq_gkg.value()) {
           std::vector<float> jac_clw(nlocs), jac_ciw(nlocs);
           in.get(Variable("ObsDiag/brightness_temperature_jacobian_"+clw_name, channels_)[ichan],
                  level_jac, jac_clw);
@@ -205,11 +209,12 @@ void CloudCostFunction::compute(const ObsFilterData & in,
           }
         }
 
-        if (fields_[ifield] == "specific_humidity_at_two_meters_above_surface"
+        if (fields_[ifield] == "water_vapor_mixing_ratio_wrt_moist_air_at_2m"
             && options_.qtotal_lnq_gkg.value()) {
           in.get(Variable("GeoVaLs/air_pressure_at_surface"), level_gv, gv_pres);
           in.get(Variable("GeoVaLs/air_temperature_at_2m"), level_gv, gv_temp);
-          in.get(Variable("GeoVaLs/specific_humidity_at_two_meters_above_surface"),
+          in.get(Variable(
+              "GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air_at_2m"),
                  level_gv, gv_qgas);
           std::vector<float> qsaturated(nlocs);
           ufo_ops_satrad_qsatwat_f90(qsaturated.data(), gv_temp.data(), gv_pres.data(),

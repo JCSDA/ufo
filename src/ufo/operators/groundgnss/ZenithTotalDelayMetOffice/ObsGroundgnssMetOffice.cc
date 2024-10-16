@@ -29,7 +29,8 @@ ObsGroundgnssMetOffice::ObsGroundgnssMetOffice(const ioda::ObsSpace & odb,
                                        const Parameters_ & parameters)
   : ObsOperatorBase(odb), keyOperGroundgnssMetOffice_(0), odb_(odb), varin_()
 {
-  const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
+  const std::vector<std::string> vv{"air_pressure_levels",
+                                    "water_vapor_mixing_ratio_wrt_moist_air",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 

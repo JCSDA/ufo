@@ -36,7 +36,7 @@ ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
   // Increment fields to be requested from getvalues and stored in geovals
   const std::vector<std::string> vv{
      "air_temperature",
-     "specific_humidity"
+     "water_vapor_mixing_ratio_wrt_moist_air"
   };
 
   for (size_t jvar = 0; jvar < vv.size(); ++jvar) {
@@ -92,7 +92,8 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
 
   // Retrieve specific humidity increment in kg/kg
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.getAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, i);  // get one level Q
+      dx.getAtLevel(tmpvar2d, oops::Variable{
+          "water_vapor_mixing_ratio_wrt_moist_air"}, i);  // get one level Q
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
@@ -138,7 +139,8 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
 
   // Retrieve specific humidity increment in kg/kg
   for (std::size_t i = 0; i < nlevels; ++i) {
-      dx.getAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, i);  // get one level Q
+      dx.getAtLevel(tmpvar2d, oops::Variable{
+          "water_vapor_mixing_ratio_wrt_moist_air"}, i);  // get one level Q
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
@@ -181,7 +183,8 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector 
       for (size_t p = 0; p < nprofiles; p++) {
           tmpvar2d[p] = dQ[l][p];
       }
-      dx.putAtLevel(tmpvar2d, oops::Variable{"specific_humidity"}, l);  // put one level Q
+      dx.putAtLevel(tmpvar2d, oops::Variable{
+          "water_vapor_mixing_ratio_wrt_moist_air"}, l);  // put one level Q
   }
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::simulateObsAD done" << std::endl;

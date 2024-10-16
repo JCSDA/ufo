@@ -35,7 +35,8 @@ MetOfficeRelativeHumidityCorrection::MetOfficeRelativeHumidityCorrection
 
   // GeoVaLs
   invars_ += Variable(std::string("GeoVaLs/") + options_.model_pressure.value());
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_specific_humidity.value());
+  invars_ += Variable(std::string("GeoVaLs/") +
+      options_.model_water_vapor_mixing_ratio_wrt_moist_air.value());
   invars_ += Variable(std::string("GeoVaLs/") + options_.model_relative_humidity.value());
   invars_ += Variable(std::string("GeoVaLs/") + options_.model_temperature.value());
 }
@@ -67,7 +68,8 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
   const GeoVaLs * const gv(in.getGeoVaLs());
 
   // Number of model levels.
-  const int nlevs = gv->nlevs(oops::Variable{options_.model_specific_humidity.value()});
+  const int nlevs = gv->nlevs(oops::Variable{
+      options_.model_water_vapor_mixing_ratio_wrt_moist_air.value()});
 
   // Vectors of GeoVaLs.
   std::vector<double> gv_rh(nlevs);
@@ -97,7 +99,8 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
     // Retrieve GeoVaLs at this location.
     gv->getAtLocation(gv_p, oops::Variable{options_.model_pressure.value()}, jloc);
     gv->getAtLocation(gv_rh, oops::Variable{options_.model_relative_humidity.value()}, jloc);
-    gv->getAtLocation(gv_q, oops::Variable{options_.model_specific_humidity.value()}, jloc);
+    gv->getAtLocation(gv_q, oops::Variable{
+        options_.model_water_vapor_mixing_ratio_wrt_moist_air.value()}, jloc);
     gv->getAtLocation(gv_t, oops::Variable{options_.model_temperature.value()}, jloc);
 
     // Log(model pressure).

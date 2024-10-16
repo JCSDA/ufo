@@ -109,7 +109,7 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
 
   // Include list of optional data from GeoVaLs
   if (options_->requestQSat.value()) {
-    invars_ += Variable("GeoVaLs/saturation_specific_humidity");
+    invars_ += Variable("GeoVaLs/saturation_water_vapor_mixing_ratio_wrt_moist_air");
   }
 }
 
@@ -307,7 +307,8 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if (inflatevars.compare("specificHumidity") == 0) {
             if ((itype[iloc] > 179 && itype[iloc] < 186) ||
                 (itype[iloc] == 199)) dpres = 1.0;
-            gvals->getAtLocation(q_profile, oops::Variable{"saturation_specific_humidity"}, iloc);
+            gvals->getAtLocation(q_profile,
+                oops::Variable{"saturation_water_vapor_mixing_ratio_wrt_moist_air"}, iloc);
             std::reverse(q_profile.begin(), q_profile.end());
 
             ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile);

@@ -6,7 +6,7 @@ variable maps:
   - name: windNorthwardAt10M
     alias: northward_wind
   - name: specificHumidity
-    alias: specific_humidity
+    alias: water_vapor_mixing_ratio_wrt_moist_air
   - name: seaIceFraction
     alias: ice_area_fraction
 

@@ -32,7 +32,8 @@ ObsGnssroRefNCEPTLAD::ObsGnssroRefNCEPTLAD(const ioda::ObsSpace & odb,
 {
   ufo_gnssro_refncep_tlad_setup_f90(keyOperGnssroRefNCEP_,
                                     params.options.value().toConfiguration());
-  const std::vector<std::string> vv{"air_temperature", "specific_humidity", "air_pressure"};
+  const std::vector<std::string> vv{"air_temperature", "water_vapor_mixing_ratio_wrt_moist_air",
+                                    "air_pressure"};
 
   varin_.reset(new oops::Variables(vv));
   oops::Log::info() << "ObsGnssroRefNCEPTLAD vars: " << *varin_ << std::endl;

@@ -31,7 +31,7 @@ observations:
         name: ObsFunction/MetOfficeRelativeHumidityCorrection
         options:
           model pressure: air_pressure
-          model specific humidity: specific_humidity
+          model specific humidity: water_vapor_mixing_ratio_wrt_moist_air
           model relative humidity: relative_humidity
           model temperature: air_temperature
           observed pressure: MetaData/pressure
@@ -59,7 +59,7 @@ observations:
         name: ObsFunction/MetOfficeRelativeHumidityCorrection
         options:
           model pressure: air_pressure
-          model specific humidity: specific_humidity
+          model specific humidity: water_vapor_mixing_ratio_wrt_moist_air
           model relative humidity: relative_humidity
           model temperature: air_temperature
           observed pressure: MetaData/pressure

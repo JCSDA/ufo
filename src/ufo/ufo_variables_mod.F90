@@ -15,11 +15,11 @@ integer, parameter, public :: n_aerosols_gocart_default=14,&
      &n_aerosols_gocart_gefs=15,n_aerosols_gocart_ufs=18,&
      &n_aerosols_gocart_geos=18 !soon 21 for geos
 
-integer, parameter, public :: MAXVARLEN=100
+integer, parameter, public :: MAXVARLEN=110
 character(len=MAXVARLEN), public, parameter :: var_tv   = "virtual_temperature"
 character(len=MAXVARLEN), public, parameter :: var_ts   = "air_temperature"
-character(len=MAXVARLEN), public, parameter :: var_mixr = "water_vapor_mixing_ratio_wrt_dry_air" ! kg/kg
-character(len=MAXVARLEN), public, parameter :: var_q    = "specific_humidity"     ! kg/kg
+character(len=MAXVARLEN), public, parameter :: var_mixr = "water_vapor_mixing_ratio_wrt_dry_air"   ! kg/kg
+character(len=MAXVARLEN), public, parameter :: var_q    = "water_vapor_mixing_ratio_wrt_moist_air" ! kg/kg
 character(len=MAXVARLEN), public, parameter :: var_u    = "eastward_wind"
 character(len=MAXVARLEN), public, parameter :: var_v    = "northward_wind"
 character(len=MAXVARLEN), public, parameter :: var_prs  = "air_pressure"
@@ -71,7 +71,7 @@ character(len=MAXVARLEN), public, parameter :: var_clgefr = "effective_radius_of
 character(len=MAXVARLEN), public, parameter :: var_clhefr = "effective_radius_of_hail_particle"
 character(len=MAXVARLEN), public, parameter :: var_cldfrac = "cloud_area_fraction_in_atmosphere_layer"
 character(len=MAXVARLEN), public, parameter :: var_cldfrac_vol = "cloud_volume_fraction_in_atmosphere_layer"
-character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
+character(len=MAXVARLEN), public, parameter :: var_sfc_q2m = "water_vapor_mixing_ratio_wrt_moist_air_at_2m" ! (kg/kg)
 character(len=MAXVARLEN), public, parameter :: var_sfc_t2m = "air_temperature_at_2m" ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_tskin = "skin_temperature_at_surface"  ! (K)
 character(len=MAXVARLEN), public, parameter :: var_sfc_wfrac = "water_area_fraction"

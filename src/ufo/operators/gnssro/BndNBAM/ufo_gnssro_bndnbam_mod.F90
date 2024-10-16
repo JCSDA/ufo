@@ -557,7 +557,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   call obsspace_put_db(obss, "ObsDiag",   "modelLayerIndex", LayerIdx)
   call obsspace_put_db(obss, "ObsDiag",   "RecordNumberIndex", RecordIdx)
   if (trim(self%roconf%output_diags) .eq. "true") then
-      call obsspace_put_db(obss, "ObsDiag", "specific_humidity", humidity)
+      call obsspace_put_db(obss, "ObsDiag", "water_vapor_mixing_ratio_wrt_moist_air", humidity)
       call obsspace_put_db(obss, "ObsDiag", "refractivity", refractivity)
       call obsspace_put_db(obss, "ObsDiag", "pressure", pressure)
       deallocate(humidity)

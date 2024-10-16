@@ -196,7 +196,7 @@ end if
 ! Water Vapour Jacobians must be converted from
 ! kg/kg to ln(g/kg) - the unit conversion cancels, then:
 ! dy/d(ln q) = dy/dq * q(kg/kg)
-! var_q    = "specific_humidity"     ! kg/kg
+! var_q    = "water_vapor_mixing_ratio_wrt_moist_air"     ! kg/kg
 ! Note : RTTOV jacobian is TOA -> surface same as prof_x
 if (profindex % q(1) > 0) then
 
@@ -228,9 +228,9 @@ end if
 ! For the sake of this first implementation this will not include liquid
 ! and ice water content just water vapour which is consistent with the
 ! profile loaded from GeoVaLs.
-! var_q    = "specific_humidity"     ! kg/kg
-! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water"
-! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water"
+! var_q    = "water_vapor_mixing_ratio_wrt_moist_air"     ! kg/kg
+! var_clw  = "cloud_liquid_water_mixing_ratio_wrt_moist_air"
+! var_cli  = "cloud_ice_mixing_ratio_wrt_moist_air"
 ! Note : RTTOV jacobian is TOA -> surface same as prof_x
 if (profindex % qt(1) > 0) then
 
@@ -341,7 +341,7 @@ if (profindex % t2 > 0) then
   end do
 end if
 
-! 2.2) Water vapour - var_sfc_q2m = "specific_humidity_at_two_meters_above_surface" ! (kg/kg)
+! 2.2) Water vapour - var_sfc_q2m = "water_vapor_mixing_ratio_wrt_moist_air_at_2m" ! (kg/kg)
 if (profindex % q2 > 0) then
   s2m_kgkg = zero
   call ufo_geovals_get_var(geovals, var_sfc_q2m, geoval)

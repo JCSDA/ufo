@@ -8,7 +8,7 @@ observations:
      Debug: false # default
      Absorbers: []
      linear obs operator:
-       increment variables: [air_temperature, specific_humidity]
+       increment variables: [air_temperature, water_vapor_mixing_ratio_wrt_moist_air]
      obs options:
        RTTOV_default_opts: UKMO_PS43 # non-default
        RTTOV_apply_reg_limits: true # for compatibility with previous

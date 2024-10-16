@@ -15,7 +15,7 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
   Aliases_.emplace("airTemperature", oops::Variable{"air_temperature"});
   Aliases_.emplace("windEastward", oops::Variable{"eastward_wind"});
   Aliases_.emplace("windNorthward", oops::Variable{"northward_wind"});
-  Aliases_.emplace("specificHumidity", oops::Variable{"specific_humidity"});
+  Aliases_.emplace("specificHumidity", oops::Variable{"water_vapor_mixing_ratio_wrt_moist_air"});
   Aliases_.emplace("relativeHumidity", oops::Variable{"relative_humidity"});
   Aliases_.emplace("pressure", oops::Variable{"air_pressure"});
   Aliases_.emplace("virtualTemperature", oops::Variable{"virtual_temperature"});

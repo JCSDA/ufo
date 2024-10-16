@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsGnssroBndNBAM> makerGnssroBndNBAM_("GnssroBndNBAM");
 ObsGnssroBndNBAM::ObsGnssroBndNBAM(const ioda::ObsSpace & odb, const Parameters_ & params)
   : ObsOperatorBase(odb), keyOperGnssroBndNBAM_(0), odb_(odb), varin_()
 {
-  std::vector<std::string> vv{"air_temperature", "specific_humidity",
+  std::vector<std::string> vv{"air_temperature", "water_vapor_mixing_ratio_wrt_moist_air",
                               "height_above_mean_sea_level_at_surface"};
 
   if ( params.options.value().vertLayer.value() == "mass" ) {

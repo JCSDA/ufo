@@ -58,7 +58,7 @@ class Cal_HumidityParameters: public VariableTransformParametersBase {
 /*!
 * \brief Relative Humidity filter
 *
-* Performs a variable conversion from specific_humidity, temperature, and
+* Performs a variable conversion from specific humidity, temperature, and
 * pressure to relative humidity. The newly calculated variable is included in the same
 * obs space.
 *

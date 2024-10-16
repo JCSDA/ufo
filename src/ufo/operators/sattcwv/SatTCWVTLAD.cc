@@ -32,7 +32,8 @@ SatTCWVTLAD::SatTCWVTLAD(const ioda::ObsSpace & odb,
                          const Parameters_ & params)
   : LinearObsOperatorBase(odb), varin_(), k_matrix(), traj_init(false)
 {
-  const std::vector<std::string> vv{"air_pressure_levels", "specific_humidity",
+  const std::vector<std::string> vv{"air_pressure_levels",
+                                    "water_vapor_mixing_ratio_wrt_moist_air",
                                     "air_pressure_at_surface"};
   varin_.reset(new oops::Variables(vv));
 
@@ -71,7 +72,8 @@ void SatTCWVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
   // Get 3-D specific humidity on theta levels (kg/kg), one level at a time
   std::vector<std::vector<float>> q(nlevels-1, std::vector<float>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q[lev], oops::Variable{"specific_humidity"}, lev);
+    geovals.getAtLevel(q[lev], oops::Variable{
+        "water_vapor_mixing_ratio_wrt_moist_air"}, lev);
   }
 
   // Check model fields are top-down
@@ -115,7 +117,8 @@ void SatTCWVTLAD::simulateObsTL(
   // Get 3-D specific humidity increments on theta levels (kg/kg), one level at a time
   std::vector<std::vector<double>> q_d(nlevels-1, std::vector<double>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q_d[lev], oops::Variable{"specific_humidity"}, lev);
+    geovals.getAtLevel(q_d[lev], oops::Variable{
+        "water_vapor_mixing_ratio_wrt_moist_air"}, lev);
   }
 
   // Loop through the obs, calculating the increment to the observation hofx
@@ -143,7 +146,8 @@ void SatTCWVTLAD::simulateObsAD(
   // Get 3-D specific humidity increments on theta levels (kg/kg), one level at a time
   std::vector<std::vector<double>> q_d(nlevels-1, std::vector<double>(nprofiles));
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.getAtLevel(q_d[lev], oops::Variable{"specific_humidity"}, lev);
+    geovals.getAtLevel(q_d[lev], oops::Variable{
+        "water_vapor_mixing_ratio_wrt_moist_air"}, lev);
   }
 
   // Get the missing value indicator
@@ -160,7 +164,8 @@ void SatTCWVTLAD::simulateObsAD(
 
   // Store the updated model state increments
   for (std::size_t lev = 0; lev < nlevels-1; ++lev) {
-    geovals.putAtLevel(q_d[lev], oops::Variable{"specific_humidity"}, lev);
+    geovals.putAtLevel(q_d[lev], oops::Variable{
+        "water_vapor_mixing_ratio_wrt_moist_air"}, lev);
   }
 }
 
