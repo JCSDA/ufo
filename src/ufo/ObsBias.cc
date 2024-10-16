@@ -206,8 +206,19 @@ void ObsBias::read(const eckit::Configuration & config) {
 
     // TODO(corymartin-noaa) read in timestamp of last update
 
-    // Find indices of predictors and variables/channels that we need in the data read from the file
-    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
+    // Find indices of variables/channels that we need in the data read from the file
+    // Don't throw an exception if the variable is not in the file if it does not need to be
+    // bias-corrected.
+    bool throwexception = (varIndexNoBC_.size() == 0) ? true : false;
+    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_,
+                                                                    throwexception);
+    // sanity check
+    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      if (var_idx[jvar] == -1) {
+        ASSERT(std::find(varIndexNoBC_.begin(), varIndexNoBC_.end(), jvar) != varIndexNoBC_.end());
+      }
+    }
+    // Find indices of predictors that we need in the data read from the file
     const std::vector<int> pred_idx = getAllStrIndices(predictors,
                                       prednames_.begin() + numStaticPredictors_, prednames_.end());
     // Determine if the records are in the input file, if not, add it to the list
@@ -226,6 +237,10 @@ void ObsBias::read(const eckit::Configuration & config) {
         for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
           if (rec_idx[jrec] == -1) {
             // coeffs are set to 0 if record not in input file
+            biascoeffs_[index(jrec, jvar, jpred)] = 0.0;
+          } else if (var_idx[jvar] == -1) {
+            // coeffs are set to 0 if variable not in input file and
+            // does not need to be bias corrected
             biascoeffs_[index(jrec, jvar, jpred)] = 0.0;
           } else {
             // use value from input file
