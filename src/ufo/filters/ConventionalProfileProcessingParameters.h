@@ -313,7 +313,8 @@ namespace ufo {
 
     /// Minimum value of denominator used when computing big gaps
     /// (dimensionless; equal to log (pressure threshold / hPa)).
-    oops::Parameter<float> AvgP_GapLogPDiffMin {"AvgP_GapLogPDiffMin", std::log(5.0), this};
+    oops::Parameter<float> AvgP_GapLogPDiffMin
+      {"AvgP_GapLogPDiffMin", static_cast<float>(std::log(5.0)), this};
 
     /// Minimum fraction of a model layer that must have been covered (in the vertical coordinate)
     /// by observed values in order for temperature to be averaged onto that layer.
