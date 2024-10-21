@@ -64,6 +64,13 @@ class ObsBiasCovariance : public util::Printable,
  private:
   void print(std::ostream &) const {}
 
+  /// index in flattened variances_ for record \p jrec, variable \p jvar
+  /// and variable predictor \p jpred
+  size_t index(size_t jrec, size_t jvar, size_t jpred) const {
+    const size_t npred = prednames_.size();
+    return jrec * (vars_.size() * npred) + jvar * npred + jpred;
+  }
+
   ioda::ObsSpace & odb_;
 
 // Hessian contribution from Jo bias correction terms
@@ -84,6 +91,9 @@ class ObsBiasCovariance : public util::Printable,
 // Error variances
   Eigen::VectorXd variances_;
 
+// Default variance for new record
+  double default_new_variance_;
+
 // Smallest variance value
   double smallest_variance_ = ObsBiasCovarianceParameters::defaultSmallestVariance();
 
@@ -98,12 +108,19 @@ class ObsBiasCovariance : public util::Printable,
 
   std::vector<std::string> prednames_;
 
+  /// bias-correct by record?
+  bool byRecord_;
+
   /// number of records that have separate bias-correction coefficients
   /// (nrecs_ = 1 if all obs use the same coefficients)
   std::size_t nrecs_;
+  /// vector of strings of record IDs
+  std::vector<std::string> recIds_;
 
   /// variables for which bias correction coefficients will be updated
   oops::ObsVariables vars_;
+  /// indices of variables (or channels) that don't need bias correction
+  std::vector<int> varIndexNoBC_;
 
   /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
   const size_t rank_;

@@ -1,0 +1,39 @@
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: aircraft
+    obsdatain:
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/artificial_aircraft_obs_forbc.nc4
+    simulated variables: [airTemperature]
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/aircraft_bias_20210731T18Z.nc4
+    bc by record: true
+    variational bc:
+      predictors:
+      - name: constant
+      - name: obsMetadataPredictor
+        variable: aircraftAscentRate
+      - name: obsMetadataPredictor
+        variable: aircraftAscentRate
+        order: 2
+    covariance: # TODO: all of this section needs revisiting by experts, this is copy-paste from amsua yaml
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.0]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        input file: Data/ufo/testinput_tier_1/aircraft_bias_20210731T18Z.nc4
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
+  tolerance: 1.e-7
+

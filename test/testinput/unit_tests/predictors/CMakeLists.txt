@@ -79,12 +79,42 @@ ufo_add_test( NAME    test_ufo_bias_covariance_amsua
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    test_ufo_bias_covariance_aircraft
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestObsBiasCovariance.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_bias_covariance_details
               TIER    1
               ECBUILD
               SOURCES ../../../mains/TestObsBiasCovarianceDetails.cc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov.yaml"
               MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_bias_covariance_details_byrecord
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestObsBiasCovarianceDetails.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_bias_covariance_details_byrecord_2
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestObsBiasCovarianceDetails.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
+              MPI     2
               LIBS    ufo
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

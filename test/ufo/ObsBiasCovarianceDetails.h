@@ -111,7 +111,7 @@ void testObsBiasCovarianceDetails() {
       ybias_cov.multiply(ybias_inc, ybias_inc_2);
       ybias_cov2.multiply(ybias_inc, ybias_inc_3);
       EXPECT(ybias_inc_2.norm() - ybias_inc_3.norm() < tolerance);
-      oops::Log::test() << "ufo::testObsBiasCovarianceDetails read / write is verified"
+      oops::Log::info() << "ufo::testObsBiasCovarianceDetails read / write is verified"
                         << std::endl;
     }
 
@@ -120,22 +120,26 @@ void testObsBiasCovarianceDetails() {
 
     // Randomize increments again
     ybias_cov.randomize(ybias_inc);
+    oops::Log::info() << "yb1 (randomized bias coeff increment): " << ybias_inc << std::endl;
 
     // linearize for the first outer loop again -- now QC and errors are set
     ybias_cov.linearize(ybias, biaserrconf);
 
     // delta_bias * B
     ybias_cov.multiply(ybias_inc, ybias_inc_2);
+    oops::Log::info() << "yb2 = yb1 * bias coeff error covariance: " << ybias_inc_2 << std::endl;
 
     EXPECT(ybias_inc.norm() != ybias_inc_2.norm());
-    oops::Log::test() << "ufo::testObsBiasCovarianceDetails multiply is verified" << std::endl;
+    oops::Log::info() << "ufo::testObsBiasCovarianceDetails multiply is verified" << std::endl;
 
     // delta_bias / B
     ybias_cov.inverseMultiply(ybias_inc_2, ybias_inc_3);
+    oops::Log::info() << "yb3 = yb2 * (bias coeff error covariance)^{-1}: " << ybias_inc_3
+                      << std::endl;
 
     // Verifing the reading is right
     EXPECT(ybias_inc.norm() - ybias_inc_3.norm() < tolerance);
-    oops::Log::test() << "ufo::testObsBiasCovarianceDetails inverseMultiply is verified"
+    oops::Log::info() << "ufo::testObsBiasCovarianceDetails inverseMultiply is verified"
                       << std::endl;
   }
 }

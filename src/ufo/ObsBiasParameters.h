@@ -75,6 +75,7 @@ class ObsBiasCovarianceParameters : public oops::Parameters {
     "minimal required obs number", this};
   oops::Parameter<std::vector<double>> varianceRange{
     "variance range", {defaultSmallestVariance(), defaultLargestVariance()}, this};
+  oops::OptionalParameter<double> defaultNewVariance{"new record analysis variance", this};
   oops::Parameter<double> stepSize{
     "step size", defaultStepSize(), this};
   oops::Parameter<double> largestAnalysisVariance{

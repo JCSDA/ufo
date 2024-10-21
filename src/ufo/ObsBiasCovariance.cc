@@ -48,6 +48,7 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
 
   Parameters_ params;
   params.validateAndDeserialize(config);
+  byRecord_ = params.BiasCorrectionByRecord;
 
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :
@@ -56,13 +57,36 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
                                                                  vars_));
     prednames_.push_back(pred->name());
   }
-
-  nrecs_ = (params.BiasCorrectionByRecord && odb.obs_group_vars().size() > 0) ? odb.nrecs() : 1;
-  if (params.BiasCorrectionByRecord && odb.obs_group_vars().size() == 0) {
+  nrecs_ = (byRecord_ && odb.obs_group_vars().size() > 0) ? odb.nrecs() : 1;
+  if (byRecord_ && odb.obs_group_vars().size() == 0) {
     throw eckit::BadParameter("ObsBiasParameters: BiasCorrectionByRecord is turned on, "
                               "but the observations are not grouped into records.");
   }
   ASSERT(nrecs_ > 0);
+
+  oops::ObsVariables varsNoBC = params.variablesNoBC;
+  varsNoBC.intersection(vars_);  // Safeguard to make sure that varsNoBC is a subset of vars_
+  for (size_t ii = 0; ii < varsNoBC.size(); ++ii) {
+    size_t index = vars_.find(varsNoBC[ii]);
+    varIndexNoBC_.push_back(index);
+  }
+
+  // save record IDs for matching
+  if (byRecord_) {
+    recIds_.resize(nrecs_);
+    // get all ids and obs types (for the hack to be removed)
+    std::vector<std::string> allids;
+    odb.get_db("MetaData", "stationIdentification", allids);
+    // save station ids for all records
+    size_t jrec = 0;
+    for (auto irec = odb.recidx_begin(); irec != odb.recidx_end(); ++irec, ++jrec) {
+      // all the identifiers will be the same for the same record, use the first one
+      const size_t iloc = odb.recidx_vector(irec)[0];
+      // remove trailing whitespaces (should really be done in files)
+      const size_t strEnd = allids[iloc].find_last_not_of(" \t");
+      recIds_[jrec] = allids[iloc].substr(0, strEnd+1);
+    }
+  }
 
   if (vars_.size() * prednames_.size() > 0) {
     if (params.covariance.value() == boost::none)
@@ -85,6 +109,11 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
 
     // Override the largest analysis variance if provided
     largest_analysis_variance_ = biasCovParams.largestAnalysisVariance;
+
+    // Set variance for new record ("new record analysis variance" if specified
+    // in yaml, or largest_analysis_variance if not))
+    default_new_variance_ = (biasCovParams.defaultNewVariance.value() != boost::none) ?
+            *biasCovParams.defaultNewVariance.value() : largest_analysis_variance_;
 
     // Initialize the variances to upper limit
     variances_ = Eigen::VectorXd::Constant(nrecs_ * vars_.size() * prednames_.size(),
@@ -186,23 +215,65 @@ void ObsBiasCovariance::read(const eckit::Configuration & config) {
     Eigen::ArrayXXf nobsassim;
     nobsvar.readWithEigenRegular(nobsassim);
 
-    // Find indices of predictors and variables/channels that we need in the data read from the file
-    // We will assume that at this stage we need all records in the file
-    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_);
+    // Read all record names into the Eigen array
+    std::vector<std::string> allrecords;
+    if (obsgroup.vars.exists("stationIdentification")) {
+      ioda::Variable recvar = obsgroup.vars.open("stationIdentification");
+      recvar.read<std::string>(allrecords);
+    }
+
+    // Find indices of variables/channels that we need in the data read from the file
+    // Don't throw an exception if the variable is not in the file if it does not need to be
+    // bias-corrected.
+    bool throwexception = (varIndexNoBC_.size() == 0) ? true : false;
+    const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_,
+                                     throwexception);
+    // sanity check
+    for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+      if (var_idx[jvar] == -1) {
+        ASSERT(std::find(varIndexNoBC_.begin(), varIndexNoBC_.end(), jvar) != varIndexNoBC_.end());
+      }
+    }
+    // Find indices of predictors that we need in the data read from the file
     const std::vector<int> pred_idx = getAllStrIndices(predictors,
                                       prednames_.begin(), prednames_.end());
+    // Determine if the records are in the input file, if not, add it to the list
+    std::vector<int> rec_idx;
+    if (byRecord_) {
+      bool throwexception = false;
+      rec_idx = getAllStrIndices(allrecords,
+                recIds_.begin(), recIds_.end(), throwexception);
+    } else {
+      rec_idx.push_back(0);
+    }
 
     // Filter predictors and channels that we need
     // FIXME: may be possible by indexing allbcerrors(pred_idx, chan_idx) when Eigen 3.4
     // is available
+    const double missing = util::missingValue<double>();
     for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
       for (size_t jvar = 0; jvar < var_idx.size(); ++jvar) {
         const size_t jrecvar = jrec * vars_.size() + jvar;
-        // TODO(Algo): RHS of the following equations to be fixed (to include jrec)
-        obs_num_[jrecvar] = nobsassim(var_idx[jvar]);
-        for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
-          analysis_variances_[jrecvar * pred_idx.size() + jpred] =
-               allbcerrors[pred_idx[jpred]](jrec, var_idx[jvar]);
+        if (rec_idx[jrec] == -1) {
+          obs_num_[jrecvar] = 0;
+        } else {
+          obs_num_[jrecvar] = nobsassim(var_idx[jvar], rec_idx[jrec]);
+        }
+        if (rec_idx[jrec] == -1) {
+          // errors are set to default new variance if record not in input file
+          for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+            analysis_variances_[index(jrec, jvar, jpred)] = default_new_variance_;
+          }
+        } else if (var_idx[jvar] == -1) {
+          // errors are set to missing values if variable is not bias corrected
+          for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+            analysis_variances_[index(jrec, jvar, jpred)] = missing;
+          }
+        } else {
+          for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+            analysis_variances_[index(jrec, jvar, jpred)] =
+                 allbcerrors[pred_idx[jpred]](rec_idx[jrec], var_idx[jvar]);
+          }
         }
       }
     }
@@ -294,9 +365,10 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
   ASSERT(nrecs_ == bias.nrecs());
 
   if (vars_.size() * prednames_.size() > 0) {
-    const float missing = util::missingValue<float>();
+    const double missing = util::missingValue<double>();
     const int missing_int = util::missingValue<int>();
     const int jouter = innerConf.getInt("iteration");
+    // The MPI accumulator only required for not-by-record BC
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> obs_num_accumulator =
         odb_.distribution()->createAccumulator<size_t>(obs_num_.size());
 
@@ -305,29 +377,47 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     const std::string qc_group_name = "EffectiveQC" + std::to_string(jouter);
     const std::vector<std::string> vars = odb_.assimvariables().variables();
     std::vector<int> qc_flags(odb_.nlocs(), 999);
+    // get all global records for bias correction by record
+    const std::vector<size_t> recnums = odb_.recidx_all_recnums();
     for (std::size_t jvar = 0; jvar < vars.size(); ++jvar) {
       if (odb_.has(qc_group_name, vars[jvar])) {
         odb_.get_db(qc_group_name, vars[jvar], qc_flags);
         for (std::size_t jloc = 0; jloc < qc_flags.size(); ++jloc)
           if (qc_flags[jloc] == 0) {
-            const std::size_t jrec = nrecs_ == 1 ? 0 : odb_.recnum()[jloc];
-            obs_num_accumulator->addTerm(jloc, jrec * vars_.size() + jvar, 1);
+            size_t jrec = 0;
+            if (nrecs_ > 1) {
+              std::size_t jrec_global = odb_.recnum()[jloc];
+              // find the index for this record on the local task
+              jrec = std::find(recnums.begin(), recnums.end(), jrec_global) -
+                               recnums.begin();
+            }
+            const size_t jrecvar = jrec * vars_.size() + jvar;
+            if (byRecord_) {
+              // For by-record BC each MPI task has information about non-overlapping
+              // records, and number of obs can be computed independently
+              obs_num_[jrecvar]++;
+            } else {
+              // For not by-record BC number of obs is cumulative across MPI tasks
+              // and requires MPI accumulator
+              obs_num_accumulator->addTerm(jloc, jrecvar, 1);
+            }
           }
       } else {
         throw eckit::UserError("Unable to find QC flags : " + vars[jvar] + "@" + qc_group_name);
       }
     }
 
-    // Sum across the processors
-    obs_num_ = obs_num_accumulator->computeResult();
+    // For not by-record BC number of obs is cumulative across MPI tasks, sum across
+    // the processors
+    if (!byRecord_) {
+      obs_num_ = obs_num_accumulator->computeResult();
+    }
     // Sum across time subwindows
     commTime_.allReduceInPlace(obs_num_.begin(), obs_num_.end(), eckit::mpi::sum());
-
     // compute the hessian contribution from Jo bias terms channel by channel
     // retrieve the effective error (after QC) for this channel
     const std::string err_group_name = "EffectiveError" + std::to_string(jouter);
     ioda::ObsVector r_inv(odb_, err_group_name);
-
     // compute \mathrm{R}^{-1}
     std::size_t nvars = r_inv.nvars();
     for (size_t vv = 0; vv < nvars; ++vv) {
@@ -342,39 +432,54 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
 
     // compute \mathrm{H}_\beta^\intercal \mathrm{R}^{-1} \mathrm{H}_\beta
     // -----------------------------------------
+    // The MPI accumulator only required for not-by-record BC
     std::unique_ptr<ioda::Accumulator<std::vector<double>>> ht_rinv_h_accumulator =
         odb_.distribution()->createAccumulator<double>(ht_rinv_h_.size());
-    for (std::size_t p = 0; p < prednames_.size(); ++p) {
+    for (std::size_t jp = 0; jp < prednames_.size(); ++jp) {
       // retrieve the predictors
-      const ioda::ObsVector predx(odb_, prednames_[p] + "Predictor");
+      const ioda::ObsVector predx(odb_, prednames_[jp] + "Predictor");
       // for each variable
       ASSERT(r_inv.nlocs() == predx.nlocs());
       // only keep the diagnoal
-      for (size_t vv = 0; vv < vars_.size(); ++vv) {
-        for (size_t ii = 0; ii < predx.nlocs(); ++ii) {
-          const std::size_t jrec = nrecs_ == 1 ? 0 : odb_.recnum()[ii];
-          ht_rinv_h_accumulator->addTerm(ii,
-                                         jrec * (vars_.size() * prednames_.size())
-                                           + vv * prednames_.size() + p,
-                                         pow(predx[ii * vars_.size() + vv], 2)
-                                           * r_inv[ii * vars_.size() + vv]);
+      for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+        for (size_t jloc = 0; jloc < predx.nlocs(); ++jloc) {
+          size_t jrec = 0;
+          if (nrecs_ > 1) {
+            std::size_t jrec_global = odb_.recnum()[jloc];
+            // find the index for this record on the local task
+            jrec = std::find(recnums.begin(), recnums.end(), jrec_global) -
+                             recnums.begin();
+          }
+          if (byRecord_) {
+            // For by-record BC each MPI task has information about non-overlapping
+            // records, and result can be accumulated independently on each task
+            ht_rinv_h_[index(jrec, jvar, jp)] += pow(predx[jloc * vars_.size() + jvar], 2)
+                                                  * r_inv[jloc * vars_.size() + jvar];
+          } else {
+            // For not by-record BC the result is cumulative across MPI tasks
+            // and requires MPI accumulator
+            ht_rinv_h_accumulator->addTerm(jloc, index(jrec, jvar, jp),
+                                           pow(predx[jloc * vars_.size() + jvar], 2)
+                                             * r_inv[jloc * vars_.size() + jvar]);
+          }
         }
       }
     }
 
-    // Sum the hessian contributions across the tasks
-    ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
+    // For not by-record BC the hessian is cumulative across MPI tasks, sum contributions across
+    // the tasks
+    if (!byRecord_) {
+      ht_rinv_h_ = ht_rinv_h_accumulator->computeResult();
+    }
     // Sum across time subwindows
     commTime_.allReduceInPlace(ht_rinv_h_.begin(), ht_rinv_h_.end(), eckit::mpi::sum());
-
     // Set obs_num_ and ht_rinv_h_ to missing for variables opted out of bias correction
-    const std::vector<int> & varIndexNoBC = bias.varIndexNoBC();
     for (std::size_t jrec = 0; jrec < nrecs_; ++jrec) {
-      for (const int jvar : varIndexNoBC) {
+      for (const int jvar : varIndexNoBC_) {
         const std::size_t jrecvar = jrec * vars_.size() + jvar;
         obs_num_[jrecvar] = missing_int;
-        for (std::size_t p = 0; p < prednames_.size(); ++p) {
-          ht_rinv_h_[jrecvar * prednames_.size() + p] = missing;
+        for (std::size_t jp = 0; jp < prednames_.size(); ++jp) {
+          ht_rinv_h_[index(jrec, jvar, jp)] = missing;
         }
       }
     }
@@ -383,8 +488,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       for (std::size_t jvar = 0; jvar < vars_.size(); ++jvar) {
         const std::size_t jrecvar = jrec * vars_.size() + jvar;
         if (obs_num_[jrecvar] != missing_int) {
-          for (std::size_t p = 0; p < prednames_.size(); ++p) {
-            const std::size_t index = jrecvar * prednames_.size() + p;
+          for (std::size_t jp = 0; jp < prednames_.size(); ++jp) {
+            const std::size_t index = this->index(jrec, jvar, jp);
 
             // Reset variances for bias predictor coeff. based on current data count
             if (obs_num_[jrecvar] <= minimal_required_obs_number_) {
@@ -407,8 +512,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
         } else {
           // Set variances, preconditioner and analysis variances to missing
           // for variables opted out of bias correction
-          for (std::size_t p = 0; p < prednames_.size(); ++p) {
-            const std::size_t index = jrecvar * prednames_.size() + p;
+          for (std::size_t jp = 0; jp < prednames_.size(); ++jp) {
+            const std::size_t index = this->index(jrec, jvar, jp);
             variances_[index] = missing;
             preconditioner_[index] = missing;
             analysis_variances_[index] = missing;
@@ -417,7 +522,6 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       }
     }
   }
-
   oops::Log::trace() << "ObsBiasCovariance::linearize is done" << std::endl;
 }
 
