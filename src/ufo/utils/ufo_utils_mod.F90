@@ -81,7 +81,6 @@ real(kind=kind_real) :: TT
 integer              :: I
 integer              :: IES
 real(kind=kind_real) :: ES(0:N + 1)    ! Table of saturation water vapour pressure (PA)
-character(len=*), parameter :: RoutineName = "Ops_Qsat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
 !       of low temperatures (.LE.T_low) for which the array index is
@@ -510,7 +509,6 @@ real(kind=kind_real)        :: TT
 integer                     :: I
 integer                     :: IES
 real(kind=kind_real)        :: ES(0:N + 1)   ! Table of saturation water vapour pressure (PA)
-character(len=*), parameter :: RoutineName = "Ops_QsatWat"
 
 ! Note: 0 element is a repeat of 1st element to cater for special case
 !       of low temperatures (.LE.T_low) for which the array index is
@@ -956,7 +954,6 @@ subroutine Ops_SatRad_Qsplit ( &
   real(kind_real)                        :: Denom
   real(kind_real)                        :: SmallValue
   real(kind_real)                        :: LF(size(qtotal))          ! fraction of ql to ql+qi
-  character(len=*), parameter :: RoutineName = "Ops_SatRad_Qsplit"
 
   real(kind_real)    :: QsplitRainParamA       !Parameters used to define proportion of
   real(kind_real)    :: QsplitRainParamB       !qt that is partitioned into a rain compnenent
@@ -1134,7 +1131,7 @@ real(kind_real)              :: X(n)     ! Temporary array used in calculating G
 ErrorCode = 0
 
 ! Determine the Cholesky triangle matrix.
-
+G(:,:) = 0.0_kind_real
 do j = 1, n
   X(j:n) = U(j:n,j)
   if (j /= 1) then
@@ -1144,8 +1141,8 @@ do j = 1, n
   end if
   if (X(j) <= Tolerance) then
     ErrorCode = 1
-    Errormessage = ' :U matrix is not positive definite'
-    write(*,*) trim(RoutineName), trim(ErrorMessage)
+    Errormessage = RoutineName//': U matrix is not positive definite'
+    call fckit_log % warning(Errormessage)
     goto 9999
   end if
   G(J:N,J) = X(J:N) / sqrt (X(J))
@@ -1276,7 +1273,7 @@ do j = 1, n
     end do
   end if
   if (x(j) <= tolerance) then
-    errormessage = 'Matrix is not positive definite'
+    errormessage = routinename//': Matrix is not positive definite'
     call fckit_log % warning(errormessage)
     status = 1
     goto 9999
@@ -1294,9 +1291,9 @@ if (present (matrix)) then
 else
   ! make sure that the dimensions of tmp were correctly specified
   if (m /= n) then
-    errormessage = '2nd and 3rd arguments of routine must be'
+    errormessage = routinename//': 2nd and 3rd arguments of routine must be'
     call fckit_log % warning(errormessage)
-    errormessage = 'identical if the matrix option is not present'
+    errormessage = routinename//': identical if the matrix option is not present'
     call fckit_log % warning(errormessage)
     status = 2
     goto 9999
@@ -1488,7 +1485,6 @@ INTEGER                           :: head  ! heaps are tree structures: head and
 INTEGER                           :: child ! to related items within the tree
 INTEGER                           :: j
 INTEGER                           :: dum   ! used to swap index items
-CHARACTER(len=*), PARAMETER       :: RoutineName = 'Ops_RealSortQuick'
 
 ! Could put in an optional mask
 
@@ -1566,9 +1562,6 @@ integer, allocatable, intent(out) :: index_vals(:)         ! Indices of sorted o
 integer, allocatable, intent(out) :: unique(:)             ! Set of unique profile numbers
 
 real(kind_real), allocatable  :: sort_key(:)           ! Key for the sorting (based on record number and impact parameter)
-integer                       :: start_point           ! Starting index of the current profile
-integer                       :: current_point         ! Ending index of the current profile
-integer                       :: iprofile              ! Loop variable, profile number
 
 ! Read through the record numbers in order to find a profile of observations
 ! Each profile shares the same record number

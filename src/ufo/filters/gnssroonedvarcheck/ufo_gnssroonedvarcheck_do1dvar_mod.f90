@@ -81,7 +81,6 @@ REAL(kind_real), INTENT(INOUT)      :: O_Bdiff  ! measure of O-B for whole profi
 REAL(kind_real), INTENT(INOUT)      :: DFS      ! measure of degrees of freedom of signal for whole profile
 
 ! Local parameters
-CHARACTER(len=*), PARAMETER         :: RoutineName = "Ops_GPSRO_Do1DVar_BA"
 INTEGER, PARAMETER                  :: max_string = 800
 
 ! Local variables

@@ -61,7 +61,6 @@ REAL(kind_real), INTENT(OUT) :: alpha(nobs)    ! bending angle
 LOGICAL, INTENT(IN)          :: noCheck        ! If true, do not apply super-refraction check
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSROcalc_alpha"
 INTEGER                     :: i
 INTEGER                     :: n
 INTEGER                     :: jbot
@@ -252,7 +251,6 @@ REAL(kind_real), INTENT(IN)  :: refrac(nb)  ! refractivity on model levels / N
 REAL(kind_real), INTENT(OUT) :: nr(nb)      ! Calculated model impact parameters
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER  :: RoutineName = "Ops_GPSROcalc_nr"
 REAL(kind_real)              :: r(nb)       ! radius of model levels /m
 REAL(kind_real)              :: z(nb)       ! geopotential heights on zb levels /m, local copy of zb
 INTEGER                      :: i
@@ -296,7 +294,6 @@ REAL(kind_real), INTENT(IN)    :: lat         ! latitude of observation
 REAL(kind_real), INTENT(INOUT) :: z(:)        ! geopotential height in, geometric height out
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSRO_geop_geom"
 REAL(kind_real)             :: r_eff   ! effective radius of Earth, formulas from MJ Mahoney (2005)
 REAL(kind_real)             :: g_somig ! Somigliana's equation for normal gravity on the surface of an ellipsoid of revolution
 REAL(kind_real)             :: latrad  ! latitude in radians

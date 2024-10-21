@@ -46,7 +46,6 @@ integer :: error  ! error code for read
 integer :: lun    ! value for identifying file
 integer :: dimid  ! value for dimension id
 integer :: varid  ! value for variable id
-integer :: nchans ! number of channels
 
 ! defaults
 self % nchans = 0

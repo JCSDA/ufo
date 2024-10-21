@@ -56,7 +56,7 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
 ! Local variables
   type(ufo_geoval), pointer      :: delp                ! The model geovals - atmospheric pressure (Pa)
   type(ufo_geoval), pointer      :: qg                  ! The model geovals - graupel mixing ratios (kg/kg)
-  real(kind_real), allocatable   :: dfed_dqg(:,:)       ! The deriv of FED vs layer qg conc (kg/sq.m/kg/kg) 
+  real(kind_real), allocatable   :: dfed_dqg(:,:)       ! The deriv of FED vs layer qg conc (kg/sq.m/kg/kg)
   logical :: ascend                                     ! Flag on direction of model levels
   integer :: iobs                                       ! Counter
 !  integer :: ivar                                      ! Counter
@@ -134,7 +134,7 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
 
     ! Build K-matrix (Jacobian of FED with respect to layer qg)
      do ilev=1,self%nlevq
-       self%K((iobs-1)*n_horiz+1 : iobs*n_horiz, ilev) = dfed_dqg(ilev,1:n_horiz)  
+       self%K((iobs-1)*n_horiz+1 : iobs*n_horiz, ilev) = dfed_dqg(ilev,1:n_horiz)
      enddo
   end do obs_loop
   deallocate(dfed_dqg)
@@ -153,9 +153,6 @@ type(ufo_geovals),       intent(in)    :: geovals
 integer,                 intent(in)    :: nvars, nlocs
 real(c_double),          intent(inout) :: hofx(nvars,nlocs)
 type(c_ptr), value,      intent(in)    :: obss
-
-! Local parameters
-  character(len=*), parameter  :: myname_="ufo_lightning_simobs_tl"
 
 ! Local variables
   integer                      :: iobs                 ! Loop variable, observation number
@@ -205,9 +202,6 @@ integer,                   intent(in)    :: nvars, nlocs
 real(c_double),            intent(in)    :: hofx(nvars,nlocs)
 type(c_ptr), value,        intent(in)    :: obss
 
-! Local parameters
-  character(len=*), parameter  :: myname_="ufo_lightning_simobs_ad"
-
 ! Local variables
   real(c_double)               :: missing  ! Missing data values
 
@@ -220,7 +214,6 @@ type(c_ptr), value,        intent(in)    :: obss
   integer                      :: nlev     ! level number
   real(kind_real), allocatable :: x_d(:,:) ! Perturbation to the state vector
   integer, parameter           :: max_string = 800
-  character(max_string)        :: err_msg  ! Message to be output
   integer                      :: n_horiz, i_horiz
 
 
@@ -245,12 +238,10 @@ type(c_ptr), value,        intent(in)    :: obss
       delp_d % vals = zero
   endif
 
-
-!
   missing = missing_value(missing)
 ! Allocate state vector x_d
   allocate(x_d(nlocs*n_horiz,1:nlev))
-  
+
 !
 ! Loop through the obs, calculating the increment to the model state layer q
 !
@@ -267,11 +258,8 @@ type(c_ptr), value,        intent(in)    :: obss
   end do obs_loop
   end do var_loop
   deallocate(x_d)
-!
-!  write(err_msg,*) "TRACE: ufo_lightning_simobs_ad: complete"
-!
-  return
 
+  return
 
 end subroutine ufo_lightning_simobs_ad_
 
@@ -332,16 +320,14 @@ DOUBLE PRECISION               :: ag, answer
 ! Local constants
 !
 integer, parameter    :: max_string = 800
-character(max_string) :: err_msg           ! Error message to be output
 character(max_string) :: message           ! General message for output
-character(len=*), parameter :: myname_ = "ufo_lightning_tlad"
 REAL(kind_real)       :: PDiff             ! Pressure diff across layer
 REAL(kind_real)       :: GK                ! 1/gravity
 INTEGER               :: ilev              ! level counter
 
 REAL(kind_real)                :: coeff3rdorder(4)
 !LOGICAL, INTENT(IN)            :: l_fed_nonlinear
-REAL(kind_real)                :: gridarea 
+REAL(kind_real)                :: gridarea
 REAL(kind_real), parameter     :: glmcoeff = 2.088e-8
 INTEGER                        :: i_horiz
 
@@ -377,20 +363,20 @@ DO ilev = ilev1, ilev2, inc  !Used for vertical integration
      ag = ag - GK * qg(ilev,i_horiz) * PDiff * gridarea ! Accumulate layer graupel mass
    END DO
 END DO
-ag = ag * 1.0E-9  !The coefficients are fitted based on the relscaled data to avoid excessively small values 
+ag = ag * 1.0E-9  !The coefficients are fitted based on the relscaled data to avoid excessively small values
 !-------------------------------------------------------------------------------
 ! Then linearize around the nonlonlinear trajectory, here ag is used in calculation of nonlinear trajectory
 !-------------------------------------------------------------------------------
 DO ilev = ilev1, ilev2, inc
    DO i_horiz = 1, n_horiz
-     PDiff = -1.0 * delp(ilev,i_horiz)     
+     PDiff = -1.0 * delp(ilev,i_horiz)
      dag_dqg = -1.0*  GK * PDiff * gridarea
      answer = (3*coeff3rdorder(1)*ag**2 + 2*coeff3rdorder(2)*ag + coeff3rdorder(3))*dag_dqg
      dfed_dqg(ilev,i_horiz) = SNGL(answer)
   END DO
 END DO
 
-dfed_dqg = dfed_dqg * 1.0E-9 !don't forget this part since the observation operator is a composite function 
+dfed_dqg = dfed_dqg * 1.0E-9 !don't forget this part since the observation operator is a composite function
 !
 END SUBROUTINE lightning_GetK
 

@@ -1,8 +1,8 @@
 
 ! (C) Copyright 2017-2020 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 module ufo_gnssroonedvarcheck_mod_c
 
@@ -81,7 +81,6 @@ integer(c_int), intent(in)                :: chanList(nchans)  !< List of channe
 logical(c_bool), intent(in)               :: noSuperCheck      !< Whether to avoid using super-refraction check in operator
 
 character(len=filename_length) :: bmatrix_filename  ! Location of the B-matrix file
-integer                        :: ifname            ! Loop variable for filename
 integer(c_int), allocatable    :: localChanList(:)  ! Allocated list of channels (even if nchans=0)
 
 type(ufo_gnssroonedvarcheck), pointer :: self
@@ -160,11 +159,8 @@ integer(c_int), intent(in)     :: c_nobs          !< number of observations - in
 character(c_char), intent(in)  :: c_apply(c_nobs) !< apply flag (converted to logical) - input
 
 type(ufo_gnssroonedvarcheck), pointer :: self
-type(oops_variables)                 :: vars
-type(oops_variables)                 :: retrieval_vars
-type(ufo_geovals), pointer           :: geovals
-integer                              :: ii
-logical                              :: apply(c_nobs)
+type(ufo_geovals), pointer            :: geovals
+logical                               :: apply(c_nobs)
 
 call ufo_gnssroonedvarcheck_registry%get(c_self, self)
 call ufo_geovals_registry%get(c_geovals, geovals)

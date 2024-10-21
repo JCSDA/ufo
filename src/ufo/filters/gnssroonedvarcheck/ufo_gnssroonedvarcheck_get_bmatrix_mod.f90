@@ -45,7 +45,6 @@ INTEGER, INTENT(IN)              :: cx_nlevp   !< The number of pressure levels 
 INTEGER, INTENT(IN)              :: cx_nlevq   !< The number of temperature levels in the model
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER      :: RoutineName = "Ops_GPSRO_GetBmatrix"
 INTEGER                          :: i
 INTEGER                          :: j
 INTEGER                          :: m
@@ -56,7 +55,6 @@ INTEGER                          :: nstate
 INTEGER                          :: nband
 INTEGER                          :: nseason
 INTEGER                          :: fileunit
-CHARACTER(len=*), PARAMETER      :: filetype_name = "Bmatrix"
 CHARACTER(len=20)                :: prefix
 CHARACTER(len=256)               :: ErrorMessage
 INTEGER                          :: return_code

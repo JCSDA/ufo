@@ -56,7 +56,6 @@ TYPE (Rmatrix_type), ALLOCATABLE, INTENT(OUT) :: Rmatrix(:)  ! The R matrices re
 INTEGER, INTENT(OUT)                          :: R_num_mats  ! Number of sats/processing R matrices in these files
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER                   :: RoutineName = "ufo_roobserror_getrmatrix"
 TYPE (Rmatrix_type)                           :: temp_rmat(max_mats)   ! Temporary store of the matrices read in
 INTEGER                                       :: i                     ! Loop variable when copying matrices
 INTEGER                                       :: fileunit              ! The unit number of the input file
@@ -89,7 +88,7 @@ DO
       R_num_mats, " out of ", max_mats
     CALL abor1_ftn(ErrorMessage)
   END IF
-  
+
   CALL ufo_roobserror_read_rmatrix (fileunit,                  &
                                     temp_rmat(R_num_mats + 1), &
                                     return_code)
@@ -154,7 +153,6 @@ TYPE (Rmatrix_type), INTENT(OUT) :: Rmatrix      ! The R matrix read from the fi
 INTEGER, INTENT(OUT)             :: return_code  ! Return code from this routine
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER      :: RoutineName = "ufo_roobserror_read_rmatrix"
 CHARACTER(len=200)               :: ErrorMessage
 REAL                             :: av_temp          ! Average troposphere temperature
 INTEGER                          :: max_height       ! The maximum height for calculating the average temperature
@@ -251,7 +249,6 @@ TYPE (Rmatrix_type), INTENT(OUT) :: out_matrix                ! Output R matrix
 logical, parameter               :: verboseOutput = .FALSE.   ! Whether to output extra debugging information
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER      :: RoutineName = "ufo_roobserror_interpolate_rmatrix"
 INTEGER                          :: i                         ! Loop variable
 INTEGER                          :: lower_match               ! The largest av_temp which is smaller than the one being searched for
 INTEGER                          :: upper_match               ! The smallest av_temp which is larger than the one being searched for
@@ -291,7 +288,7 @@ IF (upper_match > 0) THEN
     end if
     weight = (av_temp - RMatrix_list(lower_match) % av_temp) / &
       (RMatrix_list(upper_match) % av_temp - RMatrix_list(lower_match) % av_temp)
-    
+
     out_matrix % num_heights = RMatrix_list(lower_match) % num_heights
     ALLOCATE (out_matrix % height(1:out_matrix % num_heights))
     ALLOCATE (out_matrix % frac_err(1:out_matrix % num_heights))
@@ -361,7 +358,6 @@ REAL, INTENT(IN)            :: source_values(1:source_nheights)
 REAL, INTENT(OUT)           :: output_values(1:target_nheights)
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "ufo_roobserror_interpolate_heights"
 INTEGER                     :: i
 INTEGER                     :: j
 LOGICAL                     :: MatchFound
@@ -416,7 +412,6 @@ TYPE (Rmatrix_type), INTENT(IN)  :: in_mat     ! The R matrix to copy
 TYPE (Rmatrix_type), INTENT(OUT) :: out_mat    ! The target for the copy
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER      :: RoutineName = "ufo_roobserror_copy_rmatrix"
 
 out_mat % num_heights = in_mat % num_heights
 ALLOCATE (out_mat % height(out_mat % num_heights))
@@ -459,7 +454,6 @@ TYPE (Rmatrix_type), INTENT(IN)  :: RMatrix_list(1:R_num_sats)  ! The list of R 
 TYPE (Rmatrix_type), INTENT(OUT) :: out_matrix                  ! Output R matrix
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER      :: RoutineName = "ufo_roobserror_findnearest_rmatrix"
 INTEGER                          :: i                           ! Loop variable
 INTEGER                          :: closest_match               ! The R matrix whose latitude is closest to the specification
 CHARACTER(len=200)               :: ErrorMessage                ! Error message to be output
