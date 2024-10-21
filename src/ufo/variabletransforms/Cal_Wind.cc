@@ -47,11 +47,11 @@ void Cal_WindSpeedAndDirection::runTransform(const std::vector<bool> &apply) {
   getObservation(group_, northwardwindvariable_,
                  v, true);
 
-  if (!oops::allVectorsSameNonZeroSize(u, v)) {
+  if (!oops::allVectorsSameSize(u, v)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(u, v)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "U, and V", Here());
   }
 
@@ -118,10 +118,10 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
     getObservation(group_, winddirectionvariable_,
                    windFromDirection, true);
 
-    if (!oops::allVectorsSameNonZeroSize(windSpeed, windFromDirection)) {
+    if (!oops::allVectorsSameSize(windSpeed, windFromDirection)) {
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(windSpeed, windFromDirection) << std::endl;
-      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+      throw eckit::BadValue("At least one vector is the wrong size out of "
                             "wind speed, and direction", Here());
     }
 
@@ -158,10 +158,10 @@ void Cal_WindComponents::runTransform(const std::vector<bool> &apply) {
                 windFromDirection[ichan]);
     }
 
-    if (!oops::allVectorsSameNonZeroSize(windSpeed, windFromDirection)) {
+    if (!oops::allVectorsSameSize(windSpeed, windFromDirection)) {
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(windSpeed, windFromDirection) << std::endl;
-      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+      throw eckit::BadValue("At least one vector is the wrong size out of "
                             "wind speed, and direction", Here());
     }
 

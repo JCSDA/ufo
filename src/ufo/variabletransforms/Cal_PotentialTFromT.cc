@@ -74,13 +74,13 @@ void Cal_PotentialTFromT::runTransform(const std::vector<bool> &apply) {
     tempflags.assign(nlocs, 0);
   }
 
-  if (!oops::allVectorsSameNonZeroSize(pressure, temperature, tempError)) {
+  if (!oops::allVectorsSameSize(pressure, temperature, tempError)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(pressure,
                                                     temperature,
                                                     tempError)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "pressure, temperature and temperature error", Here());
   }
 

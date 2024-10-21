@@ -63,7 +63,7 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
   getObservation("ObsValue", "windSpeed", wind_speed, true);
   getObservation("ObsValue", "windDirection", wind_from_direction, true);
 
-  if (!oops::allVectorsSameNonZeroSize(latitude_in, longitude_in, datetime_in,
+  if (!oops::allVectorsSameSize(latitude_in, longitude_in, datetime_in,
                                        height, wind_speed, wind_from_direction)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(latitude_in, longitude_in, datetime_in,

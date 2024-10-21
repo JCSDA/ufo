@@ -121,21 +121,21 @@ void Cal_PressureFromHeightForProfile::methodUKMO(const std::vector<bool> &apply
   // 3. making sure we have what we need is here
   // -------------------------------------------------------------------------------
   if (dewPointTemperature.empty()) {
-    if (!oops::allVectorsSameNonZeroSize(geopotentialHeight, airTemperature, relativeHumidity)) {
+    if (!oops::allVectorsSameSize(geopotentialHeight, airTemperature, relativeHumidity)) {
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(geopotentialHeight, airTemperature,
                                                       relativeHumidity)
                            << std::endl;
-      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+      throw eckit::BadValue("At least one vector is the wrong size out of "
                             "Z, T and Rh", Here());
     }
   } else {
-    if (!oops::allVectorsSameNonZeroSize(geopotentialHeight, airTemperature, dewPointTemperature)) {
+    if (!oops::allVectorsSameSize(geopotentialHeight, airTemperature, dewPointTemperature)) {
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(geopotentialHeight, airTemperature,
                                                       dewPointTemperature)
                            << std::endl;
-      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+      throw eckit::BadValue("At least one vector is the wrong size out of "
                             "Z, T and Td", Here());
     }
   }

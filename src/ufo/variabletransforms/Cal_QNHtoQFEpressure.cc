@@ -85,10 +85,10 @@ void Cal_QNHtoQFEpressure::runTransform(const std::vector<bool> &apply) {
                            "prior to using the 'set' or 'unset' action.");
   }
 
-  if (!oops::allVectorsSameNonZeroSize(Pmsl, PStn)) {
+  if (!oops::allVectorsSameSize(Pmsl, PStn)) {
     oops::Log::warning() << "Vector sizes: " << oops::listOfVectorSizes(Pmsl, PStn)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "Station pressure and PMSL", Here());
   }
 

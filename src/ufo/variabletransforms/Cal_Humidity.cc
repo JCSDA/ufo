@@ -73,9 +73,9 @@ Method: -
   Saturated specific humidity at the dew point (ie w.r.t water), and saturated
   specific humidity (w.r.t ice below 0C) at the air temperature are calculated.
   Relative humidity is then calculated using :
-  
+
          RH = (QSAT(DEW POINT)/QSAT(DRY BULB))*100
-  
+
    For some temperatures (e.g. when dew point = temperature), supersaturation
    w.r.t ice may occur.
    The option AllowSuperSaturation (false by default) controls whether upper air relative humidity
@@ -135,12 +135,12 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
 
   // 2. making sure we have what we need is here
   // -----------------------------------------------------------------------------------------------
-  if (!oops::allVectorsSameNonZeroSize(airPressure, airTemperature, dewPointTemperature)) {
+  if (!oops::allVectorsSameSize(airPressure, airTemperature, dewPointTemperature)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(airPressure, airTemperature,
                                                     dewPointTemperature)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "P, T and Td", Here());
   }
 
@@ -291,12 +291,12 @@ void Cal_RelativeHumidity::methodUKMOmixingratio(const std::vector<bool> &apply)
     relativeHumidity.assign(nlocs_, missingValueFloat);
   }
 
-  if (!oops::allVectorsSameNonZeroSize(airPressure, airTemperature, mixingRatio)) {
+  if (!oops::allVectorsSameSize(airPressure, airTemperature, mixingRatio)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(airPressure, airTemperature,
                                                     mixingRatio)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "P, T and MixingRatio", Here());
   }
 
@@ -370,12 +370,12 @@ void Cal_RelativeHumidity::methodDEFAULT(const std::vector<bool> &apply) {
                    pressure, true);
   }
 
-  if (!oops::allVectorsSameNonZeroSize(specificHumidity, airTemperature, pressure)) {
+  if (!oops::allVectorsSameSize(specificHumidity, airTemperature, pressure)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(specificHumidity, airTemperature,
                                                     pressure)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "water_vapor_mixing_ratio_wrt_moist_air, "
                           "air_temperature and pressure", Here());
   }
@@ -488,19 +488,19 @@ void Cal_SpecificHumidity::methodDEFAULT(const std::vector<bool> &) {
   }
 
   if (have_dewpoint) {
-    if (!oops::allVectorsSameNonZeroSize(dewPointTemperature, pressure)) {
+    if (!oops::allVectorsSameSize(dewPointTemperature, pressure)) {
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(dewPointTemperature, pressure) << std::endl;
-      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+      throw eckit::BadValue("At least one vector is the wrong size out of "
                             "dewPointTemperature and pressure", Here());
     }
   } else {
-    if (!oops::allVectorsSameNonZeroSize(relativeHumidity, airTemperature, pressure)) {
+    if (!oops::allVectorsSameSize(relativeHumidity, airTemperature, pressure)) {
       oops::Log::warning() << "Vector sizes: "
                            << oops::listOfVectorSizes(relativeHumidity, airTemperature,
                                                       pressure)
                            << std::endl;
-      throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+      throw eckit::BadValue("At least one vector is the wrong size out of "
                             "relative_humidity, air_temperature and pressure", Here());
     }
   }
@@ -591,11 +591,11 @@ void Cal_VirtualTemperature::methodDEFAULT(const std::vector<bool> &apply) {
   getObservation("ObsValue", specifichumidityvariable_, specificHumidity, true);
   getObservation("ObsValue", temperaturevariable_, airTemperature, true);
 
-  if (!oops::allVectorsSameNonZeroSize(specificHumidity, airTemperature)) {
+  if (!oops::allVectorsSameSize(specificHumidity, airTemperature)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(specificHumidity, airTemperature)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "water_vapor_mixing_ratio_wrt_moist_air "
                           "and air_temperature", Here());
   }

@@ -87,11 +87,11 @@ void Cal_PStar::runTransform(const std::vector<bool> &apply) {
   data_.get(Variable("GeoVaLs/height_above_mean_sea_level_at_surface"), ModelHeight);
   data_.get(Variable("GeoVaLs/air_pressure_at_surface"), BkPStar);
 
-  if (!oops::allVectorsSameNonZeroSize(PStn, PStd, Pmsl)) {
+  if (!oops::allVectorsSameSize(PStn, PStd, Pmsl)) {
     oops::Log::warning() << "Vector sizes: "
                          << oops::listOfVectorSizes(PStn, PStd, Pmsl)
                          << std::endl;
-    throw eckit::BadValue("At least one vector is the wrong size or empty out of "
+    throw eckit::BadValue("At least one vector is the wrong size out of "
                           "Station pressure, Standard pressure and PMSL", Here());
   }
 
