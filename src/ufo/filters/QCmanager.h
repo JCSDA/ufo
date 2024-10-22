@@ -13,8 +13,8 @@
 
 #include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
-#include "oops/generic/ObsFilterParametersBase.h"
-#include "oops/interface/ObsFilterBase.h"
+#include "ufo/ObsFilterBase.h"
+#include "ufo/ObsFilterParametersBase.h"
 #include "ufo/ObsTraits.h"
 
 namespace ioda {
@@ -27,8 +27,8 @@ class GeoVaLs;
 class ObsDiagnostics;
 
 /// \brief Options controlling the operation of the QCmanager.
-class QCmanagerParameters : public oops::ObsFilterParametersBase {
-  OOPS_CONCRETE_PARAMETERS(QCmanagerParameters, oops::ObsFilterParametersBase)
+class QCmanagerParameters : public ObsFilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(QCmanagerParameters, ObsFilterParametersBase)
 };
 
 /// \brief Always the first filter to be run.
@@ -36,7 +36,7 @@ class QCmanagerParameters : public oops::ObsFilterParametersBase {
 /// The constructor sets the QC flag to `missing` at all locations with missing obs values of QC
 /// flags. The postFilter() function sets the QC flag to `Hfailed` if it was previously set to
 /// `pass`, but the obs operator failed to produce a valid value.
-class QCmanager : public oops::interface::ObsFilterBase<ObsTraits> {
+class QCmanager : public ObsFilterBase {
  public:
   typedef QCmanagerParameters Parameters_;
 
@@ -51,7 +51,7 @@ class QCmanager : public oops::interface::ObsFilterBase<ObsTraits> {
                   const ioda::ObsVector &,
                   const ioda::ObsVector &,
                   const ObsDiagnostics &) override;
-  void checkFilterData(const oops::FilterStage filterStage) override {}
+  void checkFilterData(const FilterStage filterStage) override {}
 
   oops::Variables requiredVars() const override {return nogeovals_;}
   oops::ObsVariables requiredHdiagnostics() const override {return nodiags_;}

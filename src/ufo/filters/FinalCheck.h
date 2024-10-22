@@ -12,13 +12,13 @@
 #include <ostream>
 #include <string>
 
-#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/ObsProcessorBase.h"
+#include "ufo/ObsFilterParametersBase.h"
 
 namespace ufo {
 
-class FinalCheckParameters : public oops::ObsFilterParametersBase {
+class FinalCheckParameters : public ObsFilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(FinalCheckParameters, ObsFilterParametersBase)
   // No extra parameters needed
 };

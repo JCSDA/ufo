@@ -85,6 +85,13 @@ list( APPEND ufo_src_files
     ObsBiasPreconditioner.h
     ObsDiagnostics.cc
     ObsDiagnostics.h
+    ObsFilter.cc
+    ObsFilter.h
+    ObsFilterBase.cc
+    ObsFilterBase.h
+    ObsFilterParametersBase.h
+    ObsFilters.cc
+    ObsFilters.h
     ObsOperator.cc
     ObsOperator.h
     ObsOperatorBase.cc

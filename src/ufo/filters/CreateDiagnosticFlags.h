@@ -13,13 +13,13 @@
 #include <string>
 #include <vector>
 
-#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/ObsProcessorBase.h"
+#include "ufo/ObsFilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
@@ -48,7 +48,7 @@ class DiagnosticFlagParameters : public oops::Parameters {
 /// The filter creates a Boolean variable `DiagnosticFlags/<flag>/<var>` for each flag `<flag>`
 /// specified in the `flags` list and each filter variable `<var>`. The initial values of these
 /// variables can be customized using the `initial value` and `force reinitialization` options.
-class CreateDiagnosticFlagsParameters : public oops::ObsFilterParametersBase {
+class CreateDiagnosticFlagsParameters : public ObsFilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(CreateDiagnosticFlagsParameters, ObsFilterParametersBase)
 
  public:

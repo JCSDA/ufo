@@ -20,6 +20,7 @@
 #include "ObsBiasIncrement.h"
 #include "ObsBiasPreconditioner.h"
 #include "ObsDiagnostics.h"
+#include "ObsFilters.h"
 #include "ObsOperator.h"
 #include "SampledLocations.h"
 
@@ -34,6 +35,7 @@ struct ObsTraits {
   typedef ioda::ObsSpace             ObsSpace;
   typedef ioda::ObsVector            ObsVector;
   template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;
+  typedef ufo::ObsFilters            ObsFilter;
 
   typedef ufo::ObsOperator           ObsOperator;
   typedef ufo::LinearObsOperator     LinearObsOperator;

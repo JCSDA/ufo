@@ -96,14 +96,14 @@ void ObsProcessorBase::postFilter(const GeoVaLs & gv,
 
 // -----------------------------------------------------------------------------
 
-void ObsProcessorBase::checkFilterData(const oops::FilterStage filterStage) {
+void ObsProcessorBase::checkFilterData(const FilterStage filterStage) {
   // Return if filters have been automatically designated as pre, prior or post.
-  if (filterStage == oops::FilterStage::AUTO)
+  if (filterStage == FilterStage::AUTO)
     return;
 
   // Pre filters (run before GetValues) cannot request quantities in the
   // GeoVaLs, HofX, ObsDiag or ObsBiasData groups.
-  if (filterStage == oops::FilterStage::PRE &&
+  if (filterStage == FilterStage::PRE &&
       (allvars_.hasGroup("GeoVaLs") ||
        allvars_.hasGroup("HofX") ||
        allvars_.hasGroup("ObsDiag") ||
@@ -113,7 +113,7 @@ void ObsProcessorBase::checkFilterData(const oops::FilterStage filterStage) {
 
   // Prior filters (run after GetValues and before observation operator) cannot request
   // quantities in the HofX, ObsDiag or ObsBiasData groups.
-  if (filterStage == oops::FilterStage::PRIOR &&
+  if (filterStage == FilterStage::PRIOR &&
       (allvars_.hasGroup("HofX") ||
        allvars_.hasGroup("ObsDiag") ||
        allvars_.hasGroup("ObsBiasData"))) {
@@ -124,11 +124,11 @@ void ObsProcessorBase::checkFilterData(const oops::FilterStage filterStage) {
 
   // Depending on filter stage set prior_ and/or post_ to true.
   // This ensures priorFilter and postFilter will run doFilter().
-  if (filterStage == oops::FilterStage::POST) {
+  if (filterStage == FilterStage::POST) {
     prior_ = true;
     post_ = true;
   }
-  if (filterStage == oops::FilterStage::PRIOR) {
+  if (filterStage == FilterStage::PRIOR) {
     prior_ = true;
   }
 }

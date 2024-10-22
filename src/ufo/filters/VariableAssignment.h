@@ -15,7 +15,6 @@
 
 #include "eckit/config/LocalConfiguration.h"
 #include "ioda/core/ParameterTraitsObsDtype.h"
-#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
@@ -23,6 +22,7 @@
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/ObsProcessorBase.h"
 #include "ufo/filters/processWhere.h"
+#include "ufo/ObsFilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
@@ -80,7 +80,7 @@ class AssignmentParameters : public oops::Parameters {
 };
 
 /// Parameters controlling the VariableAssignment filter.
-class VariableAssignmentParameters : public oops::ObsFilterParametersBase {
+class VariableAssignmentParameters : public ObsFilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(VariableAssignmentParameters, ObsFilterParametersBase)
 
  public:

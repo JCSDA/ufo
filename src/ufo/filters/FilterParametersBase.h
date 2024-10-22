@@ -12,13 +12,13 @@
 #include <string>
 #include <vector>
 
-#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredPolymorphicParameter.h"
 #include "ufo/filters/actions/FilterActionBase.h"  // for FilterActionFactory
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/ObsFilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
@@ -38,7 +38,7 @@ class FilterActionParameters : public oops::Parameters {
 
 
 /// \brief Parameters shared by all filters derived from FilterBase.
-class FilterParametersBaseWithAbstractActions : public oops::ObsFilterParametersBase {
+class FilterParametersBaseWithAbstractActions : public ObsFilterParametersBase {
   OOPS_ABSTRACT_PARAMETERS(FilterParametersBaseWithAbstractActions, ObsFilterParametersBase)
 
  public:

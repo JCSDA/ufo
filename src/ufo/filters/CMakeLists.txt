@@ -31,6 +31,8 @@ set ( filters_files
       FinalCheck.cc
       FinalCheck.h
       GenericFilterParameters.h
+      GeoVaLsWriter.cc
+      GeoVaLsWriter.h
       getScalarOrFilterData.cc
       getScalarOrFilterData.h
       HistoryCheck.cc

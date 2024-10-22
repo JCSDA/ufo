@@ -14,10 +14,10 @@
 
 #include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsFilterBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ObsFilterBase.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -30,8 +30,8 @@ namespace ioda {
 namespace ufo {
 
 /// \brief Parameters controlling ObsDiagnosticsWriter
-class ObsDiagnosticsWriterParameters : public oops::ObsFilterParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsDiagnosticsWriterParameters, oops::ObsFilterParametersBase)
+class ObsDiagnosticsWriterParameters : public ObsFilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsDiagnosticsWriterParameters, ObsFilterParametersBase)
  public:
   oops::OptionalParameter<std::vector<Variable>> filterVariables{"filter variables", this};
 
@@ -39,7 +39,7 @@ class ObsDiagnosticsWriterParameters : public oops::ObsFilterParametersBase {
 };
 
 
-class ObsDiagnosticsWriter : public oops::interface::ObsFilterBase<ObsTraits> {
+class ObsDiagnosticsWriter : public ObsFilterBase {
  public:
   typedef ObsDiagnosticsWriterParameters Parameters_;
   ObsDiagnosticsWriter(ioda::ObsSpace &, const Parameters_ &,
@@ -55,7 +55,7 @@ class ObsDiagnosticsWriter : public oops::interface::ObsFilterBase<ObsTraits> {
                   const ObsDiagnostics & diags) override {
     diags.write(params_.diags.toConfiguration());
   }
-  void checkFilterData(const oops::FilterStage filterStage) override {}
+  void checkFilterData(const FilterStage filterStage) override {}
 
   oops::Variables requiredVars() const override {return nogeovals_;}
   oops::ObsVariables requiredHdiagnostics() const override {return extradiagvars_;}

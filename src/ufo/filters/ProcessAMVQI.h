@@ -13,16 +13,16 @@
 #include <string>
 #include <vector>
 
-#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/filters/ObsProcessorBase.h"
+#include "ufo/ObsFilterParametersBase.h"
 
 namespace ufo {
 
 /// \brief Parameters controlling the operation of the ProcessAMVQI filter.
-class ProcessAMVQIParameters : public oops::ObsFilterParametersBase {
+class ProcessAMVQIParameters : public ObsFilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(ProcessAMVQIParameters, ObsFilterParametersBase)
 
  public:

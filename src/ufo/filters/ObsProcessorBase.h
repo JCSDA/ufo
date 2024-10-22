@@ -12,9 +12,9 @@
 
 #include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
-#include "oops/interface/ObsFilterBase.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/ObsFilterBase.h"
 #include "ufo/ObsTraits.h"
 
 namespace ioda {
@@ -32,7 +32,7 @@ namespace ufo {
 /// Observation processors only need to implement the constructor and the doFilter method;
 /// the base class takes care of applying the processor at the pre, prior or post stage.
 
-class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
+class ObsProcessorBase : public ObsFilterBase {
  public:
   ObsProcessorBase(ioda::ObsSpace &, bool deferToPost,
                    std::shared_ptr<ioda::ObsDataVector<int> >,
@@ -45,7 +45,7 @@ class ObsProcessorBase : public oops::interface::ObsFilterBase<ObsTraits> {
                   const ioda::ObsVector &,
                   const ioda::ObsVector &,
                   const ObsDiagnostics &) override;
-  void checkFilterData(const oops::FilterStage filterStage) override;
+  void checkFilterData(const FilterStage filterStage) override;
 
   oops::Variables requiredVars() const override {
     return allvars_.allFromGroup("GeoVaLs").toOopsVariables();}

@@ -17,7 +17,6 @@
 #include "boost/variant.hpp"
 
 #include "ioda/core/ParameterTraitsObsDtype.h"
-#include "oops/generic/ObsFilterParametersBase.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/parameters/NumericConstraints.h"
 #include "oops/util/parameters/Parameter.h"
@@ -25,6 +24,7 @@
 #include "ufo/filters/ObsProcessorBase.h"
 #include "ufo/filters/processWhere.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/ObsFilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ioda {
@@ -65,7 +65,7 @@ class VariablePrintParameters : public oops::Parameters {
 };
 
 /// Parameters controlling the operation of the PrintFilterData filter.
-class PrintFilterDataParameters : public oops::ObsFilterParametersBase {
+class PrintFilterDataParameters : public ObsFilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(PrintFilterDataParameters, ObsFilterParametersBase)
 
  public:

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2024 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -17,13 +17,11 @@
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/testing/Test.h"
-#include "oops/base/ObsFilters.h"
-#include "oops/interface/GeoVaLs.h"
-#include "oops/interface/ObsAuxControl.h"
-#include "oops/interface/ObsDataVector.h"
-#include "oops/interface/ObsDiagnostics.h"
-#include "oops/interface/ObsOperator.h"
-#include "oops/interface/ObsVector.h"
+#include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
+
+#include "oops/base/Locations.h"
 #include "oops/runs/Test.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
@@ -35,10 +33,16 @@
 #include "oops/util/parameters/RequiredParameter.h"
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+
 #include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
+#include "ufo/GeoVaLs.h"
+#include "ufo/ObsBias.h"
 #include "ufo/ObsBiasParameters.h"
+#include "ufo/ObsDiagnostics.h"
+#include "ufo/ObsFilters.h"
+#include "ufo/ObsOperator.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
@@ -94,7 +98,7 @@ class ObsTypeParameters : public oops::Parameters {
   oops::Parameter<ioda::ObsTopLevelParameters> obsSpace{"obs space", {}, this};
 
   /// Options used to configure observation filters.
-  oops::ObsFiltersParameters<ObsTraits> filtersParams{this};
+  ObsFiltersParameters filtersParams{this};
 
   /// Options passed to the observation operator that will be applied during the test. If not set,
   /// no observation operator will be applied. To speed up tests of filters that depend on the
@@ -186,12 +190,12 @@ class ObsFiltersParameters : public oops::Parameters {
 //! This needs to be done manually if post-filters aren't run because the HofX vector
 //! is not available.
 //!
-void runFinalCheck(oops::ObsSpace<ufo::ObsTraits> &obsspace,
-                   oops::ObsDataVector<ufo::ObsTraits, int> & qc_flags,
-                   oops::ObsDataVector<ufo::ObsTraits, float> &obserr) {
-  FinalCheck finalCheck(obsspace.obsspace(), FinalCheckParameters(),
-                        qc_flags.obsdatavectorptr(),
-                        std::make_shared<ioda::ObsDataVector<float>>(obserr.obsdatavector()));
+void runFinalCheck(ioda::ObsSpace &obsspace,
+                   std::shared_ptr<ioda::ObsDataVector<int>> qc_flags,
+                   std::shared_ptr<ioda::ObsDataVector<float>> obserr) {
+  FinalCheck finalCheck(obsspace, FinalCheckParameters(),
+                        qc_flags,
+                        obserr);
   finalCheck.doFilter();
 }
 
@@ -229,7 +233,7 @@ void convertLocalObsIndicesToGlobal(std::vector<size_t> &indices,
 //!
 template <typename Predicate>
 std::vector<size_t> getObservationIndicesWhere(
-    const ObsTraits::ObsDataVector<int> &qc_flags,
+    const ioda::ObsDataVector<int> &qc_flags,
     const eckit::mpi::Comm &comm,
     const std::vector<size_t> &globalIdxFromLocalIdx,
     const Predicate &predicate) {
@@ -264,7 +268,7 @@ std::vector<size_t> getObservationIndicesWhere(
 //! Return the indices of observations that have passed quality control in
 //! at least one variable.
 //!
-std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<int> & qc_flags,
+std::vector<size_t> getPassedObservationIndices(const ioda::ObsDataVector<int> & qc_flags,
                                                 const eckit::mpi::Comm &comm,
                                                 const std::vector<size_t> &globalIdxFromLocalIdx) {
   return getObservationIndicesWhere(qc_flags, comm, globalIdxFromLocalIdx,
@@ -277,7 +281,7 @@ std::vector<size_t> getPassedObservationIndices(const ObsTraits::ObsDataVector<i
 //! Return the indices of observations that have failed quality control in
 //! at least one variable.
 //!
-std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<int> & qc_flags,
+std::vector<size_t> getFailedObservationIndices(const ioda::ObsDataVector<int> & qc_flags,
                                                 const eckit::mpi::Comm &comm,
                                                 const std::vector<size_t> &globalIdxFromLocalIdx) {
   return getObservationIndicesWhere(qc_flags, comm, globalIdxFromLocalIdx,
@@ -290,7 +294,7 @@ std::vector<size_t> getFailedObservationIndices(const ObsTraits::ObsDataVector<i
 //! Return the indices of observations whose quality control flag is set to \p flag in
 //! at least one variable.
 //!
-std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<int> & qc_flags,
+std::vector<size_t> getFlaggedObservationIndices(const ioda::ObsDataVector<int> & qc_flags,
                                                  const eckit::mpi::Comm &comm,
                                                  const std::vector<size_t> &globalIdxFromLocalIdx,
                                                  int flag) {
@@ -304,7 +308,7 @@ std::vector<size_t> getFlaggedObservationIndices(const ObsTraits::ObsDataVector<
 //! Return the number of nonzero elements of \p data (on all MPI ranks, but counting each location
 //! only once even if it is held on multiple ranks).
 //!
-size_t numNonzero(const ObsTraits::ObsDataVector<int> & data,
+size_t numNonzero(const ioda::ObsDataVector<int> & data,
                   const ioda::Distribution &dist) {
   auto accumulator = dist.createAccumulator<size_t>();
   // Local reduction
@@ -325,7 +329,7 @@ size_t numNonzero(const ObsTraits::ObsDataVector<int> & data,
 //! Return the number of elements of \p data equal to \p value (on all MPI ranks, but counting each
 //! location only once even if it is held on multiple ranks).
 //!
-size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data, int value,
+size_t numEqualTo(const ioda::ObsDataVector<int> & data, int value,
                   const ioda::Distribution &dist) {
   auto accumulator = dist.createAccumulator<size_t>();
   // Local reduction
@@ -344,7 +348,7 @@ size_t numEqualTo(const ObsTraits::ObsDataVector<int> & data, int value,
 // -----------------------------------------------------------------------------
 
 template <typename T>
-void expectVariablesEqual(const ObsTraits::ObsSpace &obsspace,
+void expectVariablesEqual(const ioda::ObsSpace &obsspace,
                           const ufo::Variable &referenceVariable,
                           const ufo::Variable &testVariable)
 {
@@ -357,7 +361,7 @@ void expectVariablesEqual(const ObsTraits::ObsSpace &obsspace,
 
 // -----------------------------------------------------------------------------
 
-void expectVariablesApproximatelyEqual(const ObsTraits::ObsSpace &obsspace,
+void expectVariablesApproximatelyEqual(const ioda::ObsSpace &obsspace,
                                        const ufo::Variable &referenceVariable,
                                        const ufo::Variable &testVariable,
                                        float absTol)
@@ -371,7 +375,7 @@ void expectVariablesApproximatelyEqual(const ObsTraits::ObsSpace &obsspace,
 
 // -----------------------------------------------------------------------------
 
-void expectVariablesRelativelyEqual(const ObsTraits::ObsSpace &obsspace,
+void expectVariablesRelativelyEqual(const ioda::ObsSpace &obsspace,
                                     const ufo::Variable &referenceVariable,
                                     const ufo::Variable &testVariable,
                                     float relTol)
@@ -385,25 +389,18 @@ void expectVariablesRelativelyEqual(const ObsTraits::ObsSpace &obsspace,
 
 // -----------------------------------------------------------------------------
 
-void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
+void testFilters(size_t obsSpaceIndex, ioda::ObsSpace &obspace,
                  const ObsTypeParameters &params) {
-  typedef oops::GeoVaLs<ufo::ObsTraits>           GeoVaLs_;
-  typedef oops::ObsDiagnostics<ufo::ObsTraits>    ObsDiags_;
-  typedef oops::ObsAuxControl<ufo::ObsTraits>     ObsAuxCtrl_;
-  typedef oops::ObsFilters<ufo::ObsTraits>        ObsFilters_;
-  typedef oops::ObsOperator<ufo::ObsTraits>       ObsOperator_;
-  typedef oops::ObsVector<ufo::ObsTraits>         ObsVector_;
-  typedef oops::ObsDataVector<ufo::ObsTraits, float> ObsDataVector_;
-
 /// init QC and error
-  ObsDataVector_ obserrfilter(obspace, obspace.obsvariables(), "ObsError");
-  std::shared_ptr<oops::ObsDataVector<ufo::ObsTraits, int> >
-    qc_flags_(new oops::ObsDataVector<ufo::ObsTraits, int>  (obspace, obspace.obsvariables()));
+  std::shared_ptr<ioda::ObsDataVector<float>> obserrfilter =
+    std::make_shared<ioda::ObsDataVector<float>>(obspace, obspace.obsvariables(), "ObsError");
+  std::shared_ptr<ioda::ObsDataVector<int>> qc_flags_ =
+    std::make_shared<ioda::ObsDataVector<int>>(obspace, obspace.obsvariables());
 
 //  Create filters and run preProcess
-  ObsFilters_ filters(obspace,
-                      params.filtersParams,
-                      qc_flags_, obserrfilter);
+  ufo::ObsFilters filters(obspace,
+                          params.filtersParams.toConfiguration(),
+                          qc_flags_, obserrfilter);
 
   filters.preProcess();
 /// call priorFilter and postFilter if hofx is available
@@ -411,12 +408,12 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   oops::ObsVariables diagvars = filters.requiredHdiagnostics();
 
 /// initialize zero bias
-  ObsVector_ bias(obspace);
+  ioda::ObsVector bias(obspace);
   bias.zero();
 
   if (params.hofx.value() != boost::none) {
 ///   read GeoVaLs from file if required
-    const GeoVaLs_ gval(params.geovals.value(), obspace, geovars);
+    const ufo::GeoVaLs gval(params.geovals.value(), obspace, geovars);
     if (geovars.size() > 0) {
       filters.priorFilter(gval);
       } else {
@@ -425,7 +422,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
 ///   read H(x) and ObsDiags from file
     oops::Log::info() << "HofX section specified, reading HofX from file" << std::endl;
     const std::string &hofxgroup = *params.hofx.value();
-    ObsVector_ hofx(obspace, hofxgroup);
+    ioda::ObsVector hofx(obspace, hofxgroup);
     if (diagvars.size() > 0) {
       if (!params.obsDiagnostics.value().has("filename"))
         throw eckit::UserError("Element #" + std::to_string(obsSpaceIndex) +
@@ -434,68 +431,67 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       oops::Log::info() << "Obs diagnostics section specified, reading obs diagnostics from file"
                         << std::endl;
     }
-    const ObsDiags_ diags(params.obsDiagnostics.value(), obspace, diagvars);
+    const ufo::ObsDiagnostics diags(params.obsDiagnostics.value(), obspace, diagvars);
     filters.postFilter(gval, hofx, bias, diags);
   } else if (params.obsOperator.value() != boost::none) {
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
-    ObsOperator_ hop(obspace, params.obsOperator.value()->toConfiguration());
-    const ObsAuxCtrl_ ybias(obspace, params.obsBias.value().toConfiguration());
-    ObsVector_ hofx(obspace);
+    ufo::ObsOperator hop(obspace, params.obsOperator.value()->toConfiguration());
+    const ufo::ObsBias ybias(obspace, params.obsBias.value().toConfiguration());
+    ioda::ObsVector hofx(obspace);
     oops::Variables vars = hop.requiredVars();
     oops::Variables reducedVars = filters.requiredVars();
     reducedVars += ybias.requiredVars();
     vars += reducedVars;  // the reduced format is derived from the sampled format
-    GeoVaLs_ gval(params.geovals.value(), obspace, vars);
+    ufo::GeoVaLs gval(params.geovals.value(), obspace, vars);
     hop.computeReducedVars(reducedVars, gval);
     oops::ObsVariables diagvars;
     diagvars += filters.requiredHdiagnostics();
     diagvars += ybias.requiredHdiagnostics();
-    ObsDiags_ diags(obspace, hop.locations(), diagvars);
+    ufo::ObsDiagnostics diags(obspace, hop.locations(), diagvars);
     filters.priorFilter(gval);
     hop.simulateObs(gval, hofx, ybias, *qc_flags_, bias, diags);
     filters.postFilter(gval, hofx, bias, diags);
     hofx.save("hofx");
   } else if (geovars.size() > 0) {
 ///   Only call priorFilter
-    const GeoVaLs_ gval(params.geovals.value(), obspace, geovars);
+    const ufo::GeoVaLs gval(params.geovals.value(), obspace, geovars);
     filters.priorFilter(gval);
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qc_flags_, obserrfilter);
-    obserrfilter.mask(*qc_flags_);
+    runFinalCheck(obspace, qc_flags_, obserrfilter);
+    obserrfilter->mask(*qc_flags_);
   } else {
 ///   no need to run priorFilter or postFilter
     oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
                          "provided for filters, only preProcess was called" << std::endl;
 ///   apply the FinalCheck filter (which should always be run after all other filters).
-    runFinalCheck(obspace, *qc_flags_, obserrfilter);
-    obserrfilter.mask(*qc_flags_);
+    runFinalCheck(obspace, qc_flags_, obserrfilter);
+    obserrfilter->mask(*qc_flags_);
   }
 
   qc_flags_->save("EffectiveQC");
   const std::string errname = "EffectiveError";
-  obserrfilter.save(errname);
+  obserrfilter->save(errname);
 
 //  Compare with known results
   bool atLeastOneBenchmarkFound = false;
-  const ObsTraits::ObsSpace &ufoObsSpace = obspace.obsspace();
 
   if (params.passedObservationsBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const std::vector<size_t> &passedObsBenchmark =
         *params.passedObservationsBenchmark.value();
     const std::vector<size_t> passedObs = getPassedObservationIndices(
-          qc_flags_->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
+          *qc_flags_, obspace.comm(), obspace.index());
     EXPECT_EQUAL(passedObs, passedObsBenchmark);
   }
 
   if (params.passedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t passedBenchmark = *params.passedBenchmark.value();
-    size_t passed = numEqualTo(qc_flags_->obsdatavector(), ufo::QCflags::pass,
-                               *ufoObsSpace.distribution());
+    size_t passed = numEqualTo(*qc_flags_, ufo::QCflags::pass,
+                               *obspace.distribution());
     EXPECT_EQUAL(passed, passedBenchmark);
   }
 
@@ -504,14 +500,14 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
     const std::vector<size_t> &failedObsBenchmark =
         *params.failedObservationsBenchmark.value();
     const std::vector<size_t> failedObs = getFailedObservationIndices(
-          qc_flags_->obsdatavector(), ufoObsSpace.comm(), ufoObsSpace.index());
+          *qc_flags_, obspace.comm(), obspace.index());
     EXPECT_EQUAL(failedObs, failedObsBenchmark);
   }
 
   if (params.failedBenchmark.value() != boost::none) {
     atLeastOneBenchmarkFound = true;
     const size_t failedBenchmark = *params.failedBenchmark.value();
-    size_t failed = numNonzero(qc_flags_->obsdatavector(), *ufoObsSpace.distribution());
+    size_t failed = numNonzero(*qc_flags_, *obspace.distribution());
     EXPECT_EQUAL(failed, failedBenchmark);
   }
 
@@ -523,15 +519,15 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       const std::vector<size_t> &flaggedObsBenchmark =
           *params.flaggedObservationsBenchmark.value();
       const std::vector<size_t> flaggedObs =
-          getFlaggedObservationIndices(qc_flags_->obsdatavector(), ufoObsSpace.comm(),
-                                       ufoObsSpace.index(), flag);
+          getFlaggedObservationIndices(*qc_flags_, obspace.comm(),
+                                       obspace.index(), flag);
       EXPECT_EQUAL(flaggedObs, flaggedObsBenchmark);
     }
 
     if (params.flaggedBenchmark.value() != boost::none) {
       atLeastOneBenchmarkFound = true;
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
-      size_t flagged = numEqualTo(qc_flags_->obsdatavector(), flag, *ufoObsSpace.distribution());
+      size_t flagged = numEqualTo(*qc_flags_, flag, *obspace.distribution());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
     }
   }
@@ -544,33 +540,33 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
       const ufo::Variable &referenceVariable = compareVariablesParams.reference;
       const ufo::Variable &testVariable = compareVariablesParams.test;
 
-      switch (ufoObsSpace.dtype(referenceVariable.group(), referenceVariable.variable())) {
+      switch (obspace.dtype(referenceVariable.group(), referenceVariable.variable())) {
       case ioda::ObsDtype::Integer:
-        expectVariablesEqual<int>(ufoObsSpace, referenceVariable, testVariable);
+        expectVariablesEqual<int>(obspace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::Integer_64:
-        expectVariablesEqual<int64_t>(ufoObsSpace, referenceVariable, testVariable);
+        expectVariablesEqual<int64_t>(obspace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::String:
-        expectVariablesEqual<std::string>(ufoObsSpace, referenceVariable, testVariable);
+        expectVariablesEqual<std::string>(obspace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::DateTime:
-        expectVariablesEqual<util::DateTime>(ufoObsSpace, referenceVariable, testVariable);
+        expectVariablesEqual<util::DateTime>(obspace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::Bool:
-        expectVariablesEqual<bool>(ufoObsSpace, referenceVariable, testVariable);
+        expectVariablesEqual<bool>(obspace, referenceVariable, testVariable);
         break;
       case ioda::ObsDtype::Float:
         if (compareVariablesParams.absTol.value() == boost::none &&
             compareVariablesParams.relTol.value() == boost::none) {
-          expectVariablesEqual<float>(ufoObsSpace, referenceVariable, testVariable);
+          expectVariablesEqual<float>(obspace, referenceVariable, testVariable);
         } else {
           if (compareVariablesParams.absTol.value() != boost::none) {
             const float tol = *compareVariablesParams.absTol.value();
-            expectVariablesApproximatelyEqual(ufoObsSpace, referenceVariable, testVariable, tol);
+            expectVariablesApproximatelyEqual(obspace, referenceVariable, testVariable, tol);
           } else if (compareVariablesParams.relTol.value() != boost::none) {
             const float tol = *compareVariablesParams.relTol.value();
-            expectVariablesRelativelyEqual(ufoObsSpace, referenceVariable, testVariable, tol);
+            expectVariablesRelativelyEqual(obspace, referenceVariable, testVariable, tol);
           }
         }
         break;
@@ -586,7 +582,7 @@ void testFilters(size_t obsSpaceIndex, oops::ObsSpace<ufo::ObsTraits> &obspace,
   if (params.expectVariablesNotToExist.value() != boost::none) {
     for (const Variable &var : *params.expectVariablesNotToExist.value()) {
       atLeastOneBenchmarkFound = true;
-      EXPECT_NOT(ufoObsSpace.has(var.group(), var.variable()));
+      EXPECT_NOT(obspace.has(var.group(), var.variable()));
     }
   }
 
@@ -613,10 +609,10 @@ void runTest() {
 
     if (typeParams.expectExceptionWithMessage.value() != boost::none) {
       const char *expectedMessage = typeParams.expectExceptionWithMessage.value()->c_str();
-      EXPECT_THROWS_MSG(testFilters(jj, Test_::obspace()[jj], typeParams),
+      EXPECT_THROWS_MSG(testFilters(jj, Test_::obspace()[jj].obsspace(), typeParams),
                         expectedMessage);
     } else {
-      testFilters(jj, Test_::obspace()[jj], typeParams);
+      testFilters(jj, Test_::obspace()[jj].obsspace(), typeParams);
     }
   }
 }

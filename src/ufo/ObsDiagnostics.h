@@ -14,6 +14,7 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "oops/base/Locations.h"
 #include "oops/util/Printable.h"
 #include "ufo/GeoVaLs.h"
 

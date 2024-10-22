@@ -21,10 +21,9 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
-#include "oops/interface/ObsFilterBase.h"
 #include "tools/new_qc/example/Example.interface.h"
-#include "ufo/filters/FilterParametersBase.h"
-#include "ufo/ObsTraits.h"
+#include "ufo/ObsFilterParametersBase.h"
+#include "ufo/ObsFilterBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ioda {
@@ -38,8 +37,8 @@ namespace ufo {
 
 /// \brief Options controlling the operation of the Example filter.
 
-class ExampleParameters : public oops::ObsFilterParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ExampleParameters, oops::ObsFilterParametersBase)
+class ExampleParameters : public ObsFilterParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ExampleParameters, ObsFilterParametersBase)
   // TODO: list all parameters here.
   oops::Parameter<int> myParameter
     {"my Parameter",
@@ -65,7 +64,7 @@ class ExampleParameters : public oops::ObsFilterParametersBase {
 
 /// Example filter
 
-class Example : public oops::interface::ObsFilterBase<ObsTraits>,
+class Example : public ObsFilterBase,
                 private util::ObjectCounter<Example> {
  public:
   typedef ExampleParameters Parameters_;
@@ -83,7 +82,7 @@ class Example : public oops::interface::ObsFilterBase<ObsTraits>,
                   const ioda::ObsVector &,
                   const ioda::ObsVector &,
                   const ObsDiagnostics &) override;
-  void checkFilterData(const oops::FilterStage filterStage) override {};
+  void checkFilterData(const FilterStage filterStage) override {};
 
   oops::Variables requiredVars() const override {return geovars_;}
   oops::ObsVariables requiredHdiagnostics() const override {return diagnostics_;}
