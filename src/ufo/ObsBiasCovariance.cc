@@ -257,7 +257,7 @@ void ObsBiasCovariance::read(const eckit::Configuration & config) {
         if (rec_idx[jrec] == -1) {
           obs_num_[jrecvar] = 0;
         } else {
-          obs_num_[jrecvar] = nobsassim(var_idx[jvar], rec_idx[jrec]);
+          obs_num_[jrecvar] = nobsassim(rec_idx[jrec], var_idx[jvar]);
         }
         if (rec_idx[jrec] == -1) {
           // errors are set to default new variance if record not in input file
