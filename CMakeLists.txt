@@ -72,6 +72,9 @@ find_package( ioda 2.9.0 REQUIRED )
 
 # oops
 find_package( oops 1.10.0 REQUIRED )
+find_package( bufr 12.0.1 QUIET )
+find_package( bufr_query REQUIRED )
+find_package( NetCDF QUIET COMPONENTS CXX )
 
 # crtm
 find_package( crtm 2.4.1 QUIET )
