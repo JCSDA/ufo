@@ -28,6 +28,7 @@ use ufo_constants_mod, only: &
     c_virtual,               &    ! Related to mw_ratio
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
+use gnssro_mod_transform, only: geometric2geop
 
 
 implicit none
@@ -114,6 +115,7 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   integer                            :: iVar                  ! Loop variable, obs diagnostics variable number
   real(kind_real), allocatable       :: refractivity(:)       ! Refractivity on various model levels
   real(kind_real), allocatable       :: model_heights(:)      ! Geopotential heights that refractivity is calculated on
+  real(kind_real)                    :: tmp_geop_height       ! Tmp var used in geopotential height calculation
 
   write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: begin"
   call fckit_log%info(err_msg)
@@ -170,6 +172,12 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   call obsspace_get_db(obss, "MetaData", "longitude", obsLon)
   call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
   call obsspace_get_db(obss, "MetaData", "height", obs_height)
+
+! Convert geometric height to geopotential height
+  do iobs = 1, nobs
+    call geometric2geop(obsLat(iobs), obs_height(iobs), tmp_geop_height)
+    obs_height(iobs) = tmp_geop_height
+  end do
 
   obs_loop: do iobs = 1, nobs 
 
@@ -270,15 +278,15 @@ SUBROUTINE RefMetOffice_ForwardModel(nlevp, &
 
 INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
 INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
-REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
+REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! geopotential heights of rho levs
+REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! geopotential heights of theta levs
 REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
 REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
 LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops       ! Option: Use pseudo-levels in vertical interpolation?
 LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops  ! Option: Use ln(p) for vertical interpolation? (rather than exner)
 REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad    ! The minimum temperature gradient which is used
 INTEGER, INTENT(IN)            :: nobs                   ! Number of observations in the profile
-REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)           ! Impact parameter for the obs
+REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)           ! Geopotential heights for the obs
 REAL(kind_real), INTENT(IN)    :: Latitude               ! Latitude of this profile
 REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)          ! Model forecast of the observations
 LOGICAL, INTENT(OUT)           :: BAErr                  ! Was an error encountered during the calculation?

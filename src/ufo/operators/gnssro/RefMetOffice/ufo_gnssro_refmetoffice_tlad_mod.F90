@@ -32,6 +32,7 @@ use ufo_constants_mod, only: &
     c_virtual,               &    ! Related to mw_ratio
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
+use gnssro_mod_transform, only: geometric2geop
 
 private
 public :: ufo_gnssro_refmetoffice_tlad
@@ -126,6 +127,8 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   integer                     :: iobs                          ! Loop variable, observation number
 
   real(kind_real), allocatable       :: obs_height(:)          ! Geopotential height of the observation
+  real(kind_real), allocatable       :: obsLat(:)              ! Observed latitude used in geop hgt calc
+  real(kind_real)                    :: tmp_geop_height        ! Tmp var used in geopotential height calc
 
   write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_tlad_settraj: begin"
   call fckit_log%info(err_msg)
@@ -152,7 +155,16 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   
 ! Get the meta-data from the observations
   allocate(obs_height(self%nlocs))
+  allocate(obsLat(self%nlocs))
   call obsspace_get_db(obss, "MetaData", "height", obs_height)
+  call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
+
+! Convert geometric height to geopotential height.
+  do iobs = 1, self%nlocs
+    call geometric2geop(obsLat(iobs), obs_height(iobs), tmp_geop_height)
+    obs_height(iobs) = tmp_geop_height
+  end do
+
   allocate(self % K(1:self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix
@@ -167,7 +179,7 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
                             self % vert_interp_ops, &                  ! Whether to interpolate using log(pressure)
                             self % min_temp_grad, &                    ! Minimum allowed vertical temperature gradient
                             1, &                                       ! Number of observations in the profile
-                            obs_height(iobs:iobs), &                   ! Impact parameter for this observation
+                            obs_height(iobs:iobs), &                   ! Geopotential height for this observation
                             self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
     ! Flip the K-matrix back the right way around
     self % K(iobs,1:prs%nval) = self % K(iobs, prs%nval:1:-1)
@@ -178,6 +190,7 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   self%ltraj = .true.
 
   deallocate(obs_height)
+  deallocate(obsLat)
 
 end subroutine ufo_gnssro_refmetoffice_tlad_settraj
 
