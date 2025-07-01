@@ -26,12 +26,10 @@ module ufo_crtm_active_mod
  implicit none
  private
 
-
  public ufo_crtm_active_sim
  public ufo_crtm_active_diag
 
 contains
-
 
 subroutine ufo_crtm_active_sim(rts, Options, nvars, nlocs, n_Profiles, n_Channels, hofx, obss)
 implicit none
@@ -41,18 +39,17 @@ integer, intent(in) :: n_Profiles, n_Channels
 real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
 type(CRTM_RTSolution_type), intent(in) :: rts(:,:)  ! n_channels, n_profiles
 type(CRTM_Options_type),  intent(in) :: Options(:)
-type(c_ptr), value,       intent(in) :: obss         !ObsSpace
+type(c_ptr), value,       intent(in) :: obss        !ObsSpace
 
 real(c_double) :: missing
 integer        :: l, m, jlayer
-integer, allocatable   :: obs_layer(:)
+integer, allocatable   :: modelLayer(:)
 
 ! allocate observation elevation for reflectivity profiles
-allocate( obs_layer( n_Profiles ))
+allocate( modelLayer( n_Profiles ) )
 
 ! Put simulated reflectivity into hofx
 ! ----------------------------------------------
-
 
 ! Set missing value
 missing = missing_value(missing)
@@ -61,19 +58,19 @@ missing = missing_value(missing)
 hofx = missing
 
 ! Get the level number for reflectivity profiles
-call obsspace_get_db(obss, "MetaData", "Layer", obs_layer)
-
+call obsspace_get_db(obss, "MetaData", "modelLayer", modelLayer)
+modelLayer = modelLayer + 1 ! convert from 0 index to 1
+   
 do m = 1, n_Profiles
    if (.not.Options(m)%Skip_Profile) then
-      jlayer = obs_layer(m)
-      do l = 1, n_Channels
+      jlayer = modelLayer(m)
+      do l = 1, n_Channels 
         if (abs(rts(l,m)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
            hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(jlayer)
         endif
       end do
    end if
 end do
-
 
 end subroutine ufo_crtm_active_sim
 
@@ -117,16 +114,17 @@ real(kind_real) :: total_od, secant_term, wfunc_max
 real(kind_real), allocatable :: TmpVar(:)
 real(kind_real), allocatable :: Tao(:)
 real(kind_real), allocatable :: Wfunc(:)
-integer, allocatable   :: obs_layer(:)
+integer, allocatable   :: modelLayer(:)
 
 ! allocate observation elevation for reflectivity profiles
-allocate( obs_layer( n_Profiles ))
+allocate( modelLayer( n_Profiles ))
 
 ! Set missing value
 missing = missing_value(missing)
 
 ! Get the level number for reflectivity profiles
-call obsspace_get_db(obss, "MetaData", "Layer", obs_layer)
+call obsspace_get_db(obss, "MetaData", "modelLayer", modelLayer)
+modelLayer = modelLayer + 1 ! convert from 0 index to 1
 
 ! Put simulated diagnostics into hofxdiags
 ! We need to call the routines for passive instrument as well when dealing with active obs
@@ -172,7 +170,7 @@ do jvar = 1, hofxdiags%nvar
             hofxdiags%geovals(jvar)%vals = missing
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  jlayer = obs_layer(jprofile)
+                  jlayer = modelLayer(jprofile)
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
                      if (abs(rts(jchannel,jprofile)%Reflectivity(jlayer)) < threshold_reflectivity) then 
                           hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
@@ -190,7 +188,7 @@ do jvar = 1, hofxdiags%nvar
             hofxdiags%geovals(jvar)%vals = missing
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  jlayer = obs_layer(jprofile)
+                  jlayer = modelLayer(jprofile)
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
                      if (abs(rts(jchannel,jprofile)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
                          hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &

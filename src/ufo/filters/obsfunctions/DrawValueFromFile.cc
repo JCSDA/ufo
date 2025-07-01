@@ -135,6 +135,7 @@ static ObsFunctionMaker<DrawValueFromFile<std::string>> stringMaker("DrawValueFr
 template <typename T>
 DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
   : allvars_() {
+    oops::Log::trace() << "DrawValueFromFile constructor start" << std::endl;
     // Initialize options
     options_.deserialize(config);
 
@@ -208,6 +209,7 @@ DrawValueFromFile<T>::DrawValueFromFile(const eckit::LocalConfiguration &config)
 
     fpath_ = options_.fpath.value();
     allvars_  = Variables(interpSubConfs);
+    oops::Log::trace() << "DrawValueFromFile constructor complete" << std::endl;
 }
 
 
@@ -275,6 +277,7 @@ class ExtractVisitor : public boost::static_visitor<void> {
 template <typename T>
 void DrawValueFromFile<T>::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<T> & out) const {
+  oops::Log::trace() << "DrawValueFromFile compute start" << std::endl;
   DataExtractor<T> interpolator{fpath_, options_.group};
 
   // Channel number handling - do we only process the channels specified in the
@@ -385,6 +388,7 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "DrawValueFromFile compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

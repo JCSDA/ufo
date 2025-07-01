@@ -20,17 +20,20 @@ makerRecordNumberToObsSpace_("RecordNumberToObsSpace");
 
 RecordNumberToObsSpace::RecordNumberToObsSpace(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "RecordNumberToObsSpace constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-RecordNumberToObsSpace::~RecordNumberToObsSpace() {}
+RecordNumberToObsSpace::~RecordNumberToObsSpace() {
+  oops::Log::trace() << "RecordNumberToObsSpace destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void RecordNumberToObsSpace::compute(const ObsFilterData & in,
                                      ioda::ObsDataVector<int> & out) const {
-  oops::Log::trace() << "RecordNumberToObsSpace::compute started" << std::endl;
+  oops::Log::trace() << "RecordNumberToObsSpace compute start" << std::endl;
 
   const ioda::ObsSpace & obsdb = in.obsspace();
 
@@ -45,7 +48,7 @@ void RecordNumberToObsSpace::compute(const ObsFilterData & in,
     out[0][jloc] = static_cast<int>(recnums[jloc]);
   }
 
-  oops::Log::trace() << "RecordNumberToObsSpace::compute finished" << std::endl;
+  oops::Log::trace() << "RecordNumberToObsSpace compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

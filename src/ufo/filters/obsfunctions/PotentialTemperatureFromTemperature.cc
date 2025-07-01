@@ -26,6 +26,7 @@ static ObsFunctionMaker<PotentialTemperatureFromTemperature>
 PotentialTemperatureFromTemperature::PotentialTemperatureFromTemperature(
   const eckit::LocalConfiguration & conf
 ): invars_() {
+  oops::Log::trace() << "PotentialTemperatureFromTemperature constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
   std::ostringstream errString;
@@ -44,12 +45,15 @@ PotentialTemperatureFromTemperature::PotentialTemperatureFromTemperature(
 
 // -----------------------------------------------------------------------------
 
-PotentialTemperatureFromTemperature::~PotentialTemperatureFromTemperature() {}
+PotentialTemperatureFromTemperature::~PotentialTemperatureFromTemperature() {
+  oops::Log::trace() << "PotentialTemperatureFromTemperature destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void PotentialTemperatureFromTemperature::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "PotentialTemperatureFromTemperature compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   std::vector<float> potentialTemperature(nlocs, 0.0);
@@ -83,6 +87,7 @@ void PotentialTemperatureFromTemperature::compute(const ObsFilterData & in,
      }
   }
   out[0] = potentialTemperature;
+  oops::Log::trace() << "PotentialTemperatureFromTemperature compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

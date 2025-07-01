@@ -29,6 +29,7 @@ static ObsFunctionMaker<Arithmetic<int>> LinearCombinationintMaker("LinearCombin
 template <typename FunctionValue>
 Arithmetic<FunctionValue>::Arithmetic(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "Arithmetic constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 
@@ -43,6 +44,7 @@ Arithmetic<FunctionValue>::Arithmetic(const eckit::LocalConfiguration & conf)
 template <typename FunctionValue>
 void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
                                                ioda::ObsDataVector<FunctionValue> & out) const {
+  oops::Log::trace() << "Arithmetic compute start" << std::endl;
   // dimension
   const size_t nlocs = in.nlocs();
 
@@ -173,6 +175,7 @@ void Arithmetic<FunctionValue>::compute(const ObsFilterData & in,
       }  // ichan
     }  // nlocs
   }  // nvars
+  oops::Log::trace() << "Arithmetic compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

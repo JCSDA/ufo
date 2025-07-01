@@ -40,6 +40,7 @@ static FilterActionMaker<SetFlag<false>> unsetFlagMaker_("unset");
 template <bool value>
 SetFlag<value>::SetFlag(const SetFlagParameters &parameters)
   : parameters_(parameters) {
+  oops::Log::trace() << "SetFlag constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -56,7 +57,7 @@ void SetFlag<value>::apply(const Variables &vars,
       ("The option 'set variable flags to observation report' cannot be set to true if "
        "'set observation report flags' is set to false.", Here());
   }
-
+  oops::Log::trace() << "SetFlag apply start" << std::endl;
   const std::string group = "DiagnosticFlags/" + parameters_.flag.value();
 
   typedef bool (*Predicate)(int);
@@ -127,6 +128,7 @@ void SetFlag<value>::apply(const Variables &vars,
       }
     }
   }
+  oops::Log::trace() << "SetFlag apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

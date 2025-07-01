@@ -245,7 +245,7 @@ case ("bendingAngle")
     allocate(obsValue(nobs))
     call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSatid)
     call obsspace_get_db(self%obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
-    call obsspace_get_db(self%obsdb, "ObsValue", "bendingAngle", obsValue)
+    call obsspace_get_db(self%obsdb, "ObsValue", trim(self%variable), obsValue)
     call obsspace_get_db(self%obsdb, "ObsError", trim(self%variable), obsErr)
     if (self % err_variable == "latitude") then
       allocate(obsLat(nobs))
@@ -303,6 +303,67 @@ case ("atmosphericRefractivity")
     call fckit_log%debug(err_msg)
     deallocate(obsZ)
     deallocate(obsLat)  
+    ! up date obs error
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
+
+  case ("MetOffice")
+    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with the Met Office method"
+    call fckit_log%debug(err_msg)
+    if (cmp_strings(self % rmatrix_filename, "")) then
+      err_msg = "If you choose the Met Office method, then you must specify rmatrix_filename"
+      call abor1_ftn(err_msg)
+    end if
+
+    allocate(record_number(nobs))
+    if (self % use_profile) then
+      ! Get the record numbers and the set of unique profile numbers
+      call obsspace_get_recnum(self % obsdb, record_number)
+      call sort_and_unique(nobs, obsImpP, record_number, sort_order, unique)
+    else
+      allocate(unique(1:nobs), sort_order(1:nobs))
+      do iob = 1, nobs
+        record_number(iob) = iob
+        sort_order(iob) = iob
+        unique(iob) = iob
+      end do
+    end if
+
+    allocate(obsSatid(nobs))
+    allocate(obsOrigC(nobs))
+    allocate(obsValue(nobs))
+    allocate(obsZ(nobs))
+    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ) 
+    call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSatid)
+    call obsspace_get_db(self%obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
+    call obsspace_get_db(self%obsdb, "ObsValue", trim(self%variable), obsValue)
+    call obsspace_get_db(self%obsdb, "ObsError", trim(self%variable), obsErr)
+    if (self % err_variable == "latitude") then
+      allocate(obsLat(nobs))
+      call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
+      call gnssro_obserr_latitude(nobs, self % rmatrix_filename, obsSatid, obsOrigC, obsLat, obsZ, &
+                                  obsValue, obsErr, QCflags, missing, self % allow_extrapolation, &
+                                  record_number, sort_order, unique, self % verbose_output)
+      deallocate(obsLat)
+    else if (self % err_variable == "average_temperature") then
+      allocate(averageTemp(nobs))
+      if (self % average_temperature_name == "") then
+        call fckit_exception % throw("When using average_temperature error model," &
+          // " you must specify an average_temperature_name")
+      else
+        call obsspace_get_db(self%obsdb, "MetaData", self % average_temperature_name, averageTemp)
+      end if
+      call gnssro_obserr_avtemp(nobs, self % n_horiz, self % rmatrix_filename, obsSatid, obsOrigC, &
+                                obsZ, obsValue, averageTemp, &
+                                obsErr, QCflags, missing, self % allow_extrapolation, record_number, &
+                                sort_order, unique, self % verbose_output)
+    else
+      err_msg = "The error variable should be either 'latitude' or 'average_temperature', but you gave " // &
+                trim(self % err_variable)
+      call abor1_ftn(err_msg)
+    end if
+    deallocate(obsValue)
+    deallocate(obsSatid)
+    deallocate(obsOrigC)
     ! up date obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 

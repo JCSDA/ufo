@@ -22,6 +22,7 @@ static ObsFunctionMaker<TotalColumnVaporGuess> makerTotalColumnVaporGuess_("Tota
 
 TotalColumnVaporGuess::TotalColumnVaporGuess(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "TotalColumnVaporGuess constructor" << std::endl;
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_dry_air");
   invars_ += Variable("GeoVaLs/air_pressure_levels");
@@ -29,12 +30,15 @@ TotalColumnVaporGuess::TotalColumnVaporGuess(const eckit::LocalConfiguration & c
 
 // -----------------------------------------------------------------------------
 
-TotalColumnVaporGuess::~TotalColumnVaporGuess() {}
+TotalColumnVaporGuess::~TotalColumnVaporGuess() {
+  oops::Log::trace() << "TotalColumnVaporGuess destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void TotalColumnVaporGuess::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "TotalColumnVaporGuess compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/air_pressure_levels"));
@@ -59,6 +63,7 @@ void TotalColumnVaporGuess::compute(const ObsFilterData & in,
     tcwv[iloc] *= GK;
   }
   out[0] = tcwv;
+  oops::Log::trace() << "TotalColumnVaporGuess compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -29,7 +29,7 @@ ModelObThreshold::ModelObThreshold(ioda::ObsSpace & obsdb, const Parameters_ & p
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::trace() << "ModelObThreshold contructor starting" << std::endl;
+  oops::Log::trace() << "ModelObThreshold constructor" << std::endl;
   allvars_ += parameters_.model_profile;
   allvars_ += parameters_.model_vcoord;
   allvars_ += parameters_.obs_height;
@@ -38,7 +38,7 @@ ModelObThreshold::ModelObThreshold(ioda::ObsSpace & obsdb, const Parameters_ & p
 // -----------------------------------------------------------------------------
 
 ModelObThreshold::~ModelObThreshold() {
-  oops::Log::trace() << "ModelObThreshold destructed" << std::endl;
+  oops::Log::trace() << "ModelObThreshold destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -87,8 +87,7 @@ ModelObThreshold::~ModelObThreshold() {
 void ModelObThreshold::applyFilter(const std::vector<bool> & apply,
                                    const Variables & filtervars,
                                    std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ModelObThreshold priorFilter" << std::endl;
-  print(oops::Log::trace());
+  oops::Log::trace() << "ModelObThreshold applyFilter start" << std::endl;
 
   const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
@@ -167,6 +166,7 @@ void ModelObThreshold::applyFilter(const std::vector<bool> & apply,
       }
     }
   }
+  oops::Log::trace() << "ModelObThreshold applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

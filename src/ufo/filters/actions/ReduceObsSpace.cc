@@ -21,6 +21,7 @@ static FilterActionMaker<ReduceObsSpace> makerReduceObsSpace_("reduce obs space"
 
 ReduceObsSpace::ReduceObsSpace(const ReduceObsSpaceParameters &)
   : allvars_() {
+  oops::Log::trace() << "ReduceObsSpace constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -33,8 +34,9 @@ void ReduceObsSpace::apply(const Variables &,
                            ioda::ObsDataVector<float> &) const {
   if (filterdata.getGeoVaLs() != NULL) {
     throw eckit::NotImplemented("Action 'reduce obs space' not implemented for prior or post "
-                                "filters yet");
+                                "filters yet", Here());
   }
+  oops::Log::trace() << "ReduceObsSpace apply start" << std::endl;
   const size_t nvars = flagged.size();
   if (nvars == 0) return;
   const size_t nlocs = flagged[0].size();
@@ -46,6 +48,7 @@ void ReduceObsSpace::apply(const Variables &,
     }
   }
   filterdata.obsspace().reduce(keepObs);
+  oops::Log::trace() << "ReduceObsSpace apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

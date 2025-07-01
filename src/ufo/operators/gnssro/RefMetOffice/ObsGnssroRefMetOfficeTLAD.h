@@ -60,7 +60,6 @@ class ObsGnssroRefMetOfficeTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   F90hop keyOperGnssroRefMetOffice_;
   std::unique_ptr<const oops::Variables> varin_;
-  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

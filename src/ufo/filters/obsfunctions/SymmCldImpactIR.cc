@@ -30,6 +30,7 @@ static ObsFunctionMaker<SymmCldImpactIR> makerSCIIR_("SymmCldImpactIR");
 
 SymmCldImpactIR::SymmCldImpactIR(const eckit::LocalConfiguration config)
   : invars_(), channels_() {
+  oops::Log::trace() << "SymmCldImpactIR constructor" << std::endl;
   oops::Log::debug() << "SymmCldImpactIR: config = " << config << std::endl;
   // Initialize options
   options_.deserialize(config);
@@ -45,12 +46,15 @@ SymmCldImpactIR::SymmCldImpactIR(const eckit::LocalConfiguration config)
 
 // -----------------------------------------------------------------------------
 
-SymmCldImpactIR::~SymmCldImpactIR() {}
+SymmCldImpactIR::~SymmCldImpactIR() {
+  oops::Log::trace() << "SymmCldImpactIR destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SymmCldImpactIR::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & SCI) const {
+  oops::Log::trace() << "SymmCldImpactIR compute start" << std::endl;
   const float missing = util::missingValue<float>();
 
   // Get dimensions
@@ -102,6 +106,7 @@ void SymmCldImpactIR::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "SymmCldImpactIR compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

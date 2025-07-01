@@ -6,7 +6,7 @@ observations:
 - obs operator:
     name: CRTM
     Absorbers: [H2O,O3,CO2]
-    Clouds: [Water, Rain, IceSphere, Snow]
+    Clouds: [Water, Rain, Snow]
     Cloud_Fraction: 1.0
     SurfaceWindGeoVars: uv
     obs options:
@@ -14,7 +14,7 @@ observations:
       EndianType: little_endian
       CoefficientPath:  Data/
       NC_CoefficientPath:  Data/
-      # See these papers (DOIs below) for the description of the DDA CloudCoeff 
+      # The following papers discuss the DDA CloudCoeff
       # 10.1109/TGRS.2023.3330067 & 10.1029/2022JD036957
       CloudCoeff_File: CloudCoeff_DDA_Moradi_2022.nc4
       CloudCoeff_Format: netCDF
@@ -28,14 +28,24 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_obs_2009113003.nc4
-    #obsdataout:
-    #  engine:
-    #    type: H5File
-    #    obsfile: Output/cpr_cloudsat_sim_2009113003.nc4
+      obsgrouping:
+         group variables: ["sequenceNumber"]
+         sort variable: "Layer"
+         sort order: "descending"
+    extension:
+      allocate companion records with length: &num_levels 21
     simulated variables: [ReflectivityAttenuated]
     channels: 1
   geovals:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_geoval_2009113003.nc4
   vector ref: GsiHofX
   tolerance: 2.e-1
+obs prior filters:  
+- filter: Average Observations To GeoVals Model Levels
+  filter variables:
+  - name: ObsValue/ReflectivityAttenuated
+    channels: 1
+  observation vertical coordinate: MetaData/height
+  model vertical coordinate: GeoVaLs/height_above_mean_sea_level
+
 

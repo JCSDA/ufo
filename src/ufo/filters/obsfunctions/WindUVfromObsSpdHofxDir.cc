@@ -27,6 +27,7 @@ makerObsFuncWindUVfromObsSpdHofxDir_("WindUVfromObsSpdHofxDir");
 
 WindUVfromObsSpdHofxDir::WindUVfromObsSpdHofxDir(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "WindUVfromObsSpdHofxDir constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -47,6 +48,7 @@ WindUVfromObsSpdHofxDir::WindUVfromObsSpdHofxDir(const eckit::LocalConfiguration
 
 void WindUVfromObsSpdHofxDir::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "WindUVfromObsSpdHofxDir compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
   const float rad2deg = 1.0f / Constants::deg2rad;
@@ -93,6 +95,7 @@ void WindUVfromObsSpdHofxDir::compute(const ObsFilterData & in,
   // Store wind components to the DerivedObsValue group
   obsdb_.put_db("DerivedObsValue", "windEastward", w_east);
   obsdb_.put_db("DerivedObsValue", "windNorthward", w_north);
+  oops::Log::trace() << "WindUVfromObsSpdHofxDir compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

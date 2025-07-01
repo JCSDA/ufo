@@ -21,6 +21,7 @@ static FilterActionMaker<RejectObs> makerRejectObs_("reject");
 
 RejectObs::RejectObs(const RejectObsParameters &parameters)
   : allvars_(), parameters_(parameters) {
+  oops::Log::trace() << "RejectObs constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -31,6 +32,7 @@ void RejectObs::apply(const Variables & vars,
                       int filterQCflag,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {
+  oops::Log::trace() << "RejectObs apply start" << std::endl;
   for (size_t jv = 0; jv < vars.nvars(); ++jv) {
     size_t iv = flags.varnames().find(vars.variable(jv).variable());
     for (size_t jobs = 0; jobs < flags.nlocs(); ++jobs) {
@@ -38,6 +40,7 @@ void RejectObs::apply(const Variables & vars,
         flags[iv][jobs] = filterQCflag;
     }
   }
+  oops::Log::trace() << "RejectObs apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

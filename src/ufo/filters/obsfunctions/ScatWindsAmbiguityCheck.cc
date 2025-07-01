@@ -28,6 +28,7 @@ _("ScatWindsAmbiguityCheck");
 
 ScatWindsAmbiguityCheck::ScatWindsAmbiguityCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ScatWindsAmbiguityCheck constructor" << std::endl;
   oops::Log::debug() << "ScatWindsAmbiguityCheck: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -46,12 +47,15 @@ ScatWindsAmbiguityCheck::ScatWindsAmbiguityCheck(const eckit::LocalConfiguration
 
 // -----------------------------------------------------------------------------
 
-ScatWindsAmbiguityCheck::~ScatWindsAmbiguityCheck() {}
+ScatWindsAmbiguityCheck::~ScatWindsAmbiguityCheck() {
+  oops::Log::trace() << "ScatWindsAmbiguityCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ScatWindsAmbiguityCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ScatWindsAmbiguityCheck compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
 
@@ -86,6 +90,7 @@ void ScatWindsAmbiguityCheck::compute(const ObsFilterData & in,
       out[0][jj] = missing;
     }
   }
+  oops::Log::trace() << "ScatWindsAmbiguityCheck compute end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

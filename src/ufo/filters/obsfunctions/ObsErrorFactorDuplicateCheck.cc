@@ -35,6 +35,7 @@ static ObsFunctionMaker<ObsErrorFactorDuplicateCheck> makerSteps_("ObsErrorFacto
 
 ObsErrorFactorDuplicateCheck::ObsErrorFactorDuplicateCheck(const eckit::Configuration &config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorDuplicateCheck constructor" << std::endl;
   // Initialize options
   options_.reset(new ObsErrorFactorDuplicateCheckParameters());
   options_->deserialize(config);
@@ -54,7 +55,9 @@ ObsErrorFactorDuplicateCheck::ObsErrorFactorDuplicateCheck(const eckit::Configur
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorDuplicateCheck::~ObsErrorFactorDuplicateCheck() {}
+ObsErrorFactorDuplicateCheck::~ObsErrorFactorDuplicateCheck() {
+  oops::Log::trace() << "ObsErrorFactorDuplicateCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -81,6 +84,7 @@ int ObsErrorFactorDuplicateCheck::getDispl(const ObsFilterData & data,
 // -----------------------------------------------------------------------------
 void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ObsErrorFactorDuplicateCheck compute start" << std::endl;
   auto & obsdb = data.obsspace();
   int nlocs = data.nlocs();
   int commsize = obsdb.comm().size();
@@ -181,6 +185,7 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
       if ( dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
     }
   }
+  oops::Log::trace() << "ObsErrorFactorDuplicateCheck compute complete" << std::endl;
 }
 // -----------------------------------------------------------------------------
 

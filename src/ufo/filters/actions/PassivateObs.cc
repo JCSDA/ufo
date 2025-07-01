@@ -21,7 +21,8 @@ static FilterActionMaker<PassivateObs> makerPassivateObs_("passivate");
 
   PassivateObs::PassivateObs(const PassivateObsParameters &parameters)
     : allvars_() {
-  }
+  oops::Log::trace() << "PassivateObs constructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -31,6 +32,7 @@ void PassivateObs::apply(const Variables & vars,
                       int,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {
+  oops::Log::trace() << "PassivateObs apply start" << std::endl;
   for (size_t ifiltervar = 0; ifiltervar < vars.nvars(); ++ifiltervar) {
     size_t iallvar = flags.varnames().find(vars.variable(ifiltervar).variable());
     for (size_t jobs = 0; jobs < flags.nlocs(); ++jobs) {
@@ -38,6 +40,7 @@ void PassivateObs::apply(const Variables & vars,
         flags[iallvar][jobs] = QCflags::passive;
     }
   }
+  oops::Log::trace() << "PassivateObs apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

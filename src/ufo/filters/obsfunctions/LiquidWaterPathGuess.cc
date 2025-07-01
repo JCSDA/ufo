@@ -19,6 +19,7 @@ static ObsFunctionMaker<LiquidWaterPathGuess> makerLiquidWaterPathGuess_("Liquid
 
 LiquidWaterPathGuess::LiquidWaterPathGuess(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "LiquidWaterPathGuess constructor" << std::endl;
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water");
   invars_ += Variable("GeoVaLs/air_pressure");
@@ -26,12 +27,15 @@ LiquidWaterPathGuess::LiquidWaterPathGuess(const eckit::LocalConfiguration & con
 
 // -----------------------------------------------------------------------------
 
-LiquidWaterPathGuess::~LiquidWaterPathGuess() {}
+LiquidWaterPathGuess::~LiquidWaterPathGuess() {
+  oops::Log::trace() << "LiquidWaterPathGuess destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void LiquidWaterPathGuess::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "LiquidWaterPathGuess compute start" << std::endl;
   // Get dimensions
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/air_pressure"));
@@ -70,6 +74,7 @@ void LiquidWaterPathGuess::compute(const ObsFilterData & in,
     lwp[iloc] *= scalevals;
   }
   out[0] = lwp;
+  oops::Log::trace() << "LiquidWaterPathGuess compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

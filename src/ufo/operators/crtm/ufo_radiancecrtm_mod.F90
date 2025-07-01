@@ -119,7 +119,8 @@ character(len=maxvarlen), dimension(10), parameter :: more_hydrometeors = &
    call abor1_ftn(err_msg)
  end if
 
- request_cldfrac = self%conf%n_Clouds > 0 .and. self%conf%Cloud_Fraction < 0.0
+ request_cldfrac = self%conf%n_Clouds > 0 .and. self%conf%Cloud_Fraction < 0.0 &
+                   .and. (.not. self%conf%cal_cloud_frac_in_fov)
 
  request_salinity = cmp_strings(self%conf%salinity_option, "on")
 
@@ -672,6 +673,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
                                n_Channels, &
                                hofx, &
                                obss)
+      
       call ufo_crtm_active_diag(rts, &
                                 rts_K, &
                                 atm, &

@@ -8,6 +8,7 @@
 module ufo_gnssroonedvarcheck_setom1_mod
 
 use kinds
+use logger_mod, only: oops_log
 use missing_values_mod
 use ufo_roobserror_utils_mod, only: Rmatrix_type
 
@@ -45,6 +46,7 @@ INTEGER                         :: ReturnCode
 REAL(kind_real)                 :: frac_err
 REAL(kind_real)                 :: omat(nobs,nobs)
 REAL(kind_real), ALLOCATABLE    :: gradient(:)
+CHARACTER(len=800)              :: message                      ! Message to be output
 
 IF (Rmatrix % satid <= 0) THEN
   ! Rmatrix has not been set up
@@ -57,7 +59,6 @@ ELSE
   DO i = 1, Rmatrix % num_heights - 1
 
     ! Calculate the gradient of fractional error with height
-
     gradient(i) = (Rmatrix % frac_err(i + 1) - Rmatrix % frac_err(i)) / &
                   (Rmatrix % height(i + 1) - Rmatrix % height(i))
 
@@ -66,15 +67,12 @@ ELSE
   OM1_error = .FALSE.
 
   ! Initialise covariance matrix
-
   omat(:,:) = 0.0
 
   ! Calculate the variance values
-
   DO n = 1, nobs
 
     i = 1
-
     DO
 
       IF (zobs(n) < Rmatrix % height(i + 1) .OR. &
@@ -87,22 +85,18 @@ ELSE
     END DO
 
     ! Fractional error
-
     frac_err = Rmatrix % frac_err(i) + &
                gradient(i) * (zobs(n) - Rmatrix % height(i))
 
     ! Standard deviation
-
     OSigma(n) = MAX (frac_err * yobs(n), Rmatrix % min_error)
 
     ! Variance
-
     omat(n,n) = OSigma(n) ** 2
 
   END DO
 
   ! Calculate the covariances
-
   DO n = 1,nobs
 
     DO i = n + 1,nobs
@@ -117,7 +111,6 @@ ELSE
   END DO
 
   ! Invert the matrix
-
   CALL InvertMatrix (nobs,   &
                      nobs,   &
                      omat,   &
@@ -127,7 +120,11 @@ ELSE
 
   OM1(:,:) = omat(:,:)
 
-  IF (ReturnCode /= 0) OM1_error = .TRUE.
+  IF (ReturnCode /= 0) THEN
+    write(message, '(A,I8)') 'Error in inversion, return code ', ReturnCode
+    call oops_log % warning(message)
+    OM1_error = .TRUE.
+  END IF
 
   DEALLOCATE (gradient)
 END IF

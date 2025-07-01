@@ -30,6 +30,7 @@ static ObsFunctionMaker<HydrometeorCheckAMSUA> makerHydrometeorCheckAMSUA_("Hydr
 
 HydrometeorCheckAMSUA::HydrometeorCheckAMSUA(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "HydrometeorCheckAMSUA constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -70,12 +71,15 @@ HydrometeorCheckAMSUA::HydrometeorCheckAMSUA(const eckit::LocalConfiguration & c
 
 // -----------------------------------------------------------------------------
 
-HydrometeorCheckAMSUA::~HydrometeorCheckAMSUA() {}
+HydrometeorCheckAMSUA::~HydrometeorCheckAMSUA() {
+  oops::Log::trace() << "HydrometeorCheckAMSUA destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "HydrometeorCheckAMSUA compute start" << std::endl;
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
@@ -309,6 +313,7 @@ void HydrometeorCheckAMSUA::compute(const ObsFilterData & in,
       out[ichan][iloc] = affected_channels[ichan][iloc];
     }
   }
+  oops::Log::trace() << "HydrometeorCheckAMSUA compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

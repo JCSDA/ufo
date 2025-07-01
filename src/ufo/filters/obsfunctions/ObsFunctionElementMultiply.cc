@@ -24,6 +24,7 @@ static ObsFunctionMaker<ElementMultiply<int>> ElementMultiplyintMaker("ElementMu
 template <typename FunctionValue>
 ElementMultiply<FunctionValue>::ElementMultiply(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ElementMultiply constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 
@@ -38,6 +39,7 @@ ElementMultiply<FunctionValue>::ElementMultiply(const eckit::LocalConfiguration 
 template <typename FunctionValue>
 void ElementMultiply<FunctionValue>::compute(const ObsFilterData & in,
                                              ioda::ObsDataVector<FunctionValue> & out) const {
+  oops::Log::trace() << "ElementMultiply compute start" << std::endl;
   // dimension
   const size_t nlocs = in.nlocs();
 
@@ -114,6 +116,7 @@ void ElementMultiply<FunctionValue>::compute(const ObsFilterData & in,
       }  // ichan
     }  // nlocs
   }  // nvars
+  oops::Log::trace() << "ElementMultiply compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

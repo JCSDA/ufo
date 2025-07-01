@@ -29,19 +29,23 @@ ObsDomainErrCheck::ObsDomainErrCheck(ioda::ObsSpace & obsdb, const Parameters_ &
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
+  oops::Log::trace() << "ObsDomainErrCheck constructor" << std::endl;
   oops::Log::debug() << "ObsDomainErrCheck: config = " << parameters_ << std::endl;
   ASSERT(obserr);
 }
 
 // -----------------------------------------------------------------------------
 
-ObsDomainErrCheck::~ObsDomainErrCheck() {}
+ObsDomainErrCheck::~ObsDomainErrCheck() {
+  oops::Log::trace() << "ObsDomainErrCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "ObsDomainErrCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
@@ -78,6 +82,7 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
       }
   }
   oops::Log::info() << "count=" << count << std::endl;
+  oops::Log::trace() << "ObsDomainErrCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -15,16 +15,16 @@
 
 namespace ufo {
 
-ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group &,
-                                          const std::vector<std::string> &,
-                                          const std::vector<int> &,
-                                          const Eigen::MatrixXd &);
+void saveBiasCoeffsWithChannels(ioda::Group &,
+                                const std::vector<std::string> &,
+                                const std::vector<int> &,
+                                const Eigen::MatrixXd &);
 
-ioda::ObsGroup saveBiasCoeffsWithRecords(ioda::Group &,
-                                         const std::vector<std::string> &,
-                                         const std::vector<std::string> &,
-                                         const std::vector<std::string> &,
-                                         const Eigen::MatrixXd &);
+void saveBiasCoeffsWithRecords(ioda::Group &,
+                               const std::vector<std::string> &,
+                               const std::vector<std::string> &,
+                               const std::vector<std::string> &,
+                               const Eigen::MatrixXd &);
 
 }  // namespace ufo
 

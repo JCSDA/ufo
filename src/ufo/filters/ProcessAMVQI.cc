@@ -29,13 +29,13 @@ ProcessAMVQI::ProcessAMVQI(ioda::ObsSpace & obsdb, const Parameters_ & parameter
   : ObsProcessorBase(obsdb, false /*deferToPost?*/, flags, obserr),
     parameters_(parameters)
 {
-  oops::Log::trace() << "ProcessAMVQI contructor starting" << std::endl;
+  oops::Log::trace() << "ProcessAMVQI constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ProcessAMVQI::~ProcessAMVQI() {
-  oops::Log::trace() << "ProcessAMVQI destructed" << std::endl;
+  oops::Log::trace() << "ProcessAMVQI destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ ProcessAMVQI::~ProcessAMVQI() {
  *  \date 02/08/2021: Created
  */
 void ProcessAMVQI::doFilter() {
-  oops::Log::trace() << "ProcessAMVQI doFilter" << std::endl;
+  oops::Log::trace() << "ProcessAMVQI doFilter start" << std::endl;
 
   const float missing = util::missingValue<float>();
   const int int_missing = util::missingValue<int>();
@@ -188,6 +188,7 @@ void ProcessAMVQI::doFilter() {
                     new_percent_confidence[inum]);
     }
   }
+  oops::Log::trace() << "ProcessAMVQI doFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -31,6 +31,7 @@ static ObsFunctionMaker<HydrometeorCheckAMSUAclr>
 
 HydrometeorCheckAMSUAclr::HydrometeorCheckAMSUAclr(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "HydrometeorCheckAMSUAclr constructor start" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -62,16 +63,20 @@ HydrometeorCheckAMSUAclr::HydrometeorCheckAMSUAclr(const eckit::LocalConfigurati
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/water_area_fraction");
   invars_ += Variable("GeoVaLs/land_area_fraction");
+  oops::Log::trace() << "HydrometeorCheckAMSUAclr constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-HydrometeorCheckAMSUAclr::~HydrometeorCheckAMSUAclr() {}
+HydrometeorCheckAMSUAclr::~HydrometeorCheckAMSUAclr() {
+  oops::Log::trace() << "HydrometeorCheckAMSUAclr destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void HydrometeorCheckAMSUAclr::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "HydrometeorCheckAMSUAclr compute start" << std::endl;
   // Get sensor information from options
   const std::string &sensor = options_.sensor.value();
 
@@ -266,6 +271,7 @@ void HydrometeorCheckAMSUAclr::compute(const ObsFilterData & in,
       out[ichan][iloc] = affected_channels[ichan][iloc];
     }
   }
+  oops::Log::trace() << "HydrometeorCheckAMSUAclr compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

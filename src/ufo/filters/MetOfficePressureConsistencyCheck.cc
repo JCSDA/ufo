@@ -20,18 +20,20 @@ MetOfficePressureConsistencyCheck::MetOfficePressureConsistencyCheck
  const Parameters_ &parameters,
  std::shared_ptr<ioda::ObsDataVector<int> > flags,
  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
-{
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters) {
+  oops::Log::trace() << "MetOfficePressureConsistencyCheck constructor" << std::endl;
   oops::Log::debug() << "MetOfficePressureConsistencyCheck: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
-MetOfficePressureConsistencyCheck::~MetOfficePressureConsistencyCheck()
-{}
+MetOfficePressureConsistencyCheck::~MetOfficePressureConsistencyCheck() {
+  oops::Log::trace() << "MetOfficePressureConsistencyCheck destructor" << std::endl;
+}
 
 void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & apply,
                                           const Variables & filtervars,
                                           std::vector<std::vector<bool>> & flagged) const {
+    oops::Log::trace() << "MetOfficePressureConsistencyCheck applyFilter start" << std::endl;
     const ObsAccessor obsAccessor = createObsAccessor();
 
     const std::vector<size_t> validObsIds =
@@ -94,6 +96,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
     // Finally reject any of the observations where the originating pressure souce differs
     // from the reference observation
     obsAccessor.flagRejectedObservations(isRejected, flagged);
+    oops::Log::trace() << "MetOfficePressureConsistencyCheck applyFilter complete" << std::endl;
 }
 
 MetOfficePressureConsistencyCheck::ObsIndexIterator

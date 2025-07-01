@@ -112,11 +112,6 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
-! Check that the geovals are ordered top to bottom
-  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then
-    call fckit_exception%throw('Geovals should be ordered top to bottom')
-  endif
-
 ! Keep copy of dimensions
   self % nlevp = prs % nval
   self % nlevq = q % nval
@@ -136,28 +131,29 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   ALLOCATE(zb(1:self%nlevq))
 
 ! For each observation, calculate the K-matrix
-  obs_loop: do iobs = 1, self % nlocs
+  if (self % nlocs > 0) then
+    obs_loop: do iobs = 1, self % nlocs
 
-      pressure = prs % vals(:,iobs)
-      humidity = q % vals(:,iobs)
-      za = rho_heights % vals(:,iobs)
-      zb = theta_heights % vals(:,iobs)
+        pressure = prs % vals(:,iobs)
+        humidity = q % vals(:,iobs)
+        za = rho_heights % vals(:,iobs)
+        zb = theta_heights % vals(:,iobs)
 
-      CALL groundgnss_jacobian_interface(self % nlevp,                 &   ! Number of pressure levels
-                                         self % nlevq,                 &   ! Number of specific humidity levels
-                                         za(1:self%nlevp),             &   ! Heights of the pressure levels
-                                         zb(1:self%nlevq),             &   ! Heights of the specific humidity levels
-                                         humidity(1:self%nlevq),       &   ! Values of the specific humidity
-                                         pressure(1:self%nlevp),       &   ! Values of the pressure
-                                         zStation(iobs),               &   ! Station height
-                                         iobs,                         &   ! Ob number
-                                         self % vert_interp_ops,       &   ! Pressure varies exponentially with height?
-                                         self % pseudo_ops,            &   ! Use pseudo-levels in calculation?
-                                         self % min_temp_grad,         &   ! Minimum temperature gradient allowed
-                                         self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
+        CALL groundgnss_jacobian_interface(self % nlevp,                 &   ! Number of pressure levels
+                                           self % nlevq,                 &   ! Number of specific humidity levels
+                                           za(1:self%nlevp),             &   ! Heights of the pressure levels
+                                           zb(1:self%nlevq),             &   ! Heights of the specific humidity levels
+                                           humidity(1:self%nlevq),       &   ! Values of the specific humidity
+                                           pressure(1:self%nlevp),       &   ! Values of the pressure
+                                           zStation(iobs),               &   ! Station height
+                                           iobs,                         &   ! Ob number
+                                           self % vert_interp_ops,       &   ! Pressure varies exponentially with height?
+                                           self % pseudo_ops,            &   ! Use pseudo-levels in calculation?
+                                           self % min_temp_grad,         &   ! Minimum temperature gradient allowed
+                                           self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
 
-  end do obs_loop
-
+    end do obs_loop
+  endif
 ! Note that this routine has been run.
   self%ltraj = .true.
 
@@ -218,17 +214,19 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
 
 
 ! Loop through the obs, calculating the increment to the observation
-  obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
+  if (nlocs > 0) then
+  
+    obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
-    pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
-    humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
+      pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
+      humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
 
-    x_d(1:prs_d%nval) = pressure_d
-    x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = humidity_d
-    hofx(iobs) = SUM(self % K(iobs,:) * x_d)
+      x_d(1:prs_d%nval) = pressure_d
+      x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = humidity_d
+      hofx(iobs) = SUM(self % K(iobs,:) * x_d)
 
-  end do obs_loop
-
+    end do obs_loop
+  endif
   deallocate(x_d)
   deallocate(pressure_d)
   deallocate(humidity_d)
@@ -291,16 +289,16 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   allocate(x_d(1:prs_d%nval + q_d%nval))
 
 ! Loop through the obs, calculating the increment to the model state
-  obs_loop: do iobs = 1, self % nlocs
+  if (self % nlocs > 0) then
+    obs_loop: do iobs = 1, self % nlocs
 
-    if (hofx(iobs) /= missing) then
-        x_d = self % K(iobs,:) * hofx(iobs)
-	prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
-	q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
-    end if
-
-  end do obs_loop
-
+      if (hofx(iobs) /= missing) then
+          x_d = self % K(iobs,:) * hofx(iobs)
+          prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
+          q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+      end if
+    end do obs_loop
+  end if
   deallocate(x_d)
 
   call fckit_log%info("TRACE: ufo_groundgnss_metoffice_simobs_ad: complete")

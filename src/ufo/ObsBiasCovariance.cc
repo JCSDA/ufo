@@ -23,6 +23,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
+#include "oops/mpi/mpi.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
@@ -33,6 +34,7 @@
 #include "ufo/ObsBiasPreconditioner.h"
 #include "ufo/predictors/PredictorBase.h"
 #include "ufo/utils/IodaGroupIndices.h"
+#include "ufo/utils/SaveBiasCovariance.h"
 
 namespace ufo {
 
@@ -42,7 +44,7 @@ ObsBiasCovariance::ObsBiasCovariance(ioda::ObsSpace & odb, const eckit::Configur
   : odb_(odb), ht_rinv_h_(0), preconditioner_(0), obs_num_(0),
     minimal_required_obs_number_(0), analysis_variances_(0), variances_(),
     prednames_(0), vars_(odb.assimvariables()), rank_(odb.distribution()->rank()),
-    commTime_(odb.commTime())
+    comm_(odb.comm()), commTime_(odb.commTime())
 {
   oops::Log::trace() << "ObsBiasCovariance::Constructor starting" << std::endl;
 
@@ -222,6 +224,13 @@ void ObsBiasCovariance::read(const eckit::Configuration & config) {
       recvar.read<std::string>(allrecords);
     }
 
+    // If by record then store the read in data
+    if (byRecord_) {
+      inputBiasVariances_ = allbcerrors;
+      inputPredictors_ = predictors;
+      inputRecords_ = allrecords;
+    }
+
     // Find indices of variables/channels that we need in the data read from the file
     // Don't throw an exception if the variable is not in the file if it does not need to be
     // bias-corrected.
@@ -284,6 +293,21 @@ void ObsBiasCovariance::read(const eckit::Configuration & config) {
 // -----------------------------------------------------------------------------
 
 void ObsBiasCovariance::write(const eckit::Configuration & config) {
+  oops::Log::trace() << "ObsBiasCovariance::write start" << std::endl;
+
+  std::vector<std::string> globalRecordIds;
+  std::vector<double> globalBiasVariances;
+  if (byRecord_) {
+    // gather the records from all MPI threads
+    globalRecordIds = recIds_;
+    oops::mpi::allGatherv(comm_, globalRecordIds);
+
+    // gather the bias coefficients from all MPI threads to the zeroth thread
+    const std::vector<double> localvariances(analysis_variances_.data(),
+                analysis_variances_.data() + analysis_variances_.size());
+    oops::mpi::gather(comm_, localvariances, globalBiasVariances, 0);
+  }
+
   // only write files out on the task with MPI rank 0
   if (rank_ != 0 || commTime_.rank() != 0) return;
 
@@ -303,59 +327,82 @@ void ObsBiasCovariance::write(const eckit::Configuration & config) {
   const ObsBiasCovarianceParameters &biasCovParams = *params.covariance.value();
 
   if (config.has("covariance") && biasCovParams.outputFile.value() != boost::none) {
-    // FIXME: only implemented for channels currently
-    if (vars_.channels().size() == 0) {
-      throw eckit::NotImplemented("ObsBiasCovariance::write not implemented for without channels",
-                                  Here());
-    }
     // Create a file, overwrite if exists
     const std::string output_filename = *biasCovParams.outputFile.value();
     ioda::Group group = ioda::Engines::HH::createFile(output_filename,
                         ioda::Engines::BackendCreateModes::Truncate_If_Exists);
 
-    ioda::ObsGroup ogrp;
-
     // put only variable bias predictors into the predictors vector
     std::vector<std::string> predictors(prednames_.begin(), prednames_.end());
 
     std::vector<int> obs_assimilated(obs_num_.begin(), obs_num_.end());
-    Eigen::Map<const Eigen::MatrixXd>
-       allbcerrors(analysis_variances_.data(), prednames_.size(), nrecs_ * vars_.size());
-    const std::vector<int> channels = vars_.channels();
-    // dimensions
-    ioda::NewDimensionScales_t dims {
-          ioda::NewDimensionScale<int>("Record", 1),
-          ioda::NewDimensionScale<int>("Channel", channels.size())
-    };
-    // new ObsGroup
-    ogrp = ioda::ObsGroup::generate(group, dims);
-    // and the variables
-    ioda::Variable chansVar = ogrp.vars.open("Channel");
-    chansVar.write(channels);
 
-    // write number_obs_assimilated
-    ioda::Variable nobsVar = ogrp.vars.createWithScales<int>(
-                             "numberObservationsUsed", {ogrp.vars["Record"], ogrp.vars["Channel"]});
+    // Map variances to 2D before writing out
+    if (byRecord_) {
+      // Get global record indices and work out if there are new records
+      bool throwexception = false;
+      const std::vector<int> rec_idx = getAllStrIndices(
+                  inputRecords_, globalRecordIds.begin(), globalRecordIds.end(), throwexception);
+      const int nnewrecs = std::count_if(rec_idx.begin(), rec_idx.end(), [](int x) {
+          return x < 0; });
 
-    nobsVar.write(obs_assimilated);
+      // Get used predictor indices
+      const std::vector<int> pred_idx = getAllStrIndices(predictors,
+                  prednames_.begin(), prednames_.end());
 
-    // Set up the creation parameters for the bias covariance coefficients variable
-    ioda::VariableCreationParameters float_params;
-    float_params.chunk = true;               // allow chunking
-    float_params.compressWithGZIP();         // compress using gzip
-    const float missing_value = util::missingValue<float>();
-    float_params.setFillValue<float>(missing_value);
+      // Setup matrix for output
+      const size_t nrecs = inputRecords_.size() + nnewrecs;
+      const size_t npreds = inputPredictors_.size();
+      const size_t nvars = vars_.size();
+      Eigen::VectorXd finalvariances = Eigen::VectorXd::Zero(nrecs * nvars * npreds);
+      std::vector<std::string> finalrecords(nrecs);
 
-    // Loop over predictors and create variables
-    for (size_t jpred = 0; jpred < predictors.size(); ++jpred) {
-      // create and write the bias covariance coeffs
-      ioda::Variable anvarVar = ogrp.vars.createWithScales<float>(
-                               "BiasCoefficientErrors/"+predictors[jpred],
-                               {ogrp.vars["Record"], ogrp.vars["Channel"]}, float_params);
-      anvarVar.writeWithEigenRegular(allbcerrors(jpred, Eigen::all));
+      // Loop over the matrix and populate with data from the input file
+      for (size_t jpred = 0; jpred < npreds; ++jpred) {
+        for (size_t jvar = 0; jvar < nvars; ++jvar) {
+          for (size_t jrec = 0; jrec < nrecs - nnewrecs; ++jrec) {
+            finalvariances[index(jrec, jvar, jpred)] = inputBiasVariances_[jpred](jrec, jvar);
+            if (jpred == 0 && jvar == 0) finalrecords[jrec] = inputRecords_[jrec];
+          }
+        }
+      }
+
+      // Add new records to output list and assign indices
+      std::vector<int> outrec_idx = rec_idx;
+      int newRecords = 0;
+      for (size_t jrec = 0; jrec < outrec_idx.size(); ++jrec) {
+        if (outrec_idx[jrec] == -1) {
+          // Add to the end of output
+          const size_t recindex = nrecs - nnewrecs + newRecords;
+          finalrecords[recindex] = globalRecordIds[jrec];
+          outrec_idx[jrec] = recindex;
+          newRecords += 1;
+        }
+      }
+
+      // Update variances with active records
+      for (size_t jpred = 0; jpred < pred_idx.size(); ++jpred) {
+        for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
+          for (size_t jrec = 0; jrec < outrec_idx.size(); ++jrec) {
+              finalvariances[index(outrec_idx[jrec], jvar, pred_idx[jpred])] =
+                      globalBiasVariances[index(jrec, jvar, jpred)];
+          }
+        }
+      }
+
+      // Convert coefficients and send off for writing
+      const Eigen::Map<const Eigen::MatrixXd> allbcerrors(finalvariances.data(),
+                                                          npreds, nrecs * nvars);
+      saveBiasCovarianceWithRecords(group, predictors, finalrecords, vars_.variables(),
+                                    obs_assimilated, allbcerrors);
+    } else {
+      Eigen::Map<const Eigen::MatrixXd>
+         allbcerrors(analysis_variances_.data(), prednames_.size(), nrecs_ * vars_.size());
+      saveBiasCovarianceWithChannels(group, predictors, vars_.channels(), obs_assimilated,
+                                     allbcerrors);
     }
-  }
   oops::Log::trace() << "ObsBiasCovariance::write is done " << std::endl;
+  }
 }
 
 // -----------------------------------------------------------------------------

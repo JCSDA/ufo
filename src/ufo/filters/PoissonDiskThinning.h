@@ -75,7 +75,9 @@ class PoissonDiskThinning : public FilterBase,
   /// \param[out] numNonspatialDims
   ///   Number of non-spatial dimensions used for thinning.
   ObsData getObsData(const ObsAccessor &obsAccessor,
-                     int &numSpatialDims, int &numNonspatialDims) const;
+                     const std::vector<bool> &apply,
+                     int &numSpatialDims,
+                     int &numNonspatialDims) const;
 
   template <typename ValueType>
   void validateSpacings(const util::ScalarOrMap<int, ValueType> &spacingsByPriority,
@@ -89,9 +91,11 @@ class PoissonDiskThinning : public FilterBase,
   /// all processes belonging to the given communicator.
   void synchroniseRandomNumberGenerators(const eckit::mpi::Comm &comm) const;
 
-  void groupObservationsByPriority(const std::vector<size_t> &validObsIds,
+  void groupObservationsByPriority(const ObsData &obsData,
+                                   const std::vector<size_t> &validObsIds,
                                    const ObsAccessor &obsAccessor,
-                                   RecursiveSplitter &splitter) const;
+                                   RecursiveSplitter &splitter,
+                                   const std::vector<bool> &apply) const;
 
   void thinCategory(const ObsData &obsData,
                     const std::vector<size_t> &obsIdsInCategory,

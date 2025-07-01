@@ -24,7 +24,7 @@ ParameterSubstitution::ParameterSubstitution(ioda::ObsSpace & obsdb,
                                              std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                              std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : parameters_(parameters) {
-  oops::Log::trace() << "ParameterSubstitution" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution constructor" << std::endl;
 
   const eckit::LocalConfiguration sectionToRepeat = parameters.sectionToRepeat;
   const std::vector<eckit::LocalConfiguration> repetitions = parameters.repetitions.value();
@@ -71,33 +71,33 @@ ParameterSubstitution::ParameterSubstitution(ioda::ObsSpace & obsdb,
 }
 
 void ParameterSubstitution::preProcess() {
-  oops::Log::trace() << "ParameterSubstitution preProcess starting" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution preProcess start" << std::endl;
   for (int jrep = 0; jrep < filters_.size(); ++jrep) {
     oops::Log::trace() << "preProcess repetition " << jrep << std::endl;
     filters_[jrep]->preProcess();
   }
-  oops::Log::trace() << "ParameterSubstitution preProcess finished" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution preProcess complete" << std::endl;
 }
 
 void ParameterSubstitution::priorFilter(const GeoVaLs & gv) {
-  oops::Log::trace() << "ParameterSubstitution priorFilter starting" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution priorFilter start" << std::endl;
   for (int jrep = 0; jrep < filters_.size(); ++jrep) {
     oops::Log::trace() << "priorFilter repetition " << jrep << std::endl;
     filters_[jrep]->priorFilter(gv);
   }
-  oops::Log::trace() << "ParameterSubstitution priorFilter finished" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution priorFilter complete" << std::endl;
 }
 
 void ParameterSubstitution::postFilter(const GeoVaLs & gv,
                                        const ioda::ObsVector & ov,
                                        const ioda::ObsVector & bv,
                                        const ObsDiagnostics & dv) {
-  oops::Log::trace() << "ParameterSubstitution postFilter starting" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution postFilter start" << std::endl;
   for (int jrep = 0; jrep < filters_.size(); ++jrep) {
     oops::Log::trace() << "postFilter repetition " << jrep << std::endl;
     filters_[jrep]->postFilter(gv, ov, bv, dv);
   }
-  oops::Log::trace() << "ParameterSubstitution postFilter finished" << std::endl;
+  oops::Log::trace() << "ParameterSubstitution postFilter complete" << std::endl;
 }
 
 void ParameterSubstitution::checkFilterData(const FilterStage filterStage) {

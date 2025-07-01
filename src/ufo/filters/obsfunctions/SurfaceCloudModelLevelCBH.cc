@@ -24,6 +24,7 @@ static ObsFunctionMaker<SurfaceCloudModelLevelCBH>
 
 SurfaceCloudModelLevelCBH::SurfaceCloudModelLevelCBH(
         const eckit::LocalConfiguration & conf): invars_() {
+  oops::Log::trace() << "SurfaceCloudModelLevelCBH constructor" << std::endl;
   // Get options from argument
   options_.deserialize(conf);
   // Required cloud base height above mean sea level
@@ -37,6 +38,7 @@ SurfaceCloudModelLevelCBH::SurfaceCloudModelLevelCBH(
 
 void SurfaceCloudModelLevelCBH::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SurfaceCloudModelLevelCBH compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/height_above_mean_sea_level"));
   const GeoVaLs * const gv(in.getGeoVaLs());
@@ -75,6 +77,7 @@ void SurfaceCloudModelLevelCBH::compute(const ObsFilterData & in,
       out[0][iloc] = Height[ZClear[iloc] - 1];
     }
   }
+  oops::Log::trace() << "SurfaceCloudModelLevelCBH compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -21,6 +21,7 @@ PreQC::PreQC(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
              std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "PreQC constructor" << std::endl;
   oops::Log::debug() << "PreQC: config = " << parameters_ << std::endl;
 }
 
@@ -29,7 +30,7 @@ PreQC::PreQC(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
 void PreQC::applyFilter(const std::vector<bool> & apply,
                         const Variables & filtervars,
                         std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "PreQC applyFilter starting " << std::endl;
+  oops::Log::trace() << "PreQC applyFilter start" << std::endl;
 
   const int missing = util::missingValue<int>();
 
@@ -56,7 +57,7 @@ void PreQC::applyFilter(const std::vector<bool> & apply,
     }
   }
 
-  oops::Log::trace() << "PreQC applyFilter done" << std::endl;
+  oops::Log::trace() << "PreQC applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

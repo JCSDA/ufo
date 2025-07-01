@@ -473,7 +473,6 @@ observations:
       channels: *all_channels
       source variable:
         name: ObsDiag/surface_emissivity
-        type: float
         channels: *all_channels
 ### 1D-Var check ###
   - filter: RTTOV OneDVar Check

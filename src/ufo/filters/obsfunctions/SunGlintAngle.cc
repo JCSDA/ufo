@@ -21,6 +21,7 @@ static ObsFunctionMaker<SunGlintAngle> makerSunGlintAngle_("SunGlintAngle");
 
 SunGlintAngle::SunGlintAngle(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SunGlintAngle constructor" << std::endl;
   // Include list of required data from ObsSpace
   invars_ += Variable("MetaData/solarZenithAngle");
   invars_ += Variable("MetaData/solarAzimuthAngle");
@@ -30,12 +31,15 @@ SunGlintAngle::SunGlintAngle(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SunGlintAngle::~SunGlintAngle() {}
+SunGlintAngle::~SunGlintAngle() {
+  oops::Log::trace() << "SunGlintAngle destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SunGlintAngle::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SunGlintAngle compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
 
@@ -58,6 +62,7 @@ void SunGlintAngle::compute(const ObsFilterData & in,
     sun_glint[iloc] = acos(cos(sun_zenith[iloc])*cosza + sin(sun_zenith[iloc])
                             *sin(sat_zenith[iloc])*cos(bearaz))*Constants::rad2deg;
   }
+  oops::Log::trace() << "SunGlintAngle compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

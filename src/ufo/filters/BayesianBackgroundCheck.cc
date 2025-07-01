@@ -51,7 +51,7 @@ BayesianBackgroundCheck::BayesianBackgroundCheck(
 // -----------------------------------------------------------------------------
 
 BayesianBackgroundCheck::~BayesianBackgroundCheck() {
-  oops::Log::trace() << "BayesianBackgroundCheck destructed" << std::endl;
+  oops::Log::trace() << "BayesianBackgroundCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ void BayesianBackgroundCheck::unreduceVector(const std::vector<T> &vector_reduce
 void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "BayesianBackgroundCheck postFilter" << std::endl;
+  oops::Log::trace() << "BayesianBackgroundCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
   oops::Log::debug() << "BayesianBackgroundCheck obserr: " << *obserr_ << std::endl;
@@ -386,6 +386,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       previousVariableWasFirstComponentOfTwo = false;
     }
   }
+  oops::Log::trace() << "BayesianBackgroundCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

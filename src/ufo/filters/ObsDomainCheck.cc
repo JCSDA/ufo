@@ -21,23 +21,28 @@ ObsDomainCheck::ObsDomainCheck(ioda::ObsSpace & obsdb, const Parameters_ & param
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "ObsDomainCheck constructor" << std::endl;
   oops::Log::debug() << "ObsDomainCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsDomainCheck::~ObsDomainCheck() {}
+ObsDomainCheck::~ObsDomainCheck() {
+  oops::Log::trace() << "ObsDomainCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsDomainCheck::applyFilter(const std::vector<bool> & inside,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "ObsDomainCheck applyFilter start" << std::endl;
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       flagged[jv][jobs] = !inside[jobs];
     }
   }
+  oops::Log::trace() << "ObsDomainCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

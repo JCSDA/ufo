@@ -24,6 +24,7 @@ static ObsFunctionMaker<Conditional<util::DateTime>> dateTimeMaker("Conditional"
 template <typename FunctionValue>
 Conditional<FunctionValue>::Conditional(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "Conditional constructor" << std::endl;
   // Initialize options
   options_.validateAndDeserialize(conf);
 
@@ -36,6 +37,7 @@ Conditional<FunctionValue>::Conditional(const eckit::LocalConfiguration & conf)
 template <typename FunctionValue>
 void Conditional<FunctionValue>::compute(const ObsFilterData & in,
                                          ioda::ObsDataVector<FunctionValue> & out) const {
+  oops::Log::trace() << "Conditional compute start" << std::endl;
   // Assign default value to array
   const FunctionValue missing = util::missingValue<FunctionValue>();
   for (size_t ivar = 0; ivar < out.nvars(); ++ivar) {
@@ -56,6 +58,7 @@ void Conditional<FunctionValue>::compute(const ObsFilterData & in,
       }  // if apply
     }  // iloc
   }  // lcp
+  oops::Log::trace() << "Conditional compute complete" << std::endl;
 }  // compute
 
 // -----------------------------------------------------------------------------

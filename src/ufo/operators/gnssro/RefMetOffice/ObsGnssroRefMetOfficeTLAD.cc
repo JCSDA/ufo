@@ -28,15 +28,12 @@ static LinearObsOperatorMaker<ObsGnssroRefMetOfficeTLAD>
 
 ObsGnssroRefMetOfficeTLAD::ObsGnssroRefMetOfficeTLAD(const ioda::ObsSpace & odb,
                                                      const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), varin_(),
-    parameters_(parameters)
+  : LinearObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), varin_()
 {
-  ObsGnssroRefMetOfficeOptions obsOptions = parameters_.obsOptions.value();
-
   ufo_gnssro_refmetoffice_tlad_setup_f90(keyOperGnssroRefMetOffice_,
-                                         obsOptions.vertInterpOPS,
-                                         obsOptions.pseudoLevels,
-                                         obsOptions.minTempGrad);
+                                         parameters.vertInterpOPS,
+                                         parameters.pseudoLevels,
+                                         parameters.minTempGrad);
   const std::vector<std::string> vv{"air_pressure_levels",
                                     "water_vapor_mixing_ratio_wrt_moist_air",
                                     "geopotential_height", "geopotential_height_levels"};
@@ -80,7 +77,7 @@ void ObsGnssroRefMetOfficeTLAD::simulateObsAD(
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefMetOfficeTLAD::print(std::ostream & os) const {
-  os << "ObsGnssroRefMetOfficeTLAD: config = " << parameters_ << std::endl;
+  os << "ObsGnssroRefMetOfficeTLAD: " << std::endl;
 }
 
 // -----------------------------------------------------------------------------

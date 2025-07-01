@@ -29,6 +29,7 @@ MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                        std::shared_ptr<ioda::ObsDataVector<int> > flags,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters) {
+  oops::Log::trace() << "MWCLWCheck constructor" << std::endl;
   oops::Log::debug() << "MWCLWCheck: config = " << parameters_ << std::endl;
 
   const oops::ObsVariables &invars = parameters_.clwVariables.value();
@@ -41,14 +42,16 @@ MWCLWCheck::MWCLWCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
 
 // -----------------------------------------------------------------------------
 
-MWCLWCheck::~MWCLWCheck() {}
+MWCLWCheck::~MWCLWCheck() {
+  oops::Log::trace() << "MWCLWCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "MWCLWCheck postFilter" << std::endl;
+  oops::Log::trace() << "MWCLWCheck applyFilter start" << std::endl;
 
   const oops::ObsVariables observed = obsdb_.assimvariables();
   const float missing = util::missingValue<float>();
@@ -126,6 +129,7 @@ void MWCLWCheck::applyFilter(const std::vector<bool> & apply,
   clw.save("Derived");
   clw_obs_out.save("Derived");
   clw_guess_out.save("Derived");
+  oops::Log::trace() << "MWCLWCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

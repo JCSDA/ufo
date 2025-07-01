@@ -25,6 +25,7 @@ static ObsFunctionMaker<Exponential>
 
 Exponential::Exponential(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "Exponential constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 
@@ -36,13 +37,15 @@ Exponential::Exponential(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-Exponential::~Exponential() {}
+Exponential::~Exponential() {
+  oops::Log::trace() << "Exponential destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void Exponential::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "Compute Exponential ObsFunction." << std::endl;
+  oops::Log::trace() << "Exponential compute start" << std::endl;
 
   // dimension
   const size_t nlocs = in.nlocs();
@@ -89,6 +92,7 @@ void Exponential::compute(const ObsFilterData & in,
     oops::Log::warning() << "Exponential ObsFunction WARNING: " << count_exparg_toobig
       << " instance(s) of exponential argument too large." << std::endl;
   }
+  oops::Log::trace() << "Exponential compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

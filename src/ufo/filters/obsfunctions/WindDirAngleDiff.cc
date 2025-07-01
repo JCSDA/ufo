@@ -26,6 +26,7 @@ static ObsFunctionMaker<WindDirAngleDiff> makerObsFuncWindDirAngleDiff_("WindDir
 
 WindDirAngleDiff::WindDirAngleDiff(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "WindDirAngleDiff constructor" << std::endl;
   oops::Log::debug() << "WindDirAngleDiff: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -44,12 +45,15 @@ WindDirAngleDiff::WindDirAngleDiff(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-WindDirAngleDiff::~WindDirAngleDiff() {}
+WindDirAngleDiff::~WindDirAngleDiff() {
+  oops::Log::trace() << "WindDirAngleDiff destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void WindDirAngleDiff::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "WindDirAngleDiff compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
   const double deg = Constants::rad2deg;
@@ -87,6 +91,7 @@ void WindDirAngleDiff::compute(const ObsFilterData & in,
       out[0][jj] = missing;
     }
   }
+  oops::Log::trace() << "WindDirAngleDiff compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

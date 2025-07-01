@@ -15,6 +15,7 @@
 #include <boost/optional.hpp>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/mpi/mpi.h"
 #include "ufo/filters/Variable.h"
 
 namespace ioda {
@@ -70,23 +71,23 @@ class ObsAccessor {
   /// \brief Create an accessor to observations from the observation space \p obsdb, assuming that
   /// the whole set of observations held on all MPI ranks must be processed together as a single
   /// group.
-  static ObsAccessor toAllObservations(
-      const ioda::ObsSpace &obsdb);
+  static ObsAccessor toAllObservations
+  (const ioda::ObsSpace &obsdb, const bool accountForWhere = false);
 
   /// \brief Create an accessor to the collection of observations held in \p obsdb, assuming that
   /// each record can be processed independently.
-  static ObsAccessor toObservationsSplitIntoIndependentGroupsByRecordId(
-      const ioda::ObsSpace &obsdb);
+  static ObsAccessor toObservationsSplitIntoIndependentGroupsByRecordId
+  (const ioda::ObsSpace &obsdb, const bool accountForWhere = false);
 
   /// \brief Create an accessor to the collection of observations held in \p obsdb, assuming that
   /// observations with different values of the variable \p variable can be processed independently.
-  static ObsAccessor toObservationsSplitIntoIndependentGroupsByVariable(
-      const ioda::ObsSpace &obsdb, const Variable &variable);
+  static ObsAccessor toObservationsSplitIntoIndependentGroupsByVariable
+  (const ioda::ObsSpace &obsdb, const Variable &variable, const bool accountForWhere = false);
 
   /// \brief Create an accessor to the collection of observations held in \p obsdb, assuming that
   /// each record is treated as a single observation.
-  static ObsAccessor toSingleObservationsSplitIntoIndependentGroupsByVariable(
-      const ioda::ObsSpace &obsdb, const Variable &variable);
+  static ObsAccessor toSingleObservationsSplitIntoIndependentGroupsByVariable
+  (const ioda::ObsSpace &obsdb, const Variable &variable, const bool accountForWhere = false);
 
 
   /// \brief Return the IDs of observation locations that should be treated as valid by a filter.
@@ -207,6 +208,17 @@ class ObsAccessor {
                                                          const std::string &variable) const;
   std::vector<util::DateTime> getDateTimeVariableFromObsSpace(const std::string &group,
                                                               const std::string &variable) const;
+  ///  \brief Return the values of the specified variable at observation locations
+  ///         that have been selected by the `where` block.
+  std::vector<int> getIntVariableFromObsSpace(const std::string &group,
+                                              const std::string &variable,
+                                              const std::vector<bool> &apply) const;
+  std::vector<float> getFloatVariableFromObsSpace(const std::string &group,
+                                                  const std::string &variable,
+                                                  const std::vector<bool> &apply) const;
+  std::vector<util::DateTime> getDateTimeVariableFromObsSpace(const std::string &group,
+                                                              const std::string &variable,
+                                                              const std::vector<bool> &apply) const;
 
   /// \brief Return the vector of IDs of records successive observation locations belong to.
   ///
@@ -270,12 +282,14 @@ class ObsAccessor {
  private:
   /// Specifies the observation grouping by a category variable.
   /// NOTHING: no category variable used.
-  /// RECORD_ID: the category variable was also used to divide the ObsSpace into records.
+  /// CATEGORY_VARIABLE: the category variable was also used to divide the ObsSpace into records.
+  /// RECORD_ID: the ObsSpace has been divided into records according to one or more
+  ///            grouping variable, and the record index will be used as the category variable.
   /// VARIABLE: the category variable was not used to divide the ObsSpace into records.
   /// SINGLE_OBS: records are treated as single obs, in which case the category variable
   /// may or may not have been used. If it was used, the behaviour is the same regardless of whether
   /// the category variable was used to divide the ObsSpace into records.
-  enum class GroupBy { NOTHING, RECORD_ID, VARIABLE, SINGLE_OBS };
+  enum class GroupBy { NOTHING, CATEGORY_VARIABLE, RECORD_ID, VARIABLE, SINGLE_OBS };
 
   /// Private constructor. Construct instances of this class by calling toAllObservations(),
   /// toObservationsSplitIntoIndependentGroupsByRecordId(),
@@ -284,7 +298,8 @@ class ObsAccessor {
   /// instead.
   ObsAccessor(const ioda::ObsSpace &obsdb,
               GroupBy groupBy,
-              boost::optional<Variable> categoryVariable);
+              boost::optional<Variable> categoryVariable,
+              const bool accountForWhere);
 
   bool wereRecordsGroupedByCategoryVariable() const;
 
@@ -300,6 +315,28 @@ class ObsAccessor {
 
   GroupBy groupBy_;
   boost::optional<Variable> categoryVariable_;
+  bool accountForWhere_;
+
+  /// Vector of global locations.
+  mutable std::vector<size_t> glocs_;
+
+  /// Fill vector of global locations.
+  void fillGlocs(const std::vector<bool> &apply) const {
+    // Only fill glocs_ once.
+    if (glocs_.size() > 0) {
+      return;
+    }
+    const size_t nlocs = obsdb_->nlocs();
+    std::vector<bool> patchObsVec(nlocs);
+    obsDistribution_->patchObs(patchObsVec);
+    for (size_t i = 0; i < nlocs; ++i) {
+      if (apply[i] && patchObsVec[i]) {
+        const size_t gloc = obsDistribution_->globalUniqueConsecutiveLocationIndex(i);
+        glocs_.push_back(gloc);
+      }
+    }
+    oops::mpi::allGatherv(obsdb_->comm(), glocs_);
+  }
 };
 
 }  // namespace ufo

@@ -93,6 +93,8 @@ set ( filters_files
       PerformAction.h
       ProfileAverageObsToModLevels.cc
       ProfileAverageObsToModLevels.h
+      AverageObsToGeoValLevels.cc
+      AverageObsToGeoValLevels.h
       ProfileBackgroundCheck.cc
       ProfileBackgroundCheck.h
       ProfileFewObsCheck.cc
@@ -388,6 +390,9 @@ endif( ${rttov_FOUND} )
 
 add_subdirectory( gnssroonedvarcheck )
 list( APPEND filters_files ${gnssroonedvarcheck_src_files} )
+
+add_subdirectory( refractivityonedvarcheck )
+list( APPEND filters_files ${refractivityonedvarcheck_src_files} )
 
 PREPEND( _p_filters_files       "filters"       ${filters_files} )
 

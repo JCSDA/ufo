@@ -29,6 +29,7 @@ static ObsFunctionMaker<ObsErrorModelStepwiseLinear> makerSteps_("ObsErrorModelS
 
 ObsErrorModelStepwiseLinear::ObsErrorModelStepwiseLinear(const eckit::LocalConfiguration config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorModelStepwiseLinear constructor start" << std::endl;
   // Initialize options
   options_.deserialize(config);
 
@@ -85,16 +86,20 @@ ObsErrorModelStepwiseLinear::ObsErrorModelStepwiseLinear(const eckit::LocalConfi
   }
   oops::Log::debug() << "ObsErrorModelStepwiseLinear: config (constructor) = "
                      << config << std::endl;
+  oops::Log::trace() << "ObsErrorModelStepwiseLinear constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsErrorModelStepwiseLinear::~ObsErrorModelStepwiseLinear() {}
+ObsErrorModelStepwiseLinear::~ObsErrorModelStepwiseLinear() {
+  oops::Log::trace() << "ObsErrorModelStepwiseLinear destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ObsErrorModelStepwiseLinear compute start" << std::endl;
   const float missing = util::missingValue<float>();
   // Linearly interpolate from y0 to y1 at xstar between x0 and x1 to arrive at error
   float x0, x1, y0, y1;
@@ -176,6 +181,7 @@ void ObsErrorModelStepwiseLinear::compute(const ObsFilterData & data,
        obserr[iv][jobs] = std::round(obserr[iv][jobs]);
     }
   }
+  oops::Log::trace() << "ObsErrorModelStepwiseLinear compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

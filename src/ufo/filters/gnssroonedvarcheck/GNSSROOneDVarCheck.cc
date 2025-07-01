@@ -33,7 +33,7 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
                                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::debug() << "GNSSROOneDVarCheck contructor starting" << std::endl;
+  oops::Log::trace() << "GNSSROOneDVarCheck constructor" << std::endl;
 
   std::set<int> channelset = oops::parseIntSet(parameters_.channelList);
   std::vector<int> channels;
@@ -63,15 +63,13 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
   allvars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air");
   allvars_ += Variable("GeoVaLs/geopotential_height");
   allvars_ += Variable("GeoVaLs/geopotential_height_levels");
-
-  oops::Log::debug() << "GNSSROOneDVarCheck contructor complete. " << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 GNSSROOneDVarCheck::~GNSSROOneDVarCheck() {
   ufo_gnssroonedvarcheck_delete_f90(key_);
-  oops::Log::trace() << "GNSSROOneDVarCheck destructed" << std::endl;
+  oops::Log::trace() << "GNSSROOneDVarCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -79,7 +77,7 @@ GNSSROOneDVarCheck::~GNSSROOneDVarCheck() {
 void GNSSROOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
                                std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "GNSSROOneDVarCheck Filter starting" << std::endl;
+  oops::Log::trace() << "GNSSROOneDVarCheck applyFilter start" << std::endl;
 
   // Get GeoVaLs
   const ufo::GeoVaLs * gvals = data_.getGeoVaLs();
@@ -102,7 +100,7 @@ void GNSSROOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   // Read qc flags from database
   flags_->read("FortranQC");    // temporary measure as per ROobserror qc
 
-  oops::Log::trace() << "GNSSROOneDVarCheck Filter complete" << std::endl;
+  oops::Log::trace() << "GNSSROOneDVarCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

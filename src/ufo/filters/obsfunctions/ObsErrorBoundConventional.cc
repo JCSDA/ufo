@@ -29,6 +29,7 @@ static ObsFunctionMaker<ObsErrorBoundConventional> makerSteps_("ObsErrorBoundCon
 
 ObsErrorBoundConventional::ObsErrorBoundConventional(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorBoundConventional constructor" << std::endl;
   // Check options
   options_.reset(new ObsErrorBoundConventionalParameters());
   options_->deserialize(conf);
@@ -39,12 +40,15 @@ ObsErrorBoundConventional::ObsErrorBoundConventional(const eckit::LocalConfigura
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundConventional::~ObsErrorBoundConventional() {}
+ObsErrorBoundConventional::~ObsErrorBoundConventional() {
+  oops::Log::trace() << "ObsErrorBoundConventional destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorBoundConventional::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorBoundConventional compute start" << std::endl;
   // Get dimensions
   size_t nlocs = in.nlocs();
 
@@ -62,6 +66,7 @@ void ObsErrorBoundConventional::compute(const ObsFilterData & in,
      out[0][iloc] = obserr_bound_factor * \
          std::clamp(currentObserr[iloc], obserr_bound_min, obserr_bound_max);
   }
+  oops::Log::trace() << "ObsErrorBoundConventional compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

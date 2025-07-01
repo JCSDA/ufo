@@ -25,23 +25,28 @@ BlackList::BlackList(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                      std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "BlackList constructor" << std::endl;
   oops::Log::debug() << "BlackList: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-BlackList::~BlackList() {}
+BlackList::~BlackList() {
+  oops::Log::trace() << "BlackList destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void BlackList::applyFilter(const std::vector<bool> & apply,
                             const Variables & filtervars,
                             std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "BlackList applyFilter start" << std::endl;
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       flagged[jv][jobs] = apply[jobs];
     }
   }
+  oops::Log::trace() << "BlackList applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

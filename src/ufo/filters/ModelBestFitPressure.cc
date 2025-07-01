@@ -32,7 +32,7 @@ ModelBestFitPressure::ModelBestFitPressure(ioda::ObsSpace & obsdb, const Paramet
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
-  oops::Log::trace() << "ModelBestFitPressure contructor starting" << std::endl;
+  oops::Log::trace() << "ModelBestFitPressure constructor" << std::endl;
   // Get parameters from options
   allvars_ += parameters_.obs_pressure;
   // Include list of required data from GeoVals
@@ -44,7 +44,7 @@ ModelBestFitPressure::ModelBestFitPressure(ioda::ObsSpace & obsdb, const Paramet
 // -----------------------------------------------------------------------------
 
 ModelBestFitPressure::~ModelBestFitPressure() {
-  oops::Log::trace() << "ModelBestFitPressure destructed" << std::endl;
+  oops::Log::trace() << "ModelBestFitPressure destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -76,7 +76,7 @@ ModelBestFitPressure::~ModelBestFitPressure() {
 void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ModelBestFitPressure applyFilter" << std::endl;
+  oops::Log::trace() << "ModelBestFitPressure applyFilter start" << std::endl;
 
   const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
@@ -276,6 +276,7 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
     obsdb_.put_db("DerivedValue", "windNorthwardBestFit",
                   satwind_best_fit_northward_wind);
   }
+  oops::Log::trace() << "ModelBestFitPressure applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

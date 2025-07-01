@@ -45,6 +45,7 @@ std::vector<bool> identifyRejectedObservations(const ObsFilterData &data) {
 static ObsFunctionMaker<SolarZenith> maker_("SolarZenith");
 
 SolarZenith::SolarZenith(const eckit::LocalConfiguration & conf) {
+  oops::Log::trace() << "SolarZenith constructor" << std::endl;
   options_.validateAndDeserialize(conf);
 
   // List of required ObsSpace variables
@@ -54,6 +55,7 @@ SolarZenith::SolarZenith(const eckit::LocalConfiguration & conf) {
 }
 
 void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SolarZenith compute start" << std::endl;
   const float missingFloat = util::missingValue<float>();
   const util::DateTime missingDateTime = util::missingValue<util::DateTime>();
 
@@ -214,6 +216,7 @@ void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> &
     oops::Log::trace() << "SolarZenith: " << numOutOfRangeDatetimes
                        << " obs had out-of-range datetime\n";
   oops::Log::trace().flush();
+  oops::Log::trace() << "SolarZenith compute complete" << std::endl;
 }
 
 const ufo::Variables & SolarZenith::requiredVariables() const {

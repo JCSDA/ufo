@@ -85,6 +85,13 @@ real(kind_real), parameter, public :: M_co = 0.0280101_kind_real ! molecular wei
 real(kind_real), parameter, public :: M_o3 = 0.047997_kind_real ! molecular weight of ozone (kg.mol-1)
 real(kind_real), parameter, public :: M_hcho = 0.030031_kind_real ! molecular weight of formaldehyde (kg.mol-1)
 
+! constants used in DirectZDA
+real(kind_real), parameter, public :: T_melt=273.15_kind_real
+real(kind_real), parameter, public :: rhor=1000._kind_real     ! Density of rain (kg m**-3)
+real(kind_real), parameter, public :: rhoh=913._kind_real      ! Density of hail (kg m**-3)
+real(kind_real), parameter, public :: rhos=100._kind_real      ! Density of snow (kg m**-3)
+real(kind_real), parameter, public :: rhog=400._kind_real      ! Density of graupel (kg m**-3)
+real(kind_real), parameter, public :: am_s = 0.069_kind_real   ! Empirical constant used in radar Z for dry snow;from Thompson MP
 
 end module ufo_constants_mod
 

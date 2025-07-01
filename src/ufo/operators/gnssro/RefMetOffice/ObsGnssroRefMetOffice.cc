@@ -27,20 +27,17 @@ static ObsOperatorMaker<ObsGnssroRefMetOffice> makerGnssroRefMetOffice_("GnssroR
 
 ObsGnssroRefMetOffice::ObsGnssroRefMetOffice(const ioda::ObsSpace & odb,
                                              const Parameters_ & parameters)
-  : ObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), odb_(odb), varin_(),
-    parameters_(parameters)
+  : ObsOperatorBase(odb), keyOperGnssroRefMetOffice_(0), odb_(odb), varin_()
 {
-  ObsGnssroRefMetOfficeOptions obsOptions = parameters_.obsOptions.value();
-
   const std::vector<std::string> vv{"air_pressure_levels",
                                     "water_vapor_mixing_ratio_wrt_moist_air",
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
   ufo_gnssro_refmetoffice_setup_f90(keyOperGnssroRefMetOffice_,
-                                    obsOptions.vertInterpOPS,
-                                    obsOptions.pseudoLevels,
-                                    obsOptions.minTempGrad);
+                                    parameters.vertInterpOPS,
+                                    parameters.pseudoLevels,
+                                    parameters.minTempGrad);
 
   oops::Log::trace() << "ObsGnssroRefMetOffice created." << std::endl;
 }
@@ -63,7 +60,7 @@ void ObsGnssroRefMetOffice::simulateObs(const GeoVaLs & gom, ioda::ObsVector & o
 // -----------------------------------------------------------------------------
 
 void ObsGnssroRefMetOffice::print(std::ostream & os) const {
-  os << "ObsGnssroRefMetOffice: config = " <<  parameters_ << std::endl;
+  os << "ObsGnssroRefMetOffice: config = " << std::endl;
 }
 
 // -----------------------------------------------------------------------------

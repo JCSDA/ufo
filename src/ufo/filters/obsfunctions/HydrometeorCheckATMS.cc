@@ -32,6 +32,7 @@ static ObsFunctionMaker<HydrometeorCheckATMS> makerHydrometeorCheckATMS_("Hydrom
 
 HydrometeorCheckATMS::HydrometeorCheckATMS(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "HydrometeorCheckATMS constructor start" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -71,16 +72,20 @@ HydrometeorCheckATMS::HydrometeorCheckATMS(const eckit::LocalConfiguration & con
   invars_ += Variable(biastermgrp+"/sensorScanAngle_order_3", channels_);
   invars_ += Variable(biastermgrp+"/sensorScanAngle_order_2", channels_);
   invars_ += Variable(biastermgrp+"/sensorScanAngle", channels_);
+  oops::Log::trace() << "HydrometeorCheckATMS constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-HydrometeorCheckATMS::~HydrometeorCheckATMS() {}
+HydrometeorCheckATMS::~HydrometeorCheckATMS() {
+  oops::Log::trace() << "HydrometeorCheckATMS destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void HydrometeorCheckATMS::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "HydrometeorCheckATMS compute start" << std::endl;
   // Get dimensions
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
@@ -372,6 +377,7 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
       out[ichan][iloc] = affected_channels[ichan][iloc];
     }
   }
+  oops::Log::trace() << "HydrometeorCheckATMS compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

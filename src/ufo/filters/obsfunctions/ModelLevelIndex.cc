@@ -23,6 +23,7 @@ static ObsFunctionMaker<ModelLevelIndex> makerModelLevelIndex_("ModelLevelIndex"
 
 ModelLevelIndex::ModelLevelIndex(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ModelLevelIndex constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -32,13 +33,15 @@ ModelLevelIndex::ModelLevelIndex(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-ModelLevelIndex::~ModelLevelIndex() {}
+ModelLevelIndex::~ModelLevelIndex() {
+  oops::Log::trace() << "ModelLevelIndex destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ModelLevelIndex::compute(const ObsFilterData & in,
                               ioda::ObsDataVector<int> & out) const {
-  oops::Log::trace() << "ModelLevelIndex::compute started" << std::endl;
+  oops::Log::trace() << "ModelLevelIndex compute start" << std::endl;
 
   const int missingInt = util::missingValue<int>();
   const float missingFloat = util::missingValue<float>();
@@ -78,7 +81,7 @@ void ModelLevelIndex::compute(const ObsFilterData & in,
     out[0][jloc] = idx;
   }
 
-  oops::Log::trace() << "ModelLevelIndex::compute finished" << std::endl;
+  oops::Log::trace() << "ModelLevelIndex compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

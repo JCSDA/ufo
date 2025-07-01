@@ -6,7 +6,6 @@
  */
 
 #include "ufo/filters/MetOfficeBuddyCollectorV1.h"
-
 #include "ufo/filters/MetOfficeBuddyPair.h"
 
 namespace ufo {
@@ -15,8 +14,8 @@ MetOfficeBuddyCollectorV1::MetOfficeBuddyCollectorV1(const MetOfficeBuddyCheckPa
                                                      const std::vector<float> &latitudes,
                                                      const std::vector<float> &longitudes,
                                                      const std::vector<int> &stationIds)
-  : MetOfficeBuddyCollector(options, latitudes, longitudes, stationIds)
-{}
+  : MetOfficeBuddyCollector(options, latitudes, longitudes, stationIds) {
+}
 
 void MetOfficeBuddyCollectorV1::examinePotentialBuddy(int obsIdB) {
   if (stationIds_[obsIdA_] == stationIds_[obsIdB]) {

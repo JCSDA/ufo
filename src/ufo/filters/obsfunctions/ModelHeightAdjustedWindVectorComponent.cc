@@ -29,6 +29,7 @@ static ObsFunctionMaker<ModelHeightAdjustedWindVectorComponent<true>>
 template <bool northwardWind>
 ModelHeightAdjustedWindVectorComponent<northwardWind>::ModelHeightAdjustedWindVectorComponent(
         const eckit::LocalConfiguration & conf): invars_() {
+  oops::Log::trace() << "ModelHeightAdjustedWindVectorComponent constructor" << std::endl;
   // Required observation data
   if (northwardWind) {
     invars_ += Variable("ObsValue/windNorthwardAt10M");
@@ -50,6 +51,7 @@ ModelHeightAdjustedWindVectorComponent<northwardWind>::ModelHeightAdjustedWindVe
 template <bool northwardWind>
 void ModelHeightAdjustedWindVectorComponent<northwardWind>::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ModelHeightAdjustedWindVectorComponent compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   std::vector<float> WindComponent(nlocs);
   std::vector<float> ModelHeight(nlocs);
@@ -82,6 +84,7 @@ void ModelHeightAdjustedWindVectorComponent<northwardWind>::compute(const ObsFil
       }
     }
   }
+  oops::Log::trace() << "ModelHeightAdjustedWindVectorComponent compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

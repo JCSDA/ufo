@@ -32,6 +32,7 @@ static ObsFunctionMaker<SurfTypeCheckRad>
 
 SurfTypeCheckRad::SurfTypeCheckRad(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SurfTypeCheckRad constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -57,12 +58,15 @@ SurfTypeCheckRad::SurfTypeCheckRad(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SurfTypeCheckRad::~SurfTypeCheckRad() {}
+SurfTypeCheckRad::~SurfTypeCheckRad() {
+  oops::Log::trace() << "SurfTypeCheckRad destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SurfTypeCheckRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SurfTypeCheckRad compute start" << std::endl;
   // Get channel use flags from options
   std::vector<int> use_flag = options_.useflagChannel.value();
   std::vector<int> use_flag_clddet = options_.useflagCloudDetect.value();
@@ -146,6 +150,7 @@ void SurfTypeCheckRad::compute(const ObsFilterData & in,
        }
     }
   }
+  oops::Log::trace() << "SurfTypeCheckRad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

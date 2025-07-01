@@ -20,6 +20,7 @@ static ObsFunctionMaker<BgdDepartureAnomaly> makerBgdDepartureAnomaly_("BgdDepar
 
 BgdDepartureAnomaly::BgdDepartureAnomaly(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "BgdDepartureAnomaly constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -44,6 +45,7 @@ BgdDepartureAnomaly::BgdDepartureAnomaly(const eckit::LocalConfiguration & conf)
 
 void BgdDepartureAnomaly::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "BgdDepartureAnomaly compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
@@ -120,6 +122,7 @@ void BgdDepartureAnomaly::compute(const ObsFilterData & in,
       out[0][iloc] = std::abs((omblow[iloc]-MeanOmbLow) - (ombhigh[iloc]-MeanOmbHigh));
     }
   }
+  oops::Log::trace() << "BgdDepartureAnomaly compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

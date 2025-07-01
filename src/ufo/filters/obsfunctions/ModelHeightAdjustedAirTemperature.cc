@@ -24,6 +24,7 @@ static ObsFunctionMaker<ModelHeightAdjustedAirTemperature>
 
 ModelHeightAdjustedAirTemperature::ModelHeightAdjustedAirTemperature(
         const eckit::LocalConfiguration & conf): invars_() {
+  oops::Log::trace() << "ModelHeightAdjustedAirTemperature constructor" << std::endl;
   // Required observation data
   invars_ += Variable("ObsValue/airTemperatureAt2M");
   // Required model surface altitude
@@ -39,6 +40,7 @@ ModelHeightAdjustedAirTemperature::ModelHeightAdjustedAirTemperature(
 
 void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ModelHeightAdjustedAirTemperature compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   std::vector<float> t2(nlocs);
   std::vector<float> ModelHeight(nlocs);
@@ -58,6 +60,7 @@ void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
       out[0][jj] = t2[jj] + Constants::Lclr*(StationHeight[jj] - ModelHeight[jj]);
     }
   }
+  oops::Log::trace() << "ModelHeightAdjustedAirTemperature compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

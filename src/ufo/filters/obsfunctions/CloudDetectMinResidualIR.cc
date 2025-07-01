@@ -32,6 +32,7 @@ static ObsFunctionMaker<CloudDetectMinResidualIR>
 
 CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "CloudDetectMinResidualIR constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -71,13 +72,15 @@ CloudDetectMinResidualIR::CloudDetectMinResidualIR(const eckit::LocalConfigurati
 
 // -----------------------------------------------------------------------------
 
-CloudDetectMinResidualIR::~CloudDetectMinResidualIR() {}
+CloudDetectMinResidualIR::~CloudDetectMinResidualIR() {
+  oops::Log::trace() << "CloudDetectMinResidualIR destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "CloudDetectMinResidualIR::compute start" << std::endl;
+  oops::Log::trace() << "CloudDetectMinResidualIR compute start" << std::endl;
   // Get channel use flags from options
   std::vector<int> use_flag = options_.useflagChannel.value();
   std::vector<int> use_flag_clddet = options_.useflagCloudDetect.value();
@@ -360,7 +363,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     }
   // end of location loop
   }
-  oops::Log::trace() << "CloudDetectMinResidualIR::compute done" << std::endl;
+  oops::Log::trace() << "CloudDetectMinResidualIR compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

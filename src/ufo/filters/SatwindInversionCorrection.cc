@@ -27,7 +27,7 @@ SatwindInversionCorrection::SatwindInversionCorrection(ioda::ObsSpace & obsdb,
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::trace() << "SatwindInversion contructor starting" << std::endl;
+  oops::Log::trace() << "SatwindInversion constructor" << std::endl;
   // Get parameters from options
   allvars_ += parameters_.obs_pressure;
   // Include list of required data from GeoVaLs
@@ -39,7 +39,7 @@ SatwindInversionCorrection::SatwindInversionCorrection(ioda::ObsSpace & obsdb,
 // -----------------------------------------------------------------------------
 
 SatwindInversionCorrection::~SatwindInversionCorrection() {
-  oops::Log::trace() << "SatwindInversion destructed" << std::endl;
+  oops::Log::trace() << "SatwindInversion destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -86,8 +86,7 @@ SatwindInversionCorrection::~SatwindInversionCorrection() {
 void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
                                              const Variables & filtervars,
                                              std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "SatwindInversionCorrection priorFilter" << std::endl;
-  print(oops::Log::trace());
+  oops::Log::trace() << "SatwindInversionCorrection applyFilter start" << std::endl;
 
   const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
@@ -238,6 +237,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
     oops::Log::info() << "Satwind Inversion: "<< pdiff / count
                       << " Pa mean pressure difference" << std::endl;
   }
+  oops::Log::trace() << "SatwindInversionCorrection applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

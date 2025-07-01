@@ -52,6 +52,7 @@ HistoryCheck::HistoryCheck(ioda::ObsSpace &obsdb,
                            const eckit::LocalConfiguration &conf)
   : HistoryCheck(obsdb, parameters, flags, obserr)
 {
+  oops::Log::trace() << "HistoryCheck constructor" << std::endl;
   unitTestConfig_ = conf;
 }
 
@@ -62,6 +63,7 @@ HistoryCheck::HistoryCheck(ioda::ObsSpace &obsdb,
 void HistoryCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
                                std::vector<std::vector<bool> > & flagged) const {
+  oops::Log::trace() << "HistoryCheck applyFilter start" << std::endl;
   const util::DateTime widerWindowStart =
     obsdb_.windowStart() - options_.timeBeforeStartOfWindow.value();
   const util::DateTime widerWindowEnd = obsdb_.windowEnd() + options_.timeAfterEndOfWindow.value();
@@ -267,6 +269,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
     }
   }
   windowObsAccessor.flagRejectedObservations(globalObsToFlag, flagged);
+  oops::Log::trace() << "HistoryCheck applyFilter complete" << std::endl;
 }
 
 std::vector<int> HistoryCheck::getStationIds(const std::map<std::string, int> &stringMap,

@@ -25,7 +25,7 @@ DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
-  oops::Log::trace() << "DifferenceCheck contructor starting" << std::endl;
+  oops::Log::trace() << "DifferenceCheck constructor" << std::endl;
   allvars_ += parameters_.ref;
   allvars_ += parameters_.val;
 }
@@ -33,7 +33,7 @@ DifferenceCheck::DifferenceCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
 // -----------------------------------------------------------------------------
 
 DifferenceCheck::~DifferenceCheck() {
-  oops::Log::trace() << "DifferenceCheck destructed" << std::endl;
+  oops::Log::trace() << "DifferenceCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ DifferenceCheck::~DifferenceCheck() {
 void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "DifferenceCheck priorFilter" << std::endl;
+  oops::Log::trace() << "DifferenceCheck applyFilter start" << std::endl;
 
   const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
@@ -81,6 +81,7 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   }
+  oops::Log::trace() << "DifferenceCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

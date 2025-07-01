@@ -59,15 +59,12 @@ CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSRO_pen"
 dx(:) = x(:) - xb(:)
 
 ! calc. Bdx matrix   ie B^-1(x-xb)
-
 Bdx(:) = MATMUL (BM1(:,:), dx(:))
 
 ! background term (scalar)
-
 J_back = DOT_PRODUCT (dx(:), Bdx(:))
 
 ! obs. meas-calc
-
 dy(:) = yobs(:) - ycalc(:)
 
 !make sure missing data is not included
@@ -78,17 +75,13 @@ WHERE (ycalc(:) == missing_value(ycalc(1)) .OR. &
 END WHERE
 
 ! Ody   O^-1 (ymeas-ycalc)
-
 Ody(:) = MATMUL (OM1(:,:), dy (:))
 
 ! observation term. (scalar)
-
 J_obs = DOT_PRODUCT (dy(:), Ody(:))
 
 ! SCALAR value required
-
 pen_func = 0.5 * (J_back + J_obs)
-
 pen_ob = 0.5 * J_obs
 pen_back = 0.5 * J_back
 

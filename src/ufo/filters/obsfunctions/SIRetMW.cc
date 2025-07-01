@@ -22,6 +22,7 @@ static ObsFunctionMaker<SIRetMW> makerSIRetMW_("SIRetMW");
 
 SIRetMW::SIRetMW(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SIRetMW constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -48,12 +49,15 @@ SIRetMW::SIRetMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SIRetMW::~SIRetMW() {}
+SIRetMW::~SIRetMW() {
+  oops::Log::trace() << "SIRetMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SIRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SIRetMW compute start" << std::endl;
   // Get required parameters
   const std::vector<std::string> &vargrp = options_.varGroup.value();
   const std::vector<int> channels_ = {options_.ch90.value(), options_.ch150.value()};
@@ -125,6 +129,7 @@ void SIRetMW::compute(const ObsFilterData & in,
       }
       }
   }
+  oops::Log::trace() << "SIRetMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

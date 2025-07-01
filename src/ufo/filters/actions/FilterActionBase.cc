@@ -29,7 +29,6 @@ FilterActionFactory::FilterActionFactory(const std::string & name) {
 
 std::unique_ptr<FilterActionBase> FilterActionFactory::create(
     const FilterActionParametersBase & parameters) {
-  oops::Log::trace() << "FilterActionBase::create starting" << std::endl;
   const std::string &name = parameters.name.value().value();
   typename std::map<std::string, FilterActionFactory*>::iterator jloc = getMakers().find(name);
   if (jloc == getMakers().end()) {
@@ -37,7 +36,6 @@ std::unique_ptr<FilterActionBase> FilterActionFactory::create(
     ABORT("Element does not exist in ufo::FilterActionFactory.");
   }
   std::unique_ptr<FilterActionBase> action = jloc->second->make(parameters);
-  oops::Log::trace() << "FilterActionBase::create done" << std::endl;
   return action;
 }
 

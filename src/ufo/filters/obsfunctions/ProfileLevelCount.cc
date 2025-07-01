@@ -23,6 +23,7 @@ static ObsFunctionMaker<ProfileLevelCount>
 
 ProfileLevelCount::ProfileLevelCount(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ProfileLevelCount constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -31,13 +32,15 @@ ProfileLevelCount::ProfileLevelCount(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-ProfileLevelCount::~ProfileLevelCount() {}
+ProfileLevelCount::~ProfileLevelCount() {
+  oops::Log::trace() << "ProfileLevelCount destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ProfileLevelCount::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<int> & out) const {
-  oops::Log::trace() << "ProfileLevelCount::compute started" << std::endl;
+  oops::Log::trace() << "ProfileLevelCount compute start" << std::endl;
 
   // ObsSpace.
   const ioda::ObsSpace & obsdb = in.obsspace();
@@ -77,7 +80,7 @@ void ProfileLevelCount::compute(const ObsFilterData & in,
       out[0][loc] = count;
   }
 
-  oops::Log::trace() << "ProfileLevelCount::compute finished" << std::endl;
+  oops::Log::trace() << "ProfileLevelCount compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

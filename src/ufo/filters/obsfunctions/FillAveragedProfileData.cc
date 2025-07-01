@@ -31,6 +31,7 @@ template <typename FunctionValue>
 FillAveragedProfileData<FunctionValue>::FillAveragedProfileData
 (const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "FillAveragedProfileData constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -47,12 +48,12 @@ template <typename FunctionValue>
 void FillAveragedProfileData<FunctionValue>::compute
 (const ObsFilterData & in,
  ioda::ObsDataVector<FunctionValue> & out) const {
-  oops::Log::trace() << "FillAveragedProfileData::compute started" << std::endl;
+  oops::Log::trace() << "FillAveragedProfileData compute start" << std::endl;
 
   // Fill values of \p variable_to_copy in the averaged profiles.
   fillAverageProfile(in, out);
 
-  oops::Log::trace() << "FillAveragedProfileData::compute finished" << std::endl;
+  oops::Log::trace() << "FillAveragedProfileData compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

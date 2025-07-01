@@ -32,7 +32,7 @@ OceanVerticalStabilityCheck::OceanVerticalStabilityCheck(
 // -----------------------------------------------------------------------------
 
 OceanVerticalStabilityCheck::~OceanVerticalStabilityCheck() {
-  oops::Log::trace() << "OceanVerticalStabilityCheck destructed" << std::endl;
+  oops::Log::trace() << "OceanVerticalStabilityCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ OceanVerticalStabilityCheck::~OceanVerticalStabilityCheck() {
 void OceanVerticalStabilityCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "OceanVerticalStabilityCheck filter" << std::endl;
+  oops::Log::trace() << "OceanVerticalStabilityCheck applyFilter start" << std::endl;
 
   ObsAccessor obsAccessor =
     ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
@@ -113,6 +113,7 @@ void OceanVerticalStabilityCheck::applyFilter(const std::vector<bool> & apply,
     obsdb_.put_db("DiagnosticFlags/DensitySpike", filterVarName, spikeFlag);
     obsdb_.put_db("DiagnosticFlags/DensityStep", filterVarName, stepFlag);
   }
+  oops::Log::trace() << "OceanVerticalStabilityCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

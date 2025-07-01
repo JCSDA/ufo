@@ -31,6 +31,7 @@ static ObsFunctionMaker<ObsErrorFactorSurfJacobianRad>
 
 ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorSurfJacobianRad constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -67,12 +68,15 @@ ObsErrorFactorSurfJacobianRad::ObsErrorFactorSurfJacobianRad(const eckit::LocalC
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorSurfJacobianRad::~ObsErrorFactorSurfJacobianRad() {}
+ObsErrorFactorSurfJacobianRad::~ObsErrorFactorSurfJacobianRad() {
+  oops::Log::trace() << "ObsErrorFactorSurfJacobianRad destructor"  << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorSurfJacobianRad compute start" << std::endl;
   // Get sensor information from options
   const std::string &sensor = options_.sensor.value();
 
@@ -187,6 +191,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorFactorSurfJacobianRad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

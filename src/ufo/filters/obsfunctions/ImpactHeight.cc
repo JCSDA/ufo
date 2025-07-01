@@ -38,6 +38,7 @@ static ObsFunctionMaker<ImpactHeight> makerImpactHeight_("ImpactHeight");
  */
 ImpactHeight::ImpactHeight(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ImpactHeight constructor" << std::endl;
   // Get channels from options
   options_.deserialize(conf);
   std::set<int> channelset = oops::parseIntSet(options_.channelList);
@@ -49,7 +50,9 @@ ImpactHeight::ImpactHeight(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-ImpactHeight::~ImpactHeight() {}
+ImpactHeight::~ImpactHeight() {
+  oops::Log::trace() << "ImpactHeight destructor" << std::endl;
+}
 
 /* -----------------------------------------------------------------------------
  * Perform the computation.  Read in the required variables, and calculate
@@ -58,6 +61,7 @@ ImpactHeight::~ImpactHeight() {}
  */
 void ImpactHeight::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ImpactHeight compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const size_t nchans = out.nvars();
 
@@ -84,6 +88,7 @@ void ImpactHeight::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ImpactHeight compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

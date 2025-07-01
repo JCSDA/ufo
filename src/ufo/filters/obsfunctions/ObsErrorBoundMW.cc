@@ -33,6 +33,7 @@ static ObsFunctionMaker<ObsErrorBoundMW> makerObsErrorBoundMW_("ObsErrorBoundMW"
 
 ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorBoundMW constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -83,12 +84,15 @@ ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundMW::~ObsErrorBoundMW() {}
+ObsErrorBoundMW::~ObsErrorBoundMW() {
+  oops::Log::trace() << "ObsErrorBoundMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorBoundMW::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorBoundMW compute start" << std::endl;
   // Get sensor information from options
   const std::string &sensor = options_.sensor.value();
 
@@ -240,6 +244,7 @@ void ObsErrorBoundMW::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorBoundMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

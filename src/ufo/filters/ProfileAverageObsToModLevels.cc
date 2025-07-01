@@ -54,7 +54,7 @@ ProfileAverageObsToModLevels::ProfileAverageObsToModLevels(
 // -----------------------------------------------------------------------------
 
 ProfileAverageObsToModLevels::~ProfileAverageObsToModLevels() {
-  oops::Log::trace() << "ProfileAverageObsToModLevels destructed" << std::endl;
+  oops::Log::trace() << "ProfileAverageObsToModLevels destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -63,8 +63,8 @@ ProfileAverageObsToModLevels::~ProfileAverageObsToModLevels() {
 void ProfileAverageObsToModLevels::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ProfileAverageObsToModLevels postFilter" << std::endl;
-  oops::Log::trace() << "ProfileAverageObsToModLevels obserr: " << *obserr_ << std::endl;
+  oops::Log::trace() << "ProfileAverageObsToModLevels applyFilter start" << std::endl;
+  oops::Log::debug() << "ProfileAverageObsToModLevels obserr: " << *obserr_ << std::endl;
 
   const oops::ObsVariables observed = obsdb_.obsvariables();
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
@@ -135,6 +135,7 @@ void ProfileAverageObsToModLevels::applyFilter(const std::vector<bool> & apply,
     // Save new obs to obsSpace:
     obsdb_.put_db("DerivedObsValue", varname, obs[jv]);
   }  // filter variable jv
+  oops::Log::trace() << "ProfileAverageObsToModLevels applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

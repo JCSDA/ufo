@@ -32,6 +32,7 @@ static ObsFunctionMaker<CloudDetectMinResidualAVHRR>
 
 CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "CloudDetectMinResidualAVHRR constructor start" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -67,17 +68,20 @@ CloudDetectMinResidualAVHRR::CloudDetectMinResidualAVHRR(const eckit::LocalConfi
   invars_ += Variable("GeoVaLs/air_pressure");
   invars_ += Variable("GeoVaLs/air_temperature");
   invars_ += Variable("GeoVaLs/tropopause_pressure");
+  oops::Log::trace() << "CloudCostFunction constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-CloudDetectMinResidualAVHRR::~CloudDetectMinResidualAVHRR() {}
+CloudDetectMinResidualAVHRR::~CloudDetectMinResidualAVHRR() {
+  oops::Log::trace() << "CloudDetectMinResidualAVHRR destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "CloudDetectMinResidualAVHRR::compute start" << std::endl;
+  oops::Log::trace() << "CloudDetectMinResidualAVHRR compute start" << std::endl;
   // Get channel use flags from options
   std::vector<int> use_flag = options_.useflagChannel.value();
   std::vector<int> use_flag_clddet = options_.useflagCloudDetect.value();
@@ -176,6 +180,17 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       in.get(Variable("ObsError/brightnessTemperature", channels_)[ichan], obserr2[ichan]);
       obserr[ichan] = obserr2[ichan][0];
+    }
+  }
+
+  // Get criteria vector for cloud detection.
+  // If not explicitly specified in the YAML, observation errors are used instead.
+  std::vector<float> criteria4clddet(nchans, 0.0f);
+  if (options_.criteria4clddet.value() != boost::none) {
+    criteria4clddet = options_.criteria4clddet.value().get();
+  } else {
+    for (size_t ichan = 0; ichan < nchans; ++ichan) {
+      criteria4clddet[ichan] = obserr[ichan];
     }
   }
 
@@ -300,7 +315,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
       size_t ilev;
       out[ichan][iloc] = 0;
       for (ilev = 0; ilev < lcloud; ++ilev) {
-        if (fabs(cldfrac * dbt[ichan][ilev]) > obserr[ichan]) {
+        if (fabs(cldfrac * dbt[ichan][ilev]) > criteria4clddet[ichan]) {
           out[ichan][iloc]= 1;
           varinv_use[ichan][iloc]= 0.0;
           break;
@@ -327,13 +342,13 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
         dts = std::min(dts_threshold, dts);
       }
       for (size_t ichan=0; ichan < nchans; ++ichan) {
-        delta = obserr[ichan];
+        delta = criteria4clddet[ichan];
         if (std::abs(dts * dbtdts[ichan][iloc]) > delta) out[ichan][iloc] = 2;
       }
     }
   // end of location loop
   }
-  oops::Log::trace() << "CloudDetectMinResidualAVHRR::compute done" << std::endl;
+  oops::Log::trace() << "CloudDetectMinResidualAVHRR compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

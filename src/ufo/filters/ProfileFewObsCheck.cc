@@ -45,7 +45,7 @@ ProfileFewObsCheck::ProfileFewObsCheck(
 // -----------------------------------------------------------------------------
 
 ProfileFewObsCheck::~ProfileFewObsCheck() {
-  oops::Log::trace() << "ProfileFewObsCheck destructed" << std::endl;
+  oops::Log::trace() << "ProfileFewObsCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ ProfileFewObsCheck::~ProfileFewObsCheck() {
 void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
                                      const Variables & filtervars,
                                      std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ProfileFewObsCheck preProcess filter" << std::endl;
+  oops::Log::trace() << "ProfileFewObsCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
   // Check the number of channels and variables to process
@@ -129,6 +129,7 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   }
+  oops::Log::trace() << "ProfileFewObsCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

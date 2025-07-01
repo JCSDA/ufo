@@ -23,6 +23,7 @@ static ObsFunctionMaker<SatWindsLNVDCheck> makerObsFuncSatWindsLNVDCheck_("SatWi
 
 SatWindsLNVDCheck::SatWindsLNVDCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SatWindsLNVDCheck constructor" << std::endl;
   oops::Log::debug() << "SatWindsLNVDCheck: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -41,12 +42,15 @@ SatWindsLNVDCheck::SatWindsLNVDCheck(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SatWindsLNVDCheck::~SatWindsLNVDCheck() {}
+SatWindsLNVDCheck::~SatWindsLNVDCheck() {
+  oops::Log::trace() << "SatWindsLNVDCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SatWindsLNVDCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SatWindsLNVDCheck compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
 
@@ -75,6 +79,7 @@ void SatWindsLNVDCheck::compute(const ObsFilterData & in,
       out[0][jj] = missing;
     }
   }
+  oops::Log::trace() << "SatWindsLNVDCheck compute end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

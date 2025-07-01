@@ -19,19 +19,22 @@ static ObsFunctionMaker<MPIRank> makerMPIRank_("MPIRank");
 
 MPIRank::MPIRank(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "MPIRank constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 }
 
 // -----------------------------------------------------------------------------
 
-MPIRank::~MPIRank() {}
+MPIRank::~MPIRank() {
+  oops::Log::trace() << "MPIRank destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void MPIRank::compute(const ObsFilterData & in,
                       ioda::ObsDataVector<int> & out) const {
-  oops::Log::trace() << "MPIRank::compute started" << std::endl;
+  oops::Log::trace() << "MPIRank compute start" << std::endl;
 
   const ioda::ObsSpace & obsdb = in.obsspace();
   const std::size_t nlocs = obsdb.nlocs();
@@ -70,7 +73,7 @@ void MPIRank::compute(const ObsFilterData & in,
     out[0][jloc] = globalPatchRanks[index[jloc]];
   }
 
-  oops::Log::trace() << "MPIRank::compute finished" << std::endl;
+  oops::Log::trace() << "MPIRank compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

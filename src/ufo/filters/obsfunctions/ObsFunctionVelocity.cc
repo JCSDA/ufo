@@ -27,6 +27,7 @@ static ObsFunctionMaker<Velocity<float>> floatMaker("Velocity");
 template <typename FunctionValue>
 Velocity<FunctionValue>::Velocity(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "Velocity constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -46,6 +47,7 @@ Velocity<FunctionValue>::Velocity(const eckit::LocalConfiguration & conf)
 template <typename FunctionValue>
 void Velocity<FunctionValue>::compute(const ObsFilterData & in,
                                       ioda::ObsDataVector<FunctionValue> & out) const {
+  oops::Log::trace() << "Velocity compute start" << std::endl;
   // dimension
   const size_t nlocs = in.nlocs();
 
@@ -73,6 +75,7 @@ void Velocity<FunctionValue>::compute(const ObsFilterData & in,
       }
     }  // nchans
   }  // nlocs
+  oops::Log::trace() << "Velocity compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

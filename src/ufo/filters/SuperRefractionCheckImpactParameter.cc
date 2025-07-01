@@ -35,7 +35,7 @@ SuperRefractionCheckImpactParameter::SuperRefractionCheckImpactParameter(
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::trace() << "SuperRefractionCheckImpactParameter"<< std::endl;
+  oops::Log::trace() << "SuperRefractionCheckImpactParameter constructor" << std::endl;
   allvars_ += Variable("ObsDiag/atmosphericRefractivity_model");
   allvars_ += Variable("ObsDiag/geopotentialHeight_model");
   allvars_ += Variable("MetaData/impactParameterRO");
@@ -49,7 +49,7 @@ SuperRefractionCheckImpactParameter::SuperRefractionCheckImpactParameter(
 // -----------------------------------------------------------------------------
 
 SuperRefractionCheckImpactParameter::~SuperRefractionCheckImpactParameter() {
-  oops::Log::trace() << "SuperRefractionCheckImpactParameter: destructed" << std::endl;
+  oops::Log::trace() << "SuperRefractionCheckImpactParameter destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -78,7 +78,7 @@ void SuperRefractionCheckImpactParameter::applyFilter(
   // Get the height of the levels on which the refractivity has been calculated.
   // Must be the same length as the array defining the refractivity.
   Variable modelHeightsVariable = Variable("ObsDiag/geopotentialHeight_model");
-  oops::Log::trace() << data_.nlevs(modelHeightsVariable) << std::endl;
+  oops::Log::debug() << data_.nlevs(modelHeightsVariable) << std::endl;
   if (data_.nlevs(modelHeightsVariable) != nRefLevels) {
     throw eckit::BadValue("Model heights and refractivity must have the same number of levels",
                           Here());
@@ -211,6 +211,7 @@ void SuperRefractionCheckImpactParameter::applyFilter(
       }  // end iVar loop
     }  // end if profileCheck
   }   //  end iProfile loop
+  oops::Log::trace() << "SuperRefractionCheckImpactParameter applyFilter complete" << std::endl;
 }  // end applyFilter
 
 std::vector<float> SuperRefractionCheckImpactParameter::calcImpactParameterModel(

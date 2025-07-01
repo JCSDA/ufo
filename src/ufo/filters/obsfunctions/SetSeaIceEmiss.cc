@@ -28,6 +28,7 @@ namespace ufo {
 
   SetSeaIceEmiss::SetSeaIceEmiss(const eckit::LocalConfiguration & conf)
     : invars_() {
+    oops::Log::trace() << "SetSeaIceEmiss constructor" << std::endl;
     // Initialize options
     options_.validateAndDeserialize(conf);
 
@@ -50,7 +51,9 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
 
-  SetSeaIceEmiss::~SetSeaIceEmiss() {}
+  SetSeaIceEmiss::~SetSeaIceEmiss() {
+    oops::Log::trace() << "SetSeaIceEmiss destructor" << std::endl;
+  }
 
   // -----------------------------------------------------------------------------
 
@@ -61,6 +64,7 @@ namespace ufo {
   /// above 20GHz.
   void SetSeaIceEmiss::compute(const ObsFilterData & in,
                                ioda::ObsDataVector<float> & out) const {
+    oops::Log::trace() << "SetSeaIceEmiss compute start" << std::endl;
     // Get dimensions and initialise constants
     const size_t nlocs = in.nlocs();
     const size_t nchans = channels_.size();
@@ -200,6 +204,7 @@ namespace ufo {
         }
       }
     }
+    oops::Log::trace() << "SetSeaIceEmiss compute complete" << std::endl;
   }
   // -----------------------------------------------------------------------------
 

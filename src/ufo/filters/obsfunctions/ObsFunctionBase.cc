@@ -43,7 +43,7 @@ ObsFunctionFactory<FunctionValue>::ObsFunctionFactory(const std::string & name) 
 
 template <typename FunctionValue>
 ObsFunctionBase<FunctionValue> * ObsFunctionFactory<FunctionValue>::create(const Variable & var) {
-  oops::Log::trace() << "ObsFunctionBase::create starting" << std::endl;
+  oops::Log::trace() << "ObsFunctionBase create start" << std::endl;
   typename std::map<std::string, ObsFunctionFactory*>::iterator jloc =
      getMakers().find(var.variable());
   if (jloc == getMakers().end()) {
@@ -52,7 +52,7 @@ ObsFunctionBase<FunctionValue> * ObsFunctionFactory<FunctionValue>::create(const
                            Here());
   }
   ObsFunctionBase<FunctionValue> * ptr = jloc->second->make(var.options());
-  oops::Log::trace() << "ObsFunctionFactory::create done" << std::endl;
+  oops::Log::trace() << "ObsFunctionFactory create complete" << std::endl;
   return ptr;
 }
 

@@ -25,6 +25,7 @@ static FilterActionMaker<InflateError> makerInflateErr_("inflate error");
 
 void InflateErrorParameters::deserialize(util::CompositePath &path,
                                          const eckit::Configuration &config) {
+  oops::Log::trace() << "InflateErrorParameters deserialize" << std::endl;
   oops::Parameters::deserialize(path, config);
 
   // These checks should really be done at the validation stage (using JSON Schema),
@@ -40,6 +41,7 @@ void InflateErrorParameters::deserialize(util::CompositePath &path,
 
 InflateError::InflateError(const Parameters_ & parameters)
   : allvars_(), parameters_(parameters) {
+  oops::Log::trace() << "InflateError constructor" << std::endl;
   if (parameters_.inflationVariable.value() != boost::none) {
     allvars_ += *parameters_.inflationVariable.value();
   }
@@ -62,6 +64,7 @@ void InflateError::apply(const Variables & vars,
                          ioda::ObsDataVector<int> & flags,
                          ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " InflateError input obserr: " << obserr << std::endl;
+  oops::Log::trace() << "InflateError apply start" << std::endl;
   // If float factor is specified
   if (parameters_.inflationFactor.value() != boost::none) {
     float factor = *parameters_.inflationFactor.value();
@@ -103,6 +106,7 @@ void InflateError::apply(const Variables & vars,
     }
   }
   oops::Log::debug() << " InflateError output obserr: " << obserr << std::endl;
+  oops::Log::trace() << "InflateError apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

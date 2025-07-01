@@ -20,18 +20,20 @@ MetOfficeDuplicateCheck::MetOfficeDuplicateCheck
  const Parameters_ &parameters,
  std::shared_ptr<ioda::ObsDataVector<int> > flags,
  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
-{
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters) {
+  oops::Log::trace() << "MetOfficeDuplicateCheck constructor" << std::endl;
   oops::Log::debug() << "MetOfficeDuplicateCheck: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
-MetOfficeDuplicateCheck::~MetOfficeDuplicateCheck()
-{}
+MetOfficeDuplicateCheck::~MetOfficeDuplicateCheck() {
+  oops::Log::trace() << "MetOfficeDuplicateCheck destructor" << std::endl;
+}
 
 void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
                                           const Variables & filtervars,
                                           std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "MetOfficeDuplicateCheck applyFilter start" << std::endl;
   ObsAccessor obsAccessor = createObsAccessor();
 
   const int nlocs = obsAccessor.totalNumObservations();
@@ -203,6 +205,7 @@ void MetOfficeDuplicateCheck::applyFilter(const std::vector<bool> & apply,
 
   // Flag any observations that have been thinned.
   obsAccessor.flagRejectedObservations(isThinned, flagged);
+  oops::Log::trace() << "MetOfficeDuplicateCheck applyFilter complete" << std::endl;
 }
 
 

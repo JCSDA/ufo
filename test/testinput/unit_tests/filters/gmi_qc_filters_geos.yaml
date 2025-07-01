@@ -267,45 +267,11 @@ observations:
     apply at iterations: 0, 1
     filter variables:
     - name: brightnessTemperature
-      channels: 1,2,4,6
+      channels: 1-13
     threshold: 2.0
-    absolute threshold: 30.0
-    action:
-      name: reject
-  - filter: Background Check
-    apply at iterations: 0, 1
-    filter variables:
-    - name: brightnessTemperature
-      channels: 9,10,11
-    threshold: 2.0
-    absolute threshold: 20.0
-    action:
-      name: reject
-  - filter: Background Check
-    apply at iterations: 0, 1
-    filter variables:
-    - name: brightnessTemperature
-      channels: 3,5,8
-    threshold: 2.0
-    absolute threshold: 15.0
-    action:
-      name: reject
-  - filter: Background Check
-    apply at iterations: 0, 1
-    filter variables:
-    - name: brightnessTemperature
-      channels: 12,13
-    threshold: 2.0
-    absolute threshold: 10.0
-    action:
-      name: reject
-  - filter: Background Check
-    apply at iterations: 0, 1
-    filter variables:
-    - name: brightnessTemperature
-      channels: 7
-    threshold: 2.0
-    absolute threshold: 5.0
+    absolute threshold vector: [30.0, 30.0, 15.0, 30.0, 15.0,
+                                30.0,  5.0, 15.0, 20.0, 20.0,
+                                20.0, 10.0, 10.0]
     action:
       name: reject
   passedBenchmark: 588

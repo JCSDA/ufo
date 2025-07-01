@@ -58,7 +58,7 @@ void MetOfficeReflectivity::simulateObsImpl(const GeoVaLs & gv,
   const std::size_t nlocs = obsdb_.nlocs();
   const std::size_t nlevs = gv.nlevs(oops::Variable{"height_above_mean_sea_level"});
   const float missingFloat = util::missingValue<float>();
-  const float missingDouble = util::missingValue<double>();
+  const double missingDouble = util::missingValue<double>();
 
   // Retrieve gate heights.
   // These must have been precomputed before running the observation operator.
@@ -143,7 +143,7 @@ void MetOfficeReflectivity::setTrajectoryImpl(const GeoVaLs & gv,
   const std::size_t nlocs = obsdb_.nlocs();
   const std::size_t nlevs = gv.nlevs(oops::Variable{"height_above_mean_sea_level"});
   const float missingFloat = util::missingValue<float>();
-  const float missingDouble = util::missingValue<double>();
+  const double missingDouble = util::missingValue<double>();
 
   std::vector<float> height(nlocs);
   obsdb_.get_db("MetaData", "height", height);
@@ -201,7 +201,7 @@ void MetOfficeReflectivity::simulateObsTLImpl(const GeoVaLs & dx,
   const std::size_t nlocs = obsdb_.nlocs();
   const std::size_t nlevs = dx.nlevs(oops::Variable{"qrain"});
   const float missingFloat = util::missingValue<float>();
-  const float missingDouble = util::missingValue<double>();
+  const double missingDouble = util::missingValue<double>();
 
   // Retrieve gate heights.
   // These must have been precomputed before running the observation operator.
@@ -298,7 +298,7 @@ void MetOfficeReflectivity::simulateObsADImpl(GeoVaLs & dx,
   const std::size_t nlocs = obsdb_.nlocs();
   const std::size_t nlevs = dx.nlevs(oops::Variable{"qrain"});
   const float missingFloat = util::missingValue<float>();
-  const float missingDouble = util::missingValue<double>();
+  const double missingDouble = util::missingValue<double>();
 
   // Retrieve gate heights.
   // These must have been precomputed before running the observation operator.

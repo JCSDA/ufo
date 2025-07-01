@@ -21,6 +21,7 @@ static FilterActionMaker<AcceptObs> acceptObsMaker_("accept");
 
 AcceptObs::AcceptObs(const Parameters_ &)
   : allvars_() {
+  oops::Log::trace() << "AcceptObs constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -31,6 +32,7 @@ void AcceptObs::apply(const Variables & vars,
                       int /*filterQCflag*/,
                       ioda::ObsDataVector<int> & flags,
                       ioda::ObsDataVector<float> &) const {
+  oops::Log::trace() << "AcceptObs apply start" << std::endl;
   for (size_t ifiltervar = 0; ifiltervar < vars.nvars(); ++ifiltervar) {
     const size_t iallvar = flags.varnames().find(vars.variable(ifiltervar).variable());
     for (size_t jobs = 0; jobs < flags.nlocs(); ++jobs) {
@@ -43,6 +45,7 @@ void AcceptObs::apply(const Variables & vars,
       }
     }
   }
+  oops::Log::trace() << "AcceptObs apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

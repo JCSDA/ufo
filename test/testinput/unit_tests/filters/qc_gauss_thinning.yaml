@@ -68,7 +68,7 @@ observations:
     category_variable:
       name: MetaData/round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
     action:
       name: reduce obs space
   passedBenchmark: 91
@@ -187,7 +187,7 @@ observations:
     category_variable:
       name: MetaData/id_and_round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
     action:
       name: reduce obs space
 
@@ -668,7 +668,7 @@ observations:
     category_variable:
       name: MetaData/round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
     action:
       name: reduce obs space
 
@@ -845,7 +845,7 @@ observations:
     category_variable:
       name: MetaData/round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
     action:
       name: reduce obs space
 
@@ -859,7 +859,7 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/met_office_thinning.nc4
       obsgrouping:
-        group variables: [ "priority" ]
+        group variables: [ "thinningPriority" ]
     simulated variables: [airTemperature]
     observed variables: [airTemperature]
   obs filters:
@@ -877,7 +877,7 @@ observations:
     category_variable:
       name: MetaData/round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
     action:
       name: reduce obs space
 
@@ -909,7 +909,7 @@ observations:
     category_variable:
       name: MetaData/round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
 
   passedBenchmark: 145
   passedObservationsBenchmark: *regularSpatialGridPassedObsIds
@@ -940,7 +940,7 @@ observations:
     category_variable:
       name: MetaData/round
     priority_variable:
-      name: MetaData/priority
+      name: MetaData/thinningPriority
   passedBenchmark: 145
   passedObservationsBenchmark: *regularSpatialGridPassedObsIds
 # Ignore existing QC flags (including for missing values) in the thinning.

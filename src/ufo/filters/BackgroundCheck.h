@@ -54,6 +54,9 @@ class BackgroundCheckParameters : public FilterParametersBase {
   ///
   /// `absolute threshold` can be a real number or the name of a variable.
   oops::OptionalParameter<std::string> absoluteThreshold{"absolute threshold", this};
+  /// `absolute threshold vector`: a vector for all vars, i.e., channels
+  oops::OptionalParameter<std::vector<float>> absoluteThresholdVector{
+    "absolute threshold vector", this};
 
   /// The filter will flag observations whose bias-corrected value differs from its model equivalent
   /// by more than `function absolute threshold`

@@ -17,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
+#include "ufo/operators/sfccorrected/EvalSurfacePressure.h"
 #include "ufo/operators/sfccorrected/EvalSurfaceTemperature.h"
 #include "ufo/utils/OperatorUtils.h"
 

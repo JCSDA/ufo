@@ -17,6 +17,7 @@ static ObsFunctionMaker<BennartzScatIndex> makerBennartzScatIndex_("BennartzScat
 
 BennartzScatIndex::BennartzScatIndex(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "BennartzScatIndex constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -35,6 +36,7 @@ BennartzScatIndex::BennartzScatIndex(const eckit::LocalConfiguration & conf)
 
 void BennartzScatIndex::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "BennartzScatIndex compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
@@ -72,6 +74,7 @@ void BennartzScatIndex::compute(const ObsFilterData & in,
       out[0][iloc] = bt89[iloc] - bt150[iloc] - Offset;
     }
   }
+  oops::Log::trace() << "BennartzScatIndex compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

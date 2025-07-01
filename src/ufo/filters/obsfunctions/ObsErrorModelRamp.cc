@@ -25,6 +25,7 @@ static ObsFunctionMaker<ObsErrorModelRamp>
 
 ObsErrorModelRamp::ObsErrorModelRamp(const eckit::LocalConfiguration config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorModelRamp constructor" << std::endl;
   // Initialize options
   options_.deserialize(config);
 
@@ -73,12 +74,15 @@ ObsErrorModelRamp::ObsErrorModelRamp(const eckit::LocalConfiguration config)
 
 // -----------------------------------------------------------------------------
 
-ObsErrorModelRamp::~ObsErrorModelRamp() {}
+ObsErrorModelRamp::~ObsErrorModelRamp() {
+  oops::Log::trace() << "ObsErrorModelRamp destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorModelRamp::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorModelRamp compute start" << std::endl;
   const float missing = util::missingValue<float>();
 
   // Get piece-wise parameters from options
@@ -148,6 +152,7 @@ void ObsErrorModelRamp::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorModelRamp compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

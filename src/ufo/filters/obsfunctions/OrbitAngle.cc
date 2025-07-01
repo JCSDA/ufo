@@ -22,6 +22,7 @@ namespace ufo {
 static ObsFunctionMaker<OrbitAngle> maker_("OrbitAngle");
 
 OrbitAngle::OrbitAngle(const eckit::LocalConfiguration & conf) {
+  oops::Log::trace() << "OrbitAngle constructor" << std::endl;
   // List of required ObsSpace variables
   invars_ += Variable("MetaData/ephemerisLatitude1");
   invars_ += Variable("MetaData/ephemerisLongitude1");
@@ -33,6 +34,7 @@ OrbitAngle::OrbitAngle(const eckit::LocalConfiguration & conf) {
 }
 
 void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "OrbitAngle compute start" << std::endl;
   // constants
   const float missingFloat = util::missingValue<float>();
   const util::DateTime missingDateTime = util::missingValue<util::DateTime>();
@@ -254,6 +256,7 @@ void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & 
     oops::Log::trace() << "OrbitAngle: " << numFailedAngleCalc <<
                           " obs failed orbit angle calculation\n";
   oops::Log::trace().flush();
+  oops::Log::trace() << "OrbitAngle compute complete" << std::endl;
 }
 
 const ufo::Variables & OrbitAngle::requiredVariables() const {

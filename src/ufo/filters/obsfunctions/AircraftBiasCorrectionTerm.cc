@@ -27,6 +27,7 @@ _("AircraftBiasCorrectionTerm");
 
 AircraftBiasCorrectionTerm::AircraftBiasCorrectionTerm(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "AircraftBiasCorrectionTerm constructor" << std::endl;
   oops::Log::debug() << "AircraftBiasCorrectionTerm: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -51,6 +52,7 @@ AircraftBiasCorrectionTerm::~AircraftBiasCorrectionTerm() {}
 
 void AircraftBiasCorrectionTerm::compute(const ObsFilterData & in,
                                        ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "AircraftBiasCorrectionTerm compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
   // Ensure that only one output variable is expected.
@@ -74,6 +76,7 @@ void AircraftBiasCorrectionTerm::compute(const ObsFilterData & in,
       out[0][jj] = missing;
     }
   }
+  oops::Log::trace() << "AircraftBiasCorrectionTerm compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -27,6 +27,7 @@ static ObsFunctionMaker<CLWRetMW> makerCLWRetMW_("CLWRetMW");
 
 CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "CLWRetMW constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -114,12 +115,15 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-CLWRetMW::~CLWRetMW() {}
+CLWRetMW::~CLWRetMW() {
+  oops::Log::trace() << "CLWRetMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void CLWRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "CLWRetMW compute start" << std::endl;
   // Get required parameters
   const std::vector<std::string> &vargrp = options_.varGroup.value();
 
@@ -201,6 +205,9 @@ void CLWRetMW::compute(const ObsFilterData & in,
     in.get(Variable("ObsDiag/brightness_temperature_assuming_clear_sky" , channels)
            [jch37h], bt_clr_37h_wobc);
 
+//  use_bias_corrected_hofx_ch37GHz is true by default.
+    const bool use_bias_corrected_hofx_ch37GHz = options_.use_bias_corrected_hofx_ch37GHz.value();
+
 //  Add bias correction to "brightness_temperature_assuming_clear_sky"
     std::vector<float> bias37v(nlocs), bias37h(nlocs);
     const float missing = util::missingValue<float>();
@@ -211,36 +218,45 @@ void CLWRetMW::compute(const ObsFilterData & in,
              [jch37v], bias37v);
       in.get(Variable(options_.testBias.value() + "/brightnessTemperature", channels)
              [jch37h], bias37h);
-      in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
-             [jch37v], bc_cloud_liquid_water_37v);
-      in.get(Variable("ObsDiag/cloud_liquid_water_order_2" , channels)
-             [jch37v], bc_cloud_liquid_water_order_2_37v);
-      in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
-             [jch37h], bc_cloud_liquid_water_37h);
-      in.get(Variable("ObsDiag/cloud_liquid_water_order_2" , channels)
-             [jch37h], bc_cloud_liquid_water_order_2_37h);
-      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        if (bc_cloud_liquid_water_37v[0] != missing &&
-            bc_cloud_liquid_water_order_2_37v[0] != missing) {
-           bc_cloud_terms = true;
-           break;
+      if (use_bias_corrected_hofx_ch37GHz) {
+        in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
+               [jch37v], bc_cloud_liquid_water_37v);
+        in.get(Variable("ObsDiag/cloud_liquid_water_order_2" , channels)
+               [jch37v], bc_cloud_liquid_water_order_2_37v);
+        in.get(Variable("ObsDiag/cloud_liquid_water" , channels)
+               [jch37h], bc_cloud_liquid_water_37h);
+        in.get(Variable("ObsDiag/cloud_liquid_water_order_2" , channels)
+               [jch37h], bc_cloud_liquid_water_order_2_37h);
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          if (bc_cloud_liquid_water_37v[0] != missing &&
+              bc_cloud_liquid_water_order_2_37v[0] != missing) {
+             bc_cloud_terms = true;
+             break;
+          }
         }
       }
     } else {
       bias37v.assign(nlocs, 0.0f);
       bias37h.assign(nlocs, 0.0f);
     }
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-//    Since cloud_BC predictors are added, bias37v and bias37h should be subtracted by those terms.
-      bt_clr_37v[iloc] = bt_clr_37v_wobc[iloc] + bias37v[iloc];
-      bt_clr_37h[iloc] = bt_clr_37h_wobc[iloc] + bias37h[iloc];
-    }
-    if (bc_cloud_terms) {
+    if (use_bias_corrected_hofx_ch37GHz) {
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        bt_clr_37v[iloc] -= bc_cloud_liquid_water_37v[iloc];
-        bt_clr_37v[iloc] -= bc_cloud_liquid_water_order_2_37v[iloc];
-        bt_clr_37h[iloc] -= bc_cloud_liquid_water_37h[iloc];
-        bt_clr_37h[iloc] -= bc_cloud_liquid_water_order_2_37h[iloc];
+//    Since cloud_BC predictors are added, bias37v and bias37h should be subtracted by those terms.
+        bt_clr_37v[iloc] = bt_clr_37v_wobc[iloc] + bias37v[iloc];
+        bt_clr_37h[iloc] = bt_clr_37h_wobc[iloc] + bias37h[iloc];
+      }
+      if (bc_cloud_terms) {
+        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+          bt_clr_37v[iloc] -= bc_cloud_liquid_water_37v[iloc];
+          bt_clr_37v[iloc] -= bc_cloud_liquid_water_order_2_37v[iloc];
+          bt_clr_37h[iloc] -= bc_cloud_liquid_water_37h[iloc];
+          bt_clr_37h[iloc] -= bc_cloud_liquid_water_order_2_37h[iloc];
+        }
+      }
+    } else {
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        bt_clr_37v[iloc] = bt_clr_37v_wobc[iloc];
+        bt_clr_37h[iloc] = bt_clr_37h_wobc[iloc];
       }
     }
 
@@ -260,6 +276,15 @@ void CLWRetMW::compute(const ObsFilterData & in,
             bt37h[iloc] = bt37h[iloc] - bias37h[iloc];
           }
         }
+        if (vargrp[igrp] == "HofX") {
+          // Substract bias from HofX since H(x) already includes bias correction
+          if (!use_bias_corrected_hofx_ch37GHz) {
+            for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+              bt37v[iloc] = bt37v[iloc] - bias37v[iloc];
+              bt37h[iloc] = bt37h[iloc] - bias37h[iloc];
+            }
+          }
+        }
       }
       if (vargrp[igrp] == "HofX" && bc_cloud_terms) {
         // HofX used for cloud calculation is not corrected with clouds.
@@ -274,13 +299,23 @@ void CLWRetMW::compute(const ObsFilterData & in,
       // Compute cloud index
       CIret_37v37h_diff(bt_clr_37v, bt_clr_37h, water_frac, bt37v, bt37h, out[igrp]);
 
-      if (vargrp[igrp] == "HofX" && bc_cloud_terms) {
-        // Add bias corrections with the cloud bias correction terms in corrected HofX.
-        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          bt37v[iloc] += bc_cloud_liquid_water_37v[iloc];
-          bt37v[iloc] += bc_cloud_liquid_water_order_2_37v[iloc];
-          bt37h[iloc] += bc_cloud_liquid_water_37h[iloc];
-          bt37h[iloc] += bc_cloud_liquid_water_order_2_37h[iloc];
+      if (vargrp[igrp] == "HofX") {
+        if (bc_cloud_terms) {
+          // Add bias corrections with the cloud bias correction terms in corrected HofX.
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            bt37v[iloc] += bc_cloud_liquid_water_37v[iloc];
+            bt37v[iloc] += bc_cloud_liquid_water_order_2_37v[iloc];
+            bt37h[iloc] += bc_cloud_liquid_water_37h[iloc];
+            bt37h[iloc] += bc_cloud_liquid_water_order_2_37h[iloc];
+          }
+        } else {
+          if (!use_bias_corrected_hofx_ch37GHz && options_.addBias.value() == vargrp[igrp]) {
+            // Add bias corrections in HofX.
+            for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+              bt37v[iloc] = bt37v[iloc] + bias37v[iloc];
+              bt37h[iloc] = bt37h[iloc] + bias37h[iloc];
+            }
+          }
         }
       }
     }
@@ -384,6 +419,7 @@ void CLWRetMW::compute(const ObsFilterData & in,
       clw_retr_amsr2(bt18v, bt18h, bt36v, bt36h, out[igrp]);
     }
   }
+  oops::Log::trace() << "CLWRetMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -13,6 +13,8 @@
 
 #include "ioda/distribution/InefficientDistribution.h"
 #include "ioda/ObsSpace.h"
+#include "oops/mpi/mpi.h"
+
 #include "ufo/filters/FilterUtils.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variables.h"
@@ -23,6 +25,52 @@ namespace ufo {
 namespace {
 
 template <typename VariableType>
+std::vector<VariableType> getOnlySelectedVariable(const std::string &group,
+                                                  const std::string &variable,
+                                                  const std::vector<bool> &apply,
+                                                  const std::vector<size_t> &glocs,
+                                                  const ioda::ObsSpace &obsdb,
+                                                  const ioda::Distribution &obsDistribution) {
+  const size_t nlocs = obsdb.nlocs();
+  const size_t gnlocs = obsdb.globalNumLocs();
+
+  // Local result vector.
+  std::vector<VariableType> resultLocal(nlocs);
+  obsdb.get_db(group, variable, resultLocal);
+
+  // Vector signifying if each location corresponds to a 'patch' observation.
+  // This is relevant when locations are held on more than one rank, because
+  // it enables a single rank to be assigned to each location.
+  std::vector<bool> patchObsVec(nlocs);
+  obsDistribution.patchObs(patchObsVec);
+
+  // Make local result vector smaller according to both `apply` and `patchObsVec`.
+  std::vector<VariableType> resultReduced;
+  for (size_t i = 0; i < nlocs; ++i) {
+    if (apply[i] && patchObsVec[i]) {
+      resultReduced.push_back(resultLocal[i]);
+    }
+  }
+
+  // Gather reduced result vector.
+  // Note: `obsDistribution.allGatherv()` throws an assertion if `resultReduced.size() != nlocs`,
+  // which will occur if at least one entry in `apply` is `false`.
+  // Therefore use the underlying `oops::mpi::allGatherv` instead.
+  oops::mpi::allGatherv(obsdb.comm(), resultReduced);
+  ASSERT(resultReduced.size() == glocs.size());
+
+  // Set up a global result vector that is initially filled with missing values.
+  const VariableType missing = util::missingValue<VariableType>();
+  std::vector<VariableType> result(gnlocs, missing);
+  // Put the gathered result into the global result vector according to the `glocs` vector.
+  for (size_t i = 0; i < resultReduced.size(); ++i) {
+    result[glocs[i]] = resultReduced[i];
+  }
+
+  return result;
+}
+
+template <typename VariableType>
 std::vector<VariableType> getVariableFromObsSpaceImpl(
     const std::string &group, const std::string &variable,
     const ioda::ObsSpace &obsdb, const ioda::Distribution &obsDistribution) {
@@ -30,6 +78,31 @@ std::vector<VariableType> getVariableFromObsSpaceImpl(
   obsdb.get_db(group, variable, result);
   obsDistribution.allGatherv(result);
   return result;
+}
+
+template <typename VariableType>
+std::vector<VariableType> getVariableFromObsSpaceImpl(
+    const std::string &group,
+    const std::string &variable,
+    const std::vector<bool> &apply,
+    const std::vector<size_t> &glocs,
+    const bool groupByCategoryVariable,
+    const ioda::ObsSpace &obsdb,
+    const ioda::Distribution &obsDistribution,
+    const bool accountForWhere) {
+
+  // If each record is held by a single rank, no MPI communication is performed
+  // so there is no need to gather observations across ranks.
+  if (groupByCategoryVariable || !accountForWhere) {
+    return getVariableFromObsSpaceImpl<VariableType>(group, variable, obsdb, obsDistribution);
+  }
+
+  return getOnlySelectedVariable<VariableType>(group,
+                                               variable,
+                                               apply,
+                                               glocs,
+                                               obsdb,
+                                               obsDistribution);
 }
 
 /// Return the vector of elements of \p categories with indices \p validObsIds.
@@ -53,6 +126,35 @@ void groupObservationsByVariableImpl(
   std::vector<VariableType> obsCategories(obsdb.nlocs());
   obsdb.get_db(variable.group(), variable.variable(), obsCategories);
   obsDistribution.allGatherv(obsCategories);
+  const std::vector<VariableType> validObsCategories = getValidObservationCategories(
+        obsCategories, validObsIds);
+
+  splitter.groupBy(validObsCategories);
+}
+
+template <typename VariableType>
+void groupObservationsByVariableImpl(
+    const Variable &variable,
+    const std::vector<bool> &apply,
+    const std::vector<size_t> &glocs,
+    const std::vector<size_t> &validObsIds,
+    const ioda::ObsSpace &obsdb,
+    const ioda::Distribution &obsDistribution,
+    RecursiveSplitter &splitter,
+    const bool accountForWhere) {
+
+  std::vector<VariableType> obsCategories;
+  if (!accountForWhere) {
+    obsdb.get_db(variable.group(), variable.variable(), obsCategories);
+    obsDistribution.allGatherv(obsCategories);
+  } else {
+    obsCategories = getOnlySelectedVariable<VariableType>(variable.group(),
+                                                          variable.variable(),
+                                                          apply,
+                                                          glocs,
+                                                          obsdb,
+                                                          obsDistribution);
+  }
 
   const std::vector<VariableType> validObsCategories = getValidObservationCategories(
         obsCategories, validObsIds);
@@ -64,17 +166,23 @@ void groupObservationsByVariableImpl(
 
 ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
                          GroupBy groupBy,
-                         boost::optional<Variable> categoryVariable)
-  : obsdb_(&obsdb), groupBy_(groupBy), categoryVariable_(categoryVariable)
+                         boost::optional<Variable> categoryVariable,
+                         const bool accountForWhere)
+  : obsdb_(&obsdb), groupBy_(groupBy), categoryVariable_(categoryVariable),
+    accountForWhere_(accountForWhere)
 {
+  oops::Log::trace() << "ObservationAccessor constructor" << std::endl;
   // If the observations are to be grouped by a category variable, and that variable was
   // also used to divide the ObsSpace into records, change the value of `groupBy_`.
+  // Do the same if observations are to be grouped by the ObsSpace record index.
   // This is not done if the records are treated as single observations (for which
   // `groupBy_` is equal to `GroupBy::SINGLE_OBS`).
-  if (groupBy_ == GroupBy::VARIABLE && wereRecordsGroupedByCategoryVariable())
-    groupBy_ = GroupBy::RECORD_ID;
+  if ((groupBy_ == GroupBy::VARIABLE && wereRecordsGroupedByCategoryVariable()) ||
+      groupBy_ == GroupBy::RECORD_ID) {
+    groupBy_ = GroupBy::CATEGORY_VARIABLE;
+  }
 
-  if (groupBy_ == GroupBy::RECORD_ID) {
+  if (groupBy_ == GroupBy::CATEGORY_VARIABLE) {
     // Each record is held by a single process, so there's no need to exchange data between
     // processes and we can use an InefficientDistribution rather than the distribution taken from
     // obsdb_. Which in this case is *efficient*!
@@ -86,24 +194,24 @@ ObsAccessor::ObsAccessor(const ioda::ObsSpace &obsdb,
   }
 }
 
-ObsAccessor ObsAccessor::toAllObservations(
-    const ioda::ObsSpace &obsdb) {
-  return ObsAccessor(obsdb, GroupBy::NOTHING, boost::none);
+ObsAccessor ObsAccessor::toAllObservations
+(const ioda::ObsSpace &obsdb, const bool accountForWhere) {
+  return ObsAccessor(obsdb, GroupBy::NOTHING, boost::none, accountForWhere);
 }
 
 ObsAccessor ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(
-    const ioda::ObsSpace &obsdb) {
-  return ObsAccessor(obsdb, GroupBy::RECORD_ID, boost::none);
+  const ioda::ObsSpace &obsdb, const bool accountForWhere) {
+  return ObsAccessor(obsdb, GroupBy::CATEGORY_VARIABLE, boost::none, accountForWhere);
 }
 
 ObsAccessor ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
-    const ioda::ObsSpace &obsdb, const Variable &variable) {
-  return ObsAccessor(obsdb, GroupBy::VARIABLE, variable);
+  const ioda::ObsSpace &obsdb, const Variable &variable, const bool accountForWhere) {
+  return ObsAccessor(obsdb, GroupBy::VARIABLE, variable, accountForWhere);
 }
 
 ObsAccessor ObsAccessor::toSingleObservationsSplitIntoIndependentGroupsByVariable(
-    const ioda::ObsSpace &obsdb, const Variable &variable) {
-  return ObsAccessor(obsdb, GroupBy::SINGLE_OBS, variable);
+  const ioda::ObsSpace &obsdb, const Variable &variable, const bool accountForWhere) {
+  return ObsAccessor(obsdb, GroupBy::SINGLE_OBS, variable, accountForWhere);
 }
 
 std::vector<bool> ObsAccessor::getGlobalApply(
@@ -123,9 +231,39 @@ std::vector<size_t> ObsAccessor::getValidObservationIds(
         UnselectLocationIf::ANY_FILTER_VARIABLE_REJECTED;
   unselectRejectedLocations(isValid, filtervars, flags, mode);
 
-  // TODO(wsmigaj): use std::vector<unsigned char> to save space
-  std::vector<int> globalIsValid(isValid.begin(), isValid.end());
-  obsDistribution_->allGatherv(globalIsValid);
+  std::vector<int> globalIsValid;
+
+  if (groupBy_ == GroupBy::CATEGORY_VARIABLE ||
+      !accountForWhere_) {
+    // If observations are grouped according to the category variable
+    // can simply gather the globalIsValid vector using the underlying ObsSpace
+    // distribution.
+    // TODO(wsmigaj): use std::vector<unsigned char> to save space
+    globalIsValid.insert(globalIsValid.begin(), isValid.cbegin(), isValid.cend());
+    obsDistribution_->allGatherv(globalIsValid);
+  } else {
+    const size_t nlocs = obsdb_->nlocs();
+    const size_t gnlocs = obsdb_->globalNumLocs();
+    // Vector signifying if each location corresponds to a 'patch' observation.
+    // This is relevant when locations are held on more than one rank, because
+    // it enables a single rank to be assigned to each location.
+    std::vector<bool> patchObsVec(nlocs);
+    obsDistribution_->patchObs(patchObsVec);
+    std::vector<size_t> glocs;
+    for (size_t i = 0; i < nlocs; ++i) {
+      if (isValid[i] && patchObsVec[i]) {
+        const size_t gloc = obsDistribution_->globalUniqueConsecutiveLocationIndex(i);
+        glocs.push_back(gloc);
+      }
+    }
+    // Gather `glocs` vector. If any entries in `isValid` are `false`, the length
+    // of `glocs` will be smaller than the global number of locations.
+    oops::mpi::allGatherv(obsdb_->comm(), glocs);
+    globalIsValid.assign(gnlocs, 0);
+    for (size_t i = 0; i < glocs.size(); ++i) {
+      globalIsValid[glocs[i]] = 1;
+    }
+  }
 
   std::vector<size_t> validObsIds;
   for (size_t obsId = 0; obsId < globalIsValid.size(); ++obsId)
@@ -199,6 +337,48 @@ std::vector<util::DateTime> ObsAccessor::getDateTimeVariableFromObsSpace(
   return getVariableFromObsSpaceImpl<util::DateTime>(group, variable, *obsdb_, *obsDistribution_);
 }
 
+std::vector<int> ObsAccessor::getIntVariableFromObsSpace
+(const std::string &group,
+ const std::string &variable,
+ const std::vector<bool> &apply) const {
+  const bool groupByCategoryVariable = groupBy_ == GroupBy::CATEGORY_VARIABLE;
+  if (!groupByCategoryVariable) {
+    fillGlocs(apply);
+  }
+  return getVariableFromObsSpaceImpl<int>(group, variable, apply, glocs_,
+                                          groupByCategoryVariable,
+                                          *obsdb_, *obsDistribution_,
+                                          accountForWhere_);
+}
+
+std::vector<float> ObsAccessor::getFloatVariableFromObsSpace
+(const std::string &group,
+ const std::string &variable,
+ const std::vector<bool> &apply) const {
+  const bool groupByCategoryVariable = groupBy_ == GroupBy::CATEGORY_VARIABLE;
+  if (!groupByCategoryVariable) {
+    fillGlocs(apply);
+  }
+  return getVariableFromObsSpaceImpl<float>(group, variable, apply, glocs_,
+                                            groupByCategoryVariable,
+                                            *obsdb_, *obsDistribution_,
+                                            accountForWhere_);
+}
+
+std::vector<util::DateTime> ObsAccessor::getDateTimeVariableFromObsSpace
+(const std::string &group,
+ const std::string &variable,
+ const std::vector<bool> &apply) const {
+  const bool groupByCategoryVariable = groupBy_ == GroupBy::CATEGORY_VARIABLE;
+  if (!groupByCategoryVariable) {
+    fillGlocs(apply);
+  }
+  return getVariableFromObsSpaceImpl<util::DateTime>(group, variable, apply, glocs_,
+                                                     groupByCategoryVariable,
+                                                     *obsdb_, *obsDistribution_,
+                                                     accountForWhere_);
+}
+
 std::vector<size_t> ObsAccessor::getRecordIds() const {
   std::vector<size_t> recordIds = obsdb_->recnum();
   obsDistribution_->allGatherv(recordIds);
@@ -227,7 +407,7 @@ RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
   case GroupBy::NOTHING:
     // Nothing to do
     break;
-  case GroupBy::RECORD_ID:
+  case GroupBy::CATEGORY_VARIABLE:
     groupObservationsByRecordNumber(validObsIds, splitter);
     break;
   case GroupBy::VARIABLE:

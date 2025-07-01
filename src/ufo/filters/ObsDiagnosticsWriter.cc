@@ -20,7 +20,7 @@ ObsDiagnosticsWriter::ObsDiagnosticsWriter(
                        std::shared_ptr<ioda::ObsDataVector<float> >)
   : params_(params), extradiagvars_()
 {
-  oops::Log::trace() << "ObsDiagnosticsWriter contructor" << std::endl;
+  oops::Log::trace() << "ObsDiagnosticsWriter constructor" << std::endl;
   // Identify diagnostics variables
   Variables diagvars;
   if (params.filterVariables.value() != boost::none) {

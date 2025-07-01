@@ -34,7 +34,7 @@ static ObsFunctionMaker<ObsErrorFactorConventional> makerSteps_("ObsErrorFactorC
 ObsErrorFactorConventional::ObsErrorFactorConventional(const eckit::Configuration &config)
   : invars_() {
   oops::Log::debug() << "ObsErrorFactorConventional: config = " << config << std::endl;
-
+  oops::Log::trace() << "ObsErrorFactorConventional constructor" << std::endl;
   // Initialize options
   options_.reset(new ObsErrorFactorConventionalParameters());
   options_->deserialize(config);
@@ -63,13 +63,14 @@ ObsErrorFactorConventional::ObsErrorFactorConventional(const eckit::Configuratio
 // -----------------------------------------------------------------------------
 
 ObsErrorFactorConventional::~ObsErrorFactorConventional() {
-    oops::Log::debug() << "ObsErrorFactorCon: destructing "  << std::endl;
+  oops::Log::trace() << "ObsErrorFactorConventional destructor"  << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorConventional::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ObsErrorFactorConventional compute start" << std::endl;
   const int missing = util::missingValue<int>();
   static constexpr float con_g_rd = 500.0f*Constants::grav/(273.0f*Constants::rd);
   const float tiny_float = FLT_MIN;
@@ -281,6 +282,7 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
             "filtered obs = " << inflatevars[ivar] << " " << profCount << " "<< nlocs
             << " " << passCount << std::endl;
   }  // ivar (variable) loop
+  oops::Log::trace() << "ObsErrorFactorConventional compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

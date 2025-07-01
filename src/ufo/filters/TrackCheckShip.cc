@@ -39,6 +39,7 @@ TrackCheckShip::TrackCheckShip(ioda::ObsSpace &obsdb, const Parameters_ &paramet
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
+  oops::Log::trace() << "TrackCheckShip constructor" << std::endl;
   oops::Log::debug() << "TrackCheckShip: config = " << options_ << std::endl;
   if (options_.recordsAreSingleObs) {  // 'records are single obs' option set,...
     const std::vector<std::string> groupingVars = obsdb.obs_group_vars();
@@ -113,8 +114,9 @@ size_t TrackCheckShip::TrackObservation::getObservationNumber() const
 }
 
 // Required for the correct destruction of options_.
-TrackCheckShip::~TrackCheckShip()
-{}
+TrackCheckShip::~TrackCheckShip() {
+  oops::Log::trace() << "TrackCheckShip destructor" << std::endl;
+}
 
 /// Detects whether each observation in a track has been rejected, and marks
 /// the corresponding space in \p isRejected as true if so.
@@ -164,6 +166,7 @@ void TrackCheckShip::print(std::ostream & os) const {
 void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "TrackCheckShip applyFilter start" << std::endl;
   ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
                                                                obsdb_,
                                                                options_.recordsAreSingleObs);
@@ -248,6 +251,7 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
   obsAccessor.flagRejectedObservations(options_.recordsAreSingleObs ?
     recordHandler.changeThinnedIfRecordsAreSingleObs(isRejected) : isRejected,
     flagged);
+  oops::Log::trace() << "TrackCheckShip applyFilter complete" << std::endl;
 }
 
 /// \returns a \p vector of \p TrackObservations that all hold a \p shared_ptr to an instance

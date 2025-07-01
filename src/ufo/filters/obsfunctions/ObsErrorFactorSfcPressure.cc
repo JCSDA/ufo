@@ -31,6 +31,7 @@ static ObsFunctionMaker<ObsErrorFactorSfcPressure> makerSteps_("ObsErrorFactorSf
 
 ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration &config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorSfcPressure constructor" << std::endl;
   oops::Log::debug() << "ObsErrorFactorSfcPressure: config = " << config << std::endl;
   const float tiny_float = FLT_MIN;
   const float huge_float = FLT_MAX;
@@ -64,12 +65,15 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorSfcPressure::~ObsErrorFactorSfcPressure() {}
+ObsErrorFactorSfcPressure::~ObsErrorFactorSfcPressure() {
+  oops::Log::trace() << "ObsErrorFactorSfcPressure destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ObsErrorFactorSfcPressure compute start" << std::endl;
   const float missing = util::missingValue<float>();
   static constexpr float g_over_rd = 1.0f*Constants::grav/Constants::rd;
   const float lapse_rate = 1.0f*Constants::Lclr;
@@ -203,6 +207,7 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
       obserr[iv][iloc] = new_error / currentObserr[iloc];
     }
   }
+  oops::Log::trace() << "ObsErrorFactorSfcPressure compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

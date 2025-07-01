@@ -68,9 +68,13 @@ class CLWRetMWParameters : public oops::Parameters {
   /// Cloud index CIret_37v37h_diff:
   /// 1.0 - (Tb_37v - Tb_37h)/(Tb_37v_clr - Tb_37h_clr), which is used in
   /// all-sky DA. Tb_37v_clr and Tb_37h_clr for calculated Tb at 37V and 37H GHz from model values
-  /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
+  /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37V and 37H GHz.
   oops::OptionalParameter<int> ch37h{"clwret_ch37h", this};
   oops::OptionalParameter<int> ch37v{"clwret_ch37v", this};
+  /// If \c true (the default), will use bias-corrected Hofx to derived the cloud index
+  oops::Parameter<bool> use_bias_corrected_hofx_ch37GHz{
+        "use bias-corrected HofX_at_ch37GHz", true, this};
+
 
   /// For retrieving AMSR2 cloud liquid water.
   oops::OptionalParameter<int> ch18h{"clwret_ch18h", this};

@@ -308,16 +308,19 @@ TemporalThinning::TemporalThinning(ioda::ObsSpace & obsdb, const Parameters_ & p
                                    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
+  oops::Log::trace() << "TemporalThinning constructor" << std::endl;
   oops::Log::debug() << "TemporalThinning: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
-TemporalThinning::~TemporalThinning()
-{}
+TemporalThinning::~TemporalThinning() {
+  oops::Log::trace() << "TemporalThinning destructor" << std::endl;
+}
 
 void TemporalThinning::applyFilter(const std::vector<bool> & apply,
                                    const Variables & filtervars,
                                    std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "TemporalThinning applyFilter start" << std::endl;
   ObsAccessor obsAccessor = createObsAccessor();
 
   // The RecordHandler deals with data that have been grouped into records.
@@ -347,6 +350,7 @@ void TemporalThinning::applyFilter(const std::vector<bool> & apply,
      recordHandler.changeThinnedIfRecordsAreSingleObs(isThinned) :
      isThinned,
      flagged);
+  oops::Log::trace() << "TemporalThinning applyFilter complete" << std::endl;
 }
 
 ObsAccessor TemporalThinning::createObsAccessor() const {

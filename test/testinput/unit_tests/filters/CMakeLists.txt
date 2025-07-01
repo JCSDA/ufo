@@ -79,6 +79,16 @@ ufo_add_test( NAME    test_ufo_gnssrobendmetoffice_obserror
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    test_ufo_gnssrorefmetoffice_qc
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_qc.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_gnssrobndnbam_qc
               TIER    1
               ECBUILD
@@ -375,6 +385,16 @@ ufo_add_test( NAME    test_ufo_qc_gauss_thinning
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_gauss_thinning.yaml"
+              MPI     4
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_qc_gauss_thinning_mean
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_gauss_thinning_mean.yaml"
               MPI     4
               LIBS    ufo
               LABELS  filters
@@ -900,7 +920,7 @@ if( crtm_FOUND )
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/airs_qc_filters.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/airs_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -970,7 +990,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/amsua_qc_filters.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -980,7 +1000,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/amsua_qc_filters_geos.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_qc_filters_geos.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -1000,7 +1020,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/atms_qc_filters.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -1010,7 +1030,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/atms_n20_qc_filters_geos.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_n20_qc_filters_geos.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters
@@ -1101,7 +1121,7 @@ if( crtm_FOUND )
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/filters/iasi_qc_filters.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_qc_filters.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters

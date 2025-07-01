@@ -28,6 +28,7 @@ _("SatWindsErrnormCheck");
 
 SatWindsErrnormCheck::SatWindsErrnormCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SatWindsErrnormCheck constructor" << std::endl;
   oops::Log::debug() << "SatWindsErrnormCheck: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -41,12 +42,15 @@ SatWindsErrnormCheck::SatWindsErrnormCheck(const eckit::LocalConfiguration & con
 
 // -----------------------------------------------------------------------------
 
-SatWindsErrnormCheck::~SatWindsErrnormCheck() {}
+SatWindsErrnormCheck::~SatWindsErrnormCheck() {
+  oops::Log::trace() << "SatWindsErrnormCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SatWindsErrnormCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SatWindsErrnormCheck compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
 
@@ -104,6 +108,7 @@ void SatWindsErrnormCheck::compute(const ObsFilterData & in,
       out[0][jj] = missing;
     }
   }
+  oops::Log::trace() << "SatWindsErrnormCheck compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

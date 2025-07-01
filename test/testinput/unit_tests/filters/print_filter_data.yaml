@@ -32,8 +32,6 @@ observations:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals.nc4
 
   obs post filters:
-  - filter: GOMsaver
-    filename: Data/gomsaver_test.nc4
   - filter: Print Filter Data
     output to test stream: true
     message: Printing filter data before Background Check

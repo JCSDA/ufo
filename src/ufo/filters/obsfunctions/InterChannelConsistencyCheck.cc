@@ -31,6 +31,7 @@ static ObsFunctionMaker<InterChannelConsistencyCheck>
 
 InterChannelConsistencyCheck::InterChannelConsistencyCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "InterChannelConsistencyCheck constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -47,12 +48,15 @@ InterChannelConsistencyCheck::InterChannelConsistencyCheck(const eckit::LocalCon
 
 // -----------------------------------------------------------------------------
 
-InterChannelConsistencyCheck::~InterChannelConsistencyCheck() {}
+InterChannelConsistencyCheck::~InterChannelConsistencyCheck() {
+  oops::Log::trace() << "InterChannelConsistencyCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "InterChannelConsistencyCheck compute start" << std::endl;
   // Get sensor information from options
   const std::string &sensor = options_.sensor.value();
 
@@ -124,6 +128,7 @@ void InterChannelConsistencyCheck::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "InterChannelConsistencyCheck compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

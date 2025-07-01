@@ -44,13 +44,13 @@ ObsProcessorBase::ObsProcessorBase(ioda::ObsSpace & os, bool deferToPost,
 // -----------------------------------------------------------------------------
 
 ObsProcessorBase::~ObsProcessorBase() {
-  oops::Log::trace() << "ObsProcessorBase destructed" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsProcessorBase::preProcess() {
-  oops::Log::trace() << "ObsProcessorBase preProcess begin" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase preProcess start" << std::endl;
 // Cannot determine earlier when to apply filter because subclass
 // constructors add to allvars
   if (allvars_.hasGroup("HofX") || allvars_.hasGroup("ObsDiag") ||
@@ -63,17 +63,17 @@ void ObsProcessorBase::preProcess() {
       this->doFilter();
     }
   }
-  oops::Log::trace() << "ObsProcessorBase preProcess end" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase preProcess complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsProcessorBase::priorFilter(const GeoVaLs & gv) {
-  oops::Log::trace() << "ObsProcessorBase priorFilter begin" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase priorFilter start" << std::endl;
   ScopedDefaultGeoVaLFormatChange change(gv, GeoVaLFormat::REDUCED);
   if (prior_ || post_) data_.associate(gv);
   if (prior_) this->doFilter();
-  oops::Log::trace() << "ObsProcessorBase priorFilter end" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase priorFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ void ObsProcessorBase::postFilter(const GeoVaLs & gv,
                                   const ioda::ObsVector & hofx,
                                   const ioda::ObsVector & bias,
                                   const ObsDiagnostics & diags) {
-  oops::Log::trace() << "ObsProcessorBase postFilter begin" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase postFilter start" << std::endl;
   if (post_) {
     ScopedDefaultGeoVaLFormatChange change(gv, GeoVaLFormat::REDUCED);
     data_.associate(gv);
@@ -91,7 +91,7 @@ void ObsProcessorBase::postFilter(const GeoVaLs & gv,
     data_.associate(diags);
     this->doFilter();
   }
-  oops::Log::trace() << "ObsProcessorBase postFilter end" << std::endl;
+  oops::Log::trace() << "ObsProcessorBase postFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

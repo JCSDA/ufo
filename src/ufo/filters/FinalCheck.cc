@@ -26,19 +26,19 @@ FinalCheck::FinalCheck(ioda::ObsSpace & obsdb, const Parameters_ &,
                        std::shared_ptr<ioda::ObsDataVector<float>> obserr)
   : ObsProcessorBase(obsdb, true /*deferToPost?*/, std::move(qcflags), std::move(obserr))
 {
-  oops::Log::trace() << "FinalCheck constructed" << std::endl;
+  oops::Log::trace() << "FinalCheck constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 FinalCheck::~FinalCheck() {
-  oops::Log::trace() << "FinalCheck destructed" << std::endl;
+  oops::Log::trace() << "FinalCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void FinalCheck::doFilter() {
-  oops::Log::trace() << "FinalCheck doFilter starts" << std::endl;
+  oops::Log::trace() << "FinalCheck doFilter start" << std::endl;
 
   const oops::ObsVariables &derived = obsdb_.derived_obsvariables();
   for (size_t jv = 0; jv < derived.size(); ++jv) {
@@ -69,7 +69,7 @@ void FinalCheck::doFilter() {
     }
   }
 
-  oops::Log::trace() << "FinalCheck doFilter done" << std::endl;
+  oops::Log::trace() << "FinalCheck doFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

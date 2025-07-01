@@ -51,7 +51,7 @@ find_package( MPI REQUIRED COMPONENTS C CXX Fortran )
 find_package( Boost REQUIRED )
 
 # NetCDF
-find_package( NetCDF REQUIRED COMPONENTS C Fortran)
+find_package( NetCDF REQUIRED COMPONENTS C CXX Fortran)
 
 # Eigen3
 find_package( Eigen3 REQUIRED NO_MODULE HINTS
@@ -143,32 +143,29 @@ endif( ${oasim_FOUND} )
 # Set values for downloading crtm test data from tarball
 
 if( ${crtm_FOUND} )
-  if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-	  #https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.1.2.tgz
-  	  set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM")
-    set (crtm_data_tag "fix_REL-3.1.1.2")  #this may cause problems with older CRTM
-	  set (crtm_data_tag_postfix "fix/") #used in test/CMakeLists.txt and permits compatibility with older methods
-    set (crtm_data_tarball_hash "58e0a5c698a438a31dc4914fcda39846")
-    set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput" )
-	  set (crtm_data_tarball_name ${crtm_data_tag}.tgz)  #tarball name structure changed with the 3.1.0 release
-  elseif( crtm_VERSION VERSION_EQUAL 2.4.1 )
-    set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
-    set (crtm_data_tag "2.4.1_skylab_4.0" )
-	  set (crtm_data_tag_postfix "") #needed for backward compatibility
-    set (crtm_data_tarball_hash "5ef915c445f94c6ef11f53221521a79e")
-    set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput/CRTMv2" )
-	  set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
-  elseif( crtm_VERSION VERSION_EQUAL 2.4.0 )
-    set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
-    set (crtm_data_tag "2.4.0_skylab_3.0" )
-	  set (crtm_data_tag_postfix "") #needed for backward compatibility
-    set (crtm_data_tarball_hash "73a89f04c2ed52b9b904eac9dab52b60")
-    set (CRTM_CMAKE_TESTINPUT "${CMAKE_CURRENT_SOURCE_DIR}/test/testinput/CRTMv2" )
-	  set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
-  else ()
-	  #Something is wrong with the CRTM_Version
-	   message(FATAL_ERROR "Error: Requested CRTM Version (${crtm_VERSION}) is incompatible with UFO.  Contact the JCSDA OBS team.")
-  endif()
+    if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
+        #https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.2.0.tgz
+        set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM")
+        set (crtm_data_tag "fix_REL-3.1.2.0")  #this may cause problems with older CRTM
+        set (crtm_data_tag_postfix "fix/") #used in test/CMakeLists.txt and permits compatibility with older methods
+        set (crtm_data_tarball_hash "0e5888cae80aa674b2e67ecd4490317d")
+        set (crtm_data_tarball_name ${crtm_data_tag}.tgz)  #tarball name structure changed with the 3.1.0 release
+    elseif( crtm_VERSION VERSION_EQUAL 2.4.1 )
+        set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
+        set (crtm_data_tag "2.4.1_skylab_4.0" )
+        set (crtm_data_tag_postfix "") #needed for backward compatibility
+        set (crtm_data_tarball_hash "5ef915c445f94c6ef11f53221521a79e")
+        set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
+    elseif( crtm_VERSION VERSION_EQUAL 2.4.0 )
+        set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
+        set (crtm_data_tag "2.4.0_skylab_3.0" )
+        set (crtm_data_tag_postfix "") #needed for backward compatibility
+        set (crtm_data_tarball_hash "73a89f04c2ed52b9b904eac9dab52b60")
+        set (crtm_data_tarball_name crtm_coefficients_${crtm_data_tag}.tar.gz)
+    else ()
+        #Something is wrong with the CRTM_Version
+        message(FATAL_ERROR "Error: Requested CRTM Version (${crtm_VERSION}) is incompatible with UFO.  Contact the JCSDA OBS team.")
+    endif()
 endif( ${crtm_FOUND} )
 
 
@@ -178,13 +175,13 @@ endif( ${crtm_FOUND} )
 ### Basically, with the current logic we hack ufo-data_FOUND to match ENABLE_UFO_DATA
 #find_package( ufo-data QUIET )
 if (ENABLE_UFO_DATA)
-  set (ufo-data_FOUND TRUE)
+    set (ufo-data_FOUND TRUE)
 else()
-  # Set values for downloading ufo test data from tarball
-  set (ufo_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
-  set (ufo_data_tag "1.10.0")
-  set (ufo_data_tarball_name "ufo_testinput_tier_1_${ufo_data_tag}.tar.gz")
-  set (ufo_data_tarball_hash "9dde2bc6a84da5d5e0e18e6d0aa62148")
+    # Set values for downloading ufo test data from tarball
+    set (ufo_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM/file")
+    set (ufo_data_tag "1.10.0")
+    set (ufo_data_tarball_name "ufo_testinput_tier_1_${ufo_data_tag}.tar.gz")
+    set (ufo_data_tarball_hash "9dde2bc6a84da5d5e0e18e6d0aa62148")
 endif()
 
 ################################################################################

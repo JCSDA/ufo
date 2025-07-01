@@ -76,7 +76,7 @@ USE ufo_gnssroonedvarcheck_pen_mod, only: &
     Ops_GPSRO_pen
 
 USE ufo_gnssroonedvarcheck_eval_derivs_mod, only: &
-    Ops_GPSRO_eval_derivs_BA
+    Ops_GPSRO_eval_derivs
 
 USE ufo_utils_mod, only: &
     InvertMatrix, Ops_Cholesky
@@ -127,8 +127,8 @@ REAL(kind_real), INTENT(INOUT) :: Ts(nlevq)
 REAL(kind_real), INTENT(INOUT) :: DFS         ! Measure of degrees of freesom of signal for whole profile
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER  :: RoutineName = "Ops_GPSRO_rootsolv_BA"
 INTEGER, PARAMETER           :: max_string = 800
+REAL(kind_real), PARAMETER   :: threshold = 30   ! Ignore differences of more then 1 radian when calculating derivates
 
 LOGICAL                      :: MARQ
 INTEGER                      :: i
@@ -396,18 +396,19 @@ Iteration_loop: DO
 
     ! Evaluate the -dJ_dx(vector NOTE SIGN!!) and d2J_dx2(matrix) at x
 
-    CALL Ops_GPSRO_eval_derivs_BA (nstate,   &
-                                   nobs,     &
-                                   x,        &
-                                   xb,       &
-                                   yobs,     &
-                                   ycalc,    &
-                                   BM1,      &
-                                   OM1,      &
-                                   Kmat,     &
-                                   dJ_dx,    &
-                                   d2J_dx2,  &
-                                   diag_d2J)
+    CALL Ops_GPSRO_eval_derivs (nstate,    &
+                                nobs,      &
+                                x,         &
+                                xb,        &
+                                yobs,      &
+                                ycalc,     &
+                                BM1,       &
+                                OM1,       &
+                                Kmat,      &
+                                threshold, & ! Ignore differences larger than 1 radian
+                                dJ_dx,     &
+                                d2J_dx2,   &
+                                diag_d2J)
 
     ! Store inverse of soln. cov matrix
     Amat(:,:) = d2J_dx2(:,:)

@@ -60,7 +60,6 @@ class ObsGnssroRefMetOffice : public ObsOperatorBase,
   F90hop keyOperGnssroRefMetOffice_;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
-  Parameters_ parameters_;
 };
 
 // -----------------------------------------------------------------------------

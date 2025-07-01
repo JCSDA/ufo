@@ -1,0 +1,159 @@
+time window:
+  begin: 2020-05-11T02:59:59Z  # Shifted back by 1 s to include obs taken at 03:00:00
+  end: 2020-05-11T09:00:00Z
+
+# These tests check the functionality of the 'select_mean' option of Gaussian Thinning.
+# The first test operates on some (40) randomly generated sea surface temperature observations,
+# checking that the calculated means match the reference values calculated earlier.
+# The second includes other_variable as one of the simulated variables, which would result in
+# different locations being accepted if the filter acted on it - but the test checks that the
+# filter is only applied to seaSurfaceTemperature (as above) and ignores other_variable, not
+# rejecting any locations in the latter.
+# While the first 2 tests have 'min_num_obs_per_bin' set, the third doesn't - it tests that the
+# default value of 5 is used (note the spatial bins are the same as for the first 2 tests, but
+# there is only 1 time bin instead of 2).
+# The fourth test checks that the filter acts on the latest valid type - in this case, a
+# derived obs value rather than obs value. Using the same spatial and temporal bins as the 3rd
+# test, and default 5 min_num_obs_per_bin as well - this is compared to reference data with the 
+# same transformation applied to it.
+
+observations:
+- obs space:
+    name: Mean super-obbing for Satellite SST compared to reference
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata_ref.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/superob_mean_test_out.nc4
+    simulated variables: [seaSurfaceTemperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: seaSurfaceTemperature
+    select_mean: true
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 6000
+    time_mesh: PT3H00M00S
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedBenchmark: 14
+  compareVariables: 
+    - reference:
+        name: TestReference/seaSurfaceTemperature
+      test:
+        name: DerivedObsValue/seaSurfaceTemperature
+      absTol: 1.0e-4
+
+
+- obs space:
+    name: Mean super-obbing for Satellite SST with extra variable
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata_ref.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/superob_mean_test_out2.nc4
+    simulated variables: [seaSurfaceTemperature, other_variable]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: seaSurfaceTemperature
+    select_mean: true
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 6000  # km
+    time_mesh: PT3H00M00S
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedBenchmark: 51  # When >1 simulated variable (but only 1 filter variable allowed),
+                       # the filter variable is filtered as normal (14 accepted, as above) and the
+                       # other variable is not filtered at all (37 accepted, since 3 are missing),
+                       # to a total 14 + 37 = 51
+  compareVariables: 
+    - reference:
+        name: TestReference/seaSurfaceTemperature
+      test:
+        name: DerivedObsValue/seaSurfaceTemperature
+      absTol: 1.0e-4
+      
+- obs space:
+    name: Mean super-obbing for Satellite SST with single time bin
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata_ref.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/superob_mean_test_out3.nc4
+    simulated variables: [seaSurfaceTemperature]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: seaSurfaceTemperature
+    select_mean: true
+    horizontal_mesh: 6000  # km
+    time_mesh: PT6H00M00S  # so only 1 time bin, not 2
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedObservationsBenchmark:
+  - 0
+  - 2
+  - 6
+  - 8
+  - 12
+  - 18
+  - 28
+  - 34
+  passedBenchmark: 8
+  
+- obs space:
+    name: Mean super-obbing for Satellite SST, default min 5 obs per bin, derived obs value
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_testdata_ref.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/superob_test_out4.nc4
+    simulated variables: [seaSurfaceTemperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/seaSurfaceTemperature
+      type: float
+      function:
+        name: ObsFunction/LinearCombination
+        options:
+          variables: [ObsValue/seaSurfaceTemperature, MetaData/latitude]
+          coefs: [1.0, 0.05]  # meaningless quantity, just for testing
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: seaSurfaceTemperature
+    select_mean: true
+    horizontal_mesh: 6000  # km
+    time_mesh: PT6H00M00S
+    time_min: 2020-05-11T03:00:00Z
+    time_max: 2020-05-11T09:00:00Z
+  passedObservationsBenchmark:
+  - 0
+  - 2
+  - 6
+  - 8
+  - 12
+  - 18
+  - 28
+  - 34
+  passedBenchmark: 8
+# compare mean to the reference, given earlier linear combination
+  compareVariables: 
+    - reference:    
+        name: TestReference/seaSurfaceTemperatureAdjust 
+      test:
+        name: DerivedObsValue/seaSurfaceTemperature
+      absTol: 1.0e-4

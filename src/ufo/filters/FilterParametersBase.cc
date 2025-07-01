@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 
@@ -19,6 +20,7 @@ namespace ufo {
 
 void FilterParametersBase::deserialize(util::CompositePath &path,
                                        const eckit::Configuration &config) {
+  oops::Log::trace() << "FilterParametersBase deserialize" << std::endl;
   FilterParametersBaseWithAbstractActions::deserialize(path, config);
 
   if (action_.value() != boost::none && actions_.value() != boost::none)
@@ -29,6 +31,7 @@ void FilterParametersBase::deserialize(util::CompositePath &path,
 // -----------------------------------------------------------------------------
 
 std::vector<std::unique_ptr<FilterActionParametersBase>> FilterParametersBase::actions() const {
+  oops::Log::trace() << "FilterParametersBase actions start" << std::endl;
   std::vector<std::unique_ptr<FilterActionParametersBase>> result;
   if (action_.value() != boost::none) {
     ASSERT(actions_.value() == boost::none);
@@ -44,6 +47,7 @@ std::vector<std::unique_ptr<FilterActionParametersBase>> FilterParametersBase::a
     action->deserialize(conf);
     result.push_back(std::move(action));
   }
+  oops::Log::trace() << "FilterParametersBase actions complete" << std::endl;
   return result;
 }
 

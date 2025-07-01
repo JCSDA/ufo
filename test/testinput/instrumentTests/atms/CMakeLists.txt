@@ -60,13 +60,13 @@ if( crtm_FOUND )
         LABELS  crtm filters
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
- 
+
     # H(x) with QC
     ufo_add_test( NAME  instrument_atms_n20_gfs_HofX_qc
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/atms/atms_n20_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_n20_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm atms n20 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -76,7 +76,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/atms/atms_npp_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_npp_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm atms npp qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../

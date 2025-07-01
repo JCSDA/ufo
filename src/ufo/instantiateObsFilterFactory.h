@@ -9,6 +9,7 @@
 #define UFO_INSTANTIATEOBSFILTERFACTORY_H_
 
 #include "ufo/filters/AcceptList.h"
+#include "ufo/filters/AverageObsToGeoValLevels.h"
 #include "ufo/filters/BackgroundCheck.h"
 #include "ufo/filters/BayesianBackgroundCheck.h"
 #include "ufo/filters/BayesianBackgroundQCFlags.h"
@@ -48,6 +49,7 @@
 #include "ufo/filters/ProfileMaxDifferenceCheck.h"
 #include "ufo/filters/ProfileUnFlagObsCheck.h"
 #include "ufo/filters/QCmanager.h"
+#include "ufo/filters/refractivityonedvarcheck/RefractivityOneDVarCheck.h"
 #include "ufo/filters/SatName.h"
 #include "ufo/filters/SatwindInversionCorrection.h"
 #include "ufo/filters/SpikeAndStepCheck.h"
@@ -145,6 +147,8 @@ void instantiateObsFilterFactory() {
              ProcessAMVQIMaker("Process AMV QI");
   static FilterMaker<ProfileAverageObsToModLevels>
            ProfileAverageObsToModLevelsMaker("Average Observations To Model Levels");
+  static FilterMaker<AverageObsToGeoValLevels>
+           AverageObsToGeoValLevelsMaker("Average Observations To GeoVals Model Levels");
   static FilterMaker<ProfileBackgroundCheck>
            ProfileBackgroundCheckMaker("Profile Background Check");
   static FilterMaker<ProfileFewObsCheck>
@@ -155,6 +159,8 @@ void instantiateObsFilterFactory() {
            ProfileUnFlagObsCheckMaker("Profile Unflag Observations Check");
   static FilterMaker<BlackList>
            rejectListMaker("RejectList");  // same as BlackList
+  static FilterMaker<RefractivityOneDVarCheck>
+           RefractivityOneDVarCheckMaker("Refractivity 1DVar Check");
   static FilterMaker<ROobserror>
            ROobserrorMaker("ROobserror");
   static FilterMaker<QCmanager>

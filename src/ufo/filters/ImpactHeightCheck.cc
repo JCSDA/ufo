@@ -50,7 +50,7 @@ ImpactHeightCheck::ImpactHeightCheck(
 // -----------------------------------------------------------------------------
 
 ImpactHeightCheck::~ImpactHeightCheck() {
-  oops::Log::trace() << "ImpactHeightCheck destructed" << std::endl;
+  oops::Log::trace() << "ImpactHeightCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ ImpactHeightCheck::~ImpactHeightCheck() {
 void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ImpactHeightCheck post-filter" << std::endl;
+  oops::Log::trace() << "ImpactHeightCheck applyFilter start" << std::endl;
   const float missingFloat = util::missingValue<float>();
 
   // Check that we have the same number of variables as vertical levels
@@ -286,6 +286,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   }
+  oops::Log::trace() << "ImpactHeightCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -6,7 +6,6 @@
  */
 
 #include "ufo/filters/MetOfficeBuddyCollectorV2.h"
-
 #include "ufo/filters/MetOfficeBuddyPair.h"
 
 namespace ufo {
@@ -15,8 +14,8 @@ MetOfficeBuddyCollectorV2::MetOfficeBuddyCollectorV2(const MetOfficeBuddyCheckPa
                                                      const std::vector<float> &latitudes,
                                                      const std::vector<float> &longitudes,
                                                      const std::vector<int> &stationIds)
-  : MetOfficeBuddyCollector(options, latitudes, longitudes, stationIds)
-{}
+  : MetOfficeBuddyCollector(options, latitudes, longitudes, stationIds) {
+}
 
 void MetOfficeBuddyCollectorV2::examinePotentialBuddy(int obsIdB) {
   assert(numBuddiesWithSameStationId_ <= options_.maxNumBuddiesWithSameStationId);

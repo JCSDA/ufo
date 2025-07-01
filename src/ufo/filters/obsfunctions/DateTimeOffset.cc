@@ -22,6 +22,7 @@ constexpr util::NamedEnumerator<OffsetUnit>
 
 DateTimeOffset::DateTimeOffset(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "DateTimeOffset constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -31,13 +32,15 @@ DateTimeOffset::DateTimeOffset(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-DateTimeOffset::~DateTimeOffset() {}
+DateTimeOffset::~DateTimeOffset() {
+  oops::Log::trace() << "DateTimeOffset destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void DateTimeOffset::compute(const ObsFilterData & in,
                              ioda::ObsDataVector<util::DateTime> & out) const {
-  oops::Log::trace() << "DateTimeOffset::compute started" << std::endl;
+  oops::Log::trace() << "DateTimeOffset compute start" << std::endl;
 
   // Apply offsets to datetimes.
   // todo(ctgh): add Integer_64 when it becomes available.
@@ -48,7 +51,7 @@ void DateTimeOffset::compute(const ObsFilterData & in,
   else
     throw eckit::BadParameter("Offset variable has incorrect type", Here());
 
-  oops::Log::trace() << "DateTimeOffset::compute finished" << std::endl;
+  oops::Log::trace() << "DateTimeOffset compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

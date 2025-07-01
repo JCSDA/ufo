@@ -26,6 +26,7 @@ static ObsFunctionMaker<CLWMatchIndexMW> makerCLWMatchIndexMW_("CLWMatchIndexMW"
 
 CLWMatchIndexMW::CLWMatchIndexMW(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "CLWMatchIndexMW constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -46,12 +47,15 @@ CLWMatchIndexMW::CLWMatchIndexMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-CLWMatchIndexMW::~CLWMatchIndexMW() {}
+CLWMatchIndexMW::~CLWMatchIndexMW() {
+  oops::Log::trace() << "CLWMatchIndexMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void CLWMatchIndexMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "CLWMatchIndexMW compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   const size_t nchans = channels_.size();
@@ -82,6 +86,7 @@ void CLWMatchIndexMW::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "CLWMatchIndexMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

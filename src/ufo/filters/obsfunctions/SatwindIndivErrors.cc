@@ -33,6 +33,7 @@ static ObsFunctionMaker<SatwindIndivErrors> makerSatwindIndivErrors_("SatwindInd
 
 SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SatwindIndivErrors constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -55,7 +56,9 @@ SatwindIndivErrors::SatwindIndivErrors(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SatwindIndivErrors::~SatwindIndivErrors() {}
+SatwindIndivErrors::~SatwindIndivErrors() {
+  oops::Log::trace() << "SatwindIndivErrors destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 /*! \brief Function to calculate situation dependent observation errors for satwinds
@@ -111,6 +114,7 @@ SatwindIndivErrors::~SatwindIndivErrors() {}
 
 void SatwindIndivErrors::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "SatwindIndivErrors compute start" << std::endl;
   // Get obs space
   auto & obsdb = in.obsspace();
 
@@ -252,6 +256,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
     oops::Log::warning() << "Satwind Indiv Errors: " << countQi
       << " observations with bad/missing QI. Using default vector err in these cases" << std::endl;
   }
+  oops::Log::trace() << "SatwindIndivErrors compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

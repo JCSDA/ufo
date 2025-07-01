@@ -34,8 +34,8 @@ MetOfficeBuddyPairFinder::MetOfficeBuddyPairFinder(const MetOfficeBuddyCheckPara
                            const std::vector<float> *pressures,
                            const std::vector<int> &stationIds)
   : options_(options), latitudes_(latitudes), longitudes_(longitudes),
-    datetimes_(datetimes), pressures_(pressures), stationIds_(stationIds)
-{}
+    datetimes_(datetimes), pressures_(pressures), stationIds_(stationIds) {
+}
 
 std::vector<MetOfficeBuddyPair> MetOfficeBuddyPairFinder::findBuddyPairs(
     const std::vector<size_t> & validObsIds) {

@@ -25,6 +25,7 @@ static ObsFunctionMaker<ModelHeightAdjustedRelativeHumidity>
 
 ModelHeightAdjustedRelativeHumidity::ModelHeightAdjustedRelativeHumidity(
         const eckit::LocalConfiguration & conf): invars_() {
+  oops::Log::trace() << "ModelHeightAdjustedRelativeHumidity constructor" << std::endl;
   // Retrieve observation data  // Required observation data
   invars_ += Variable("ObsValue/relativeHumidityAt2M");
   // Required model surface altitude
@@ -42,6 +43,7 @@ ModelHeightAdjustedRelativeHumidity::ModelHeightAdjustedRelativeHumidity(
 
 void ModelHeightAdjustedRelativeHumidity::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ModelHeightAdjustedRelativeHumidity compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   std::vector<float> rh(nlocs);
   std::vector<float> T(nlocs);
@@ -76,6 +78,7 @@ void ModelHeightAdjustedRelativeHumidity::compute(const ObsFilterData & in,
       out[0][jj] = CorrectedRH;
     }
   }
+  oops::Log::trace() << "ModelHeightAdjustedRelativeHumidity compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

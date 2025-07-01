@@ -38,6 +38,7 @@ static ObsFunctionMaker<AssignValueEqualChannels>
  */
 AssignValueEqualChannels::AssignValueEqualChannels(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "AssignValueEqualChannels constructor" << std::endl;
   // Get options into a local variable
   options_.deserialize(conf);
 
@@ -47,7 +48,9 @@ AssignValueEqualChannels::AssignValueEqualChannels(const eckit::LocalConfigurati
 
 // -----------------------------------------------------------------------------
 
-AssignValueEqualChannels::~AssignValueEqualChannels() {}
+AssignValueEqualChannels::~AssignValueEqualChannels() {
+  oops::Log::trace() << "AssignValueEqualChannels destructor" << std::endl;
+}
 
 /* -----------------------------------------------------------------------------
  * Perform the computation.
@@ -58,6 +61,7 @@ AssignValueEqualChannels::~AssignValueEqualChannels() {}
  */
 void AssignValueEqualChannels::compute(const ObsFilterData & in,
                         ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "AssignValueEqualChannels compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const size_t nchans = out.nvars();
   const std::vector<int> channels = options_.variable.value().channels();
@@ -84,6 +88,7 @@ void AssignValueEqualChannels::compute(const ObsFilterData & in,
     }
     ivar++;
   }
+  oops::Log::trace() << "AssignValueEqualChannels compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

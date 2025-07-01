@@ -106,12 +106,13 @@ void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
 void BayesianBackgroundQCFlags::applyFilter(const std::vector<bool> & apply,
                                             const Variables & filtervars,
                                             std::vector<std::vector<bool>> & flagged) const {
-  print(oops::Log::trace());
+  oops::Log::trace() << "BayesianBackgroundQCFlags applyFilter start" << std::endl;
 
   for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
     const std::string varname = filtervars.variable(ivar).variable();
     setFlags(varname, apply, flagged[ivar]);
   }
+  oops::Log::trace() << "BayesianBackgroundQCFlags applyFilter complete" << std::endl;
 }
 
 void BayesianBackgroundQCFlags::print(std::ostream & os) const {

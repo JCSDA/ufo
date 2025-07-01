@@ -27,6 +27,7 @@ makerRadarScanEdgeFlag_("RadarScanEdgeFlag");
 
 RadarScanEdgeFlag::RadarScanEdgeFlag(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "RadarScanEdgeFlag constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -36,13 +37,15 @@ RadarScanEdgeFlag::RadarScanEdgeFlag(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-RadarScanEdgeFlag::~RadarScanEdgeFlag() {}
+RadarScanEdgeFlag::~RadarScanEdgeFlag() {
+  oops::Log::trace() << "RadarScanEdgeFlag destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void RadarScanEdgeFlag::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<int> & out) const {
-  oops::Log::trace() << "RadarScanEdgeFlag::compute started" << std::endl;
+  oops::Log::trace() << "RadarScanEdgeFlag compute start" << std::endl;
 
   const ioda::ObsSpace & obsdb = in.obsspace();
 
@@ -223,7 +226,7 @@ void RadarScanEdgeFlag::compute(const ObsFilterData & in,
     }
   }  // loop over records
 
-  oops::Log::trace() << "RadarScanEdgeFlag::compute finished" << std::endl;
+  oops::Log::trace() << "RadarScanEdgeFlag compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

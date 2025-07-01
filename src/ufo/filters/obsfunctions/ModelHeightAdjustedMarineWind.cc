@@ -26,6 +26,7 @@ static ObsFunctionMaker<ModelHeightAdjustedNorthwardMarineWind>
 ModelHeightAdjustedMarineWindComponent::ModelHeightAdjustedMarineWindComponent(
         const eckit::LocalConfiguration & conf, const Variable &windComponent)
         : invars_(), wind_(windComponent) {
+  oops::Log::trace() << "ModelHeightAdjustedMarineWindComponent constructor" << std::endl;
   // Required observation station height
   invars_ += Variable("MetaData/anemometerHeight");
   // Required wind component
@@ -36,6 +37,7 @@ ModelHeightAdjustedMarineWindComponent::ModelHeightAdjustedMarineWindComponent(
 
 void ModelHeightAdjustedMarineWindComponent::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ModelHeightAdjustedMarineWindComponent compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   std::vector<float> WindComponent(nlocs);
   std::vector<float> StationHeight(nlocs);
@@ -56,6 +58,7 @@ void ModelHeightAdjustedMarineWindComponent::compute(const ObsFilterData & in,
       out[0][jj] = WindComponent[jj]*ScaleFactor;
     }
   }
+  oops::Log::trace() << "ModelHeightAdjustedMarineWindComponent compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

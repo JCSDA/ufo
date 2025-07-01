@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "oops/util/Logger.h"
 #include "ufo/filters/actions/FilterAction.h"
-
 #include "ufo/filters/actions/FilterActionBase.h"
 
 namespace ufo {
@@ -14,8 +14,9 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 FilterAction::FilterAction(const FilterActionParametersBase & parameters)
-  : action_(FilterActionFactory::create(parameters))
-{}
+  : action_(FilterActionFactory::create(parameters)) {
+  oops::Log::trace() << "FilterAction constructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 

@@ -26,6 +26,7 @@ static FilterActionMaker<ROobserrInflation> makerInflateErr_("RONBAMErrInflate")
 
 ROobserrInflation::ROobserrInflation(const Parameters_ & parameters)
   : allvars_(), parameters_(parameters) {
+  oops::Log::trace() << "ROobserrInflation constructor" << std::endl;
 }
 // -----------------------------------------------------------------------------
 
@@ -35,6 +36,7 @@ void ROobserrInflation::apply(const Variables & vars,
                               int filterQCflag,
                               ioda::ObsDataVector<int> & flags,
                               ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ROobserrInflation apply start" << std::endl;
   const float missing = util::missingValue<float>();
   size_t nlocs = data.nlocs();
   ioda::ObsDataVector<int> layeridx(data.obsspace(), "modelLayerIndex", "ObsDiag");
@@ -75,6 +77,7 @@ void ROobserrInflation::apply(const Variables & vars,
       if (obserr[iallvar][jobs] != missing) obserr[iallvar][jobs] *= factor[jobs];
     }
   }
+  oops::Log::trace() << "ROobserrInflation apply complete" << std::endl;
 }
 // -----------------------------------------------------------------------------
 }  // namespace ufo

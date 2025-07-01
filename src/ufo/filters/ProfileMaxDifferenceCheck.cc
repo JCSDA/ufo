@@ -40,7 +40,7 @@ ProfileMaxDifferenceCheck::ProfileMaxDifferenceCheck(
 // -----------------------------------------------------------------------------
 
 ProfileMaxDifferenceCheck::~ProfileMaxDifferenceCheck() {
-  oops::Log::trace() << "ProfileMaxDifferenceCheck: destructed" << std::endl;
+  oops::Log::trace() << "ProfileMaxDifferenceCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ void ProfileMaxDifferenceCheck::applyFilter(
                                       const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ProfileMaxDifferenceCheck postFilter" << std::endl;
+  oops::Log::trace() << "ProfileMaxDifferenceCheck applyFilter start" << std::endl;
   const float missingFloat = util::missingValue<float>();
 
   // Get the variables that will be used in this filter
@@ -104,6 +104,7 @@ void ProfileMaxDifferenceCheck::applyFilter(
       }
     }  //  end iVar loop
   }  //  end iProfile loop
+  oops::Log::trace() << "ProfileMaxDifferenceCheck applyFilter complete" << std::endl;
 }  //  end applyFilter
 
 int ProfileMaxDifferenceCheck::calcMaxDifference(

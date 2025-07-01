@@ -25,6 +25,7 @@ static ObsFunctionMaker<ChannelUseflagCheckRad>
 
 ChannelUseflagCheckRad::ChannelUseflagCheckRad(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ChannelUseflagCheckRad constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -40,12 +41,15 @@ ChannelUseflagCheckRad::ChannelUseflagCheckRad(const eckit::LocalConfiguration &
 
 // -----------------------------------------------------------------------------
 
-ChannelUseflagCheckRad::~ChannelUseflagCheckRad() {}
+ChannelUseflagCheckRad::~ChannelUseflagCheckRad() {
+  oops::Log::trace() << "ChannelUseflagCheckRad destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ChannelUseflagCheckRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ChannelUseflagCheckRad compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   const size_t nchans = channels_.size();
@@ -67,6 +71,7 @@ void ChannelUseflagCheckRad::compute(const ObsFilterData & in,
       out[ichan][iloc] = useflag[ichan] * factor;
     }
   }
+  oops::Log::trace() << "ChannelUseflagCheckRad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

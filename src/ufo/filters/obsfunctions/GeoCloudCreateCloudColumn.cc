@@ -28,6 +28,7 @@ static ObsFunctionMaker<GeoCloudCreateCloudColumn>
 
 GeoCloudCreateCloudColumn::GeoCloudCreateCloudColumn(
         const eckit::LocalConfiguration & conf): invars_(), channels_() {
+  oops::Log::trace() << "GeoCloudCreateCloudColumn constructor" << std::endl;
   // Get options from argument
   options_.deserialize(conf);
   // Get channels used
@@ -52,6 +53,7 @@ GeoCloudCreateCloudColumn::GeoCloudCreateCloudColumn(
 
 void GeoCloudCreateCloudColumn::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "GeoCloudCreateCloudColumn compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/height_above_mean_sea_level"));
   const GeoVaLs * const gv(in.getGeoVaLs());
@@ -284,6 +286,7 @@ void GeoCloudCreateCloudColumn::compute(const ObsFilterData & in,
   }
 
   obsErrorOut.save(options_.outputGroup.value());
+  oops::Log::trace() << "GeoCloudCreateCloudColumn compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

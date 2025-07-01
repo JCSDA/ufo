@@ -28,6 +28,7 @@ static ObsFunctionMaker<ObsErrorFactorTransmitTopRad>
 
 ObsErrorFactorTransmitTopRad::ObsErrorFactorTransmitTopRad(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorTransmitTopRad constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -42,13 +43,15 @@ ObsErrorFactorTransmitTopRad::ObsErrorFactorTransmitTopRad(const eckit::LocalCon
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorTransmitTopRad::~ObsErrorFactorTransmitTopRad() {}
+ObsErrorFactorTransmitTopRad::~ObsErrorFactorTransmitTopRad() {
+  oops::Log::trace() << "ObsErrorFactorTransmitTopRad destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "ObsErrorFactorTransmitTopRad::compute start" << std::endl;
+  oops::Log::trace() << "ObsErrorFactorTransmitTopRad compute start" << std::endl;
   // Get dimensions
   size_t nlocs = in.nlocs();
   if (nlocs == 0) {
@@ -64,7 +67,7 @@ void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
       out[ich][iloc] = sqrt(1.0f / (std::abs(tao_top[iloc])+eps) );
     }
   }
-  oops::Log::trace() << "ObsErrorFactorTransmitTopRad::compute done" << std::endl;
+  oops::Log::trace() << "ObsErrorFactorTransmitTopRad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

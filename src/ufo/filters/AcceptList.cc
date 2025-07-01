@@ -25,6 +25,7 @@ AcceptList::AcceptList(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "AcceptList constructor" << std::endl;
   oops::Log::debug() << "AcceptList: config = " << parameters_ << std::endl;
 }
 
@@ -33,11 +34,13 @@ AcceptList::AcceptList(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
 void AcceptList::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "AcceptList applyFilter start" << std::endl;
   for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       flagged[jv][jobs] = apply[jobs];
     }
   }
+  oops::Log::trace() << "AcceptList applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

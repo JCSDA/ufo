@@ -24,6 +24,7 @@ static ObsFunctionMaker<ProfileAverageObsPressure>
 
 ProfileAverageObsPressure::ProfileAverageObsPressure(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ProfileAverageObsPressure constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -36,13 +37,15 @@ ProfileAverageObsPressure::ProfileAverageObsPressure(const eckit::LocalConfigura
 
 // -----------------------------------------------------------------------------
 
-ProfileAverageObsPressure::~ProfileAverageObsPressure() {}
+ProfileAverageObsPressure::~ProfileAverageObsPressure() {
+  oops::Log::trace() << "ProfileAverageObsPressure destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ProfileAverageObsPressure::compute(const ObsFilterData & in,
                                         ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "ProfileAverageObsPressure::compute started" << std::endl;
+  oops::Log::trace() << "ProfileAverageObsPressure::compute start" << std::endl;
 
   // ObsSpace.
   const ioda::ObsSpace & obsdb = in.obsspace();
@@ -116,7 +119,7 @@ void ProfileAverageObsPressure::compute(const ObsFilterData & in,
     }
   }
 
-  oops::Log::trace() << "ProfileAverageObsPressure::compute finished" << std::endl;
+  oops::Log::trace() << "ProfileAverageObsPressure::compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

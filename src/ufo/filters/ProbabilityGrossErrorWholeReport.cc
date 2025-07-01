@@ -28,13 +28,13 @@ ProbabilityGrossErrorWholeReport::ProbabilityGrossErrorWholeReport(ioda::ObsSpac
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
-  oops::Log::trace() << "ProbabilityGrossErrorWholeReport contructor starting" << std::endl;
+  oops::Log::trace() << "ProbabilityGrossErrorWholeReport constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 ProbabilityGrossErrorWholeReport::~ProbabilityGrossErrorWholeReport() {
-  oops::Log::trace() << "ProbabilityGrossErrorWholeReport destructed" << std::endl;
+  oops::Log::trace() << "ProbabilityGrossErrorWholeReport destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ ProbabilityGrossErrorWholeReport::~ProbabilityGrossErrorWholeReport() {
 void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ProbabilityGrossErrorWholeReport preProcess" << std::endl;
+  oops::Log::trace() << "ProbabilityGrossErrorWholeReport applyFilter start" << std::endl;
   // Missing value indicator
   const float missingValueFloat = util::missingValue<float>();
   // Dimensions
@@ -211,6 +211,7 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
                   diagFlagsBackReject[ivar]);
   }
   obsdb_.put_db("MetaData", "grossErrorProbabilityReport", ReportPGE);
+  oops::Log::trace() << "ProbabilityGrossErrorWholeReport applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

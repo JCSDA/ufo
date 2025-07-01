@@ -43,7 +43,7 @@ SpikeAndStepCheck::SpikeAndStepCheck(
 // -----------------------------------------------------------------------------
 
 SpikeAndStepCheck::~SpikeAndStepCheck() {
-  oops::Log::trace() << "SpikeAndStepCheck destructed" << std::endl;
+  oops::Log::trace() << "SpikeAndStepCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -99,7 +99,7 @@ void SpikeAndStepCheck::validateParameters() const {
 void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "SpikeAndStepCheck filter" << std::endl;
+  oops::Log::trace() << "SpikeAndStepCheck applyFilter start" << std::endl;
 
   ObsAccessor obsAccessor =
     ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
@@ -174,6 +174,7 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
   obsAccessor.flagRejectedObservations(isThinned, flagged);
   obsdb_.put_db("DiagnosticFlags/ProfileSpike", yVarName, spikeFlag);
   obsdb_.put_db("DiagnosticFlags/ProfileStep", yVarName, stepFlag);
+  oops::Log::trace() << "SpikeAndStepCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

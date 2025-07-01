@@ -23,6 +23,7 @@ static ObsFunctionMaker<SCATRetMW> makerSCATRetMW_("SCATRetMW");
 
 SCATRetMW::SCATRetMW(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SCATRetMW constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -48,12 +49,15 @@ SCATRetMW::SCATRetMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SCATRetMW::~SCATRetMW() {}
+SCATRetMW::~SCATRetMW() {
+  oops::Log::trace() << "SCATRetMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SCATRetMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SCATRetMW compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
   const size_t ngrps = options_.varGroup.value().size();
@@ -101,6 +105,7 @@ void SCATRetMW::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "SCATRetMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

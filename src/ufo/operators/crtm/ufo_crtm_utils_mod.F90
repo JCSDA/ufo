@@ -351,20 +351,28 @@ character(max_string) :: cloud_reff_method
    conf%Clouds(1:conf%n_Clouds,1) = str_array
 
    if (f_confOper%has("Cloud_Fraction")) then
-     call f_confOper%get_or_die("Cloud_Fraction",conf%Cloud_Fraction)
-     if ( conf%Cloud_Fraction < 0.0 .or. &
-          conf%Cloud_Fraction > 1.0 ) then
-       write(message,*) trim(ROUTINE_NAME),' error: must specify ' // &
-                        ' 0.0 <= Cloud_Fraction <= 1.0' // &
-                        ' or remove Cloud_Fraction from conf' // &
-                        ' and provide as a geoval'
-       call abor1_ftn(message)
+     if (conf%cal_cloud_frac_in_fov) then
+       message = trim(ROUTINE_NAME) // &
+           ': Cloud_Fraction input is ignored since it will be calculated within UFO.'
+       if (message_flag) CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+     else
+       call f_confOper%get_or_die("Cloud_Fraction",conf%Cloud_Fraction)
+       if ( conf%Cloud_Fraction < 0.0 .or. &
+            conf%Cloud_Fraction > 1.0 ) then
+         write(message,*) trim(ROUTINE_NAME),' error: must specify ' // &
+                          ' 0.0 <= Cloud_Fraction <= 1.0' // &
+                          ' or remove Cloud_Fraction from conf' // &
+                          ' and provide as a geoval'
+         call abor1_ftn(message)
+       end if
      end if
    else
-     message = trim(ROUTINE_NAME) // &
-             ': Cloud_Fraction is not provided in conf.' // &
-             ' Will request as a geoval.'
-     if (message_flag) CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+     if (.not. conf%cal_cloud_frac_in_fov .and. conf%n_Clouds > 0) then
+       message = trim(ROUTINE_NAME) // &
+               ': Cloud_Fraction is not provided in conf.' // &
+               ' Will request as a geoval.'
+       if (message_flag) CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
+     end if
    end if
    if (conf%cal_cloud_frac_in_fov) then
      message = trim(ROUTINE_NAME) // &
@@ -681,6 +689,10 @@ character(len=MAXVARLEN) :: varname
 character(len=64) :: obsGroupName
 character(len=max_string) :: message
 real(kind_real)  :: ObsVal(n_Profiles,n_Channels)
+integer :: extendedObs(n_Profiles), actObsAvgQC(n_Profiles)
+integer :: seqNum(n_Profiles)
+
+
 
 real(c_double)  :: missing_d
 real(kind_real) :: missing_r
@@ -707,8 +719,22 @@ real(kind_real), allocatable :: alon(:),alat(:)
  do jchannel = 1, n_Channels
    call get_var_name(channels(jchannel),varname, Is_Active_Sensor, Is_Vis_or_UV)
    call obsspace_get_db(obss, trim(obsGroupName), varname, ObsVal(:,jchannel))
- enddo
+enddo
 
+ if (Is_Active_Sensor) then
+    call obsspace_get_db(obss, "MetaData", "sequenceNumber", seqNum)    
+    if (obsspace_has(obss, "MetaData", "extendedObsSpace")) then
+       call obsspace_get_db(obss, "MetaData", "extendedObsSpace", extendedObs)
+    else
+       extendedObs = 1
+    endif
+    if (obsspace_has(obss, "MetaData", "actObsAvgQC")) then
+       call obsspace_get_db(obss, "MetaData", "actObsAvgQC", actObsAvgQC)
+    else
+       actObsAvgQC = 1
+    endif
+ endif
+ 
  allocate(alon(n_Profiles),alat(n_Profiles))
  if (obsspace_has(obss, "MetaData", "latitude")) call obsspace_get_db(obss, "MetaData", "latitude", alat)
  if (obsspace_has(obss, "MetaData", "longitude")) call obsspace_get_db(obss, "MetaData", "longitude", alon)
@@ -750,17 +776,21 @@ real(kind_real), allocatable :: alon(:),alat(:)
    ! check for all channels in Vis/UV profiles that have ObsValue/albedo
    ! that are below minimum threshold. Skip those.
    if (Is_Vis_or_UV) then
-     Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) < lowest_albedo)
+      Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) < lowest_albedo)
    endif
 
    ! check for all channels in active profiles that have ObsValue/Reflectivity
    ! that are beyond threshold. Skip those.
    if (Is_Active_Sensor) then
-     ! the second dimension is for channels so if any channel is missing then skip it
-     Options(jprofile)%Skip_Profile = any(abs(ObsVal(jprofile,:)) >= threshold_reflectivity)
-   endif
+      if (extendedObs(jprofile) == 0) Options(jprofile)%Skip_Profile = .TRUE.
+      if (actObsAvgQC(jprofile) == 0) Options(jprofile)%Skip_Profile = .TRUE.       
+      if (.not.  Options(jprofile)%Skip_Profile) then
+         ! the second dimension is for channels so if any channel is missing then skip it
+         Options(jprofile)%Skip_Profile = any(abs(ObsVal(jprofile,:)) >= threshold_reflectivity)
+      endif   
+   endif  
  end do profile_loop
-
+  
 end subroutine ufo_crtm_skip_profiles
 
 ! ------------------------------------------------------------------------------

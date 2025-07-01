@@ -39,6 +39,10 @@ void GaussianThinningParameters::deserialize(util::CompositePath &path,
             path.path() + ": distance_norm must not be set to 'geodesic' when "
                           "ops_compatibility_mode is set to true", Here());
   }
+  if (selectMedian && selectMean) {
+      throw eckit::UserError(
+            path.path() + ": only one of select_median and select_mean can be set to true", Here());
+  }
 }
 
 }  // namespace ufo

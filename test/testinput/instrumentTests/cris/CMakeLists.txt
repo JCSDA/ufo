@@ -63,7 +63,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/cris/cris-fsr_n20_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_n20_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm cris-fsr n20 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -73,7 +73,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/cris/cris-fsr_npp_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris-fsr_npp_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm cris-fsr npp qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../

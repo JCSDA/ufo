@@ -57,6 +57,8 @@ set ( utils_files
       NearestNeighborInterpolation.h
       SaveBiasCoeffs.cc
       SaveBiasCoeffs.h
+      SaveBiasCovariance.cc
+      SaveBiasCovariance.h
       SpatialBinSelector.h
       SpatialBinSelector.cc
       StringUtils.cc

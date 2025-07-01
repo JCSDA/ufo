@@ -24,6 +24,7 @@ makerFlagOriginalAndAveragedProfiles_("flag original and averaged profiles");
 FlagOriginalAndAveragedProfiles::FlagOriginalAndAveragedProfiles
 (const FlagOriginalAndAveragedProfilesParameters &parameters)
   : allvars_(), parameters_(parameters) {
+  oops::Log::trace() << "FlagOriginalAndAveragedProfiles constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -47,6 +48,7 @@ void FlagOriginalAndAveragedProfiles::apply(const Variables & vars,
   if (!obsdb.has("MetaData", "extendedObsSpace"))
     throw eckit::UserError("The extended obs space has not been produced", Here());
 
+  oops::Log::trace() << "FlagOriginalAndAveragedProfiles apply start" << std::endl;
   // Correspondence between record numbers and indices in the data sample.
   const std::vector<std::size_t> &recnums = data.obsspace().recidx_all_recnums();
 
@@ -86,6 +88,7 @@ void FlagOriginalAndAveragedProfiles::apply(const Variables & vars,
       }
     }
   }
+  oops::Log::trace() << "FlagOriginalAndAveragedProfiles apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

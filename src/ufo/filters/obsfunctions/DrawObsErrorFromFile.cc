@@ -44,6 +44,7 @@ static ObsFunctionMaker<DrawObsErrorFromFile> maker("DrawObsErrorFromFile");
 
 DrawObsErrorFromFile::DrawObsErrorFromFile(const eckit::LocalConfiguration &config)
   : invars_() {
+  oops::Log::trace() << "DrawObsErrorFromFile constructor" << std::endl;
   options_.deserialize(config);
 
   // Initialise the DrawValueFromFile object with the `group` option.
@@ -66,6 +67,7 @@ DrawObsErrorFromFile::DrawObsErrorFromFile(const eckit::LocalConfiguration &conf
 
 void DrawObsErrorFromFile::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "DrawObsErrorFromFile compute start" << std::endl;
   const float missing = util::missingValue<float>();
 
   // Interpolate variances
@@ -118,6 +120,7 @@ void DrawObsErrorFromFile::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "DrawObsErrorFromFile compute complete" << std::endl;
 }
 
 const ufo::Variables & DrawObsErrorFromFile::requiredVariables() const {

@@ -30,6 +30,7 @@ static ObsFunctionMaker<NearSSTRetCheckIR> makerNearSSTRetCheckIR_("NearSSTRetCh
 
 NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "NearSSTRetCheckIR constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -65,13 +66,15 @@ NearSSTRetCheckIR::NearSSTRetCheckIR(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-NearSSTRetCheckIR::~NearSSTRetCheckIR() {}
+NearSSTRetCheckIR::~NearSSTRetCheckIR() {
+  oops::Log::trace() << "NearSSTRetCheckIR destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "NearSSTRetCheckIR::compute start" << std::endl;
+  oops::Log::trace() << "NearSSTRetCheckIR compute start" << std::endl;
   // Get obs space
   auto & obsdb_ = in.obsspace();
 
@@ -287,7 +290,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     }
   // end of location loop
   }
-  oops::Log::trace() << "NearSSTRetCheckIR::compute done" << std::endl;
+  oops::Log::trace() << "NearSSTRetCheckIR compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

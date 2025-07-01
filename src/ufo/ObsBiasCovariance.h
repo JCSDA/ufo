@@ -108,6 +108,12 @@ class ObsBiasCovariance : public util::Printable,
 
   std::vector<std::string> prednames_;
 
+  /// store data from the input file when using by record
+  /// for outputting during the write procedure
+  std::vector<Eigen::ArrayXXf> inputBiasVariances_;
+  std::vector<std::string> inputPredictors_;
+  std::vector<std::string> inputRecords_;
+
   /// bias-correct by record?
   bool byRecord_;
 
@@ -124,6 +130,9 @@ class ObsBiasCovariance : public util::Printable,
 
   /// MPI rank, used to determine whether the task should output bias errors coeffs to a file
   const size_t rank_;
+
+  /// MPI communicator
+  const eckit::mpi::Comm & comm_;
 
   /// MPI communicator used in time decomposition for 4DEnVar and weak-constraint 4DVar
   const eckit::mpi::Comm & commTime_;

@@ -35,6 +35,7 @@ VariableTransforms::VariableTransforms(
     std::shared_ptr<ioda::ObsDataVector<float>> obserr)
     : FilterBase(obsdb, config, flags, obserr), parameters_()
 {
+  oops::Log::trace() << "VariableTransforms constructor" << std::endl;
   // Create parameters for this transformation
   parameters_ = TransformFactory::createParameters(config.getString("Transform"));
   parameters_->validateAndDeserialize(config);
@@ -52,15 +53,16 @@ VariableTransforms::VariableTransforms(
 
 // -----------------------------------------------------------------------------
 
-VariableTransforms::~VariableTransforms() {}
+VariableTransforms::~VariableTransforms() {
+  oops::Log::trace() << "VariableTransforms destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void VariableTransforms::applyFilter(
     const std::vector<bool>& apply, const Variables&,
     std::vector<std::vector<bool>>&) const {
-  print(oops::Log::trace());
-  oops::Log::debug() << " --> In variabletransforms::applyFilter" << std::endl;
+  oops::Log::trace() << "VariableTransforms applyFilter start" << std::endl;
 
   // Do not perform transformation if there are no observations present.
   if (parameters_->SkipWhenNoObs.value() && data_.nlocs() == 0) {
@@ -78,6 +80,7 @@ void VariableTransforms::applyFilter(
   // Run all calculations requested
   oops::Log::debug() << "         estimate: " << parameters_->Transform.value() << std::endl;
   transform->runTransform(apply);
+  oops::Log::trace() << "VariableTransforms applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

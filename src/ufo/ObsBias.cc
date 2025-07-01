@@ -275,8 +275,6 @@ void ObsBias::read(const eckit::Configuration & config) {
 
 void ObsBias::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "ObsBias::write start" << std::endl;
-  Parameters_ params;
-  params.validateAndDeserialize(config);
 
   std::vector<std::string> globalRecordIds;
   std::vector<double> globalBiasCoeffs;
@@ -293,6 +291,9 @@ void ObsBias::write(const eckit::Configuration & config) const {
 
   // only write files out on the task with MPI rank 0
   if (rank_ != 0 || commTime_.rank() != 0) return;
+
+  Parameters_ params;
+  params.validateAndDeserialize(config);
 
   if (params.outputFile.value() != boost::none) {
     // Create a file, overwrite if exists

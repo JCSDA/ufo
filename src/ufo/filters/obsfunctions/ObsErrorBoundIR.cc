@@ -28,6 +28,7 @@ static ObsFunctionMaker<ObsErrorBoundIR> makerObsErrorBoundIR_("ObsErrorBoundIR"
 
 ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorBoundIR constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -54,13 +55,15 @@ ObsErrorBoundIR::ObsErrorBoundIR(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-ObsErrorBoundIR::~ObsErrorBoundIR() {}
+ObsErrorBoundIR::~ObsErrorBoundIR() {
+  oops::Log::trace() << "ObsErrorBoundIR destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorBoundIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "ObsErrorBoundIR::compute start" << std::endl;
+  oops::Log::trace() << "ObsErrorBoundIR compute start" << std::endl;
   // Get observation error bounds from options
   const std::vector<float> &obserr_bound_max = options_.obserrBoundMax.value();
   // Get dimensions
@@ -116,7 +119,7 @@ void ObsErrorBoundIR::compute(const ObsFilterData & in,
       }
     }
   }
-  oops::Log::trace() << "ObsErrorBoundIR::compute end" << std::endl;
+  oops::Log::trace() << "ObsErrorBoundIR compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

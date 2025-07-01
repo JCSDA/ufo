@@ -21,6 +21,7 @@ static ObsFunctionMaker<SIRetSymmetricMW> makerSIRetSymmetricMW_("SIRetSymmetric
 
 SIRetSymmetricMW::SIRetSymmetricMW(const eckit::LocalConfiguration & conf)
   : invars_(), conf_(conf) {
+  oops::Log::trace() << "SIRetSymmetricMW constructor" << std::endl;
   SIRetMW siretfunc(conf_);
   ASSERT(siretfunc.siVariableGroups().size() == 2);
 
@@ -29,12 +30,15 @@ SIRetSymmetricMW::SIRetSymmetricMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SIRetSymmetricMW::~SIRetSymmetricMW() {}
+SIRetSymmetricMW::~SIRetSymmetricMW() {
+  oops::Log::trace() << "SIRetSymmetricMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void SIRetSymmetricMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SIRetSymmetricMW compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
 
@@ -50,6 +54,7 @@ void SIRetSymmetricMW::compute(const ObsFilterData & in,
     if (siret[0][iloc] >= siretfunc.getBadValue() || siret[1][iloc] >= siretfunc.getBadValue())
         out[0][iloc] = siretfunc.getBadValue();
   }
+  oops::Log::trace() << "SIRetSymmetricMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

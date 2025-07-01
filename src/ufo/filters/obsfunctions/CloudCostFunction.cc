@@ -25,6 +25,7 @@ static ObsFunctionMaker<CloudCostFunction> makerCloudCostFunction_("CloudCostFun
 
 CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "CloudCostFunction constructor start" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -71,12 +72,14 @@ CloudCostFunction::CloudCostFunction(const eckit::LocalConfiguration & conf)
     invars_ += Variable("GeoVaLs/air_temperature_at_2m");
     invars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air_at_2m");
   }
+  oops::Log::trace() << "CloudCostFunction constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void CloudCostFunction::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "CloudCostFunction compute start" << std::endl;
   // Get dimensions
   const size_t nlocs = in.nlocs();
   const size_t nchans = channels_.size();
@@ -337,6 +340,7 @@ void CloudCostFunction::compute(const ObsFilterData & in,
     Cost_final /= static_cast<float>(nchans);  // normalise by number of channels
     out[0][iloc] = std::min(Cost_final, options_.maxCost.value());
   }
+  oops::Log::trace() << "CloudCostFunction compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -20,7 +20,7 @@ SuperOb::SuperOb(ioda::ObsSpace & obsdb,
                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr),
     options_(parameters) {
-  oops::Log::trace() << "SuperOb constructor" << std::endl;
+  oops::Log::trace() << "SuperOb constructor start" << std::endl;
 
   // The ObsSpace must have been divided into records.
   if (obsdb.obs_group_vars().empty()) {
@@ -43,7 +43,7 @@ SuperOb::SuperOb(ioda::ObsSpace & obsdb,
     allvars_ += Variables(filtervars_, "HofX");
   }
 
-  oops::Log::debug() << "SuperOb constructor finished" << std::endl;
+  oops::Log::trace() << "SuperOb constructor complete" << std::endl;
 }
 
 SuperOb::~SuperOb() {
@@ -53,7 +53,7 @@ SuperOb::~SuperOb() {
 void SuperOb::applyFilter(const std::vector<bool> & apply,
                           const Variables & filtervars,
                           std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "SuperOb applyFilter" << std::endl;
+  oops::Log::trace() << "SuperOb applyFilter start" << std::endl;
 
   // Run superobbing algorithm.
   const SuperObParametersWrapper & params = options_.algorithmParameters.value();
@@ -63,6 +63,7 @@ void SuperOb::applyFilter(const std::vector<bool> & apply,
                            data_, apply, filtervars, *flags_, flagged);
 
   superOb->runAlgorithm();
+  oops::Log::trace() << "SuperOb applyFilter complete" << std::endl;
 }
 
 void SuperOb::print(std::ostream & os) const {

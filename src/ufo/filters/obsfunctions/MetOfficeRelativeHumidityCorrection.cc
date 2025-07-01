@@ -27,6 +27,7 @@ static ObsFunctionMaker<MetOfficeRelativeHumidityCorrection>
 MetOfficeRelativeHumidityCorrection::MetOfficeRelativeHumidityCorrection
 (const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "MetOfficeRelativeHumidityCorrection constructor" << std::endl;
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
@@ -43,13 +44,15 @@ MetOfficeRelativeHumidityCorrection::MetOfficeRelativeHumidityCorrection
 
 // -----------------------------------------------------------------------------
 
-MetOfficeRelativeHumidityCorrection::~MetOfficeRelativeHumidityCorrection() {}
+MetOfficeRelativeHumidityCorrection::~MetOfficeRelativeHumidityCorrection() {
+  oops::Log::trace() << "MetOfficeRelativeHumidityCorrection destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
                                         ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "MetOfficeRelativeHumidityCorrection::compute started" << std::endl;
+  oops::Log::trace() << "MetOfficeRelativeHumidityCorrection compute start" << std::endl;
 
   // Missing float value.
   const float missing = util::missingValue<float>();
@@ -140,7 +143,7 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
     out[0][jloc] = interp_rh - interp_rh_from_q;
   }
 
-  oops::Log::trace() << "MetOfficeRelativeHumidityCorrection::compute finished" << std::endl;
+  oops::Log::trace() << "MetOfficeRelativeHumidityCorrection compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

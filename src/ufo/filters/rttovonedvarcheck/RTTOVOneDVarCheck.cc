@@ -32,7 +32,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
   : FilterBase(obsdb, parameters, flags, obserr), channels_(), retrieved_vars_(),
     hoxdiags_retrieved_vars_(), parameters_(parameters)
 {
-  oops::Log::trace() << "RTTOVOneDVarCheck contructor starting" << std::endl;
+  oops::Log::trace() << "RTTOVOneDVarCheck constructor start" << std::endl;
 
   // Check only one variable has been defined - BT
   // Get channels from filter variables
@@ -96,7 +96,7 @@ RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ &
 
 RTTOVOneDVarCheck::~RTTOVOneDVarCheck() {
   ufo_rttovonedvarcheck_delete_f90(keyRTTOVOneDVarCheck_);
-  oops::Log::trace() << "RTTOVOneDVarCheck destructed" << std::endl;
+  oops::Log::trace() << "RTTOVOneDVarCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ RTTOVOneDVarCheck::~RTTOVOneDVarCheck() {
 void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                const Variables & filtervars,
                                std::vector<std::vector<bool>> &) const {
-  oops::Log::trace() << "RTTOVOneDVarCheck Filter starting" << std::endl;
+  oops::Log::trace() << "RTTOVOneDVarCheck applyFilter start" << std::endl;
 
 // Create oops variable with the list of channels
   oops::Variables variables = filtervars.toOopsVariables();
@@ -140,7 +140,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
 // Read qc flags from database
   flags_->read("FortranQC");    // temporary measure as per ROobserror qc
 
-  oops::Log::trace() << "RTTOVOneDVarCheck Filter complete" << std::endl;
+  oops::Log::trace() << "RTTOVOneDVarCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

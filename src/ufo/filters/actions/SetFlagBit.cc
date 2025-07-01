@@ -24,6 +24,7 @@ static FilterActionMaker<SetFlagBit> setFlagMaker_("set flag bit");
 
 SetFlagBit::SetFlagBit(const SetFlagBitParameters &parameters)
   : bitsetter_(1 << parameters.bit.value()) {
+  oops::Log::trace() << "SetFlagBit constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -34,6 +35,7 @@ void SetFlagBit::apply(const Variables &vars,
                        int,
                        ioda::ObsDataVector<int> &qcFlags,
                        ioda::ObsDataVector<float> &) const {
+  oops::Log::trace() << "SetFlagBit apply start" << std::endl;
   const std::string group = "DiagnosticFlags";
   const size_t nlocs = data.nlocs();
   const size_t nvars = vars.nvars();
@@ -55,6 +57,7 @@ void SetFlagBit::apply(const Variables &vars,
     }
     data.obsspace().put_db(group, variableName, diagnosticFlags);
   }
+  oops::Log::trace() << "SetFlagBit apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

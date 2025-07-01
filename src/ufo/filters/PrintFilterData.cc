@@ -395,7 +395,7 @@ void PrintFilterData::printAllData() const {
 }
 
 void PrintFilterData::doFilter() {
-  oops::Log::trace() << "PrintFilterData doFilter started" << std::endl;
+  oops::Log::trace() << "PrintFilterData doFilter start" << std::endl;
   oops::Log::debug() << *this;
 
   // Print welcome message.
@@ -414,7 +414,7 @@ void PrintFilterData::doFilter() {
   this->getAllData();
   this->printAllData();
 
-  oops::Log::trace() << "PrintFilterData doFilter finished" << std::endl;
+  oops::Log::trace() << "PrintFilterData doFilter complete" << std::endl;
 }
 
 void PrintFilterData::print(std::ostream & os) const {

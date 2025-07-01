@@ -88,13 +88,13 @@ FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
 // -----------------------------------------------------------------------------
 
 FilterBase::~FilterBase() {
-  oops::Log::trace() << "FilterBase destructed" << std::endl;
+  oops::Log::trace() << "FilterBase destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void FilterBase::doFilter() {
-  oops::Log::trace() << "FilterBase doFilter begin" << std::endl;
+  oops::Log::trace() << "FilterBase doFilter start" << std::endl;
 
 // Select locations to which the filter will be applied
   std::vector<bool> apply = processWhere(whereParameters_, data_, whereOperator_);
@@ -131,7 +131,7 @@ void FilterBase::doFilter() {
   }
 
 // Done
-  oops::Log::trace() << "FilterBase doFilter end" << std::endl;
+  oops::Log::trace() << "FilterBase doFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

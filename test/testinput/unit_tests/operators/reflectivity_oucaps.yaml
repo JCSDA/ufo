@@ -1,6 +1,6 @@
 time window:
-  begin: 2022-05-12T21:00:00Z
-  end: 2022-05-13T00:00:00Z
+  begin: 2023-03-31T17:00:00Z
+  end: 2023-03-31T23:00:00Z
 
 # Test Thompson microphysics reflectivity operator with variational method (option 108)
 observations:
@@ -9,19 +9,25 @@ observations:
     microphysics option: Thompson
     use variational method: true
     vertical coordinate: geopotential_height
+    var_rain_mixing_ratio: mixing_ratio_of_rain
+    var_snow_mixing_ratio: mixing_ratio_of_snow
+    var_graupel_mixing_ratio: mixing_ratio_of_graupel
+    var_rain_number_concentration: rain_number_concentration
+    #observation alias file: obsop_name_map.yaml
+
   obs space:
     name: Radar_Reflectivity
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/obs_radar_mrms_202205122200.nc
+        obsfile: Data/ufo/testinput_tier_1/obs_radar_oucaps_2023033120.nc
     obsdataout:
       engine:
         type: H5File
-        obsfile: hofx108_radar_mrms_202205122200.nc
+        obsfile: hofx_radar_thompson_var_oucaps.nc
     simulated variables: [reflectivity]
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_radar_mrms_202205122200.nc
+    filename: Data/ufo/testinput_tier_1/geovals_radar_oucaps_2023033120.nc
   vector ref: Reference_TM_VarOP
   tolerance: 1.e-6
   linear obs operator test:
@@ -36,18 +42,53 @@ observations:
     microphysics option: Thompson
     use variational method: False
     vertical coordinate: geopotential_height
+    var_rain_mixing_ratio: mixing_ratio_of_rain
+    var_snow_mixing_ratio: mixing_ratio_of_snow
+    var_graupel_mixing_ratio: mixing_ratio_of_graupel
+    var_rain_number_concentration: rain_number_concentration
+    observation alias file: obsop_name_map.yaml
+
   obs space:
     name: Radar_Reflectivity2
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/obs_radar_mrms_202205122200.nc
+        obsfile: Data/ufo/testinput_tier_1/obs_radar_oucaps_2023033120.nc
     obsdataout:
       engine:
         type: H5File
-        obsfile: hofx109_radar_mrms_202205122200.nc
+        obsfile: hofx_radar_thompson_enkf_oucaps.nc
     simulated variables: [reflectivity]
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_radar_mrms_202205122200.nc
+    filename: Data/ufo/testinput_tier_1/geovals_radar_oucaps_2023033120.nc
   vector ref: Reference_TM_EnKFOP
   tolerance: 1.e-6
+
+
+# Test GFDL microphysics reflectivity operator
+observations:
+- obs operator:
+    name: DirectZDA
+    #microphysics option: Thompson
+    microphysics option: GFDL
+    use variational method: false
+    vertical coordinate: geopotential_height
+    var_rain_mixing_ratio: mixing_ratio_of_rain
+    var_snow_mixing_ratio: mixing_ratio_of_snow
+    var_graupel_mixing_ratio: mixing_ratio_of_graupel
+  obs space:
+    name: Radar_Reflectivity3
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs_radar_oucaps_2023033120.nc
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: hofx-mpas.mrms_reflectivity.202202160000.nc
+    simulated variables: [reflectivity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_radar_oucaps_2023033120.nc
+  vector ref: Reference_GFDL
+  tolerance: 1.e-6
+

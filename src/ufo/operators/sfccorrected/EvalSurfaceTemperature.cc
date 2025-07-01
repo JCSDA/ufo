@@ -16,6 +16,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/VertInterp.interface.h"
+#include "ufo/variabletransforms/Formulas.h"
 
 namespace ufo {
 
@@ -47,6 +48,8 @@ void airTemperatureAt2M_WRFDA::simobs(const ufo::GeoVaLs & gv,
   // Setup parameters used throughout
   const size_t nobs = obsdb.nlocs();
   const float missing = util::missingValue<float>();
+  std::vector<float> obs_lats(nobs);
+  obsdb.get_db("MetaData", "latitude", obs_lats);
 
   // Create arrays needed
   std::vector<float> model_height_level1(nobs), model_height_surface(nobs),
@@ -57,15 +60,23 @@ void airTemperatureAt2M_WRFDA::simobs(const ufo::GeoVaLs & gv,
   const int surface_level_index = gv.nlevs(geomz_var) - 1;
   gv.getAtLevel(model_height_level1, geomz_var, surface_level_index);
   if (params_.geovarGeomZ.value().find("geopotential") != std::string::npos) {
-      oops::Log::trace()  << "ObsSfcCorrected::simulateObs do geopotential conversion profile"
-                         << std::endl;
+    oops::Log::trace()  << "ObsSfcCorrected::simulateObs_WRFDA do geopotential"
+                        << " conversion for model level 1" << std::endl;
+    for (size_t iloc = 0; iloc < nobs; ++iloc) {
+      model_height_level1[iloc] = formulas::Geopotential_to_Geometric_Height(obs_lats[iloc],
+          model_height_level1[iloc]);
+    }
   }
 
   // Get surface height.  If geopotential then convert to geometric height.
   gv.get(model_height_surface, oops::Variable(params_.geovarSfcGeomZ.value()));
   if (params_.geovarSfcGeomZ.value().find("geopotential") != std::string::npos) {
-      oops::Log::trace()  << "ObsSfcCorrected::simulateObs do geopotential conversion surface"
-                         << std::endl;
+    oops::Log::trace()  << "ObsSfcCorrected::simulateObs_WRFDA do geopotential"
+                        << " conversion for model surface level" << std::endl;
+    for (size_t iloc = 0; iloc < nobs; ++iloc) {
+      model_height_surface[iloc] = formulas::Geopotential_to_Geometric_Height(obs_lats[iloc],
+          model_height_surface[iloc]);
+    }
   }
 
   // Read other data in
@@ -140,13 +151,16 @@ void airTemperatureAt2M_UKMO::simobs(const ufo::GeoVaLs & gv,
 
   // Create arrays needed
   std::vector<float> model_height_surface(nobs), model_p_surface(nobs),
-      obs_height(nobs);
+      obs_height(nobs), lats(nobs);
   std::vector<double> model_p_2000m(nobs), model_T_2000m(nobs);
+  obsdb.get_db("MetaData", "latitude", lats);
+  bool convertLevel1GeopotentialHeight = false;
 
   // Get level 1 height.  If geopotential then convert to geometric height.
   if (params_.geovarGeomZ.value().find("geopotential") != std::string::npos) {
     oops::Log::trace()  << "ObsSfcCorrected::simulateObs do geopotential conversion profile"
                        << std::endl;
+    convertLevel1GeopotentialHeight = true;
   }
 
   // Get surface height.  If geopotential then convert to geometric height.
@@ -154,6 +168,10 @@ void airTemperatureAt2M_UKMO::simobs(const ufo::GeoVaLs & gv,
   if (params_.geovarSfcGeomZ.value().find("geopotential") != std::string::npos) {
     oops::Log::trace()  << "ObsSfcCorrected::simulateObs do geopotential conversion surface"
                        << std::endl;
+    for (size_t iloc = 0; iloc < nobs; ++iloc) {
+      model_height_surface[iloc] = formulas::Geopotential_to_Geometric_Height(lats[iloc],
+         model_height_surface[iloc]);
+    }
   }
 
   // Read data in
@@ -175,8 +193,16 @@ void airTemperatureAt2M_UKMO::simobs(const ufo::GeoVaLs & gv,
       gv.getAtLocation(profile_height, model_height_var, iloc);
       gv.getAtLocation(profile_pressure, model_p_var, iloc);
       gv.getAtLocation(profile_T, model_T_var, iloc);
-      // Vertical interpolation to get model pressure and temperature at 2000 m
+      // Convert geopotential to geometric height if needed
+      if (convertLevel1GeopotentialHeight) {
+        for (size_t i = 0; i < model_nlevs; ++i) {
+          profile_height[i] = formulas::Geopotential_to_Geometric_Height(lats[iloc],
+            profile_height[i]);
+        }
+      }
       vert_interp_weights_f90(model_nlevs, height_used, profile_height.data(), index, weight);
+
+      // Vertical interpolation to get model pressure and temperature at 2000 m
       vert_interp_apply_f90(model_nlevs, profile_pressure.data(),
                             model_p_2000m[iloc], index, weight);
       vert_interp_apply_f90(model_nlevs, profile_T.data(),

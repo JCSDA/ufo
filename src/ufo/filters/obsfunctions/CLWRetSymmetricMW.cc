@@ -24,6 +24,7 @@ static ObsFunctionMaker<CLWRetSymmetricMW> makerCLWRetSymmetricMW_("CLWRetSymmet
 
 CLWRetSymmetricMW::CLWRetSymmetricMW(const eckit::LocalConfiguration & conf)
   : invars_(), conf_(conf) {
+  oops::Log::trace() << "CLWRetSymmetricMW constructor" << std::endl;
   CLWRetMW clwretfunc(conf_);
   ASSERT(clwretfunc.clwVariableGroups().size() == 2);
 
@@ -32,12 +33,15 @@ CLWRetSymmetricMW::CLWRetSymmetricMW(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-CLWRetSymmetricMW::~CLWRetSymmetricMW() {}
+CLWRetSymmetricMW::~CLWRetSymmetricMW() {
+  oops::Log::trace() << "CLWRetSymmetricMW destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void CLWRetSymmetricMW::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "CLWRetSymmetricMW compute start" << std::endl;
   // Get dimension
   const size_t nlocs = in.nlocs();
 
@@ -53,6 +57,7 @@ void CLWRetSymmetricMW::compute(const ObsFilterData & in,
     if (clwret[0][iloc] >= clwretfunc.getBadValue() || clwret[1][iloc] >= clwretfunc.getBadValue())
         out[0][iloc] = clwretfunc.getBadValue();
   }
+  oops::Log::trace() << "CLWRetSymmetricMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

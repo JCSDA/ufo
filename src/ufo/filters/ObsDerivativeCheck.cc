@@ -33,12 +33,15 @@ ObsDerivativeCheck::ObsDerivativeCheck(ioda::ObsSpace & obsdb, const Parameters_
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
+  oops::Log::trace() << "ObsDerivativeCheck constructor" << std::endl;
   oops::Log::debug() << "ObsDerivativeCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-ObsDerivativeCheck::~ObsDerivativeCheck() {}
+ObsDerivativeCheck::~ObsDerivativeCheck() {
+  oops::Log::trace() << "ObsDerivativeCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -97,6 +100,7 @@ void get_locs(const std::vector<std::size_t> & rSort, const size_t & i1, const s
 void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "ObsDerivativeCheck applyFilter start" << std::endl;
   const float missing = util::missingValue<float>();
   const double radiusEarth = Constants::mean_earth_rad*1000.0;
 
@@ -235,6 +239,7 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   }
+  oops::Log::trace() << "ObsDerivativeCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

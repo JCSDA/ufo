@@ -1,0 +1,139 @@
+time window:
+  begin: 2018-04-14T20:30:00Z
+  end: 2018-04-15T03:30:00Z
+
+observations:
+# New test configuration for EvalSurfacePressure tests using c++ file instead of Fortran
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: WRFDA
+  obs space:
+    name: Surface operator station pressure WRFDA method
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_m_WRFDA_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98240.77327572
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+ # Set levels_are_top_down: false (level index 0 is nearest to the Earth's surface
+ # in the GeoVal file), so that levels in GeoVal are made top_down after being read.
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: WRFDA
+    geovar_geomz: geopotential_height
+    geovar_sfc_geomz: geopotential_height_at_surface
+  obs space:
+    name: Surface operator station pressure WRFDA method with geopotential
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_m_WRFDA_out2.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
+    levels_are_top_down: false
+  rms ref: 99605.18477385
+  tolerance: 1.e-08
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: UKMO
+  obs space:
+    name: Surface operator station pressure UKMO method
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_m_UKMOS_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98239.27356140
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+ # New additions to test nc-diag file output variables that are not height and
+ # height_above_mean_sea_level_at_surface, which can be overriden with new optional parameters
+ # geovar_geomz and geovar_sfc_geomz
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: UKMO
+    geovar_geomz: geopotential_height
+    geovar_sfc_geomz: geopotential_height_at_surface
+  obs space:
+    name: Surface operator station pressure UKMO method with geopotential
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_m_UKMOS_out2.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
+  rms ref: 99603.92205093
+  tolerance: 1.e-08
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+  obs space:
+    name: Surface operator station pressure GSL
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_m.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_GSI_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 99633.58066186
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    geovar_geomz: geopotential_height
+    geovar_sfc_geomz: geopotential_height_at_surface
+  obs space:
+    name: Surface operator station pressure GSL method with geopotential
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_new.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfc_2018041500_m_GSI_out2.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
+    levels_are_top_down: false
+  rms ref: 99672.22998383 
+  tolerance: 1.e-08

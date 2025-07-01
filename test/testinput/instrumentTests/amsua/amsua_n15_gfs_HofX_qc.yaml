@@ -334,5 +334,4 @@ observations:
     action:
       name: reject
 # passedBenchmark: 90 # crtm v2.3
-# passedBenchmark: 96 # crtm v2.4
-  passedBenchmark: 90 # crtm v3.0
+  passedBenchmark: 96 # crtm v2.4 or greater

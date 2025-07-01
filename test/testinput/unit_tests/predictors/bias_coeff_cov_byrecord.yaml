@@ -36,5 +36,6 @@ observations:
         inflation:
           ratio: 1.1
           ratio for small dataset: 2.0
+      output file: Data/aircraft_covariance_20210731T18Z_test1.nc4
   tolerance: 1.e-7
 

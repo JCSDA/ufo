@@ -27,6 +27,7 @@ static ObsFunctionMaker<StringManipulation> makerStringManip_("StringManipulatio
 
 StringManipulation::StringManipulation(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "StringManipulation constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 
@@ -40,6 +41,7 @@ StringManipulation::StringManipulation(const eckit::LocalConfiguration & conf)
 
 void StringManipulation::compute(const ObsFilterData & in,
                                  ioda::ObsDataVector<std::string> & out) const {
+  oops::Log::trace() << "StringManipulation compute start" << std::endl;
   // dimension
   const size_t nlocs = in.nlocs();
 
@@ -69,6 +71,7 @@ void StringManipulation::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "StringManipulation compute complete" << std::endl;
 }
 // -----------------------------------------------------------------------------
 

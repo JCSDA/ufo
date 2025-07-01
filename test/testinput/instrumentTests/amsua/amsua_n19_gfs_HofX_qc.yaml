@@ -370,5 +370,4 @@ observations:
       flag: UseFlag_Check
     - name: reject
 # passedBenchmark: 76 # crtm v2.3
-# passedBenchmark: 81 # crtm v2.4
-  passedBenchmark: 86 # crtm v3.0
+  passedBenchmark: 81 # crtm v2.4 or greater

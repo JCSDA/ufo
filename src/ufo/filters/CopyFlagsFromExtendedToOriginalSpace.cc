@@ -23,7 +23,7 @@ CopyFlagsFromExtendedToOriginalSpace::CopyFlagsFromExtendedToOriginalSpace
                                      std::shared_ptr<ioda::ObsDataVector<float>> obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace constructor" << std::endl;
+  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace constructor start" << std::endl;
 
   // Ensure observations have been grouped into profiles.
   if (obsdb_.obs_group_vars().empty()) {
@@ -40,13 +40,13 @@ CopyFlagsFromExtendedToOriginalSpace::CopyFlagsFromExtendedToOriginalSpace
   // Get parameters from options
   allvars_ += parameters_.obsVertCoord;
   allvars_ += parameters_.modelVertCoord;
-  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace constructed" << std::endl;
+  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 CopyFlagsFromExtendedToOriginalSpace::~CopyFlagsFromExtendedToOriginalSpace() {
-  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace destructed" << std::endl;
+  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -54,7 +54,7 @@ CopyFlagsFromExtendedToOriginalSpace::~CopyFlagsFromExtendedToOriginalSpace() {
 void CopyFlagsFromExtendedToOriginalSpace::applyFilter(const std::vector<bool> & apply,
                                           const Variables & filtervars,
                                           std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace Filter" << std::endl;
+  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace applyFilter start" << std::endl;
   oops::Log::debug() << "CopyFlagsFromExtendedToOriginalSpace obserr: " << *obserr_ << std::endl;
 
   // Number of locations.
@@ -117,7 +117,7 @@ void CopyFlagsFromExtendedToOriginalSpace::applyFilter(const std::vector<bool> &
     }  // profile jprof
     obsdb_.put_db(flagName, varName, varToCopy);
   }
-  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace::applyFilter finished" << std::endl;
+  oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

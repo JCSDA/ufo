@@ -23,14 +23,18 @@ static ObsFunctionMaker<VisibilityDiagnostic> makerVisibilityDiagnostic_(
 
 VisibilityDiagnostic::VisibilityDiagnostic(
     const eckit::LocalConfiguration& conf) {
+  oops::Log::trace() << "VisibilityDiagnostic constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 }
 
-VisibilityDiagnostic::~VisibilityDiagnostic() {}
+VisibilityDiagnostic::~VisibilityDiagnostic() {
+  oops::Log::trace() << "VisibilityDiagnostic destructor" << std::endl;
+}
 
 void VisibilityDiagnostic::compute(const ObsFilterData& in,
                                    ioda::ObsDataVector<float>& out) const {
+  oops::Log::trace() << "VisibilityDiagnostic compute start" << std::endl;
   if (out.nvars() != 1) {
     throw eckit::BadValue("VisibilityDiagnostic: one output variable expected",
                           Here());
@@ -117,6 +121,7 @@ void VisibilityDiagnostic::compute(const ObsFilterData& in,
     // Limit visibility to avoid unrealistically high values
     out[0][iloc] = 1.0f / (1.0f / visibility + 1.0f / visibility_limit);
   }  // nlocs
+  oops::Log::trace() << "VisibilityDiagnostic compute complete" << std::endl;
 }
 
 float VisibilityDiagnostic::saturationSpecificHumidity(const float t,

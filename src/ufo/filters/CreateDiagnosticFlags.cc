@@ -27,7 +27,7 @@ CreateDiagnosticFlags::CreateDiagnosticFlags(ioda::ObsSpace &obsdb, const Parame
   : ObsProcessorBase(obsdb, parameters.deferToPost, std::move(qcflags), std::move(obserr)),
     parameters_(parameters)
 {
-  oops::Log::trace() << "CreateDiagnosticFlags constructor starts" << std::endl;
+  oops::Log::trace() << "CreateDiagnosticFlags constructor start" << std::endl;
   if (parameters.filterVariables.value().is_initialized()) {
     const oops::ObsVariables &observedVariables = obsdb.obsvariables();
     const oops::ObsVariables filterVariables = getFilterVariables();
@@ -37,13 +37,13 @@ CreateDiagnosticFlags::CreateDiagnosticFlags(ioda::ObsSpace &obsdb, const Parame
                                "' is not an observed variable", Here());
       }
   }
-  oops::Log::trace() << "CreateDiagnosticFlags constructed" << std::endl;
+  oops::Log::trace() << "CreateDiagnosticFlags constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 CreateDiagnosticFlags::~CreateDiagnosticFlags() {
-  oops::Log::trace() << "CreateDiagnosticFlags destructed" << std::endl;
+  oops::Log::trace() << "CreateDiagnosticFlags destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ oops::ObsVariables CreateDiagnosticFlags::getFilterVariables() const {
 // -----------------------------------------------------------------------------
 
 void CreateDiagnosticFlags::doFilter() {
-  oops::Log::trace() << "CreateDiagnosticFlags doFilter starts" << std::endl;
+  oops::Log::trace() << "CreateDiagnosticFlags doFilter start" << std::endl;
 
   // Create bitmap if needed
   if (parameters_.bitMap) {
@@ -90,7 +90,7 @@ void CreateDiagnosticFlags::doFilter() {
                                  params.initialValue);
     }
   }
-  oops::Log::trace() << "CreateDiagnosticFlags doFilter done" << std::endl;
+  oops::Log::trace() << "CreateDiagnosticFlags doFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

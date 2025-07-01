@@ -31,6 +31,7 @@ static ObsFunctionMaker<ObsErrorFactorTopoRad>
 
 ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorTopoRad constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -68,12 +69,15 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorTopoRad::~ObsErrorFactorTopoRad() {}
+ObsErrorFactorTopoRad::~ObsErrorFactorTopoRad() {
+  oops::Log::trace() << "ObsErrorFactorTopoRad destructor"  << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorTopoRad compute start" << std::endl;
   // Get sensor information from options
   const std::string &sensor = options_.sensor.value();
 
@@ -162,6 +166,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
                        << "  amsua, atms, and mhs."
                        << std::endl;
   }
+  oops::Log::trace() << "ObsErrorFactorTopoRad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

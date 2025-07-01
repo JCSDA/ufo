@@ -16,10 +16,10 @@
 
 namespace ufo {
 
-ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
-                                          const std::vector<std::string> & predictors,
-                                          const std::vector<int> & channels,
-                                          const Eigen::MatrixXd & coeffs) {
+void saveBiasCoeffsWithChannels(ioda::Group & parent,
+                                const std::vector<std::string> & predictors,
+                                const std::vector<int> & channels,
+                                const Eigen::MatrixXd & coeffs) {
   // dimensions
   ioda::NewDimensionScales_t newDims {
       ioda::NewDimensionScale<int>("Record", 1),
@@ -49,15 +49,13 @@ ioda::ObsGroup saveBiasCoeffsWithChannels(ioda::Group & parent,
   // and the variables
   ioda::Variable chansVar = ogrp.vars.open("Channel");
   chansVar.write(channels);
-
-  return ogrp;
 }
 
-ioda::ObsGroup saveBiasCoeffsWithRecords(ioda::Group & parent,
-                                         const std::vector<std::string> & predictors,
-                                         const std::vector<std::string> & recIDs,
-                                         const std::vector<std::string> & vars,
-                                         const Eigen::MatrixXd & coeffs) {
+void saveBiasCoeffsWithRecords(ioda::Group & parent,
+                               const std::vector<std::string> & predictors,
+                               const std::vector<std::string> & recIDs,
+                               const std::vector<std::string> & vars,
+                               const Eigen::MatrixXd & coeffs) {
   // dimensions
   ioda::NewDimensionScales_t newDims {
       ioda::NewDimensionScale<int>("Record", recIDs.size()),
@@ -91,8 +89,6 @@ ioda::ObsGroup saveBiasCoeffsWithRecords(ioda::Group & parent,
   ioda::Variable recordVar = ogrp.vars.createWithScales<std::string>(
               "stationIdentification", {ogrp.vars["Record"]});
   recordVar.write(recIDs);
-
-  return ogrp;
 }
 
 }  // namespace ufo

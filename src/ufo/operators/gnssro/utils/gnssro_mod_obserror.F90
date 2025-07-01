@@ -244,7 +244,6 @@ CALL ufo_roobserror_getrmatrix(Rmax_num,         &  ! Max number of R matrices t
 ! a matrix which depends on latitude or average temperature
 !--------------------------------------------------------
 
-! For every profile that we have found, perform a 1DVar minimisation
 current_point = 1
 do iprofile = 1, size(unique)
   start_point = current_point
@@ -343,7 +342,7 @@ real(kind_real), intent(in)      :: missing              ! Missing value indicat
 logical, intent(in)              :: allow_extrapolation  ! Extrapolate errors outside of the given range
 integer(c_size_t), intent(in)    :: record_number(1:nobs)! Number used to identify unique profiles in the data
 integer, intent(in)              :: sort_order(1:nobs)   ! An index to sort the record numbers
-integer, allocatable, intent(in) :: unique(:)            ! Set of unique profile numbers
+integer, intent(in)              :: unique(1:nobs)       ! Set of unique profile numbers
 logical, intent(in)              :: verboseOutput        ! Whether to output extra debugging information
 
 ! Local parameters
@@ -373,7 +372,6 @@ CALL ufo_roobserror_getrmatrix(Rmax_num,         &  ! Max number of R matrices t
 ! No interpolation between matrices to match old code
 !--------------------------------------------------------
 
-! For every profile that we have found, perform a 1DVar minimisation
 current_point = 1
 do iprofile = 1, size(unique)
   start_point = current_point
@@ -438,7 +436,7 @@ do iprofile = 1, size(unique)
       ObsErr(iob) = MAX (frac_err * obsValue(iob), Rmatrix % min_error)
 
     else
-      WRITE(Message,'(A,I8,2F16.4)') 'Missing', iob, obsZ(iob), obsLat(iob)
+      WRITE(Message,'(A,I8,2E16.8)') 'Missing', iob, obsZ(iob), obsLat(iob)
       obsErr(iob) = missing
     end if
   end do

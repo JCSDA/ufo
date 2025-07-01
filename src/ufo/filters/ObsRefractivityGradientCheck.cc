@@ -40,7 +40,7 @@ ObsRefractivityGradientCheck::ObsRefractivityGradientCheck(
 // -----------------------------------------------------------------------------
 
 ObsRefractivityGradientCheck::~ObsRefractivityGradientCheck() {
-  oops::Log::trace() << "ObsRefractivityGradientCheck: destructed" << std::endl;
+  oops::Log::trace() << "ObsRefractivityGradientCheck: destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ void ObsRefractivityGradientCheck::applyFilter(
                                       const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ObsRefractivityGradientCheck postFilter" << std::endl;
+  oops::Log::trace() << "ObsRefractivityGradientCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
   const float missingFloat = util::missingValue<float>();
 
@@ -110,6 +110,7 @@ void ObsRefractivityGradientCheck::applyFilter(
       }  //  end isort loop
     }  //  end jv loop
   }  //  end iProfile loop
+  oops::Log::trace() << "ObsRefractivityGradientCheck applyFilter complete" << std::endl;
 }
 
 std::vector<float> ObsRefractivityGradientCheck::calcVerticalGradient(

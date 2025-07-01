@@ -34,6 +34,7 @@ static ObsFunctionMaker<AverageTemperatureBelow>
  */
 AverageTemperatureBelow::AverageTemperatureBelow(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "AverageTemperatureBelow constructor" << std::endl;
   // Get options from argument
   options_.deserialize(conf);
 
@@ -43,7 +44,9 @@ AverageTemperatureBelow::AverageTemperatureBelow(const eckit::LocalConfiguration
 
 // -----------------------------------------------------------------------------
 
-AverageTemperatureBelow::~AverageTemperatureBelow() {}
+AverageTemperatureBelow::~AverageTemperatureBelow() {
+  oops::Log::trace() << "AverageTemperatureBelow destructor" << std::endl;
+}
 
 /* -----------------------------------------------------------------------------
  * Perform the computation.  Read in the geovals for air_temperature and
@@ -53,6 +56,7 @@ AverageTemperatureBelow::~AverageTemperatureBelow() {}
  */
 void AverageTemperatureBelow::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "AverageTemperatureBelow compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/air_temperature"));
 
@@ -122,6 +126,7 @@ void AverageTemperatureBelow::compute(const ObsFilterData & in,
       out[0][iloc] = missingFloat;
     }
   }
+  oops::Log::trace() << "AverageTemperatureBelow compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

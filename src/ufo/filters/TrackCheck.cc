@@ -104,16 +104,19 @@ TrackCheck::TrackCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
+  oops::Log::trace() << "TrackCheck constructor" << std::endl;
   oops::Log::debug() << "TrackCheck: config = " << options_ << std::endl;
 }
 
 // Required for the correct destruction of options_.
-TrackCheck::~TrackCheck()
-{}
+TrackCheck::~TrackCheck() {
+  oops::Log::trace() << "TrackCheck destructor" << std::endl;
+}
 
 void TrackCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "TrackCheck applyFilter start" << std::endl;
   // 3rd arg: recordsAreSingleObs = false for Track Check.
   ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
                                                                obsdb_,
@@ -136,6 +139,7 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
                                         obsPressureLocTime, isRejected);
   }
   obsAccessor.flagRejectedObservations(isRejected, flagged);
+  oops::Log::trace() << "TrackCheck applyFilter complete" << std::endl;
 }
 
 TrackCheck::ObsGroupPressureLocationTime TrackCheck::collectObsPressuresLocationsTimes

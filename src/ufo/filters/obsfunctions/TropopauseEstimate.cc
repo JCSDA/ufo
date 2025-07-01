@@ -29,6 +29,7 @@ static ObsFunctionMaker<TropopauseEstimate> makerObsFuncTropopauseEstimate_("Tro
 
 TropopauseEstimate::TropopauseEstimate(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "TropopauseEstimate constructor" << std::endl;
   oops::Log::debug() << "TropopauseEstimate: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -44,12 +45,15 @@ TropopauseEstimate::TropopauseEstimate(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-TropopauseEstimate::~TropopauseEstimate() {}
+TropopauseEstimate::~TropopauseEstimate() {
+  oops::Log::trace() << "TropopauseEstimate destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void TropopauseEstimate::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "TropopauseEstimate compute start" << std::endl;
   const size_t nlocs = in.nlocs();
 
   // Ensure that only one output variable is expected.
@@ -104,6 +108,7 @@ void TropopauseEstimate::compute(const ObsFilterData & in,
   if (options_.save) {
     out.save("DerivedValue");
   }
+  oops::Log::trace() << "TropopauseEstimate compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

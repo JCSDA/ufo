@@ -29,6 +29,7 @@ static ObsFunctionMaker<StableLayersCloudTopPressure>
 StableLayersCloudTopPressure::StableLayersCloudTopPressure
 (const eckit::LocalConfiguration & conf)
   : invars_(), channels_() {
+  oops::Log::trace() << "StableLayersCloudTopPressure constructor" << std::endl;
   // Validate and deserialize options.
   options_.validateAndDeserialize(conf);
 
@@ -57,12 +58,15 @@ StableLayersCloudTopPressure::StableLayersCloudTopPressure
 
 // -----------------------------------------------------------------------------
 
-StableLayersCloudTopPressure::~StableLayersCloudTopPressure() {}
+StableLayersCloudTopPressure::~StableLayersCloudTopPressure() {
+  oops::Log::trace() << "StableLayersCloudTopPressure destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
                                         ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "StableLayersCloudTopPressure compute start" << std::endl;
   // Missing float value.
   const float missing = util::missingValue<float>();
 
@@ -403,6 +407,7 @@ void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
   obsdb.put_db("MetaData", "overcastBriTempAtCloudTop", bt_cloud_top);
   obsdb.put_db("MetaData", "standardDeviationAtCloudTop", standard_deviation);
   obsdb.put_db("DiagnosticFlags/NoStableLayers", "brightnessTemperature", nostablelayers_flag);
+  oops::Log::trace() << "StableLayersCloudTopPressure compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

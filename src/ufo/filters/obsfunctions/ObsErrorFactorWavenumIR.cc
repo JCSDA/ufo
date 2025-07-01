@@ -31,6 +31,7 @@ static ObsFunctionMaker<ObsErrorFactorWavenumIR>
 
 ObsErrorFactorWavenumIR::ObsErrorFactorWavenumIR(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorWavenumIR constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -52,12 +53,15 @@ ObsErrorFactorWavenumIR::ObsErrorFactorWavenumIR(const eckit::LocalConfiguration
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorWavenumIR::~ObsErrorFactorWavenumIR() {}
+ObsErrorFactorWavenumIR::~ObsErrorFactorWavenumIR() {
+  oops::Log::trace() << "ObsErrorFactorWavenumIR destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorWavenumIR compute start" << std::endl;
   // Get obs space
   auto & obsdb_ = in.obsspace();
 
@@ -108,6 +112,7 @@ void ObsErrorFactorWavenumIR::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorFactorWavenumIR compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

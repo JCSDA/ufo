@@ -25,7 +25,7 @@ static ObsFunctionMaker<CloudFirstGuessMinimumResidual>
 CloudFirstGuessMinimumResidual::CloudFirstGuessMinimumResidual(
         const eckit::LocalConfiguration & conf)
   : invars_(), channels_() {
-  oops::Log::trace() << "CloudFirstGuessMinimumResidual constructor start" << std::endl;
+  oops::Log::trace() << "CloudFirstGuessMinimumResidual constructor" << std::endl;
 
   // Initialize options
   options_.validateAndDeserialize(conf);
@@ -42,13 +42,13 @@ CloudFirstGuessMinimumResidual::CloudFirstGuessMinimumResidual(
   invars_ += Variable("ObsDiag/brightness_temperature_assuming_clear_sky", channels_);
   invars_ += Variable("ObsDiag/brightness_temperature_from_atmosphere_layer_to_toa", channels_);
   invars_ += Variable("GeoVaLs/air_pressure");
-
-  oops::Log::trace() << "CloudFirstGuessMinimumResidual constructor end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-CloudFirstGuessMinimumResidual::~CloudFirstGuessMinimumResidual() {}
+CloudFirstGuessMinimumResidual::~CloudFirstGuessMinimumResidual() {
+  oops::Log::trace() << "CloudFirstGuessMinimumResidual destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -73,8 +73,8 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
   ioda::ObsDataVector<float> firstGuessValues(in.obsspace(), oops::ObsVariables(firstGuessNames));
   if (nlocs == 0) {
     firstGuessValues.save(options_.outputGroup.value());
-    oops::Log::trace() << "CloudFirstGuessMinimumResidual (with zero observations) compute end"
-                       << std::endl;
+    oops::Log::trace() <<
+      "CloudFirstGuessMinimumResidual (with zero observations) compute complete" << std::endl;
     return;
   }
 
@@ -181,7 +181,7 @@ void CloudFirstGuessMinimumResidual::compute(const ObsFilterData & in,
     }
   }
   firstGuessValues.save(options_.outputGroup.value());
-  oops::Log::trace() << "CloudFirstGuessMinimumResidual compute end" << std::endl;
+  oops::Log::trace() << "CloudFirstGuessMinimumResidual compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

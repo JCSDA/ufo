@@ -24,6 +24,7 @@ static ObsFunctionMaker<WindsSPDBCheck> makerObsFuncWindsSPDBCheck_("WindsSPDBCh
 
 WindsSPDBCheck::WindsSPDBCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "WindsSPDBCheck constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -61,12 +62,15 @@ WindsSPDBCheck::WindsSPDBCheck(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-WindsSPDBCheck::~WindsSPDBCheck() {}
+WindsSPDBCheck::~WindsSPDBCheck() {
+  oops::Log::trace() << "WindsSPDBCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void WindsSPDBCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "WindsSPDBCheck compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
 
@@ -170,6 +174,7 @@ void WindsSPDBCheck::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "WindsSPDBCheck compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

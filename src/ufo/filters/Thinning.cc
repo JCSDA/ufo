@@ -25,18 +25,22 @@ Thinning::Thinning(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "Thinning constructor" << std::endl;
   oops::Log::debug() << "Thinning: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-Thinning::~Thinning() {}
+Thinning::~Thinning() {
+  oops::Log::trace() << "Thinning destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void Thinning::applyFilter(const std::vector<bool> & apply,
                            const Variables & filtervars,
                            std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "Thinning applyFilter start" << std::endl;
   // get local and global number of locations
   const size_t nlocs = obsdb_.nlocs();
   const size_t max_gindex = obsdb_.sourceNumLocs();
@@ -57,6 +61,7 @@ void Thinning::applyFilter(const std::vector<bool> & apply,
       if ( apply[jobs] && rand[gindex[jobs]] < amount ) flagged[jv][jobs] = true;
     }
   }
+  oops::Log::trace() << "Thinning applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

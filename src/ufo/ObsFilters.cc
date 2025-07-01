@@ -27,7 +27,7 @@ ObsFilters::ObsFilters(ioda::ObsSpace & os,
   : obsspace_(os), autoFilters_(), preFilters_(), priorFilters_(), postFilters_(),
     geovars_(), diagvars_(), qcflags_(qcflags), obserrfilter_(obserr),
     iteration_(iteration) {
-  oops::Log::trace() << "ObsFilters::ObsFilters starting";
+  oops::Log::trace() << "ObsFilters::ObsFilters starting" << std::endl;
 
   ObsFiltersParameters params;
   params.validateAndDeserialize(config);

@@ -26,12 +26,12 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 ObsFilterData::ObsFilterData(ioda::ObsSpace & obsdb)
   : obsdb_(obsdb), gvals_(NULL), ovecs_(), diags_(NULL), dvecsf_(), dvecsi_() {
-  oops::Log::trace() << "ObsFilterData created" << std::endl;
+  oops::Log::trace() << "ObsFilterData constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 ObsFilterData::~ObsFilterData() {
-  oops::Log::trace() << "ObsFilterData destructed" << std::endl;
+  oops::Log::trace() << "ObsFilterData destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

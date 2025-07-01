@@ -26,6 +26,7 @@ namespace ufo {
 
   SetSurfaceType::SetSurfaceType(const eckit::LocalConfiguration & conf)
     : invars_() {
+    oops::Log::trace() << "SetSurfaceType constructor" << std::endl;
     // Initialize options
     options_.validateAndDeserialize(conf);
 
@@ -59,12 +60,15 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
 
-  SetSurfaceType::~SetSurfaceType() {}
+  SetSurfaceType::~SetSurfaceType() {
+    oops::Log::trace() << "SetSurfaceType destructor" << std::endl;
+  }
 
   // -----------------------------------------------------------------------------
 
   void SetSurfaceType::compute(const ObsFilterData & in,
                                ioda::ObsDataVector<float> & out) const {
+    oops::Log::trace() << "SetSurfaceType compute start" << std::endl;
     // Get dimension
     const size_t nlocs = in.nlocs();
 
@@ -244,6 +248,7 @@ namespace ufo {
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       out[0][iloc] = static_cast <float> (surftype[iloc]);
       }
+    oops::Log::trace() << "SetSurfaceType compute complete" << std::endl;
   }
 
   // -----------------------------------------------------------------------------

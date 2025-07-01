@@ -151,6 +151,11 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// \c obs space.obsdatain.obsgrouping.group variable YAML option.
   oops::OptionalParameter<Variable> categoryVariable{"category_variable", this};
 
+  /// Group observations according to the underlying ObsSpace record index.
+  /// Particularly useful when more than one variable has been used to group the ObsSpace
+  /// into records.
+  oops::OptionalParameter<bool> groupByRecordID{"group_by_record_id", this};
+
   // Selection of observations to retain
 
   /// Variable storing observation priorities. An observation will not be retained if it lies
@@ -196,6 +201,16 @@ class PoissonDiskThinningParameters : public FilterParametersBase {
   /// Instead of randomly shuffling obs, sort by the pressure coordinate.
   /// Must be "ascending" or "descending" wrt to pressure coordinate values.
   oops::OptionalParameter<std::string> sortVertical{"sort_vertical", this};
+
+  /// Account for the `where` selection when gathering ObsSpace variables across all MPI ranks.
+  /// If the `where` selection is sufficiently discriminatory, enabling this option
+  /// can lead to a significant reduction in the time spent in the gather operation.
+  /// However, in the extreme case in which the `where` selection has no effect
+  /// (or is absent), enabling this option will increase the time spent in this filter
+  /// because extra gather operations are performed.
+  /// It is therefore recommended to enable this option only after some trialling
+  /// with a typical use-case.
+  oops::Parameter<bool> accountForWhere{"account_for_where_in_gather", false, this};
 
   /// Seed with which to initialize the random number generator used to shuffle the observations
   /// if \p shuffle is set to true.

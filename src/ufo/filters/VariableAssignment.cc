@@ -458,6 +458,7 @@ ioda::ObsDtype getDataType(boost::optional<ioda::ObsDtype> dtypeParam,
 
 void AssignmentParameters::deserialize(util::CompositePath &path,
                                        const eckit::Configuration &config) {
+  oops::Log::trace() << "VariableAssignment deserialize" << std::endl;
   oops::Parameters::deserialize(path, config);
 
   // These checks should really be done at the validation stage (using JSON Schema),
@@ -479,6 +480,7 @@ VariableAssignment::VariableAssignment(ioda::ObsSpace & obsdb, const Parameters_
   : ObsProcessorBase(obsdb, parameters.deferToPost, std::move(flags), std::move(obserr)),
     parameters_(parameters)
 {
+  oops::Log::trace() << "VariableAssignment constructor" << std::endl;
   oops::Log::debug() << "VariableAssignment: config = " << parameters_ << std::endl;
   allvars_ += getAllWhereVariables(parameters.where);
 
@@ -493,7 +495,7 @@ VariableAssignment::VariableAssignment(ioda::ObsSpace & obsdb, const Parameters_
 }
 
 void VariableAssignment::doFilter() {
-  oops::Log::trace() << "VariableAssignment doFilter begin" << std::endl;
+  oops::Log::trace() << "VariableAssignment doFilter start" << std::endl;
 
   // Select locations at which the filter will be applied
   const std::vector<bool> apply = processWhere(parameters_.where, data_, parameters_.whereOperator);
@@ -505,7 +507,7 @@ void VariableAssignment::doFilter() {
     assignToVariable(variable, dtype, assignment, apply, data_, obsdb_, *flags_);
   }
 
-  oops::Log::trace() << "VariableAssignment doFilter end" << std::endl;
+  oops::Log::trace() << "VariableAssignment doFilter complete" << std::endl;
 }
 
 void VariableAssignment::print(std::ostream & os) const {

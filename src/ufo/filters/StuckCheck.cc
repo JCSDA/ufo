@@ -32,6 +32,7 @@ StuckCheck::StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
                         std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
+  oops::Log::trace() << "StuckCheck constructor" << std::endl;
   if (options_.core.percentageStuckTolerance.value()) {
     if ((options_.core.numberStuckTolerance.value()) ||
            (options_.core.timeStuckTolerance.value())) {  // must NOT be set if percentage set
@@ -53,8 +54,9 @@ StuckCheck::StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
 }
 
 // Required for the correct destruction of ObsGroupDateTimes_.
-StuckCheck::~StuckCheck()
-{}
+StuckCheck::~StuckCheck() {
+  oops::Log::trace() << "StuckCheck destructor" << std::endl;
+}
 
 /// The filter removes observations if they are part of a 'streak'. A streak is where the number
 /// of identical observation values in sequence (for a given variable) is greater than a user
@@ -64,6 +66,7 @@ StuckCheck::~StuckCheck()
 void StuckCheck::applyFilter(const std::vector<bool> & apply,
                              const Variables & filtervars,
                              std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "StuckCheck applyFilter start" << std::endl;
   // 3rd arg: recordsAreSingleObs = false for Stuck Check.
   ObsAccessor obsAccessor = TrackCheckUtils::createObsAccessor(options_.stationIdVariable,
                                                                obsdb_,
@@ -135,6 +138,7 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
     }
   }
   obsAccessor.flagRejectedObservations(isRejected, flagged);
+  oops::Log::trace() << "StuckCheck applyFilter complete" << std::endl;
 }
 
 void StuckCheck::print(std::ostream & os) const {

@@ -111,11 +111,6 @@ observations:
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
-          cloud cover parameter 4: 5  # Required
-          cloud cover parameter 5: 6  # Required
-          cloud cover parameter 6: 2  # Required
-          cloud cover parameter 7: 3  # Required
-          cloud cover parameter 8: 0.6666666667  # 2/3 - Required
           total water relative humidity parameter 1: 0.5  # Required
           total water relative humidity parameter 2: 2.0  # Required
           total water relative humidity parameter 3: 2.0  # Required
@@ -156,11 +151,6 @@ observations:
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
-          cloud cover parameter 4: 5  # Required
-          cloud cover parameter 5: 6  # Required
-          cloud cover parameter 6: 2  # Required
-          cloud cover parameter 7: 3  # Required
-          cloud cover parameter 8: 0.6666666667  # 2/3 - Required
           total water relative humidity parameter 1: 0.5  # Required
           total water relative humidity parameter 2: 2.0  # Required
           total water relative humidity parameter 3: 2.0  # Required
@@ -201,11 +191,6 @@ observations:
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
-          cloud cover parameter 4: 5  # Required
-          cloud cover parameter 5: 6  # Required
-          cloud cover parameter 6: 2  # Required
-          cloud cover parameter 7: 3  # Required
-          cloud cover parameter 8: 0.6666666667  # 2/3 - Required
           total water relative humidity parameter 1: 0.5  # Required
           total water relative humidity parameter 2: 2.0  # Required
           total water relative humidity parameter 3: 2.0  # Required
@@ -246,11 +231,6 @@ observations:
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
-          cloud cover parameter 4: 5  # Required
-          cloud cover parameter 5: 6  # Required
-          cloud cover parameter 6: 2  # Required
-          cloud cover parameter 7: 3  # Required
-          cloud cover parameter 8: 0.6666666667  # 2/3 - Required
           total water relative humidity parameter 1: 0.5  # Required
           total water relative humidity parameter 2: 2.0  # Required
           total water relative humidity parameter 3: 2.0  # Required
@@ -310,11 +290,6 @@ observations:
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
-          cloud cover parameter 4: 5  # Required
-          cloud cover parameter 5: 6  # Required
-          cloud cover parameter 6: 2  # Required
-          cloud cover parameter 7: 3  # Required
-          cloud cover parameter 8: 0.6666666667  # 2/3 - Required
           total water relative humidity parameter 1: 0.5  # Required
           total water relative humidity parameter 2: 2.0  # Required
           total water relative humidity parameter 3: 2.0  # Required
@@ -353,11 +328,6 @@ observations:
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
-          cloud cover parameter 4: 5  # Required
-          cloud cover parameter 5: 6  # Required
-          cloud cover parameter 6: 2  # Required
-          cloud cover parameter 7: 3  # Required
-          cloud cover parameter 8: 0.6666666667  # 2/3 - Required
           total water relative humidity parameter 1: 0.5  # Required
           total water relative humidity parameter 2: 2.0  # Required
           total water relative humidity parameter 3: 2.0  # Required

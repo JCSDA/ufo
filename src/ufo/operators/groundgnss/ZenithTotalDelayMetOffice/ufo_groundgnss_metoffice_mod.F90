@@ -107,12 +107,6 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
-! Check that the geovals are ordered top to bottom
-  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then
-    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
-    call fckit_exception%throw(err_msg)
-  endif
-
   nlevp = prs % nval
   nlevq = q % nval
 
@@ -130,34 +124,36 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   allocate(humidity(1:nlevq))
   allocate(za(1:nlevp))
   allocate(zb(1:nlevq))
+  
+  if (nobs > 0) then
+    obs_loop: do iobs = 1, nobs
 
-  obs_loop: do iobs = 1, nobs
+      pressure = prs % vals(:,iobs)
+      humidity = q % vals(:,iobs)
+      za = rho_heights % vals(:,iobs)
+      zb = theta_heights % vals(:,iobs)
 
-    pressure = prs % vals(:,iobs)
-    humidity = q % vals(:,iobs)
-    za = rho_heights % vals(:,iobs)
-    zb = theta_heights % vals(:,iobs)
+      call Ops_Groundgnss_ForwardModel(nlevp,                  &
+                                       nlevq,                  &
+                                       za(1:nlevp),            &
+                                       zb(1:nlevq),            &
+                                       pressure(1:nlevp),      &
+                                       humidity(1:nlevq),      &
+                                       self % vert_interp_ops, &
+                                       self % pseudo_ops,      &
+                                       self % min_temp_grad,   &
+                                       1,                      &
+                                       zStation(iobs),         &
+                                       hofx(iobs))
 
-    call Ops_Groundgnss_ForwardModel(nlevp,                  &
-                                     nlevq,                  &
-                                     za(1:nlevp),            &
-                                     zb(1:nlevq),            &
-                                     pressure(1:nlevp),      &
-                                     humidity(1:nlevq),      &
-                                     self % vert_interp_ops, &
-                                     self % pseudo_ops,      &
-                                     self % min_temp_grad,   &
-                                     1,                      &
-                                     zStation(iobs),         &
-                                     hofx(iobs))
+      write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
+      call fckit_log%debug(message)
+      write(message,'(A,F12.4)') "hofx(iobs) = ", hofx(iobs)
+      call fckit_log%debug(message)
 
-    write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
-    call fckit_log%debug(message)
-    write(message,'(A,F12.4)') "hofx(iobs) = ", hofx(iobs)
-    call fckit_log%debug(message)
-
-  end do obs_loop
-
+    end do obs_loop
+  endif
+  
   write(err_msg,*) "TRACE: ufo_groundgnss_metoffice_simobs: completed"
   call fckit_log%info(err_msg)
   

@@ -34,7 +34,7 @@ SuperRefractionCheckNBAM::SuperRefractionCheckNBAM(
                                  std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
-  oops::Log::trace() << "SuperRefractionCheckNBAM"<< std::endl;
+  oops::Log::trace() << "SuperRefractionCheckNBAM constructor" << std::endl;
   allvars_ += Variable("ObsDiag/atmosphericRefractivity_model");
   allvars_ += Variable("ObsDiag/geopotentialHeight_model");
   allvars_ += Variable("MetaData/impactParameterRO");
@@ -60,7 +60,7 @@ SuperRefractionCheckNBAM::SuperRefractionCheckNBAM(
 // -----------------------------------------------------------------------------
 
 SuperRefractionCheckNBAM::~SuperRefractionCheckNBAM() {
-  oops::Log::trace() << "SuperRefractionCheckNBAM: destructed" << std::endl;
+  oops::Log::trace() << "SuperRefractionCheckNBAM destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ void SuperRefractionCheckNBAM::applyFilter(
                                       const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "SuperRefractionCheckNBAM postFilter " << std::endl;
+  oops::Log::trace() << "SuperRefractionCheckNBAM applyFilter start" << std::endl;
   const float missingFloat = util::missingValue<float>();
   // Get the refractivity from the obs diagnostics, including the number of
   // vertical levels on which the refractivity has been calculated (nRefLevels)
@@ -214,6 +214,7 @@ void SuperRefractionCheckNBAM::applyFilter(
       }  // end step 2(3) check
     }  // end iFilterVar loop
   }   // end iProfile loop
+  oops::Log::trace() << "SuperRefractionCheckNBAM applyFilter complete" << std::endl;
 }  // end applyFilter
 
 std::vector<float> SuperRefractionCheckNBAM::calcImpactParameterModel(

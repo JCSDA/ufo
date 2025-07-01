@@ -134,7 +134,7 @@ ProfileUnFlagObsCheck::ProfileUnFlagObsCheck(
 // -----------------------------------------------------------------------------
 
 ProfileUnFlagObsCheck::~ProfileUnFlagObsCheck() {
-  oops::Log::trace() << "ProfileUnFlagObsCheck destructed" << std::endl;
+  oops::Log::trace() << "ProfileUnFlagObsCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -143,7 +143,7 @@ ProfileUnFlagObsCheck::~ProfileUnFlagObsCheck() {
 void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
                                         const Variables & filtervars,
                                         std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ProfileUnFlagObsCheck preProcess filter" << std::endl;
+  oops::Log::trace() << "ProfileUnFlagObsCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
   // setup the calculation of the absolute tolerance to use a piecewise linear
@@ -234,6 +234,7 @@ void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
   }
 
   oops::Log::debug() << std::endl;
+  oops::Log::trace() << "ProfileUnFlagObsCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

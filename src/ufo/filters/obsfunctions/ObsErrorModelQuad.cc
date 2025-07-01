@@ -28,6 +28,7 @@ static ObsFunctionMaker<ObsErrorModelQuad>
 
 ObsErrorModelQuad::ObsErrorModelQuad(const eckit::LocalConfiguration & config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorModelQuad constructor" << std::endl;
   // Initialize options
   options_.deserialize(config);
 
@@ -72,12 +73,15 @@ ObsErrorModelQuad::ObsErrorModelQuad(const eckit::LocalConfiguration & config)
 
 // -----------------------------------------------------------------------------
 
-ObsErrorModelQuad::~ObsErrorModelQuad() {}
+ObsErrorModelQuad::~ObsErrorModelQuad() {
+  oops::Log::trace() << "ObsErrorModelQuad destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorModelQuad::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorModelQuad compute start" << std::endl;
   const float missing = util::missingValue<float>();
 
   // Get piece-wise parameters from options
@@ -128,6 +132,7 @@ void ObsErrorModelQuad::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorModelQuad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

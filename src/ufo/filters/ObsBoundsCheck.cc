@@ -66,6 +66,7 @@ ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const Parameters_ & param
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "ObsBoundsCheck constructor" << std::endl;
   if (parameters_.testVariables.value() != boost::none) {
     for (const Variable & var : *parameters_.testVariables.value())
       allvars_ += var;
@@ -75,13 +76,16 @@ ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const Parameters_ & param
 
 // -----------------------------------------------------------------------------
 
-ObsBoundsCheck::~ObsBoundsCheck() {}
+ObsBoundsCheck::~ObsBoundsCheck() {
+  oops::Log::trace() << "ObsBoundsCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                                  const Variables & filtervars,
                                  std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "ObsBoundsCheck applyFilter start" << std::endl;
   // Find the variables that should be tested. Use the variables specified in the 'test variables'
   // option if present, otherwise the filter variables.
   ufo::Variables testvars;
@@ -159,6 +163,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
                            flagged[ifiltervar++]);
     }
   }
+  oops::Log::trace() << "ObsBoundsCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

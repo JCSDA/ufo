@@ -51,7 +51,7 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
                      std::shared_ptr<ioda::ObsDataVector<float> > /*obserr*/)
   : obsdb_(obsdb), nogeovals_(), nodiags_(), flags_(qcflags)
 {
-  oops::Log::trace() << "QCmanager::QCmanager starting" << std::endl;
+  oops::Log::trace() << "QCmanager constructor start" << std::endl;
 
   ASSERT(qcflags);
 
@@ -88,7 +88,7 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
     }
   }
 
-  oops::Log::trace() << "QCmanager::QCmanager done" << std::endl;
+  oops::Log::trace() << "QCmanager constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
                            const ioda::ObsVector & hofx,
                            const ioda::ObsVector & /*bias*/,
                            const ObsDiagnostics & /*diags*/) {
-  oops::Log::trace() << "QCmanager postFilter" << std::endl;
+  oops::Log::trace() << "QCmanager postFilter start" << std::endl;
 
   const double missing = util::missingValue<double>();
   const oops::ObsVariables &allObservedVars = obsdb_.assimvariables();
@@ -111,15 +111,14 @@ void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
       }
     }
   }
-  oops::Log::trace() << "QCmanager postFilter done" << std::endl;
+  oops::Log::trace() << "QCmanager postFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 QCmanager::~QCmanager() {
-  oops::Log::trace() << "QCmanager::~QCmanager starting" << std::endl;
+  oops::Log::trace() << "QCmanager destructor" << std::endl;
   oops::Log::info() << *this;
-  oops::Log::trace() << "QCmanager::~QCmanager done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

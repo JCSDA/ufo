@@ -33,7 +33,7 @@ namespace ufo {
 Variable::Variable(const eckit::Configuration & conf)
   : varname_(), grpname_(), channels_(),
     options_(conf.getSubConfiguration("options")) {
-  oops::Log::trace() << "ufo::Variable(config) start " << conf << std::endl;
+  oops::Log::trace() << "ufo::Variable(config) constructor start" << conf << std::endl;
   std::string fullname = conf.getString("name");
   splitVarGroup(fullname, varname_, grpname_);
   // read channels if available
@@ -42,13 +42,15 @@ Variable::Variable(const eckit::Configuration & conf)
     std::set<int> channelset = oops::parseIntSet(chlist);
     std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
   }
-  oops::Log::trace() << "ufo::Variable(conf) done" << std::endl;
+  oops::Log::trace() << "ufo::Variable(config) constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Variable::Variable(const std::string & fullname, const eckit::LocalConfiguration options)
   : varname_(), grpname_(), channels_(), options_(options) {
+  oops::Log::trace() << "ufo::Variable constructor with "<< fullname << " and configuration"
+                     << std::endl;
   splitVarGroup(fullname, varname_, grpname_);
 }
 
@@ -56,9 +58,9 @@ Variable::Variable(const std::string & fullname, const eckit::LocalConfiguration
 
 Variable::Variable(const std::string & fullname, const std::vector<int> & channels)
   : varname_(), grpname_(), channels_(channels), options_() {
-  oops::Log::trace() << "ufo::Variable(name, channels) start " << std::endl;
+  oops::Log::trace() << "ufo::Variable constructor with "<< fullname << " and channels"
+                     << std::endl;
   splitVarGroup(fullname, varname_, grpname_);
-  oops::Log::trace() << "ufo::Variable(name, channels) done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -66,6 +68,8 @@ Variable::Variable(const std::string & fullname, const std::vector<int> & channe
 Variable::Variable(const Variable & var, const std::string & group)
   : varname_(var.varname_), grpname_(group), channels_(var.channels_),
     options_(var.options_) {
+  oops::Log::trace() << "ufo::Variable constructor with "<< group << "/" << var.varname_
+                     << std::endl;
 }
 
 // -----------------------------------------------------------------------------

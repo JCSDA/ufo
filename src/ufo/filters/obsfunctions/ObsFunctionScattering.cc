@@ -22,6 +22,7 @@ static ObsFunctionMaker<ObsFunctionScattering> makerObsFuncScattering_("Scatteri
 
 ObsFunctionScattering::ObsFunctionScattering(const eckit::LocalConfiguration)
   : invars_() {
+  oops::Log::trace() << "ObsFunctionScattering constructor" << std::endl;
   // empiracal formula is used to calculate AMSU-A scattering over ocean
   std::vector<int> channels{1, 2, 15};
   invars_ += Variable("ObsValue/brightnessTemperature", channels);
@@ -29,12 +30,15 @@ ObsFunctionScattering::ObsFunctionScattering(const eckit::LocalConfiguration)
 
 // -----------------------------------------------------------------------------
 
-ObsFunctionScattering::~ObsFunctionScattering() {}
+ObsFunctionScattering::~ObsFunctionScattering() {
+  oops::Log::trace() << "ObsFunctionScattering destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsFunctionScattering::compute(const ObsFilterData & input,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsFunctionScattering compute start" << std::endl;
   const size_t nlocs = input.nlocs();
   std::vector<float> bt1, bt2, bt15;
   std::vector<int> channels{1, 2, 15};
@@ -48,6 +52,7 @@ void ObsFunctionScattering::compute(const ObsFilterData & input,
     oops::Log::debug() << "Tb1, Tb2, Tb15: " << bt1[jj] << ", " << bt2[jj] << ", " << bt15[jj]
                        << ", scattering=" << out[0][jj] << std::endl;
   }
+  oops::Log::trace() << "ObsFunctionScattering compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

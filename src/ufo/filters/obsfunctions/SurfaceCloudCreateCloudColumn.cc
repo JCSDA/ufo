@@ -26,6 +26,7 @@ static ObsFunctionMaker<SurfaceCloudCreateCloudColumn>
 
 SurfaceCloudCreateCloudColumn::SurfaceCloudCreateCloudColumn(
         const eckit::LocalConfiguration & conf): invars_(), channels_() {
+  oops::Log::trace() << "SurfaceCloudCreateCloudColumn constructor" << std::endl;
   // Get options from argument
   options_.deserialize(conf);
   // Get channels used
@@ -59,6 +60,7 @@ SurfaceCloudCreateCloudColumn::SurfaceCloudCreateCloudColumn(
 
 void SurfaceCloudCreateCloudColumn::compute(const ObsFilterData & in,
                                 ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "SurfaceCloudCreateCloudColumn compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   // TODO(model variable naming sprint): which height is it?
   const size_t nlevs = in.nlevs(Variable("GeoVaLs/height_above_mean_sea_level"));
@@ -347,6 +349,7 @@ void SurfaceCloudCreateCloudColumn::compute(const ObsFilterData & in,
   }
 
   obsErrorOut.save(options_.outputGroup.value());
+  oops::Log::trace() << "SurfaceCloudCreateCloudColumn compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

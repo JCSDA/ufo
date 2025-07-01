@@ -59,7 +59,7 @@ ProfileBackgroundCheck::ProfileBackgroundCheck(
 // -----------------------------------------------------------------------------
 
 ProfileBackgroundCheck::~ProfileBackgroundCheck() {
-  oops::Log::trace() << "ProfileBackgroundCheck destructed" << std::endl;
+  oops::Log::trace() << "ProfileBackgroundCheck destructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ ProfileBackgroundCheck::~ProfileBackgroundCheck() {
 void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
-  oops::Log::trace() << "ProfileBackgroundCheck postFilter" << std::endl;
+  oops::Log::trace() << "ProfileBackgroundCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
   oops::Log::debug() << "ProfileBackgroundCheck obserr: " << *obserr_;
@@ -168,6 +168,7 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       }
     }
   }
+  oops::Log::trace() << "ProfileBackgroundCheck applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

@@ -164,7 +164,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/amsua/amsua_metop-a_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-a_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm amsua metop-a qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -194,7 +194,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/amsua/amsua_n15_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n15_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm amsua n15 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -204,7 +204,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/amsua/amsua_n18_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm amsua n18 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
@@ -214,7 +214,7 @@ if( crtm_FOUND )
         TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-        ARGS    "${CRTM_CMAKE_TESTINPUT}/instrumentTests/amsua/amsua_n19_gfs_HofX_qc.yaml"
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n19_gfs_HofX_qc.yaml"
         MPI     1
         LABELS  crtm amsua n19 qc instrument
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../

@@ -107,6 +107,7 @@ ufo_add_test( NAME    test_ufo_bias_covariance_details_byrecord
               MPI     1
               LIBS    ufo
               LABELS  unit_tests predictors
+              TEST_DEPENDS ufo_test_tier1_test_ufo_bias_covariance_aircraft
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_covariance_details_byrecord_2
@@ -117,6 +118,7 @@ ufo_add_test( NAME    test_ufo_bias_covariance_details_byrecord_2
               MPI     2
               LIBS    ufo
               LABELS  unit_tests predictors
+              TEST_DEPENDS ufo_test_tier1_test_ufo_bias_covariance_details_byrecord
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff_readwrite
@@ -137,6 +139,7 @@ ufo_add_test( NAME    test_ufo_bias_coeff_readwrite_byrecord
               MPI     2
               LIBS    ufo
               LABELS  unit_tests predictors
+              TEST_DEPENDS ufo_test_tier1_test_ufo_bias_covariance_details_byrecord_2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_bias_coeff_increment_readwrite
@@ -245,7 +248,7 @@ if( crtm_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CRTM_CMAKE_TESTINPUT}/unit_tests/predictors/ssmis_f17_gfs_backgroundcheck_bc.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_gfs_backgroundcheck_bc.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm unit_tests predictors

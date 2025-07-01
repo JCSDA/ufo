@@ -22,6 +22,7 @@ static ObsFunctionMaker<ObsErrorFactorLatRad> makerObsErrorFactorLatRad_("ObsErr
 
 ObsErrorFactorLatRad::ObsErrorFactorLatRad(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorLatRad constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -32,13 +33,15 @@ ObsErrorFactorLatRad::ObsErrorFactorLatRad(const eckit::LocalConfiguration & con
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorLatRad::~ObsErrorFactorLatRad() {}
+ObsErrorFactorLatRad::~ObsErrorFactorLatRad() {
+  oops::Log::trace() << "ObsErrorFactorLatRad destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
-  oops::Log::trace() << "ObsErrorFactorLatRad::compute start" << std::endl;
+  oops::Log::trace() << "ObsErrorFactorLatRad compute start" << std::endl;
   // Get parameters from options
   const std::vector<float> &params = options_.latitudeParameters.value();
 
@@ -63,7 +66,7 @@ void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
       out[0][jj] = 1.0;
     }
   }
-  oops::Log::trace() << "ObsErrorFactorLatRad::compute done" << std::endl;
+  oops::Log::trace() << "ObsErrorFactorLatRad compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

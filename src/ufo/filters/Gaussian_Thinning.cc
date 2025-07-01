@@ -45,6 +45,7 @@ Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb,
                                      std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, params, flags, obserr), options_(params)
 {
+  oops::Log::trace() << "Gaussian_Thinning constructor" << std::endl;
   oops::Log::debug() << "Gaussian_Thinning: config = " << options_ << std::endl;
 }
 
@@ -53,6 +54,7 @@ Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb,
 void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
                                     const Variables & filtervars,
                                     std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "Gaussian_Thinning applyFilter start" << std::endl;
   ObsAccessor obsAccessor = createObsAccessor();
 
   bool retainOnlyIfAllFilterVariablesAreValid =
@@ -114,7 +116,6 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     priorities = obsAccessor.getIntVariableFromObsSpace(
           priorityVariable.group(), priorityVariable.variable());
   }
-
   if (options_.selectMedian) {
     ASSERT(filtervars.size() == 1);  // only works on one variable at a time
     const size_t filterVarIndex = 0;
@@ -125,6 +126,38 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     //  must be in a bin to accept a super-ob (the median-valued observation)
     isThinned = identifyThinnedObservationsMedian(
                               validObsIds, obsAccessor, splitter, obs, options_.minNumObsPerBin);
+  } else if (options_.selectMean) {
+    ASSERT(filtervars.size() == 1);  // only works on one variable at a time
+    const size_t filterVarIndex = 0;
+    const std::string varname = filtervars.variable(filterVarIndex).variable();
+    // Gather obs from all MPI ranks
+    const std::vector<float> globalObs = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
+                              varname);
+    // Define mean vector, identical to the global obs values, intended to be overwritten.
+    // In the case of a single observation in a bin, this ensures the mean is still returned.
+    std::vector<float> mean = globalObs;
+    //  Different version of identifyThinnedObservations(), which takes additional inputs:
+    //  @ObsValue of the filter variable, option specifying minimum number of obs there
+    //  must be in a bin to accept a super-ob (the mean value of obs),
+    //  and vector of means.
+    isThinned = identifyThinnedObservationsMean(
+                              validObsIds, obsAccessor, splitter, globalObs,
+                              options_.minNumObsPerBin, distancesToBinCenter,
+                              priorities, mean);
+    // Create a local mean vector the size of the obs space on the current MPI rank
+    std::vector<float> localObs;
+    obsdb_.get_db("ObsValue", varname, localObs);
+    std::vector<float> localMean = localObs;
+    // Loop over obs on current MPI rank, assigning mean values to local mean vector
+    for (size_t localObsId = 0; localObsId < obsdb_.nlocs(); localObsId++) {
+      if (apply[localObsId]) {
+        const size_t globalObsId =
+            obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(localObsId);
+        localMean[localObsId] = mean[globalObsId];
+      }
+    }
+    // Assign the calculated local mean to the derived obs value of the filter variable.
+    obsdb_.put_db("DerivedObsValue", varname, localMean);
   } else {  // default function, thinning obs according to distance_norm:
     isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter, priorities);
@@ -138,6 +171,8 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   // Optionally reject all filter variables if any has failed QC and ob is invalid for thinning
   if (retainOnlyIfAllFilterVariablesAreValid)
     obsAccessor.flagObservationsForAnyFilterVariableFailingQC(apply, *flags_, filtervars, flagged);
+
+  oops::Log::trace() << "Gaussian_Thinning applyFilter complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -169,6 +204,9 @@ std::unique_ptr<DistanceCalculator> Gaussian_Thinning::makeDistanceCalculator(
     distanceNorm = DistanceNorm::MAXIMUM;
   if (options.selectMedian) {
     distanceNorm = DistanceNorm::NULLNORM;
+    }
+  if (options.selectMean) {
+    distanceNorm = DistanceNorm::GEODESIC;
     }
   switch (distanceNorm) {
   case DistanceNorm::GEODESIC:
@@ -504,6 +542,70 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
         } else {
           isThinned[validObsIds[validObsIndex]] = true;
         }
+      }
+    }
+  }
+  return isThinned;
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
+    const std::vector<size_t> &validObsIds,
+    const ObsAccessor &obsAccessor,
+    const RecursiveSplitter &splitter,
+    const std::vector<float> &obsval,
+    const float &minNumObsPerBin,
+    const std::vector<float> &distancesToBinCenter,
+    const std::vector<int> &priorities,
+    std::vector<float> &mean) const {
+
+  std::function<bool(size_t, size_t)> comparator = makeObservationComparator(
+          validObsIds, distancesToBinCenter, obsAccessor, priorities);
+
+  const size_t totalNumObs = obsAccessor.totalNumObservations();
+  const float missing = util::missingValue<float>();
+
+  std::vector<bool> isThinned(totalNumObs, true);
+  if (minNumObsPerBin < 2) {
+    // bins with 1 obs are not counted as a group of splitter - so if accepting single-obs,
+    // they must be accepted (isThinned=false) by default; otherwise if minNumObsPerBin >= 2,
+    // single-obs in bins must be rejected by default.
+    isThinned.assign(totalNumObs, false);
+  }
+  for (ufo::RecursiveSplitter::Group validObsIndices : splitter.multiElementGroups()) {
+    float sumObs = 0.0f;
+    int count = 0;
+    const size_t bestValidObsIndex = *std::min_element(
+          std::begin(validObsIndices), std::end(validObsIndices), comparator);
+    for (size_t validObsIndex : validObsIndices) {
+      if (validObsIndex != bestValidObsIndex)
+        isThinned[validObsIds[validObsIndex]] = true;
+      else
+        isThinned[validObsIds[validObsIndex]] = false;
+    }
+    // observation values in this bin:
+    std::vector<float> validObsValues;
+    for (size_t validObsIndex : validObsIndices) {
+      if (obsval[validObsIds[validObsIndex]] != missing) {
+        validObsValues.push_back(obsval[validObsIds[validObsIndex]]);
+      }
+    }
+    const size_t groupSize = validObsValues.size();
+    if (groupSize < minNumObsPerBin) {
+      continue;
+    }
+    // find mean obs value in bin:
+    for (float obsValue : validObsValues) {
+      sumObs += obsValue;
+      count++;
+    }
+
+    if (count > 0) {
+      const float obsMean = sumObs / count;
+      for (size_t validObsIndex : validObsIndices) {
+          // assign mean of validObsValues to same index in the mean vector
+          mean[validObsIds[validObsIndex]] = obsMean;
       }
     }
   }

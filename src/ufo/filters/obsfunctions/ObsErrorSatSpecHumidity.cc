@@ -36,6 +36,7 @@ static ObsFunctionMaker<ObsErrorSatSpecHumidity> maker_("ObsErrorSatSpecHumidity
 
 ObsErrorSatSpecHumidity::ObsErrorSatSpecHumidity(const eckit::Configuration &config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorSatSpecHumidity constructor" << std::endl;
   // Initialize options
   options_.reset(new ObsErrorSatSpecHumidityParameters());
   options_->deserialize(config);
@@ -49,13 +50,14 @@ ObsErrorSatSpecHumidity::ObsErrorSatSpecHumidity(const eckit::Configuration &con
 // -----------------------------------------------------------------------------
 
 ObsErrorSatSpecHumidity::~ObsErrorSatSpecHumidity() {
-    oops::Log::debug() << "ObsErrorSatSpecHumidity: destructing "  << std::endl;
+    oops::Log::trace() << "ObsErrorSatSpecHumidity destructor"  << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ObsErrorSatSpecHumidity compute start" << std::endl;
   const float missing = util::missingValue<float>();
   float logp_ob, satSpecificHumidity;
   double d_err;
@@ -110,6 +112,7 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
     d_err = static_cast<double>(inputErr[jobs]);
     obserr[0][jobs] = d_err * satSpecificHumidity;
   }
+  oops::Log::trace() << "ObsErrorSatSpecHumidity compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

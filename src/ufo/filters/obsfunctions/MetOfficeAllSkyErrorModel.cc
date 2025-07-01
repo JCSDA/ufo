@@ -36,6 +36,7 @@ static ObsFunctionMaker<MetOfficeAllSkyErrorModel>
 
 MetOfficeAllSkyErrorModel::MetOfficeAllSkyErrorModel(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "MetOfficeAllSkyErrorModel constructor" << std::endl;
   // Check options
   options_.deserialize(conf);
 
@@ -56,12 +57,15 @@ MetOfficeAllSkyErrorModel::MetOfficeAllSkyErrorModel(const eckit::LocalConfigura
 
 // -----------------------------------------------------------------------------
 
-MetOfficeAllSkyErrorModel::~MetOfficeAllSkyErrorModel() {}
+MetOfficeAllSkyErrorModel::~MetOfficeAllSkyErrorModel() {
+  oops::Log::trace() << "MetOfficeAllSkyErrorModel destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "MetOfficeAllSkyErrorModel compute start" << std::endl;
   // Get parameters from options
   const std::vector<float> &fixland = options_.fixland.value().get();
   const std::vector<float> &fixsea = options_.fixsea.value().get();
@@ -254,6 +258,7 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
         out[ich][iloc] = sqrt(out[ich][iloc]);
      }
   }
+  oops::Log::trace() << "MetOfficeAllSkyErrorModel compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

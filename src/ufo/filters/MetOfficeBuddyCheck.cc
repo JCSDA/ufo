@@ -288,6 +288,7 @@ MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters
   : FilterBase(obsdb, parameters, std::move(flags), std::move(obserr),
                 VariableNameMap(parameters.AliasFile.value())), options_(parameters)
 {
+  oops::Log::trace() << "MetOfficeBuddyCheck constructor" << std::endl;
   oops::Log::debug() << "MetOfficeBuddyCheck: config = " << options_ << std::endl;
   allvars_ += Variables(filtervars_, "HofX");
   for (size_t i = 0; i < filtervars_.size(); ++i) {
@@ -305,6 +306,7 @@ MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters
 void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "MetOfficeBuddyCheck applyFilter start" << std::endl;
   // Fetch metadata required for identifying buddy pairs.
   const boost::optional<int> &numLevels = options_.numLevels.value();
   const bool overrideObsGrouping = options_.overrideObsGrouping;
@@ -493,6 +495,7 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                   varNameAndGrossErrProbs.second);
 
   flagRejectedObservations(filtervars, calculatedGrossErrProbsByVarName, flagged);
+  oops::Log::trace() << "MetOfficeBuddyCheck applyFilter complete" << std::endl;
 }
 
 Variable MetOfficeBuddyCheck::backgroundErrorVariable(const Variable &filterVariable,

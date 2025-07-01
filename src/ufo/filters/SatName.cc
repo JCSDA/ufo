@@ -67,11 +67,14 @@ SatName::SatName(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
+  oops::Log::trace() << "SatName constructor" << std::endl;
   oops::Log::debug() << "SatName: config (constructor) = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
-SatName::~SatName() {}
+SatName::~SatName() {
+  oops::Log::trace() << "SatName destructor" << std::endl;
+}
 // -----------------------------------------------------------------------------
 /*! \brief A filter that creates a string variable that makes it simpler to
  *  identify Atmospheric Motion Vector (AMV) / Satwind observations by
@@ -153,6 +156,7 @@ SatName::~SatName() {}
 void SatName::applyFilter(const std::vector<bool> & apply,
                           const Variables & filtervars,
                           std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "SatName applyFilter start" << std::endl;
   std::vector<float> cfreq(obsdb_.nlocs());
   std::vector<int> satid(obsdb_.nlocs());
   std::vector<int> compm(obsdb_.nlocs());
@@ -215,6 +219,7 @@ void SatName::applyFilter(const std::vector<bool> & apply,
                      << " observations with unidentified satellite id" << std::endl;
   oops::Log::info() << "SatName: " << count_missing_chan
                      << " observations with unidentified channel" << std::endl;
+  oops::Log::trace() << "SatName applyFilter complete" << std::endl;
   }
 // -----------------------------------------------------------------------------
 void SatName::print(std::ostream & os) const {

@@ -19,8 +19,8 @@
 namespace ufo {
 
 /// Configuration options recognized by the refractivity operator.
-class ObsGnssroRefMetOfficeOptions : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsGnssroRefMetOfficeOptions, Parameters)
+class ObsGnssroRefMetOfficeParameters : public ObsOperatorParametersBase {
+  OOPS_CONCRETE_PARAMETERS(ObsGnssroRefMetOfficeParameters, ObsOperatorParametersBase)
 
  public:
   /// If true assume that pressure varies exponentially with height when
@@ -32,16 +32,6 @@ class ObsGnssroRefMetOfficeOptions : public oops::Parameters {
   /// The minimum temperature gradient permitted before a profile is considered
   /// isothermal.  Only used if pseudo-levels are also used.
   oops::Parameter<float> minTempGrad{"min_temp_grad", 1.0e-6, this};
-};
-
-/// Configuration options recognized by the refractivity operator.
-class ObsGnssroRefMetOfficeParameters : public ObsOperatorParametersBase {
-  OOPS_CONCRETE_PARAMETERS(ObsGnssroRefMetOfficeParameters, ObsOperatorParametersBase)
-
- public:
-  /// Obs Options - settings for the observation operator
-  oops::Parameter<ObsGnssroRefMetOfficeOptions> obsOptions{"obs options",
-    ObsGnssroRefMetOfficeOptions(), this};
 };
 
 }  // namespace ufo

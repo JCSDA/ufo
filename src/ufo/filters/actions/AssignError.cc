@@ -26,6 +26,7 @@ static FilterActionMaker<AssignError> makerAssignErr_("assign error");
 
 void AssignErrorParameters::deserialize(util::CompositePath &path,
                                         const eckit::Configuration &config) {
+  oops::Log::trace() << "AssignErrorParameters deserialize" << std::endl;
   oops::Parameters::deserialize(path, config);
 
   // These checks should really be done at the validation stage (using JSON Schema),
@@ -43,6 +44,7 @@ void AssignErrorParameters::deserialize(util::CompositePath &path,
 
 AssignError::AssignError(const Parameters_ & parameters)
   : allvars_(), parameters_(parameters) {
+  oops::Log::trace() << "AssignError constructor" << std::endl;
   if (parameters_.errorFunction.value() != boost::none) {
     allvars_ += *parameters_.errorFunction.value();
   }
@@ -57,6 +59,7 @@ void AssignError::apply(const Variables & vars,
                         ioda::ObsDataVector<int> & qcFlags,
                         ioda::ObsDataVector<float> & obserr) const {
   oops::Log::debug() << " AssignError input obserr: " << obserr << std::endl;
+  oops::Log::trace() << "AssignError apply start" << std::endl;
   const float missing = util::missingValue<float>();
   // If float error is specified
   if (parameters_.errorParameter.value() != boost::none) {
@@ -109,6 +112,7 @@ void AssignError::apply(const Variables & vars,
     }
   }
   oops::Log::debug() << " AssignError output obserr: " << obserr << std::endl;
+  oops::Log::trace() << "AssignError apply complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

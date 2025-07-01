@@ -24,6 +24,7 @@ static ObsFunctionMaker<ObsErrorFactorQuotient> makerSteps_("ObsErrorFactorQuoti
 
 ObsErrorFactorQuotient::ObsErrorFactorQuotient(const eckit::LocalConfiguration config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorQuotient constructor" << std::endl;
   // Initialize options
   options_.deserialize(config);
 
@@ -42,12 +43,15 @@ ObsErrorFactorQuotient::ObsErrorFactorQuotient(const eckit::LocalConfiguration c
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorQuotient::~ObsErrorFactorQuotient() {}
+ObsErrorFactorQuotient::~ObsErrorFactorQuotient() {
+  oops::Log::trace() << "ObsErrorFactorQuotient destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorQuotient::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorQuotient compute start" << std::endl;
   const float missing = util::missingValue<float>();
 
   // Get the numeratory and denominator names
@@ -85,6 +89,7 @@ void ObsErrorFactorQuotient::compute(const ObsFilterData & data,
   if (options_.save) {
     out.save("DerivedValue");
   }
+  oops::Log::trace() << "ObsErrorFactorQuotient compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

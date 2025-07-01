@@ -27,6 +27,7 @@ static ObsFunctionMaker<TropopauseHeight>
 TropopauseHeight::TropopauseHeight
 (const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "TropopauseHeight constructor" << std::endl;
   // Validate and deserialize options.
   options_.validateAndDeserialize(conf);
 
@@ -38,13 +39,15 @@ TropopauseHeight::TropopauseHeight
 
 // -----------------------------------------------------------------------------
 
-TropopauseHeight::~TropopauseHeight() {}
+TropopauseHeight::~TropopauseHeight() {
+  oops::Log::trace() << "TropopauseHeight destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void TropopauseHeight::compute(const ObsFilterData & in,
                                         ioda::ObsDataVector<int> & out) const {
-  oops::Log::trace() << "TropopauseHeight::compute started" << std::endl;
+  oops::Log::trace() << "TropopauseHeight compute start" << std::endl;
 
   // Missing int value.
   const int missing = util::missingValue<int>();
@@ -152,7 +155,7 @@ void TropopauseHeight::compute(const ObsFilterData & in,
     }
   }
 
-  oops::Log::trace() << "TropopauseHeight::compute finished" << std::endl;
+  oops::Log::trace() << "TropopauseHeight compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

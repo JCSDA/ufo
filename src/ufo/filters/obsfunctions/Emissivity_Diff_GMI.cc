@@ -24,6 +24,7 @@ static ObsFunctionMaker<Emissivity_Diff_GMI> makerEmissivity_Diff_GMI_("Emissivi
 
 Emissivity_Diff_GMI::Emissivity_Diff_GMI(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "Emissivity_Diff_GMI constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -43,12 +44,15 @@ Emissivity_Diff_GMI::Emissivity_Diff_GMI(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-Emissivity_Diff_GMI::~Emissivity_Diff_GMI() {}
+Emissivity_Diff_GMI::~Emissivity_Diff_GMI() {
+  oops::Log::trace() << "Emissivity_Diff_GMI destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void Emissivity_Diff_GMI::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "Emissivity_Diff_GMI compute start" << std::endl;
   const float missing = util::missingValue<float>();
   std::vector<float> &regression_diff = out[0];
   // Get dimension
@@ -99,6 +103,7 @@ void Emissivity_Diff_GMI::compute(const ObsFilterData & in,
       regression_diff[iloc] = missing;
     }
   }
+  oops::Log::trace() << "Emissivity_Diff_GMI compute complete" << std::endl;
 }
 // -----------------------------------------------------------------------------
 const ufo::Variables & Emissivity_Diff_GMI::requiredVariables() const {

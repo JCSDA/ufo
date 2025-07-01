@@ -161,6 +161,11 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// If false or unspecified, will use distance_norm as described below.
   oops::Parameter<bool> selectMedian{"select_median", false, this};
 
+  /// True to return the mean value of the observations in each bin.
+  /// The mean is returned as a derived obs value.
+  /// The observation that is retained is based on distanceNorm.
+  oops::Parameter<bool> selectMean{"select_mean", false, this};
+
   /// If selectMedian=true, then minNumObsPerBin is the minimum number of observations there must
   /// be in each bin for the median-valued obs to be accepted, otherwise all obs in that bin are
   /// rejected. E.g. if minNumObsPerBin=5, then all obs in any bin with 4 or fewer obs are rejected

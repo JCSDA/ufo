@@ -25,6 +25,7 @@ static ObsFunctionMaker<SelectStatistic> makerSelectStatistic_("SelectStatistic"
 
 SelectStatistic::SelectStatistic(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "SelectStatistic constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 
@@ -37,7 +38,9 @@ SelectStatistic::SelectStatistic(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-SelectStatistic::~SelectStatistic() {}
+SelectStatistic::~SelectStatistic() {
+  oops::Log::trace() << "SelectStatistic destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -53,6 +56,7 @@ ufo::ObsAccessor SelectStatistic::createObsAccessor(const ioda::ObsSpace &obsdb)
 
 // template <typename InputType>
 void SelectStatistic::compute(const ObsFilterData & in, ioda::ObsDataVector<int> & out) const {
+  oops::Log::trace() << "SelectStatistic compute start" << std::endl;
   // initialize
   out.zero();
   size_t nchans = out.nvars();
@@ -133,6 +137,7 @@ void SelectStatistic::compute(const ObsFilterData & in, ioda::ObsDataVector<int>
       }  // record all missing values or not
     }  // for each channel
   }  // for each record
+  oops::Log::trace() << "SelectStatistic compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

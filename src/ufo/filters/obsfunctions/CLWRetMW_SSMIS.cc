@@ -23,6 +23,7 @@ static ObsFunctionMaker<CLWRetMW_SSMIS> makerCLWRetMW_SSMIS_("CLWRetMW_SSMIS");
 
 CLWRetMW_SSMIS::CLWRetMW_SSMIS(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "CLWRetMW_SSMIS constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -40,12 +41,15 @@ CLWRetMW_SSMIS::CLWRetMW_SSMIS(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-CLWRetMW_SSMIS::~CLWRetMW_SSMIS() {}
+CLWRetMW_SSMIS::~CLWRetMW_SSMIS() {
+  oops::Log::trace() << "CLWRetMW_SSMIS destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void CLWRetMW_SSMIS::compute(const ObsFilterData & in,
                                     ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "CLWRetMW_SSMIS compute start" << std::endl;
   // Get required parameters
   const std::string &vargrp = options_.varGroup.value();
 
@@ -69,6 +73,7 @@ void CLWRetMW_SSMIS::compute(const ObsFilterData & in,
 
   // Compute cloud liquid water amount
   cloudLiquidWater(bt19h, bt19v, bt22v, bt37h, bt37v, bt91v, bt91h, water_frac, out[0]);
+  oops::Log::trace() << "CLWRetMW_SSMIS compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

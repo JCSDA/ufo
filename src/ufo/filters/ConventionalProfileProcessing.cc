@@ -35,6 +35,7 @@ namespace ufo {
    std::shared_ptr<ioda::ObsDataVector<float> > obserr)
     : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
   {
+    oops::Log::trace() << "ConventionalProfileProcessing constructor" << std::endl;
     // Determine whether any check requires HofX to have been calculated.
     // If so, add the filter variables to \c allvars_.
     // This is performed here because \c allvars_ must be filled prior to the filter being run.
@@ -78,7 +79,9 @@ namespace ufo {
 
   // -----------------------------------------------------------------------------
 
-  ConventionalProfileProcessing::~ConventionalProfileProcessing() {}
+  ConventionalProfileProcessing::~ConventionalProfileProcessing() {
+    oops::Log::trace() << "ConventionalProfileProcessing destructor" << std::endl;
+  }
 
   // -----------------------------------------------------------------------------
 
@@ -200,7 +203,7 @@ namespace ufo {
    const Variables & filtervars,
    std::vector<std::vector<bool>> & flagged) const
   {
-    print(oops::Log::trace());
+    oops::Log::trace() << "ConventionalProfileProcessing applyFilter start" << std::endl;
 
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(data_,
@@ -270,6 +273,7 @@ namespace ufo {
         oops::Log::debug() << std::endl;
       }
     }
+    oops::Log::trace() << "ConventionalProfileProcessing applyFilter complete" << std::endl;
   }
 
   // -----------------------------------------------------------------------------

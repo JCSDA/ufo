@@ -46,6 +46,9 @@ class CloudDetectMinResidualAVHRRParameters : public oops::Parameters {
   /// Parameter for original observation error
   oops::OptionalParameter<std::vector<float>> obserrOriginal{"error parameter vector", this};
 
+  /// Parameter for cloud detection
+  oops::OptionalParameter<std::vector<float>> criteria4clddet{"cloud detection criteria", this};
+
   /// Name of the data group to which the observation error is applied (default: ObsErrorData)
   oops::Parameter<std::string> testObserr{"test_obserr", "ObsErrorData", this};
 

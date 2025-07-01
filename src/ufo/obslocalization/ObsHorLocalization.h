@@ -23,6 +23,7 @@
 #include "eckit/geometry/Point3.h"
 #include "eckit/geometry/UnitSphere.h"
 
+#include "ioda/distribution/Halo.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -92,6 +93,7 @@ class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
 
   /// TODO(travis) distribution name is needed for temporary fix, should be removed eventually
   std::string distName_;
+  double haloSize_;
 };
 
 // -----------------------------------------------------------------------------
@@ -108,6 +110,12 @@ ObsHorLocalization<MODEL>::ObsHorLocalization(const eckit::Configuration & confi
   // check that this distribution supports local obs space
   // TODO(travis) this has been moved to computeLocalization as a quick fix for a bug.
   distName_ = obsspace.distribution()->name();
+  if (distName_ == "Halo") {
+    auto haloDist = std::dynamic_pointer_cast<const ioda::Halo>(obsspace.distribution());
+    haloSize_ = haloDist->haloSize();
+  } else {
+    haloSize_ = 1.e+20;
+  }
 
   const size_t nlocs = obsspace.nlocs();
   // Get latitudes and longitudes of all observations.
@@ -190,6 +198,12 @@ ObsHorLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
   //  breaks LETKF when using a split observer/solver
   if ( distName_ != "Halo" && distName_ != "InefficientDistribution" ) {
     std::string message = "Can not use ObsHorLocalization with distribution=" + distName_;
+    throw eckit::BadParameter(message);
+  }
+  if (distName_ == "Halo" && lengthscale > haloSize_) {
+    std::string message = "Can not use ObsHorLocalization with distribution=" + distName_ +
+                          " and lengthscale=" + std::to_string(lengthscale) +
+                          " greater than haloSize=" + std::to_string(haloSize_);
     throw eckit::BadParameter(message);
   }
 

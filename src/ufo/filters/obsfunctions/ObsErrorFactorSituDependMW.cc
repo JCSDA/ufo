@@ -32,6 +32,7 @@ static ObsFunctionMaker<ObsErrorFactorSituDependMW>
 
 ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorSituDependMW constructor" << std::endl;
   // Initialize options
   options_.deserialize(conf);
 
@@ -85,12 +86,15 @@ ObsErrorFactorSituDependMW::ObsErrorFactorSituDependMW(const eckit::LocalConfigu
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorSituDependMW::~ObsErrorFactorSituDependMW() {}
+ObsErrorFactorSituDependMW::~ObsErrorFactorSituDependMW() {
+  oops::Log::trace() << "ObsErrorFactorSituDependMW destructor"  << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "ObsErrorFactorSituDependMW compute start" << std::endl;
   // Get sensor information from options
   const std::string &sensor = options_.sensor.value();
 
@@ -248,6 +252,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
       }
     }
   }
+  oops::Log::trace() << "ObsErrorFactorSituDependMW compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

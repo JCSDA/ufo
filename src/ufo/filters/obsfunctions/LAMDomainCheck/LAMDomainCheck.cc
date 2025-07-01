@@ -21,6 +21,7 @@ static ObsFunctionMaker<LAMDomainCheck> makerObsFuncLAMDomainCheck_("LAMDomainCh
 
 LAMDomainCheck::LAMDomainCheck(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "LAMDomainCheck constructor" << std::endl;
   oops::Log::debug() << "LAMDomainCheck: config = " << conf << std::endl;
   // Initialize options
   options_.deserialize(conf);
@@ -33,7 +34,9 @@ LAMDomainCheck::LAMDomainCheck(const eckit::LocalConfiguration & conf)
 
 // -----------------------------------------------------------------------------
 
-LAMDomainCheck::~LAMDomainCheck() {}
+LAMDomainCheck::~LAMDomainCheck() {
+  oops::Log::trace() << "LAMDomainCheck destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 /*! \brief LAMDomainCheck::compute
@@ -75,6 +78,7 @@ LAMDomainCheck::~LAMDomainCheck() {}
 
 void LAMDomainCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "LAMDomainCheck compute start" << std::endl;
   const size_t nlocs = in.nlocs();
   const float missing = util::missingValue<float>();
 
@@ -127,6 +131,7 @@ void LAMDomainCheck::compute(const ObsFilterData & in,
   if (options_.save) {
     out.save("DerivedValue");
   }
+  oops::Log::trace() << "LAMDomainCheck compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

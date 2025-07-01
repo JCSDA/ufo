@@ -24,6 +24,7 @@ static ObsFunctionMaker<OceanPressureToDepth>
 
 OceanPressureToDepth::OceanPressureToDepth(const eckit::LocalConfiguration & conf)
   : invars_() {
+  oops::Log::trace() << "OceanPressureToDepth constructor" << std::endl;
   // Check options
   options_.validateAndDeserialize(conf);
 
@@ -34,12 +35,15 @@ OceanPressureToDepth::OceanPressureToDepth(const eckit::LocalConfiguration & con
 
 // -----------------------------------------------------------------------------
 
-OceanPressureToDepth::~OceanPressureToDepth() {}
+OceanPressureToDepth::~OceanPressureToDepth() {
+  oops::Log::trace() << "OceanPressureToDepth destructor" << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void OceanPressureToDepth::compute(const ObsFilterData & in,
                                    ioda::ObsDataVector<float> & out) const {
+  oops::Log::trace() << "OceanPressureToDepth compute start" << std::endl;
   // dimension
   const size_t nlocs = in.nlocs();
 
@@ -76,6 +80,7 @@ void OceanPressureToDepth::compute(const ObsFilterData & in,
       depth[loc] = ((((param5 * p_db + param6) * p_db - param7) * p_db + param8) * p_db) / g;
     }
   }
+  oops::Log::trace() << "OceanPressureToDepth compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

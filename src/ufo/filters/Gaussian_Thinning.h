@@ -105,6 +105,16 @@ class Gaussian_Thinning : public FilterBase,
       const std::vector<float> &obsval,
       const float &minNumObsPerBin) const;
 
+  std::vector<bool> identifyThinnedObservationsMean(
+      const std::vector<size_t> &validObsIds,
+      const ObsAccessor &obsAccessor,
+      const RecursiveSplitter &splitter,
+      const std::vector<float> &obsval,
+      const float &minNumObsPerBin,
+      const std::vector<float> &distancesToBinCenter,
+      const std::vector<int> &priorities,
+      std::vector<float> &mean) const;
+
   std::function<bool(size_t, size_t)> makeObservationComparator(
       const std::vector<size_t> &validObsIds,
       const std::vector<float> &distancesToBinCenter,

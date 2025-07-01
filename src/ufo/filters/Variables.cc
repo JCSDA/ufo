@@ -29,25 +29,24 @@ namespace ufo {
 
 Variables::Variables()
   : vars_() {
-  oops::Log::trace() << "ufo::Variables created empty" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Variables::Variables(const std::vector<eckit::LocalConfiguration> & confs)
   : vars_() {
-  oops::Log::trace() << "ufo::Variables(config) start " << std::endl;
+  oops::Log::trace() << "ufo::Variables(config) constructor start" << std::endl;
   for (size_t jvar = 0; jvar < confs.size(); ++jvar) {
     vars_.push_back(Variable(confs[jvar]));
   }
-  oops::Log::trace() << "ufo::Variables(conf) done" << std::endl;
+  oops::Log::trace() << "ufo::Variables(config) constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Variables::Variables(const oops::ObsVariables & oopsvars)
   : vars_() {
-  oops::Log::trace() << "ufo::Variables(oops::Vars) start" << std::endl;
+  oops::Log::trace() << "ufo::Variables(oops::ObsVariables) constructor start" << std::endl;
   if (oopsvars.channels().size() > 0) {
     const auto & channels = oopsvars.channels();
     const size_t nvars = oopsvars.size() / channels.size();
@@ -67,34 +66,36 @@ Variables::Variables(const oops::ObsVariables & oopsvars)
       vars_.push_back(Variable(oopsvars[jvar]));
     }
   }
+  oops::Log::trace() << "ufo::Variables(oops::ObsVariables) constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Variables::Variables(const oops::Variables & oopsvars)
   : vars_() {
-  oops::Log::trace() << "ufo::Variables(oops::Vars) start" << std::endl;
+  oops::Log::trace() << "ufo::Variables(oops::Vars) constructor start" << std::endl;
   for (size_t jvar = 0; jvar < oopsvars.size(); ++jvar) {
     vars_.push_back(Variable(oopsvars[jvar].name()));
   }
-  oops::Log::trace() << "ufo::Variables(oops::Vars) end" << std::endl;
+  oops::Log::trace() << "ufo::Variables(oops::Vars) constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Variables::Variables(const ufo::Variables & vars, const std::string & group)
   : vars_() {
-  oops::Log::trace() << "ufo::Variables(ufovars, group) start " << std::endl;
+  oops::Log::trace() << "ufo::Variables(ufovars, group) constructor start" << std::endl;
   for (size_t jvar = 0; jvar < vars.size(); ++jvar) {
     vars_.push_back(Variable(vars[jvar], group));
   }
+  oops::Log::trace() << "ufo::Variables(ufovars, group) constructor complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
 Variables::Variables(const std::vector<ufo::Variable> & vars)
   : vars_(vars) {
-  oops::Log::trace() << "ufo::Variables(std::vector<ufo::Variable>) start " << std::endl;
+  oops::Log::trace() << "ufo::Variables(std::vector<ufo::Variable>) constructor" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

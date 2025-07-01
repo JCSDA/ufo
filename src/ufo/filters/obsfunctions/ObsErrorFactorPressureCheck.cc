@@ -1,5 +1,6 @@
 /*
  * (C) Copyright 2023 NASA
+ * (C) Copyright 2025 NOAA/NCEP/EMC
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -21,6 +22,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
+#include "ufo/variabletransforms/Formulas.h"
 
 namespace ufo {
 
@@ -79,6 +81,7 @@ static ObsFunctionMaker<ObsErrorFactorPressureCheck> makerSteps_("ObsErrorFactor
 
 ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configuration &config)
   : invars_() {
+  oops::Log::trace() << "ObsErrorFactorPressureCheck constructor" << std::endl;
   const float missing = util::missingValue<float>();
   // Initialize options
   options_.reset(new ObsErrorFactorPressureCheckParameters());
@@ -104,6 +107,8 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
   invars_ += Variable("GeoVaLs/geopotential_height");
   invars_ += Variable("GeoVaLs/air_pressure_at_surface");
   invars_ += Variable("GeoVaLs/air_pressure");
+  invars_ += Variable("GeoVaLs/air_temperature");
+
   const std::string geovar_sfc_geomz = options_->geovar_sfc_geomz.value();
   invars_ += Variable("GeoVaLs/" + geovar_sfc_geomz);
 
@@ -115,13 +120,17 @@ ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configurat
 
 // -----------------------------------------------------------------------------
 
-ObsErrorFactorPressureCheck::~ObsErrorFactorPressureCheck() {}
+ObsErrorFactorPressureCheck::~ObsErrorFactorPressureCheck() {
+  oops::Log::trace() << "ObsErrorFactorPressureCheck destructor"  << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
 void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
+  oops::Log::trace() << "ObsErrorFactorPressureCheck compute start" << std::endl;
   const float missing = util::missingValue<float>();
+  float temp, satVaporPres, satSpecificHumidity;
 
   // Get output variable size
   int nvars = obserr.nvars();
@@ -179,6 +188,16 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
     data.get(Variable("GeoVaLs/air_pressure"), level, prsl[ilev]);
   }
 
+// Get temperature for saturated vapor pressure calculation
+  std::vector<std::vector<float>> airtemp(nlevs, std::vector<float>(nlocs));
+  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
+    const size_t level = nlevs - ilev - 1;
+    data.get(Variable("GeoVaLs/air_temperature"), level, airtemp[ilev]);
+  }
+
+// Set formulation for saturated vapor pressure calculation
+  formulas::Formulation formulation = formulas::Formulation::Rogers;
+
   int iflag;
   double sat_specific_humidity;
   const float grav = Constants::grav;
@@ -193,8 +212,8 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   float dpres, sfcchk, logobspres, logsfcpres, rlow, rhgh, drpx;
   float obserror, new_error, error_factor;
   std::vector<float> zges_mh(nlevs);
-  std::vector<float> logprsl(nlevs);
-  std::vector<double> q_profile(nlevs);
+  std::vector<float> logprsl(nlevs), airtemp_prof(nlevs);
+  std::vector<double> qs_profile(nlevs);
   bool reported_height = false;
   bool iflag_print_one = true;
   bool iflag_print_negone = true;
@@ -206,6 +225,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   const float AssumedSfcWndObsHeight = options_->AssumedSfcWndObsHeight.value();
 
   for (size_t iv = 0; iv < nvars; ++iv) {   // Variable loop
+// -----------------------------------------------
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (qcflagdata[iloc] != 0) {
         continue;
@@ -295,14 +315,20 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
 
         sfcchk = 0.0f;
 
+// for pressure coordinate
       } else {
         logobspres = std::log(obs_pressure[iloc]);
         logsfcpres = std::log(model_pressure_sfc[iloc]);
+//
+// air temperature and pressure profiles at iloc
+//
         for (size_t k = 0 ; k < nlevs ; ++k) {
           logprsl[k] = std::log(prsl[k][iloc]);
           logprsl_double[k] = std::log(prsl[k][iloc]);
+          airtemp_prof[k] = airtemp[k][iloc];
         }
 
+       // logprsl[0] at surface
         ASSERT(logprsl[0] > logprsl[nlevs-1]);
         iflag = -1;    // in decreasing order
         if (iflag_print_negone) {
@@ -327,16 +353,35 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         } else {
           drpx = 0.0f;
         }
+
         if (inflatevars.compare("specificHumidity") == 0) {
             if ((itype[iloc] > 179 && itype[iloc] < 186) ||
                 (itype[iloc] == 199)) dpres = 1.0;
-            gvals->getAtLocation(q_profile,
-                oops::Variable{"saturation_water_vapor_mixing_ratio_wrt_moist_air"}, iloc);
-            std::reverse(q_profile.begin(), q_profile.end());
 
-            ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, q_profile);
+            if (options_->requestQSat.value()) {
+       // Use geovals
+              gvals->getAtLocation(qs_profile,
+                  oops::Variable{"saturation_water_vapor_mixing_ratio_wrt_moist_air"}, iloc);
+              std::reverse(qs_profile.begin(), qs_profile.end());
+
+            } else {
+       //
+       // Calculate saturated vapor pressure (at iloc, k=0 at surface)
+       //
+              for (size_t k = 0 ; k < nlevs ; ++k) {
+                temp = airtemp_prof[k];
+                satVaporPres = formulas::SatVaporPres_fromTemp(temp, formulation);
+
+// Convert saturated vapor pressure to saturation specific humidity
+                satSpecificHumidity = Constants::epsilon * satVaporPres / obs_pressure[iloc];
+                qs_profile[k] = satSpecificHumidity;
+              }
+            }
+
+            ufo::PiecewiseLinearInterpolation vert_interp_model(logprsl_double, qs_profile);
+
             if ((itype[iloc] >= 180) && (itype[iloc] <= 184)) {
-                sat_specific_humidity = q_profile[0];
+                sat_specific_humidity = qs_profile[0];
             } else {
                 sat_specific_humidity = vert_interp_model(logobspres);
             }
@@ -356,8 +401,9 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
       }
       if (dpres > nlevs) obserr[iv][iloc]=1.e20f;
       if ((itype[iloc] >= 221 && itype[iloc] <= 229) && dpres < 0.0f) obserr[iv][iloc]=1.e20f;
-    }
-  }
+    }  // iloc
+  }  // nvars
+  oops::Log::trace() << "ObsErrorFactorPressureCheck compute complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

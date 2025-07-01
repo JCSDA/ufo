@@ -19,7 +19,6 @@ use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
 use fckit_log_module, only : fckit_log
-use fckit_exception_module, only: fckit_exception
 use ufo_utils_refractivity_calculator, only: &
     ufo_calculate_refractivity, ufo_refractivity_partial_derivatives
 use ufo_constants_mod, only: &
@@ -32,6 +31,7 @@ use ufo_constants_mod, only: &
     c_virtual,               &    ! Related to mw_ratio
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
+use gnssro_mod_transform, only: geometric2geop
 
 private
 public :: ufo_gnssro_refmetoffice_tlad
@@ -40,6 +40,7 @@ public :: ufo_gnssro_refmetoffice_tlad_settraj
 public :: ufo_gnssro_refmetoffice_simobs_tl
 public :: ufo_gnssro_refmetoffice_simobs_ad
 public :: ufo_gnssro_refmetoffice_tlad_delete
+public :: jacobian_interface
 
 integer, parameter :: max_string=800
 
@@ -126,6 +127,7 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   integer                     :: iobs                          ! Loop variable, observation number
 
   real(kind_real), allocatable       :: obs_height(:)          ! Geopotential height of the observation
+  real(kind_real), allocatable       :: obsLat(:)              ! Observed latitude - used in geopotential height calculation
 
   write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_tlad_settraj: begin"
   call fckit_log%info(err_msg)
@@ -139,12 +141,6 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_z,    theta_heights) ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi,   rho_heights)   ! Geopotential height of the pressure levels
 
-! make sure that the geovals are in the correct vertical order (top-to-bottom)
-  if( prs%vals(1,1) > prs%vals(prs%nval,1) ) then 
-    write(err_msg,'(a)') 'Geovals should be ordered top to bottom'
-    call fckit_exception%throw(err_msg)
-  endif
-
 ! Keep copy of dimensions
   self % nlevp = prs % nval
   self % nlevq = q % nval
@@ -152,22 +148,32 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   
 ! Get the meta-data from the observations
   allocate(obs_height(self%nlocs))
+  allocate(obsLat(self%nlocs))
   call obsspace_get_db(obss, "MetaData", "height", obs_height)
+  call obsspace_get_db(obss, "MetaData", "latitude", obsLat)
+
+! Convert geometric height to geopotential height.
+  do iobs = 1, self%nlocs
+    if (obs_height(iobs) /= missing_value(obs_height(iobs))) then
+      call geometric2geop(obsLat(iobs), obs_height(iobs), obs_height(iobs))
+    end if
+  end do
+
   allocate(self % K(1:self%nlocs, 1:prs%nval + q%nval))
 
 ! For each observation, calculate the K-matrix
   obs_loop: do iobs = 1, self % nlocs
     CALL jacobian_interface(prs % nval, &                              ! Number of pressure levels
                             q % nval, &                                ! Number of specific humidity levels
-                            rho_heights % vals(prs%nval:1:-1,iobs), &  ! Heights of the pressure levels
-                            theta_heights % vals(q%nval:1:-1,iobs), &  ! Heights of the specific humidity levels
+                            rho_heights % vals(prs%nval:1:-1,iobs), &  ! Geopotential heights of the pressure levels
+                            theta_heights % vals(q%nval:1:-1,iobs), &  ! Geopotential heights of the specific humidity levels
                             prs % vals(prs%nval:1:-1,iobs), &          ! Values of the pressure
                             q % vals(q%nval:1:-1,iobs), &              ! Values of the specific humidity
                             self % pseudo_ops, &                       ! Whether to use pseudo-levels in the calculation
                             self % vert_interp_ops, &                  ! Whether to interpolate using log(pressure)
                             self % min_temp_grad, &                    ! Minimum allowed vertical temperature gradient
                             1, &                                       ! Number of observations in the profile
-                            obs_height(iobs:iobs), &                   ! Impact parameter for this observation
+                            obs_height(iobs:iobs), &                   ! Geopotential height of this observation
                             self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
     ! Flip the K-matrix back the right way around
     self % K(iobs,1:prs%nval) = self % K(iobs, prs%nval:1:-1)
@@ -178,6 +184,7 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   self%ltraj = .true.
 
   deallocate(obs_height)
+  deallocate(obsLat)
 
 end subroutine ufo_gnssro_refmetoffice_tlad_settraj
 
@@ -405,15 +412,15 @@ IMPLICIT NONE
 ! Subroutine arguments:
 integer, intent(in)          :: nlevp            !< Number of pressure levels
 integer, intent(in)          :: nlevq            !< Number of specific humidity levels
-real(kind_real), intent(in)  :: za(:)            !< Height of the pressure levels
-real(kind_real), intent(in)  :: zb(:)            !< Height of the specific humidity levels
+real(kind_real), intent(in)  :: za(:)            !< Geopotential height of the pressure levels
+real(kind_real), intent(in)  :: zb(:)            !< Geopotential height of the specific humidity levels
 real(kind_real), intent(in)  :: p(:)             !< Input pressure
 real(kind_real), intent(in)  :: q(:)             !< Input specific humidity
 logical, intent(in)          :: vert_interp_ops  !< Use log(p) for vertical interpolation?
 logical, intent(in)          :: pseudo_ops       !< Use pseudo-levels to reduce errors?
 real(kind_real), intent(in)  :: min_temp_grad    !< Minimum value for the vertical temperature gradient
 integer, intent(in)          :: nobs             !< Number of observations
-real(kind_real), intent(in)  :: zobs(:)          !< Height of the observations
+real(kind_real), intent(in)  :: zobs(:)          !< Geopotential height of the observations
 real(kind_real), intent(out) :: Kmat(:,:)        !< K-matrix (Jacobian)
 
 ! Local declarations:

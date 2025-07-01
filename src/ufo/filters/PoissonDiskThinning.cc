@@ -168,8 +168,8 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
                                          const Parameters_ &parameters,
                                          std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                          std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
-{
+  : FilterBase(obsdb, parameters, flags, obserr), options_(parameters) {
+  oops::Log::trace() << "PoissonDiskThinning constructor" << std::endl;
   oops::Log::debug() << "PoissonDiskThinning: config = " << options_ << std::endl;
   if (options_.sortVertical.value() != boost::none &&
       options_.minVerticalSpacing.value() == boost::none) {
@@ -208,18 +208,20 @@ PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
 }
 
 // Required for the correct destruction of options_.
-PoissonDiskThinning::~PoissonDiskThinning()
-{}
+PoissonDiskThinning::~PoissonDiskThinning() {
+  oops::Log::trace() << "PoissonDiskThinning destructor" << std::endl;
+}
 
 void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
                                       const Variables & filtervars,
                                       std::vector<std::vector<bool>> & flagged) const {
+  oops::Log::trace() << "PoissonDiskThinning applyFilter start" << std::endl;
   ObsAccessor obsAccessor = createObsAccessor();
 
   const std::vector<size_t> validObsIds = getValidObservationIds(apply, filtervars, obsAccessor);
 
   int numSpatialDims, numNonspatialDims;
-  ObsData obsData = getObsData(obsAccessor, numSpatialDims, numNonspatialDims);
+  ObsData obsData = getObsData(obsAccessor, apply, numSpatialDims, numNonspatialDims);
 
   std::vector<bool> isThinned(obsData.totalNumObs, false);
 
@@ -260,7 +262,7 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     // randomly shuffle points of equal priority. Otherwise, if 'min_vertical_spacing'
     // and 'sort_vertical' are specified, sort according to pressure coordinate.
     RecursiveSplitter prioritySplitter(obsIdsInCategory.size());
-    groupObservationsByPriority(obsIdsInCategory, obsAccessor, prioritySplitter);
+    groupObservationsByPriority(obsData, obsIdsInCategory, obsAccessor, prioritySplitter, apply);
     if (options_.shuffle) {
       prioritySplitter.shuffleGroups();
     } else if (options_.sortVertical.value() != boost::none &&
@@ -298,19 +300,33 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
     }
     obsdb_.put_db("DerivedObsValue", filtervars_.variable(0).variable(), localObs);
   }
+  oops::Log::trace() << "PoissonDiskThinning applyFilter complete" << std::endl;
 }
 
 ObsAccessor PoissonDiskThinning::createObsAccessor() const {
+  // Detect incompatible options
+  if (options_.categoryVariable.value() != boost::none &&
+      options_.groupByRecordID.value() != boost::none) {
+    throw eckit::UserError("Cannot have both a category variable and "
+                           "group by record ID", Here());
+  }
   if (options_.categoryVariable.value() != boost::none) {
-    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable(
-          obsdb_, *options_.categoryVariable.value());
+    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByVariable
+      (obsdb_, *options_.categoryVariable.value(), options_.accountForWhere);
+  } else if (options_.groupByRecordID.value() != boost::none &&
+             options_.groupByRecordID.value().value()) {
+    return ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId
+      (obsdb_, options_.accountForWhere);
   } else {
-    return ObsAccessor::toAllObservations(obsdb_);
+    return ObsAccessor::toAllObservations
+      (obsdb_, options_.accountForWhere);
   }
 }
 
-PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
-    const ObsAccessor &obsAccessor, int &numSpatialDims, int &numNonspatialDims) const
+PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData
+(const ObsAccessor &obsAccessor,
+ const std::vector<bool> &apply,
+ int &numSpatialDims, int &numNonspatialDims) const
 {
   ObsData obsData;
 
@@ -322,15 +338,15 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   obsData.minLongitudeSpacings = options_.minLongitudeSpacing.value();
   if (obsData.minHorizontalSpacings != boost::none) {
     validateSpacings(*obsData.minHorizontalSpacings, "min_horizontal_spacing");
-    obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
-    obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
+    obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude", apply);
+    obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude", apply);
     numSpatialDims = 3;
   } else if (obsData.minLatitudeSpacings != boost::none ||
              obsData.minLongitudeSpacings != boost::none) {
     validateSpacings(*obsData.minLatitudeSpacings, "min_latitude_spacing");
     validateSpacings(*obsData.minLongitudeSpacings, "min_longitude_spacing");
-    obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude");
-    obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude");
+    obsData.latitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "latitude", apply);
+    obsData.longitudes = obsAccessor.getFloatVariableFromObsSpace("MetaData", "longitude", apply);
     numSpatialDims = 2;
   }
 
@@ -338,21 +354,23 @@ PoissonDiskThinning::ObsData PoissonDiskThinning::getObsData(
   if (obsData.minVerticalSpacings != boost::none) {
     validateSpacings(*obsData.minVerticalSpacings, "min_vertical_spacing");
     obsData.pressures =
-      obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup, options_.pressureCoord);
+      obsAccessor.getFloatVariableFromObsSpace(options_.pressureGroup,
+                                               options_.pressureCoord,
+                                               apply);
     ++numNonspatialDims;
   }
 
   obsData.minTimeSpacings = options_.minTimeSpacing.value();
   if (obsData.minTimeSpacings != boost::none) {
     validateSpacings(*obsData.minTimeSpacings, "min_time_spacing");
-    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "dateTime");
+    obsData.times = obsAccessor.getDateTimeVariableFromObsSpace("MetaData", "dateTime", apply);
     ++numNonspatialDims;
   }
 
   const boost::optional<Variable> priorityVariable = options_.priorityVariable;
   if (priorityVariable != boost::none) {
-    obsData.priorities = obsAccessor.getIntVariableFromObsSpace(
-          priorityVariable.get().group(), priorityVariable.get().variable());
+    obsData.priorities = obsAccessor.getIntVariableFromObsSpace
+      (priorityVariable.get().group(), priorityVariable.get().variable(), apply);
   }
 
   if (options_.selectMedian) {
@@ -429,16 +447,21 @@ void PoissonDiskThinning::synchroniseRandomNumberGenerators(const eckit::mpi::Co
 }
 
 void PoissonDiskThinning::groupObservationsByPriority(
+    const ObsData &obsData,
     const std::vector<size_t> &validObsIds,
     const ObsAccessor &obsAccessor,
-    RecursiveSplitter &splitter) const {
+    RecursiveSplitter &splitter,
+    const std::vector<bool> &apply) const {
   boost::optional<Variable> priorityVariable = options_.priorityVariable;
   if (priorityVariable == boost::none)
     return;
 
-  // TODO(wsmigaj): reuse the priority vector from obsData.
-  std::vector<int> priority = obsAccessor.getIntVariableFromObsSpace(
-        priorityVariable.get().group(), priorityVariable.get().variable());
+  std::vector<int> priority =
+    obsData.priorities != boost::none ?
+    *obsData.priorities :
+    obsAccessor.getIntVariableFromObsSpace(priorityVariable.get().group(),
+                                           priorityVariable.get().variable(),
+                                           apply);
 
   auto reverse = [](int i) {
       return -i - std::numeric_limits<int>::lowest() + std::numeric_limits<int>::max();
@@ -728,9 +751,9 @@ std::array<float, numDims> PoissonDiskThinning::getObservationPosition(
   }
 
   if (obsData.times) {
-    // We choose obsData.times[0] as the reference time when converting datetimes to floats.
-    // Maybe there's a better way.
-    position[dim++] = ((*obsData.times)[obsId] - (*obsData.times)[0]).toSeconds();
+    // We use the centre of the assimilation window as the reference time when converting
+    // datetimes to floats.
+    position[dim++] = ((*obsData.times)[obsId] - obsdb_.timeWindow().midpoint()).toSeconds();
   }
 
   return position;
