@@ -682,7 +682,7 @@ if( ${rttov_FOUND} )
   elseif(DEFINED rttov_BASE_DIR AND EXISTS "${rttov_BASE_DIR}/etc")
     set(RTTOV_COEF_DIR "${rttov_BASE_DIR}/etc/rtcoef_rttov12")
   endif()
-  message("RTTOV coefficient directory: ${RTTOV_COEF_DIR}")
+  message(STATUS "RTTOV coefficient directory: ${RTTOV_COEF_DIR}")
 
   if(DEFINED ENV{RTTOV_LOCAL_EMIS_ATLAS_DIR} AND EXISTS $ENV{RTTOV_LOCAL_EMIS_ATLAS_DIR})
     set(RTTOV_EMIS_ATLAS_DIR "$ENV{RTTOV_LOCAL_EMIS_ATLAS_DIR}")
@@ -691,7 +691,7 @@ if( ${rttov_FOUND} )
   elseif(DEFINED rttov_BASE_DIR AND EXISTS "${rttov_BASE_DIR}/etc")
     set(RTTOV_EMIS_ATLAS_DIR "${rttov_BASE_DIR}/etc/emis_data")
   endif()
-  message("RTTOV emissivity atlas directory: ${RTTOV_EMIS_ATLAS_DIR}")
+  message(STATUS "RTTOV emissivity atlas directory: ${RTTOV_EMIS_ATLAS_DIR}")
   
   # Extract mietable to binDir/Data
   if(EXISTS "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.tar.zst")
