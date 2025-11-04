@@ -9,6 +9,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
+#include <memory>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -43,8 +45,7 @@ Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb,
                                      const GaussianThinningParameters & params,
                                      std::shared_ptr<ioda::ObsDataVector<int> > flags,
                                      std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, params, flags, obserr), options_(params)
-{
+  : FilterBase(obsdb, params, flags, obserr), options_(params) {
   oops::Log::trace() << "Gaussian_Thinning constructor" << std::endl;
   oops::Log::debug() << "Gaussian_Thinning: config = " << options_ << std::endl;
 }
@@ -133,6 +134,43 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     // Gather obs from all MPI ranks
     const std::vector<float> globalObs = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
                               varname);
+    // Gather Error variables from all ranks if specified
+    std::vector<float> thinnedSystematicErrorStandardDeviation;
+    std::vector<float> thinnedRandomErrorStandardDeviation;
+    std::vector<float> totalErrorStandardDeviation;
+    if (options_.calculateUncertainty.value()) {
+      if (options_.randomErrorStandardDeviationVariable.value()) {
+        std::vector<float> globalRandomErrorStandardDeviation =
+            obsAccessor.getFloatVariableFromObsSpace(
+                options_.randomErrorStandardDeviationVariable.value()->group(),
+                options_.randomErrorStandardDeviationVariable.value()->variable());
+
+        // set default value for error in case only one observation in the bin.
+        thinnedRandomErrorStandardDeviation = globalRandomErrorStandardDeviation;
+
+        // reduce the grouped random error standard deviation as these values are
+        // independently and identically distributed.
+        isThinned = identifyThinnedObservationsMean(
+            validObsIds, obsAccessor, splitter, globalRandomErrorStandardDeviation,
+            distancesToBinCenter, priorities, MeanThinningType::RANDOMERROR,
+            thinnedRandomErrorStandardDeviation);
+      }
+      if (options_.systematicErrorStandardDeviationVariable.value()) {
+        // set the systematic error to a non-missing element of the group
+        std::vector<float> globalSystematicErrorStandardDeviation =
+            obsAccessor.getFloatVariableFromObsSpace(
+                options_.systematicErrorStandardDeviationVariable.value()->group(),
+                options_.systematicErrorStandardDeviationVariable.value()->variable());
+
+        // set default value for error in case only one observation in the bin.
+        thinnedSystematicErrorStandardDeviation = globalSystematicErrorStandardDeviation;
+
+        isThinned = identifyThinnedObservationsMean(
+            validObsIds, obsAccessor, splitter, globalSystematicErrorStandardDeviation,
+            distancesToBinCenter, priorities, MeanThinningType::SYSTEMATICERROR,
+            thinnedSystematicErrorStandardDeviation);
+      }
+    }
     // Define mean vector, identical to the global obs values, intended to be overwritten.
     // In the case of a single observation in a bin, this ensures the mean is still returned.
     std::vector<float> mean = globalObs;
@@ -141,23 +179,44 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     //  must be in a bin to accept a super-ob (the mean value of obs),
     //  and vector of means.
     isThinned = identifyThinnedObservationsMean(
-                              validObsIds, obsAccessor, splitter, globalObs,
-                              options_.minNumObsPerBin, distancesToBinCenter,
-                              priorities, mean);
+        validObsIds, obsAccessor, splitter, globalObs,
+        distancesToBinCenter, priorities, MeanThinningType::MEAN, mean);
     // Create a local mean vector the size of the obs space on the current MPI rank
     std::vector<float> localObs;
     obsdb_.get_db("ObsValue", varname, localObs);
     std::vector<float> localMean = localObs;
+
     // Loop over obs on current MPI rank, assigning mean values to local mean vector
     for (size_t localObsId = 0; localObsId < obsdb_.nlocs(); localObsId++) {
       if (apply[localObsId]) {
         const size_t globalObsId =
             obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(localObsId);
         localMean[localObsId] = mean[globalObsId];
+        if (options_.calculateUncertainty.value()) {
+          // If the systematic or random variance is present, add it to the total variance.
+          float variance = 0.f;
+          if ((thinnedRandomErrorStandardDeviation.size() > 0)
+           && (thinnedRandomErrorStandardDeviation[globalObsId] != util::missingValue<float>())) {
+            variance += pow(thinnedRandomErrorStandardDeviation[globalObsId], 2);
+          }
+          if ((thinnedSystematicErrorStandardDeviation.size() > 0) &&
+              (thinnedSystematicErrorStandardDeviation[globalObsId]
+                  != util::missingValue<float>())) {
+            variance += pow(thinnedSystematicErrorStandardDeviation[globalObsId], 2);
+          }
+          if (variance < std::numeric_limits<float>::min()) {
+            totalErrorStandardDeviation.emplace_back(util::missingValue<float>());
+          } else {
+            totalErrorStandardDeviation.emplace_back(sqrt(variance));
+          }
+        }
       }
     }
     // Assign the calculated local mean to the derived obs value of the filter variable.
     obsdb_.put_db("DerivedObsValue", varname, localMean);
+    if (totalErrorStandardDeviation.size() > 0) {
+      obsdb_.put_db("DerivedObsError", varname, totalErrorStandardDeviation);
+    }
   } else {  // default function, thinning obs according to distance_norm:
     isThinned = identifyThinnedObservations(
         validObsIds, obsAccessor, splitter, distancesToBinCenter, priorities);
@@ -341,8 +400,7 @@ void Gaussian_Thinning::groupObservationsByVerticalCoordinate(
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());
-  for (size_t obsId : validObsIds)
-  {
+  for (size_t obsId : validObsIds) {
     bins.push_back(binSelector->bin(vcoord[obsId]));
   }
   splitter.groupBy(bins);
@@ -406,8 +464,7 @@ void Gaussian_Thinning::groupObservationsByTime(
 
   std::vector<int> bins;
   bins.reserve(validObsIds.size());
-  for (size_t obsId : validObsIds)
-  {
+  for (size_t obsId : validObsIds) {
     bins.push_back(binSelector->bin((times[obsId] - timeOffset).toSeconds()));
   }
   splitter.groupBy(bins);
@@ -530,8 +587,7 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
       std::stable_sort(obsgroupSorted.begin(), obsgroupSorted.end());
       const float obsMedian = 0.5*(obsgroupSorted[floor(0.5*(groupSize-1))]
                             + obsgroupSorted[ceil(0.5*(groupSize-1))]);
-      auto i = std::min_element(obsgroup.begin(), obsgroup.end(), [=] (float x, float y)
-      {
+      auto i = std::min_element(obsgroup.begin(), obsgroup.end(), [=] (float x, float y) {
           return abs(x - obsMedian) < abs(y - obsMedian);
       });
       const size_t bestValidObsIndex = std::distance(obsgroup.begin(), i);
@@ -555,10 +611,10 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
     const ObsAccessor &obsAccessor,
     const RecursiveSplitter &splitter,
     const std::vector<float> &obsval,
-    const float &minNumObsPerBin,
     const std::vector<float> &distancesToBinCenter,
     const std::vector<int> &priorities,
-    std::vector<float> &mean) const {
+    const MeanThinningType meanThinningType,
+    std::vector<float> &result) const {
 
   std::function<bool(size_t, size_t)> comparator = makeObservationComparator(
           validObsIds, distancesToBinCenter, obsAccessor, priorities);
@@ -567,15 +623,15 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
   const float missing = util::missingValue<float>();
 
   std::vector<bool> isThinned(totalNumObs, true);
-  if (minNumObsPerBin < 2) {
+
+  if (options_.minNumObsPerBin < 2) {
     // bins with 1 obs are not counted as a group of splitter - so if accepting single-obs,
     // they must be accepted (isThinned=false) by default; otherwise if minNumObsPerBin >= 2,
     // single-obs in bins must be rejected by default.
     isThinned.assign(totalNumObs, false);
   }
+  size_t group = 0;
   for (ufo::RecursiveSplitter::Group validObsIndices : splitter.multiElementGroups()) {
-    float sumObs = 0.0f;
-    int count = 0;
     const size_t bestValidObsIndex = *std::min_element(
           std::begin(validObsIndices), std::end(validObsIndices), comparator);
     for (size_t validObsIndex : validObsIndices) {
@@ -592,22 +648,38 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
       }
     }
     const size_t groupSize = validObsValues.size();
-    if (groupSize < minNumObsPerBin) {
+    if (groupSize < options_.minNumObsPerBin) {
       continue;
     }
-    // find mean obs value in bin:
+
+    float sumObs = 0.0f;
+    float sumOfVariances = 0.0f;
+    int count = 0;
     for (float obsValue : validObsValues) {
       sumObs += obsValue;
+      sumOfVariances += obsValue * obsValue;
       count++;
     }
 
+    // find result obs value in bin:
+    float resultValue = missing;
+    switch (meanThinningType) {
+      case MeanThinningType::MEAN:
+      case MeanThinningType::SYSTEMATICERROR:
+        resultValue = sumObs / count;
+        break;
+      case MeanThinningType::RANDOMERROR:
+        resultValue = sqrt(sumOfVariances) / count;
+        break;
+    }
+
     if (count > 0) {
-      const float obsMean = sumObs / count;
       for (size_t validObsIndex : validObsIndices) {
-          // assign mean of validObsValues to same index in the mean vector
-          mean[validObsIds[validObsIndex]] = obsMean;
+        // assign mean of validObsValues to same index in the result vector
+        result[validObsIds[validObsIndex]] = resultValue;
       }
     }
+    ++group;
   }
   return isThinned;
 }
@@ -617,8 +689,7 @@ std::function<bool(size_t, size_t)> Gaussian_Thinning::makeObservationComparator
     const std::vector<size_t> &validObsIds,
     const std::vector<float> &distancesToBinCenter,
     const ObsAccessor &obsAccessor,
-    const std::vector<int> &priorities) const
-{
+    const std::vector<int> &priorities) const {
   if (options_.priorityVariable.value() == boost::none) {
     if (options_.tiebreakerPickLatest) {
       // if tiebreakerPickLatest has been set then if distance to the bin center

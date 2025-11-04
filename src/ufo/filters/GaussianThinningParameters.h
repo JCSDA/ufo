@@ -166,12 +166,37 @@ class GaussianThinningParameters : public FilterParametersBase {
   /// The observation that is retained is based on distanceNorm.
   oops::Parameter<bool> selectMean{"select_mean", false, this};
 
+  oops::Parameter<bool> calculateUncertainty{"calculate uncertainty for mean observation", false,
+      this};
+
+  /// The optional systematic error standard deviation variable. When 'select mean' is
+  /// used, this variable will be used to calculate the systematic standard
+  /// deviation for the thinned data.
+  oops::OptionalParameter<Variable> systematicErrorStandardDeviationVariable{
+      "systematic error standard deviation variable",
+      "The optional systematic error standard deviation variable. When 'select mean' is "
+      "used, this variable will be used to calculate the systematic standard "
+      "deviation for the thinned data.",
+      this};
+
+  /// The optional random error standard deviation variable. When 'select mean' is used,
+  /// this variable will be used to calculate the random standard deviation
+  /// for the thinned data, which is reduced according to the number of
+  /// observations used in the mean.
+  oops::OptionalParameter<Variable> randomErrorStandardDeviationVariable{
+      "random error standard deviation variable",
+      "The optional random error standard deviation variable. When 'select mean' is used, "
+      "this variable will be used to calculate the random standard deviation "
+      "for the thinned data, which is reduced according to the number of "
+      "observations used in the mean.",
+      this};
+
   /// If selectMedian=true, then minNumObsPerBin is the minimum number of observations there must
   /// be in each bin for the median-valued obs to be accepted, otherwise all obs in that bin are
   /// rejected. E.g. if minNumObsPerBin=5, then all obs in any bin with 4 or fewer obs are rejected
   /// on the basis that the statistics are too poor to generate a reliable median. This parameter
   /// does nothing if selectMedian=false.
-  oops::Parameter<int> minNumObsPerBin{"min_num_obs_per_bin", 5, this};
+  oops::Parameter<size_t> minNumObsPerBin{"min_num_obs_per_bin", 5, this};
 
   /// Determines which of the highest-priority observations lying in a cell is retained.
   ///

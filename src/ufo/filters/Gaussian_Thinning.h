@@ -73,6 +73,8 @@ class Gaussian_Thinning : public FilterBase,
 
   ObsAccessor createObsAccessor() const;
 
+  enum class MeanThinningType { MEAN, RANDOMERROR, SYSTEMATICERROR };
+
   void groupObservationsBySpatialLocation(const std::vector<size_t> &validObsIds,
                                           const DistanceCalculator &distanceCalculator,
                                           const ObsAccessor &obsAccessor,
@@ -110,9 +112,9 @@ class Gaussian_Thinning : public FilterBase,
       const ObsAccessor &obsAccessor,
       const RecursiveSplitter &splitter,
       const std::vector<float> &obsval,
-      const float &minNumObsPerBin,
       const std::vector<float> &distancesToBinCenter,
       const std::vector<int> &priorities,
+      const MeanThinningType meanThinningType,
       std::vector<float> &mean) const;
 
   std::function<bool(size_t, size_t)> makeObservationComparator(

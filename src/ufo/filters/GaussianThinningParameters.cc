@@ -43,6 +43,22 @@ void GaussianThinningParameters::deserialize(util::CompositePath &path,
       throw eckit::UserError(
             path.path() + ": only one of select_median and select_mean can be set to true", Here());
   }
+  if (!(selectMean && calculateUncertainty) &&
+      (systematicErrorStandardDeviationVariable.value() ||
+       randomErrorStandardDeviationVariable.value())) {
+    throw eckit::UserError(
+        path.path() +
+            ": the systematic or random error standard deviation variable calculation is "
+            "only supported when 'select_mean' and "
+            "'calculate uncertainty for mean observation' are true",
+        Here());
+  }
+  if (!selectMean && calculateUncertainty) {
+    throw eckit::UserError(path.path() +
+                               ": uncertainty calculation is "
+                               "only supported when select_mean is true",
+                           Here());
+  }
 }
 
 }  // namespace ufo

@@ -1,0 +1,49 @@
+time window:
+  begin: 2024-12-31T00:00:00Z
+  end: 2025-01-03T00:00:00Z
+
+observations:
+- obs space:
+    name: Mean super-obbing for ice thickness with error calculation.
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ice_thickness_gaussian_mean_thinning_error.nc
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/ice_thickness_gaussian_mean_thinning_error_out.nc
+    simulated variables: [iceThickness, seaIceFreeboard]
+    observed variables: [iceThickness, seaIceFreeboard]
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: ObsValue/iceThickness
+    select_mean: true
+    calculate uncertainty for mean observation: true
+    systematic error standard deviation variable: SystematicErrorStandardDeviation/iceThickness
+    random error standard deviation variable: RandomErrorStandardDeviation/iceThickness
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 10  # km
+    time_mesh: PT24H00M00S
+    time_min: 2025-01-01T00:00:00Z
+    time_max: 2025-01-02T00:00:00Z
+  - filter: Perform Action
+    filter variables:
+    - name: ObsValue/iceThickness
+    action:
+      name: assign error
+      error function:
+        name: DerivedObsError/iceThickness
+  passedBenchmark: 6
+  compareVariables:
+    - reference:
+        name: TestReferenceSuperObsValue/iceThickness
+      test:
+        name: DerivedObsValue/iceThickness
+      absTol: 1.0e-4
+    - reference:
+        name: TestReferenceSuperObsError/iceThickness
+      test:
+        name: EffectiveError/iceThickness
+      absTol: 1.0e-4
