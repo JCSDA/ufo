@@ -1934,7 +1934,7 @@ if( ${rttov_FOUND} )
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops.yaml"
-              MPI     1
+              MPI     2
               LIBS    ufo
               LABELS  rttov operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
@@ -1954,7 +1954,7 @@ if( ${rttov_FOUND} )
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops.yaml"
-              MPI     1
+              MPI     2
               LIBS    ufo
               LABELS  rttov operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

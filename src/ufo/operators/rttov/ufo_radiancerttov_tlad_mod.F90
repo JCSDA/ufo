@@ -577,6 +577,12 @@ contains
 
     ! Initial checks
     ! --------------
+    ! Check for zero profiles on a rank
+    if (self % nprofiles == 0) then
+      message = myname_ // ' zero profiles on this rank!'
+      call fckit_log % info(message)
+      return
+    end if
 
     ! Check if trajectory was set
     if (.not. self % ltraj) then
@@ -712,6 +718,12 @@ contains
 
     ! Initial checks
     ! --------------
+    ! Check for zero profiles on a rank
+    if (self % nprofiles == 0) then
+      message = myname_ // ' zero profiles on this rank!'
+      call fckit_log % info(message)
+      return
+    end if
 
     ! Check if trajectory was set
     if (.not. self % ltraj) then
