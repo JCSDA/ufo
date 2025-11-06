@@ -9,7 +9,7 @@ module ufo_metoffice_bmatrixstatic_mod
 
 use fckit_log_module, only : fckit_log
 use kinds
-use ufo_constants_mod, only: zero, one
+use ufo_constants_mod, only: zero
 use ufo_utils_mod, only : ufo_utils_iogetfreeunit, InvertMatrix
 use ufo_vars_mod
 
@@ -115,7 +115,6 @@ integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matri
 integer, allocatable          :: nonzero_fields(:) ! fields_in with nonzero entries removed
 integer, allocatable          :: nonzero_fields_in(:) ! fields_in with nonzero entries removed
 real(kind=kind_real)          :: t1,t2        ! Time values for logging
-character(len=:), allocatable :: str
 logical                       :: testing = .false.
 integer                       :: ii, jj
 logical                       :: match
@@ -190,8 +189,6 @@ subroutine ufo_metoffice_bmatrixstatic_delete(self)
 
 implicit none
 class(ufo_metoffice_bmatrixstatic), intent(inout) :: self  !< B-matrix Covariance
-
-character(len=*), parameter :: RoutineName = "ufo_metoffice_bmatrixstatic_delete"
 
 self % status = .false.
 self % nbands = 0
@@ -569,7 +566,7 @@ real(kind_real), intent(out) :: b_inverse(:,:)
 real(kind_real), intent(out) :: b_sigma(:)
 
 ! Local Variables
-integer :: band, i
+integer :: band
 
 ! select appropriate b matrix for latitude of observation
 b_matrix(:,:) = zero

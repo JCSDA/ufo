@@ -19,7 +19,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
   use kinds,              only: kind_real
   use missing_values_mod, only: missing_value
   use obsspace_mod,       only: obsspace_get_db
-  use ufo_vars_mod,       only: MAXVARLEN, var_prs, var_prsi, var_prsimo
+  use ufo_vars_mod,       only: MAXVARLEN, var_prs
   use ufo_geovals_mod,    only: ufo_geoval, ufo_geovals, ufo_geovals_get_var
   use vert_interp_mod,    only: vert_interp_weights, vert_interp_apply
   implicit none

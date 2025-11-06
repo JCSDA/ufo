@@ -174,8 +174,8 @@ character(len=MAXVARLEN) :: geovar
 real(c_double) :: missing
 
 character(len=MAXVARLEN) :: message
-integer :: nlayers, id, nobs_wavelength
-integer :: km, nobs, nch, ic, i, j, k
+integer :: nlayers, nobs_wavelength
+integer :: nobs, nch, ic, i, j, k
 
  ! Get airdens and delp and number of layers from geovals
  ! -----------------------

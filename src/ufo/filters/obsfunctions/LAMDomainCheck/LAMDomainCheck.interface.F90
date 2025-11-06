@@ -9,7 +9,7 @@ module ufo_lamdomaincheck_mod_c
 
   use iso_c_binding
   use kinds
-  use ufo_constants_mod, only: pi, deg2rad, rad2deg, two, half, mean_earth_rad
+  use ufo_constants_mod, only: deg2rad, two, half, mean_earth_rad
 
   implicit none
 

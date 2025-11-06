@@ -12,7 +12,6 @@ use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
-use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use vert_interp_mod
 use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
@@ -20,15 +19,11 @@ use gnssro_mod_conf
 use missing_values_mod
 use fckit_log_module, only : fckit_log
 use ufo_utils_refractivity_calculator, only: &
-    ufo_calculate_refractivity, ufo_refractivity_partial_derivatives
+    ufo_refractivity_partial_derivatives
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
-    cp,                      &    ! Heat capacity at constant pressure for air
-    rd_over_cp,              &    ! Ratio of gas constant to heat capacity
     grav,                    &    ! Gravitational field strength
-    pref,                    &    ! Reference pressure for calculating exner
     mw_ratio,                &    ! Ratio of molecular weights of water and dry air
-    c_virtual,               &    ! Related to mw_ratio
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
 use gnssro_mod_transform, only: geometric2geop
@@ -282,8 +277,6 @@ end subroutine ufo_gnssro_refmetoffice_simobs_tl
 !-------------------------------------------------------------------------------
 
 subroutine ufo_gnssro_refmetoffice_simobs_ad(self, geovals, hofx, obss)
-
-  use typesizes,     only: wp => EightByteReal
 
   implicit none
 

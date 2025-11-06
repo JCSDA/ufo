@@ -95,7 +95,6 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable    :: dndp(:,:), dndt(:,:), dndq(:,:)
   real(kind_real), allocatable    :: dxidp(:,:), dxidt(:,:), dxidq(:,:)
   real(kind_real), allocatable    :: dbenddxi(:), dbenddn(:)
-  integer,         allocatable    :: super_refraction_flag(:)
   integer,         allocatable    :: obsSRflag(:)
   integer                         :: hasSRflag
   integer                         :: ModelsigLevelcheck

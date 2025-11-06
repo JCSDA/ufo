@@ -224,7 +224,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
   use radarz_iface, only: P_qr, P_qs, P_qg, P_qh,   &
                           P_nr, P_ns, P_ng, P_nh,   & 
-                          P_vg, P_vh, qgh_opt, ta,  &
+                          P_vg, P_vh, ta,  &
                           t_obs_dual, t_para_dsd, nscalar
   use radarz_module, only: init_refl, init_para_dsd, calcMDR, calcMu, &
                            set_dsd_para, rdr_obs
@@ -260,7 +260,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   real(kind_real) :: qrges, qsges, qgges, qhges
   real(kind_real) :: qnrges, qnsges, qngges, qnhges
   real(kind_real) :: qvgges, qvhges
-  real(kind_real) :: rdBZ, rdBZr, rdBZs, rdBZg, rdBZh
+  real(kind_real) :: rdBZ, rdBZr, rdBZs
   real(kind_real) :: P1D, Q1D, T1D, RHO
   real(kind_real) :: Ze, Zer, Zes, Zeg, Zeh
   real(kind_real) :: wgt_dry, wgt_wet
@@ -395,8 +395,6 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
       rdBZ = zero
       rdBZr = zero
       rdBZs = zero
-      rdBZg = zero
-      rdBZh = zero
       wgt_dry = zero
       wgt_wet = zero ;
       Zeg_dry = zero
@@ -462,7 +460,6 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
          rdBZ = ten * log10(Ze) ! hofx
          if (Zer > 0) rdBZr = ten * log10(Zer)
          if (Zes > 0) rdBZs = ten * log10(Zes)
-         if (Zeg > 0) rdBZg = ten * log10(Zeg)
 
       end if
 
@@ -510,7 +507,6 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
          rdBZ = ten * log10(Ze)
          if (Zer .gt. zero) rdBZr = ten * log10(Zer)
          if (Zes .gt. zero) rdBZs = ten * log10(Zes)
-         if (Zeg .gt. zero) rdBZg = ten * log10(Zeg)
 
       end if
 

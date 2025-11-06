@@ -43,7 +43,6 @@ LOGICAL, INTENT(IN)            :: capsupersat   ! Whether to remove super-satura
 REAL(kind_real), INTENT(INOUT) :: x(:)
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER :: RoutineName = "Ops_GPSRO_humidcheck"
 INTEGER                     :: i
 REAL(kind_real)                        :: P(nlevp)
 REAL(kind_real)                        :: Q(nlevq)

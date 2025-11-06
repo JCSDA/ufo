@@ -25,7 +25,7 @@ MODULE RADARZ_MODULE
 !########################################################################
 !########################################################################
 
-  use kinds, only: kind_real,kind_single,kind_int
+  use kinds, only: kind_real,kind_int
   use radarz_iface
 
 !-----------------------------------------------------------------------
@@ -501,7 +501,6 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   REAL(kind_real) :: fms,fmh,fmg,fws,fwh,fwg,rhoms,rhomh,rhomg
   REAL(kind_real) :: qrf,qsf,qhf,qgf
   REAL(kind_real) :: alphaa_ws,alphab_ws,alphaa_wh,alphab_wh,alphaa_wg,alphab_wg
-  REAL(kind_real) :: alphak_ws,alphak_wh,alphak_wg
   REAL(kind_real) :: rainReflH,ZdrysnowH,ZwetsnowH
   REAL(kind_real) :: rainReflV,ZdrysnowV,ZwetsnowV
   REAL(kind_real) :: ZdryhailH,ZwethailH,ZdrygrplH,ZwetgrplH
@@ -513,9 +512,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   REAL(kind_real) :: temH,temV,temHV
 
   REAL(kind_real) :: tair_C
-  REAL(kind_real) :: z_snow_thom
   REAL(kind_real) :: ntms, ntmh, ntmg
-  REAL(kind_real) :: exp_term,gam_term
   logical :: firstcall = .true.
   SAVE firstcall
 
@@ -721,19 +718,16 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   IF(fms > 0._kind_real) THEN
     alphaa_ws = snow_alpha_a(fws)
     alphab_ws = snow_alpha_b(fws)
-    alphak_ws = alphaa_ws - alphab_ws
   ENDIF
 
   IF(hail_ON == 1 .and. fmh > 0._kind_real) THEN
     alphaa_wh = hail_alpha_a(fwh)
     alphab_wh = hail_alpha_b(fwh)
-    alphak_wh = alphaa_wh - alphab_wh
   ENDIF
 
   IF(graupel_ON == 1 .and. fmg > 0._kind_real) THEN
     alphaa_wg = grpl_alpha_a(fwg)
     alphab_wg = grpl_alpha_b(fwg)
-    alphak_wg = alphaa_wg - alphab_wg
   ENDIF
 
 !-----------------------------------------------------------------------
@@ -1874,7 +1868,6 @@ SUBROUTINE calc_N0x_mp(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh,ntg, &
 
   REAL(kind_real), PARAMETER :: D0r = 50.e-5_kind_real
   REAL(kind_real), PARAMETER :: R1 = 1.e-12_kind_real
-  REAL(kind_real), PARAMETER :: R2 = 1.e-6_kind_real
   REAL(kind_real), PARAMETER :: gonv_min = 1.e4_kind_real
   REAL(kind_real), PARAMETER :: gonv_max = 3.e6_kind_real
   REAL(kind_real), PARAMETER :: bm_g = 3.0_kind_real
@@ -1886,7 +1879,7 @@ SUBROUTINE calc_N0x_mp(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh,ntg, &
   REAL(kind_real) :: xslwq,ygra1,zans1
   REAL(kind_real) :: N0_exp,N0_min
   REAL(kind_real) :: rg,am_g,oge1,cgg_1,cgg_2,cgg_3,ogg1,ogg2,ogmg,cge_1
-  REAL(kind_real) :: lam_exp,lamg,ilamg
+  REAL(kind_real) :: lam_exp,lamg
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !
@@ -2039,7 +2032,6 @@ SUBROUTINE calc_N0x_melt(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh, &
   REAL(kind_real), INTENT(INOUT)  :: ntms,ntmh,ntmg
   REAL(kind_real) :: db_alfr,db_alfs,db_alfh,db_alfg
   REAL(kind_real) :: db_mur,db_mus,db_muh,db_mug
-  REAL(kind_real) :: pow1,pow2
   REAL(kind_real), PARAMETER :: epsQ  = 1.e-12_kind_real
   REAL(kind_real), PARAMETER :: epsN  = 1.e-3_kind_real
   REAL(kind_real), PARAMETER :: maxN0 = 4.e+37_kind_real

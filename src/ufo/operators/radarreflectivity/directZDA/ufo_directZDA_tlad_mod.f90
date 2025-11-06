@@ -170,7 +170,7 @@ end subroutine ufo_directZDA_tlad_setup_
 subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
   use obsspace_mod
   use ufo_constants_mod, only : t2tv, rd, one, pi, zero, ten, T_melt, rhor, &
-                               rhoh, rhos, rhog, am_s
+                               am_s
 
   implicit none
   class(ufo_directZDA_tlad), intent(inout) :: self
@@ -184,7 +184,6 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
 
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
-  real(kind_real), allocatable :: vfields(:,:)  ! background fields interplated vertically to the observation height
 
   integer :: i_melt_snow, i_melt_graupel
   real(kind_real) :: denom
@@ -205,7 +204,6 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
   real(kind_real) :: smoz, alpha_const_tm_dry_snow
   real(kind_real) :: oams
 
-  real(kind_real) :: Ze_orig
   integer :: iret_coef4dbzfwrd
 
   type(ufo_geoval),    pointer :: qr, qs, qg, qnr, prs, t, qv
@@ -352,7 +350,6 @@ subroutine ufo_directZDA_tlad_settraj_(self, geovals, obss)
         end if
 
       ! Convert to simulated radar reflectivity in units of dBZ
-        Ze_orig = Ze
         rdBZ = ten * log10(Ze)
         rdBZr = ten * log10(Zer)
         rdBZs = ten * log10(Zes)
@@ -530,9 +527,6 @@ subroutine ufo_directZDA_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
   real(c_double),         intent(inout) :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in) :: obss
 
-  character(len=*), parameter :: myname="ufo_directZDA_tlad_tl"
-  character(max_string)       :: err_msg
-
   integer :: iobs, ivar, nvars_geovars
   type(ufo_geoval), pointer :: profile
   character(len=MAXVARLEN) :: geovar
@@ -591,9 +585,6 @@ subroutine ufo_directZDA_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
   integer,                   intent(in)    :: nvars, nlocs
   real(c_double),            intent(in)    :: hofx(nvars, nlocs)
   type(c_ptr), value,        intent(in)    :: obss
-
-  character(len=*), parameter :: myname="ufo_directZDA_tlad_ad"
-  character(max_string)       :: err_msg
 
   integer :: iobs, ivar, nvars_geovars
   type(ufo_geoval), pointer :: profile

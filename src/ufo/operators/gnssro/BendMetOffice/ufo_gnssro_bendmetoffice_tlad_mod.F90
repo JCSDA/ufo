@@ -452,13 +452,8 @@ REAL(kind_real), ALLOCATABLE :: nr(:)              ! Model calculation of impact
 ! Local variables
 !
 INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
-REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 LOGICAL                      :: BAErr             ! Whether we encountered an error in calculating the refractivity
 CHARACTER(LEN=200)           :: err_msg           ! Output message
-
-! Set up the size of the state
-x(1:nlevp) = prs
-x(nlevp+1:nlevp+nlevq) = q
 
 BAErr = .FALSE.
 

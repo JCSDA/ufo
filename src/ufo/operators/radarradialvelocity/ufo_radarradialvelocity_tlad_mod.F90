@@ -49,7 +49,6 @@ subroutine radarradialvelocity_tlad_setup_(self, yaml_conf)
 
   character(kind=c_char,len=:), allocatable :: coord_name
 
-  integer :: ivar, nvars
   call self%geovars%push_back(geovars_default)
 
   if( yaml_conf%has("VertCoord") ) then
@@ -76,14 +75,13 @@ subroutine radarradialvelocity_tlad_settraj_(self, geovals, obss)
   type(c_ptr), value,        intent(in)    :: obss
 
   !local variables
-  integer :: iobs, ivar, nvars_geovars
+  integer :: iobs
   real(kind_real),  dimension(:), allocatable :: obsvcoord
   !real(kind_real),  dimension(:), allocatable :: cosazm_costilt, sinazm_costilt, sintilt, vterminal
-  type(ufo_geoval), pointer :: vcoordprofile, profile  
+  type(ufo_geoval), pointer :: vcoordprofile 
 
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
-  integer:: i
 
   real(kind_real), allocatable :: vfields(:,:)  ! background fields (u,v,w) interplated vertically to the observation height
 

@@ -44,12 +44,11 @@ subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
   class(ufo_atmvertinterplay_tlad), intent(inout) :: self
   type(fckit_configuration), intent(in) :: grid_conf
 
-  character(kind=c_char,len=:), allocatable :: coord_name
   character(kind=c_char,len=:), allocatable :: gvars(:)
   real(kind=c_double), allocatable :: coefficients(:)
   integer(kind=c_int), allocatable :: nlevels(:)
   !Local Variables
-  integer :: ivar, nlevs=0, nvars=0, ngvars=0, ncoefs=0
+  integer :: ivar, nlevs=0, ngvars=0, ncoefs=0
   ! Check configurations
   ngvars = grid_conf%get_size("geovals")
   call grid_conf%get_or_die("geovals", gvars)
@@ -57,7 +56,6 @@ subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
   do ivar = 1, ngvars
     call self%geovars%push_back(gvars(ivar))
   enddo
-  nvars = self%obsvars%nvars()
   ncoefs = grid_conf%get_size("coefficients")
   call grid_conf%get_or_die("coefficients", coefficients)
   allocate(self%coefficients(ncoefs))
@@ -84,7 +82,6 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals_in, obss)
   type(ufo_geoval),pointer :: p_temp
   type(ufo_geoval),pointer :: profile
   character(len=MAXVARLEN) :: var_zdir
-  character(len=MAXVARLEN) :: geovar
   real(kind_real), dimension(:), allocatable :: airpressure
   ! Make sure nothing already allocated
   call self%cleanup()
@@ -136,9 +133,7 @@ subroutine atmvertinterplay_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hof
 
   integer :: iobs, ivar
   type(ufo_geoval), pointer :: profile
-  type(ufo_geoval), pointer :: pressure
   character(len=MAXVARLEN) :: geovar
-  character(len=MAXVARLEN) :: var_zdir
   type(ufo_geovals) :: geovals
   integer :: nsig
   real(c_double) :: missing
@@ -171,9 +166,7 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
 
   integer :: iobs, ivar
   type(ufo_geoval), pointer :: profile
-  type(ufo_geoval), pointer :: pressure
   character(len=MAXVARLEN) :: geovar
-  character(len=MAXVARLEN) :: var_zdir
   integer :: nsig
   real(c_double) :: missing
   missing = missing_value(missing)

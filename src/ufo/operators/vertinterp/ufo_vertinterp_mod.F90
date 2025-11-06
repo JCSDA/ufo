@@ -62,7 +62,7 @@ subroutine vertinterp_setup_(self, grid_conf)
   character(kind=c_char,len=:), allocatable :: interp_method
   character(kind=c_char,len=:), allocatable :: hofx_scaling_field
   character(kind=c_char,len=:), allocatable :: hofx_scaling_field_group
-  integer :: ivar, nvars, nlevs
+  integer :: nlevs
   character(len=MAXVARLEN) :: interp_method_backup
 
   !> grab what vertical coordinate/variable to use from the config

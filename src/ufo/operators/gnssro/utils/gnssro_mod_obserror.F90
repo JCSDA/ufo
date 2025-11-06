@@ -18,7 +18,7 @@ subroutine bending_angle_obserr_ECMWF(obsImpH, obsValue, nobs,  obsErr, QCflags,
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue
-integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
+integer(c_int),                  intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 real(kind_real)                  :: H_km, missing
 integer :: i
@@ -51,7 +51,7 @@ use ufo_constants_mod, only: deg2rad
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue, obsLat
-integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
+integer(c_int),                  intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 real(kind_real):: H_m, missing
 real(kind_real):: lat_in_rad,trop_proxy,damping_factor,errfac
@@ -165,7 +165,7 @@ implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
 real(kind_real), dimension(nobs),intent(out) :: obsErr
-integer(c_int),  dimension(nobs),intent(in)  :: QCflags(:)
+integer(c_int),                  intent(in)  :: QCflags(:)
 real(kind_real)                   :: H_km, missing
 
 integer :: i
@@ -228,7 +228,6 @@ integer :: R_num_sats                              ! Actual number of R-matrices
 character(len=200) :: Message                      ! Message to be output
 integer :: iob                                     ! Loop variable, observation number
 integer :: iPoint                                  ! Loop variable, point in the profile
-integer :: igeoval                                 ! Loop variable, geoval number
 integer :: iheight                                 ! Loop variable, height in profile
 integer :: start_point                             ! Starting index of the current profile
 integer :: current_point                           ! Ending index of the current profile

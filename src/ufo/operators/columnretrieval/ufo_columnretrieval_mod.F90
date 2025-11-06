@@ -42,8 +42,6 @@ subroutine ufo_columnretrieval_setup(self, f_conf)
   implicit none
   class(ufo_columnretrieval), intent(inout)     :: self
   type(fckit_configuration), intent(in) :: f_conf
-  integer :: nlevs_yaml
-  integer :: ivar, nvars
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("nlayers_retrieval", self%nlayers_retrieval)
@@ -94,7 +92,7 @@ end subroutine destructor
 subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx)
   use kinds
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, &
-                             ufo_geovals_reorderzdir, ufo_geovals_copy
+                             ufo_geovals_copy
   use ufo_constants_mod, only: zero, one
   use satcolumn_mod, only: simulate_column_ob
   use iso_c_binding
@@ -108,9 +106,7 @@ subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx
 
   ! Local variables
   type(ufo_geoval), pointer :: prsi, tracer
-  integer :: iobs, ilev
-  character(len=MAXVARLEN) :: varstring
-  character(len=4) :: levstr
+  integer :: iobs
   real(kind_real), allocatable, dimension(:,:) :: avgkernel_obs, prsi_obs
   real(kind_real), allocatable, dimension(:) :: apriori_term
   real(kind_real) :: hofx_tmp

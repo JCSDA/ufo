@@ -13,9 +13,7 @@ use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
-use ufo_geovals_mod_c, only: ufo_geovals_registry
 use vert_interp_mod
-use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod
 use missing_values_mod
 use ufo_gnssro_ukmo1d_utils_mod
@@ -110,7 +108,6 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   character(max_string)        :: message                       ! General message for output
   integer                      :: nlocs_check                   ! Number of observations (profiles)
   integer                      :: nlevels_check                 ! Number of observations in a profile
-  integer                      :: ilev                          ! Loop variable, level number
   integer                      :: iloc                          ! Loop variable, observation number
   type(ufo_geoval), pointer    :: q                             ! Model background values of specific humidity
   type(ufo_geoval), pointer    :: prs                           ! Model background values of air pressure
@@ -345,8 +342,6 @@ character(len=*), parameter  :: myname_ = "Ops_GPSRO_ForwardModel"
 !
 ! Local variables
 ! 
-INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
-REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
 integer                      :: ilevel            ! Loop variable, model level number
 integer                      :: iobs              ! Loop variable, observation number

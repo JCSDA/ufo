@@ -80,7 +80,6 @@ class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
 character(len=*), intent(in) :: filepath
 character(len=*), intent(in), optional :: atlaspath
 
-character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitPCEmis"
 logical                     :: file_exists  ! Check if a file exists logical
 
 ! Read eigenvector file
@@ -276,8 +275,6 @@ implicit none
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_pcemis), intent(inout) :: self !< PC emissivity type
 
-character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_DeletePCEmis"
-
 self % emis_eigen % NChans = 0
 self % emis_eigen % NumEV = 0
 if (allocated (self % emis_eigen % Channels)) deallocate (self % emis_eigen % Channels)
@@ -399,7 +396,6 @@ real(kind_real), intent(in)  :: PC(:)
 real(kind_real), intent(out) :: Emissivity(:)
 
 ! Local declarations:
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PCToEmis"
 real(kind_real)             :: BigEOF(NumChans,NumChans)
 real(kind_real)             :: BigPC(NumChans)
 integer                     :: ChannelIndex(NumChans)
@@ -465,7 +461,6 @@ real(kind_real), intent(in)  :: Emissivity_K(:)
 real(kind_real), intent(out) :: PC_K(:,:)
 
 ! Local declarations:
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_EmisKToPC"
 real(kind_real)             :: JEMatrix_element
 integer                     :: ichan
 integer                     :: ChannelIndex(NumChans)

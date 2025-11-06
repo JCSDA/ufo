@@ -139,7 +139,6 @@ REAL(kind_real)              :: J_min
 REAL(kind_real)              :: pen_ob
 REAL(kind_real)              :: pen_back
 REAL(kind_real)              :: xold(nstate)
-REAL(kind_real)              :: x_temp(nstate)
 REAL(kind_real)              :: xmin(nstate)
 REAL(kind_real)              :: ymin(nobs)
 REAL(kind_real)              :: lambda

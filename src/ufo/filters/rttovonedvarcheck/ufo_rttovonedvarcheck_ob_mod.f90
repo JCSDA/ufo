@@ -97,7 +97,6 @@ integer, intent(in) :: nprofelements !< number of profile elements used
 integer :: nchans_all !< Size of all channels in ObsSpace
 logical, intent(in) :: storeclw
 logical, intent(in) :: storetransmittance
-character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_InitOb"
 real(kind_real) :: missing_real
 integer :: missing_int
 
@@ -155,7 +154,6 @@ implicit none
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_ob), intent(inout) :: self !< observation metadata type
 
-character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_DeleteOb"
 real(kind_real) :: missing_real
 integer :: missing_int
 

@@ -12,8 +12,6 @@ use kinds
 use obsspace_mod
 use missing_values_mod
 
-use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_sum
-
 implicit none
 private
 integer, parameter :: max_string=800
@@ -884,7 +882,6 @@ type(ufo_geoval), pointer, intent(inout)    :: geoval
 character(len=*), parameter :: myname_="ufo_geovals_get_var_by_index"
 
 character(max_string) :: err_msg
-integer :: jv
 
 geoval => NULL()
 

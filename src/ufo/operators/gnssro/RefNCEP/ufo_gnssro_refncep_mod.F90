@@ -10,7 +10,6 @@ module ufo_gnssro_refncep_mod
   use kinds
   use ufo_vars_mod
   use ufo_geovals_mod
-  use ufo_geovals_mod_c, only: ufo_geovals_registry
   use vert_interp_mod
   use ufo_basis_mod,     only: ufo_basis
   use obsspace_mod

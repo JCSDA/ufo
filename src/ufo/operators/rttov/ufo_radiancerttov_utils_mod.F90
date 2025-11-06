@@ -17,7 +17,7 @@ module ufo_radiancerttov_utils_mod
   use fckit_log_module, only : fckit_log
   use kinds, only : kind_real ! from oops
   use missing_values_mod, only : missing_value
-  use obsspace_mod, only : obsspace_get_nlocs, obsspace_has, obsspace_get_db, obsspace_put_db, &
+  use obsspace_mod, only : obsspace_get_nlocs, obsspace_has, obsspace_get_db, &
     obsspace_get_window
 
   use rttov_types, only : rttov_options, rttov_profile, rttov_coefs, &
@@ -44,8 +44,8 @@ module ufo_radiancerttov_utils_mod
   
   use ufo_geovals_mod, only : ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_utils_mod, only : Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat, cmp_strings, getindex, upper2lower
-  use ufo_constants_mod, only : zero, half, one, deg2rad, min_q, min_clw, min_ciw, m_to_km, &
-                                g_to_kg, pa_to_hpa, RTTOV_ToA
+  use ufo_constants_mod, only : zero, one, deg2rad, min_q, min_clw, min_ciw, m_to_km, &
+                                pa_to_hpa, RTTOV_ToA
 
   use ufo_vars_mod, only : maxvarlen, &
     var_prs, var_ts, var_sfc_t2m, var_sfc_u10, var_sfc_v10, var_ps, &

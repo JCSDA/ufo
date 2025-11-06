@@ -56,10 +56,7 @@ integer, intent(in)                             :: nchans
 integer, intent(in)                             :: channels(:)
 type(ufo_metoffice_rmatrixradiance), intent(in) :: full_rmatrix
 
-character(len=*), parameter :: &
-      routinename = "rsubmatrix_setup"
-character(len=max_string)   :: err_msg
-integer                     :: ii, ff, ss
+integer                     :: ff, ss
 character(len=max_string)   :: mat_type
 
 self % nchans = nchans

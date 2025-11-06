@@ -46,12 +46,9 @@ contains
 ! ------------------------------------------------------------------------------
 subroutine columnretrieval_tlad_setup_(self, f_conf)
   use fckit_configuration_module, only: fckit_configuration
-  use ufo_constants_mod, only: one
   implicit none
   class(ufo_columnretrieval_tlad), intent(inout) :: self
   type(fckit_configuration), intent(in)  :: f_conf
-  integer :: nlevs_yaml
-  character(len=:), allocatable :: value(:)
 
   ! get configuration for the averaging kernel operator
   call f_conf%get_or_die("nlayers_retrieval", self%nlayers_retrieval)
@@ -93,7 +90,7 @@ end subroutine destructor
 subroutine columnretrieval_tlad_settraj_(self, geovals_in, obss)
   use iso_c_binding
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-  use ufo_constants_mod, only: one, zero
+  use ufo_constants_mod, only: one
   use obsspace_mod
   implicit none
   class(ufo_columnretrieval_tlad), intent(inout) :: self
@@ -102,9 +99,7 @@ subroutine columnretrieval_tlad_settraj_(self, geovals_in, obss)
 
   ! Local variables
   type(ufo_geoval), pointer :: prsi
-  integer :: iobs, ilev
-  character(len=MAXVARLEN) :: varstring
-  character(len=4) :: levstr
+  integer :: iobs
   type(ufo_geovals) :: geovals
   character(len=max_string) :: err_msg
 
@@ -165,8 +160,7 @@ subroutine columnretrieval_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx
   real(c_double),          intent(inout) :: hofx(nvars, nlocs)
   type(c_ptr), value,      intent(in)    :: obss
   type(ufo_geoval), pointer :: tracer
-  integer :: ivar, iobs
-  character(len=MAXVARLEN) :: geovar
+  integer :: iobs
   real(kind_real) :: hofx_tmp
   type(ufo_geovals) :: geovals
   real(c_double) :: missing
@@ -206,7 +200,6 @@ subroutine columnretrieval_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx
   real(c_double),          intent(in)    :: hofx(nvars, nlocs)
   type(c_ptr), value,      intent(in)    :: obss
   type(ufo_geoval), pointer :: tracer
-  type(ufo_geovals) :: geovals
   real(kind_real) :: hofx_tmp
   integer :: iobs
   real(c_double) :: missing

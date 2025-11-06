@@ -52,7 +52,7 @@ contains
     real(kind=kind_real), intent(in)    :: lono, lato, deptho !< Observation location    
     real(kind=kind_real), intent(inout) :: temp_i             !< Vertically interpolated Insitu temperature at
 
-    real(kind_real) :: tp, sp, prso
+    real(kind_real) :: tp, prso
 
 
     !< Pressure from depth
@@ -164,7 +164,6 @@ contains
     real(kind=kind_real) :: delta_tp, delta_sp    
 
     ! Vertical interpolation
-    real(kind_real) :: wf
     integer :: wi
 
     delta_tp=delta

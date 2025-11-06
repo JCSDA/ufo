@@ -109,10 +109,8 @@ real(kind_real)             :: missing_real
 integer                     :: missing_int
 integer                     :: jvar, iloc , jobs   !< counters
 character(len=max_string)   :: var
-character(len=max_string)   :: varname
 character(len=200)          :: message
 logical                     :: variable_present = .false.
-logical                     :: model_surface_present = .false.
 type(ufo_geoval), pointer   :: geoval
 integer                     :: numpc
 

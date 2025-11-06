@@ -74,7 +74,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   real(kind_real), allocatable            :: ref(:), radius(:)
   real(kind_real)                         :: sIndx
   integer                                 :: indx
-  integer                                 :: iflip
   integer,allocatable                     :: nlocs_begin(:)
   integer,allocatable                     :: nlocs_end(:)
   real(c_double)                          :: missing
@@ -86,7 +85,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   integer  :: SRcheckHeight,  ModelsigLevelcheck, SRcloseLayers
   integer,          allocatable           :: RecordIdx(:)
   logical                                 :: qcfail
-  integer                                 :: top_layer_SR,bot_layer_SR,count_SR
+  integer                                 :: top_layer_SR,count_SR
   logical                                 :: super_ref_GEOS
   real(kind_real)                         :: toss_max_height
 
@@ -153,10 +152,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(gesZs(nlocs))
 
 ! copy geovals to local background arrays
-  iflip = 0
   if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
-     iflip = 1
-     write(err_msg,'(a)')'  ufo_gnssro_bndnbam_simobs:'//new_line('a')//                         &
+    write(err_msg,'(a)')'  ufo_gnssro_bndnbam_simobs:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but bndNBAM requires it to be ascending order, need flip'
     call fckit_log%debug(err_msg)
@@ -296,7 +293,6 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       qcfail = .false.
       count_SR = 0
       top_layer_SR = 0
-      bot_layer_SR = 0
       RecordIdx(icount) = irec
       iobs = icount
 !     super refracticion chek height defination
@@ -365,10 +361,8 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                  else
                     count_SR=count_SR+1 ! layers of SR
                     if (count_SR > 1 ) then
-                       bot_layer_SR=k
                     else
                        top_layer_SR=k
-                       bot_layer_SR=top_layer_SR
                     endif
                     if (obsImpP(iobs) <= refXrad(top_layer_SR+2)) then
                        super_refraction_flag(iobs) = 1

@@ -5,7 +5,6 @@
 !> Fortran module of Gnssro NBAM (NCEP's Bending Angle Method) operator
 
 module ufo_gnssro_bndnbam_util_mod
-  use fckit_log_module, only: fckit_log
   use kinds
   use missing_values_mod
   use gnssro_mod_constants
@@ -49,7 +48,6 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   real(kind_real)                :: lagConst(3,nlevExt)
 
   real(kind_real)                 :: sIndx
-  real(kind_real)                 :: obsImpH
   integer                         :: k, igrd, indx
   real(kind_real)                 :: d_refXrad
   real(kind_real)                 :: w4(4), dw4(4)

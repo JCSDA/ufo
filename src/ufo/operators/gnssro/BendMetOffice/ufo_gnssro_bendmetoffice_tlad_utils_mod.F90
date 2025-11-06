@@ -7,28 +7,12 @@
 module ufo_gnssro_bendmetoffice_tlad_utils_mod
 
 !use iso_c_binding
-use fckit_log_module, only: fckit_log
 use kinds,            only: kind_real
 
 ! Generic routines from elsewhere in jedi
 use missing_values_mod
 use ufo_constants_mod, only: &
-    rd,                     &    ! Gas constant for dry air
-    cp,                     &    ! Heat capacity at constant pressure for air
-    rd_over_cp,             &    ! Ratio of gas constant to heat capacity
-    pref,                   &    ! Reference pressure for calculating exner
-    pi,                     &    ! Something to do with circles...
-    grav,                   &    ! Gravitational field strength
-    ecc,                    &    ! eccentricity
-    k_somig,                &    ! Somigliana's constant
-    g_equat,                &    ! equatorial gravity (ms-2)
-    a_earth,                &    ! semi-major axis of earth (m)
-    flatt,                  &    ! flattening
-    m_ratio,                &    ! gravity ratio
-    mw_ratio,               &    ! Ratio of molecular weights of water and dry air
-    c_virtual,              &    ! Related to mw_ratio
-    n_alpha,                &    ! Refractivity constant a
-    n_beta                       ! Refractivity constant b
+    pi                           ! Something to do with circles...
 
 implicit none
 public             :: Ops_GPSROcalc_alphaK

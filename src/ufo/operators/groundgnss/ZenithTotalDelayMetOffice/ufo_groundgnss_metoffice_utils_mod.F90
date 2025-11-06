@@ -8,7 +8,6 @@
 module ufo_groundgnss_ukmo_utils_mod
 
 !use iso_c_binding
-use fckit_log_module, only: fckit_log
 use kinds,            only: kind_real
 
 ! Generic routines from elsewhere in jedi

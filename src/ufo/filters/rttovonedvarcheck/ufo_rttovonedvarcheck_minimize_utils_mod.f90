@@ -11,7 +11,7 @@ use fckit_log_module, only : fckit_log
 use iso_c_binding
 use kinds
 use oops_variables_mod
-use ufo_constants_mod, only: grav, zero, t0c, half, one, two, min_q, Pa_to_hPa
+use ufo_constants_mod, only: grav, zero, half, one, two, Pa_to_hPa
 use ufo_geovals_mod
 use ufo_rttovonedvarcheck_constants_mod
 use ufo_rttovonedvarcheck_ob_mod
@@ -67,7 +67,6 @@ type(ufo_rttovonedvarcheck_ob), intent(in) :: ob   !< satellite metadata
 real(kind_real), intent(out)     :: prof_x(:) !< x vector
 
 ! Local arguments:
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_GeoVaLs2ProfVec"
 character(len=max_string)   :: varname
 
 type(ufo_geoval), pointer    :: geoval
@@ -235,7 +234,6 @@ type(ufo_rttovonedvarcheck_ob), intent(inout) :: ob   !< satellite metadata
 real(kind_real), intent(in)      :: prof_x(:) !< x vector
 
 ! Local arguments:
-character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_ProfVec2GeoVaLs"
 character(len=max_string)    :: varname
 integer                      :: gv_index, i, ii
 integer                      :: nlevels
@@ -471,9 +469,8 @@ type(ufo_rttovonedvarcheck_rsubmatrix), intent(in) :: r_matrix
 real(kind_real), intent(out)      :: Jcost(3)
 
 ! Local arguments:
-character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CostFunction"
 integer                      :: y_size
-real(kind_real)              :: Jb, Jo, Jcurrent
+real(kind_real)              :: Jb, Jo
 real(kind_real), allocatable :: RinvDeltaY(:)
 
 !-------------------------------------------------------------------------------
@@ -486,7 +483,6 @@ call r_matrix % multiply_inverse_vector(DeltaObs, RinvDeltaY)
 
 Jo = half * dot_product(DeltaObs, RinvDeltaY)
 Jb = half * dot_product(DeltaProf, (matmul(b_inv, DeltaProf)))
-Jcurrent = Jb + Jo
 
 Jcost(1) = (Jo + Jb) * two / real (y_size, kind_real)   ! Normalize cost by nchans
 Jcost(2) = Jb * two / real (y_size, kind_real)          ! Normalize cost by nchans
@@ -538,8 +534,6 @@ real(kind_real), allocatable :: Temp(:)
 real(kind_real)              :: Temp2(1)
 real(kind_real)              :: rtbase
 integer                      :: nlevels_q
-integer                      :: toplevel_q
-character(len=*), parameter  :: RoutineName = "ufo_rttovonedvarcheck_CheckIteration"
 type(ufo_geoval), pointer    :: geoval
 character(len=max_string)    :: varname
 integer                      :: ii
@@ -615,7 +609,6 @@ Constrain: if (.not. OutOfRange) then
   else
     nlevels_q = nlevels_1dvar
   end if
-  toplevel_q = nlevels_1dvar - nlevels_q + 1
   allocate (qsaturated(nlevels_q))
 
 
@@ -818,8 +811,7 @@ real(kind_real) :: dp
 real(kind_real) :: meanql
 real(kind_real) :: meanqi
 integer         :: i
-integer         :: nlevels_q, toplevel_q
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_CheckCloudyIteration"
+integer         :: nlevels_q
 real(kind_real)             :: Plevels_1DVar(nlevels_1dvar)
 type(ufo_geoval), pointer   :: geoval
 real(kind_real)             :: clw(nlevels_1dvar)
@@ -860,7 +852,6 @@ else if ( profindex % qi(1) > 0 ) then
 else
   nlevels_q = nlevels_1dvar
 end if
-toplevel_q = nlevels_1dvar - nlevels_q + 1
 
 !is the profile cloudy?
 !if it is do the test
@@ -938,7 +929,7 @@ real(kind_real), intent(in)       :: binv(:,:) ! (nprofelements,nprofelements)
 real(kind_real), intent(in)       :: hmatrix(:,:) ! (nchans,nprofelements)
 real(kind_real), intent(in)       :: rdiagonal(:) ! nchans
 
-integer :: obs_size, profile_size, ii, jj
+integer :: obs_size, profile_size, ii
 character(len=12) :: chans_fmt, prof_fmt
 character(len=3) :: txt_nchans, txt_nprof
 character(len=10) :: int_fmt
@@ -1052,9 +1043,6 @@ type(ufo_rttovonedvarcheck_profindex), intent(in) :: profindex   ! profile index
 type(ufo_geovals), intent(in)                     :: geovals     ! model data at obs location
 real(kind_real), intent(in)                       :: H_matrix_Guess(:, :) ! cloudy Jacobians for channels
 type(ufo_rttovonedvarcheck_ob), intent(inout)     :: ob
-
-! Local constants:
-character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_cloudy_channel_rejection"
 
 ! Local variables:
 real(kind_real), allocatable :: Wfunc(:)         ! Individual temperature Jacobian

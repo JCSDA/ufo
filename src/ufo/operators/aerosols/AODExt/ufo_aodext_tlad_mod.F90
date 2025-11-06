@@ -325,7 +325,7 @@ real(kind_real), dimension(:,:),   allocatable :: angstrom   !(nvars, nlocs) Ang
 real(kind_real), dimension(:,:),   allocatable :: angstrom_ad!(nvars, nlocs) Adjoint of Angstrom coefficient
 real(kind_real), dimension(:,:),   allocatable :: logm       !(nvars, nlocs) Denominator of Angstrom coeff
 
-real(kind_real) :: arg1, arg1_ad, tmp, tmp_ad, coef, coef_ad
+real(kind_real) :: tmp, tmp_ad, coef, coef_ad
 
 integer :: nch, nobs, km, ic, i, j
 

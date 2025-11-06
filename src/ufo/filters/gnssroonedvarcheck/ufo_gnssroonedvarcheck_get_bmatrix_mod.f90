@@ -55,7 +55,6 @@ INTEGER                          :: nstate
 INTEGER                          :: nband
 INTEGER                          :: nseason
 INTEGER                          :: fileunit
-CHARACTER(len=20)                :: prefix
 CHARACTER(len=256)               :: ErrorMessage
 INTEGER                          :: return_code
 
@@ -63,7 +62,6 @@ INTEGER                          :: return_code
 ! 0. Determine BMatrix environment variable name
 !-----------------------------------------------
 
-prefix = 'GPSRO_'
 fileunit = ufo_utils_iogetfreeunit()
 
 OPEN(UNIT=fileunit, FILE=filename, ACTION='READ', STATUS='OLD', IOSTAT=return_code)

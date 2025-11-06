@@ -13,7 +13,6 @@ use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
-use ufo_geovals_mod_c,   only: ufo_geovals_registry
 use vert_interp_mod
 use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod

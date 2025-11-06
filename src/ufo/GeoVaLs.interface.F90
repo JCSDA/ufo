@@ -569,7 +569,6 @@ end subroutine ufo_geovals_minmaxavg_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_geovals_nlocs_c(c_key_self, nlocs) bind(c, name='ufo_geovals_nlocs_f90')
-use ufo_vars_mod, only: MAXVARLEN
 use string_f_c_mod
 implicit none
 integer(c_int), intent(in) :: c_key_self
@@ -877,7 +876,7 @@ character(max_string) :: err_msg
 character(len=MAXVARLEN) :: varname
 type(ufo_geovals), pointer :: self
 character(len=MAXVARLEN), pointer :: variables(:)  !< either the sampled or reduced variable list
-integer :: ivar, iloc, jv
+integer :: ivar, iloc
 
 call c_f_string(c_var, varname)
 call ufo_geovals_registry%get(c_key_self, self)

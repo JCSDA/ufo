@@ -12,7 +12,6 @@ use ufo_roobserror_mod
 use kinds
 
 use ufo_geovals_mod
-use ufo_geovals_mod_c,   only: ufo_geovals_registry
 
 implicit none
 private
@@ -77,7 +76,6 @@ implicit none
 integer(c_int), intent(in)    :: c_self      ! The object containing configuration info
 
 type(ufo_roobserror), pointer :: self
-character(len=200)            :: ErrorMessage   ! Error message to be output
 
 call ufo_roobserror_registry%get(c_self, self)
 

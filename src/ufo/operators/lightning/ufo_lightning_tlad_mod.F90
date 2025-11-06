@@ -60,7 +60,6 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
   logical :: ascend                                     ! Flag on direction of model levels
   integer :: iobs                                       ! Counter
 !  integer :: ivar                                      ! Counter
-  integer :: nlocs                                      ! number of observations
   integer :: ilev1                                      ! starting level for loop
   integer :: ilev2                                      ! ending level for loop
   integer :: ilev                                       ! level for loop
@@ -69,7 +68,6 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
   integer :: isfc                                       ! index of lowest level
   integer :: n_horiz                                    ! number of square grid boxes for graupel
   integer, parameter      :: max_string = 800
-  character(max_string)   :: message                    ! General message for output
   character(max_string)   :: err_msg                    ! Error Messages to be output to the user
 
   n_horiz = self % n_horiz
@@ -159,7 +157,6 @@ type(c_ptr), value,      intent(in)    :: obss
   integer                      :: ivar                 ! obervation variable
   integer                      :: ilev                 ! loop variable, level number
   integer                      :: nlev                 ! number of levels
-  real(kind_real), allocatable :: x_d(:)               ! Increment to the state vector
 
   type(ufo_geoval), pointer    :: qg_d                 ! Pointer to the specific humidity perturbations
   type(ufo_geoval), pointer    :: delp_d               ! Pointer to the specific humidity perturbations
@@ -320,7 +317,6 @@ DOUBLE PRECISION               :: ag, answer
 ! Local constants
 !
 integer, parameter    :: max_string = 800
-character(max_string) :: message           ! General message for output
 REAL(kind_real)       :: PDiff             ! Pressure diff across layer
 REAL(kind_real)       :: GK                ! 1/gravity
 INTEGER               :: ilev              ! level counter

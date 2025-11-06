@@ -13,10 +13,8 @@ use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
-use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_basis_mod,     only: ufo_basis
 use vert_interp_mod
-use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod
 use missing_values_mod
 use ufo_gnssro_ropp2d_utils_mod

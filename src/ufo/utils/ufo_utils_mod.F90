@@ -11,7 +11,6 @@ module ufo_utils_mod
 
 use fckit_log_module, only : fckit_log
 use kinds, only: kind_real
-use missing_values_mod, only: missing_value
 use ufo_constants_mod, only : zero, half, one, two, &
                               t0c, zerodegc, min_q, epsilon
 

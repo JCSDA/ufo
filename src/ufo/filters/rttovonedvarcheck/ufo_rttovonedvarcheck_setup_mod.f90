@@ -106,7 +106,6 @@ type(fckit_configuration), intent(in)      :: f_conf       !< yaml file contents
 integer(c_int), intent(in)                 :: channels(:)
 
 ! local variables
-character(len=max_string)     :: tmp
 character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
 type(fckit_configuration)     :: surface_emissivity_conf

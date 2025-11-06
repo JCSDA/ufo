@@ -39,7 +39,6 @@ REAL(kind_real), INTENT(OUT)    :: OM1(:,:)
 LOGICAL, INTENT(OUT)            :: OM1_error
 
 ! Local declarations:
-CHARACTER(len=*), PARAMETER     :: RoutineName = "Ops_GPSRO_setOM1"
 INTEGER                         :: n
 INTEGER                         :: i
 INTEGER                         :: ReturnCode

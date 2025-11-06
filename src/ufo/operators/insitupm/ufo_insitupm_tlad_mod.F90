@@ -27,12 +27,12 @@ module ufo_insitupm_tlad_mod
   logical :: scalefactor
   type(obs_variables), public :: obsvars
   type(oops_variables), public :: geovars
-  integer(kind=c_int), dimension(:), allocatable :: tracer_modes_cmaq(:)
-  real(kind=kind_real), dimension(:,:), allocatable :: prs(:,:)
-  real(kind=kind_real), dimension(:,:), allocatable :: ts(:,:)
-  real(kind=c_double), dimension(:,:,:), allocatable :: facs(:,:,:) 
-  real(kind=c_double), dimension(:), allocatable :: wf(:)
-  integer(kind=c_int), dimension(:), allocatable :: wi(:) 
+  integer(kind=c_int), allocatable :: tracer_modes_cmaq(:)
+  real(kind=kind_real), allocatable :: prs(:,:)
+  real(kind=kind_real), allocatable :: ts(:,:)
+  real(kind=c_double), allocatable :: facs(:,:,:) 
+  real(kind=c_double), allocatable :: wf(:)
+  integer(kind=c_int), allocatable :: wi(:) 
  contains
   procedure :: setup  => ufo_insitupm_tlad_setup_
   procedure :: cleanup  => ufo_insitupm_tlad_cleanup_

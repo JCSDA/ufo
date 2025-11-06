@@ -13,9 +13,7 @@ use iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
-use ufo_geovals_mod_c, only: ufo_geovals_registry
 use vert_interp_mod
-use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod  
 use missing_values_mod
 use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
@@ -24,7 +22,6 @@ use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav,                    &    ! Gravitational field strength
     mw_ratio,                &    ! Ratio of molecular weights of water and dry air
-    c_virtual,               &    ! Related to mw_ratio
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
 use gnssro_mod_transform, only: geometric2geop
@@ -286,7 +283,6 @@ REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:)    ! Geopotentia
 ! Things that may need to be output, as they are used by the TL/AD calculation
 ! 
 INTEGER                      :: nRefLevels          ! Number of levels in refractivity calculation
-REAL(kind_real), ALLOCATABLE :: nr(:)               ! Model calculation of impact parameters
 ! 
 ! Local parameters
 ! 
@@ -295,8 +291,6 @@ character(len=*), parameter  :: myname_ = "Ops_GPSRO_ForwardModel"
 !
 ! Local variables
 ! 
-INTEGER                      :: num_pseudo        ! Number of levels, including pseudo levels
-REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
 INTEGER                      :: iObs              ! Loop counter, observation number
 INTEGER                      :: iLevel            ! Number of model level just above observation

@@ -8,7 +8,6 @@
 module ufo_rttovonedvarcheck_profindex_mod
 
 use kinds
-use fckit_log_module, only : fckit_log
 use ufo_metoffice_bmatrixstatic_mod
 use ufo_rttovonedvarcheck_constants_mod
 
@@ -87,7 +86,7 @@ integer, intent(in)                                   :: nlevels !< number of mo
 character(len=*), parameter :: routinename = "ufo_rttovonedvarcheck_profindex_setup"
 
 ! local variables:
-integer :: i,j
+integer :: j
 integer :: firstelement
 integer :: lastelement
 integer :: nelements

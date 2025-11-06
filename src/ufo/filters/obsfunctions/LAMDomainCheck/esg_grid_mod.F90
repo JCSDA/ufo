@@ -11,7 +11,7 @@
 module esg_grid_mod
 
   use kinds
-  use ufo_constants_mod, only: pi, deg2rad, rad2deg, zero, one, two
+  use ufo_constants_mod, only: deg2rad, zero, one, two
   implicit none
   private
   public :: gtoxm_ak_dd, gtoxm_ak_rr

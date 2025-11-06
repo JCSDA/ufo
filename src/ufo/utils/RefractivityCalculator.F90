@@ -23,14 +23,7 @@ use ufo_constants_mod, only: &
     cp,                      &    ! Heat capacity at constant pressure for air
     rd_over_cp,              &    ! Ratio of gas constant to heat capacity
     pref,                    &    ! Reference pressure for calculating exner
-    pi,                      &    ! Something to do with circles...
     grav,                    &    ! Gravitational field strength
-    ecc,                     &    ! eccentricity
-    k_somig,                 &    ! Somigliana's constant
-    g_equat,                 &    ! equatorial gravity (ms-2)
-    a_earth,                 &    ! semi-major axis of earth (m)
-    flatt,                   &    ! flattening
-    m_ratio,                 &    ! gravity ratio
     mw_ratio,                &    ! Ratio of molecular weights of water and dry air
     c_virtual,               &    ! Related to mw_ratio
     n_alpha,                 &    ! Refractivity constant a
@@ -348,12 +341,8 @@ REAL(kind_real), OPTIONAL, INTENT(OUT), ALLOCATABLE :: refractivity(:) !< Calcul
 INTEGER                                   :: i
 INTEGER                                   :: counter
 REAL(kind_real)                           :: Pb(nlevq)
-REAL(kind_real)                           :: T_virtual(nlevq)
 REAL(kind_real)                           :: T(nlevq)
 REAL(kind_real)                           :: refrac(nlevq)                   ! Refractivity on model levels
-REAL(kind_real)                           :: Extheta
-REAL(kind_real)                           :: pwt1
-REAL(kind_real)                           :: pwt2
 REAL(kind_real)                           :: Ndry
 REAL(kind_real)                           :: Nwet
 REAL(kind_real)                           :: dEx_dP(nlevP,nlevP)
