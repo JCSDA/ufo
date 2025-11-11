@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_SETSURFACETYPE_H_
 #define UFO_FILTERS_OBSFUNCTIONS_SETSURFACETYPE_H_
 
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,34 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
+
+namespace ufo {
+
+enum class AAPPSurfaceTests{
+      ORIGINAL,
+      SG
+};
+
+struct AAPPSurfaceTestsParameterTraitsHelper {
+  typedef AAPPSurfaceTests EnumType;
+  static constexpr char enumTypeName[] = "AAPPSurfaceTests";
+  static constexpr util::NamedEnumerator<AAPPSurfaceTests> namedValues[] = {
+    { AAPPSurfaceTests::ORIGINAL, "original" },
+    { AAPPSurfaceTests::SG, "sg" }
+  };
+};
+
+}  // namespace ufo
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::AAPPSurfaceTests> :
+    public EnumParameterTraits<ufo::AAPPSurfaceTestsParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
 
 namespace ufo {
 
@@ -70,6 +99,13 @@ class SetSurfaceTypeParameters : public oops::Parameters {
   /// Example: To use the AAPP Surface Type set
   ///          UseAAPPSurfaceType: true
   oops::Parameter<bool> UseAAPPSurfaceClass{"UseAAPPSurfaceClass", false, this};
+
+  /// AAPP surface test version
+  /// string which can either be "original" or "sg"
+  /// currently no other option is allowed
+  /// Example (a): for Metopsg instruments set to sg
+  /// Example (b): for ATOVS instruments set to original
+  oops::Parameter<AAPPSurfaceTests> AAPPsurftest{"AAPPsurftest", AAPPSurfaceTests::ORIGINAL, this};
 
   /// Use reported Surface Water Fraction (default false)
   /// Example: To use reported Surface Water Fraction (which is MetaData/waterAreaFraction) set

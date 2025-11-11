@@ -14,7 +14,9 @@ namespace ufo {
 
 //-------------------------------------------------------------------------------------------------
 
-/// AAPP surface classification
+/// AAPP surface classifications
+
+  // Original version
   // these appear to be shifted by 1 (i.e. 0-8) compared to the original definition (1-9)
   // in NWPSAF-MF-UD-003 (AAPP documentation - data formats)
 
@@ -28,6 +30,21 @@ struct AAPP_surfclass {
   static constexpr int wetland   = 6;  // Wet land (non-forested land w/ wet surface)
   static constexpr int wetsnow   = 7;  // Wet snow (w/ water > 2%, over land/ice)
   static constexpr int desert    = 8;  // Desert
+};
+
+  // Second generation version
+  // used in AAPP-SG - a reduced set of surfaces from an updated surface class
+  // determination procedure. See NWP-SAF document NWPSAF-MO-TR-041.
+  // In the following classes the numbers in brackets refer to the Telsem2 classes
+  // used to generate the surface emissivities.
+
+struct AAPPSG_surfclass {
+  static constexpr int sea       = 1;  // Ocean or New sea-ice (11,12,13 and FastemOcean)
+  static constexpr int multiice  = 2;  // Multi-year ice (14,15,16,20,21,22)
+  static constexpr int wetland   = 3;  // Wet land incl. forest (1,2,10)
+  static constexpr int dryland   = 4;  // Dry land (3,4)
+  static constexpr int snow      = 5;  // Snow  (17,18,19)
+  static constexpr int desert    = 6;  // Desert (5)
 };
 
 struct BUFR_surftype {

@@ -1,0 +1,28 @@
+  
+time window:
+  begin: 2024-09-12T00:00:00Z
+  end: 2024-09-12T23:59:00Z
+
+observations:
+### Test user-specified  AAPsurfaceclass as sg ###
+- obs space:
+    name: Test user-specified AAPPsurfaceclass sg processing
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obs_epsmws_202409120600_surfaceclass_aapptest_v1.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-24
+  geovals:
+    filename:
+      Data/ufo/testinput_tier_1/geovals_epsmws_202409120600_surfaceclass_aapptest_v1.nc4
+  obs function:
+    name: ObsFunction/SetSurfaceType
+    options:
+      AAPPsurftest: sg
+      UseAAPPSurfaceClass: true
+      UseReportSurface: false
+      UseReportElevation: false
+      UseSurfaceWaterFraction: false
+    variables: [surfaceQualifier]
+    tolerance: 1.0e-7

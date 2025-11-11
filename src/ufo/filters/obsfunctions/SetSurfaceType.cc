@@ -87,6 +87,9 @@ namespace ufo {
 
     float heighttolerance = options_.HeightTolerance.value();
 
+    // store input AAPPsurftest
+    ufo::AAPPSurfaceTests AAPPsurftest = options_.AAPPsurftest.value();
+
     // Set elevation from observation, or use model surface height
     // -----------------------------------------------------------------------------
     bool elevation_from_ob = false;
@@ -212,19 +215,43 @@ namespace ufo {
         std::vector<int> AAPP_surface_class(nlocs);
         in.get(Variable("MetaData/surfaceClassAAPP"), AAPP_surface_class);
 
-        for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-          if (AAPP_surface_class[iloc] == AAPP_surfclass::sea) {
-          // reclassify surface as sea if prior classification hasn't as long as not 'highland'
-            if (surftype[iloc] != surftype_sea_ &&
-                elevation[iloc] < options_.HighlandHeight.value()) {
-              surftype[iloc] = surftype_sea_;
+
+        if (AAPPsurftest == AAPPSurfaceTests::ORIGINAL) {
+        //
+        // processing for original version of AAPP surface classes
+        //
+          oops::Log::debug() << "processing original AAPPsurftest" << std::endl;
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            if (AAPP_surface_class[iloc] == AAPP_surfclass::sea) {
+            // reclassify surface as sea if prior classification hasn't as long as not 'highland'
+              if (surftype[iloc] != surftype_sea_ &&
+                  elevation[iloc] < options_.HighlandHeight.value()) {
+                surftype[iloc] = surftype_sea_;
+              }
+            } else if (AAPP_surface_class[iloc] >= AAPP_surfclass::newice &&  // AAPP_surface_class
+                       AAPP_surface_class[iloc] <= AAPP_surfclass::desert) {  // must be valid
+              if (surftype[iloc] == surftype_sea_ &&
+                  std::abs(latitude[iloc]) >= options_.IceLimitSoft.value() &&
+                  ice_area_frac[iloc] >= 0.0f) {
+                surftype[iloc] = surftype_seaice_;
+              }
             }
-          } else if (AAPP_surface_class[iloc] >= AAPP_surfclass::newice &&  // AAPP_surface_class
-                     AAPP_surface_class[iloc] <= AAPP_surfclass::desert) {  // must be valid
-            if (surftype[iloc] == surftype_sea_ &&
-                std::abs(latitude[iloc]) >= options_.IceLimitSoft.value() &&
-                ice_area_frac[iloc] >= 0.0f) {
-              surftype[iloc] = surftype_seaice_;
+          }
+        } else if (AAPPsurftest == AAPPSurfaceTests::SG) {
+        //
+        // processing for second generation version of AAPP surface classes
+        // see https://nwp-saf.eumetsat.int/site/download/documentation/aapp/NWPSAF-MO-TR-041-AAPP_microwave_tests_part2.pdf
+        // for further information
+        //
+          oops::Log::debug() << "processing sg AAPPsurftest" << std::endl;
+          for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+            if (AAPP_surface_class[iloc] == AAPPSG_surfclass::sea) {
+            // reclassify land as sea if prior classification hasn't as long as not 'highland'
+            // note the seaice has already been determined in an earlier step
+              if (surftype[iloc] == surftype_land_ &&
+                  elevation[iloc] < options_.HighlandHeight.value()) {
+                surftype[iloc] = surftype_sea_;
+              }
             }
           }
         }
