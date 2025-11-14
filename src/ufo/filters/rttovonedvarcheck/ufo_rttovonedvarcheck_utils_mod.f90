@@ -564,16 +564,16 @@ type(ufo_rttovonedvarcheck_ob), intent(inout)      :: ob            !< satellite
 
 ! Local declarations:
 integer                              :: nchans_1dvar
-real(kind_quad)                      :: Hessian(2,2)
-real(kind_quad)                      :: Identity(2,2)
-real(kind_quad)                      :: Eigenvalue(2)
-real(kind_quad)                      :: Eigenvectors(2,2)
-real(kind_quad)                      :: FirstEigenvector(2)
-real(kind_quad), allocatable         :: ChannelWeights(:)
-real(kind_quad)                      :: Determinant
-real(kind_quad)                      :: Trace
-real(kind_quad)                      :: Gap
-real(kind_quad)                      :: Normalisation
+real(kind_real)                      :: Hessian(2,2)
+real(kind_real)                      :: Identity(2,2)
+real(kind_real)                      :: Eigenvalue(2)
+real(kind_real)                      :: Eigenvectors(2,2)
+real(kind_real)                      :: FirstEigenvector(2)
+real(kind_real), allocatable         :: ChannelWeights(:)
+real(kind_real)                      :: Determinant
+real(kind_real)                      :: Trace
+real(kind_real)                      :: Gap
+real(kind_real)                      :: Normalisation
 
 nchans_1dvar = size(ob % channels_used)
 allocate(ChannelWeights(nchans_1dvar))
