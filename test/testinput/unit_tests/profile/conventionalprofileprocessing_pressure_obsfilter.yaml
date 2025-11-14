@@ -37,31 +37,3 @@ observations:
   passedBenchmark: 21
   benchmarkFlag: 24
   flaggedBenchmark: 0
-- obs space:
-    name: GeoVaLs are in the wrong order, throwing an exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_obs.nc4
-      obsgrouping:
-        group variables: [ "stationIdentification" ]
-    simulated variables: [height]
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/met_office_conventional_profile_processing_pressure_obsfilter_reversed_geovals_out.nc4
-  geovals:
-    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_unittests_vertinterp_geovals_reversed.nc4
-  obs filters:
-  - filter: Conventional Profile Processing
-    filter variables:
-    - name: height
-    Checks: ["Basic", "Pressure"]
-    compareWithOPS: false
-    BChecks_Skip: true
-    flagBasicChecksFail: false
-    PrintStationID: true
-    alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
-    "height_above_mean_sea_level_levels_minus_one": "air_pressure_levels_minus_one"}
-  HofX: HofX
-  expectExceptionWithMessage: GeoVaLs are in the wrong order

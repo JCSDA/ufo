@@ -36,33 +36,6 @@ observations:
       absTol: 1.0e-5                      # tolerance in Pa
 #---------------------------------------------------
 - obs space:
-    name: GeoVaLs are in the wrong order, throwing an exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/satwind_obs_1d_small_2020100106_noinv_invcorr_reversed_geovals_out.nc4
-    simulated variables: [windEastward, windNorthward]
-  geovals:
-    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
-  obs filters:
-  - filter: Create Diagnostic Flags
-    filter variables:
-    - name: windEastward
-    - name: windNorthward
-    flags:
-    - name: InversionCorrectionPerformed
-      initial value: false
-  - filter: Satwind Inversion Correction
-    observation pressure:
-      name: MetaData/pressure
-    RH threshold: 54
-  expectExceptionWithMessage: GeoVaLs are not ordered from model top to bottom
-#---------------------------------------------------
-- obs space:
     name: Diagnostic flags not initialised
     obsdatain:
       engine:

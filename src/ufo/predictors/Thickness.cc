@@ -63,9 +63,6 @@ void Thickness::compute(const ioda::ObsSpace & odb,
     geovals.getAtLocation(p_prof, oops::Variable{"air_pressure"}, jl);
     geovals.getAtLocation(t_prof, oops::Variable{"air_temperature"}, jl);
 
-    if (p_prof.front() > p_prof.back())
-      throw eckit::BadValue("GeoVaLs are in the wrong order.", Here());
-
     // Check that layer top is within pressure levels
     if (p_high > p_prof.back()) {
       oops::Log::error() << "layer top is greater than largest model pressure level" << std::endl;

@@ -184,51 +184,6 @@ observations:
     observation vertical coordinate: pressure
     vertical coordinate: air_pressure_levels_minus_one
   obs space:
-    name: GeoVaLs are in the wrong order, throwing an exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/satwind_obs_1d_small_2020100106_noinv.nc4
-    simulated variables: [windEastward, windNorthward]
-  geovals:
-    filename: Data/ufo/testinput_tier_1/satwind_geoval_small_reversed_20201001T0600Z.nc4
-  obs filters:
-  # Process QI values in new BUFR from percent confidence
-  - filter: Process AMV QI
-    number of generating apps: 4
-  # Set constant pressure error
-  - filter: Variable Assignment
-    assignments:
-    - name: MetaDataError/pressure
-      type: float
-      value: 10000.0
-  # Post filter - Assign individual observation errors
-  - filter: Perform Action
-    defer to post: true
-    filter variables:
-    - name: windEastward
-    action:
-      name: assign error
-      error function:
-        name: ObsFunction/SatwindIndivErrors
-        options:
-          verror add: 7.5
-          verror mult: -5.0
-          wind component: windEastward
-          observation vertical coordinate: pressure
-          vertical coordinate: air_pressure_levels_minus_one
-          pressure error:
-            name: MetaDataError/pressure
-          quality index:
-            name: MetaData/qiWithoutForecast
-  expectExceptionWithMessage: GeoVaLs are not ordered from model top to bottom
-#---------------------------------------------------
-- obs operator:
-    name: VertInterp
-    observation alias file: ../resources/namemap/test_name_map.yaml
-    observation vertical coordinate: pressure
-    vertical coordinate: air_pressure_levels_minus_one
-  obs space:
     name: Incorrect vertical coordinate
     obsdatain:
       engine:

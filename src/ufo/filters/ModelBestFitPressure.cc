@@ -152,11 +152,6 @@ void ModelBestFitPressure::applyFilter(const std::vector<bool> & apply,
       gvals->getAtLocation(model_eastvec_profile, model_eastvec_name, idata);
       gvals->getAtLocation(model_northvec_profile, model_northvec_name, idata);
 
-      // Check GeoVaLs are in correct vertical order
-      if (model_pressure_profile.front() > model_pressure_profile.back()) {
-        throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
-      }
-
       float min_vector_diff = std::numeric_limits<float>::max();
       const size_t UNINITIALIZED = std::numeric_limits<size_t>::max();
       size_t imin = UNINITIALIZED;

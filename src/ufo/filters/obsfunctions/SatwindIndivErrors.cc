@@ -182,10 +182,6 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
     } else if ( profile == "windNorthward" ) {
       gvals->getAtLocation(cx_windcomponent, oops::Variable{"northward_wind"}, iloc);
     }
-    // Check GeoVaLs are in correct vertical order
-    if (cx_p.front() > cx_p.back()) {
-      throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
-    }
     // Initialize at each location
     float error_press = 0.0;  // default wind error contribution from error in pressure, ms-1
     float error_vector = 3.5;  // default wind error contribution from error in vector, ms-1

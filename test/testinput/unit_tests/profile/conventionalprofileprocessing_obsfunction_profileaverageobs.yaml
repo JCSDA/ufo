@@ -94,35 +94,3 @@ observations:
             observation vertical coordinate: MetaData/pressure
             model vertical coordinate: air_pressure_levels
   expectExceptionWithMessage: The extended obs space has not been produced
-
-- obs space:
-    name: GeoVaLs are in the wrong order, throwing an exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs.nc4
-      obsgrouping:
-        group variables: [ "stationIdentification" ]
-        sort variable: "pressure"
-        sort order: "descending"
-    simulated variables: [airTemperature]
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/met_office_conventional_profile_processing_profileaverageobs_out4.nc4
-    extension:
-      allocate companion records with length: 71
-  geovals:
-    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_profileaverageobs_geovals_reversed.nc4
-  obs filters:
-  - filter: Variable Assignment
-    assignments:
-      - name: DerivedMetaData/pressure
-        type: float
-        function:
-          name: ObsFunction/ProfileAverageObsPressure
-          options:
-            observation vertical coordinate: MetaData/pressure
-            model vertical coordinate: air_pressure_levels
-  expectExceptionWithMessage: GeoVaLs are in the wrong order
-

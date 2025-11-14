@@ -37,13 +37,9 @@ namespace ufo {
       if (geovals_->has(pres_var)) {
         std::vector<float> vec_gv(geovals_->nlevs(pres_var));
         geovals_->getAtLocation(vec_gv, pres_var, 0);
-        if (vec_gv.front() > vec_gv.back())
-          throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
       } else if (geovals_->has(pres_rho_var)) {
         std::vector<float> vec_gv(geovals_->nlevs(pres_rho_var));
         geovals_->getAtLocation(vec_gv, pres_rho_var, 0);
-        if (vec_gv.front() > vec_gv.back())
-          throw eckit::BadValue("GeoVaLs are in the wrong order", Here());
       } else {
         throw eckit::BadValue("GeoVaLs must contain a pressure coordinate");
       }

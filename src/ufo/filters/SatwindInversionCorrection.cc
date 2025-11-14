@@ -152,10 +152,6 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
         gvals->getAtLocation(model_temp_profile, model_temp_name, iloc);
         gvals->getAtLocation(model_rh_profile, model_rh_name, iloc);
         gvals->getAtLocation(model_vcoord_profile, model_vcoord_name, iloc);
-        // Check GeoVaLs are in correct vertical order
-        if (model_vcoord_profile.front() > model_vcoord_profile.back()) {
-          throw eckit::BadValue("GeoVaLs are not ordered from model top to bottom", Here());
-        }
         // ---------------------------------------------------------------------------
         //  Search for inversion and if present find T and P of base and top
         // ---------------------------------------------------------------------------
