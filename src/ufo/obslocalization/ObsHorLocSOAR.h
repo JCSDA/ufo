@@ -24,10 +24,9 @@
 namespace ufo {
 
 /// Horizontal SOAR observation space localization
-template<class MODEL>
-class ObsHorLocSOAR: public ufo::ObsHorLocalization<MODEL> {
-  typedef typename MODEL::GeometryIterator   GeometryIterator_;
-  typedef typename ObsHorLocalization<MODEL>::LocalObs LocalObs_;
+template<class ITERATOR>
+class ObsHorLocSOAR: public ufo::ObsHorLocalization<ITERATOR> {
+  typedef typename ObsHorLocalization<ITERATOR>::LocalObs LocalObs_;
 
  public:
   ObsHorLocSOAR(const eckit::Configuration &, ioda::ObsSpace &);
@@ -36,7 +35,7 @@ class ObsHorLocSOAR: public ufo::ObsHorLocalization<MODEL> {
   /// Compute SOAR localization using the set of \p localobs and save localization
   /// values in \p locvector.
   /// (missing values indicate that observation is outside of localization)
-  void localizeLocalObs(const GeometryIterator_ &,
+  void localizeLocalObs(const ITERATOR &,
                         ioda::ObsVector & locvector,
                         const LocalObs_ & localobs) const override;
 
@@ -47,22 +46,22 @@ class ObsHorLocSOAR: public ufo::ObsHorLocalization<MODEL> {
 };
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-ObsHorLocSOAR<MODEL>::ObsHorLocSOAR(const eckit::Configuration & config,
-                                    ioda::ObsSpace & obsspace)
-  : ObsHorLocalization<MODEL>::ObsHorLocalization(config, obsspace), options_()
+template<typename ITERATOR>
+ObsHorLocSOAR<ITERATOR>::ObsHorLocSOAR(const eckit::Configuration & config,
+                                       ioda::ObsSpace & obsspace)
+  : ObsHorLocalization<ITERATOR>::ObsHorLocalization(config, obsspace), options_()
 {
   options_.validateAndDeserialize(config);
 }
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsHorLocSOAR<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+template<typename ITERATOR>
+void ObsHorLocSOAR<ITERATOR>::localizeLocalObs(const ITERATOR & i,
                                         ioda::ObsVector & locvector,
                                         const LocalObs_ & localobs) const {
   // Apply box car localization
-  ObsHorLocalization<MODEL>::localizeLocalObs(i, locvector, localobs);
+  ObsHorLocalization<ITERATOR>::localizeLocalObs(i, locvector, localobs);
 
   // Apply SOAR localization
   const double SOARexpDecayH = options_.SOARexpDecayH;
@@ -78,8 +77,8 @@ void ObsHorLocSOAR<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsHorLocSOAR<MODEL>::print(std::ostream & os) const {
+template<typename ITERATOR>
+void ObsHorLocSOAR<ITERATOR>::print(std::ostream & os) const {
   os << "SOAR horizontal localization with " << options_.SOARexpDecayH
      << " soar decay" << std::endl;
 }

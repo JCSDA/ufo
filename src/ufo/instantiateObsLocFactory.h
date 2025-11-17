@@ -8,22 +8,22 @@
 #ifndef UFO_INSTANTIATEOBSLOCFACTORY_H_
 #define UFO_INSTANTIATEOBSLOCFACTORY_H_
 
-#include "oops/base/ObsLocalizationBase.h"
 #include "ufo/obslocalization/ObsHorLocalization.h"
 #include "ufo/obslocalization/ObsHorLocGC99.h"
 #include "ufo/obslocalization/ObsHorLocSOAR.h"
+#include "ufo/obslocalization/ObsLocalizationBase.h"
 #include "ufo/obslocalization/ObsVertLocalization.h"
-#include "ufo/ObsTraits.h"
 
 namespace ufo {
-template<typename MODEL> void instantiateObsLocFactory() {
-  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsHorLocGC99<MODEL>>
+
+template<typename ITERATOR> void instantiateObsLocFactory() {
+  static ObsLocalizationMaker<ITERATOR, ObsHorLocGC99<ITERATOR>>
            maker_("Horizontal Gaspari-Cohn");
-  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsHorLocSOAR<MODEL>>
+  static ObsLocalizationMaker<ITERATOR, ObsHorLocSOAR<ITERATOR>>
            makerSOAR_("Horizontal SOAR");
-  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsHorLocalization<MODEL>>
+  static ObsLocalizationMaker<ITERATOR, ObsHorLocalization<ITERATOR>>
            makerBoxCar_("Horizontal Box car");
-  static oops::ObsLocalizationMaker<MODEL, ObsTraits, ufo::ObsVertLocalization<MODEL>>
+  static ObsLocalizationMaker<ITERATOR, ObsVertLocalization<ITERATOR>>
            makerVertLoc_("Vertical localization");
 }
 

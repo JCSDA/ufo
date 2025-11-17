@@ -27,26 +27,23 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/base/ObsLocalizationBase.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/obslocalization/ObsHorLocParameters.h"
-#include "ufo/ObsTraits.h"
+#include "ufo/obslocalization/ObsLocalizationBase.h"
 
 namespace ufo {
 
 /// Horizontal Box car observation space localization
-template<class MODEL>
-class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
-  typedef typename MODEL::GeometryIterator   GeometryIterator_;
-
+template<class ITERATOR>
+class ObsHorLocalization: public ObsLocalizationBase<ITERATOR> {
  public:
   ObsHorLocalization(const eckit::Configuration &, ioda::ObsSpace &);
 
   /// Compute localization and save localization values in \p locvector.
   /// Missing values indicate that observation is outside of localization.
   /// The lengthscale from ObsHorLocParameters is used.
-  void computeLocalization(const GeometryIterator_ &,
+  void computeLocalization(const ITERATOR &,
                            ioda::ObsVector & locvector) const override;
 
  protected:
@@ -63,13 +60,13 @@ class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
 
   /// For a given distance, returns the local observations and their distances.
   /// Intended to be called by \c computeLocalization() .
-  const LocalObs getLocalObs(const GeometryIterator_ &, double lengthscale) const;
+  const LocalObs getLocalObs(const ITERATOR &, double lengthscale) const;
 
   /// Compute box car localization using the set of \p localobs and save
   /// localization values in \p locvector. Mmissing values are set for obs
   /// outside of localization.
   /// Intended to be called by \c computeLocalization() .
-  virtual void localizeLocalObs(const GeometryIterator_ &,
+  virtual void localizeLocalObs(const ITERATOR &,
                                 ioda::ObsVector & locvector,
                                 const LocalObs & localobs) const;
 
@@ -105,8 +102,8 @@ class ObsHorLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
 /*!
  * \details Creates a KDTree class member that can be used for searching for local obs
  */
-template<typename MODEL>
-ObsHorLocalization<MODEL>::ObsHorLocalization(const eckit::Configuration & config,
+template<typename ITERATOR>
+ObsHorLocalization<ITERATOR>::ObsHorLocalization(const eckit::Configuration & config,
                                               ioda::ObsSpace & obsspace)
   : options_(), lats_(obsspace.nlocs()), lons_(obsspace.nlocs()),
     cachepoint_(-999, -999), cachelocvector_(obsspace)
@@ -148,8 +145,8 @@ ObsHorLocalization<MODEL>::ObsHorLocalization(const eckit::Configuration & confi
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsHorLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
+template<typename ITERATOR>
+void ObsHorLocalization<ITERATOR>::computeLocalization(const ITERATOR & i,
                                                     ioda::ObsVector & locvector) const {
   oops::Log::trace() << "ObsHorLocalization::computeLocalization" << std::endl;
 
@@ -176,8 +173,8 @@ void ObsHorLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsHorLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+template<typename ITERATOR>
+void ObsHorLocalization<ITERATOR>::localizeLocalObs(const ITERATOR & i,
                                               ioda::ObsVector & locvector,
                                               const LocalObs & localobs) const {
   oops::Log::trace() << "ObsHorLocalization::computeLocalization(lengthscale)" << std::endl;
@@ -200,10 +197,9 @@ void ObsHorLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
 }
 
 
-template<typename MODEL>
-const typename ObsHorLocalization<MODEL>::LocalObs
-ObsHorLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
-                                    double lengthscale) const {
+template<typename ITERATOR>
+const typename ObsHorLocalization<ITERATOR>::LocalObs
+ObsHorLocalization<ITERATOR>::getLocalObs(const ITERATOR & i, double lengthscale) const {
   oops::Log::trace() << "ObsHorLocalization::getLocalObs" << std::endl;
 
   if ( lengthscale <= 0.0 ) {
@@ -309,8 +305,8 @@ ObsHorLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsHorLocalization<MODEL>::print(std::ostream & os) const {
+template<typename ITERATOR>
+void ObsHorLocalization<ITERATOR>::print(std::ostream & os) const {
   os << "ObsHorLocalization (box car) horizontal localization with " << options_.lengthscale
      << " lengthscale" << std::endl;
 }

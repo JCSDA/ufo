@@ -22,26 +22,23 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/base/ObsLocalizationBase.h"
 #include "oops/util/missingValues.h"
 
+#include "ufo/obslocalization/ObsLocalizationBase.h"
 #include "ufo/obslocalization/ObsVertLocParameters.h"
-#include "ufo/ObsTraits.h"
 
 namespace ufo {
 
 /// Vertical observation space localization
-template<class MODEL>
-class ObsVertLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
-  typedef typename MODEL::GeometryIterator   GeometryIterator_;
-
+template<class ITERATOR>
+class ObsVertLocalization: public ObsLocalizationBase<ITERATOR> {
  public:
   ObsVertLocalization(const eckit::Configuration &, const ioda::ObsSpace &);
 
   /// Compute localization and save localization values in \p locvector.
   /// Missing values indicate that observation is outside of localization.
   /// The lengthscale from ObsVertLocParameters is used.
-  void computeLocalization(const GeometryIterator_ &,
+  void computeLocalization(const ITERATOR &,
                            ioda::ObsVector & locvector) const override;
 
  protected:
@@ -58,13 +55,13 @@ class ObsVertLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
 
   /// For a given distance, returns the local observations and their distances.
   /// Intended to be called by \c computeLocalization() .
-  const LocalObs getLocalObs(const GeometryIterator_ &, double lengthscale) const;
+  const LocalObs getLocalObs(const ITERATOR &, double lengthscale) const;
 
   /// Compute localization using the set of \p localobs and save
   /// localization values in \p locvector. Missing values are set for obs
   /// outside of localization.
   /// Intended to be called by \c computeLocalization() .
-  void localizeLocalObs(const GeometryIterator_ &,
+  void localizeLocalObs(const ITERATOR &,
                                 ioda::ObsVector & locvector,
                                 const LocalObs & localobs) const;
 
@@ -83,8 +80,8 @@ class ObsVertLocalization: public oops::ObsLocalizationBase<MODEL, ObsTraits> {
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-ObsVertLocalization<MODEL>::ObsVertLocalization(const eckit::Configuration & config,
+template<typename ITERATOR>
+ObsVertLocalization<ITERATOR>::ObsVertLocalization(const eckit::Configuration & config,
                                                 const ioda::ObsSpace & obsspace)
   : options_()
 {
@@ -109,8 +106,8 @@ ObsVertLocalization<MODEL>::ObsVertLocalization(const eckit::Configuration & con
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsVertLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i,
+template<typename ITERATOR>
+void ObsVertLocalization<ITERATOR>::computeLocalization(const ITERATOR & i,
                                                  ioda::ObsVector & locvector) const {
   oops::Log::trace() << "ObsVertLocalization::computeLocalization" << std::endl;
 
@@ -125,8 +122,8 @@ void ObsVertLocalization<MODEL>::computeLocalization(const GeometryIterator_ & i
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsVertLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
+template<typename ITERATOR>
+void ObsVertLocalization<ITERATOR>::localizeLocalObs(const ITERATOR & i,
                                               ioda::ObsVector & locvector,
                                               const LocalObs & localobs) const {
   oops::Log::trace() << "ObsVertLocalization::computeLocalization(lengthscale)" << std::endl;
@@ -180,9 +177,9 @@ void ObsVertLocalization<MODEL>::localizeLocalObs(const GeometryIterator_ & i,
   }
 }
 
-template<typename MODEL>
-const typename ObsVertLocalization<MODEL>::LocalObs
-ObsVertLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
+template<typename ITERATOR>
+const typename ObsVertLocalization<ITERATOR>::LocalObs
+ObsVertLocalization<ITERATOR>::getLocalObs(const ITERATOR & i,
                                     double lengthscale) const {
   oops::Log::trace() << "ObsVertLocalization::getLocalObs" << std::endl;
 
@@ -251,8 +248,8 @@ ObsVertLocalization<MODEL>::getLocalObs(const GeometryIterator_ & i,
 
 // -----------------------------------------------------------------------------
 
-template<typename MODEL>
-void ObsVertLocalization<MODEL>::print(std::ostream & os) const {
+template<typename ITERATOR>
+void ObsVertLocalization<ITERATOR>::print(std::ostream & os) const {
   os << "ObsVertLocalization with " << options_.lengthscale
      << " lengthscale and " << options_.localizationFunction.value()
      << " localization function"<< std::endl;
