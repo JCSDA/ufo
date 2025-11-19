@@ -74,6 +74,50 @@ endif()
 # Make UFO_UFO_TESTFILES_PATH available at parent scope so that downstream repos have access to it
 set (UFO_UFO_TESTFILES_PATH ${ufo_data_testinput_tier_1_local} PARENT_SCOPE)
 
+# Validate the testing data files
+file(GLOB_RECURSE OBS_FILES
+  "${ufo_data_testinput_tier_1_local}/*.nc4"
+  "${ufo_data_testinput_tier_1_local}/*.nc"
+  "${ufo_data_testinput_tier_1_local}/*.ioda"
+)
+foreach(pattern
+  "(.*)geoval(.*)"
+  "(.*)obsdiag(.*)"
+  # Remove satbias files
+  "(.*)satbias(.*)"
+  # Remove misc test files
+  "(.*)interpolation(.*)"
+  "(.*)obserror_multi_variant(.*)"
+  # Remove known buggy non-obs files
+  "(.*)met_office_gauss_thinning_groundgnssnames_obs.nc4"
+  "(.*)obserror_4d.nc"  # Wrong dimension attachment
+  "(.*)obserror_2d_fullr.nc"
+  "(.*)obserror_latitude_longitude.nc"
+  "(.*)satwind_pressure_errors.nc4"
+  "(.*)satwind_pressure_errors_nomissing.nc4"
+  "(.*)scatwind_obs_2d_2020100106.nc4"
+  "(.*)superob_testdata.nc4"
+  "(.*)mtgirs_obserror_fstest.nc4"  # used with drawFromFile obsfunction
+)
+  list(FILTER OBS_FILES EXCLUDE REGEX ${pattern})
+endforeach()
+foreach(obs_file ${OBS_FILES})
+  get_filename_component(obs_name ${obs_file} NAME)
+  # Note: IODA_YAML_ROOT is provided by find_package(ioda).
+  # The ObsSpace.yaml file is *not* a test file. It always exists.
+  ecbuild_add_test(
+    TARGET "ufo_data_validate_${obs_name}"
+    COMMAND ioda-validate.x
+    LABELS ufo_data_validate
+    ENVIRONMENT "ECKIT_COLOUR_OUTPUT=1"
+    ARGS
+      "--ignore-warn"
+      "--ignore-error"
+      "${IODA_YAML_ROOT}/validation/ObsSpace.yaml"
+      "${obs_file}"
+  )
+endforeach()
+
 # Create Data directory for test input config and symlink all files
 list( APPEND ufo_test_input
   testinput/empty.yaml
