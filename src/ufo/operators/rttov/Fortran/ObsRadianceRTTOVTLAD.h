@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_RTTOV_OBSRADIANCERTTOVTLAD_H_
-#define UFO_OPERATORS_RTTOV_OBSRADIANCERTTOVTLAD_H_
+#ifndef UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOVTLAD_H_
+#define UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOVTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -16,8 +16,8 @@
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/rttov/ObsRadianceRTTOVParameters.h"
-#include "ufo/operators/rttov/ObsRadianceRTTOVTLAD.interface.h"
+#include "ufo/operators/rttov/Fortran/ObsRadianceRTTOVParameters.h"
+#include "ufo/operators/rttov/Fortran/ObsRadianceRTTOVTLAD.interface.h"
 
 // Forward declarations
 namespace ioda {
@@ -61,4 +61,4 @@ class ObsRadianceRTTOVTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_RTTOV_OBSRADIANCERTTOVTLAD_H_
+#endif  // UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOVTLAD_H_

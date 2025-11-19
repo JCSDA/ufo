@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_RTTOVCPP_RTTOVCPP_INTERFACE_H_
-#define UFO_OPERATORS_RTTOVCPP_RTTOVCPP_INTERFACE_H_
+#ifndef UFO_OPERATORS_RTTOV_CPP_V12_RTTOVCPP_INTERFACE_H_
+#define UFO_OPERATORS_RTTOV_CPP_V12_RTTOVCPP_INTERFACE_H_
 
 #include <string>
 #include <vector>
@@ -46,4 +46,4 @@ void rttovcpp_interface(const GeoVaLs &, const ioda::ObsSpace & odb_,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_RTTOVCPP_RTTOVCPP_INTERFACE_H_
+#endif  // UFO_OPERATORS_RTTOV_CPP_V12_RTTOVCPP_INTERFACE_H_

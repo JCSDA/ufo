@@ -5,15 +5,15 @@
 
 set ( rttovcpp_files
     ObsRadianceRTTOVCPP.h
-    ObsRadianceRTTOVCPP.cc
+    v12/ObsRadianceRTTOVCPP.cc
     ObsRadianceRTTOVCPPParameters.h
     ObsRadianceRTTOVCPPTLAD.h
-    ObsRadianceRTTOVCPPTLAD.cc
-    rttovcpp_interface.h
-    rttovcpp_interface.cc
+    v12/ObsRadianceRTTOVCPPTLAD.cc
+    v12/rttovcpp_interface.h
+    v12/rttovcpp_interface.cc
 )
 
-PREPEND( _p_rttovcpp_files       "operators/rttovcpp"       ${rttovcpp_files} )
+PREPEND( _p_rttovcpp_files       "operators/rttov/CPP"       ${rttovcpp_files} )
 
 set ( rttovcpp_src_files
       ${_p_rttovcpp_files}

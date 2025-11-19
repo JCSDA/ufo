@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_RTTOV_OBSRADIANCERTTOV_INTERFACE_H_
-#define UFO_OPERATORS_RTTOV_OBSRADIANCERTTOV_INTERFACE_H_
+#ifndef UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOV_INTERFACE_H_
+#define UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOV_INTERFACE_H_
 
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -37,4 +37,4 @@ extern "C" {
 }  // extern C
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_RTTOV_OBSRADIANCERTTOV_INTERFACE_H_
+#endif  // UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOV_INTERFACE_H_

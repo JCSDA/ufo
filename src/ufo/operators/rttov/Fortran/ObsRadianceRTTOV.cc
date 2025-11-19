@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#include "ufo/operators/rttov/ObsRadianceRTTOV.h"
+#include "ufo/operators/rttov/Fortran/ObsRadianceRTTOV.h"
 
 #include <ostream>
 #include <set>

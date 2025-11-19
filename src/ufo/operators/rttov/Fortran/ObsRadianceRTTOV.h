@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
  */
 
-#ifndef UFO_OPERATORS_RTTOV_OBSRADIANCERTTOV_H_
-#define UFO_OPERATORS_RTTOV_OBSRADIANCERTTOV_H_
+#ifndef UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOV_H_
+#define UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOV_H_
 
 #include <ostream>
 #include <string>
@@ -17,8 +17,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/operators/rttov/ObsRadianceRTTOV.interface.h"
-#include "ufo/operators/rttov/ObsRadianceRTTOVParameters.h"
+#include "ufo/operators/rttov/Fortran/ObsRadianceRTTOV.interface.h"
+#include "ufo/operators/rttov/Fortran/ObsRadianceRTTOVParameters.h"
 
 namespace ioda {
   class ObsSpace;
@@ -62,4 +62,4 @@ class ObsRadianceRTTOV : public ObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_RTTOV_OBSRADIANCERTTOV_H_
+#endif  // UFO_OPERATORS_RTTOV_FORTRAN_OBSRADIANCERTTOV_H_

@@ -13,13 +13,13 @@ set ( rttov_files
     ObsRadianceRTTOVTLAD.interface.F90
     ObsRadianceRTTOVTLAD.interface.h
     ObsRadianceRTTOVParameters.h
-    ufo_radiancerttov_mod.F90
-    ufo_reconradop_mod.F90
-    ufo_radiancerttov_tlad_mod.F90
-    ufo_radiancerttov_utils_mod.F90
+    v12/ufo_radiancerttov_mod.F90
+    v12/ufo_reconradop_mod.F90
+    v12/ufo_radiancerttov_tlad_mod.F90
+    v12/ufo_radiancerttov_utils_mod.F90
 )
 
-PREPEND( _p_rttov_files       "operators/rttov"       ${rttov_files} )
+PREPEND( _p_rttov_files       "operators/rttov/Fortran/"       ${rttov_files} )
 
 set ( rttov_src_files
       ${_p_rttov_files}

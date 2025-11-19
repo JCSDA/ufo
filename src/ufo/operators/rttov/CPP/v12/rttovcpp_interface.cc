@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/operators/rttovcpp/rttovcpp_interface.h"
+#include "ufo/operators/rttov/CPP/v12/rttovcpp_interface.h"
 
 #include <ostream>
 #include <string>

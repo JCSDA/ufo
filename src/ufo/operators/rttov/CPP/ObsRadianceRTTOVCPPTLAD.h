@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef UFO_OPERATORS_RTTOVCPP_OBSRADIANCERTTOVCPPTLAD_H_
-#define UFO_OPERATORS_RTTOVCPP_OBSRADIANCERTTOVCPPTLAD_H_
+#ifndef UFO_OPERATORS_RTTOV_CPP_OBSRADIANCERTTOVCPPTLAD_H_
+#define UFO_OPERATORS_RTTOV_CPP_OBSRADIANCERTTOVCPPTLAD_H_
 
 #include <ostream>
 #include <string>
@@ -17,7 +17,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/LinearObsOperatorBase.h"
-#include "ufo/operators/rttovcpp/ObsRadianceRTTOVCPPParameters.h"
+#include "ufo/operators/rttov/CPP/ObsRadianceRTTOVCPPParameters.h"
 
 #include "rttov/wrapper/RttovSafe.h"
 
@@ -71,4 +71,4 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
 // -----------------------------------------------------------------------------
 
 }  // namespace ufo
-#endif  // UFO_OPERATORS_RTTOVCPP_OBSRADIANCERTTOVCPPTLAD_H_
+#endif  // UFO_OPERATORS_RTTOV_CPP_OBSRADIANCERTTOVCPPTLAD_H_

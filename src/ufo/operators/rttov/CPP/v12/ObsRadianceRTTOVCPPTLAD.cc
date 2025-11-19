@@ -20,8 +20,8 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
-#include "ufo/operators/rttovcpp/ObsRadianceRTTOVCPPTLAD.h"
-#include "ufo/operators/rttovcpp/rttovcpp_interface.h"
+#include "ufo/operators/rttov/CPP/ObsRadianceRTTOVCPPTLAD.h"
+#include "ufo/operators/rttov/CPP/v12/rttovcpp_interface.h"
 
 namespace ufo {
 
