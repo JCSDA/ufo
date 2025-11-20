@@ -51,6 +51,7 @@ add_subdirectory( operators/timeoper )
 add_subdirectory( operators/vertinterp )
 add_subdirectory( operators/lightning )
 add_subdirectory( operators/windspeed )
+add_subdirectory( operators/pathsum )
 
 
 # Base files
@@ -152,6 +153,7 @@ list( APPEND ufo_src_files
     ${superob_src_files}
     ${windspeed_src_files}
     ${densityreduction_src_files}
+    ${pathsum_src_files}
 )
 
 ## Create Library target
