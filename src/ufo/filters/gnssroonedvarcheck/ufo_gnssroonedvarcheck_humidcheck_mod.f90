@@ -25,7 +25,7 @@ SUBROUTINE Ops_GPSRO_humidcheck (nstate, &
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav,                    &    ! Gravitational field strength
-    c_virtual                     ! Related to mw_ratio
+    c_virtual                     ! Related to gas_constant
 
 USE ufo_utils_mod, ONLY: &
     Ops_Qsat,            &

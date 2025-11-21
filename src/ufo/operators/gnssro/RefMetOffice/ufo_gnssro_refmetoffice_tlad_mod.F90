@@ -23,7 +23,7 @@ use ufo_utils_refractivity_calculator, only: &
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav,                    &    ! Gravitational field strength
-    mw_ratio,                &    ! Ratio of molecular weights of water and dry air
+    rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
 use gnssro_mod_transform, only: geometric2geop
@@ -630,12 +630,12 @@ DO n = 1, nobs
 
     ! Calculate refractivity
     Ndry = n_alpha * P_ob / T_ob
-    Nwet = n_beta * P_ob * q_ob / (T_ob ** 2 * (mw_ratio + (1.0 - mw_ratio) * q_ob))
+    Nwet = n_beta * P_ob * q_ob / (T_ob ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_ob))
     Nref(n) = Ndry + Nwet
 
     drefob_dPob(n,n) = Nref(n) / P_ob
     drefob_dTob(n,n) = -(Ndry + 2.0 * Nwet) / T_ob
-    drefob_dqob(n,n) = n_beta * p_ob * mw_ratio / (T_ob * (mw_ratio + (1.0 - mw_ratio) * q_ob)) ** 2
+    drefob_dqob(n,n) = n_beta * p_ob * rd_over_rv / (T_ob * (rd_over_rv + (1.0 - rd_over_rv) * q_ob)) ** 2
 
   ELSE
 

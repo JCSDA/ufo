@@ -50,12 +50,12 @@ subroutine gsi_tp_to_qs( t, p, es, qs)
    real(kind_real) :: omeps
    real(kind_real) :: t_c  ! T in degreesC.
 
-   omeps = 1.0_kind_real - rd_over_rv
+   omeps = 1.0_kind_real - (rd_over_rv)
    t_c = t - t0c
 
    es = es_w_0 * exp( es_beta * t_c / ( t_c + es_gamma ) )
 
-   qs = rd_over_rv * es / ( p - omeps * es )
+   qs = (rd_over_rv) * es / ( p - omeps * es )
 
    return
 end subroutine gsi_tp_to_qs

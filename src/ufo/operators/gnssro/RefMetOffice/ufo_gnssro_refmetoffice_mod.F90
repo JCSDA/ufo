@@ -20,8 +20,8 @@ use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
 use fckit_log_module,  only : fckit_log
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
+    rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
     grav,                    &    ! Gravitational field strength
-    mw_ratio,                &    ! Ratio of molecular weights of water and dry air
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
 use gnssro_mod_transform, only: geometric2geop
@@ -386,7 +386,7 @@ DO iObs = 1, nobs
       ! Calculate refractivity
 
       ycalc(iObs) = n_alpha * P_ob / T_ob + n_beta * P_ob * humidity_ob / (T_ob ** 2 * &
-                (mw_ratio + (1.0 - mw_ratio) * humidity_ob))
+                (rd_over_rv + (1.0 - rd_over_rv) * humidity_ob))
     END IF
 
   ELSE

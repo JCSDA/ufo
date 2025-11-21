@@ -97,8 +97,8 @@ contains
            gesTv0 = t%vals(wi,iobs)*(one + (rv_over_rd-one) * (q%vals(wi,iobs)/(1-q%vals(wi,iobs)) ))
            gesP   = prs%vals(wi,iobs)/exp(two*grav*(obsH-gph%vals(wi,iobs))/(rd*(gesTv+gesTv0)))
            refr1  = n_a*gesP/gesT
-           refr2  = n_b*gesP*gesQ/ ( gesT**2 * (rd_over_rv+(1-rd_over_rv)*gesQ) )
-           refr3  = n_c*gesP*gesQ/ ( gesT    * (rd_over_rv+(1-rd_over_rv)*gesQ) )
+           refr2  = n_b*gesP*gesQ/ ( gesT**2 * ((rd_over_rv)+(1-(rd_over_rv))*gesQ) )
+           refr3  = n_c*gesP*gesQ/ ( gesT    * ((rd_over_rv)+(1-(rd_over_rv))*gesQ) )
            hofx(iobs)  = refr1 + refr2 + refr3
       enddo
 

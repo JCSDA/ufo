@@ -192,8 +192,8 @@ float Qsat_From_Psat(float Psat, float P, Formulation formulation) {
 
   switch (formulation) {
     case Formulation::GillUKMO:
-      QSat = (Constants::epsilon * Psat) /
-             (std::max(P, Psat) - (1.0f - Constants::epsilon) * Psat);
+      QSat = (Constants::rd_over_rv * Psat) /
+             (std::max(P, Psat) - (1.0f - Constants::rd_over_rv) * Psat);
       break;
     default: {
       std::string errString =
@@ -213,7 +213,7 @@ float VirtualTemp_From_Psat_P_T(float Psat, float P, float T, Formulation formul
 
   switch (formulation) {
     case Formulation::DEFAULT: {
-      Tv = T * ((P + Psat / Constants::epsilon) / (P + Psat));
+      Tv = T * ((P + Psat / Constants::rd_over_rv) / (P + Psat));
       break;
     }
     default: {

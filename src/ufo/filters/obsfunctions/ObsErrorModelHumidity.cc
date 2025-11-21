@@ -218,7 +218,7 @@ void ObsErrorModelHumidity::compute(const ObsFilterData & data,
     satVaporPres = formulas::SatVaporPres_fromTemp(temp, formulation);
 
     // Convert saturated vapor pressure to saturation specific humidity
-    satSpecificHumidity = Constants::epsilon * satVaporPres / ob_pressure[jobs];
+    satSpecificHumidity = Constants::rd_over_rv * satVaporPres / ob_pressure[jobs];
 
     // Output error is the product of interpolated RH error and forecast
     // saturation specific humidity

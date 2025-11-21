@@ -75,7 +75,7 @@ real(kind_real) :: refr1,refr2,refr3, tfact
 ! constants needed to compute refractivity
   call gnssro_ref_constants(use_compress)
 
-  tfact = (1-rd_over_rv)*specH+rd_over_rv
+  tfact = (1-(rd_over_rv))*specH+(rd_over_rv)
   refr1 = n_a*pressure/temperature
   refr2 = n_b*specH*pressure/(temperature**2*tfact)
   refr3 = n_c*specH*pressure/(temperature*tfact)

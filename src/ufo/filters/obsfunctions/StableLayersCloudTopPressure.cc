@@ -419,12 +419,13 @@ double StableLayersCloudTopPressure::computeSALR(const double p, const double t)
                                   ((1.0 / Constants::t0c) - (1.0 / t)));
 
     // Calculate the saturation mixing ratio.
-    const double rs = (Constants::epsilon * es) / (p - es);
+    const double rs = (Constants::rd_over_rv * es) / (p - es);
 
     // Calculate the saturated adiabatic lapse rate.
     const double numerator = (Constants::rd * t) / (Constants::cp) +
                                       (Constants::L_c * rs) / (Constants::cp);
-    const double denominator = p * (1.0 + (std::pow(Constants::L_c, 2) * rs * Constants::epsilon) /
+    const double denominator = p * (1.0 + (std::pow(Constants::L_c, 2) *
+                         rs * Constants::rd_over_rv) /
                         (Constants::cp * Constants::rd * std::pow(t, 2)));
     return numerator / denominator;
 }

@@ -18,7 +18,7 @@ observations:
 #      obsfile: Data/gnssro_obs_2018041500_s_refncep_opr_out.nc4
   geovals:
    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2018041500_s.nc4
-  rms ref: 128.48077739761979
+  rms ref: 128.48111309077711
   tolerance: 1.0e-13
   linear obs operator test:
     coef TL:  1.0e-6

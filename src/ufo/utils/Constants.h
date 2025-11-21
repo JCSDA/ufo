@@ -20,8 +20,8 @@ namespace ufo {
 struct Constants {
   static constexpr double deg2rad        = M_PI / 180.;
   static constexpr double rad2deg        = 180. * M_1_PI;
-  static constexpr double grav           = 9.80665e+0;
-  static constexpr double speedOfLight   = 299792458;     // m / s
+  static constexpr double grav           = 9.80665e+0;   // Gravity m / s^2
+  static constexpr double speedOfLight   = 299792458;    // m / s
   static constexpr double t0c            = 2.7315e+2;    // temperature at zero celsius (K)
   static constexpr double ttp            = 2.7316e+2;    // temperature at h2o triple point (K)
   static constexpr double rd             = 2.8705e2;     // specific gas constant for dry air
@@ -32,17 +32,17 @@ struct Constants {
                                                          // for dry air (J K^-1 kg^-1)
   static constexpr double cv             = 7.1760e2;     // heat capacity at constant volume
                                                          // for dry air (J K^-1 kg^-1)
-  static constexpr double rspec          = cp - cv;      // specific gas constant for dry air
-  static constexpr double rspec_over_cp  = rspec/cp;
   static constexpr double pref           = 1.0e5;        // Reference pressure for calculating
                                                          //      exner
-  static constexpr double rd_over_rv     = rd/rv;
+  static constexpr double rd_over_rv     = 0.62198;
+          // ratio of molecular weight of water (18.01528 g/mol) to dry air (28.9645 g/mol)
+          // Often called "epsilon" or "gas constant ratio"
   static constexpr double rd_over_cp     = rd/cp;
   static constexpr double cv_over_cp     = cv/cp;
   static constexpr double rv_over_rd     = rv/rd;
   static constexpr double rd_over_g      = rd/grav;
   static constexpr double g_over_rd      = grav / rd;
-  static constexpr double mean_earth_rad = 6371.0;
+  static constexpr double mean_earth_rad = 6371.0;       // Mean radius of the Earth (km)
   static constexpr double zero           = 0.0;
   static constexpr double quarter        = 0.25;
   static constexpr double half           = 0.5;
@@ -51,31 +51,31 @@ struct Constants {
   static constexpr double four           = 4.0;
   static constexpr double five           = 5.0;
   static constexpr double ten            = 10.0;
-  static constexpr double k_t            = 0.65;         // Thermal conductivity of water
+  static constexpr double k_t            = 0.65;         // Thermal conductivity of water at 20degC
+                                                         // (W m^-1 K^-1)
   static constexpr double L_e            = 2.26e+06;     // Latent heat of vaporization at 373.15K
                                                          // (J kg^-1)
   static constexpr double L_c            = 2.5e+06;      // Latent heat of condensation at 273.15K
                                                          // (J kg^-1)
   static constexpr double eps            = 0.1;          // Albedo of sea water
-  static constexpr double sig            = 5.67e-6;      // Stefan-Boltzmann constant
+  static constexpr double Stefan_Boltzmann_const = 5.67e-8;
+                                                         // Stefan-Boltzmann constant (W m^-2 K^-4)
   static constexpr double alpha          = 2.7e-4;       // Water thermal expansion coefficient
-  static constexpr double cw             = 0.015;        // Water specific heat
-  static constexpr double v_w            = 0.8e-6;       // Water kinematic viscosity
-  static constexpr double S_B            = 0.026;
-  static constexpr double gr             = 9.81;
+                                                         // (K^1)
+  static constexpr double cw             = 0.015;        // Water specific heat (cal g^-1 degC^-1)
+    // Water specific heat = 4184.0  (J kg^-1 K^-1) need to fix this
+  static constexpr double v_w            = 0.8e-6;       // Water kinematic viscosity (m^2/s)
   static constexpr double Rou            = 1000.0;
   static constexpr double DU             = 21.4e-6;      // Dobson unit, kg O3/m**2
-  static constexpr double Lclr           = 0.0065;       // constant lapse rate
-  static constexpr double t2tv           = 0.608;        // constant lapse rate
-  static constexpr double von_karman     = 0.41;         // Von Karman Constant
+  static constexpr double Lclr           = 0.0065;       // constant dry adiabatic lapse rate (K/m)
+  static constexpr double t2tv           = 0.608;        // constant moist adiabatic lapse rate
+                                                         // (degC/km)
   static constexpr double es_w_0         = 611.2;        // saturation vapor pressure of water at
                                                          // 0degC (Pa)
   static constexpr double euzc_0         = 34.0;         // constant for estimating euphotic layer
   static constexpr double euzc_1         = -0.39;        // constant for estimating euphotic layer
-  static constexpr double epsilon        = 0.62198;      // Ratio of molecular weight of
-                                                         //       water and dry air
-  static constexpr double trop_lapse_rate   = 0.002;   // Lapse rate of tropopause (K/m)
-                                                       // according to WMO definition
+  static constexpr double trop_lapse_rate   = 0.002;     // Lapse rate of tropopause (K/m)
+                                                         // according to WMO definition
 
   // International Civil Aviation Organization (ICAO) atmosphere.
   // https://en.wikipedia.org/wiki/International_Standard_Atmosphere#ICAO_Standard_Atmosphere
@@ -107,7 +107,7 @@ struct Constants {
   static constexpr double grav_polar        = 9.8321849378;    // [m/s2]
   static constexpr double grav_equator      = 9.7803253359;    // [m/s2]
   static constexpr double earth_omega       = 7.292115e-5;     // [rad/s]
-  static constexpr double grav_constant     = 3.986004418e14;
+  static constexpr double grav_constant     = 3.986004418e14;  // [m3/s2]
   static constexpr double flattening   = (semi_major_axis - semi_minor_axis) / semi_major_axis;
   static constexpr double somigliana   = (semi_minor_axis / semi_major_axis) *
                                          (grav_polar / grav_equator) - 1.0;

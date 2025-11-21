@@ -22,10 +22,10 @@ use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     cp,                      &    ! Heat capacity at constant pressure for air
     rd_over_cp,              &    ! Ratio of gas constant to heat capacity
+    rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
     pref,                    &    ! Reference pressure for calculating exner
     grav,                    &    ! Gravitational field strength
-    mw_ratio,                &    ! Ratio of molecular weights of water and dry air
-    c_virtual,               &    ! Related to mw_ratio
+    c_virtual,               &    ! Related to gas-constant
     n_alpha,                 &    ! Refractivity constant a
     n_beta                        ! Refractivity constant b
 use kinds,            only: kind_real
@@ -193,7 +193,7 @@ IF (.NOT. refracerr) THEN
     T_local(i) = T_virtual / (1.0 + C_virtual * q(i))
 
     ! Wet component
-    Nwet = n_beta * Pb(i) * q(i) / (T_local(i) ** 2 * (mw_ratio + (1.0 - mw_ratio) * q(i)))
+    Nwet = n_beta * Pb(i) * q(i) / (T_local(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q(i)))
 
     Ndry = n_alpha * Pb(i) / T_local(i)
 
@@ -248,7 +248,7 @@ IF (.NOT. refracerr) THEN
     END DO
 
     refractivity = n_alpha * P_pseudo / T_pseudo + n_beta * P_pseudo * q_pseudo / &
-               (T_pseudo ** 2 * (mw_ratio + (1.0 - mw_ratio) * q_pseudo))
+               (T_pseudo ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_pseudo))
   ELSE
     refractivity = refracModel
     model_heights = zb
@@ -468,7 +468,7 @@ IF (pseudo_ops) THEN
       T_pseudo(i) = T(counter)
       IF (PRESENT(refractivity)) refractivity(i) = n_alpha * P_pseudo(i) / T_pseudo(i) + &
           n_beta * P_pseudo(i) * q_pseudo(i) / &
-          (T_pseudo(i) ** 2 * (mw_ratio + (1.0 - mw_ratio) * q_pseudo(i)))
+          (T_pseudo(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_pseudo(i)))
 
       dref_dPpseudo(i,i) = dref_dPb(counter,counter)
       dref_dTpseudo(i,i) = dref_dT(counter,counter)
@@ -505,14 +505,14 @@ IF (pseudo_ops) THEN
 
       Ndry = n_alpha * P_pseudo(i) / T_pseudo(i)
       Nwet = n_beta * P_pseudo(i) * q_pseudo(i) / (T_pseudo(i) ** 2 &
-                    *(mw_ratio + (1.0 - mw_ratio) * q_pseudo(i)))
+                    *(rd_over_rv + (1.0 - rd_over_rv) * q_pseudo(i)))
 
       IF (PRESENT(refractivity)) refractivity(i) = Ndry + Nwet
 
       dref_dPpseudo(i,i) = (Ndry + Nwet) / P_pseudo(i)
       dref_dTpseudo(i,i) = -(Ndry + 2.0 * Nwet) / T_pseudo(i)
-      dref_dqpseudo(i,i) = n_beta * P_pseudo(i) * mw_ratio / (T_pseudo(i) * (mw_ratio + &
-                           (1.0 - mw_ratio) * q_pseudo(i))) ** 2
+      dref_dqpseudo(i,i) = n_beta * P_pseudo(i) * rd_over_rv / (T_pseudo(i) * (rd_over_rv + &
+                           (1.0 - rd_over_rv) * q_pseudo(i))) ** 2
 
       ! Transform P, q and T to pseudo-levels
       IF (MIN (q(counter - 1), q(counter)) > 0.0) THEN
@@ -776,9 +776,9 @@ DO i = 1, nlevq
 
   ! wet component
 
-  Nwet = n_beta * Pb(i) * q(i) / (T(i) ** 2 * (mw_ratio + (1.0 - mw_ratio) * q(i)))
+  Nwet = n_beta * Pb(i) * q(i) / (T(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q(i)))
 
-  dref_dq(i,i) = n_beta * Pb(i) * mw_ratio / (T(i) * (mw_ratio + (1.0 - mw_ratio) * q(i))) ** 2
+  dref_dq(i,i) = n_beta * Pb(i) * rd_over_rv / (T(i) * (rd_over_rv + (1.0 - rd_over_rv) * q(i))) ** 2
 
   Ndry = n_alpha * Pb(i) / T(i)
 

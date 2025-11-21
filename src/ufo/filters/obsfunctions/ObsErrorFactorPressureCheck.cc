@@ -378,7 +378,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
                   satVaporPres = formulas::SatVaporPres_fromTemp(temp, formulation);
 
 // Convert saturated vapor pressure to saturation specific humidity
-                  satSpecificHumidity = Constants::epsilon * satVaporPres / obs_pressure[iloc];
+                  satSpecificHumidity = Constants::rd_over_rv * satVaporPres / obs_pressure[iloc];
                   qs_profile[k] = satSpecificHumidity;
                 }
               }

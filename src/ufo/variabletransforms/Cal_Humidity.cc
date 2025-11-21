@@ -406,7 +406,7 @@ void Cal_RelativeHumidity::methodDEFAULT(
       esat = std::min(pressure[jobs]*0.15f, satVaporPres);
 
       // Convert sat. vapor pressure to sat water vapor mixing ratio
-      qvs = 0.622 * esat/(pressure[jobs]-esat);
+      qvs = Constants::rd_over_rv * esat/(pressure[jobs]-esat);
 
       // Convert specific humidity to water vapor mixing ratio
       qv = std::max(1.0e-12f, specificHumidity[jobs]/(1.0f-specificHumidity[jobs]));
@@ -617,7 +617,7 @@ void Cal_SpecificHumidity::methodDEFAULT(
         satVaporPres = formulas::SatVaporPres_fromTemp(
             dewPointTemperature[jobs], SatVaporPres_fromTemp_form);
         esat = std::min(pressure[jobs]*0.15f, satVaporPres);
-        qv = 0.622 * esat/(pressure[jobs]-esat);
+        qv = Constants::rd_over_rv * esat/(pressure[jobs]-esat);
         specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
       }
     }
@@ -628,7 +628,7 @@ void Cal_SpecificHumidity::methodDEFAULT(
         satVaporPres = formulas::SatVaporPres_fromTemp(
             airTemperature[jobs], SatVaporPres_fromTemp_form);
         esat = std::min(pressure[jobs]*0.15f, satVaporPres);
-        qvs = 0.622 * esat/(pressure[jobs]-esat);
+        qvs = Constants::rd_over_rv * esat/(pressure[jobs]-esat);
         qv = std::max(1.0e-12f, relativeHumidity[jobs]*qvs);
         specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
       }

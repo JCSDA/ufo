@@ -109,16 +109,16 @@ subroutine ufo_gnssro_refncep_tlad_settraj(self, geovals, obss)
     gesP = prs%vals(wi0,iobs)/exp(two*grav*(obsH-gph%vals(wi0,iobs))/(rd*(Tv+Tv0)))
 
     self%jac_t(iobs)   = - n_a*gesP/gesT**2                                                 &
-                         - n_b*two*gesP*gesQ/( ((1-rd_over_rv)*gesQ+rd_over_rv)*gesT**3  )  &
-                         - n_c*gesP*gesQ/( ((1-rd_over_rv)*gesQ+rd_over_rv)*gesT**2 )
+                         - n_b*two*gesP*gesQ/( ((1-(rd_over_rv))*gesQ+(rd_over_rv))*gesT**3  )  &
+                         - n_c*gesP*gesQ/( ((1-(rd_over_rv))*gesQ+(rd_over_rv))*gesT**2 )
 
-    self%jac_q(iobs)   =   n_b*gesP/( gesT**2*( (1-rd_over_rv)*gesQ+rd_over_rv)**2 )         &
-                                   * rd_over_rv                                              &
-                         + n_c*gesP/( gesT   *( (1-rd_over_rv)*gesQ+rd_over_rv)**2 )         &
-                                   * rd_over_rv
+    self%jac_q(iobs)   =   n_b*gesP/( gesT**2*( (1-(rd_over_rv))*gesQ+(rd_over_rv))**2 )         &
+                                   * (rd_over_rv)                                              &
+                         + n_c*gesP/( gesT   *( (1-(rd_over_rv))*gesQ+(rd_over_rv))**2 )         &
+                                   * (rd_over_rv)
     self%jac_prs(iobs) =   n_a/gesT                                                 &
-                         + n_b*gesQ/ ( ((1-rd_over_rv)*gesQ+rd_over_rv)*gesT**2 )   &
-                         + n_c*gesQ/ ( ((1-rd_over_rv)*gesQ+rd_over_rv)*gesT )
+                         + n_b*gesQ/ ( ((1-(rd_over_rv))*gesQ+(rd_over_rv))*gesT**2 )   &
+                         + n_c*gesQ/ ( ((1-(rd_over_rv))*gesQ+(rd_over_rv))*gesT )
 
   enddo
 

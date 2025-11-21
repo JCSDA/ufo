@@ -12,7 +12,7 @@ module ufo_utils_mod
 use fckit_log_module, only : fckit_log
 use kinds, only: kind_real
 use ufo_constants_mod, only : zero, half, one, two, &
-                              t0c, zerodegc, min_q, epsilon
+                              t0c, zerodegc, min_q, rd_over_rv
 
 implicit none
 private
@@ -68,7 +68,7 @@ real(kind=kind_real), intent(in)    :: P(npnts)  !< Pressure (Pa).
 real(kind=kind_real), intent(inout) :: QS(npnts) !< Saturation mixing ratio (KG/KG)
 
 ! Local declarations:
-real(kind=kind_real), parameter :: one_minus_epsilon = one - epsilon
+real(kind=kind_real), parameter :: one_minus_epsilon = one - rd_over_rv
 real(kind=kind_real), parameter :: T_low = 183.15_kind_real  ! Lowest temperature for which look-up table is valid
 real(kind=kind_real), parameter :: T_high = 338.15_kind_real  ! Highest temperature for which look-up table is valid
 real(kind=kind_real), parameter :: delta_T = 0.1_kind_real    ! Temperature increment of look-up table
@@ -448,7 +448,7 @@ do I = 1, npnts
   ! Note that at very low pressures we apply a fix, to prevent a
   ! singularity (Qsat tends to 1.0 kg/kg).
 
-  QS(I) = (epsilon * QS(I)) / (max (P(I), QS(I)) - one_minus_epsilon * QS(I))
+  QS(I) = (rd_over_rv * QS(I)) / (max (P(I), QS(I)) - one_minus_epsilon * QS(I))
 
 end do
 
@@ -496,7 +496,7 @@ real(kind=kind_real)        :: P(npnts)  ! Pressure (Pa).
 real(kind=kind_real)        :: QS(npnts) ! Saturation mixing ratio at temperature T and pressure P (KG/KG)
 
 ! Local declarations:
-real(kind=kind_real), parameter :: one_minus_epsilon = one - epsilon
+real(kind=kind_real), parameter :: one_minus_epsilon = one - rd_over_rv
 real(kind=kind_real), parameter :: T_low = 183.15_kind_real
 real(kind=kind_real), parameter :: T_high = 338.15_kind_real
 real(kind=kind_real), parameter :: delta_T = 0.1_kind_real
@@ -876,7 +876,7 @@ do I = 1, npnts
   ! Note that at very low pressures we apply a fix, to prevent a singularity
   ! (Qsat tends to 1.0 kg/kg)
 
-  QS(I) = (epsilon * QS(I)) / (max (P(I), QS(I)) - one_minus_epsilon * QS(I))
+  QS(I) = (rd_over_rv * QS(I)) / (max (P(I), QS(I)) - one_minus_epsilon * QS(I))
 
 end do
 

@@ -312,9 +312,9 @@ if (nlocs > 0 ) then
 
 !       jacobian for refractivity(N)
         fv    = rv_over_rd-one
-        pw    = rd_over_rv+gesQ(k,iobs)*(one-rd_over_rv)
-        q_coef =  n_b *gesP(k,iobs)/(gesT(k,iobs)**2*pw**2)*rd_over_rv + &
-                  n_c *gesP(k,iobs)/(gesT(k,iobs)*  pw**2)*rd_over_rv
+        pw    = (rd_over_rv)+gesQ(k,iobs)*(one-(rd_over_rv))
+        q_coef =  n_b *gesP(k,iobs)/(gesT(k,iobs)**2*pw**2)*(rd_over_rv) + &
+                  n_c *gesP(k,iobs)/(gesT(k,iobs)*  pw**2)*(rd_over_rv)
         p_coef =  n_a/gesT(k,iobs)   + &
                   n_b*gesQ(k,iobs)/(gesT(k,iobs)**2*pw) + &
                   n_c*gesQ(k,iobs)/(gesT(k,iobs)*pw)
