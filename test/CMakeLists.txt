@@ -108,6 +108,7 @@ foreach(obs_file ${OBS_FILES})
   ecbuild_add_test(
     TARGET "ufo_data_validate_${obs_name}"
     COMMAND ioda-validate.x
+    DEPENDS ioda-validate.x
     LABELS ufo_data_validate
     ENVIRONMENT "ECKIT_COLOUR_OUTPUT=1"
     ARGS
