@@ -224,6 +224,21 @@ float VirtualTemp_From_Rh_Psat_P_T(float Rh, float Psat, float P, float T,
 
 // -------------------------------------------------------------------------------------
 /*!
+* \brief Derive Virtual Temperature using Specific Humidity, and air temperature.
+* Formula used here is from variabletransforms, cal_VirtualTemperature method
+* in the UFO code base.
+*
+* \param Sh
+*     Specific humidity
+* \param AT
+*     Air Temperature
+*
+* \return Virtual Temperature
+*/
+float VirtualTemp_From_Sh_AT(float Sh, float At);
+
+// -------------------------------------------------------------------------------------
+/*!
 * \brief Converts height to pressure using the International Civil Aviation Organization
 * (ICAO) atmosphere.
 *

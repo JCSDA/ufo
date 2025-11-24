@@ -51,6 +51,94 @@ observations:
   tolerance: 1.e-08
 - obs operator:
     name: SfcCorrected
+    correction scheme to use: WRFDA
+  obs space:
+    name: Surface operator station pressure WRFDA method with no obs virtual temperature
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_novt.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_novt_WRFDA_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98240.77327572
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: WRFDA
+  obs space:
+    name: Surface operator station pressure WRFDA method with obs air temperature
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_airT.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_airT_WRFDA_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98240.77327572
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: WRFDA
+  obs space:
+    name: Surface operator station pressure WRFDA method with no obs, geoval used
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_noT.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_modelT_WRFDA_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98240.77327572
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: WRFDA
+  obs space:
+    name: Surface operator station pressure WRFDA method virtualTemp is calculated
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_calVT.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_VT_WRFDA_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 98240.77327572
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcCorrected
     correction scheme to use: UKMO
   obs space:
     name: Surface operator station pressure UKMO method
@@ -111,6 +199,28 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
   rms ref: 99633.58066186
+  tolerance: 1.e-08
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+  obs space:
+    name: Surface operator station pressure GSL method with no obs virtual temperature
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_novt.nc4
+ #   obsdataout:
+ #     engine:
+ #       type: H5File
+ #       obsfile: Data/sfc_2018041500_novt_GSL_out.nc4
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ps_geovals_2018041500_0000.nc4
+  rms ref: 99634.1699
   tolerance: 1.e-08
   linear obs operator test:
     coef TL: 0.1

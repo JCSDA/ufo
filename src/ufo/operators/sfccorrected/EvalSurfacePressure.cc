@@ -134,6 +134,48 @@ void stationPressure_WRFDA::AD() const {
 }
 
 // --------------------------------------------------------------------------------
+void stationPressure_WRFDA::getTemperatureValues(const size_t nobs,
+                                                  const int surface_level_index,
+                                                  const ufo::GeoVaLs & gv,
+                                                  const ioda::ObsSpace & obsdb,
+                                                  std::vector<float> & modelVirtualTemp,
+                                                  std::vector<float> & obsVirtualTemp) const {
+  gv.getAtLevel(modelVirtualTemp, oops::Variable("virtual_temperature"), surface_level_index);
+  if (obsdb.has("ObsValue", "virtualTemperature")) {
+    obsdb.get_db("ObsValue", "virtualTemperature", obsVirtualTemp);
+  } else {
+    // If virtual temperature is not available, calculate from air temperature
+    obsVirtualTemp.assign(nobs, util::missingValue<float>());
+    if (obsdb.has("ObsValue", "airTemperature")) {
+       std::vector<float> obsAirTemp(nobs, util::missingValue<float>());
+       obsdb.get_db("ObsValue", "airTemperature", obsAirTemp);
+       if (obsdb.has("ObsValue", "specificHumidity")) {
+          std::vector<float> obsHumidity(nobs, util::missingValue<float>());
+          obsdb.get_db("ObsValue", "specificHumidity", obsHumidity);
+          // Calculate virtual temperature from air temperature and specific humidity
+          for (size_t iloc = 0; iloc < nobs; ++iloc) {
+             if (obsHumidity[iloc] != util::missingValue<float>() &&
+                          obsAirTemp[iloc] != util::missingValue<float>()) {
+                  obsVirtualTemp[iloc] = formulas::VirtualTemp_From_Sh_AT(obsHumidity[iloc],
+                          obsAirTemp[iloc]);
+             }
+          }
+        } else {   // specific humidity is not available, use air temperature as virtual temperature
+          for (size_t iloc = 0; iloc < nobs; ++iloc) {
+             obsVirtualTemp[iloc] = obsAirTemp[iloc];
+          }
+        }
+    } else {   // Neither virtual temperature nor air temperature is available
+       oops::Log::warning()  << "stationPressure_WRFDA::getDataValues virtualTemperature and "
+            << "airTemperature not found, set to model virtualTemperature" << std::endl;
+       for (size_t iloc = 0; iloc < nobs; ++iloc) {
+          obsVirtualTemp[iloc] = modelVirtualTemp[iloc];
+       }
+    }
+  }
+}
+
+// --------------------------------------------------------------------------------
 void stationPressure_WRFDA::getDataValues(const ufo::GeoVaLs & gv,
                                           const ioda::ObsSpace & obsdb,
                                           const Parameters_ & params_,
@@ -152,7 +194,6 @@ void stationPressure_WRFDA::getDataValues(const ufo::GeoVaLs & gv,
   obsdb.get_db("MetaData", "stationElevation", obsHeight);
   obsdb.get_db("MetaData", "latitude", obsLats);
   obsdb.get_db("ObsValue", "stationPressure", obsPressure);
-  obsdb.get_db("ObsValue", "virtualTemperature", obsVirtualTemp);
 
   // Get level 1 height.  If geopotential then convert to geometric height.
   gv.getAtLevel(modelHeightLevel1, geomz_var, surface_level_index);
@@ -180,7 +221,8 @@ void stationPressure_WRFDA::getDataValues(const ufo::GeoVaLs & gv,
     }
   }
   gv.get(modelPressureSurface, oops::Variable("air_pressure_at_surface"));
-  gv.getAtLevel(modelVirtualTemp, oops::Variable("virtual_temperature"), surface_level_index);
+  this->getTemperatureValues(nobs, surface_level_index, gv, obsdb,
+                             modelVirtualTemp, obsVirtualTemp);
 }
 
 // ----------------------------------------

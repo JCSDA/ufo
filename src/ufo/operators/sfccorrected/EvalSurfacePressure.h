@@ -54,6 +54,13 @@ class stationPressure_WRFDA : public SurfaceOperatorBase {
                      std::vector<float> &,
                      std::vector<float> &,
                      std::vector<float> &) const;
+
+  void getTemperatureValues(const size_t,
+                            const int,
+                            const ufo::GeoVaLs &,
+                            const ioda::ObsSpace &,
+                            std::vector<float> &,
+                            std::vector<float> &) const;
 };
 
 class stationPressure_UKMO : public SurfaceOperatorBase {

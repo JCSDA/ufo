@@ -251,6 +251,15 @@ float VirtualTemp_From_Rh_Psat_P_T(float Rh, float Psat, float P, float T,
 
 /* -------------------------------------------------------------------------------------*/
 
+float VirtualTemp_From_Sh_AT(float Sh, float At) {
+  float Tv = util::missingValue<float>();  // virtual temperature
+  float qv = std::max(1.0e-12f, Sh/(1.0f-Sh));  // specific humidity
+  Tv = At * (Constants::one + (Constants::t2tv * qv));
+  return Tv;
+}
+
+/* -------------------------------------------------------------------------------------*/
+
 float Height_To_Pressure_ICAO_atmos(float height, Formulation formulation) {
   const float missingValueFloat = util::missingValue<float>();
   float Pressure = missingValueFloat;
