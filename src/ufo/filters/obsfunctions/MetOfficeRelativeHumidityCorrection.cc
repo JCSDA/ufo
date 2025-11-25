@@ -35,11 +35,10 @@ MetOfficeRelativeHumidityCorrection::MetOfficeRelativeHumidityCorrection
   invars_ += Variable(options_.observed_pressure.value());
 
   // GeoVaLs
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_pressure.value());
-  invars_ += Variable(std::string("GeoVaLs/") +
-      options_.model_water_vapor_mixing_ratio_wrt_moist_air.value());
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_relative_humidity.value());
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_temperature.value());
+  invars_ += Variable(std::string("GeoVaLs/air_pressure"));
+  invars_ += Variable(std::string("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air"));
+  invars_ += Variable(std::string("GeoVaLs/relative_humidity"));
+  invars_ += Variable(std::string("GeoVaLs/air_temperature"));
 }
 
 // -----------------------------------------------------------------------------
@@ -71,8 +70,7 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
   const GeoVaLs * const gv(in.getGeoVaLs());
 
   // Number of model levels.
-  const int nlevs = gv->nlevs(oops::Variable{
-      options_.model_water_vapor_mixing_ratio_wrt_moist_air.value()});
+  const int nlevs = gv->nlevs(oops::Variable{"water_vapor_mixing_ratio_wrt_moist_air"});
 
   // Vectors of GeoVaLs.
   std::vector<double> gv_rh(nlevs);
@@ -100,11 +98,10 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
     const double obs_log_p = std::log(obs_p[jloc]);
 
     // Retrieve GeoVaLs at this location.
-    gv->getAtLocation(gv_p, oops::Variable{options_.model_pressure.value()}, jloc);
-    gv->getAtLocation(gv_rh, oops::Variable{options_.model_relative_humidity.value()}, jloc);
-    gv->getAtLocation(gv_q, oops::Variable{
-        options_.model_water_vapor_mixing_ratio_wrt_moist_air.value()}, jloc);
-    gv->getAtLocation(gv_t, oops::Variable{options_.model_temperature.value()}, jloc);
+    gv->getAtLocation(gv_p, oops::Variable{"air_pressure"}, jloc);
+    gv->getAtLocation(gv_rh, oops::Variable{"relative_humidity"}, jloc);
+    gv->getAtLocation(gv_q, oops::Variable{"water_vapor_mixing_ratio_wrt_moist_air"}, jloc);
+    gv->getAtLocation(gv_t, oops::Variable{"air_temperature"}, jloc);
 
     // Log(model pressure).
     std::transform(gv_p.cbegin(), gv_p.cend(), gv_log_p.begin(),

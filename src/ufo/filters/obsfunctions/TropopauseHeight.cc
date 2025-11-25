@@ -32,9 +32,9 @@ TropopauseHeight::TropopauseHeight
   options_.validateAndDeserialize(conf);
 
   // GeoVaLs.
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_pressure.value());
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_specific_humidity.value());
-  invars_ += Variable(std::string("GeoVaLs/") + options_.model_temperature.value());
+  invars_ += Variable(std::string("GeoVaLs/air_pressure"));
+  invars_ += Variable(std::string("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air"));
+  invars_ += Variable(std::string("GeoVaLs/air_temperature"));
 }
 
 // -----------------------------------------------------------------------------
@@ -59,7 +59,7 @@ void TropopauseHeight::compute(const ObsFilterData & in,
   const GeoVaLs * const gv(in.getGeoVaLs());
 
   // Number of model levels.
-  const int nlevs = gv->nlevs(oops::Variable{options_.model_specific_humidity.value()});
+  const int nlevs = gv->nlevs(oops::Variable{"water_vapor_mixing_ratio_wrt_moist_air"});
 
   // Vectors of GeoVaLs.
   std::vector<float> gv_p(nlevs);
@@ -85,9 +85,9 @@ void TropopauseHeight::compute(const ObsFilterData & in,
 
   for (size_t jloc = 0; jloc < nlocs; ++jloc) {
     // Retrieve GeoVaLs at this location.
-    gv->getAtLocation(gv_p, oops::Variable{options_.model_pressure.value()}, jloc);
-    gv->getAtLocation(gv_q, oops::Variable{options_.model_specific_humidity.value()}, jloc);
-    gv->getAtLocation(gv_t, oops::Variable{options_.model_temperature.value()}, jloc);
+    gv->getAtLocation(gv_p, oops::Variable{"air_pressure"}, jloc);
+    gv->getAtLocation(gv_q, oops::Variable{"water_vapor_mixing_ratio_wrt_moist_air"}, jloc);
+    gv->getAtLocation(gv_t, oops::Variable{"air_temperature"}, jloc);
 
     // Initially set the tropopause level to a missing value.
     out[0][jloc] = missing;

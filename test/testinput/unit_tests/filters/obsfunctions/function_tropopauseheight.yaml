@@ -24,10 +24,6 @@ observations:
           type: int
           function:
             name: IntObsFunction/TropopauseHeight
-            options:
-              model pressure: air_pressure
-              model specific humidity: water_vapor_mixing_ratio_wrt_moist_air
-              model temperature: air_temperature
     - filter: Variable Assignment
       assignments:
         - name: MetaData/tropopauseLevelRH
@@ -35,9 +31,6 @@ observations:
           function:
             name: IntObsFunction/TropopauseHeight
             options:
-              model pressure: air_pressure
-              model specific humidity: water_vapor_mixing_ratio_wrt_moist_air
-              model temperature: air_temperature
               rhmethod: true
   compareVariables:
     - reference:
