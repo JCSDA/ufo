@@ -45,29 +45,33 @@ float grdcrd1(const float & d, const std::vector<float> & gh,
   if (iflag == 1) {
   //   Case in which gh is in increasing order
     if (d <= gh[0]) {
-       ix = 0;
-     } else {
-       ix = nlevs - 1;
-       for (size_t k = 0 ; k < nlevs-1 ; ++k) {
-         if (d <= gh[k]) {
-           ix = k-1;
-           break;
-         }
-       }
-     }
+      ix = 0;
+    } else {
+      ix = nlevs - 2;
+      for (size_t k = 1 ; k < nlevs ; ++k) {
+        if (d <= gh[k]) {
+          ix = k-1;
+          break;
+        }
+      }
+    }
   } else if (iflag == -1) {
   //   Case in which gh is in decreasing order
     if (d >= gh[0]) {
-       ix = 0;
-     } else {
-       ix = nlevs - 1;
-       for (size_t k = 0 ; k < nlevs-1 ; ++k) {
-         if (d >= gh[k]) {
-           ix = k-1;
-           break;
-         }
-       }
-     }
+      ix = 0;
+    } else {
+      ix = nlevs - 2;
+      for (size_t k = 1 ; k < nlevs ; ++k) {
+        if (d >= gh[k]) {
+          ix = k-1;
+          break;
+        }
+      }
+    }
+  } else {
+  // Defensive: handle unexpected iflag values
+    throw eckit::Exception("ObsErrorFactorPressureCheck grdcrd1: "
+                            "iflag must be 1 (increasing order) or -1 (decreasing order)");
   }
   result = 1.0f+static_cast<float>(ix) + (d-gh[ix])/(gh[ix+1]-gh[ix]);
   return result;
