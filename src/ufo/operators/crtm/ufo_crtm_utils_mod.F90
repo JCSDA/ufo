@@ -258,6 +258,8 @@ character(*), parameter :: routine_name = 'crtm_conf_setup'
 character(len=255) :: IRwaterCoeff, VISwaterCoeff, &
                       IRVISlandCoeff, IRVISsnowCoeff, IRVISiceCoeff, &
                       MWwaterCoeff
+! To save the value read from yaml, since Cloud_Fraction is derived from Obs Opearator and used for Linear Obs Operator too.
+real(kind_real) :: cloudFraction = -1.0_kind_real
 integer :: jspec, ivar
 character(len=max_string) :: message
 character(len=:), allocatable :: str
@@ -370,6 +372,7 @@ character(max_string) :: cloud_reff_method
        if (message_flag) CALL Display_Message(ROUTINE_NAME, TRIM(message), WARNING )
      else
        call f_confOper%get_or_die("Cloud_Fraction",conf%Cloud_Fraction)
+       cloudFraction = conf%Cloud_Fraction ! saving from Yaml file to be used for linear-obs-operator
        if ( conf%Cloud_Fraction < 0.0 .or. &
             conf%Cloud_Fraction > 1.0 ) then
          write(message,*) trim(ROUTINE_NAME),' error: must specify ' // &
@@ -380,7 +383,8 @@ character(max_string) :: cloud_reff_method
        end if
      end if
    else
-     if (.not. conf%cal_cloud_frac_in_fov .and. conf%n_Clouds > 0) then
+     ! If Cloud_Fraction is not provided as parameter in Obs Operator then provide warning
+     if (.not. conf%cal_cloud_frac_in_fov .and. conf%n_Clouds > 0 .and. cloudFraction <= 0.0) then
        message = trim(ROUTINE_NAME) // &
                ': Cloud_Fraction is not provided in conf.' // &
                ' Will request as a geoval.'
