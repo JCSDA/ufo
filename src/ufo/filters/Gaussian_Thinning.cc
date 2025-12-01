@@ -634,12 +634,6 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
   for (ufo::RecursiveSplitter::Group validObsIndices : splitter.multiElementGroups()) {
     const size_t bestValidObsIndex = *std::min_element(
           std::begin(validObsIndices), std::end(validObsIndices), comparator);
-    for (size_t validObsIndex : validObsIndices) {
-      if (validObsIndex != bestValidObsIndex)
-        isThinned[validObsIds[validObsIndex]] = true;
-      else
-        isThinned[validObsIds[validObsIndex]] = false;
-    }
     // observation values in this bin:
     std::vector<float> validObsValues;
     for (size_t validObsIndex : validObsIndices) {
@@ -650,6 +644,12 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
     const size_t groupSize = validObsValues.size();
     if (groupSize < options_.minNumObsPerBin) {
       continue;
+    }
+    for (size_t validObsIndex : validObsIndices) {
+      if (validObsIndex != bestValidObsIndex)
+        isThinned[validObsIds[validObsIndex]] = true;
+      else
+        isThinned[validObsIds[validObsIndex]] = false;
     }
 
     float sumObs = 0.0f;

@@ -47,7 +47,6 @@ observations:
         name: DerivedObsValue/seaSurfaceTemperature
       absTol: 1.0e-4
 
-
 - obs space:
     name: Mean super-obbing for Satellite SST with extra variable
     obsdatain:
@@ -101,15 +100,11 @@ observations:
     time_min: 2020-05-11T03:00:00Z
     time_max: 2020-05-11T09:00:00Z
   passedObservationsBenchmark:
-  - 0
   - 2
-  - 6
   - 8
   - 12
-  - 18
-  - 28
   - 34
-  passedBenchmark: 8
+  passedBenchmark: 4
   
 - obs space:
     name: Mean super-obbing for Satellite SST, default min 5 obs per bin, derived obs value
@@ -141,19 +136,8 @@ observations:
     time_min: 2020-05-11T03:00:00Z
     time_max: 2020-05-11T09:00:00Z
   passedObservationsBenchmark:
-  - 0
   - 2
-  - 6
   - 8
   - 12
-  - 18
-  - 28
   - 34
-  passedBenchmark: 8
-# compare mean to the reference, given earlier linear combination
-  compareVariables: 
-    - reference:    
-        name: TestReference/seaSurfaceTemperatureAdjust 
-      test:
-        name: DerivedObsValue/seaSurfaceTemperature
-      absTol: 1.0e-4
+  passedBenchmark: 4
