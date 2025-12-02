@@ -1,0 +1,47 @@
+_: &all_channels 16, 38, 49, 51, 55, 57, 59, 61, 63, 66, 70, 72, 74, 79, 81 
+
+time window:
+  begin: 2021-06-24T09:00:00Z
+  end: 2021-06-24T15:00:00Z
+
+observations:
+- obs space:
+    name: Test PC scores to radiance (and then brightness temperature) conversion with mean added
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile:  Data/ufo/testinput_tier_1/PCscores_transform_mtg-irs_20210624.nc4
+    observed variables: []
+    simulated variables: [brightnessTemperature]
+    derived variables: [brightnessTemperature]
+    channels: *all_channels
+  obs pre filters:
+### PC scores to spectral radiance (W / (m^2.sr.m^-1))
+  - filter: Variable Transforms
+    Transform: SatRadianceFromPCScores
+    destination variable:
+      name: radiance
+      channels: *all_channels
+    reconstruction operator file: Data/ufo/testinput_tier_1/resources/auxillary/mtg-irs_pcscores_reconstructor.nc4
+    operator data group: PCScores # default
+    operator channel group: MetaData # default
+    number of principal components: 300
+    principal component scores variable: MetaData/principalComponentScore
+    reconstruction scaling factor: 1.0 
+    operator mean data group: PCmean
+### Radiance to brightness temperature (K)
+  - filter: Variable Transforms
+    Transform: SatBrightnessTempFromRad
+    transform from:
+      name: DerivedObsValue/radiance
+      channels: *all_channels
+    spectral variable:
+      name: MetaData/sensorCentralWavenumber
+      channels: *all_channels
+    radiance units: wavenumber
+  compareVariables:
+  - reference:
+      name: DerivedObsValue/brightnessTemperature
+    test:
+      name: referenceObsValue/brightnessTemperature
+    absTol: 2.0e-4

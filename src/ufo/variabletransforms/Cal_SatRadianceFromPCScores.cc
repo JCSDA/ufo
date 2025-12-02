@@ -81,6 +81,24 @@ void Cal_SatRadianceFromPCScores::runTransform(const std::vector<bool> &apply) {
     reconstructorChannels[i] = payloadChannels[i][0][0];
   }
 
+  // If user specified Read Means associated with reconstruction operator from
+  // MetaData/sensorChannelNumber
+  std::vector<float> operatorMean(nReconstructorChannels);
+  std::fill(operatorMean.begin(), operatorMean.end(), 0.0);
+
+  if (parameters_.operatorMean.value().size() > 0) {
+    const std::string meanGroup = parameters_.operatorMean.value();
+    const boost::multi_array<float, 3> payloadMean
+                                     = Extractor.loadData(meanGroup).payloadArray;
+    ASSERT((payloadMean.shape()[1] == 1) && (payloadMean.shape()[2] == 1));  // 1-d data
+    ASSERT(payloadMean.num_elements() == nReconstructorChannels);
+    for (std::size_t i = 0; i < nReconstructorChannels; ++i) {
+      operatorMean[i] = payloadMean[i][0][0];
+    }
+  }
+
+
+
   // Channels for destination will normally be the same as obsdb_.assimvariables().channels()
   const Variable radianceVar = parameters_.destinationVariable;
   const std::vector<int> destinationChannels = radianceVar.channels();
@@ -120,7 +138,8 @@ void Cal_SatRadianceFromPCScores::runTransform(const std::vector<bool> &apply) {
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       // Only for locations selected by where clause
       if (apply[iloc]) {
-        reconRadiance[ichan][iloc] = reconMatrix(ichan, iloc);
+        reconRadiance[ichan][iloc] = reconMatrix(ichan, iloc) +\
+                                     operatorMean[destinationChannelIndex[ichan]];
       }
     }
   }

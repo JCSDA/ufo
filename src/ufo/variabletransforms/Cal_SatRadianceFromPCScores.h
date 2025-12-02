@@ -87,6 +87,11 @@ class Cal_SatRadianceFromPCScoresParameters: public VariableTransformParametersB
   /// Scaling factor applied to the matrix multiplication (reconstruction operator * PC scores)
   /// in order to reconstruct radiances in units of W m^-2 sr^-1 (m^-1)^-1.
   oops::Parameter<float> scalingFactor{"reconstruction scaling factor", 0.5, this};
+
+  /// Group in reconstruction operator file containing a 1-d variable defining channels,
+  /// by default this group is empty, unless the user specifies a PCMean group indicating
+  /// that a mean radiance /bias should be added as part of the reconstruction.
+  oops::Parameter<std::string> operatorMean{"operator mean data group", "", this};
 };
 
 /*!
