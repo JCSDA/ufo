@@ -7,15 +7,50 @@
 
 #include "ufo/filters/DifferenceCheck.h"
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
 namespace ufo {
+
+namespace {
+
+// -----------------------------------------------------------------------------
+
+/// Set each element of \p flagged to true if the corresponding element of \p apply is true
+/// and the corresponding element of \p testValues or \p refValues is missing value.
+/// If the corresponding element of \p testValues and \p refValues is non-missing values
+/// then set \p flagged to true if their difference is lying outside [\p minValue, \p maxValue].
+void flagWhereDiffOut(const std::vector<float> &refValues, std::vector<float> &testValues,
+                       const size_t nlocs, const size_t nvars,
+                       const float vmin, const float vmax,
+                       const std::vector<bool> & apply,
+                       std::vector<std::vector<bool>> & flagged) {
+  const float missing = util::missingValue<float>();
+  // Loop over all obs
+  for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+    if (apply[jobs]) {
+      // check to see if one of the reference or value is missing
+      if (testValues[jobs] == missing || refValues[jobs] == missing) {
+        for (size_t jv = 0; jv < nvars; ++jv) flagged[jv][jobs] = true;
+      } else {
+        // Check if difference is within min/max value range and set flag
+        float diff = testValues[jobs] - refValues[jobs];
+        for (size_t jv = 0; jv < nvars; ++jv) {
+          if (vmin != missing && diff < vmin) flagged[jv][jobs] = true;
+          if (vmax != missing && diff > vmax) flagged[jv][jobs] = true;
+        }
+      }
+    }
+  }
+}
+}  // end of namespace
 
 // -----------------------------------------------------------------------------
 
@@ -45,6 +80,7 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
 
   const float missing = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
+  const size_t nvars = filtervars.nvars();
 
 // min/max value setup
   float vmin = parameters_.minvalue.value().value_or(missing);
@@ -57,30 +93,22 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
     vmax = thresh;
   }
 
-// Get reference values and values to compare (as floats)
-  std::vector<float> ref, val;
-  data_.get(parameters_.ref, ref);
-  data_.get(parameters_.val, val);
-  ASSERT(ref.size() == val.size());
+  // Get reference values and values as ObsDataVector using variable name with channel
+  // to compare (as floats)
+  ioda::ObsDataVector<float> refDataVec(obsdb_, parameters_.ref.value().toOopsObsVariables(),
+                                         parameters_.ref.value().group(), false);
+  ioda::ObsDataVector<float> valDataVec(obsdb_, parameters_.val.value().toOopsObsVariables(),
+                                         parameters_.val.value().group(), false);
+  data_.get(parameters_.ref, refDataVec);
+  data_.get(parameters_.val, valDataVec);
+  ASSERT(refDataVec.nlocs() == valDataVec.nlocs());
+  ASSERT(refDataVec.nvars() == valDataVec.nvars());
 
-// Loop over all obs
-  for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-    if (apply[jobs]) {
-      // check to see if one of the reference or value is missing
-      if (val[jobs] == missing || ref[jobs] == missing) {
-        for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
-          flagged[jv][jobs] = true;
-        }
-      } else {
-// Check if difference is within min/max value range and set flag
-        float diff = val[jobs] - ref[jobs];
-        for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
-          if (vmin != missing && diff < vmin) flagged[jv][jobs] = true;
-          if (vmax != missing && diff > vmax) flagged[jv][jobs] = true;
-        }
-      }
-    }
+  for (size_t ivar = 0; ivar < refDataVec.nvars(); ++ivar) {
+    flagWhereDiffOut(refDataVec[ivar], valDataVec[ivar],
+             nlocs, nvars, vmin, vmax, apply, flagged);
   }
+
   oops::Log::trace() << "DifferenceCheck applyFilter complete" << std::endl;
 }
 
