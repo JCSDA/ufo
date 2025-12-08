@@ -16,12 +16,11 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
+#include "ufo/errors/ObsErrorBase.h"
 #include "ufo/errors/ObsErrorParametersBase.h"
-#include "ufo/ObsTraits.h"
 
 namespace ioda {
   class ObsSpace;
@@ -83,15 +82,15 @@ class ObsErrorWithinGroupCovParameters : public ObsErrorParametersBase {
 ///          Full observation error covariance matrix is R = D^{1/2} * C * D^{1/2}
 ///          where D^{1/2} is a diagonal matrix with stddev_ (ObsError group)
 ///          on the diagonal, and C is the correlation matrix.
-class ObsErrorWithinGroupCov : public oops::interface::ObsErrorBase<ObsTraits> {
+class ObsErrorWithinGroupCov : public ObsErrorBase {
  public:
   /// The type of parameters passed to the constructor.
   /// This typedef is used by the ObsErrorFactory.
   typedef ObsErrorWithinGroupCovParameters Parameters_;
 
   /// Initialize observation errors
-  ObsErrorWithinGroupCov(const eckit::Configuration &, ioda::ObsSpace &,
-                        const eckit::mpi::Comm &timeComm);
+  ObsErrorWithinGroupCov(const Parameters_ &, ioda::ObsSpace &,
+                         const eckit::mpi::Comm &);
 
   /// Update obs error standard deviations to be equal to \p stddev
   void update(const ioda::ObsVector & stddev) override;

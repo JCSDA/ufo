@@ -15,7 +15,7 @@ observations:
 #       obsfile: Data/sondes_obs_2018041500_s_obserr_diagonal_out.nc4
     simulated variables: [airTemperature]
   obs error:
-    covariance model: diagonal ufo
+    covariance model: diagonal
 - obs space:
     name: Aircraft
     obsdatain:
@@ -28,7 +28,7 @@ observations:
 #       obsfile: Data/aircraft_obs_2018041500_s_obserr_diagonal_out.nc4
     simulated variables: [airTemperature,specificHumidity]
   obs error:
-    covariance model: diagonal ufo
+    covariance model: diagonal
 - obs space:
     name: Satwind
     obsdatain:
@@ -41,4 +41,4 @@ observations:
 #       obsfile: Data/satwind_obs_2018041500_s_obserr_diagonal_out.nc4
     simulated variables: [windEastward, windNorthward]
   obs error:
-    covariance model: diagonal ufo
+    covariance model: diagonal

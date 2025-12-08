@@ -22,6 +22,12 @@
 
 namespace ufo {
 
+// -----------------------------------------------------------------------------
+
+static ObsErrorMaker<ObsErrorWithinGroupCov> makerWithinGroupCov_("within group covariances");
+
+// -----------------------------------------------------------------------------
+
 namespace {
 
 // -----------------------------------------------------------------------------
@@ -77,11 +83,13 @@ ioda::ObsDataVector<float> coord_constructor(const ObsErrorWithinGroupCovParamet
 
 }  // anonymous namespace
 
-ObsErrorWithinGroupCov::ObsErrorWithinGroupCov(const eckit::Configuration & obsErrGrpConf,
-                                             ioda::ObsSpace & obspace,
-                                             const eckit::mpi::Comm &timeComm)
-  : ObsErrorBase(timeComm), params_(oops::validateAndDeserialize<Parameters_>(obsErrGrpConf)),
-    obspace_(obspace), coord_(coord_constructor(params_, obspace)),
+ObsErrorWithinGroupCov::ObsErrorWithinGroupCov(const Parameters_ & params,
+                                               ioda::ObsSpace & obspace,
+                                               const eckit::mpi::Comm &timeComm)
+  : ObsErrorBase(timeComm),
+    params_(params),
+    obspace_(obspace),
+    coord_(coord_constructor(params_, obspace)),
     stddev_(obspace, "ObsError")
 {
   correlations_.reserve(obspace.nrecs());

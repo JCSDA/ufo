@@ -193,6 +193,11 @@ ecbuild_add_executable( TARGET  test_ObsDiagnostics.x
                         LIBS    ufo
                        )
 
+ecbuild_add_executable( TARGET  test_ObsError.x
+                        SOURCES mains/TestObsErrorCovariance.cc
+                        LIBS    ufo
+                       )
+
 ecbuild_add_executable( TARGET  test_ObsOperator.x
                         SOURCES mains/TestObsOperator.cc
                         LIBS    ufo

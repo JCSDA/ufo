@@ -17,10 +17,10 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/ObsVariables.h"
-#include "oops/interface/ObsErrorBase.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 
+#include "ufo/errors/ObsErrorBase.h"
 #include "ufo/errors/ObsErrorParametersBase.h"
 #include "ufo/errors/ObsErrorReconditioner.h"
 #include "ufo/ObsTraits.h"
@@ -53,14 +53,14 @@ class ObsErrorCrossVarCovParameters : public ObsErrorParametersBase {
 ///          on the diagonal, and C is the correlation matrix. The cross-variable
 ///          R matrices at each location can be reconditioned to reduce their condition
 ///          number, in order to speed up convergence of minimisation.
-class ObsErrorCrossVarCov : public oops::interface::ObsErrorBase<ObsTraits> {
+class ObsErrorCrossVarCov : public ObsErrorBase {
  public:
   /// The type of parameters for this class.
   typedef ObsErrorCrossVarCovParameters Parameters_;
 
   /// Initialize observation errors
-  ObsErrorCrossVarCov(const eckit::Configuration &, ioda::ObsSpace &,
-                      const eckit::mpi::Comm &timeComm);
+  ObsErrorCrossVarCov(const Parameters_ &, ioda::ObsSpace &,
+                      const eckit::mpi::Comm &);
 
   /// Update obs error standard deviations to be equal to \p stddev
   void update(const ioda::ObsVector & stddev) override;
