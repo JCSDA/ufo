@@ -129,6 +129,36 @@ observations:
   passedBenchmark: 99
 
 - obs space:
+    name: test_specificHumidity6
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_apply.nc
+    simulated variables: [relativeHumidity, airTemperature, stationPressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: SpecificHumidity   # calculate specific humidity from relative humidity
+                                  # using Default method and default Formulation (Roger 1989)
+    where:
+    - variable:
+        name: DiagnosticFlags/PermanentStationRejection/stationPressure
+      value: is_true # apply transform only where stationPressure is not permanently rejected
+    pressure group variable: "MetaData"
+    pressure variable: "pressure"
+    pressure at 2m variable: "stationPressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    specific humidity variable: "specificHumidity"
+
+  compareVariables:               # test output matches precalculated values
+    - reference:
+        name: TestReference/specificHumidity_NOAA_err
+      test:
+        name: DerivedObsValue/specificHumidity
+      absTol: 1.0e-7
+  passedBenchmark: 99
+
+- obs space:
     name: specific humidity calculation, single observation (for execution on multiple MPI ranks)
     obsdatain:
       engine:
