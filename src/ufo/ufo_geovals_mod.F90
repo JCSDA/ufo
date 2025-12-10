@@ -174,6 +174,7 @@ end subroutine ufo_geovals_update_linit
 !> @param npaths_by_method
 !>   An array of length `nsampling_methods` whose ith element is the number of paths in the set
 !>   of interpolation paths obtained with the ith sampling method.
+!if (self%nsampling_methods .gt. 0) then
 !> @param sampling_method_by_var
 !>   An array of length `nvars` whose ith element is the index of the observation location
 !>   sampling method producing the set of paths along which the ith variable will be
@@ -1675,7 +1676,7 @@ logical, intent(in)               :: levels_are_top_down
 type(c_ptr), intent(in)           :: c_obspace
 type(oops_variables), intent(in)  :: vars
 
-integer :: global_npaths, var_global_npaths
+integer :: global_npaths, var_global_npaths, global_nlocs
 integer :: nval
 integer :: obs_nlocs
 integer :: obs_all_nlocs
@@ -1683,7 +1684,8 @@ integer :: my_npaths, my_loc, my_path, global_path, global_path_start, global_pa
 character(len=MAXVARLEN), pointer :: varname
 type(oops_variables)  :: reduced_vars
 
-integer :: ncid, dimid, varid, vartype, ndims
+logical :: use_nprofiles = .false.
+integer :: ncid, dimid, varid, vartype, ndims, dimid_nlocs
 integer, dimension(3) :: dimids
 integer :: ivar
 integer :: ierr
@@ -1695,27 +1697,43 @@ character(len=30) :: geo_nlocs_str
 integer(c_size_t), allocatable, dimension(:) :: global_loc_by_my_loc
 integer(c_size_t), allocatable, dimension(:) :: global_path_by_my_path
 type(ufo_index_range), allocatable :: path_ranges_by_loc(:)
+integer, allocatable, dimension(:) :: pblb_indices
+integer, allocatable, dimension(:) :: pble_indices
 real, allocatable :: field2d(:,:), field1d(:)
 
-! At the time being, the NetCDF GeoVaLs file format requires all GeoVaLs to be interpolated
+! For the most part, the NetCDF GeoVaLs file format requires all GeoVaLs to be interpolated
 ! along the same set of paths composed of as many paths as there are observation locations.
 ! The format will be made more general in future.
+! There are two exception to this limitation:
+! * when loc_multiplier is used to specify multiple geoval profiles per observation.
+! * when the nprofiles dimension exists in the geovals file to specify the
+!   dimension of all the geovals variables, distinct from nlocs. 
 integer, parameter :: nsampling_methods = 1
 integer(c_size_t), allocatable :: sampling_method_by_var(:)
 logical(c_bool) :: is_sampling_method_trivial(1)
 
 ! open netcdf file
 call check('nf90_open', nf90_open(trim(filename),nf90_nowrite,ncid))
-
-! find how many locs are in the file
-ierr = nf90_inq_dimid(ncid, "nlocs", dimid)
+ierr = nf90_inq_dimid(ncid, "nlocs", dimid_nlocs)
 if(ierr /= nf90_noerr) then
   write(err_msg,*) "Error: Dimension nlocs not found in ", trim(filename)
   call abor1_ftn(err_msg)
-endif
+end if
 
-call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
-call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = global_npaths))
+call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid_nlocs))
+call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid_nlocs, len = global_nlocs))
+
+! Determine if the geovals uses the nprofiles or nlocs dimension for variables.
+ierr = nf90_inq_dimid(ncid, "nprofiles", dimid)
+if(ierr == nf90_noerr) then
+  ! The geovals file has an nprofiles dimension, distinct from nlocs
+  use_nprofiles = .true.
+  call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nprofiles", dimid))
+  call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = global_npaths))
+else
+  dimid = dimid_nlocs
+  global_npaths = global_nlocs
+end if
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
@@ -1728,48 +1746,86 @@ call obsspace_get_index(c_obspace, global_loc_by_my_loc)
 ! single location in the obs file. There needs to be at least
 ! loc_multiplier * obs_all_nlocs locations in the geovals file.
 
-if (global_npaths .lt. (loc_multiplier * obs_all_nlocs)) then
-  write(obs_nlocs_str, *) loc_multiplier * obs_all_nlocs
-  write(geo_nlocs_str, *) global_npaths
-  write(err_msg,'(7a)') &
-     "Error: Number of locations in the geovals file (", &
-     trim(adjustl(geo_nlocs_str)), ") must be greater than or equal to ", &
-     "the product of loc_multiplier and number of locations in the ", &
-     "obs file (", trim(adjustl(obs_nlocs_str)), ")"
-  call abor1_ftn(err_msg)
+if (.not. use_nprofiles) then
+  if (global_npaths .lt. (loc_multiplier * obs_all_nlocs)) then
+    write(obs_nlocs_str, *) loc_multiplier * obs_all_nlocs
+    write(geo_nlocs_str, *) global_npaths
+    write(err_msg,'(7a)') &
+       "Error: Number of locations in the geovals file (", &
+       trim(adjustl(geo_nlocs_str)), ") must be greater than or equal to ", &
+       "the product of loc_multiplier and number of locations in the ", &
+       "obs file (", trim(adjustl(obs_nlocs_str)), ")"
+    call abor1_ftn(err_msg)
+  endif
 endif
 
-! We have enough locations in the geovals file to cover the span of the
-! number of locations in the obs file. Generate the global_path_by_my_path map according
-! to the loc_multiplier and obs_nlocs values.
 allocate(path_ranges_by_loc(obs_nlocs))
-if (loc_multiplier > 0) then
-  my_npaths = loc_multiplier * obs_nlocs
+if (use_nprofiles) then
+  ! Read path_ranges_by_loc from the geovals file. The values in the file
+  ! should already be global values, so the adjustment from local to global
+  ! is only needed for my_loc, not for the begin and end offsets. 
+  my_npaths = global_npaths
+  allocate(pblb_indices(obs_all_nlocs))
+  allocate(pble_indices(obs_all_nlocs))
   allocate(global_path_by_my_path(my_npaths))
-  my_path = 1
-  do my_loc = 1,obs_nlocs
-    global_path_start = ((global_loc_by_my_loc(my_loc) - 1) * loc_multiplier) + 1
-    global_path_end = global_loc_by_my_loc(my_loc) * loc_multiplier
-    path_ranges_by_loc(my_loc)%begin = my_path
-    do global_path = global_path_start, global_path_end
-      global_path_by_my_path(my_path) = global_path
-      my_path = my_path + 1
-    enddo
-    path_ranges_by_loc(my_loc)%end = my_path
-  enddo
-else
+  ierr = nf90_inq_varid(ncid, "paths_by_loc_begin", varid)
+  if(ierr /= nf90_noerr) then
+    write(err_msg,*) "Error: Variable paths_by_loc_begin not found in ", trim(filename)
+    call abor1_ftn(err_msg)
+  endif
+  call check('nf90_get_var_pblb', nf90_get_var(ncid, varid, pblb_indices))
 
-  ! Negative loc_multipliers are no longer supported. They used to map each location to a set
-  ! of paths with non-consecutive indices, which cannot be represented with the current data
-  ! structures.
-  write(err_msg, *) "Error: loc_multiplier must be positive"
-  call abor1_ftn(err_msg)
-end if
+  ierr = nf90_inq_varid(ncid, "paths_by_loc_end", varid)
+  if(ierr /= nf90_noerr) then
+    write(err_msg,*) "Error: Variable paths_by_loc_end not found in ", trim(filename)
+    call abor1_ftn(err_msg)
+  endif
+  call check('nf90_get_var_pble', nf90_get_var(ncid, varid, pble_indices))
+
+  do my_loc = 1,obs_nlocs
+    ! global_loc = global_loc_by_my_loc(my_loc)
+    !write(*,*) "map my_loc=", my_loc, " to global_loc=", global_loc
+    path_ranges_by_loc(my_loc)%begin = pblb_indices(my_loc)
+    path_ranges_by_loc(my_loc)%end = pble_indices(my_loc)
+  enddo
+
+  do my_path = 1, my_npaths
+     global_path_by_my_path(my_path) = my_path
+  enddo
+
+  deallocate(pblb_indices)
+  deallocate(pble_indices)
+else
+  ! We have enough locations in the geovals file to cover the span of the
+  ! number of locations in the obs file. Generate the global_path_by_my_path map according
+  ! to the loc_multiplier and obs_nlocs values.
+  if (loc_multiplier > 0) then
+    my_npaths = loc_multiplier * obs_nlocs
+    allocate(global_path_by_my_path(my_npaths))
+    my_path = 1
+    do my_loc = 1,obs_nlocs
+      global_path_start = ((global_loc_by_my_loc(my_loc) - 1) * loc_multiplier) + 1
+      global_path_end = global_loc_by_my_loc(my_loc) * loc_multiplier
+      path_ranges_by_loc(my_loc)%begin = my_path
+      do global_path = global_path_start, global_path_end
+        global_path_by_my_path(my_path) = global_path
+        my_path = my_path + 1
+      enddo
+      path_ranges_by_loc(my_loc)%end = my_path
+    enddo
+  else
+    ! Negative loc_multipliers are no longer supported. They used to map each location to a set
+    ! of paths with non-consecutive indices, which cannot be represented with the current data
+    ! structures.
+    write(err_msg, *) "Error: loc_multiplier must be positive"
+    call abor1_ftn(err_msg)
+  endif
+endif
 
 ! define a common sampling method for all variables
 allocate(sampling_method_by_var(vars%nvars()))
 sampling_method_by_var(:) = 1
-is_sampling_method_trivial(1) = (loc_multiplier == 1)
+is_sampling_method_trivial(1) = (loc_multiplier == 1 .and. .not. use_nprofiles)
 
 ! Currently NetCDF files store variables only in the sampled format. But if loc_multiplier is
 ! equal to 1, there is no difference between the sampled and reduced format, so we can set up a
@@ -1777,7 +1833,7 @@ is_sampling_method_trivial(1) = (loc_multiplier == 1)
 ! VaLs object storing variables only in the sampled format.
 !
 ! In future we may want to extend the NetCDF file layout to accommodate both formats at once.
-if (loc_multiplier == 1) then
+if (loc_multiplier == 1 .and. .not. use_nprofiles) then
   reduced_vars = oops_variables(vars)
 else
   reduced_vars = oops_variables()
@@ -1877,6 +1933,7 @@ endif
 
 end subroutine ufo_geovals_read_netcdf
 
+
 ! ------------------------------------------------------------------------------
 subroutine ufo_geovals_write_netcdf(self, filename)
 use netcdf
@@ -1884,33 +1941,67 @@ implicit none
 type(ufo_geovals), intent(inout)  :: self
 character(max_string), intent(in) :: filename
 
-integer :: i
-integer :: ncid, dimid_nlocs, dimid_nval, dims(2)
+integer :: i, nlocs
+integer :: ncid, dimid_nlocs, dimid_nval, dimid_nprofile, dims(2)
 integer, allocatable :: ncid_var(:)
+integer :: ncid_pbl_begin, ncid_pbl_end
+integer, allocatable :: pbl_indices(:)
+integer :: nprofiles
+logical :: nprofiles_and_nlocs_differ
 
+nlocs = self%nlocs
 allocate(ncid_var(self%nvar))
 
 call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
-! TODO(wsmigaj): define a new format with nlocs replaced by nprofiles and stored
-! separately for each variable
-!------------------------------------------------------------------------------
-!call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%nlocs, dimid_nlocs))
 ! This modification accounts for two scenarios:
 ! the number of observations (nlocs) for the trivial sampling method, where self%geovals(1)%nprofiles
-! is equal to nlocs, thus not affecting previous cases; and the number of extended geovals required for non-trivial cases.
-! Further refinement is needed for storing each variable separately.
-!------------------------------------------------------------------------------
+! is equal to nlocs, thus not affecting previous cases; and the number of extended geovals 
+! required for non-trivial cases. Further refinement is needed for storing each variable with its
+! own separate dimensions.
 call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%geovals(1)%nprofiles, dimid_nlocs))
 
 dims(2) = dimid_nlocs
-
+nprofiles = -1
+nprofiles_and_nlocs_differ = .false.
 do i = 1, self%nvar
+  ! Check if number of profiles and observed locs are the same
+  ! If not, we will create an nprofiles dimension for use with the geoval vars.
+  ! This code requires the nprofile dim of all variables to be the same.
+  if (self%geovals(i)%nprofiles /= self%nlocs) then
+    if (nprofiles == -1) then 
+      nprofiles = self%geovals(i)%nprofiles
+      nprofiles_and_nlocs_differ = .true.
+      ! create a profile dimension for this var to use in place of nlocs.
+      call check('nf90_def_dim', &
+           nf90_def_dim(ncid,"nprofiles",self%geovals(i)%nprofiles, dimid_nprofile))
+    else if (self%geovals(i)%nprofiles /= nprofiles) then
+      call abor1_ftn("ufo_geovals_write_netcdf: all variables must share the same"&
+          // " nprofiles dimension")
+    end if
+    dims(2) = dimid_nprofile
+  else
+    dims(2) = dimid_nlocs
+  end if 
+
+  ! Create a separate nval dimension for each variable
   call check('nf90_def_dim', &
        nf90_def_dim(ncid,trim(self%variables(i))//"_nval",self%geovals(i)%nval, dimid_nval))
   dims(1) = dimid_nval
-  call check('nf90_def_var',  &
+
+  call check('nf90_def_var', &
        nf90_def_var(ncid,trim(self%variables(i)),nf90_float,dims,ncid_var(i)))
 enddo
+
+! Define variables for paths_by_loc mapping if the relationship 
+! between paths and observed locations is not 1-to-1.
+if (nprofiles_and_nlocs_differ) then
+  ! For now, we just define the paths_by_loc for the first sampling method. If
+  ! the geovals use sampled and reduced format, there could be more than one. 
+  call check('nf90_def_pblb_var',  &
+       nf90_def_var(ncid,"paths_by_loc_begin",nf90_int,dimid_nlocs,ncid_pbl_begin))
+  call check('nf90_def_pble_var',  &
+       nf90_def_var(ncid,"paths_by_loc_end",nf90_int,dimid_nlocs,ncid_pbl_end))
+end if
 
 call check('nf90_enddef', nf90_enddef(ncid))
 
@@ -1918,10 +2009,71 @@ do i = 1, self%nvar
   call check('nf90_put_var', nf90_put_var(ncid,ncid_var(i),self%geovals(i)%vals(:,:)))
 enddo
 
+! Write the paths_by_loc mapping if the relationship between
+! paths and observed locations is not 1-to-1.
+if (nprofiles_and_nlocs_differ) then
+  ! For now, we write just the paths_by_loc for the first sampling method. If
+  ! the geovals use sampled and reduced format, there could be more than one. 
+  ! TODO(smarshall) - if the geovals are written from multiple PEs, the
+  ! pbl_indices will be relative to only the paths and locs in that PE.
+  ! Ultimately, these indices should be global to all locations across all PEs.
+  if (self%nsampling_methods .eq. 0) then
+      call abor1_ftn("ufo_geovals_write_netcdf: num sampling method must be " &
+          // "> 0 when nprofiles and nlocs differ")
+  end if
+  allocate(pbl_indices(self%nlocs))
+  do i = 1, self%nlocs
+    pbl_indices(i) = self%sampling_methods(1)%paths_by_loc(i)%begin
+  enddo
+  call check('nf90_put_var', nf90_put_var(ncid,ncid_pbl_begin,pbl_indices(:)))
+  do i = 1, self%nlocs
+    pbl_indices(i) = self%sampling_methods(1)%paths_by_loc(i)%end
+  enddo
+  call check('nf90_put_var', nf90_put_var(ncid,ncid_pbl_end,pbl_indices(:)))
+  deallocate(pbl_indices)
+end if
+
 call check('nf90_close', nf90_close(ncid))
 deallocate(ncid_var)
 
 end subroutine ufo_geovals_write_netcdf
+
+!subroutine ufo_geovals_write_netcdf(self, filename)
+!use netcdf
+!implicit none
+!type(ufo_geovals), intent(inout)  :: self
+!character(max_string), intent(in) :: filename
+!
+!integer :: i
+!integer :: ncid, dimid_nlocs, dimid_nval, dims(2)
+!integer, allocatable :: ncid_var(:)
+!
+!allocate(ncid_var(self%nvar))
+!
+!call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
+!! TODO(wsmigaj): define a new format with nlocs replaced by nprofiles and stored
+!! separately for each variable
+!call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%nlocs, dimid_nlocs))
+!dims(2) = dimid_nlocs
+!
+!do i = 1, self%nvar
+!  call check('nf90_def_dim', &
+!       nf90_def_dim(ncid,trim(self%variables(i))//"_nval",self%geovals(i)%nval, dimid_nval))
+!  dims(1) = dimid_nval
+!  call check('nf90_def_var',  &
+!       nf90_def_var(ncid,trim(self%variables(i)),nf90_float,dims,ncid_var(i)))
+!enddo
+!
+!call check('nf90_enddef', nf90_enddef(ncid))
+!
+!do i = 1, self%nvar
+!  call check('nf90_put_var', nf90_put_var(ncid,ncid_var(i),self%geovals(i)%vals(:,:)))
+!enddo
+!
+!call check('nf90_close', nf90_close(ncid))
+!deallocate(ncid_var)
+!
+!end subroutine ufo_geovals_write_netcdf
 
 ! ------------------------------------------------------------------------------
 

@@ -7,6 +7,7 @@ add_subdirectory( BndROPP2D )
 add_subdirectory( utils )
 add_subdirectory( QC )
 add_subdirectory( BendMetOffice )
+add_subdirectory( RefNLPEP2D )
 
 PREPEND( _p_refncep_files      "operators/gnssro/RefNCEP"       ${refncep_src_files} )
 PREPEND( _p_refmetoffice_files "operators/gnssro/RefMetOffice"  ${refmetoffice_src_files} )
@@ -16,6 +17,7 @@ PREPEND( _p_bndropp2d_files    "operators/gnssro/BndROPP2D"     ${bndropp2d_src_
 PREPEND( _p_utils_files        "operators/gnssro/utils"         ${utils_src_files} )
 PREPEND( _p_qc_files           "operators/gnssro/QC"            ${qc_src_files} )
 PREPEND( _p_metoffice_files    "operators/gnssro/BendMetOffice" ${bendmetoffice_src_files} )
+PREPEND( _p_refnlpep2d_files   "operators/gnssro/RefNLPEP2D"    ${refnlpep2d_files} )
 
 set ( gnssro_src_files
         ${_p_refncep_files}
@@ -26,5 +28,6 @@ set ( gnssro_src_files
         ${_p_utils_files}
         ${_p_qc_files}
         ${_p_metoffice_files}
-    PARENT_SCOPE  
+        ${_p_refnlpep2d_files}
+    PARENT_SCOPE
 )

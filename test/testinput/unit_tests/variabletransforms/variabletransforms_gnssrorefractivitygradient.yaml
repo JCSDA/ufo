@@ -1,0 +1,81 @@
+time window:
+  begin: 2025-07-03T21:00:00Z
+  end: 2025-07-04T03:00:00Z
+observations:
+- obs space:
+    name: GnssroRefGradient with ducting flags
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssrorefractivitygradient_transforms.nc4
+    observed variables: [atmosphericRefractivity]
+    derived variables: [atmosphericRefractivityGradient]
+    simulated variables: [atmosphericRefractivityGradient]
+    obsdataout:
+       engine:
+         type: H5File
+         obsfile: Data/gnssrorefractivitygradient_transforms_output_with_ducting_flags.nc4
+  obs filters:
+  - filter: Variable Transforms
+    Transform: GnssroRefractivityGradient
+    UseValidDataOnly: false
+    SkipWhenNoObs: false
+    group: "ObsValue"
+    min super refraction: 0.45
+    calculate ducting flag: true
+    calculate profile ducting flag: true
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  passedBenchmark: 48  # Topmost levels of 2 RO profiles have missing atmosphericRefractivityGradient
+  compareVariables:    #  test output matches precalculated values
+    - reference:
+        name: TestReference/atmosphericRefractivityGradient
+      test:
+        name: DerivedObsValue/atmosphericRefractivityGradient
+      relTol: 5.0e-6
+    - reference:
+        name: TestReference/sampleDuctingFlag
+      test:
+        name: DerivedObsValue/sampleDuctingFlag
+    - reference:
+        name: TestReference/profileDuctingFlag
+      test:
+        name: DerivedObsValue/profileDuctingFlag
+
+- obs space:
+    name: GnssroRefGradient without ducting flags
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssrorefractivitygradient_transforms.nc4
+    observed variables: [atmosphericRefractivity]
+    derived variables: [atmosphericRefractivityGradient]
+    simulated variables: [atmosphericRefractivityGradient]
+    obsdataout:
+       engine:
+         type: H5File
+         obsfile: Data/gnssrorefractivitygradient_transforms_output_wo_ducting_flags.nc4
+  obs filters:
+  - filter: Variable Transforms
+    Transform: GnssroRefractivityGradient
+    UseValidDataOnly: false
+    SkipWhenNoObs: false
+    group: "ObsValue"
+    calculate ducting flag: false
+    calculate profile ducting flag: false
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  passedBenchmark: 48  # Topmost levels of 2 RO profiles have missing atmosphericRefractivityGradient
+  compareVariables:    #  test output matches precalculated values
+    - reference:
+        name: TestReference/atmosphericRefractivityGradient
+      test:
+        name: DerivedObsValue/atmosphericRefractivityGradient
+      relTol: 5.0e-6
+  expectVariablesNotToExist:
+  - name: DerivedObsValue/sampleDuctingFlag
+  - name: DerivedObsValue/profileDuctingFlag

@@ -147,6 +147,9 @@ real(kind_real), allocatable   :: obsGeoid(:)             ! The geoid undulation
 real(kind_real), allocatable   :: obsLocR(:)              ! The local radius of curvature at the observation location
 real(kind_real), allocatable   :: obsValue(:)
 real(kind_real), allocatable   :: obsErr(:)
+real(kind_real), allocatable   :: obsRefr(:)              ! observed atmosphericRefractivity (N-units)
+real(kind_real), allocatable   :: obsNLPEP(:)             ! observed nonLocalPseudoExcessPhase (m)
+real(kind_real), allocatable   :: errScaleFactor(:)       ! Factor to map one kind of error to another
 real(kind_real), allocatable   :: averageTemp(:)          ! The average model temperature
 integer(c_int),  allocatable   :: obsSaid(:)
 integer(c_int),  allocatable   :: QCflags(:)
@@ -376,8 +379,66 @@ case ("atmosphericRefractivity")
      call abor1_ftn(err_msg)
   end select
 
+case ("nonLocalPseudoExcessPhase")
+
+  ! Get scale factors to convert refractivity errors into non-local pseudo excess phase errors.
+  ! This part is common to any technique that repurposes a refractivity error model.
+  allocate(errScaleFactor(nobs)) 
+  if (obsspace_has(self%obsdb, "ObsValue", "atmosphericRefractivity") .AND. &
+      & obsspace_has(self%obsdb, "ObsValue", "nonLocalPseudoExcessPhase")) then
+    allocate(obsRefr(nobs))
+    allocate(obsNLPEP(nobs))
+    call obsspace_get_db(self%obsdb, "ObsValue", "atmosphericRefractivity", obsRefr)
+    call obsspace_get_db(self%obsdb, "ObsValue", "nonLocalPseudoExcessPhase", obsNLPEP)
+
+    do iob = 1, nobs
+      errScaleFactor(iob) = obsNLPEP(iob) / obsRefr(iob)
+    end do
+    deallocate(obsRefr)
+    deallocate(obsNLPEP)
+  else
+     write(err_msg,*) "ufo_roobserror_mod: could not access observations of &
+       &atmosphericRefractivity and nonLocalPseudoExcessPhase while computing &
+       &errors for nonLocalPseudoExcessPhase from refractivity; error cannot &
+       &be properly scaled"
+     call abor1_ftn(err_msg)
+  end if
+
+  select case (trim(self%errmodel))
+
+  case ("NCEP")
+
+    allocate(obsZ(nobs))
+    allocate(obsLat(nobs))
+    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ)
+    call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
+    call refractivity_obserr_NCEP(obsLat, obsZ, nobs, obsErr, QCflags, missing)
+    do iob = 1, nobs
+      if (QCflags(iob) .eq. 0) then
+        ! Scale refractivity error to nonLocalPseudoExcessPhase error. 
+        obsErr(iob) = obsErr(iob) * errScaleFactor(iob) 
+      end if
+    end do
+
+    write(err_msg,*) 'ufo_roobserror_mod: setting up nonLocalPseudoExcessPhase &
+        &obs error with NCEP method'
+    call fckit_log%debug(err_msg)
+    deallocate(obsZ)
+    deallocate(obsLat) 
+    ! up date obs error
+    call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
+
+  case default
+     write(err_msg,*) 'ufo_roobserror_mod: only NCEP error model is available &
+         &for variable nonLocalPseudoExcessPhase'
+     call abor1_ftn(err_msg)
+  end select
+
+  deallocate(errScaleFactor)
+
 case default
-  call abor1_ftn("ufo_roobserror_prior: variable has to be bending_angle or refractivity")
+  call abor1_ftn('ufo_roobserror_prior: variable has to be bendingAngle, &
+      &atmosphericRefractivity, or nonLocalPseudoExcessPhase')
 end select
 
 deallocate(QCflags)
