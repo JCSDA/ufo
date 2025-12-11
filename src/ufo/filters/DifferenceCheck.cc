@@ -30,6 +30,7 @@ namespace {
 void flagWhereDiffOut(const std::vector<float> &refValues, std::vector<float> &testValues,
                        const size_t nlocs, const size_t nvars,
                        const float vmin, const float vmax,
+                       const bool minExclusive, const bool maxExclusive,
                        const std::vector<bool> & apply,
                        std::vector<std::vector<bool>> & flagged) {
   const float missing = util::missingValue<float>();
@@ -43,12 +44,16 @@ void flagWhereDiffOut(const std::vector<float> &refValues, std::vector<float> &t
         // Check if difference is within min/max value range and set flag
         float diff = testValues[jobs] - refValues[jobs];
         for (size_t jv = 0; jv < nvars; ++jv) {
-          if (vmin != missing && diff < vmin) flagged[jv][jobs] = true;
-          if (vmax != missing && diff > vmax) flagged[jv][jobs] = true;
-        }
-      }
-    }
-  }
+          if (vmin != missing && diff <= vmin) {
+            if (diff < vmin || minExclusive) flagged[jv][jobs] = true;
+          }
+          if (!flagged[jv][jobs] && vmax != missing && diff >= vmax) {
+            if (diff > vmax || maxExclusive) flagged[jv][jobs] = true;
+          }
+        }  // end for loop over vars
+      }  // end else for missing value check
+    }  // end if apply[jobs]
+  }  // end for loop over obs
 }
 }  // end of namespace
 
@@ -85,6 +90,8 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
 // min/max value setup
   float vmin = parameters_.minvalue.value().value_or(missing);
   float vmax = parameters_.maxvalue.value().value_or(missing);
+  const bool minExclusive = parameters_.minExclusive.value();
+  const bool maxExclusive = parameters_.maxExclusive.value();
 
 // check for threshold and if exists, set vmin and vmax appropriately
   if (parameters_.threshold.value() != boost::none) {
@@ -106,7 +113,7 @@ void DifferenceCheck::applyFilter(const std::vector<bool> & apply,
 
   for (size_t ivar = 0; ivar < refDataVec.nvars(); ++ivar) {
     flagWhereDiffOut(refDataVec[ivar], valDataVec[ivar],
-             nlocs, nvars, vmin, vmax, apply, flagged);
+             nlocs, nvars, vmin, vmax, minExclusive, maxExclusive, apply, flagged);
   }
 
   oops::Log::trace() << "DifferenceCheck applyFilter complete" << std::endl;

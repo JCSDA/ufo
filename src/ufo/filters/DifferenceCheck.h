@@ -45,6 +45,10 @@ class DifferenceCheckParameters : public FilterParametersBase {
   /// `maxvalue`.
   oops::OptionalParameter<float> maxvalue{"maxvalue", this};
 
+  /// Select whether the minvalue or maxvalue is an exclusive limit. Default value is inclusive.
+  oops::Parameter<bool> minExclusive{"min_exclusive", false, this};
+  oops::Parameter<bool> maxExclusive{"max_exclusive", false, this};
+
   /// If the `threshold` option is specified, the filter behaves as if `minvalue` was set to
   /// `-threshold` and `maxvalue` was set to `threshold` (overriding any values of these options
   /// specified independently).
