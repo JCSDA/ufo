@@ -73,12 +73,14 @@ ioda::ObsDataVector<float> coord_constructor(const ObsErrorWithinGroupCovParamet
       }
       vars = params.var.value().get();
       assert(vars.size() == 1);
-      return ioda::ObsDataVector<float>(obspace, oops::ObsVariables(vars), "MetaData");
+      break;
     case DistanceFunctions::HAVERSINE:
       vars = {"latitude", "longitude"};
-      oops::ObsVariables variables(vars);
-      return ioda::ObsDataVector<float>(obspace, variables, "MetaData");
+      break;
+    default:
+      throw eckit::BadParameter("ObsErrorWithinGroupCov: unimplemented distance function", Here());
   }
+  return ioda::ObsDataVector<float>(obspace, oops::ObsVariables(vars), "MetaData");
 }
 
 }  // anonymous namespace
