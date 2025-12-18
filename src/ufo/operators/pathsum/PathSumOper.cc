@@ -44,6 +44,7 @@ PathSumOper::PathSumOper(const ioda::ObsSpace & odb,
              *params.weights.value() : std::vector<double>()),
     heightRange_(params.heightRange.value() != boost::none ?
                  *params.heightRange.value() : std::vector<double>()),
+    interpolateBoundaries_(params.interpolateBoundaries),
     useKmForHeight_(params.useKmForHeight.value()),
     scalingFactor_(params.scalingFactor)
   {
@@ -67,11 +68,10 @@ PathSumOper::~PathSumOper() {
 }
 
 // -----------------------------------------------------------------------------
+/// Segement length between two points is returned in [m] by default
+/// or [km] if useKmForHeight is true
 double PathSumOper::computeSegmentLength(const std::array<double, 3> &p1,
                                          const std::array<double, 3> &p2) const {
-// Distance between two points is retruned is in [m] by default
-// or [km] if useKmForHeight is true
-
   // Apply scaling factor if input heights are in km
   double scale = useKmForHeight_ ? 0.001 : 1.0;                // convert m->km if needed
 
@@ -126,6 +126,57 @@ inline bool isValidValue(double v) {
   return true;
 }
 
+//------------------------------------------------------------------------------
+/// TrapezoidalWeight = 0.5 * (segment ending at lev) + 0.5 * (segment starting at lev)
+double PathSumOper::computeTrapezoidalWeight(std::size_t lev,
+                                             const std::vector<double> &heights,
+                                             float lat, float lon,
+                                             std::size_t nlevs) const {
+  const double missing = util::missingValue<double>();
+
+  if (heights.empty() || lev >= nlevs) {
+    return missing;
+  }
+
+  double prevSegmentLength = missing;
+  double nextSegmentLength = missing;
+
+  // Segment ending at lev (from lev-1 to lev)
+  if (lev > 0 && isValidValue(heights[lev-1]) && isValidValue(heights[lev])) {
+    std::array<double, 3> p0 = {lat, lon, heights[lev-1]};
+    std::array<double, 3> p1 = {lat, lon, heights[lev]};
+    prevSegmentLength = computeSegmentLength(p0, p1);
+  }
+
+  // Segment starting at lev (from lev to lev+1)
+  if (lev < nlevs - 1 && isValidValue(heights[lev]) && isValidValue(heights[lev+1])) {
+    std::array<double, 3> p0 = {lat, lon, heights[lev]};
+    std::array<double, 3> p1 = {lat, lon, heights[lev+1]};
+    nextSegmentLength = computeSegmentLength(p0, p1);
+  }
+
+  // Trapezoidal weight: half of each adjacent segment
+  if (isValidValue(prevSegmentLength) && isValidValue(nextSegmentLength)) {
+    return 0.5 * prevSegmentLength + 0.5 * nextSegmentLength;
+  } else if (isValidValue(nextSegmentLength)) {
+    return 0.5 * nextSegmentLength;  // First level: only next segment
+  } else if (isValidValue(prevSegmentLength)) {
+    return 0.5 * prevSegmentLength;  // Last level: only prev segment
+  }
+
+  return missing;
+}
+
+//------------------------------------------------------------------------------
+/// Linear interpolation to get value at point x between two points x0 (with
+/// value y0) and x1 (with value y1)
+inline double linearInterpolate(double x, double x0, double x1, double y0, double y1) {
+  if (x1 == x0) return y0;  // avoid div-by-zero
+  double slope = (y1 - y0) / (x1 - x0);
+  double yinterp = y0 + (x - x0) * slope;
+  return yinterp;
+}
+
 // -----------------------------------------------------------------------------
 void PathSumOper::simulateObs(const GeoVaLs & geovals,
                               ioda::ObsVector & hofx,
@@ -143,7 +194,7 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
   const double missing = util::missingValue<double>();
 
   // Lat/lon from ODB only needed if computing weights(wts)
-  std::vector<double> lats, lons;
+  std::vector<float> lats, lons;
   if (!weightsVar_) {
     odb_.get_db("MetaData", "latitude", lats);
     odb_.get_db("MetaData", "longitude", lons);
@@ -152,82 +203,135 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
 
   if (pathType_ == "vertical") {
     // Case 1: Vertical integration
-    // Data structure requirement:
-    // for each location defined by latitude(Location), longitude(Location), there is
-    // a vertical model profile defined by height_wrt_surface(Location, nlevs)
 
     // Loop over locations
     for (std::size_t loc = 0; loc < nlocs; ++loc) {
       hofx[loc] = missing;
 
       // Extract profile for main variable
-      std::vector<double> vals(nlevs);
-      geovals.getAtLocation(vals, geovalVar_, loc);
-
-      // Get vertical coordinate if no weights are defined or height range is defined in yaml
-      std::vector<double> heights(nlevs);
-      if ((!weightsVar_ && weights_.empty()) || !heightRange_.empty()) {
-        geovals.getAtLocation(heights, oops::Variable{"height_wrt_surface"}, loc);
-        if (heights.empty()) {
-          oops::Log::warning() << "height_wrt_surface is empty," <<
-                                  " therefore height range can not be applied" << std::endl;
-          continue;  // safety check
-        }
-      }
+      std::vector<double> valueProfile(nlevs);
+      geovals.getAtLocation(valueProfile, geovalVar_, loc);
 
       // Extract weights for integration computation if WeightsVar is defined in yaml
-      std::vector<double> wts(nlevs-1, missing);  // default = missing
+      std::vector<double> wts(nlevs, missing);  // default = missing, dimension nlevs
       if (weightsVar_) {
         geovals.getAtLocation(wts, *weightsVar_, loc);
       }
 
-      // Prepare for vertical path integration
-      double sum = 0.0;
-      bool anyValid = false;
-
+      // Apply height range restriction and interpolate boundaries if needed
       const bool useHeightRange = !heightRange_.empty();
       const double hmin = useHeightRange ? heightRange_[0] : std::numeric_limits<double>::lowest();
       const double hmax = useHeightRange ? heightRange_[1] : std::numeric_limits<double>::max();
 
-      for (std::size_t lev = 1; lev < nlevs; ++lev) {
-        double wt = missing;
+      // Get vertical coordinate if no weights are defined or height range is defined in yaml
+      std::vector<double> heights;
+      if ((!weightsVar_ && weights_.empty()) || useHeightRange) {
+        std::vector<double> heightProfile(nlevs);
+        geovals.getAtLocation(heightProfile, oops::Variable{"height_wrt_surface"}, loc);
+        if (heightProfile.empty()) {
+          oops::Log::warning() << "height_wrt_surface is empty," <<
+                                  " therefore height range can not be applied" << std::endl;
+          continue;  // safety check
+        }
+        heights = heightProfile;  // Copy to heights for use in interpolation and integration
+      }
 
-        // Determine whether this level pair should be considered based on height range (if defined)
+      // Create working copies so original GeoVaLs remain untouched
+      std::vector<double> vals = valueProfile;
+
+      if (useHeightRange && interpolateBoundaries_ && heights.size() > 1) {
+        // Ensure increasing order. Note: heights should be monotonic
+        if (heights.front() > heights.back()) {
+          std::reverse(heights.begin(), heights.end());
+          std::reverse(vals.begin(), vals.end());
+        }
+
+        // Interpolate upper/lower boundary if needed
+        bool lowerBoundaryInterpolated = false;
+        bool upperBoundaryInterpolated = false;
+        bool lowerBoundaryNeeded = false;
+        bool upperBoundaryNeeded = false;
+        for (std::size_t lev = 1; lev < nlevs; ++lev) {
+          if (isValidValue(heights[lev-1]) && heights[lev-1] < hmin) {
+            lowerBoundaryNeeded = true;
+            if (isValidValue(heights[lev]) && heights[lev] >= hmin) {
+              double interpVal = linearInterpolate(hmin,
+                                                   heights[lev-1], heights[lev],
+                                                   vals[lev-1], vals[lev]);
+              heights[lev-1] = hmin;
+              vals[lev-1] = interpVal;
+              lowerBoundaryInterpolated = true;
+              break;
+            }
+          }
+          if (isValidValue(heights[lev]) && heights[lev] >= hmax) {
+            upperBoundaryNeeded = true;
+            if (isValidValue(heights[lev-1]) && heights[lev-1] < hmax) {
+              double interpVal = linearInterpolate(hmax,
+                                                   heights[lev-1], heights[lev],
+                                                   vals[lev-1], vals[lev]);
+              heights[lev] = hmax;
+              vals[lev] = interpVal;
+              upperBoundaryInterpolated = true;
+              break;
+            }
+          }
+        }
+        if (lowerBoundaryNeeded && !lowerBoundaryInterpolated) {
+            oops::Log::warning() << "Could not interpolate lower boundary at hmin=" << hmin
+                                 << " for location " << loc
+                                 << ": no valid level pair found spanning hmin" << std::endl;
+        }
+        if (upperBoundaryNeeded && !upperBoundaryInterpolated) {
+           oops::Log::warning() << "Could not interpolate upper boundary at hmax=" << hmax
+                                 << " for location " << loc
+                                 << ": no valid level pair found spanning hmax" << std::endl;
+        }
+      }
+
+      // Prepare for vertical path integration
+      // Loop over levels (nlevs dimension, same as vals)
+      double sum = 0.0;
+      bool anyValid = false;
+
+      for (std::size_t lev = 0; lev < nlevs; ++lev) {
+        // Check if this level is within height range (if defined)
         bool withinHeightRange = true;
-        if (!heightRange_.empty()) {
-          // If height is available and height range is define in yaml,
-          // only consider levels within the height range
-          withinHeightRange =
-            (heights[lev]   >= hmin && heights[lev]   < hmax &&
-             heights[lev-1] >= hmin && heights[lev-1] < hmax);
-        }
-
-        if (!withinHeightRange) {
-          oops::Log::trace() << "Beyond height range, skip level " << lev << std::endl;
-          continue;  // skip levels outside the height range
-        }
-
-        // ---- Determine weight (wt) depending on configuration ----
-        if (weightsVar_) {
-          // option 1: read from GeoVaLs
-          wt = wts[lev-1];  // pre-fetched earlier
-        } else if (!weights_.empty()) {
-          // option 2: yaml-defined static weights
-          if (lev - 1 < weights_.size())
-            wt = weights_[lev - 1];
-        } else {
-          // option 3: compute geometrically (requires height + lat/lon)
-          if (!heights.empty() &&
-            isValidValue(heights[lev-1]) && isValidValue(heights[lev])) {
-            std::array<double, 3> p0 = {lats[loc], lons[loc], heights[lev-1]};
-            std::array<double, 3> p1 = {lats[loc], lons[loc], heights[lev]};
-            wt = computeSegmentLength(p0, p1);  // m or km depending on flag
+        if (useHeightRange) {
+          if (!heights.empty() && isValidValue(heights[lev])) {
+            withinHeightRange = (heights[lev] >= hmin && heights[lev] <= hmax);
+          } else {
+            withinHeightRange = false;
           }
         }
 
-        // Compute trapezoidal sum if all valid
-        if (isValidValue(vals[lev]) && isValidValue(vals[lev-1]) && isValidValue(wt)) {
-          sum += 0.5f * (vals[lev] + vals[lev-1]) * wt;
+        if (!withinHeightRange) {
+          oops::Log::trace() << "Beyond height range, skip level " << heights[lev] << std::endl;
+          continue;
+        }
+
+        // ---- Determine weight (wt) depending on configuration ----
+        double wt = missing;
+        if (weightsVar_) {
+          // option 1: read from GeoVaLs (dimension nlevs)
+          if (lev < wts.size()) {
+            wt = wts[lev];
+            oops::Log::trace() << "wts from geoval" << std::endl;
+          }
+        } else if (!weights_.empty()) {
+          if (lev < weights_.size()) {
+            wt = weights_[lev];
+            oops::Log::trace() << "wts from yaml" << std::endl;
+          }
+        } else {
+          // option 3: compute trapezoidal weight based on segment length
+          wt = computeTrapezoidalWeight(lev, heights, lats[loc], lons[loc], nlevs);
+          oops::Log::trace() << "wts from operator" << std::endl;
+        }
+
+        // Compute sum using weight * value
+        if (isValidValue(vals[lev]) && isValidValue(wt)) {
+          sum += wt * vals[lev];
           anyValid = true;
         }
       }

@@ -93,8 +93,12 @@ class PathSumOperParameters : public ObsOperatorParametersBase {
   // Optional YAML weights
   oops::OptionalParameter<std::vector<double>> weights{"weights", this};
 
-  // Optional height range restriction: [zmin, zmax]
+  // Optional height range restriction: [hmin, hmax]
   oops::OptionalParameter<std::vector<double>> heightRange{"height range", this};
+
+  // Optional: whether to interpolate to exact height range boundaries [hmin, hmax].
+  //           Only works when heightrange is defined
+  oops::Parameter<bool> interpolateBoundaries{"interpolate boundaries", false, this};
 
   // Optional scaling factor for geoval height unit. True if km is unit of geoval height unit
   // Otherwise, m (SI unit) is assumed
@@ -131,9 +135,11 @@ class PathSumOper : public ObsOperatorBase {
   double computeSegmentLength(const std::array<double, 3> &p1,
                               const std::array<double, 3> &p2) const;
 
-  // Compute trapezoidal integration
-  double trapezoidal_integration(const std::vector<double> &x,
-                               const std::vector<double> &y) const;
+  // Compute trapezoidal weight for a given level based on segment lengths
+  double computeTrapezoidalWeight(std::size_t lev,
+                                  const std::vector<double> &heights,
+                                  float lat, float lon,
+                                  std::size_t nlevs) const;
 
   /// Parameters stored
   const ioda::ObsSpace & odb_;
@@ -142,6 +148,7 @@ class PathSumOper : public ObsOperatorBase {
   boost::optional<oops::Variable> weightsVar_;
   std::vector<double> weights_;
   std::vector<double> heightRange_;
+  bool interpolateBoundaries_;
   bool useKmForHeight_;
   float scalingFactor_;
 
