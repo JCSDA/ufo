@@ -183,8 +183,8 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
       gvals->getAtLocation(cx_windcomponent, oops::Variable{"northward_wind"}, iloc);
     }
     // Initialize at each location
-    float error_press = 0.0;  // default wind error contribution from error in pressure, ms-1
-    float error_vector = 3.5;  // default wind error contribution from error in vector, ms-1
+    double error_press = 0.0;  // default wind error contribution from error in pressure, ms-1
+    double error_vector = 3.5;  // default wind error contribution from error in vector, ms-1
     double weight = 0.0;
     double sum_top = 0.0;
     double sum_weight = 0.0;
@@ -207,7 +207,7 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
     if ( (ob_qi[iloc] != missing) &&
          (ob_qi[iloc] > 0.0) &&
          (ob_qi[iloc] <= 100.0)) {
-      error_vector = eu_mult * (ob_qi[iloc] * 0.01) + eu_add;
+      error_vector = static_cast<double>(eu_mult * (ob_qi[iloc] * 0.01) + eu_add);
     } else {
       countQiAccumulator->addTerm(iloc, 1);
     }
@@ -222,9 +222,10 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
       }
       // Calculate weight for each background level, avoiding zero divide.
       if (pressure_error[iloc] > 0) {
-        weight = exp(-0.5 * pow(cx_p[ilev] - ob_p[iloc], 2) /
-                            pow(pressure_error[iloc], 2) )
-                 * std::abs(cx_p[ilev] - cx_p[ilev + 1]);
+        weight = exp(-0.5 *
+                     pow(static_cast<double>(cx_p[ilev] - ob_p[iloc]), 2) /
+                     pow(static_cast<double>(pressure_error[iloc]), 2))
+                     * std::abs(cx_p[ilev] - cx_p[ilev + 1]);
       } else {
           weight = 0.0;
       }
@@ -239,12 +240,12 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
       sum_weight += weight;
     }
 
-    if (sum_weight > 0) {
-      error_press = sqrt(sum_top / sum_weight);
+    if (sum_weight > 0.0) {
+      error_press = sqrt(static_cast<double>(sum_top / sum_weight));
     }
 
-    obserr[0][iloc] = sqrt(pow(error_vector, 2) +
-                           pow(error_press, 2) );
+    obserr[0][iloc] = static_cast<float>(sqrt(pow(error_vector, 2) +
+                                              pow(error_press, 2) ));
   }
   // sum number of bad QI values
   const std::size_t countQi = countQiAccumulator->computeResult();
