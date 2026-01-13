@@ -108,7 +108,8 @@ std::vector<MetOfficeBuddyPair> MetOfficeBuddyPairFinder::pairObservations(
   // Initialise variables
   const float bandWidth = zonalBandWidth(options_.numZonalBands);
   // eqn 3.1
-  const float searchDLat = Constants::rad2deg * options_.searchRadius / Constants::mean_earth_rad;
+  const float searchDLat = static_cast<float>(Constants::rad2deg * options_.searchRadius
+                           / (Constants::mean_earth_rad_m / 1000.0));  // in km
   const float searchDLatB = searchDLat + 0.5f * bandWidth;
   const int numSearchBands = static_cast<int>(searchDLat / bandWidth) + 1;
 
@@ -239,7 +240,7 @@ std::unique_ptr<MetOfficeBuddyCollector> MetOfficeBuddyPairFinder::makeBuddyColl
 
 float MetOfficeBuddyPairFinder::getLongitudeSearchRangeHalfWidth(int bandIndex,
                                                                  float bandWidth) const {
-  const float earthRadius = Constants::mean_earth_rad;
+  const float earthRadius = static_cast<float>(Constants::mean_earth_rad_m / 1000.0);  // km
   const float deg2rad = static_cast<float>(Constants::deg2rad);
   const float rad2deg = static_cast<float>(Constants::rad2deg);
 

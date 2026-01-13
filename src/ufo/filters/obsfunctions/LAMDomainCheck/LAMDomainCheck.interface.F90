@@ -9,7 +9,7 @@ module ufo_lamdomaincheck_mod_c
 
   use iso_c_binding
   use kinds
-  use ufo_constants_mod, only: deg2rad, two, half, mean_earth_rad
+  use ufo_constants_mod, only: deg2rad, two, half, mean_earth_rad_m
 
   implicit none
 
@@ -125,7 +125,7 @@ subroutine lam_domaincheck_circle_c(c_cenlat, c_cenlon, c_radius, &
   dlat = half*abs(lat - cenlat)
   dlon = half*abs(lon - cenlon)
   rr = sqrt( sin(dlat)**2 + cos(lat)*cos(cenlat)*sin(dlon)**2 )
-  rr = two*asin(rr)*mean_earth_rad
+  rr = two*asin(rr)*(mean_earth_rad_m/1000.0)
 
   ! use rr to determine if mask is 1 (good) or 0 (bad)
   c_mask = 0  ! outside domain

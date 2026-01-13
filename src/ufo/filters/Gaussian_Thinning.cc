@@ -357,11 +357,11 @@ boost::optional<SpatialBinSelector> Gaussian_Thinning::makeSpatialBinSelector(
   SpatialBinCountRoundingMode roundingMode = roundHorizontalBinCountToNearest ?
         SpatialBinCountRoundingMode::NEAREST : SpatialBinCountRoundingMode::DOWN;
 
-  const float earthRadius = Constants::mean_earth_rad;  // km
+  const float earthRadius = static_cast<float>(Constants::mean_earth_rad_m / 1000.0);  // km
   const float meridianLength = M_PI * earthRadius;
   if (defineMeridian20000km)
     // Distance horizontalMesh is defined with respect to a meridian of exactly 20000.0 km;
-    // scale horizontalMesh to be consistent with meridian defined using Constants::mean_earth_rad
+    // scale horizontalMesh to be consistent with meridian defined using mean_earth_rad_km
     horizontalMesh *= meridianLength/20000.0;
   const float tentativeNumLatBins = meridianLength / horizontalMesh;
   const int numLatBins = SpatialBinSelector::roundNumBins(tentativeNumLatBins, roundingMode);

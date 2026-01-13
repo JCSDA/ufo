@@ -33,19 +33,19 @@ CASE("ufo/GeometryCalculations/haversine") {
 
   // Distance between the South pole and the North pole.
   const double result2 = ufo::haversine(-90.0, 0.0, 90.0, 90.0);
-  EXPECT(oops::is_close_relative(result2, 20015086.79602057, 1e-14));
+  EXPECT(oops::is_close_relative(result2, 20015114.352186374, 1e-14));
 
   // Distance around the equator.
   const double result3 = ufo::haversine(0.0, 0.0, 0.0, 180.0);
-  EXPECT(oops::is_close_relative(result3, 20015086.79602057, 1e-14));
+  EXPECT(oops::is_close_relative(result3, 20015114.352186374, 1e-14));
 
   // Distances between some arbitrarily-chosen points.
   const double result4 = ufo::haversine(-60.0, 70.0, 30.0, -80.0);
-  EXPECT(oops::is_close_relative(result4, 16001196.682441674, 1e-14));
+  EXPECT(oops::is_close_relative(result4, 16001218.712405037, 1e-14));
   const double result5 = ufo::haversine(45.0, -34.0, 23.0, 12.0);
-  EXPECT(oops::is_close_relative(result5, 4808553.133012492, 1e-14));
+  EXPECT(oops::is_close_relative(result5, 4808559.7532829279, 1e-14));
   const double result6 = ufo::haversine(100.0, 80.0, 100.001, 79.999);
-  EXPECT(oops::is_close_relative(result6, 112.85910788562497, 1e-14));
+  EXPECT(oops::is_close_relative(result6, 112.85926326662934, 1e-14));
 }
 
 CASE("ufo/GeometryCalculations/convertRangeAzimToLatLon") {
@@ -55,19 +55,19 @@ CASE("ufo/GeometryCalculations/convertRangeAzimToLatLon") {
          oops::is_close_relative(lon1, 30.0, 1e-14));
   const auto[lat2, lon2] = ufo::convertRangeAzimToLatLon(10000.0, 90.0, 60.0, 30.0, 1000.0, 0.0);
   EXPECT(oops::is_close_relative(lat2, 60.0, 1e-14) &&
-         oops::is_close_relative(lon2, 30.179843066810278, 1e-14));
+         oops::is_close_relative(lon2, 30.1798428192375, 1e-14));
   const auto[lat3, lon3] = ufo::convertRangeAzimToLatLon(10000.0, 90.0, 60.0, 30.0, 1000.0, 45.0);
   EXPECT(oops::is_close_relative(lat3, 60.0, 1e-14) &&
-         oops::is_close_relative(lon3, 30.127062525508897, 1e-14));
+         oops::is_close_relative(lon3, 30.127062350739433, 1e-14));
   const auto[lat4, lon4] = ufo::convertRangeAzimToLatLon(10000.0, 90.0, 60.0, 30.0, 1000.0, 90.0);
   EXPECT(oops::is_close_relative(lat4, 60.0, 1e-14) &&
          oops::is_close_relative(lon4, 30.0, 1e-14));
   const auto[lat5, lon5] = ufo::convertRangeAzimToLatLon(10000.0, -45.0, 0.0, 0.0, 0.0, 0.0);
-  EXPECT(oops::is_close_relative(lat5, 0.06359161122573972, 1e-14) &&
-         oops::is_close_relative(lon5, 359.9364083887743, 1e-14));
+  EXPECT(oops::is_close_relative(lat5, 0.06359152367493523, 1e-14) &&
+         oops::is_close_relative(lon5, 359.93640847632508, 1e-14));
   const auto[lat6, lon6] = ufo::convertRangeAzimToLatLon(10000.0, -45.0, 89.9, 0.0, 10000.0, -45.0);
-  EXPECT(oops::is_close_relative(lat6, 89.94495057109484, 1e-14) &&
-         oops::is_close_relative(lon6, 334.2452068200381, 1e-14));
+  EXPECT(oops::is_close_relative(lat6, 89.944950509229699, 1e-14) &&
+         oops::is_close_relative(lon6, 334.24524226617109, 1e-14));
 
   // Tests of the range/azimuth to lat/lon conversion routine which modifies values in place.
   double lat1b, lon1b;

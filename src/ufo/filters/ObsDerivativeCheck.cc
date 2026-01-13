@@ -102,7 +102,7 @@ void ObsDerivativeCheck::applyFilter(const std::vector<bool> & apply,
                                  std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ObsDerivativeCheck applyFilter start" << std::endl;
   const float missing = util::missingValue<float>();
-  const double radiusEarth = Constants::mean_earth_rad*1000.0;
+  const double radiusEarth = Constants::mean_earth_rad_m;
 
   // first we want to get the config of the two vars to use in computing the derivative
   const std::string strInd_ = parameters_.independent;

@@ -18,7 +18,7 @@ double haversine(const double lat1,
                  const double lon1,
                  const double lat2,
                  const double lon2) {
-  const double earthRadius = ufo::Constants::mean_earth_rad * 1000.0;
+  const double earthRadius = ufo::Constants::mean_earth_rad_m;
   const double deg2rad = ufo::Constants::deg2rad;
   const double deltaLat = lat1 - lat2;
   const double deltaLon = lon1 - lon2;
@@ -43,7 +43,7 @@ void convertRangeAzimToLatLon(const double range,
                            "greater than 89.9 degrees", Here());
   }
   const double deg2rad = ufo::Constants::deg2rad;
-  const double earthRadius = ufo::Constants::mean_earth_rad * 1000.0;
+  const double earthRadius = ufo::Constants::mean_earth_rad_m;
   const double earthCircumference = 2.0 * M_PI * earthRadius;
   // Earth radius accounting for curvature.
   const double effectiveEarthRadius = earthRadius * 4.0 / 3.0;

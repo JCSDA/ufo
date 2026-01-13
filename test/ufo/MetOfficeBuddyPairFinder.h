@@ -259,7 +259,8 @@ void findEndpoint(double startLat, double startLon, double distance, double bear
     startLat *= ufo::Constants::deg2rad;
     startLon *= ufo::Constants::deg2rad;
     bearing *= ufo::Constants::deg2rad;
-    distance /= ufo::Constants::mean_earth_rad;
+    const double mean_earth_rad_km = ufo::Constants::mean_earth_rad_m / 1000.0;
+    distance /= mean_earth_rad_km;
     endLat = std::asin(std::sin(startLat) * std::cos(distance) +
                        std::cos(startLat) * std::sin(distance) * std::cos(bearing));
     endLon = startLon + std::atan2(std::sin(bearing) * std::sin(distance) * std::cos(startLat),

@@ -42,7 +42,6 @@ struct Constants {
   static constexpr double rv_over_rd     = rv/rd;
   static constexpr double rd_over_g      = rd/grav;
   static constexpr double g_over_rd      = grav / rd;
-  static constexpr double mean_earth_rad = 6371.0;       // Mean radius of the Earth (km)
   static constexpr double zero           = 0.0;
   static constexpr double quarter        = 0.25;
   static constexpr double half           = 0.5;
@@ -104,6 +103,8 @@ struct Constants {
   // Originally from src/ufo/operators/gnssro/utils/gnssro_mod_transform.F90
   static constexpr double semi_major_axis   = 6378.1370e3;     // [m]
   static constexpr double semi_minor_axis   = 6356.7523142e3;  // [m]
+  static constexpr double mean_earth_rad_m  = ( (2 * semi_major_axis) + semi_minor_axis) / 3;
+                                              // Mean radius of the Earth [m]
   static constexpr double grav_polar        = 9.8321849378;    // [m/s2]
   static constexpr double grav_equator      = 9.7803253359;    // [m/s2]
   static constexpr double earth_omega       = 7.292115e-5;     // [rad/s]

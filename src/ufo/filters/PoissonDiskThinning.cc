@@ -731,7 +731,7 @@ std::array<float, numDims> PoissonDiskThinning::getObservationPosition(
       position[dim++] = (*obsData.longitudes)[obsId];
     } else {
       const float deg2rad = static_cast<float>(M_PI / 180.0);
-      const float earthRadius = Constants::mean_earth_rad;
+      const float earthRadius = static_cast<float>(Constants::mean_earth_rad_m / 1000.0);
 
       const float lon = deg2rad * (*obsData.longitudes)[obsId];
       const float lat = deg2rad * (*obsData.latitudes)[obsId];
@@ -770,7 +770,7 @@ std::array<float, numDims> PoissonDiskThinning::getExclusionVolumeSemiAxes(
   unsigned int dim = 0;
 
   if (obsData.minHorizontalSpacings) {
-    const float earthDiameter = 2 * Constants::mean_earth_rad;
+    const float earthDiameter = static_cast<float>(2 * Constants::mean_earth_rad_m / 1000.0);
     const float invEarthDiameter = 1 / earthDiameter;
 
     const float minGeodesicDistance = obsData.minHorizontalSpacings->at(priority);
