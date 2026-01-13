@@ -139,10 +139,17 @@ void assignObsDataVector(const std::vector<bool> &apply,
   // Minimum and maximum destination type cast to int64_t.
   // This ensures that out-of-bounds values (caused by an inappropriate epoch)
   // are not silenty stored in the output vector.
-  const int64_t minVariableType =
-    static_cast<int64_t>(std::numeric_limits<VariableType>::lowest());
-  const int64_t maxVariableType =
-    static_cast<int64_t>(std::numeric_limits<VariableType>::max());
+  int64_t minVariableType = 0;
+  int64_t maxVariableType = 0;
+  if constexpr (std::is_same_v<VariableType, float>) {
+    // For float, use the full int64_t range to avoid overflow during cast.
+    minVariableType = std::numeric_limits<int64_t>::min();
+    maxVariableType = std::numeric_limits<int64_t>::max();
+  } else {
+    minVariableType = static_cast<int64_t>(std::numeric_limits<VariableType>::lowest());
+    maxVariableType = static_cast<int64_t>(std::numeric_limits<VariableType>::max());
+  }
+
   for (size_t ival = 0; ival < source.nvars(); ++ival) {
     const ioda::ObsDataRow<util::DateTime> &currentSource = source[ival];
     ioda::ObsDataRow<VariableType> &currentDestination = destination[ival];
