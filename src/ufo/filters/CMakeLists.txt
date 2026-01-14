@@ -78,6 +78,7 @@ set ( filters_files
       ObsDomainErrCheck.h
       ObsFilterData.cc
       ObsFilterData.h
+      ObsPolygonCheck.h
       ObsRefractivityGradientCheck.h
       ObsRefractivityGradientCheck.cc
       ParameterSubstitution.cc
