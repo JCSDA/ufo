@@ -1,0 +1,37 @@
+time window:
+  begin: 2023-11-30T21:00:00Z
+  end: 2023-12-01T03:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: iasi_metop-b
+      EndianType: little_endian
+      CoefficientPath: Data/
+      ReconstructedRadianceCorrection: true
+      CMatrixPath: Data/ufo/testinput_tier_1/resources/auxillary/iasi_cmatrix_and_bias
+    linear obs operator:
+      Absorbers: [H2O,O3]
+      Surfaces: [Water_Temperature,Land_Temperature,Ice_Temperature,Snow_Temperature]
+      ReconstructedRadianceCorrection: true
+      CMatrixPath: Data/ufo/testinput_tier_1/resources/auxillary/iasi_cmatrix_and_bias
+  obs space:
+    name: iasi_metop-b
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metop-b_pcobs_2023120100.nc4
+    observed variables: [brightnessTemperature]
+    simulated variables: [brightnessTemperature]
+    channels: &all_channels 1-1997
+
+  geovals:
+    filename: Data/ufo/testinput_tier_1/iasi_metop-b_pcobs_geovals_2023120100.nc4
+  vector ref: refHofx
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11

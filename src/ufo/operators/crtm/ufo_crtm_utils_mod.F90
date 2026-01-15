@@ -102,6 +102,8 @@ type crtm_conf
  logical :: cal_cloud_reff_in_fov  = .false.
  logical :: precip_hydro = .false.
  logical :: flag_deep_conv_mass_flux = .true.
+ logical :: read_Cmatrix = .false.
+ character(len=max_string) :: Cmatrix_path
 end type crtm_conf
 
 
@@ -664,7 +666,17 @@ character(max_string) :: cloud_reff_method
  if (f_confOpts%has("InspectProfileNumber")) then
    call f_confOpts%get_or_die("InspectProfileNumber",conf%inspect)
  endif
+ ! reconstruction operator cmatrix path 
 
+ conf % read_Cmatrix = .false.
+ if (f_confOpts % has("ReconstructedRadianceCorrection")) then
+    call f_confOpts % get_or_die("ReconstructedRadianceCorrection", conf % read_Cmatrix)
+ end if
+
+ if (conf % read_Cmatrix) then
+    call f_confOpts % get_or_die("CMatrixPath", str)
+    conf % Cmatrix_path = trim(str)
+ end if
 end subroutine crtm_conf_setup
 
 ! -----------------------------------------------------------------------------

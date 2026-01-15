@@ -67,6 +67,13 @@ namespace ufo
     /// MWwaterCoeff
     oops::OptionalParameter<std::string> MWwaterCoeff{"MWwaterCoeff", "FASTEM6", this};
     /// Scaling factor
+    /// if true, initialise and read C matrix for reconstructed radiances
+    oops::OptionalParameter<bool> ReconstructedRadianceCorrection
+                                 {"ReconstructedRadianceCorrection", this};
+
+    /// C matrix path
+    oops::OptionalParameter<std::string> CMatrixPath{"CMatrixPath", this};
+
     oops::Parameter <double> modelUnitsCoeff{"model units coeff",
           "Conversion between model units", 1.0, this};
   };  // end class ObsOptionsParameters

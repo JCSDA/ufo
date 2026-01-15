@@ -30,6 +30,7 @@ set ( crtm_files
   ObsAodCRTMTLAD.interface.h
   ufo_aodcrtm_mod.F90
   ufo_aodcrtm_tlad_mod.F90
+  ufo_reconradop_crtm_mod.F90
 )
 
 PREPEND( _p_crtm_files       "operators/crtm"       ${crtm_files} )
