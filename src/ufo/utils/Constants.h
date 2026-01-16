@@ -20,20 +20,21 @@ namespace ufo {
 struct Constants {
   static constexpr double deg2rad        = M_PI / 180.;
   static constexpr double rad2deg        = 180. * M_1_PI;
-  static constexpr double grav           = 9.80665e+0;   // Gravity m / s^2
-  static constexpr double speedOfLight   = 299792458;    // m / s
-  static constexpr double t0c            = 2.7315e+2;    // temperature at zero celsius (K)
-  static constexpr double ttp            = 2.7316e+2;    // temperature at h2o triple point (K)
-  static constexpr double rd             = 2.8705e2;     // specific gas constant for dry air
-                                                         // (J K^-1 kg^-1)
-  static constexpr double rv             = 4.6150e2;     // specific gas constant for water vapor
-                                                         // (J K^-1 kg^-1)
-  static constexpr double cp             = 1.0046e3;     // heat capacity at constant pressure
-                                                         // for dry air (J K^-1 kg^-1)
-  static constexpr double cv             = 7.1760e2;     // heat capacity at constant volume
-                                                         // for dry air (J K^-1 kg^-1)
-  static constexpr double pref           = 1.0e5;        // Reference pressure for calculating
-                                                         //      exner
+  static constexpr double grav           = 9.80665e+0;    // Gravity m / s^2
+  static constexpr double speedOfLight   = 299792458;     // m / s
+  static constexpr double t0c            = 2.7315e+2;     // temperature at zero celsius (K)
+  static constexpr double ttp            = 2.7316e+2;     // temperature at h2o triple point (K)
+  static constexpr double rd             = 2.8705e2;      // specific gas constant for dry air
+                                                          // (J K^-1 kg^-1)
+  static constexpr double rv             = 4.6150e2;      // specific gas constant for water vapor
+                                                          // (J K^-1 kg^-1)
+  static constexpr double cp             = 1.0046e3;      // heat capacity at constant pressure
+                                                          // for dry air (J K^-1 kg^-1)
+  static constexpr double cv             = 7.1760e2;      // heat capacity at constant volume
+                                                          // for dry air (J K^-1 kg^-1)
+  static constexpr double k_B            = 1.380649e-23;  // Boltzmann constant (J K-1)
+  static constexpr double pref           = 1.0e5;         // Reference pressure for calculating
+                                                          //      exner
   static constexpr double rd_over_rv     = 0.62198;
           // ratio of molecular weight of water (18.01528 g/mol) to dry air (28.9645 g/mol)
           // Often called "epsilon" or "gas constant ratio"

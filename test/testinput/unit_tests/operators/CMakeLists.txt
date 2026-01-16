@@ -76,6 +76,16 @@ ufo_add_test( NAME    test_ufo_opr_aod_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ ufo_add_test( NAME    test_ufo_opr_aod_ukca
+               TIER    1
+               ECBUILD
+               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_ukca.yaml"
+               MPI     1
+               LIBS    ufo
+               LABELS  operators
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_linopr_aod_metoffice
               TIER    1
               ECBUILD
