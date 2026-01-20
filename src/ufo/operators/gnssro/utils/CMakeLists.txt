@@ -10,6 +10,16 @@ set (  utils_src_files
        gnssro_mod_constants.F90
        gnssro_mod_transform.F90
        gnssro_mod_obserror.F90
+       GnssroGeoVaLs.cc
+       GnssroProfileExtractor.cc
+       GnssroProfileRayPaths.cc
+       GnssroRayPath.cc
+       GnssroRayPathGenerator.cc
+       GnssroRayPathOrchestrator.cc
+       GnssroRayPathParameters.cc
+       GnssroRayTrajectory.cc
+       RefractivityCalculator.cc
+       StraightLineRayPathGenerator.cc
 PARENT_SCOPE
 )
 

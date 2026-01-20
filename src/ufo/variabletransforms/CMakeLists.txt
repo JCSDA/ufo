@@ -8,6 +8,7 @@
 set ( variabletransforms_files
       Cal_AdjustedHeightCoordinate.h
       Cal_AdjustedHeightCoordinate.cc
+      Cal_GnssroRefractivityGradient.cc
       Cal_HeightFromPressure.h
       Cal_HeightFromPressure.cc
       Cal_Humidity.h
@@ -16,6 +17,7 @@ set ( variabletransforms_files
       Cal_IceThicknessFromFreeboard.cc
       Cal_Logarithm.h
       Cal_Logarithm.cc
+      Cal_NonLocalPseudoExcessPhase.cc
       Cal_PotentialTFromT.h
       Cal_PotentialTFromT.cc
       Cal_PressureFromHeight.h

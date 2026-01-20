@@ -1,0 +1,38 @@
+time window:
+  begin: 2025-07-03T21:00:00Z
+  end: 2025-07-04T03:00:00Z
+observations:
+- obs space:
+    name: GnssroRef
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/nonlocalpseudoexcessphase_transforms.nc4
+    observed variables: [atmosphericRefractivity]
+    derived variables: [nonLocalPseudoExcessPhase]
+    simulated variables: [nonLocalPseudoExcessPhase]
+#   obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/nonlocalpseudoexcessphase_transforms_output.nc4
+  obs filters:
+  - filter: Variable Transforms
+    Transform: NonLocalPseudoExcessPhase
+    UseValidDataOnly: true
+    res: 11.0
+    top_2d: 60.0
+    n_horiz: 19
+    group: "ObsValue"
+    refractivity variable: "atmosphericRefractivity"
+    nlpep variable: "nonLocalPseudoExcessPhase"
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  passedBenchmark: 50          # All 50 obs pass for nonLocalPseudoExcessPhase 
+  compareVariables:            #  test output matches precalculated values
+    - reference:
+        name: TestReference/nonLocalPseudoExcessPhase
+      test:
+        name: DerivedObsValue/nonLocalPseudoExcessPhase
+      relTol: 5.0e-6

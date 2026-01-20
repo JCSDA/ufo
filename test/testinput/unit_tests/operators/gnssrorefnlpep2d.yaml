@@ -1,0 +1,35 @@
+time window:
+  begin: 2025-07-03T21:00:00Z
+  end: 2025-07-04T03:00:00Z
+observations:
+- obs operator:
+   name: GnssroRefNLPEP2D
+   obs options:
+    ray_path_gen_type: "StraightLine"
+    res: 11.0
+    top_2d: 22.0
+    n_horiz: 19
+    refr_algo: "RuegerBevis"
+    use_compress: true
+  obs space:
+    name: GnssroRef
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2025070400_refnlpep2d.nc4
+    observed variables: []
+    derived variables: [nonLocalPseudoExcessPhase]
+    simulated variables: [nonLocalPseudoExcessPhase]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/gnssro_obs_2025070400_refnlpep2d_nlpep_opr_out.nc4
+  geovals:
+   filename: Data/ufo/testinput_tier_1/gnssro_geoval_2025070400_refnlpep2d.nc4
+  rms ref: 35.181904131227647 
+  tolerance: 1.0e-11
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 6.0e-4
+    tolerance AD: 1.0e-13
+    iterations TL: 10
