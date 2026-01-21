@@ -183,7 +183,7 @@ extern "C" {
   int ufo_geovals_get_default_format_f90(const F90goms &);
   void ufo_geovals_set_default_format_f90(F90goms &, const int &);
   bool ufo_geovals_are_reduced_and_sampled_formats_aliased_f90(const F90goms &,
-                                                                const int &, const char *);
+                                                               const int &, const char *);
 
   void ufo_geovals_delete_f90(F90goms &);
   void ufo_geovals_copy_f90(const F90goms &, F90goms &);
@@ -192,7 +192,7 @@ extern "C" {
   void ufo_geovals_reorderzdir_f90(const F90goms &, const int &, const char *,
                                    const int &, const char *);
   void ufo_geovals_abs_f90(const F90goms &);
-  void ufo_geovals_rms_f90(const F90goms &, double &);
+  void ufo_geovals_rms_f90(const F90goms &, double &, const int &, const char *);
   void ufo_geovals_analytic_init_f90(F90goms &, const SampledLocations &,
                                      const eckit::Configuration &);
   void ufo_geovals_random_f90(const F90goms &);

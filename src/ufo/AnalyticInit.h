@@ -10,11 +10,10 @@
 
 #include <string>
 
-#include "oops/interface/AnalyticInitBase.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
-#include "ufo/ObsTraits.h"
+#include "ufo/AnalyticInitBase.h"
 
 namespace ufo {
   class GeoVaLs;
@@ -28,7 +27,7 @@ class AnalyticInitParameters : public oops::Parameters {
 };
 
 /// AnalyticInit: filling GeoVaLs with analytic formula
-class AnalyticInit : public oops::interface::AnalyticInitBase<ObsTraits> {
+class AnalyticInit : public ufo::AnalyticInitBase {
  public:
   typedef AnalyticInitParameters Parameters_;
   explicit AnalyticInit(const eckit::Configuration &);

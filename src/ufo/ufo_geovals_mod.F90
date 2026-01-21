@@ -928,24 +928,34 @@ end subroutine ufo_geovals_abs
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_rms(self,vrms)
+subroutine ufo_geovals_rms(self,vrms,varname)
 implicit none
 type(ufo_geovals), intent(in) :: self
 real(kind_real), intent(inout) :: vrms
+character(len=*), intent(in), optional :: varname
 integer :: jv, jo
 real(kind_real) :: N
+type(ufo_geoval), pointer :: geoval
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_rms: geovals not initialized")
 endif
 vrms=0.0_kind_real
 N=0.0_kind_real
-do jv = 1, self%nvar
-   do jo = 1, self%geovals(jv)%nprofiles
-      vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
-      N=N+self%geovals(jv)%nval
-   enddo
-enddo
+if (present(varname)) then
+  call ufo_geovals_get_var(self, varname, geoval)
+  do jo = 1, geoval%nprofiles
+    vrms = vrms + Sum(geoval%vals(:,jo)**2)
+    N=N+geoval%nval
+  enddo
+else
+  do jv = 1, self%nvar
+     do jo = 1, self%geovals(jv)%nprofiles
+        vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
+        N=N+self%geovals(jv)%nval
+     enddo
+  enddo
+endif
 
 if ( N > 0) vrms = sqrt(vrms/N)
 
