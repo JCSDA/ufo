@@ -109,6 +109,10 @@ class PathSumOperParameters : public ObsOperatorParametersBase {
 };
 
 // -----------------------------------------------------------------------------
+// Path types
+enum class PathType {VERTICAL, SLANT};
+
+// -----------------------------------------------------------------------------
 // PathSum observation operator
 class PathSumOper : public ObsOperatorBase {
  public:
@@ -143,7 +147,7 @@ class PathSumOper : public ObsOperatorBase {
 
   /// Parameters stored
   const ioda::ObsSpace & odb_;
-  std::string pathType_;
+  PathType pathType_;
   const oops::Variable geovalVar_;
   boost::optional<oops::Variable> weightsVar_;
   std::vector<double> weights_;

@@ -35,7 +35,6 @@ PathSumOper::PathSumOper(const ioda::ObsSpace & odb,
                          const Parameters_ & params)
   : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
     odb_(odb),
-    pathType_(params.pathType),
     geovalVar_(oops::Variable(params.geovalVar.value())),
     weightsVar_(params.weightsVar.value() ?
           boost::optional<oops::Variable>(oops::Variable(*params.weightsVar.value()))
@@ -48,6 +47,16 @@ PathSumOper::PathSumOper(const ioda::ObsSpace & odb,
     useKmForHeight_(params.useKmForHeight.value()),
     scalingFactor_(params.scalingFactor)
   {
+    std::string ptype = params.pathType.value();
+    std::transform(ptype.begin(), ptype.end(), ptype.begin(), ::tolower);
+    if (ptype == "vertical") {
+      pathType_ = PathType::VERTICAL;
+    } else if (ptype == "slant") {
+      pathType_ = PathType::SLANT;
+    } else {
+      throw eckit::BadParameter(
+        "Unknown path type: " + ptype, Here());
+    }
     requiredVars_ += oops::Variables(std::vector<oops::Variable>{geovalVar_});
     if (!weightsVar_ || !heightRange_.empty()) {
       requiredVars_ += oops::Variables(std::vector<oops::Variable>{
@@ -201,7 +210,7 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
     ASSERT(lats.size() == nlocs && lons.size() == nlocs);
   }
 
-  if (pathType_ == "vertical") {
+  if (pathType_ == PathType::VERTICAL) {
     // Case 1: Vertical integration
 
     // Loop over locations
@@ -342,7 +351,7 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
         hofx[loc] = sum * scalingFactor_;
       }
     }
-  } else if (pathType_ == "slant") {
+  } else if (pathType_ == PathType::SLANT) {
       oops::Log::warning() << "[PathSumOper] Slant path computation is currently a placeholder "
                            << "and will be implemented in a future update. "
                            << "Exiting now to prevent use of incomplete results." << std::endl;
@@ -361,5 +370,4 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
   os << "PathSumOper::print not implemented";
 }
 // -----------------------------------------------------------------------------
-
 }  // namespace ufo
