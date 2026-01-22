@@ -42,13 +42,34 @@ struct DistanceFunctionsParameterTraitsHelper {
   };
 };
 
+enum class CorrelationFunctions {
+      GC99,
+      MARKOV
+};
+
+struct CorrelationFunctionsParameterTraitsHelper {
+  typedef CorrelationFunctions EnumType;
+  static constexpr char enumTypeName[] = "CorrelationFunctions";
+  static constexpr util::NamedEnumerator<CorrelationFunctions> namedValues[] = {
+    { CorrelationFunctions::GC99, "gc99" },
+    { CorrelationFunctions::MARKOV, "markov" }
+  };
+};
+
 }  // namespace ufo
 
 namespace oops {
 
+// Add the specialization for DistanceFunctions:
 template <>
 struct ParameterTraits<ufo::DistanceFunctions> :
     public EnumParameterTraits<ufo::DistanceFunctionsParameterTraitsHelper>
+{};
+
+// Add the specialization for CorrelationFunctions:
+template <>
+struct ParameterTraits<ufo::CorrelationFunctions> :
+    public EnumParameterTraits<ufo::CorrelationFunctionsParameterTraitsHelper>
 {};
 
 }  // namespace oops
@@ -56,19 +77,28 @@ struct ParameterTraits<ufo::DistanceFunctions> :
 namespace ufo {
 
 /// \brief Parameters for obs errors with correlations between obs in one group
-///        set by obs space.obsgrouping
+///        set by obs space.obsgrouping. The parameters are listed in alphabetical
+///        order based on the parameter name.
 class ObsErrorWithinGroupCovParameters : public ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorWithinGroupCovParameters, ObsErrorParametersBase)
  public:
+  oops::Parameter<CorrelationFunctions> correlationFunction{"correlation function",
+        "Correlation function to use for correlation computations. "
+        "Currently only 'gc99' and 'markov' are supported",
+        CorrelationFunctions::GC99, this};
+  oops::RequiredParameter<double> lscale{"correlation lengthscale",
+        "Correlation lengthscale used with the correlation functions", this};
   oops::OptionalParameter<std::vector<std::string>> var{"correlation variable names",
         "Group/Name obs variable that correlations should be computed for (note: "
         "this variable should be the same variable as obs space is grouped on", this};
-  oops::RequiredParameter<double> lscale{"correlation lengthscale",
-        "Gaspari-Cohn correlation lengthscale", this};
   oops::Parameter<DistanceFunctions> distanceFunction{"distance function",
         "Distance function to use for correlation computations. "
         "Currently only 'linear' and 'haversine' are supported",
         DistanceFunctions::LINEAR, this};
+  oops::Parameter<double> markovLengthscaleFactor{"lengthscale factor for markov correlation limit",
+        "The lengthscale factor is multiplied by the lengthscale to provide the limit in "
+        "which correlations are evaluated. Beyond this distance correlation values are set to "
+        "zero.", 1.0, this};
 };
 
 // -----------------------------------------------------------------------------
