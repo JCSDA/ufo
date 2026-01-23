@@ -1686,7 +1686,7 @@ type(c_ptr), intent(in)           :: c_obspace
 type(oops_variables), intent(in)  :: vars
 
 integer :: global_npaths, var_global_npaths
-integer :: nval
+integer :: nval, ival
 integer :: obs_nlocs
 integer :: obs_all_nlocs
 integer :: my_npaths, my_loc, my_path, global_path, global_path_start, global_path_end
@@ -1872,7 +1872,13 @@ do ivar = 1, self%nvar
   endif
 
   ! set the missing value equal to IODA missing_value
-  where (self%geovals(ivar)%vals > 1.0e08) self%geovals(ivar)%vals = self%missing_value
+  do my_loc = 1, obs_nlocs
+    do ival = 1, nval
+      if(self%geovals(ivar)%vals(ival, my_loc) > 1.0e08) then
+        self%geovals(ivar)%vals(ival, my_loc) = self%missing_value
+      endif
+    enddo
+  enddo
 
 enddo
 
