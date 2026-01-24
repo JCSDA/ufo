@@ -124,7 +124,7 @@ class ParameterSubstitution : public ObsFilterBase,
   void checkFilterData(const FilterStage) override;
   oops::Variables requiredVars() const override;
   oops::ObsVariables requiredHdiagnostics() const override;
-  void print(std::ostream & os) const;
+  void print(std::ostream & os) const override;
 
  private:
   const Parameters_ parameters_;
