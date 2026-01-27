@@ -16,6 +16,7 @@
 #ifndef UFO_FILTERS_OBSPOLYGONCHECK_H_
 #define UFO_FILTERS_OBSPOLYGONCHECK_H_
 
+#include <exception>
 #include <memory>
 #include <ostream>
 #include <string>
@@ -34,20 +35,43 @@ namespace ufo {
 
 class ObsPolygonCheckParameters : public FilterParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsPolygonCheckParameters, FilterParametersBase)
-  oops::RequiredParameter <std::string> polyFileName
-    {"polygon wkt file",
-     "Path to a Well Known Text (WKT) file containing the polygon as longitude, latitude pairs. "
-     "Observations that lie within this polygon are retained. "
-     "File contents should look like: \"POLYGON((180 -3, -125 18, 98.4 0, 180 -3))\""
-     this};
-  oops::RequiredParameter <float> insideLon
-    {"inside point longitude",
-     "Longitude of the sample point within the domain, used to find which side of the polygon is inside.",
-     this};
-  oops::RequiredParameter <float> insideLat
-    {"inside point latitude",
-     "Latitude of the sample point within the domain, used to find which side of the polygon is inside.",
-     this};
+
+ public:
+  oops::RequiredParameter<std::vector<float>> vertex_longitudes {
+    "vertex longitudes",
+    "Latitudes of vertices of the polygon.",
+    this};
+  oops::RequiredParameter<std::vector<float>> vertex_latitudes {
+    "vertex latitudes",
+    "Latitudes of vertices of the polygon.",
+    this};
+  oops::RequiredParameter<float> inside_point_longitude {
+    "inside point longitude",
+    "Longitude of a point inside the polygon (used to determine which side is inside).",
+    this};
+  oops::RequiredParameter<float> inside_point_latitude {
+    "inside point latitude",
+    "Latitude of a point inside the polygon (used to determine which side is inside).",
+    this};
+};
+
+/// ObsPolygonLatLonSizeMismatch: thrown when the parameters vertex_longitudes
+/// and vertex_latitudes have different lengths.
+
+class ObsPolygonLatLonSizeMismatch: public std::invalid_argument {
+public:
+  ObsPolygonLatLonSizeMismatch(const std::string &message):
+    std::invalid_argument(message)
+  {}
+};
+
+/// ObsPolygonIsInvalid: thrown when boost::geometry::is_valid doesn't like a polygon.
+
+class ObsPolygonIsInvalid: public std::invalid_argument {
+public:
+  ObsPolygonIsInvalid(const std::string &message):
+    std::invalid_argument(message)
+  {}
 };
 
 /// PolygonCheck: find obs within a specified polygon.
