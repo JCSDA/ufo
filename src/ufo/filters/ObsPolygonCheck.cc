@@ -58,14 +58,14 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
   using polygon_t = bg::model::polygon<point_t>;
 
   // Get from the parameters a point within the polygon.
-  point_t insidePoint(parameters_.inside_point_longitude.value(), parameters_.inside_point_latitude.value());
+  const point_t insidePoint(parameters_.inside_point_longitude.value(), parameters_.inside_point_latitude.value());
 
   // Assemble a polygon from the list of longitudes and latitudes.
   polygon_t poly;
-  auto &vertex_latitudes = parameters_.vertex_latitudes.value();
-  auto &vertex_longitudes = parameters_.vertex_longitudes.value();
-  size_t nlon = vertex_longitudes.size();
-  size_t nlat = vertex_latitudes.size();
+  const auto &vertex_latitudes = parameters_.vertex_latitudes.value();
+  const auto &vertex_longitudes = parameters_.vertex_longitudes.value();
+  const size_t nlon = vertex_longitudes.size();
+  const size_t nlat = vertex_latitudes.size();
   if(nlon != nlat) {
     std::ostringstream what;
     what << "Mismatch between vertex longitude count (" << nlon
@@ -91,13 +91,14 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
   obsdb_.get_db("MetaData", "longitude", lons);
 
   // Figure out which side is the inside by checking a point that is known to be inside.
-  bool useThisSide = bg::within(insidePoint, poly);
+  const bool useThisSide = bg::within(insidePoint, poly);
 
   // Find all points that are on the opposite side from the "inside point"
-  std::vector<bool> notInside(obsdb_.nlocs(), true);
+  const size_t nlocs = obsdb_.nlocs();
+  std::vector<bool> notInside(nlocs, true);
   size_t applyCount = 0;
   size_t insideCount = 0;
-  for (size_t iloc = 0; iloc < obsdb_.nlocs(); iloc++)
+  for (size_t iloc = 0; iloc < nlocs; iloc++)
     if(apply[iloc])
       try {
         applyCount++;
@@ -112,7 +113,7 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
       }
 
   for (auto &vec : flagged)
-    for (size_t iloc = 0; iloc < obsdb_.nlocs(); iloc++)
+    for (size_t iloc = 0; iloc < nlocs; iloc++)
       if(apply[iloc])
         vec[iloc] = notInside[iloc];
 
