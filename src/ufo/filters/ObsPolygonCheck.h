@@ -39,7 +39,7 @@ class ObsPolygonCheckParameters : public FilterParametersBase {
  public:
   oops::RequiredParameter<std::vector<float>> vertex_longitudes {
     "vertex longitudes",
-    "Latitudes of vertices of the polygon.",
+    "Longitudes of vertices of the polygon.",
     this};
   oops::RequiredParameter<std::vector<float>> vertex_latitudes {
     "vertex latitudes",
