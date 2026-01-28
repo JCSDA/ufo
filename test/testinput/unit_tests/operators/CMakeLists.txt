@@ -256,6 +256,26 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    test_ufo_opr_gnssrorefmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice
               TIER    1
               ECBUILD
@@ -324,6 +344,26 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nosupercheck
               MPI     1
               LIBS    ufo
               LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam

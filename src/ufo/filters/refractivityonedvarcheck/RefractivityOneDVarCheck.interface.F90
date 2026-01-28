@@ -50,6 +50,8 @@ subroutine ufo_refractivityonedvarcheck_create_c( &
   y_test, &
   minval_ytest, &
   maxval_ytest, &
+  dryRefractivityConstant, &
+  wetRefractivityConstant, &
   c_onedvarflag &
 ) bind(c,name='ufo_refractivityonedvarcheck_create_f90')
 
@@ -81,6 +83,8 @@ logical(c_bool), intent(in)               :: vert_interp_ops   !< Whether to use
 real(c_float), intent(in)                 :: y_test            !< Threshold on distance between observed and solution bending angles
 real(c_float), intent(in)                 :: minval_ytest      !< Minimum value for y_test
 real(c_float), intent(in)                 :: maxval_ytest      !< Maximum value for y_test
+real(c_float), intent(in)                 :: dryRefractivityConstant !< Dry refractivity constant
+real(c_float), intent(in)                 :: wetRefractivityConstant !< Wet refractivity constant
 integer(c_int), intent(in)                :: c_onedvarflag     !< flag for qc manager logging - input
 
 character(len=filename_length) :: bmatrix_filename             ! Location of the B-matrix file
@@ -113,6 +117,8 @@ call ufo_refractivityonedvarcheck_create( &
   y_test, &
   minval_ytest, &
   maxval_ytest, &
+  dryRefractivityConstant, &
+  wetRefractivityConstant, &
   c_onedvarflag &
 )
 

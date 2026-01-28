@@ -14,6 +14,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/utils/Constants.h"
 
 namespace ufo {
 
@@ -82,6 +83,18 @@ class RefractivityOneDVarCheckParameters : public FilterParametersBase {
   /// Maximum threshold for the value of y_test times of observation uncertainty.
   /// Mainly applies to observations in the lower troposphere where the refractivity is large.
   oops::Parameter<float> maxval_ytest{"maxval_ytest", 30, this};
+
+  oops::Parameter<float> dryRefractivityConstant
+    {"dry_refractivity_constant",
+     "Constant used to multiply the dry refractivity components",
+     Constants::dry_refractivity_constant,
+     this};
+
+  oops::Parameter<float> wetRefractivityConstant
+    {"wet_refractivity_constant",
+     "Constant used to multiply the wet refractivity components",
+     Constants::wet_refractivity_constant,
+     this};
 };
 
 }  // namespace ufo

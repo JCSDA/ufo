@@ -45,6 +45,8 @@ extern "C" {
     const float &,
     const float &,
     const float &,
+    const float &,
+    const float &,
     const int &);
   void ufo_refractivityonedvarcheck_delete_f90(F90onedvarcheck &);
   void ufo_refractivityonedvarcheck_apply_f90(

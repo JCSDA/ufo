@@ -63,9 +63,6 @@ real(kind_real), parameter, public :: flatt = 0.003352811       ! flattening of 
    ! f = (semi_major_axis-semi_minor_axis)/semi_major_axis
 real(kind_real), parameter, public :: m_ratio= 0.003449787      ! gravity ratio
    ! ratio of centrifugal to gravitational force on the equator
-! Refractivity constants
-real(kind_real), parameter, public :: n_alpha = 0.776           ! Refractivity constant a
-real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity constant b
 
 ! constants used in CRTM interface
 real(kind_real), parameter, public :: kg_to_g = 1000.0_kind_real

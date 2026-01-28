@@ -52,6 +52,8 @@ SUBROUTINE Ops_GPSRO_rootsolv_BA (nstate,        &   ! size of state vector
                                   GPSRO_min_temp_grad, &   ! Minimum vertical temperature gradient allowed
                                   capsupersat,   &
                                   noSuperCheck,  &   ! Don't apply super-refraction check in operator?
+                                  dryRefractivityConstant, & ! Dry refractivity constant
+                                  wetRefractivityConstant, & ! Wet refractivity constant
                                   O_Bdiff,       &   ! observed -background bending angle value
                                   RO_Rad_Curv,   &   ! Radius of curvature of ellipsoid
                                   Latitude,      &   ! Latitude of occ
@@ -109,6 +111,8 @@ LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops
 REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad
 LOGICAL, INTENT(IN)            :: capsupersat
 LOGICAL, INTENT(IN)            :: noSuperCheck
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant
 INTEGER, INTENT(OUT)           :: it
 REAL(kind_real), INTENT(OUT)   :: x(:)
 REAL(kind_real), INTENT(OUT)   :: yb(:)
@@ -259,19 +263,21 @@ Iteration_loop: DO
   pressure = 100 * x(1:nlevp)
   humidity = 0.001 * x(nlevp+1:nlevp+nlevq)
 
-  CALL ufo_calculate_refractivity (nlevp,                  &
-                                   nlevq,                  &
-                                   za,                     &
-                                   zb,                     &
-                                   pressure,               &
-                                   humidity,               &
-                                   GPSRO_pseudo_ops,       &
-                                   GPSRO_vert_interp_ops,  &
-                                   GPSRO_min_temp_grad,    &
-                                   BAerr,                  &
-                                   nRefLevels,             &
-                                   refractivity,           &
-                                   model_heights,          &
+  CALL ufo_calculate_refractivity (nlevp,                   &
+                                   nlevq,                   &
+                                   za,                      &
+                                   zb,                      &
+                                   pressure,                &
+                                   humidity,                &
+                                   GPSRO_pseudo_ops,        &
+                                   GPSRO_vert_interp_ops,   &
+                                   GPSRO_min_temp_grad,     &
+                                   dryRefractivityConstant, &
+                                   wetRefractivityConstant, &
+                                   BAerr,                   &
+                                   nRefLevels,              &
+                                   refractivity,            &
+                                   model_heights,           &
                                    temperature=T)
 
   ! no point proceeding further if ...
@@ -357,6 +363,8 @@ Iteration_loop: DO
                                GPSRO_pseudo_ops,      &
                                GPSRO_vert_interp_ops, &
                                GPSRO_min_temp_grad,   &
+                               dryRefractivityConstant, & ! Dry refractivity constant
+                               wetRefractivityConstant, & ! Wet refractivity constant
                                dref_dP,               &
                                dref_dq)
 

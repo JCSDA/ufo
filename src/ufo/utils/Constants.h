@@ -122,6 +122,10 @@ struct Constants {
 
   // Constants used for gnssro super refraction check
   static constexpr float superRefractionCritVal = 0.157;  // unit: N m^-1
+
+  // Refractivity coefficients
+  static constexpr double dry_refractivity_constant = 0.776;   // Dry refractivity constant a
+  static constexpr double wet_refractivity_constant = 3.73e3;  // Wet refractivity constant b
 };
 
 //--------------------------------------------------------------------------------------------------

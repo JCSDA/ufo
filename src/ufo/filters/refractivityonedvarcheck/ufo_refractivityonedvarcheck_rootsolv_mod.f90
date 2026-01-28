@@ -54,6 +54,8 @@ SUBROUTINE Ops_GPSRO_rootsolv( &
   GPSRO_vert_interp_ops, & ! Whether to vertically interpolate using exner or ln(p)
   GPSRO_min_temp_grad, &   ! Minimum vertical temperature gradient allowed
   capsupersat,   &
+  dryRefractivityConstant, &
+  wetRefractivityConstant, &
   O_Bdiff,       &   ! observed-background refractivity value
   Tb,            &
   Ts,            &
@@ -101,6 +103,8 @@ LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops       !< Whether to use pseud
 LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops  !< Use log(p) for vertical interpolation?
 REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad    !< Threshold for vertical temperature gradient
 LOGICAL, INTENT(IN)            :: capsupersat            !< Remove super-saturation?
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant !< Dry refractivity constant
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant !< Wet refractivity constant
 INTEGER, INTENT(OUT)           :: it                     !< Number of iterations taken
 REAL(kind_real), INTENT(OUT)   :: x(:)                   !< Model state at minimum
 REAL(kind_real), INTENT(OUT)   :: yb(:)                  !< Calculated refractivity for the background state
@@ -231,6 +235,8 @@ Iteration_loop: DO
                                  GPSRO_pseudo_ops, &
                                  GPSRO_vert_interp_ops, &
                                  GPSRO_min_temp_grad, &
+                                 dryRefractivityConstant, &
+                                 wetRefractivityConstant, &
                                  nobs, &
                                  zobs, &
                                  ycalc, &
@@ -305,6 +311,8 @@ Iteration_loop: DO
                             GPSRO_pseudo_ops, &       ! Whether to use pseudo-levels in the calculation
                             GPSRO_vert_interp_ops, &  ! Whether to interpolate using log(pressure)
                             GPSRO_min_temp_grad, &    ! Minimum allowed vertical temperature gradient
+                            dryRefractivityConstant, & ! Dry refractivity constant
+                            wetRefractivityConstant, & ! Wet refractivity constant
                             nobs, &                   ! Number of observations in the profile
                             zobs, &                   ! Height of the observations
                             Kmat)                     ! K-matrix (Jacobian of the observation with respect to the inputs)

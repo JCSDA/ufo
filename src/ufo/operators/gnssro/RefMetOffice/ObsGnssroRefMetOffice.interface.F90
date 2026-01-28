@@ -35,18 +35,23 @@ contains
 subroutine ufo_gnssro_refmetoffice_setup_c(c_key_self, &
                                            vert_interp_ops, &
                                            pseudo_ops, &
-                                           min_temp_grad) bind(c,name='ufo_gnssro_refmetoffice_setup_f90')
+                                           min_temp_grad, &
+                                           dryRefractivityConstant, &
+                                           wetRefractivityConstant) bind(c,name='ufo_gnssro_refmetoffice_setup_f90')
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 logical(c_bool), intent(in) :: vert_interp_ops
 logical(c_bool), intent(in) :: pseudo_ops
 real(c_float), intent(in) :: min_temp_grad
+real(c_float), intent(in) :: dryRefractivityConstant
+real(c_float), intent(in) :: wetRefractivityConstant
 
 type(ufo_gnssro_RefMetOffice), pointer :: self
 
 call ufo_gnssro_refmetoffice_registry%setup(c_key_self, self)
 
-call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad)
+call self%setup(vert_interp_ops, pseudo_ops, min_temp_grad, dryRefractivityConstant, &
+                wetRefractivityConstant)
 
 end subroutine ufo_gnssro_refmetoffice_setup_c
   

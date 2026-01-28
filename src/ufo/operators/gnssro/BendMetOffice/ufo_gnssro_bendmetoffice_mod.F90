@@ -31,6 +31,8 @@ type :: ufo_gnssro_BendMetOffice
   logical :: pseudo_ops
   logical :: noSuperCheck
   real(kind_real) :: min_temp_grad
+  real(kind_real) :: dryRefractivityConstant
+  real(kind_real) :: wetRefractivityConstant
   integer, allocatable :: chanList(:)
   contains
     procedure :: setup     => ufo_gnssro_bendmetoffice_setup
@@ -43,17 +45,20 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad, chanList, noSuperCheck)
+subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, &
+                                          min_temp_grad, chanList, noSuperCheck, &
+                                          dryRefractivityConstant, wetRefractivityConstant)
 
 implicit none
 
 class(ufo_gnssro_BendMetOffice), intent(inout) :: self
-logical(c_bool), intent(in) :: vert_interp_ops
-logical(c_bool), intent(in) :: pseudo_ops
-real(c_float), intent(in) :: min_temp_grad
-integer(c_int), intent(in) :: chanList(:)
-logical(c_bool), intent(in) :: noSuperCheck
-
+logical(c_bool), intent(in)  :: vert_interp_ops
+logical(c_bool), intent(in)  :: pseudo_ops
+real(c_float), intent(in)    :: min_temp_grad
+integer(c_int), intent(in)   :: chanList(:)
+logical(c_bool), intent(in)  :: noSuperCheck
+real(c_float), intent(in)    :: dryRefractivityConstant
+real(c_float), intent(in)    :: wetRefractivityConstant
 character(len=*), parameter  :: myname_ = "ufo_gnssro_bendmetoffice_setup"
 integer, parameter           :: max_string = 800
 character(max_string)        :: message                       ! General message for output
@@ -65,6 +70,8 @@ self % min_temp_grad = min_temp_grad
 allocate(self % chanList(1:size(chanList)))
 self % chanList = chanList
 self % noSuperCheck = noSuperCheck
+self % dryRefractivityConstant = dryRefractivityConstant
+self % wetRefractivityConstant = wetRefractivityConstant
 
 write(message, *) myname_, ' Setting up Met Office GNSS-RO forward operator with'
 call fckit_log%info(message)
@@ -75,6 +82,10 @@ call fckit_log%info(message)
 write(message, *) 'min_temp_grad =', self % min_temp_grad
 call fckit_log%info(message)
 write(message, *) 'no super check =', self % noSuperCheck
+call fckit_log%info(message)
+write(message, *) 'dryRefractivityConstant =', self % dryRefractivityConstant
+call fckit_log%info(message)
+write(message, *) 'wetRefractivityConstant =', self % wetRefractivityConstant
 call fckit_log%info(message)
 write(message, '(A)') 'chanList = '
 call fckit_log % debug(message)
@@ -209,6 +220,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
                                 self % pseudo_ops, &
                                 self % vert_interp_ops, &
                                 self % min_temp_grad, &
+                                self % dryRefractivityConstant, &
+                                self % wetRefractivityConstant, &
                                 nlevels, &
                                 impact_param(1+(iloc-1)*nlevels:iloc*nlevels), &
                                 radius_curv(iloc), &
@@ -296,6 +309,8 @@ SUBROUTINE Ops_GPSRO_ForwardModel(nlevp, &
                                   GPSRO_pseudo_ops, &
                                   GPSRO_vert_interp_ops, &
                                   GPSRO_min_temp_grad, &
+                                  dryRefractivityConstant, &
+                                  wetRefractivityConstant, &
                                   nobs, &
                                   zobs, &
                                   RO_Rad_Curv, &
@@ -308,26 +323,28 @@ SUBROUTINE Ops_GPSRO_ForwardModel(nlevp, &
                                   noSuperCheck, &
                                   tobs)
 
-INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
-INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
-REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
-REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
-REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
-LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops       ! Option: Use pseudo-levels in vertical interpolation?
-LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops  ! Option: Use ln(p) for vertical interpolation? (rather than exner)
-REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad    ! The minimum temperature gradient which is used
-INTEGER, INTENT(IN)            :: nobs                   ! Number of observations in the profile
-REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)           ! Impact parameter for the obs
-REAL(kind_real), INTENT(IN)    :: RO_Rad_Curv            ! Earth's radius of curvature for these observations
-REAL(kind_real), INTENT(IN)    :: Latitude               ! Latitude of this profile
-REAL(kind_real), INTENT(IN)    :: RO_geoid_und           ! Undulation - difference between the geoid and the ellipsoid
-REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)          ! Model forecast of the observations
-LOGICAL, INTENT(OUT)           :: BAErr                  ! Was an error encountered during the calculation?
+INTEGER, INTENT(IN)            :: nlevp                   ! no. of p levels in state vec.
+INTEGER, INTENT(IN)            :: nlevq                   ! no. of theta levels
+REAL(kind_real), INTENT(IN)    :: za(1:nlevp)             ! heights of rho levs
+REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)             ! heights of theta levs
+REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)       ! Model background pressure
+REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)       ! Model background specific humidity
+LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops        ! Option: Use pseudo-levels in vertical interpolation?
+LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops   ! Option: Use ln(p) for vertical interpolation? (rather than exner)
+REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad     ! The minimum temperature gradient which is used
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant ! Constant for dry refractivity calculation
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant ! Constant for wet refractivity calculation
+INTEGER, INTENT(IN)            :: nobs                    ! Number of observations in the profile
+REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)            ! Impact parameter for the obs
+REAL(kind_real), INTENT(IN)    :: RO_Rad_Curv             ! Earth's radius of curvature for these observations
+REAL(kind_real), INTENT(IN)    :: Latitude                ! Latitude of this profile
+REAL(kind_real), INTENT(IN)    :: RO_geoid_und            ! Undulation - difference between the geoid and the ellipsoid
+REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)           ! Model forecast of the observations
+LOGICAL, INTENT(OUT)           :: BAErr                   ! Was an error encountered during the calculation?
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)  ! Refractivity as calculated
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:) ! Height of the levels for refractivity
-LOGICAL, INTENT(IN)            :: noSuperCheck           ! Do we skip a super-refraction check in the operator?
-REAL(kind_real), INTENT(OUT)   :: tobs(1:nobs)           ! Virtual temperature on model levels
+LOGICAL, INTENT(IN)            :: noSuperCheck            ! Do we skip a super-refraction check in the operator?
+REAL(kind_real), INTENT(OUT)   :: tobs(1:nobs)            ! Virtual temperature on model levels
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 ! 
@@ -356,19 +373,21 @@ END IF
 
 BAErr = .FALSE.
 
-CALL ufo_calculate_refractivity (nlevp,                 &
-                                 nlevq,                 &
-                                 za,                    &
-                                 zb,                    &
-                                 pressure,              &
-                                 humidity,              &
-                                 GPSRO_pseudo_ops,      &
-                                 GPSRO_vert_interp_ops, &
-                                 GPSRO_min_temp_grad,   &
-                                 BAerr,                 &
-                                 nRefLevels,            &
-                                 refractivity,          &
-                                 model_heights,         &
+CALL ufo_calculate_refractivity (nlevp,                   &
+                                 nlevq,                   &
+                                 za,                      &
+                                 zb,                      &
+                                 pressure,                &
+                                 humidity,                &
+                                 GPSRO_pseudo_ops,        &
+                                 GPSRO_vert_interp_ops,   &
+                                 GPSRO_min_temp_grad,     &
+                                 dryRefractivityConstant, &
+                                 wetRefractivityConstant, &
+                                 BAerr,                   &
+                                 nRefLevels,              &
+                                 refractivity,            &
+                                 model_heights,           &
                                  tpseudo=temperature)
 
 ALLOCATE(nr(1:nRefLevels))

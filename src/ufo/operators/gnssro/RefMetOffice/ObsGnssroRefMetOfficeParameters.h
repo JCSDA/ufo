@@ -15,6 +15,7 @@
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/ObsOperatorParametersBase.h"
+#include "ufo/utils/Constants.h"
 
 namespace ufo {
 
@@ -32,6 +33,18 @@ class ObsGnssroRefMetOfficeParameters : public ObsOperatorParametersBase {
   /// The minimum temperature gradient permitted before a profile is considered
   /// isothermal.  Only used if pseudo-levels are also used.
   oops::Parameter<float> minTempGrad{"min_temp_grad", 1.0e-6, this};
+
+  oops::Parameter<float> dryRefractivityConstant
+    {"dry_refractivity_constant",
+     "Constant used to multiply the dry refractivity components",
+     Constants::dry_refractivity_constant,
+     this};
+
+  oops::Parameter<float> wetRefractivityConstant
+    {"wet_refractivity_constant",
+     "Constant used to multiply the wet refractivity components",
+     Constants::wet_refractivity_constant,
+     this};
 };
 
 }  // namespace ufo

@@ -30,20 +30,26 @@ contains
   
 ! ------------------------------------------------------------------------------
   
-subroutine ufo_groundgnss_metoffice_setup_c(c_key_self, c_conf) bind(c,name='ufo_groundgnss_metoffice_setup_f90')
+subroutine ufo_groundgnss_metoffice_setup_c(c_key_self, &
+                                            c_vertInterpOPS, &
+                                            c_pseudoLevels, &
+                                            c_minTempGrad, &
+                                            c_dryRefractivityConstant, &
+                                            c_wetRefractivityConstant) bind(c,name='ufo_groundgnss_metoffice_setup_f90')
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
-type(c_ptr), value, intent(in) :: c_conf
+logical(c_bool), intent(in) :: c_vertInterpOPS
+logical(c_bool), intent(in) :: c_pseudoLevels
+real(c_float), intent(in) :: c_minTempGrad
+real(c_float), intent(in) :: c_dryRefractivityConstant
+real(c_float), intent(in) :: c_wetRefractivityConstant
     
 type(ufo_groundgnss_MetOffice), pointer :: self
-type(fckit_configuration)               :: f_conf
 
 call ufo_groundgnss_MetOffice_registry%setup(c_key_self, self)
-f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf)
-
-call f_conf%final()
+call self%setup(c_vertInterpOPS, c_pseudoLevels, c_minTempGrad, &
+                c_dryRefractivityConstant, c_wetRefractivityConstant)
 
 end subroutine ufo_groundgnss_MetOffice_setup_c
   

@@ -30,6 +30,8 @@ type, extends(ufo_basis) :: ufo_groundgnss_MetOffice
   logical :: vert_interp_ops
   logical :: pseudo_ops
   real(kind_real) :: min_temp_grad
+  real(kind_real) :: dryRefractivityConstant
+  real(kind_real) :: wetRefractivityConstant
   contains
     procedure :: setup     => ufo_groundgnss_metoffice_setup
     procedure :: simobs    => ufo_groundgnss_metoffice_simobs
@@ -41,16 +43,27 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_groundgnss_metoffice_setup(self, f_conf)
+subroutine ufo_groundgnss_metoffice_setup(self, &
+                                         vertInterpOPS, &
+                                         pseudoLevels, &
+                                         minTempGrad, &
+                                         dryRefractivityConstant, &
+                                         wetRefractivityConstant)
 
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_groundgnss_MetOffice), intent(inout) :: self
-type(fckit_configuration), intent(in)          :: f_conf
+logical(c_bool), intent(in) :: vertInterpOPS
+logical(c_bool), intent(in) :: pseudoLevels
+real(c_float), intent(in) :: minTempGrad
+real(c_float), intent(in) :: dryRefractivityConstant
+real(c_float), intent(in) :: wetRefractivityConstant
 
-call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
-call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
-call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
+self % vert_interp_ops = vertInterpOPS
+self % pseudo_ops = pseudoLevels
+self % min_temp_grad = minTempGrad
+self % dryRefractivityConstant = dryRefractivityConstant
+self % wetRefractivityConstant = wetRefractivityConstant
 
 end subroutine ufo_groundgnss_metoffice_setup
 
@@ -135,6 +148,8 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
                                        self % vert_interp_ops, &
                                        self % pseudo_ops,      &
                                        self % min_temp_grad,   &
+                                       self % dryRefractivityConstant, &
+                                       self % wetRefractivityConstant, &
                                        1,                      &
                                        zStation(iobs),         &
                                        hofx(iobs))
@@ -165,20 +180,24 @@ SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,                &
                                        vert_interp_ops,      &
                                        pseudo_ops,           &
                                        gbgnss_min_temp_grad, &
+                                       dryRefractivityConstant, &
+                                       wetRefractivityConstant, &
                                        nobs,                 &
                                        zStation,             &
                                        Model_ZTD)
 
-INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
-INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! heights of rho levs
-REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! heights of theta levs
-REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
-REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
-LOGICAL, INTENT(IN)            :: vert_interp_ops        ! Pressure varies exponentially with height?
-LOGICAL, INTENT(IN)            :: pseudo_ops             ! Use pseudo-levels in calculation?
-REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad   ! The minimum temperature gradient which is used
-INTEGER, INTENT(IN)            :: nobs                   ! Number of observations
+INTEGER, INTENT(IN)            :: nlevp                    ! no. of p levels in state vec.
+INTEGER, INTENT(IN)            :: nlevq                    ! no. of theta levels
+REAL(kind_real), INTENT(IN)    :: za(1:nlevp)              ! heights of rho levs
+REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)              ! heights of theta levs
+REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)        ! Model background pressure
+REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)        ! Model background specific humidity
+LOGICAL, INTENT(IN)            :: vert_interp_ops          ! Pressure varies exponentially with height?
+LOGICAL, INTENT(IN)            :: pseudo_ops               ! Use pseudo-levels in calculation?
+REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad     ! The minimum temperature gradient which is used
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant  ! Constant used to multiply the dry refractivity components
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant  ! Constant used to multiply the wet refractivity components
+INTEGER, INTENT(IN)            :: nobs                     ! Number of observations
 
 REAL(kind_real), INTENT(IN)    :: zStation               ! Station heights
 REAL(kind_real), INTENT(INOUT) :: Model_ZTD              ! Model forecast of the observations
@@ -218,18 +237,20 @@ END IF
 ! The ufo_utils_refractivity_calculator currently relies on the variables being provided
 ! bottom to top. The geovals are provided top to bottom and so the vertical variables need
 ! to be reveresed when they are passed into this routine and the outputs then need to be reversed
-CALL ufo_calculate_refractivity(nlevp,                  &
-                                nlevq,                  &
-                                za(nlevp:1:-1),         &
-                                zb(nlevq:1:-1),         &
-                                pressure(nlevp:1:-1),   &
-                                humidity(nlevq:1:-1),   &
-                                vert_interp_ops,        &
-                                pseudo_ops,             &
-                                gbgnss_min_temp_grad,   &
-                                refracerr,              &
-                                nRefLevels,             &
-                                refrac,                 &
+CALL ufo_calculate_refractivity(nlevp,                   &
+                                nlevq,                   &
+                                za(nlevp:1:-1),          &
+                                zb(nlevq:1:-1),          &
+                                pressure(nlevp:1:-1),    &
+                                humidity(nlevq:1:-1),    &
+                                vert_interp_ops,         &
+                                pseudo_ops,              &
+                                gbgnss_min_temp_grad,    &
+                                dryRefractivityConstant, &
+                                wetRefractivityConstant, &
+                                refracerr,               &
+                                nRefLevels,              &
+                                refrac,                  &
                                 model_heights)
 ! Flip the vertical direction of refrac and model_height back to top to bottom.
 refrac = refrac(nRefLevels:1:-1)
@@ -239,6 +260,7 @@ CALL Ops_groundgnss_TopCorrection(pressure,    &
                                   nlevq,       &
                                   za,          &
                                   zb,          &
+                                  dryRefractivityConstant, &
                                   TopCorrection)
 
 

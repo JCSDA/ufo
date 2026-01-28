@@ -22,28 +22,30 @@ contains
 ! Find a solution to the satellite sounding inverse problem
 !-------------------------------------------------------------------------------
 SUBROUTINE Refractivity_Do1DVar (nlevp,                  &
-                              nlevq,                  &
-                              BM1,                    &
-                              Bsig,                   &
-                              Back,                   &
-                              Ob,                     &
-                              RMatrix,                &
-                              GPSRO_pseudo_ops,       &
-                              GPSRO_vert_interp_ops,  &
-                              GPSRO_min_temp_grad,    &
-                              GPSRO_cost_funct_test,  &   ! Threshold value for the cost function convergence test
-                              GPSRO_y_test,           &   ! Threshold value for the yobs-ysol tes
-                              GPSRO_n_iteration_test, &   ! Maximum number of iterations
-                              GPSRO_Delta_factor,     &   ! Delta
-                              GPSRO_Delta_ct2,        &   ! Delta observations
-                              GPSRO_OB_test,          &   ! Threshold value for the O-B test
-                              minval_ytest,           &   ! Minimum value for RHS of y-test
-                              maxval_ytest,           &   ! Maximum value for RHS of y-test
-                              capsupersat,            &
-                              RefracErr,              &
-                              Tb,                     &
-                              Ts,                     &
-                              O_Bdiff,                &
+                              nlevq,                   &
+                              BM1,                     &
+                              Bsig,                    &
+                              Back,                    &
+                              Ob,                      &
+                              RMatrix,                 &
+                              GPSRO_pseudo_ops,        &
+                              GPSRO_vert_interp_ops,   &
+                              GPSRO_min_temp_grad,     &
+                              GPSRO_cost_funct_test,   &   ! Threshold value for the cost function convergence test
+                              GPSRO_y_test,            &   ! Threshold value for the yobs-ysol tes
+                              GPSRO_n_iteration_test,  &   ! Maximum number of iterations
+                              GPSRO_Delta_factor,      &   ! Delta
+                              GPSRO_Delta_ct2,         &   ! Delta observations
+                              GPSRO_OB_test,           &   ! Threshold value for the O-B test
+                              minval_ytest,            &   ! Minimum value for RHS of y-test
+                              maxval_ytest,            &   ! Maximum value for RHS of y-test
+                              capsupersat,             &
+                              dryRefractivityConstant, &
+                              wetRefractivityConstant, &
+                              RefracErr,               &
+                              Tb,                      &
+                              Ts,                      &
+                              O_Bdiff,                 &
                               DFS)
 
 use ufo_gnssroonedvarcheck_setom1_mod, only: &
@@ -84,6 +86,8 @@ REAL(kind_real), INTENT(IN)            :: GPSRO_OB_test           !< Threshold v
 REAL(kind_real), INTENT(IN)            :: minval_ytest            !< Minimum value for RHS of y-test
 REAL(kind_real), INTENT(IN)            :: maxval_ytest            !< Maximum value for RHS of y-test
 LOGICAL, INTENT(IN)                    :: capsupersat             !< Remove super-saturation?
+REAL(kind_real), INTENT(IN)            :: dryRefractivityConstant !< Dry refractivity constant
+REAL(kind_real), INTENT(IN)            :: wetRefractivityConstant !< Wet refractivity constant
 LOGICAL, INTENT(OUT)                   :: RefracErr               !< Were there errors in the refractivity calculation?
 REAL(kind_real), INTENT(INOUT)         :: Tb(nlevq)               !< Calculated background temperature
 REAL(kind_real), INTENT(INOUT)         :: Ts(nlevq)               !< 1DVar solution temperature
@@ -227,6 +231,8 @@ IF (nobs > 0) THEN
       GPSRO_vert_interp_ops,     &
       GPSRO_min_temp_grad,       &
       capsupersat,               &
+      dryRefractivityConstant,   &
+      wetRefractivityConstant,   &
       O_Bdiff,                   &    ! observed -background BA value
       Tb,                        &
       Ts,                        &

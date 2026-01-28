@@ -14,8 +14,7 @@ use kinds,            only: kind_real
 use missing_values_mod
 use ufo_constants_mod, only: &
     rd,                      &   ! Gas constant for dry air
-    grav,                    &   ! Gravitational field strength
-    n_alpha                      ! Refractivity constant a
+    grav                         ! Gravitational field strength
 
 implicit none
 public                      :: Ops_Groundgnss_ZTD
@@ -118,6 +117,7 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
                                         nlevq, &
                                         za,    &
                                         zb,    &
+                                        dryRefractivityConstant, &
                                         TopCorrection)
 
     IMPLICIT NONE
@@ -126,6 +126,7 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
     INTEGER, INTENT(IN)              :: nlevq              ! no. of temperature/theta levels
     REAL(kind_real), INTENT(IN)      :: za(:)              ! heights of pressure (rho) levels
     REAL(kind_real), INTENT(IN)      :: zb(:)              ! Heights of temperature/theta levels
+    REAL(kind_real), INTENT(IN)      :: dryRefractivityConstant ! Dry air refractivity constant
     REAL(kind_real), INTENT(INOUT)   :: TopCorrection      ! ZTD Top of atmos correction
 
 
@@ -144,7 +145,7 @@ SUBROUTINE Ops_groundgnss_TopCorrection(P,    &
 
     END DO
 
-    TCconstant = (refrac_scale * n_alpha * rd)/ grav
+    TCconstant = (refrac_scale * dryRefractivityConstant * rd)/ grav
 
     TopCorrection = TCconstant * pN(1) !pN at the model top
 

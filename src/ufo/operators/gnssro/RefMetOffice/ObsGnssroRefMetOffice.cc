@@ -37,7 +37,9 @@ ObsGnssroRefMetOffice::ObsGnssroRefMetOffice(const ioda::ObsSpace & odb,
   ufo_gnssro_refmetoffice_setup_f90(keyOperGnssroRefMetOffice_,
                                     parameters.vertInterpOPS,
                                     parameters.pseudoLevels,
-                                    parameters.minTempGrad);
+                                    parameters.minTempGrad,
+                                    parameters.dryRefractivityConstant,
+                                    parameters.wetRefractivityConstant);
 
   oops::Log::trace() << "ObsGnssroRefMetOffice constructor done." << std::endl;
 }

@@ -19,13 +19,9 @@ use missing_values_mod
 use fckit_log_module, only : fckit_log
 use ufo_utils_refractivity_calculator, only: &
     ufo_calculate_refractivity, ufo_refractivity_kmat
-
-
-
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
-    grav,                    &    ! Gravitational field strength
-    n_alpha                       ! Refractivity constant a
+    grav                          ! Gravitational field strength
 
 
 integer, parameter             :: max_string=800
@@ -41,6 +37,8 @@ type, extends(ufo_basis_tlad)  ::  ufo_groundgnss_metoffice_tlad
   logical :: vert_interp_ops
   logical :: pseudo_ops
   real(kind_real) :: min_temp_grad
+  real(kind_real) :: dryRefractivityConstant
+  real(kind_real) :: wetRefractivityConstant
   contains
     procedure :: setup      => ufo_groundgnss_metoffice_setup
     procedure :: delete     => ufo_groundgnss_metoffice_tlad_delete
@@ -55,16 +53,27 @@ contains
 ! Get the optional settings for the forward model, and save them in the object
 ! so that they can be used in the code.
 ! ------------------------------------------------------------------------------
-subroutine ufo_groundgnss_metoffice_setup(self, f_conf)
+subroutine ufo_groundgnss_metoffice_setup(self, &
+                                          vertInterpOPS, &
+                                          pseudoLevels, &
+                                          minTempGrad, &
+                                          dryRefractivityConstant, &
+                                          wetRefractivityConstant)
 
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_groundgnss_metoffice_tlad), intent(inout) :: self
-type(fckit_configuration), intent(in)               :: f_conf
+logical(c_bool), intent(in) :: vertInterpOPS
+logical(c_bool), intent(in) :: pseudoLevels
+real(c_float), intent(in) :: minTempGrad
+real(c_float), intent(in) :: dryRefractivityConstant
+real(c_float), intent(in) :: wetRefractivityConstant
 
-call f_conf%get_or_die("vert_interp_ops", self % vert_interp_ops)
-call f_conf%get_or_die("pseudo_ops", self % pseudo_ops)
-call f_conf%get_or_die("min_temp_grad", self % min_temp_grad)
+self % vert_interp_ops = vertInterpOPS
+self % pseudo_ops = pseudoLevels
+self % min_temp_grad = minTempGrad
+self % dryRefractivityConstant = dryRefractivityConstant
+self % wetRefractivityConstant = wetRefractivityConstant
 
 end subroutine ufo_groundgnss_metoffice_setup
 
@@ -137,17 +146,19 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
         za = rho_heights % vals(:,iobs)
         zb = theta_heights % vals(:,iobs)
 
-        CALL groundgnss_jacobian_interface(self % nlevp,                 &   ! Number of pressure levels
-                                           self % nlevq,                 &   ! Number of specific humidity levels
-                                           za(1:self%nlevp),             &   ! Heights of the pressure levels
-                                           zb(1:self%nlevq),             &   ! Heights of the specific humidity levels
-                                           humidity(1:self%nlevq),       &   ! Values of the specific humidity
-                                           pressure(1:self%nlevp),       &   ! Values of the pressure
-                                           zStation(iobs),               &   ! Station height
-                                           iobs,                         &   ! Ob number
-                                           self % vert_interp_ops,       &   ! Pressure varies exponentially with height?
-                                           self % pseudo_ops,            &   ! Use pseudo-levels in calculation?
-                                           self % min_temp_grad,         &   ! Minimum temperature gradient allowed
+        CALL groundgnss_jacobian_interface(self % nlevp,                   &   ! Number of pressure levels
+                                           self % nlevq,                   &   ! Number of specific humidity levels
+                                           za(1:self%nlevp),               &   ! Heights of the pressure levels
+                                           zb(1:self%nlevq),               &   ! Heights of the specific humidity levels
+                                           humidity(1:self%nlevq),         &   ! Values of the specific humidity
+                                           pressure(1:self%nlevp),         &   ! Values of the pressure
+                                           zStation(iobs),                 &   ! Station height
+                                           iobs,                           &   ! Ob number
+                                           self % vert_interp_ops,         &   ! Pressure varies exponentially with height?
+                                           self % pseudo_ops,              &   ! Use pseudo-levels in calculation?
+                                           self % min_temp_grad,           &   ! Minimum temperature gradient allowed
+                                           self % dryRefractivityConstant, &   ! Dry refractivity constant
+                                           self % wetRefractivityConstant, &   ! Wet refractivity constant
                                            self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
 
     end do obs_loop
@@ -320,32 +331,36 @@ end subroutine ufo_groundgnss_metoffice_tlad_delete
 !-------------------------------------------------------------------------
 ! Interface for calculating the K-matrix for calculating TL/AD
 !-------------------------------------------------------------------------
-SUBROUTINE groundgnss_jacobian_interface(nlevp,     &
-                              nlevq,                &
-                              za,                   &
-                              zb,                   &
-                              q,                    &
-                              prs,                  &
-                              zStation,             &
-                              iobs,                 &
-                              vert_interp_ops,      &
-                              pseudo_ops,           &
-                              gbgnss_min_temp_grad, &
+SUBROUTINE groundgnss_jacobian_interface(nlevp,        &
+                              nlevq,                   &
+                              za,                      &
+                              zb,                      &
+                              q,                       &
+                              prs,                     &
+                              zStation,                &
+                              iobs,                    &
+                              vert_interp_ops,         &
+                              pseudo_ops,              &
+                              gbgnss_min_temp_grad,    &
+                              dryRefractivityConstant, &
+                              wetRefractivityConstant, &
                               K)
 
 IMPLICIT NONE
 
-INTEGER, INTENT(IN)            :: nlevP                 ! The number of model pressure levels
-INTEGER, INTENT(IN)            :: nlevq                 ! The number of model theta levels
-REAL(kind_real), INTENT(IN)    :: za(:)                 ! The geometric height of the model pressure levels
-REAL(kind_real), INTENT(IN)    :: zb(:)                 ! The geometric height of the model theta levels
-REAL(kind_real), INTENT(IN)    :: q(1:nlevq)            ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)    :: prs(1:nlevP)          ! The model values that are being perturbed
-REAL(kind_real), INTENT(IN)    :: zStation              ! Station height
-LOGICAL, INTENT(IN)            :: vert_interp_ops       ! Pressure varies exponentially with height?
-LOGICAL, INTENT(IN)            :: pseudo_ops            ! Use pseudo-levels in calculation?
-REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad  ! The minimum temperature gradient which is used
-INTEGER, INTENT(IN)            :: iobs                  ! Ob number
+INTEGER, INTENT(IN)            :: nlevP                   ! The number of model pressure levels
+INTEGER, INTENT(IN)            :: nlevq                   ! The number of model theta levels
+REAL(kind_real), INTENT(IN)    :: za(:)                   ! The geometric height of the model pressure levels
+REAL(kind_real), INTENT(IN)    :: zb(:)                   ! The geometric height of the model theta levels
+REAL(kind_real), INTENT(IN)    :: q(1:nlevq)              ! The model values that are being perturbed
+REAL(kind_real), INTENT(IN)    :: prs(1:nlevP)            ! The model values that are being perturbed
+REAL(kind_real), INTENT(IN)    :: zStation                ! Station height
+LOGICAL, INTENT(IN)            :: vert_interp_ops         ! Pressure varies exponentially with height?
+LOGICAL, INTENT(IN)            :: pseudo_ops              ! Use pseudo-levels in calculation?
+REAL(kind_real), INTENT(IN)    :: gbgnss_min_temp_grad    ! The minimum temperature gradient which is used
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant ! Dry refractivity constant
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant ! Wet refractivity constant
+INTEGER, INTENT(IN)            :: iobs                    ! Ob number
 
 REAL(kind_real), INTENT(INOUT) :: K(:,:)                ! The calculated K matrix
 !
@@ -375,18 +390,20 @@ refracerr = .FALSE.
 ! The ufo_utils_refractivity_calculator currently relies on the variables being provided
 ! bottom to top. The geovals are provided top to bottom and so the vertical variables need
 ! to be reveresed when they are passed into this routine and the outputs then need to be reversed
-CALL ufo_calculate_refractivity(nlevp,                &
-                                nlevq,                &
-                                za(nlevp:1:-1),       &
-                                zb(nlevq:1:-1),       &
-                                prs(nlevp:1:-1),      &
-                                q(nlevq:1:-1),        &
-                                vert_interp_ops,      &
-                                pseudo_ops,           &
-                                gbgnss_min_temp_grad, &
-                                refracerr,            &
-                                nRefLevels,           &
-                                refrac,               &
+CALL ufo_calculate_refractivity(nlevp,                   &
+                                nlevq,                   &
+                                za(nlevp:1:-1),          &
+                                zb(nlevq:1:-1),          &
+                                prs(nlevp:1:-1),         &
+                                q(nlevq:1:-1),           &
+                                vert_interp_ops,         &
+                                pseudo_ops,              &
+                                gbgnss_min_temp_grad,    &
+                                dryRefractivityConstant, &
+                                wetRefractivityConstant, &
+                                refracerr,               &
+                                nRefLevels,              &
+                                refrac,                  &
                                 model_heights)
 
 ! Flip the vertical direction of refrac and model_height back to top to bottom.
@@ -407,6 +424,8 @@ IF (.NOT. refracerr) THEN
                          vert_interp_ops,      &
                          pseudo_ops,           &
                          gbgnss_min_temp_grad, &
+                         dryRefractivityConstant, &
+                         wetRefractivityConstant, &
                          refracerr,            &
                          refrac,               &
                          K)
@@ -435,6 +454,8 @@ SUBROUTINE Groundgnss_GetK(nstate,              &
                           vert_interp_ops,      &
                           pseudo_ops,           &
                           gbgnss_min_temp_grad, &
+                          dryRefractivityConstant, &
+                          wetRefractivityConstant, &
                           refracerr,            &
                           refrac,               &
                           K)
@@ -445,23 +466,25 @@ SUBROUTINE Groundgnss_GetK(nstate,              &
 IMPLICIT NONE
 
 INTEGER, INTENT(IN)             :: nstate
-INTEGER, INTENT(IN)             :: nlevP                  ! The number of model pressure levels
-INTEGER, INTENT(IN)             :: nlevq                  ! The number of model theta levels
-REAL(kind_real), INTENT(IN)     :: za(:)                  ! The geometric height of the model pressure levels
-REAL(kind_real), INTENT(IN)     :: zb(:)                  ! The geometric height of the model theta levels
-REAL(kind_real), INTENT(IN)     :: P(:)                   ! The model pressure values
-REAL(kind_real), INTENT(IN)     :: q(:)                   ! The model humidity values
-REAL(kind_real), INTENT(IN)     :: zStation               ! Station height
-INTEGER, INTENT(IN)             :: iobs                   ! Ob number
-LOGICAL, INTENT(IN)             :: vert_interp_ops        ! Pressure varies exponentially with height?
-LOGICAL, INTENT(IN)             :: pseudo_ops             ! Use pseudo-levels in calculation?
-REAL(kind_real), INTENT(IN)     :: gbgnss_min_temp_grad   ! The minimum temperature gradient which is used
-LOGICAL, INTENT(INOUT)          :: refracerr              ! Whether we encountered an error in calculating the refractivity
-REAL(kind_real), INTENT(IN)     :: refrac(:)              ! Model refractivity on theta levels - returned from forward model
-REAL(kind_real), INTENT(INOUT)  :: K(:,:)                 ! The calculated K matrix
+INTEGER, INTENT(IN)             :: nlevP                   ! The number of model pressure levels
+INTEGER, INTENT(IN)             :: nlevq                   ! The number of model theta levels
+REAL(kind_real), INTENT(IN)     :: za(:)                   ! The geometric height of the model pressure levels
+REAL(kind_real), INTENT(IN)     :: zb(:)                   ! The geometric height of the model theta levels
+REAL(kind_real), INTENT(IN)     :: P(:)                    ! The model pressure values
+REAL(kind_real), INTENT(IN)     :: q(:)                    ! The model humidity values
+REAL(kind_real), INTENT(IN)     :: zStation                ! Station height
+INTEGER, INTENT(IN)             :: iobs                    ! Ob number
+LOGICAL, INTENT(IN)             :: vert_interp_ops         ! Pressure varies exponentially with height?
+LOGICAL, INTENT(IN)             :: pseudo_ops              ! Use pseudo-levels in calculation?
+REAL(kind_real), INTENT(IN)     :: gbgnss_min_temp_grad    ! The minimum temperature gradient which is used
+REAL(kind_real), INTENT(IN)     :: dryRefractivityConstant ! Dry refractivity constant
+REAL(kind_real), INTENT(IN)     :: wetRefractivityConstant ! Wet refractivity constant
+LOGICAL, INTENT(INOUT)          :: refracerr               ! Whether we encountered an error in calculating the refractivity
+REAL(kind_real), INTENT(IN)     :: refrac(:)               ! Model refractivity on theta levels - returned from forward model
+REAL(kind_real), INTENT(INOUT)  :: K(:,:)                  ! The calculated K matrix
 
-REAL(kind_real), ALLOCATABLE    :: dref_dP(:, :)          ! Partial derivative of refractivity wrt. pressure
-REAL(kind_real), ALLOCATABLE    :: dref_dq(:, :)          ! Partial derivative of refractivity wrt. specific humidity
+REAL(kind_real), ALLOCATABLE    :: dref_dP(:, :)           ! Partial derivative of refractivity wrt. pressure
+REAL(kind_real), ALLOCATABLE    :: dref_dq(:, :)           ! Partial derivative of refractivity wrt. specific humidity
 
 
 ! Local constants
@@ -592,6 +615,8 @@ CALL ufo_refractivity_kmat (nlevP,                &
                             pseudo_ops,           &
                             vert_interp_ops,      &
                             gbgnss_min_temp_grad, &
+                            dryRefractivityConstant, &
+                            wetRefractivityConstant, &
                             dref_dP,              &
                             dref_dq,              &
                             dPb_dP)
@@ -719,7 +744,7 @@ dztd_dp(:) = MATMUL(dztd_dp,dp_local_dPin)
 
 ! First add in dZTD/dp for the top correction, which only depends on top level theta pressure
 
-dztd_dpN(1) = refrac_scale * n_alpha * rd / grav
+dztd_dpN(1) = refrac_scale * dryRefractivityConstant * rd / grav
 x1 = MATMUL(dPb_dP, dp_local_dPin)
 x2 = MATMUL(dztd_dpN, x1)
 dztd_dp = x2 + dztd_dp

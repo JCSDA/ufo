@@ -25,9 +25,7 @@ use ufo_constants_mod, only: &
     rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
     pref,                    &    ! Reference pressure for calculating exner
     grav,                    &    ! Gravitational field strength
-    c_virtual,               &    ! Related to gas-constant
-    n_alpha,                 &    ! Refractivity constant a
-    n_beta                        ! Refractivity constant b
+    c_virtual                     ! Related to gas-constant
 use kinds,            only: kind_real
 
 implicit none
@@ -67,6 +65,8 @@ SUBROUTINE ufo_calculate_refractivity (nlevP,           &
                                        vert_interp_ops, &
                                        pseudo_ops,      &
                                        min_temp_grad,   &
+                                       dryRefractivityConstant, &
+                                       wetRefractivityConstant, &
                                        refracerr,       &
                                        nRefLevels,      &
                                        refractivity,    &
@@ -87,6 +87,8 @@ REAL(kind_real), INTENT(IN)                           :: q(nlevq)               
 LOGICAL, INTENT(IN)                                   :: vert_interp_ops         !< Use log(p) for vertical interpolation?
 LOGICAL, INTENT(IN)                                   :: pseudo_ops              !< Use pseudo-levels to reduce errors?
 REAL(kind_real), INTENT(IN)                           :: min_temp_grad           !< Minimum value for the vertical temperature gradient
+REAL(kind_real), INTENT(IN)                           :: dryRefractivityConstant !< Dry air refractivity constant
+REAL(kind_real), INTENT(IN)                           :: wetRefractivityConstant !< Wet air refractivity constant
 LOGICAL, INTENT(OUT)                                  :: refracerr               !< refractivity error
 INTEGER, INTENT(OUT)                                  :: nRefLevels              !< no. of pseudo levs
 REAL(kind_real), ALLOCATABLE, INTENT(OUT)             :: refractivity(:)         !< Ref. on pseudo levs
@@ -193,9 +195,9 @@ IF (.NOT. refracerr) THEN
     T_local(i) = T_virtual / (1.0 + C_virtual * q(i))
 
     ! Wet component
-    Nwet = n_beta * Pb(i) * q(i) / (T_local(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q(i)))
+    Nwet = wetRefractivityConstant * Pb(i) * q(i) / (T_local(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q(i)))
 
-    Ndry = n_alpha * Pb(i) / T_local(i)
+    Ndry = dryRefractivityConstant * Pb(i) / T_local(i)
 
     refracModel(i) = Ndry + Nwet
 
@@ -247,8 +249,9 @@ IF (.NOT. refracerr) THEN
       END IF
     END DO
 
-    refractivity = n_alpha * P_pseudo / T_pseudo + n_beta * P_pseudo * q_pseudo / &
-               (T_pseudo ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_pseudo))
+    refractivity = dryRefractivityConstant * P_pseudo / T_pseudo + &
+                   wetRefractivityConstant * P_pseudo * q_pseudo / &
+                   (T_pseudo ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_pseudo))
   ELSE
     refractivity = refracModel
     model_heights = zb
@@ -314,6 +317,8 @@ SUBROUTINE ufo_refractivity_kmat(nlevP,           &
                                  pseudo_ops,      &
                                  vert_interp_ops, &
                                  min_temp_grad,   &
+                                 dryRefractivityConstant, &
+                                 wetRefractivityConstant, &
                                  dref_dP,         &
                                  dref_dq,         &
                                  dPb_dP,          &
@@ -332,6 +337,8 @@ REAL(kind_real), INTENT(IN)               :: q(nlevq)                  !< Specif
 LOGICAL, INTENT(IN)                       :: pseudo_ops                !< Whether to use pseudo-levels in calculation
 LOGICAL, INTENT(IN)                       :: vert_interp_ops           !< Whether to interpolate vertically using exner or ln(p)
 REAL(kind_real), INTENT(IN)               :: min_temp_grad             !< Minimum value for the vertical temperature gradient
+REAL(kind_real), INTENT(IN)               :: dryRefractivityConstant   !< Dry air refractivity constant
+REAL(kind_real), INTENT(IN)               :: wetRefractivityConstant   !< Wet air refractivity constant
 REAL(kind_real), ALLOCATABLE, INTENT(OUT) :: dref_dP(:,:)              !< kmatrix for p
 REAL(kind_real), ALLOCATABLE, INTENT(OUT) :: dref_dq(:,:)              !< kmatrix for q
 REAL(kind_real), OPTIONAL, INTENT(OUT)    :: dPb_dP(nlevq,nlevP)       !< Gradient of pressure on theta levels wrt pressure on pressure levels
@@ -439,6 +446,8 @@ call ufo_refractivity_partial_derivatives(nlevP,           &
                                           P,               &
                                           q,               &
                                           vert_interp_ops, &
+                                          dryRefractivityConstant, &
+                                          wetRefractivityConstant, &
                                           dT_dTv,          &
                                           dT_dq,           &
                                           dref_dPb,        &
@@ -466,8 +475,9 @@ IF (pseudo_ops) THEN
       P_pseudo(i) = Pb(counter)
       q_pseudo(i) = q(counter)
       T_pseudo(i) = T(counter)
-      IF (PRESENT(refractivity)) refractivity(i) = n_alpha * P_pseudo(i) / T_pseudo(i) + &
-          n_beta * P_pseudo(i) * q_pseudo(i) / &
+      IF (PRESENT(refractivity)) refractivity(i) = &
+          dryRefractivityConstant * P_pseudo(i) / T_pseudo(i) + &
+          wetRefractivityConstant * P_pseudo(i) * q_pseudo(i) / &
           (T_pseudo(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_pseudo(i)))
 
       dref_dPpseudo(i,i) = dref_dPb(counter,counter)
@@ -503,15 +513,15 @@ IF (pseudo_ops) THEN
                     ((model_heights(i) - zb(counter - 1)) / (zb(counter) - zb(counter - 1))))
       END IF
 
-      Ndry = n_alpha * P_pseudo(i) / T_pseudo(i)
-      Nwet = n_beta * P_pseudo(i) * q_pseudo(i) / (T_pseudo(i) ** 2 &
-                    *(rd_over_rv + (1.0 - rd_over_rv) * q_pseudo(i)))
+      Ndry = dryRefractivityConstant * P_pseudo(i) / T_pseudo(i)
+      Nwet = wetRefractivityConstant * P_pseudo(i) * q_pseudo(i) / (T_pseudo(i) ** 2 &
+                    * (rd_over_rv + (1.0 - rd_over_rv) * q_pseudo(i)))
 
       IF (PRESENT(refractivity)) refractivity(i) = Ndry + Nwet
 
       dref_dPpseudo(i,i) = (Ndry + Nwet) / P_pseudo(i)
       dref_dTpseudo(i,i) = -(Ndry + 2.0 * Nwet) / T_pseudo(i)
-      dref_dqpseudo(i,i) = n_beta * P_pseudo(i) * rd_over_rv / (T_pseudo(i) * (rd_over_rv + &
+      dref_dqpseudo(i,i) = wetRefractivityConstant * P_pseudo(i) * rd_over_rv / (T_pseudo(i) * (rd_over_rv + &
                            (1.0 - rd_over_rv) * q_pseudo(i))) ** 2
 
       ! Transform P, q and T to pseudo-levels
@@ -657,6 +667,8 @@ subroutine ufo_refractivity_partial_derivatives(nlevP,           &
                                                 P,               &
                                                 q,               &
                                                 vert_interp_ops, &
+                                                dryRefractivityConstant, &
+                                                wetRefractivityConstant, &
                                                 dT_dTv,          &
                                                 dT_dq,           &
                                                 dref_dPb,        &
@@ -681,6 +693,8 @@ REAL(kind_real), INTENT(IN)               :: zb(nlevq)                 !< Height
 REAL(kind_real), INTENT(IN)               :: P(nlevp)                  !< Pressure
 REAL(kind_real), INTENT(IN)               :: q(nlevq)                  !< Specific humidity
 LOGICAL, INTENT(IN)                       :: vert_interp_ops           !< Whether to interpolate vertically using exner or ln(p)
+REAL(kind_real), INTENT(IN)               :: dryRefractivityConstant   !< Constant for dry refractivity calculation
+REAL(kind_real), INTENT(IN)               :: wetRefractivityConstant   !< Constant for wet refractivity calculation
 REAL(kind_real), INTENT(OUT)              :: dT_dTv(nlevq,nlevq)       !< Partial derivative of temperature wrt virtual temperature
 REAL(kind_real), INTENT(OUT)              :: dT_dq(nlevq,nlevq)        !< Partial derivative of temperature wrt specific humidity
 REAL(kind_real), INTENT(OUT)              :: dref_dPb(nlevq,nlevq)     !< Partial derivative of refractivity wrt pressure on model theta levels
@@ -776,11 +790,11 @@ DO i = 1, nlevq
 
   ! wet component
 
-  Nwet = n_beta * Pb(i) * q(i) / (T(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q(i)))
+  Nwet = wetRefractivityConstant * Pb(i) * q(i) / (T(i) ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q(i)))
 
-  dref_dq(i,i) = n_beta * Pb(i) * rd_over_rv / (T(i) * (rd_over_rv + (1.0 - rd_over_rv) * q(i))) ** 2
+  dref_dq(i,i) = wetRefractivityConstant * Pb(i) * rd_over_rv / (T(i) * (rd_over_rv + (1.0 - rd_over_rv) * q(i))) ** 2
 
-  Ndry = n_alpha * Pb(i) / T(i)
+  Ndry = dryRefractivityConstant * Pb(i) / T(i)
 
   refractivity(i) = Ndry + Nwet
 

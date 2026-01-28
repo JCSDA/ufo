@@ -34,7 +34,12 @@ ObsGroundgnssMetOffice::ObsGroundgnssMetOffice(const ioda::ObsSpace & odb,
                                     "geopotential_height", "geopotential_height_levels"};
   varin_.reset(new oops::Variables(vv));
 
-  ufo_groundgnss_metoffice_setup_f90(keyOperGroundgnssMetOffice_, parameters.toConfiguration());
+  ufo_groundgnss_metoffice_setup_f90(keyOperGroundgnssMetOffice_,
+                                     parameters.vertInterpOPS.value(),
+                                     parameters.pseudoLevels.value(),
+                                     parameters.minTempGrad.value(),
+                                     parameters.dryRefractivityConstant.value(),
+                                     parameters.wetRefractivityConstant.value());
 
   oops::Log::trace() << "ObsGroundgnssMetOffice constructor done." << std::endl;
 }

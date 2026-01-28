@@ -42,6 +42,8 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_bendmetoffice_tlad
   logical                       :: pseudo_ops
   logical                       :: noSuperCheck
   real(kind_real)               :: min_temp_grad
+  real(kind_real)               :: dryRefractivityConstant
+  real(kind_real)               :: wetRefractivityConstant
   integer, allocatable          :: chanList(:)
   integer                       :: nlevp
   integer                       :: nlevq
@@ -68,7 +70,8 @@ contains
 !!
 !-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_setup(self, vert_interp_ops, pseudo_ops, &
-                                          min_temp_grad, chanList, noSuperCheck)
+                                          min_temp_grad, chanList, noSuperCheck, &
+                                          dryRefractivityConstant, wetRefractivityConstant)
 
 implicit none
 
@@ -78,6 +81,8 @@ logical(c_bool),                         intent(in) :: pseudo_ops       !< Wheth
 real(c_float),                           intent(in) :: min_temp_grad    !< The minimum temperature gradient in the vertical
 integer(c_int),                          intent(in) :: chanList(:)      !< List of channels (vertical levels) to use
 logical(c_bool),                         intent(in) :: noSuperCheck     !< If true the don't perform super-refraction check
+real(c_float),                           intent(in) :: dryRefractivityConstant
+real(c_float),                           intent(in) :: wetRefractivityConstant
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
@@ -85,6 +90,8 @@ self % min_temp_grad = min_temp_grad
 allocate(self % chanList(1:size(chanList)))
 self % chanList = chanList
 self % noSuperCheck = noSuperCheck
+self % dryRefractivityConstant = dryRefractivityConstant
+self % wetRefractivityConstant = wetRefractivityConstant
 
 end subroutine ufo_gnssro_bendmetoffice_setup
 
@@ -188,6 +195,8 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
                             self % pseudo_ops, &                       ! Whether to use pseudo-levels in the calculation
                             self % vert_interp_ops, &                  ! Whether to interpolate using log(pressure)
                             self % min_temp_grad, &                    ! Minimum allowed vertical temperature gradient
+                            self % dryRefractivityConstant, &          ! Dry air refractivity constant
+                            self % wetRefractivityConstant, &          ! Wet air refractivity constant
                             obsLocR(iobs), &                           ! Local radius of curvature of the earth
                             obsLat(iobs), &                            ! Latitude of the observation
                             obsGeoid(iobs), &                          ! Geoid undulation at the tangent point
@@ -414,6 +423,8 @@ SUBROUTINE jacobian_interface(nlevp, &
                               pseudo_ops, &
                               vert_interp_ops, &
                               min_temp_grad, &
+                              dryRefractivityConstant, &
+                              wetRefractivityConstant, &
                               ro_rad_curv, &
                               latitude, &
                               ro_geoid_und, &
@@ -433,6 +444,8 @@ REAL(kind_real), INTENT(IN)    :: prs(1:nlevp)     !< The model values that are 
 LOGICAL, INTENT(IN)            :: pseudo_ops       !< Whether to use pseudo levels in the calculation
 LOGICAL, INTENT(IN)            :: vert_interp_ops  !< Whether to use exner for the vertical interpolation
 REAL(kind_real), INTENT(IN)    :: min_temp_grad    !< The minimum allowed vertical temperature gradient
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant !< Dry air refractivity constant
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant !< Wet air refractivity constant
 REAL(kind_real), INTENT(IN)    :: ro_rad_curv      !< The earth's radius of curvature at the ob location
 REAL(kind_real), INTENT(IN)    :: latitude         !< The latitude of the ob location
 REAL(kind_real), INTENT(IN)    :: ro_geoid_und     !< The geoid undulation at the ob location
@@ -466,6 +479,8 @@ CALL ufo_calculate_refractivity (nlevp,            &
                                  pseudo_ops,       &
                                  vert_interp_ops,  &
                                  min_temp_grad,    &
+                                 dryRefractivityConstant, &
+                                 wetRefractivityConstant, &
                                  BAerr,            &
                                  nRefLevels,       &
                                  refractivity,     &
@@ -493,6 +508,8 @@ IF (.NOT. BAErr) THEN
                         pseudo_ops, &
                         vert_interp_ops, &
                         min_temp_grad, &
+                        dryRefractivityConstant, &
+                        wetRefractivityConstant, &
                         prs, &
                         q, &
                         ro_rad_curv, &
@@ -540,6 +557,8 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
                           pseudo_ops, &
                           vert_interp_ops, &
                           min_temp_grad, &
+                          dryRefractivityConstant, &
+                          wetRefractivityConstant, &
                           pressure, &
                           humidity, &
                           ro_rad_curv, &
@@ -556,26 +575,28 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
 !
     IMPLICIT NONE
 
-    INTEGER, INTENT(IN)          :: nlevp                 !< The number of model pressure levels
-    INTEGER, INTENT(IN)          :: nRefLevels            !< Number of refractivity levels
-    INTEGER, INTENT(IN)          :: nlevq                 !< The number of model theta levels
-    REAL(kind_real), INTENT(IN)  :: za(:)                 !< The geometric height of the model pressure levels
-    REAL(kind_real), INTENT(IN)  :: zb(:)                 !< The geometric height of the model theta levels
-    REAL(kind_real), INTENT(IN)  :: model_heights(:)      !< The geometric height of the refractivity levels
-    LOGICAL, INTENT(IN)          :: pseudo_ops            !< Whether to use pseudo levels in the calculation
-    LOGICAL, INTENT(IN)          :: vert_interp_ops       !< Whether to use exner for the vertical interpolation
-    REAL(kind_real), INTENT(IN)  :: min_temp_grad         !< Minimum allowed vertical temperature gradient
-    REAL(kind_real), INTENT(IN)  :: pressure(nlevp)       !< Model pressure
-    REAL(kind_real), INTENT(IN)  :: humidity(nlevq)       !< Model specific humidity
-    REAL(kind_real), INTENT(IN)  :: ro_rad_curv           !< The earth's radius of curvature at the ob location
-    REAL(kind_real), INTENT(IN)  :: latitude              !< The latitude of the ob location
-    REAL(kind_real), INTENT(IN)  :: ro_geoid_und          !< The geoid undulation at the ob location
-    REAL(kind_real), INTENT(IN)  :: ref_model(nRefLevels) !< Model refractivity on theta levels - returned from forward model
-    INTEGER, INTENT(IN)          :: nobs                  !< The number of observations in this column
-    REAL(kind_real), INTENT(IN)  :: zobs(:)               !< The impact parameters of the column of observations
-    REAL(kind_real), INTENT(IN)  :: nr(nRefLevels)        !< The impact parameters of the model data
-    REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)   !< The calculated K matrix
-    LOGICAL, INTENT(IN)          :: noSuperCheck          !< If true, then don't apply super-refraction check
+    INTEGER, INTENT(IN)          :: nlevp                   !< The number of model pressure levels
+    INTEGER, INTENT(IN)          :: nRefLevels              !< Number of refractivity levels
+    INTEGER, INTENT(IN)          :: nlevq                   !< The number of model theta levels
+    REAL(kind_real), INTENT(IN)  :: za(:)                   !< The geometric height of the model pressure levels
+    REAL(kind_real), INTENT(IN)  :: zb(:)                   !< The geometric height of the model theta levels
+    REAL(kind_real), INTENT(IN)  :: model_heights(:)        !< The geometric height of the refractivity levels
+    LOGICAL, INTENT(IN)          :: pseudo_ops              !< Whether to use pseudo levels in the calculation
+    LOGICAL, INTENT(IN)          :: vert_interp_ops         !< Whether to use exner for the vertical interpolation
+    REAL(kind_real), INTENT(IN)  :: min_temp_grad           !< Minimum allowed vertical temperature gradient
+    REAL(kind_real), INTENT(IN)  :: dryRefractivityConstant !< Dry air refractivity constant
+    REAL(kind_real), INTENT(IN)  :: wetRefractivityConstant !< Wet air refractivity constant
+    REAL(kind_real), INTENT(IN)  :: pressure(nlevp)         !< Model pressure
+    REAL(kind_real), INTENT(IN)  :: humidity(nlevq)         !< Model specific humidity
+    REAL(kind_real), INTENT(IN)  :: ro_rad_curv             !< The earth's radius of curvature at the ob location
+    REAL(kind_real), INTENT(IN)  :: latitude                !< The latitude of the ob location
+    REAL(kind_real), INTENT(IN)  :: ro_geoid_und            !< The geoid undulation at the ob location
+    REAL(kind_real), INTENT(IN)  :: ref_model(nRefLevels)   !< Model refractivity on theta levels - returned from forward model
+    INTEGER, INTENT(IN)          :: nobs                    !< The number of observations in this column
+    REAL(kind_real), INTENT(IN)  :: zobs(:)                 !< The impact parameters of the column of observations
+    REAL(kind_real), INTENT(IN)  :: nr(nRefLevels)          !< The impact parameters of the model data
+    REAL(kind_real), INTENT(OUT) :: K(nobs,nlevp+nlevq)     !< The calculated K matrix
+    LOGICAL, INTENT(IN)          :: noSuperCheck            !< If true, then don't apply super-refraction check
 
     REAL(kind_real)              :: m1(nobs, nRefLevels)             ! Intermediate term in the K-matrix calculation
     REAL(kind_real), ALLOCATABLE :: dref_dp(:, :)                    ! Partial derivative of refractivity wrt. pressure
@@ -595,6 +616,8 @@ SUBROUTINE Ops_GPSRO_GetK(nlevp, &
                                pseudo_ops, &
                                vert_interp_ops, &
                                min_temp_grad, &
+                               dryRefractivityConstant, &
+                               wetRefractivityConstant, &
                                dref_dp,    &       !out
                                dref_dq)            !out
 
