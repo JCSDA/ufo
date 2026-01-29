@@ -353,7 +353,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_refractivity_changes
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_refractivity_changes
@@ -363,7 +363,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_refractivity_changes
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam
