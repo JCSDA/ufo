@@ -15,13 +15,13 @@
 
 #include "ufo/filters/ObsPolygonCheck.h"
 
-#include "ioda/ObsSpace.h"
-#include "oops/util/Logger.h"
-#include <boost/geometry.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <boost/geometry.hpp>
+#include "ioda/ObsSpace.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 
@@ -57,7 +57,8 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
   using polygon_t = bg::model::polygon<point_t>;
 
   // Get from the parameters a point within the polygon.
-  const point_t insidePoint(parameters_.inside_point_longitude.value(), parameters_.inside_point_latitude.value());
+  const point_t insidePoint(parameters_.inside_point_longitude.value(),
+                            parameters_.inside_point_latitude.value());
 
   // Assemble a polygon from the list of longitudes and latitudes.
   polygon_t poly;
@@ -65,20 +66,20 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
   const auto &vertex_longitudes = parameters_.vertex_longitudes.value();
   const size_t nlon = vertex_longitudes.size();
   const size_t nlat = vertex_latitudes.size();
-  if(nlon != nlat) {
+  if (nlon != nlat) {
     std::ostringstream what;
     what << "Mismatch between vertex longitude count (" << nlon
          << ") and vertex latitude count (" << nlat << ").";
     throw ObsPolygonLatLonSizeMismatch(what.str());
   }
-  for(int i=0; i<nlon; i++)
+  for (int i = 0; i < nlon; i++)
     poly.outer().push_back(point_t(vertex_longitudes[i], vertex_latitudes[i]));
 
   // Ask boost::geometry to correct common problems in the polygon definition.
   bg::correct(poly);
 
   // Scan for obvious errors that bg::correct couldn't correct.
-  if(std::string reason; !bg::is_valid(poly, reason)) {
+  if (std::string reason; !bg::is_valid(poly, reason)) {
     std::ostringstream what;
     what << "ObsPolygonCheck: unable to correct invalid polygon (" << reason << ")";
     throw ObsPolygonIsInvalid(what.str());
@@ -98,25 +99,28 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
   size_t applyCount = 0;
   size_t insideCount = 0;
   for (size_t iloc = 0; iloc < nlocs; iloc++)
-    if(apply[iloc])
+    if (apply[iloc]) {
       try {
         applyCount++;
         bool inside = useThisSide == bg::within(point_t(lons[iloc], lats[iloc]), poly);
-        notInside[iloc] = not inside;
-        if(inside)
+        notInside[iloc] = !inside;
+        if (inside)
           insideCount++;
       } catch(const bg::exception &ex) {
         // We only catch boost geometry exceptions here; anything else is passed through.
         oops::Log::error() << "ObsPolygonCheck: boost::geometry error: " << ex.what() << std::endl;
         // The default value for all points is "not inside" so any erroring points will be rejected.
       }
+    }
 
   for (auto &vec : flagged)
     for (size_t iloc = 0; iloc < nlocs; iloc++)
-      if(apply[iloc])
+      if (apply[iloc])
         vec[iloc] = notInside[iloc];
 
-  oops::Log::trace() << "ObsPolygonCheck applyFilter complete (kept " << insideCount << " of " << applyCount << " locations discarding " << (applyCount - insideCount) << ")" << std::endl;
+  oops::Log::trace() << "ObsPolygonCheck applyFilter complete (kept " << insideCount
+                     << " of " << applyCount << " locations discarding "
+                     << (applyCount - insideCount) << ")" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

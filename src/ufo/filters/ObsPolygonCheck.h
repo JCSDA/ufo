@@ -59,8 +59,8 @@ class ObsPolygonCheckParameters : public FilterParametersBase {
 /// and vertex_latitudes have different lengths.
 
 class ObsPolygonLatLonSizeMismatch: public std::invalid_argument {
-public:
-  ObsPolygonLatLonSizeMismatch(const std::string &message):
+ public:
+  explicit ObsPolygonLatLonSizeMismatch(const std::string &message):
     std::invalid_argument(message)
   {}
 };
@@ -68,8 +68,8 @@ public:
 /// ObsPolygonIsInvalid: thrown when boost::geometry::is_valid doesn't like a polygon.
 
 class ObsPolygonIsInvalid: public std::invalid_argument {
-public:
-  ObsPolygonIsInvalid(const std::string &message):
+ public:
+  explicit ObsPolygonIsInvalid(const std::string &message):
     std::invalid_argument(message)
   {}
 };
