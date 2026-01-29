@@ -33,7 +33,6 @@ ObsPolygonCheck::ObsPolygonCheck(ioda::ObsSpace & obsdb, const Parameters_ & par
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ObsPolygonCheck constructor" << std::endl;
-  oops::Log::debug() << "ObsPolygonCheck: config = " << parameters_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
