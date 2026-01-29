@@ -192,7 +192,7 @@ extern "C" {
   void ufo_geovals_reorderzdir_f90(const F90goms &, const int &, const char *,
                                    const int &, const char *);
   void ufo_geovals_abs_f90(const F90goms &);
-  void ufo_geovals_rms_f90(const F90goms &, double &, const int &, const char *);
+  void ufo_geovals_rms_f90(const F90goms &, double &);
   void ufo_geovals_analytic_init_f90(F90goms &, const SampledLocations &,
                                      const eckit::Configuration &);
   void ufo_geovals_random_f90(const F90goms &);

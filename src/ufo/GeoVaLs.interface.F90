@@ -416,25 +416,15 @@ end subroutine ufo_geovals_abs_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_rms_c(c_key_self,vrms,lvar,c_var) bind(c,name='ufo_geovals_rms_f90')
-use ufo_vars_mod, only: MAXVARLEN
-use string_f_c_mod
+subroutine ufo_geovals_rms_c(c_key_self,vrms) bind(c,name='ufo_geovals_rms_f90')
 implicit none
 integer(c_int), intent(in) :: c_key_self
 real(c_double), intent(inout) :: vrms
-integer(c_int), intent(in) :: lvar
-character(kind=c_char, len=1), intent(in) :: c_var(lvar+1)
 type(ufo_geovals), pointer :: self
-character(len=MAXVARLEN) :: varname
 
 call ufo_geovals_registry%get(c_key_self, self)
 
-if (lvar > 0) then
-  call c_f_string(c_var, varname)
-  call ufo_geovals_rms(self,vrms,varname)
-else
-  call ufo_geovals_rms(self,vrms)
-endif
+call ufo_geovals_rms(self,vrms)
 
 end subroutine ufo_geovals_rms_c
 

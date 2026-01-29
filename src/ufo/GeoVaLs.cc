@@ -122,8 +122,7 @@ GeoVaLs::GeoVaLs(const Locations_ & locations, const oops::Variables & vars)
  * \details This ufo::GeoVaLs constructor is used in all oops H(x) and DA applications.
  */
 GeoVaLs::GeoVaLs(const Locations_ & locations,
-                 const oops::Variables & vars, const std::vector<size_t> & nlevs,
-                 const eckit::Configuration & conf)
+                 const oops::Variables & vars, const std::vector<size_t> & nlevs)
   : keyGVL_(-1), vars_(vars), dist_(getSharedDistribution(locations))
 {
   oops::Log::trace() << "GeoVaLs constructor starting" << std::endl;
@@ -142,12 +141,22 @@ GeoVaLs::GeoVaLs(const Locations_ & locations,
                         isSamplingMethodTrivial.get());
   setupSamplingMethods(locations);
 
-  if (!conf.empty()) {
-    std::unique_ptr<AnalyticInitBase> init(ufo::AnalyticInitFactory::create(conf));
+  oops::Log::trace() << "GeoVaLs constructor key = " << keyGVL_ << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+/*! \brief Analytic init constructor, based off of existing GeoVaLs */
+GeoVaLs::GeoVaLs(const Locations_ & locations, const GeoVaLs & other,
+                 const eckit::Configuration & initConf)
+  : keyGVL_(-1), vars_(other.vars_), reducedVars_(other.reducedVars_), dist_(other.dist_)
+{
+  oops::Log::trace() << "GeoVaLs analytic init constructor starting" << std::endl;
+  ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
+  if (!initConf.empty()) {
+    std::unique_ptr<AnalyticInitBase> init(ufo::AnalyticInitFactory::create(initConf));
     init->fillGeoVaLs(locations.samplingMethod(0).sampledLocations(), *this);
   }
-
-  oops::Log::trace() << "GeoVaLs constructor key = " << keyGVL_ << std::endl;
+  oops::Log::trace() << "GeoVaLs analytic init constructor key = " << keyGVL_ << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -199,7 +208,6 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
 }
 // -----------------------------------------------------------------------------
 /*! \brief Copy constructor */
-
 GeoVaLs::GeoVaLs(const GeoVaLs & other)
   : keyGVL_(-1), vars_(other.vars_), reducedVars_(other.reducedVars_), dist_(other.dist_)
 {
@@ -287,20 +295,20 @@ void GeoVaLs::reorderzdir(const std::string & varname, const std::string & vardi
 }
 // -----------------------------------------------------------------------------
 /*! \brief Calculate rms */
-double GeoVaLs::rms(const std::string & var) const {
+double GeoVaLs::rms() const {
   oops::Log::trace() << "GeoVaLs::rms starting" << std::endl;
   double zz;
-  ufo_geovals_rms_f90(keyGVL_, zz, var.size(), var.c_str());
+  ufo_geovals_rms_f90(keyGVL_, zz);
   oops::Log::trace() << "GeoVaLs::rms done" << std::endl;
   return zz;
 }
 // -----------------------------------------------------------------------------
 /*! \brief Calculate normalized rms */
-double GeoVaLs::normalizedrms(const GeoVaLs & other, const std::string & var) const {
+double GeoVaLs::normalizedrms(const GeoVaLs & other) const {
   oops::Log::trace() << "GeoVaLs::normalizerms starting" << std::endl;
   GeoVaLs temp_gval(*this);
   ufo_geovals_normalize_f90(temp_gval.keyGVL_, other.keyGVL_);
-  double zz = temp_gval.rms(var);
+  double zz = temp_gval.rms();
   oops::Log::trace() << "GeoVaLs::normalizerms done" << std::endl;
   return zz;
 }

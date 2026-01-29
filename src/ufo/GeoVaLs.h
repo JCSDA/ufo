@@ -141,8 +141,9 @@ class GeoVaLs : public util::Printable,
   static const std::string classname() {return "ufo::GeoVaLs";}
 
   GeoVaLs(const Locations_ & locations,
-          const oops::Variables & vars, const std::vector<size_t> & nlevs,
-          const eckit::Configuration & conf = eckit::LocalConfiguration());
+          const oops::Variables & vars, const std::vector<size_t> & nlevs);
+  GeoVaLs(const Locations_ & locations, const GeoVaLs &,
+          const eckit::Configuration & initConf = eckit::LocalConfiguration());
 
 // Deprecated constructor - Please do not use this constructor in new code.
   GeoVaLs(std::shared_ptr<const ioda::Distribution> dist, const oops::Variables & vars);
@@ -197,8 +198,8 @@ class GeoVaLs : public util::Printable,
   void zero();
   void reorderzdir(const std::string &, const std::string &);
   void random();
-  double rms(const std::string & var = "") const;
-  double normalizedrms(const GeoVaLs &, const std::string & var = "") const;
+  double rms() const;
+  double normalizedrms(const GeoVaLs &) const;
 
   /// \brief Return true if this GeoVaLs object contains variable `var` stored in format `format`.
   bool has(const oops::Variable & var, GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;

@@ -928,34 +928,24 @@ end subroutine ufo_geovals_abs
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_geovals_rms(self,vrms,varname)
+subroutine ufo_geovals_rms(self,vrms)
 implicit none
 type(ufo_geovals), intent(in) :: self
 real(kind_real), intent(inout) :: vrms
-character(len=*), intent(in), optional :: varname
 integer :: jv, jo
 real(kind_real) :: N
-type(ufo_geoval), pointer :: geoval
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_rms: geovals not initialized")
 endif
 vrms=0.0_kind_real
 N=0.0_kind_real
-if (present(varname)) then
-  call ufo_geovals_get_var(self, varname, geoval)
-  do jo = 1, geoval%nprofiles
-    vrms = vrms + Sum(geoval%vals(:,jo)**2)
-    N=N+geoval%nval
-  enddo
-else
-  do jv = 1, self%nvar
-     do jo = 1, self%geovals(jv)%nprofiles
-        vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
-        N=N+self%geovals(jv)%nval
-     enddo
-  enddo
-endif
+do jv = 1, self%nvar
+   do jo = 1, self%geovals(jv)%nprofiles
+      vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
+      N=N+self%geovals(jv)%nval
+   enddo
+enddo
 
 if ( N > 0) vrms = sqrt(vrms/N)
 
@@ -1431,16 +1421,16 @@ use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
 use ufo_sampled_locations_mod
 use ufo_utils_mod, only: cmp_strings
+use ufo_constants_mod, only : one, pi, deg2rad, t2tv
 
 implicit none
 type(ufo_geovals), intent(inout) :: self
 type(ufo_sampled_locations), intent(in)  :: sampled_locations
 character(*), intent(in)         :: ic
 
-real(kind_real) :: pi = acos(-1.0_kind_real)
-real(kind_real) :: deg_to_rad,rlat, rlon
+real(kind_real) :: rlat, rlon
 real(kind_real) :: p0, kz, u0, v0, w0, t0, phis0, ps0, rho0, hum0
-real(kind_real) :: q1, q2, q3, q4
+real(kind_real) :: q1, q2, q3, q4, qv
 real(kind_real), allocatable, dimension(:) :: lons, lats
 integer :: npaths, ivar, iprofile, ival
 
@@ -1448,14 +1438,27 @@ if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
 endif
 
-! The last variable should be the ln pressure coordinate.  That's
+! The last variable should be the pressure coordinate.  That's
 ! where we get the height information for the analytic init
 if (self%variables(self%nvar) /= var_prs .and. &
     self%variables(self%nvar) /= var_prsi) then
   call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
 endif
 
-deg_to_rad = pi/180.0_kind_real
+! Today, code exists only to populate these geovals variables:
+! - air_temperature
+! - virtual_temperature
+! - water_vapor_mixing_ratio_wrt_moist_air
+! - air_pressure
+! Error if the GeoVaLs is set up requesting fields that can't be populated
+do ivar = 1, self%nvar
+   if (.not. (cmp_strings(self%variables(ivar), var_ts) \
+              .or. cmp_strings(self%variables(ivar), var_tv) \
+              .or. cmp_strings(self%variables(ivar), var_q) \
+              .or. cmp_strings(self%variables(ivar), var_prs))) then
+      call abor1_ftn("ufo_geovals_analytic_init: unable to fill variable " // trim(self%variables(ivar)))
+   endif
+enddo
 
 npaths = sampled_locations%npaths()
 allocate(lons(npaths), lats(npaths))
@@ -1467,8 +1470,8 @@ do ivar = 1, self%nvar-1
    do iprofile = 1, self%geovals(ivar)%nprofiles
 
       ! convert lat and lon to radians
-      rlat = deg_to_rad * lats(iprofile)
-      rlon = deg_to_rad*modulo(lons(iprofile)+180.0_kind_real,360.0_kind_real) - pi
+      rlat = deg2rad * lats(iprofile)
+      rlon = deg2rad * modulo(lons(iprofile)+180.0_kind_real, 360.0_kind_real) - pi
 
       do ival = 1, self%geovals(ivar)%nval
 
@@ -1481,7 +1484,7 @@ do ivar = 1, self%nvar-1
 
          case ("invent_state")
 
-           t0 = cos(deg_to_rad * lons(iprofile) ) * cos(rlat)
+           t0 = cos(deg2rad * lons(iprofile) ) * cos(rlat)
 
          case ("dcmip-test-1-1")
 
@@ -1509,11 +1512,16 @@ do ivar = 1, self%nvar-1
 
          end select init_option
 
-         ! currently only temperature is implemented
-         if (cmp_strings(self%variables(ivar), var_tv)) then
-            ! Warning: we may need a conversion from temperature to
-            ! virtual temperture here
+         if (cmp_strings(self%variables(ivar), var_ts)) then
+            ! air_temperature
             self%geovals(ivar)%vals(ival,iprofile) = t0
+         else if (cmp_strings(self%variables(ivar), var_tv)) then
+            ! virtual_temperture from specific_humidity & air_temperature
+            qv = max(1.0e-12_kind_real, hum0/(one - hum0))
+            self%geovals(ivar)%vals(ival,iprofile) = t0 * (one + (t2tv * qv))
+         else if (cmp_strings(self%variables(ivar), var_q)) then
+            ! specific humidity / water_vapor_mixing_ratio_wrt_moist_air
+            self%geovals(ivar)%vals(ival,iprofile) = hum0
          endif
 
       enddo
