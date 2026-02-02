@@ -404,10 +404,10 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
     ! Flag bad profiles
     do ipoint = 0, nobs_profile-1
-      if (qc_flags(start_point + ipoint) > 0) then
+      if (qc_flags(index_vals(start_point + ipoint)) > 0) then
         ! Do nothing, since the data are already flagged
       else if (Ob % bendingangle(ipoint+1) % PGEFinal > 0.5) then
-        qc_flags(start_point + ipoint) = self % onedvarflag
+        qc_flags(index_vals(start_point + ipoint)) = self % onedvarflag
         Ob % qc_flags(ipoint+1) = self % onedvarflag
       end if
     end do
