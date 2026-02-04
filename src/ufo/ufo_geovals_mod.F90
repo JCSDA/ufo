@@ -1452,9 +1452,9 @@ endif
 ! - air_pressure
 ! Error if the GeoVaLs is set up requesting fields that can't be populated
 do ivar = 1, self%nvar
-   if (.not. (cmp_strings(self%variables(ivar), var_ts) \
-              .or. cmp_strings(self%variables(ivar), var_tv) \
-              .or. cmp_strings(self%variables(ivar), var_q) \
+   if (.not. (cmp_strings(self%variables(ivar), var_ts) &
+              .or. cmp_strings(self%variables(ivar), var_tv) &
+              .or. cmp_strings(self%variables(ivar), var_q) &
               .or. cmp_strings(self%variables(ivar), var_prs))) then
       call abor1_ftn("ufo_geovals_analytic_init: unable to fill variable " // trim(self%variables(ivar)))
    endif
