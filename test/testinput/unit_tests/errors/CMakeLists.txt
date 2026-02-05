@@ -5,7 +5,7 @@
 
 # Unit tests for errors
 
-#
+
 ufo_add_test( NAME    test_ufo_metoffice_error_matrices
               TIER    1
               ECBUILD
@@ -15,32 +15,34 @@ ufo_add_test( NAME    test_ufo_metoffice_error_matrices
               LIBS    ufo
               LABELS  errors metoffice
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-#
+
 ufo_add_test( NAME    test_ufo_obserrorcrossvarcorr
               TIER    1
               ECBUILD
-              SOURCES ../../../mains/TestObsErrorCovariance.cc
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsError.x
+              DEPENDS test_ObsError.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrorcrossvarcorr.yaml"
               MPI     4
               LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-#
+
 ufo_add_test( NAME    test_ufo_obserrorcrossvarcov
               TIER    1
               ECBUILD
-              SOURCES ../../../mains/TestObsErrorCovariance.cc
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsError.x
+              DEPENDS test_ObsError.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrorcrossvarcov.yaml"
               MPI     4
               LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
-#
 ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
               TIER    1
               ECBUILD
-              SOURCES ../../../mains/TestObsErrorCovariance.cc
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsError.x
+              DEPENDS test_ObsError.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrorwithingroupcorr.yaml"
               MPI     2
               LIBS    ufo
@@ -58,11 +60,11 @@ ufo_add_test( NAME    test_ufo_obserrorwithingroupcorrdiags
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
-#
 ufo_add_test( NAME    test_ufo_obserrordiagonal
               TIER    1
               ECBUILD
-              SOURCES ../../../mains/TestObsErrorCovariance.cc
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsError.x
+              DEPENDS test_ObsError.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiagonal.yaml"
               MPI     4
               LIBS    ufo

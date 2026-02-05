@@ -5,7 +5,7 @@ use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use obsspace_mod
-use ufo_constants_mod, only: mean_earth_rad
+use ufo_constants_mod, only: mean_earth_rad_m
 use gnssro_mod_constants, only: MAXVARLEN
 
 implicit none
@@ -65,7 +65,7 @@ if (f_conf%has("ro_type"))  then
   roconf%ro_type=trim(str)
 endif
 !if (f_conf%has("ro_type")) call f_conf%get_or_die("ro_type",roconf%ro_type)
-roconf%dtheta        = roconf%res/mean_earth_rad
+roconf%dtheta        = roconf%res/(mean_earth_rad_m/1000.0) ! m to km
 roconf%vertlayer = "full"
 if (f_conf%has("vertlayer")) then
    call f_conf%get_or_die("vertlayer",str)

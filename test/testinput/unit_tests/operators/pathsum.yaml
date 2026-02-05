@@ -5,12 +5,14 @@ time window:
 observations:
 - obs operator:
     name: PathSum
-    path type: vertical            # use "slant" for slant path
+    path type: vertical
     geoval variable: electron_density
+    weight variable: pathsum_weights    # weight from geoval
+    height range: [0, 2000]
     use km for height: true        # only applicable if using sementLength computation inside code
     scaling factor: 1.0e-07        # used to unit conversion
   obs space:
-    name: GNSSVTEC
+    name: GNSSVTEC_readweight
     obsdatain:
       engine:
         type: H5File
@@ -19,18 +21,42 @@ observations:
    #obsdataout:
    #  engine:
    #    type: H5File
-   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out.nc4
+   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out1.nc4
   geovals:
-    filename: Data/ufo/testinput_tier_1/geovals_gridded_vtec_202010232345_100locs.nc4
+    filename: Data/ufo/testinput_tier_1/geovals_gridded_vtec_weights_202010232345_100locs.nc4
   vector ref: TestReference
-  tolerance: 1.0e-03
+  tolerance: 1.0e-02
   norm ref: TestReference
-  tolerance: 1.0e-06
+  tolerance: 1.0e-04
+- obs operator:
+    name: PathSum
+    path type: vertical            # use "slant" for slant path
+    geoval variable: electron_density
+    height range: [0, 2000]
+    use km for height: true        # only applicable if using sementLength computation inside code
+    scaling factor: 1.0e-07        # used to unit conversion
+  obs space:
+    name: GNSSVTEC_computeweight
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnss_gridded_vtec_202010232345_100locs.nc4
+    simulated variables: [totalElectronContent]
+   #obsdataout:
+   #  engine:
+   #    type: H5File
+   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out2.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_gridded_vtec_weights_202010232345_100locs.nc4
+  vector ref: TestReference
+  tolerance: 1.0e-02
+  norm ref: TestReference
+  tolerance: 1.0e-04
 - obs operator:
     name: PathSum
     path type: vertical            
     geoval variable: electron_density
-    weights: [1.0, 2.0]         # optional for vertical integration
+    weights: [1.0, 2.0, 3.0]         # optional for vertical integration
     height range: [0, 105]      # height range for vertical integration
     scaling factor: 1.0e-04
   obs space:
@@ -43,7 +69,7 @@ observations:
    #obsdataout:
    #  engine:
    #    type: H5File
-   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out2.nc4
+   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out3.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_gridded_vtec_202010232345_synthetic.nc4
   vector ref: TestReference
@@ -67,10 +93,35 @@ observations:
    #obsdataout:
    #  engine:
    #    type: H5File
-   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out3.nc4
+   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out4.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_gridded_vtec_202010232345_synthetic.nc4
   vector ref: TestReference
   tolerance: 1.0e-03
   norm ref: TestReference
+  tolerance: 1.0e-06
+- obs operator:
+    name: PathSum
+    path type: vertical
+    geoval variable: electron_density
+    weight variable: weights    # weight from geoval
+    height range: [0, 105]      # height range for vertical integration
+    interpolate boundaries: true
+    scaling factor: 1.0e-04
+  obs space:
+    name: PathSum_interpolateBoundaries
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnss_gridded_vtec_202010232345_synthetic.nc4
+    simulated variables: [totalElectronContent]
+   #obsdataout:
+   #  engine:
+   #    type: H5File
+   #    obsfile: Data/gnss_vtec_obs_202010232345_opr_out5.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_gridded_vtec_202010232345_synthetic.nc4
+  vector ref: TestReference2
+  tolerance: 1.0e-03
+  norm ref: TestReference2
   tolerance: 1.0e-06

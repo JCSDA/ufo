@@ -21,27 +21,29 @@ contains
 !-------------------------------------------------------------------------------
 ! Find a solution to the satellite sounding inverse problem
 !-------------------------------------------------------------------------------
-SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                  &
-                                 nlevq,                  &
-                                 BM1,                    &
-                                 Bsig,                   &
-                                 Back,                   &
-                                 Ob,                     &
-                                 GPSRO_pseudo_ops,       &
-                                 GPSRO_vert_interp_ops,  &
-                                 GPSRO_min_temp_grad,    &
-                                 GPSRO_cost_funct_test,  &   ! Threshold value for the cost function convergence test
-                                 GPSRO_y_test,           &   ! Threshold value for the yobs-ysol tes
-                                 GPSRO_n_iteration_test, &   ! Maximum number of iterations
-                                 GPSRO_Delta_factor,     &   ! Delta
-                                 GPSRO_Delta_ct2,        &   ! Delta observations
-                                 GPSRO_OB_test,          &   ! Threshold value for the O-B test
-                                 capsupersat,            &
-                                 noSuperCheck,           &   ! Do not apply super-refraction check in operator?
-                                 BAerr,                  &
-                                 Tb,                     &
-                                 Ts,                     &
-                                 O_Bdiff,                &
+SUBROUTINE Ops_GPSRO_Do1DVar_BA (nlevp,                   &
+                                 nlevq,                   &
+                                 BM1,                     &
+                                 Bsig,                    &
+                                 Back,                    &
+                                 Ob,                      &
+                                 GPSRO_pseudo_ops,        &
+                                 GPSRO_vert_interp_ops,   &
+                                 GPSRO_min_temp_grad,     &
+                                 GPSRO_cost_funct_test,   &   ! Threshold value for the cost function convergence test
+                                 GPSRO_y_test,            &   ! Threshold value for the yobs-ysol tes
+                                 GPSRO_n_iteration_test,  &   ! Maximum number of iterations
+                                 GPSRO_Delta_factor,      &   ! Delta
+                                 GPSRO_Delta_ct2,         &   ! Delta observations
+                                 GPSRO_OB_test,           &   ! Threshold value for the O-B test
+                                 capsupersat,             &
+                                 noSuperCheck,            &   ! Do not apply super-refraction check in operator?
+                                 dryRefractivityConstant, &  ! Dry refractivity constant
+                                 wetRefractivityConstant, &  ! Wet refractivity constant
+                                 BAerr,                   &
+                                 Tb,                      &
+                                 Ts,                      &
+                                 O_Bdiff,                 &
                                  DFS)
 
 use ufo_gnssroonedvarcheck_utils_mod, only: &
@@ -74,6 +76,8 @@ REAL(kind_real), INTENT(IN)         :: GPSRO_Delta_factor
 REAL(kind_real), INTENT(IN)         :: GPSRO_OB_test
 LOGICAL, INTENT(IN)                 :: capsupersat
 LOGICAL, INTENT(IN)                 :: noSuperCheck
+REAL(kind_real), INTENT(IN)         :: dryRefractivityConstant
+REAL(kind_real), INTENT(IN)         :: wetRefractivityConstant
 LOGICAL, INTENT(OUT)                :: BAerr
 REAL(kind_real), INTENT(INOUT)      :: Tb(nlevq)
 REAL(kind_real), INTENT(INOUT)      :: Ts(nlevq)
@@ -127,18 +131,20 @@ Ob % BendingAngle(:) % PGEFinal = 1.0
 ! Calculate refractivity on theta levels, to find appropriate
 ! impact height vertical range
 
-CALL ufo_calculate_refractivity (nlevp,                  &
-                                 nlevq,                  &
-                                 Back % za,              &
-                                 Back % zb,              &
-                                 Back % p,               &
-                                 Back % q,               &
-                                 GPSRO_pseudo_ops,       &
-                                 GPSRO_vert_interp_ops,  &
-                                 GPSRO_min_temp_grad,    &
-                                 BAerr,                  &
-                                 nRefLevels,             &
-                                 refractivity,           &
+CALL ufo_calculate_refractivity (nlevp,                   &
+                                 nlevq,                   &
+                                 Back % za,               &
+                                 Back % zb,               &
+                                 Back % p,                &
+                                 Back % q,                &
+                                 GPSRO_pseudo_ops,        &
+                                 GPSRO_vert_interp_ops,   &
+                                 GPSRO_min_temp_grad,     &
+                                 dryRefractivityConstant, &
+                                 wetRefractivityConstant, &
+                                 BAerr,                   &
+                                 nRefLevels,              &
+                                 refractivity,            &
                                  model_heights)
 
 ! Set the background vector
@@ -231,6 +237,8 @@ IF (nobs > 0) THEN
                                 GPSRO_min_temp_grad,       &
                                 capsupersat,               &
                                 noSuperCheck,              &    ! Don't apply super-refraction check in operator?
+                                dryRefractivityConstant,   &    ! Dry refractivity constant
+                                wetRefractivityConstant,   &    ! Wet refractivity constant
                                 O_Bdiff,                   &    ! observed -background BA value
                                 temp_rad_curv,             &    ! Radius of curvature of ellipsoid
                                 temp_latitude,             &    ! Latitude of occ

@@ -19,16 +19,18 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/base/ObsError.h"
 #include "oops/mpi/mpi.h"
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/instantiateObsErrorFactory.h"
-
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
+
+#include "ufo/errors/ObsErrorCrossVarCov.h"
+#include "ufo/errors/ObsErrorDiagonal.h"
+#include "ufo/errors/ObsErrorWithinGroupCov.h"
+
 
 namespace ufo {
 namespace test {
@@ -45,7 +47,6 @@ void testNoReconditioning() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
   const util::TimeWindow timeWindow(Tconf.getSubConfiguration("time window"));
 
-  ufo::instantiateObsErrorFactory();
   std::vector<eckit::LocalConfiguration> conf;
   ::test::TestEnvironment::config().get("observations", conf);
 
@@ -59,8 +60,8 @@ void testNoReconditioning() {
     const eckit::LocalConfiguration obsSpaceConf(conf[jj], "obs space");
     ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::myself(), timeWindow, oops::mpi::myself());
 
-    ObsErrorCrossVarCov R(rconf, obsspace, oops::mpi::myself());
-    ObsErrorCrossVarCov RRecon(rconf, obsspace, oops::mpi::myself());
+    ObsErrorCrossVarCov R(Params, obsspace, oops::mpi::myself());
+    ObsErrorCrossVarCov RRecon(Params, obsspace, oops::mpi::myself());
     oops::Log::info() << "Corr before:\n" << R << std::endl;
 
     ioda::ObsVector mask(obsspace, "ObsError");
@@ -77,8 +78,6 @@ void testNoReconditioning() {
 void compareKnownOutput() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
   const util::TimeWindow timeWindow(Tconf.getSubConfiguration("time window"));
-
-  ufo::instantiateObsErrorFactory();
 
   std::vector<eckit::LocalConfiguration> conf;
   ::test::TestEnvironment::config().get("observations", conf);
@@ -97,7 +96,7 @@ void compareKnownOutput() {
     Params.validateAndDeserialize(rconf);
     TestParams.validateAndDeserialize(testconf);
 
-    ObsErrorCrossVarCov R(rconf, obsspace, oops::mpi::myself());
+    ObsErrorCrossVarCov R(Params, obsspace, oops::mpi::myself());
     ioda::ObsVector mask(obsspace, "ObsError");
     ioda::ObsVector sample(obsspace, "ObsValue");
     std::vector<double> refVec = TestParams.refVec.value().value();
@@ -119,8 +118,6 @@ void testNoValidOptionSelected() {
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
   const util::TimeWindow timeWindow(Tconf.getSubConfiguration("time window"));
 
-  ufo::instantiateObsErrorFactory();
-
   std::vector<eckit::LocalConfiguration> conf;
   ::test::TestEnvironment::config().get("observations", conf);
 
@@ -136,7 +133,7 @@ void testNoValidOptionSelected() {
     Params.validateAndDeserialize(rconf);
 
     const std::string msg = conf[jj].getString("expectExceptionWithMessage");
-    EXPECT_THROWS_MSG(ObsErrorCrossVarCov R(rconf, obsspace, oops::mpi::myself()), msg.c_str());
+    EXPECT_THROWS_MSG(ObsErrorCrossVarCov R(Params, obsspace, oops::mpi::myself()), msg.c_str());
   }
 }
 

@@ -13,6 +13,8 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "errors/ObsError.h"
 #include "GeoVaLs.h"
 #include "LinearObsOperator.h"
 #include "ObsBias.h"
@@ -35,6 +37,7 @@ struct ObsTraits {
   typedef ioda::ObsSpace             ObsSpace;
   typedef ioda::ObsVector            ObsVector;
   template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;
+  typedef ufo::ObsError              ObsError;
   typedef ufo::ObsFilters            ObsFilter;
 
   typedef ufo::ObsOperator           ObsOperator;

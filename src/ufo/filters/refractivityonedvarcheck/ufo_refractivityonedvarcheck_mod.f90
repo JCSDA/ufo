@@ -53,6 +53,8 @@ type, public :: ufo_refractivityonedvarcheck
   logical                   :: pseudo_ops        !< Whether to use pseudo levels in forward operator
   logical                   :: vert_interp_ops   !< Whether to use ln(p) or exner in vertical interpolation
   real(kind_real)           :: min_temp_grad     !< The minimum vertical temperature gradient allowed
+  real(kind_real)           :: dryRefractivityConstant !< Dry refractivity constant
+  real(kind_real)           :: wetRefractivityConstant !< Wet refractivity constant
   type(rmatrix_type), allocatable :: Rmatrix_list(:) !< All the R matrices read in from the file
   integer                   :: r_num_sats        !< The number of R matrices in the list
 end type ufo_refractivityonedvarcheck
@@ -85,6 +87,8 @@ subroutine ufo_refractivityonedvarcheck_create( &
   y_test, &
   minval_ytest, &
   maxval_ytest, &
+  dryRefractivityConstant, &
+  wetRefractivityConstant, &
   onedvarflag &
 )
 
@@ -105,6 +109,8 @@ subroutine ufo_refractivityonedvarcheck_create( &
   real(c_float), intent(in)                   :: y_test            !< Threshold on distance between observed and solution refractivities
   real(c_float), intent(in)                   :: minval_ytest      !< Minimum value for RHS of y-test
   real(c_float), intent(in)                   :: maxval_ytest      !< Maximum value for RHS of y-test
+  real(c_float), intent(in)                   :: dryRefractivityConstant !< Dry refractivity constant
+  real(c_float), intent(in)                   :: wetRefractivityConstant !< Wet refractivity constant
   integer(c_int), intent(in)                  :: onedvarflag       !< flag for qc manager
 
   character(len=800) :: message
@@ -127,6 +133,8 @@ subroutine ufo_refractivityonedvarcheck_create( &
   self % y_test = y_test
   self % minval_ytest = minval_ytest
   self % maxval_ytest = maxval_ytest
+  self % dryRefractivityConstant = dryRefractivityConstant
+  self % wetRefractivityConstant = wetRefractivityConstant
 
   write(message, '(A)') 'GNSS-RO 1D-Var check: input parameters are:'
   call oops_log % debug(message)
@@ -155,6 +163,10 @@ subroutine ufo_refractivityonedvarcheck_create( &
   write(message, '(A,F16.8)') 'minval_ytest = ', minval_ytest
   call oops_log % debug(message)
   write(message, '(A,F16.8)') 'maxval_ytest = ', maxval_ytest
+  call oops_log % debug(message)
+  write(message, '(A,F16.8)') 'dryRefractivityConstant = ', dryRefractivityConstant
+  call oops_log % debug(message)
+  write(message, '(A,F16.8)') 'wetRefractivityConstant = ', wetRefractivityConstant
   call oops_log % debug(message)
 
   write(message, '(2A)') 'Attempting to read rmatrix file: ', TRIM(rmatrix_filename)
@@ -409,6 +421,8 @@ subroutine ufo_refractivityonedvarcheck_apply(self, geovals, apply)
       self % minval_ytest,     &   ! Minimum value for RHS of y-test
       self % maxval_ytest,     &   ! Maximum value for RHS of y-test
       self % capsupersat,      &   ! Whether to remove super-saturation
+      self % dryRefractivityConstant, & ! Dry refractivity constant
+      self % wetRefractivityConstant, & ! Wet refractivity constant
       BAerr,                   &   ! Whether there are errors in the refractivity calculation
       Tb,                      &   ! Calculated background temperature
       Ts,                      &   ! 1DVar solution temperature
@@ -418,10 +432,10 @@ subroutine ufo_refractivityonedvarcheck_apply(self, geovals, apply)
 
     ! Flag bad profiles
     do ipoint = 0, nobs_profile-1
-      if (qc_flags(start_point + ipoint) > 0) then
+      if (qc_flags(index_vals(start_point + ipoint)) > 0) then
         ! Do nothing, since the data are already flagged
       else if (Ob % refractivity(ipoint+1) % PGEFinal > 0.5) then
-        qc_flags(start_point + ipoint) = self % onedvarflag
+        qc_flags(index_vals(start_point + ipoint)) = self % onedvarflag
         Ob % qc_flags(ipoint+1) = self % onedvarflag
       end if
     end do

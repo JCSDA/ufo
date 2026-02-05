@@ -24,7 +24,8 @@ MetOfficeBuddyCollector::MetOfficeBuddyCollector(const MetOfficeBuddyCheckParame
 {
   // eqn 3.1
   maxLatDifferenceBetweenBuddiesInDeg_ =
-      Constants::rad2deg * options.searchRadius / Constants::mean_earth_rad;
+      Constants::rad2deg * options.searchRadius /
+      (Constants::mean_earth_rad_m / 1000.0);  // convert mean_earth_rad_m to km
 }
 
 void MetOfficeBuddyCollector::calcDeltaLatLonAndDistanceTo(int obsIdB,
@@ -39,7 +40,7 @@ void MetOfficeBuddyCollector::calcDeltaLatLonAndDistanceTo(int obsIdB,
   else if (deltaLonInRad < -M_PI)
     deltaLonInRad += 2 * M_PI;
 
-  distanceInKm = Constants::mean_earth_rad *
+  distanceInKm = (Constants::mean_earth_rad_m / 1000.0) *
       std::sqrt(util::sqr(deltaLatInRad) +
                 4.0 * util::sqr(std::sin(0.5 * deltaLonInRad)) *
                 std::cos(latitudes_[obsIdA_] * Constants::deg2rad) *
@@ -58,7 +59,8 @@ MetOfficeBuddyPair MetOfficeBuddyCollector::createBuddyPair(int obsIdB,
     // eqn 3.5
     double alpha = 0.5 * std::sin(latitudes_[obsIdA_] * Constants::deg2rad) * deltaLonInRad;
     // eqn 3.6
-    double sinBeta = Constants::mean_earth_rad * deltaLatInRad * std::cos(alpha) / distanceInKm;
+    double sinBeta = (Constants::mean_earth_rad_m / 1000.0) * deltaLatInRad * std::cos(alpha)
+                      / distanceInKm;
     sinBeta = std::min(1.0, std::max(-1.0, sinBeta));
     double beta = std::asin(sinBeta);
     rotA = alpha + beta;  // eqn 3.7

@@ -76,7 +76,7 @@ class ObsLogarithm : public ObsOperatorBase,
   std::vector<int> operatorVarIndices_;
 
   /// Log base (0 for natural logarithm)
-  float logBase_ = 0.0;
+  double logBase_ = 0.0;
 
   /// Ref to the ObsSpace
   const ioda::ObsSpace &odb_;

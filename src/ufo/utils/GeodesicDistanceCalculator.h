@@ -26,7 +26,7 @@ class GeodesicDistanceCalculator : public DistanceCalculator {
                                  float /*inverseLatitudeBinWidth*/,
                                  float /*inverseLongitudeBinWidth*/) const override {
     const float deg2rad = static_cast<float>(Constants::deg2rad);
-    const float re = static_cast<float>(Constants::mean_earth_rad);  // km
+    const float re = static_cast<float>(Constants::mean_earth_rad_m / 1000.0);  // km
 
     float q1 = std::cos((obsLongitude - longitudeBinCenter) * deg2rad);
     float q2 = std::cos((obsLatitude - latitudeBinCenter) * deg2rad);

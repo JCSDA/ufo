@@ -33,7 +33,9 @@ ObsGnssroRefMetOfficeTLAD::ObsGnssroRefMetOfficeTLAD(const ioda::ObsSpace & odb,
   ufo_gnssro_refmetoffice_tlad_setup_f90(keyOperGnssroRefMetOffice_,
                                          parameters.vertInterpOPS,
                                          parameters.pseudoLevels,
-                                         parameters.minTempGrad);
+                                         parameters.minTempGrad,
+                                         parameters.dryRefractivityConstant,
+                                         parameters.wetRefractivityConstant);
   const std::vector<std::string> vv{"air_pressure_levels",
                                     "water_vapor_mixing_ratio_wrt_moist_air",
                                     "geopotential_height", "geopotential_height_levels"};

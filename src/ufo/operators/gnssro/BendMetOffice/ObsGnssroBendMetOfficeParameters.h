@@ -13,6 +13,7 @@
 
 #include "oops/util/parameters/Parameters.h"
 #include "ufo/ObsOperatorParametersBase.h"
+#include "ufo/utils/Constants.h"
 
 namespace ufo {
 
@@ -46,6 +47,18 @@ class ObsGnssroBendMetOfficeParameters : public ObsOperatorParametersBase {
     {"no super-refraction check",
      "Whether to avoid using the super-refraction check in the operator",
      false,
+     this};
+
+  oops::Parameter<float> dryRefractivityConstant
+    {"dry_refractivity_constant",
+     "Constant used to multiply the dry refractivity components",
+     Constants::dry_refractivity_constant,
+     this};
+
+  oops::Parameter<float> wetRefractivityConstant
+    {"wet_refractivity_constant",
+     "Constant used to multiply the wet refractivity components",
+     Constants::wet_refractivity_constant,
      this};
 
   /// List of channels available for assimilation - this is used for vertical

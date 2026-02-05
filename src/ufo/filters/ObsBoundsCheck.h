@@ -38,6 +38,10 @@ class ObsBoundsCheckParameters : public FilterParametersBase {
   /// Maximum allowed value of the tested variables.
   oops::OptionalParameter<float> maxvalue{"maxvalue", this};
 
+  /// Select whether the minvalue or maxvalue is an exclusive limit. Default value is inclusive.
+  oops::Parameter<bool> minExclusive{"min_exclusive", false, this};
+  oops::Parameter<bool> maxExclusive{"max_exclusive", false, this};
+
   /// Variables to be compared against the bounds specified in the `minvalue` and `maxvalue`
   /// options.
   ///

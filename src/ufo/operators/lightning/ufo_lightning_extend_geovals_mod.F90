@@ -62,7 +62,7 @@ end subroutine ufo_lightning_extend_geovals
 ! simulating a 15x15 km^2 grid area. These points are used for ordering extended 
 ! geovals and facilitating horizontal integration within the observation operators.
 subroutine find_partner_points(center_lat, center_lon, n_horiz, plat_2d, plon_2d, kerror)
-  use ufo_constants_mod, only: mean_earth_rad, pi
+  use ufo_constants_mod, only: mean_earth_rad_m, pi
   implicit none
 
   real(kind_real), intent(in) :: center_lat, center_lon
@@ -78,7 +78,7 @@ subroutine find_partner_points(center_lat, center_lon, n_horiz, plat_2d, plon_2d
   ! Calculate latitude increment (delta_lat) for grid points
   ! This approximation works well for small areas where Earth's curvature is minimal.
   ! It converts a distance on Earth's surface to an angular change in latitude.
-  delta_lat = (distance /(1000 * mean_earth_rad)) * (180.0 / pi)
+  delta_lat = (distance / mean_earth_rad_m) * (180.0 / pi)
 
   ! Calculate longitude increment (delta_lon) for grid points
   ! Adjusts for Earth's shape by accounting for the cosine of the latitude,

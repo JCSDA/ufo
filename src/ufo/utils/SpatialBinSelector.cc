@@ -29,7 +29,8 @@ SpatialBinSelector::SpatialBinSelector(IndexType numLatitudeBins,
     const int equatorToMeridianLengthRatio = 2;
     float tentativeNumLongitudeBins;
     if (partitionLongitudeBinsUsingMesh) {
-      const float meridianLength = M_PI * Constants::mean_earth_rad;
+      const float meridianLength = static_cast<float>(M_PI *
+        Constants::mean_earth_rad_m / 1000.0);  // km
       tentativeNumLongitudeBins =
             equatorToMeridianLengthRatio * (meridianLength/horizontalMesh) *
             std::cos(latBinCenter * static_cast<float>(Constants::deg2rad));

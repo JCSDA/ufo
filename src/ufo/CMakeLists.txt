@@ -60,11 +60,12 @@ list( APPEND ufo_src_files
     Fortran.h
     AnalyticInit.cc
     AnalyticInit.h
+    AnalyticInitBase.cc
+    AnalyticInitBase.h
     GeoVaLs.cc
     GeoVaLs.h
     GeoVaLs.interface.F90
     GeoVaLs.interface.h
-    instantiateObsErrorFactory.h
     instantiateObsFilterFactory.h
     instantiateObsLocFactory.h
     LinearObsBiasOperator.cc

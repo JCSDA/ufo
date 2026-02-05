@@ -23,9 +23,7 @@ use ufo_utils_refractivity_calculator, only: &
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav,                    &    ! Gravitational field strength
-    rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
-    n_alpha,                 &    ! Refractivity constant a
-    n_beta                        ! Refractivity constant b
+    rd_over_rv                    ! Ratio of molecular weights of water and dry air
 use gnssro_mod_transform, only: geometric2geop
 
 private
@@ -46,6 +44,8 @@ type, extends(ufo_basis_tlad)   ::  ufo_gnssro_refmetoffice_tlad
   logical :: pseudo_ops                   !< Use pseudo-levels in the refractivity calculation
   real(kind_real) :: min_temp_grad        !< The minimum temperature gradient before a profile is considered isothermal
                                           !  Used in pseudo-levels calculation
+  real(kind_real) :: dryRefractivityConstant  !< Dry refractivity constant
+  real(kind_real) :: wetRefractivityConstant  !< Wet refractivity constant
   integer                       :: nlevp  !< The number of pressure levels
   integer                       :: nlevq  !< The number of specific humidity (or temperature) levels
   integer                       :: nlocs  !< The number of observations
@@ -72,7 +72,8 @@ contains
 !! \date 26 May 2021
 !!
 !-------------------------------------------------------------------------------
-subroutine ufo_gnssro_refmetoffice_tlad_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
+subroutine ufo_gnssro_refmetoffice_tlad_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad, &
+                                              dryRefractivityConstant, wetRefractivityConstant)
 
 implicit none
 
@@ -80,10 +81,14 @@ class(ufo_gnssro_refmetoffice_tlad), intent(inout) :: self
 logical(c_bool), intent(in) :: vert_interp_ops
 logical(c_bool), intent(in) :: pseudo_ops
 real(c_float), intent(in) :: min_temp_grad
+real(c_float), intent(in) :: dryRefractivityConstant
+real(c_float), intent(in) :: wetRefractivityConstant
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
 self % min_temp_grad = min_temp_grad
+self % dryRefractivityConstant = dryRefractivityConstant
+self % wetRefractivityConstant = wetRefractivityConstant
 
 end subroutine ufo_gnssro_refmetoffice_tlad_setup
 
@@ -167,6 +172,8 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
                             self % pseudo_ops, &                       ! Whether to use pseudo-levels in the calculation
                             self % vert_interp_ops, &                  ! Whether to interpolate using log(pressure)
                             self % min_temp_grad, &                    ! Minimum allowed vertical temperature gradient
+                            self % dryRefractivityConstant, &          ! Dry refractivity constant
+                            self % wetRefractivityConstant, &          ! Wet refractivity constant
                             1, &                                       ! Number of observations in the profile
                             obs_height(iobs:iobs), &                   ! Geopotential height of this observation
                             self % K(iobs:iobs,1:prs%nval+q%nval))     ! K-matrix (Jacobian of the observation with respect to the inputs)
@@ -396,6 +403,8 @@ SUBROUTINE jacobian_interface(nlevp,  &
                               pseudo_ops, &
                               vert_interp_ops, &
                               min_temp_grad, &
+                              dryRefractivityConstant, &
+                              wetRefractivityConstant, &
                               nobs,   &
                               zobs,   &
                               Kmat)
@@ -412,6 +421,8 @@ real(kind_real), intent(in)  :: q(:)             !< Input specific humidity
 logical, intent(in)          :: vert_interp_ops  !< Use log(p) for vertical interpolation?
 logical, intent(in)          :: pseudo_ops       !< Use pseudo-levels to reduce errors?
 real(kind_real), intent(in)  :: min_temp_grad    !< Minimum value for the vertical temperature gradient
+real(kind_real), intent(in)  :: dryRefractivityConstant  !< Dry refractivity constant
+real(kind_real), intent(in)  :: wetRefractivityConstant  !< Wet refractivity constant
 integer, intent(in)          :: nobs             !< Number of observations
 real(kind_real), intent(in)  :: zobs(:)          !< Geopotential height of the observations
 real(kind_real), intent(out) :: Kmat(:,:)        !< K-matrix (Jacobian)
@@ -515,6 +526,8 @@ call ufo_refractivity_partial_derivatives(nlevP,           &
                                           P,               &
                                           q,               &
                                           vert_interp_ops, &
+                                          dryRefractivityConstant, &
+                                          wetRefractivityConstant, &
                                           dT_dTv,          &
                                           dT_dq,           &
                                           dref_dPb,        &
@@ -629,13 +642,13 @@ DO n = 1, nobs
     END IF
 
     ! Calculate refractivity
-    Ndry = n_alpha * P_ob / T_ob
-    Nwet = n_beta * P_ob * q_ob / (T_ob ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_ob))
+    Ndry = dryRefractivityConstant * P_ob / T_ob
+    Nwet = wetRefractivityConstant * P_ob * q_ob / (T_ob ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * q_ob))
     Nref(n) = Ndry + Nwet
 
     drefob_dPob(n,n) = Nref(n) / P_ob
     drefob_dTob(n,n) = -(Ndry + 2.0 * Nwet) / T_ob
-    drefob_dqob(n,n) = n_beta * p_ob * rd_over_rv / (T_ob * (rd_over_rv + (1.0 - rd_over_rv) * q_ob)) ** 2
+    drefob_dqob(n,n) = wetRefractivityConstant * p_ob * rd_over_rv / (T_ob * (rd_over_rv + (1.0 - rd_over_rv) * q_ob)) ** 2
 
   ELSE
 

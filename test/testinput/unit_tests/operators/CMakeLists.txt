@@ -76,6 +76,16 @@ ufo_add_test( NAME    test_ufo_opr_aod_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ ufo_add_test( NAME    test_ufo_opr_aod_ukca
+               TIER    1
+               ECBUILD
+               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_ukca.yaml"
+               MPI     1
+               LIBS    ufo
+               LABELS  operators
+               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_linopr_aod_metoffice
               TIER    1
               ECBUILD
@@ -246,6 +256,26 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    test_ufo_opr_gnssrorefmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice
               TIER    1
               ECBUILD
@@ -253,7 +283,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice
@@ -263,7 +293,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nopseudo
@@ -273,7 +303,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nopseudo
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nopseudo.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nopseudo
@@ -283,7 +313,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nopseudo
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nopseudo.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_profile
@@ -303,7 +333,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nosupercheck
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nosupercheck
@@ -313,7 +343,27 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nosupercheck
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_refractivity_changes
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators CI_exclude_hang_gnssro_ukmo_intel_O1
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam
@@ -1703,6 +1753,26 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+    ufo_add_test( NAME    test_ufo_iasi_crtmreconrad_linop_check
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtmreconrad_linop_check.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    test_ufo_iasi_crtmreconrad_linop_tlad_check
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtmreconrad_linop_check.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
     ufo_add_test( NAME    test_ufo_linopr_iasi_crtm
               TIER    2
               ECBUILD
@@ -2026,7 +2096,7 @@ if( ${rttov_FOUND} )
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov operators CI_exclude_segfault_camelemis_atlas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_tlad_check
@@ -2036,7 +2106,7 @@ if( ${rttov_FOUND} )
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov operators CI_exclude_segfault_camelemis_atlas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_tlad_2pe_check
@@ -2046,7 +2116,7 @@ if( ${rttov_FOUND} )
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov operators CI_exclude_segfault_camelemis_atlas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_ssmis_rttov_ops

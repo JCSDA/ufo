@@ -70,6 +70,11 @@ find_package( fckit 0.11.0 REQUIRED )
 # ioda
 find_package( ioda 2.9.0 REQUIRED )
 
+# leaky inherited dependency from ioda
+# will be removed these once the ioda issue is fixed
+find_package( bufr 12.0.1 QUIET )
+find_package( bufr_query QUIET )
+
 # oops
 find_package( oops 1.10.0 REQUIRED )
 

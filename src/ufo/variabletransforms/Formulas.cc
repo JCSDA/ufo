@@ -521,7 +521,7 @@ void horizontalDrift
         (windspd[loc_current] * std::cos((winddir[loc_current] - 180.0) * Constants::deg2rad) +
          windspd[loc_next] * std::cos((winddir[loc_next] - 180.0) * Constants::deg2rad));
       // Total height of the observation above the centre of the Earth.
-      const double totalheight = ufo::Constants::mean_earth_rad * 1000.0 + height[loc_current];
+      const double totalheight = ufo::Constants::mean_earth_rad_m + height[loc_current];
       // Change in latitude.
       const double dlat = ufo::Constants::rad2deg * avgv * dt / totalheight;
       // Change in longitude.

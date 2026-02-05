@@ -24,6 +24,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/Range.h"
 
+#include "ufo/AnalyticInitBase.h"
 #include "ufo/GeoVaLs.interface.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/SampledLocations.h"
@@ -144,6 +145,21 @@ GeoVaLs::GeoVaLs(const Locations_ & locations,
 }
 
 // -----------------------------------------------------------------------------
+/*! \brief Analytic init constructor, based off of existing GeoVaLs */
+GeoVaLs::GeoVaLs(const Locations_ & locations, const GeoVaLs & other,
+                 const eckit::Configuration & initConf)
+  : keyGVL_(-1), vars_(other.vars_), reducedVars_(other.reducedVars_), dist_(other.dist_)
+{
+  oops::Log::trace() << "GeoVaLs analytic init constructor starting" << std::endl;
+  ufo_geovals_copy_f90(other.keyGVL_, keyGVL_);
+  if (!initConf.empty()) {
+    std::unique_ptr<AnalyticInitBase> init(ufo::AnalyticInitFactory::create(initConf));
+    init->fillGeoVaLs(locations.samplingMethod(0).sampledLocations(), *this);
+  }
+  oops::Log::trace() << "GeoVaLs analytic init constructor key = " << keyGVL_ << std::endl;
+}
+
+// -----------------------------------------------------------------------------
 /*! \brief Constructor for tests
  *
  * \param params
@@ -192,7 +208,6 @@ GeoVaLs::GeoVaLs(const GeoVaLs & other, const int & index)
 }
 // -----------------------------------------------------------------------------
 /*! \brief Copy constructor */
-
 GeoVaLs::GeoVaLs(const GeoVaLs & other)
   : keyGVL_(-1), vars_(other.vars_), reducedVars_(other.reducedVars_), dist_(other.dist_)
 {
@@ -257,8 +272,7 @@ void GeoVaLs::allocate(const int & nlevels, const oops::Variables & vars)
   oops::Log::trace() << "GeoVaLs::allocate done" << std::endl;
 }
 // -----------------------------------------------------------------------------
-void GeoVaLs::addReducedVars(const oops::Variables & vars,
-                                     const std::vector<size_t> & nlevs) {
+void GeoVaLs::addReducedVars(const oops::Variables & vars, const std::vector<size_t> & nlevs) {
   oops::Log::trace() << "GeoVaLs::addReducedVars starting" << std::endl;
   reducedVars_ += vars;
   ufo_geovals_add_reduced_vars_f90(keyGVL_, vars, nlevs.size(), nlevs.data());

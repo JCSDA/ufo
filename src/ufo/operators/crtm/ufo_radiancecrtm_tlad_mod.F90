@@ -26,13 +26,14 @@ module ufo_radiancecrtm_tlad_mod
  use ufo_utils_mod, only: cmp_strings
  use ufo_crtm_passive_mod
  use ufo_crtm_active_mod
-
+ use ufo_reconradop_crtm_mod
  implicit none
  private
 
  !> Fortran derived type for radiancecrtm trajectory
  type, public :: ufo_radiancecrtm_tlad
  private
+  type(ufo_reconradop_crtm) :: reconradop_crtm
   character(len=MAXVARLEN), public, allocatable :: varin(:)  ! variables requested from the model
   integer, allocatable                          :: channels(:)
   type(crtm_conf) :: conf
@@ -113,6 +114,7 @@ character(max_string) :: err_msg
    call abor1_ftn(err_msg)
  end if
 
+
  ! save channels
  allocate(self%channels(size(channels)))
  self%channels(:) = channels(:)
@@ -147,6 +149,7 @@ class(ufo_radiancecrtm_tlad), intent(inout) :: self
     call CRTM_Options_Destroy(self%Options)
     deallocate(self%Options)
  endif
+
 
 end subroutine ufo_radiancecrtm_tlad_delete
 
@@ -385,7 +388,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
 
        rts_K%Radiance                = ZERO
        rts_K%Brightness_Temperature  = ZERO
-   else if (Is_Vis_or_UV) then
+   else if (Is_Vis_or_UV .or. self % conf % read_Cmatrix ) then
        rts_K%Radiance                = ONE
        rts_K%Brightness_Temperature  = ZERO
    else
@@ -567,6 +570,20 @@ integer, allocatable :: zeroCloudInCRTM0(:)
                                 hofxdiags,&
                                 err_stat)
    else
+      if (self % conf % read_Cmatrix) then 
+         call self%reconradop_crtm%apply(self%conf % Cmatrix_path,&
+                                         rts, &
+                                         n, &
+                                         self%n_Profiles, &
+                                         self%n_Channels, &
+                                         self%conf%n_Absorbers,&
+                                         self%n_Layers,&
+                                         self%channels, &
+                                         rts_K, &
+                                         self%atm_K, &
+                                         self%sfc_K, .true. )
+      end if
+
       call ufo_crtm_passive_diag(rts, &
                                  rts_K, &
                                  atm, &

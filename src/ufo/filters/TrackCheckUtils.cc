@@ -37,7 +37,7 @@ float distance2(const TrackCheckUtils::Point &a, const TrackCheckUtils::Point &b
 TrackCheckUtils::Point pointFromLatLon(float latitude, float longitude) {
   // This local copy is needed because convertSphericalToCartesian takes the first parameter by
   // reference, but Constants::mean_earth_rad has no out-of-line definition.
-  const double meanEarthRadius = Constants::mean_earth_rad;
+  const double meanEarthRadius = Constants::mean_earth_rad_m / 1000.0;  // km
   eckit::geometry::Point3 eckitPoint;
   eckit::geometry::Sphere::convertSphericalToCartesian(
         meanEarthRadius, eckit::geometry::Point2(longitude, latitude), eckitPoint);

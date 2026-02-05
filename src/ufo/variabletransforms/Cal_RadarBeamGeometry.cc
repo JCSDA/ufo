@@ -42,10 +42,10 @@ void Cal_RadarBeamGeometry::runTransform(const std::vector<bool> &apply) {
   // Compute effective Earth radius. If OPS compatibility mode is used then
   // there are two slightly different values used at different points.
   const double effectiveEarthRadius = params_.opsCompatibilityMode ?
-    ufo::Constants::mean_earth_rad * 1000.0 * 1.33 :
-    ufo::Constants::mean_earth_rad * 1000.0 * 4/3;
+    ufo::Constants::mean_earth_rad_m * 1.33 :
+    ufo::Constants::mean_earth_rad_m * 4/3;
   const double effectiveEarthRadiusBeamTilt = params_.opsCompatibilityMode ?
-    ufo::Constants::mean_earth_rad * 1000.0 * 1.3 :
+    ufo::Constants::mean_earth_rad_m * 1.3 :
     effectiveEarthRadius;
 
   // Input data

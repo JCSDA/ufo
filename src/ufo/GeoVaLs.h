@@ -142,6 +142,8 @@ class GeoVaLs : public util::Printable,
 
   GeoVaLs(const Locations_ & locations,
           const oops::Variables & vars, const std::vector<size_t> & nlevs);
+  GeoVaLs(const Locations_ & locations, const GeoVaLs &,
+          const eckit::Configuration & initConf = eckit::LocalConfiguration());
 
 // Deprecated constructor - Please do not use this constructor in new code.
   GeoVaLs(std::shared_ptr<const ioda::Distribution> dist, const oops::Variables & vars);

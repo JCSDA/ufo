@@ -193,6 +193,11 @@ ecbuild_add_executable( TARGET  test_ObsDiagnostics.x
                         LIBS    ufo
                        )
 
+ecbuild_add_executable( TARGET  test_ObsError.x
+                        SOURCES mains/TestObsErrorCovariance.cc
+                        LIBS    ufo
+                       )
+
 ecbuild_add_executable( TARGET  test_ObsOperator.x
                         SOURCES mains/TestObsOperator.cc
                         LIBS    ufo
@@ -634,6 +639,8 @@ SpcCoeff/Little_Endian/abi_g17.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_g17.TauCoeff.bin
 SpcCoeff/Little_Endian/abi_g18.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_g18.TauCoeff.bin
+SpcCoeff/Little_Endian/abi_g19.SpcCoeff.bin
+TauCoeff/ODPS/Little_Endian/abi_g19.TauCoeff.bin
 SpcCoeff/Little_Endian/abi_gr.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/abi_gr.TauCoeff.bin
 SpcCoeff/Little_Endian/v.abi_g16.SpcCoeff.bin
@@ -642,6 +649,8 @@ SpcCoeff/Little_Endian/v.abi_g17.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.abi_g17.TauCoeff.bin
 SpcCoeff/Little_Endian/v.abi_g18.SpcCoeff.bin
 TauCoeff/ODAS/Little_Endian/v.abi_g18.TauCoeff.bin
+SpcCoeff/Little_Endian/v.abi_g19.SpcCoeff.bin
+TauCoeff/ODAS/Little_Endian/v.abi_g19.TauCoeff.bin
 SpcCoeff/Little_Endian/ahi_himawari8.SpcCoeff.bin
 TauCoeff/ODPS/Little_Endian/ahi_himawari8.TauCoeff.bin
 SpcCoeff/Little_Endian/radiometer_smap.SpcCoeff.bin

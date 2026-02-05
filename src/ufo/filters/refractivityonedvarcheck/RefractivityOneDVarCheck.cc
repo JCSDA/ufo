@@ -56,6 +56,8 @@ RefractivityOneDVarCheck::RefractivityOneDVarCheck(
     parameters_.y_test.value(),
     parameters_.minval_ytest.value(),
     parameters_.maxval_ytest.value(),
+    parameters_.dryRefractivityConstant.value(),
+    parameters_.wetRefractivityConstant.value(),
     RefractivityOneDVarCheck::qcFlag());
 
   allvars_ += Variable("GeoVaLs/air_pressure_levels");

@@ -19,7 +19,6 @@ real(kind_real), parameter, public :: rd_over_cp = rd/cp
 real(kind_real), parameter, public :: cv_over_cp = cv/cp
 real(kind_real), parameter, public :: rv_over_rd = rv/rd
 real(kind_real), parameter, public :: rd_over_g  = rd/grav
-real(kind_real), parameter, public :: mean_earth_rad = 6371.0  ! Mean radius of the Earth (km)
 real(kind_real), parameter, public :: zero    = 0.0_kind_real
 real(kind_real), parameter, public :: quarter = 0.25_kind_real
 real(kind_real), parameter, public :: half    = 0.5_kind_real
@@ -58,13 +57,12 @@ real(kind_real), parameter, public :: ecc = 0.081819            ! eccentricity
 real(kind_real), parameter, public :: k_somig = 1.931853E-3     ! Somigliana's constant
 real(kind_real), parameter, public :: g_equat = 9.7803253359    ! equatorial gravity (ms-2)
 real(kind_real), parameter, public :: a_earth = 6378.137E3      ! semi-major axis of earth (m)
+real(kind_real), parameter, public :: b_earth = 6356.7523142E3  ! semi-minor axis of earth (m)
+real(kind_real), parameter, public :: mean_earth_rad_m = ( (2 * a_earth ) + b_earth)/ 3  ! Mean radius of the Earth (m)
 real(kind_real), parameter, public :: flatt = 0.003352811       ! flattening of oblate ellipsoid
    ! f = (semi_major_axis-semi_minor_axis)/semi_major_axis
 real(kind_real), parameter, public :: m_ratio= 0.003449787      ! gravity ratio
    ! ratio of centrifugal to gravitational force on the equator
-! Refractivity constants
-real(kind_real), parameter, public :: n_alpha = 0.776           ! Refractivity constant a
-real(kind_real), parameter, public :: n_beta  = 3.73E3          ! Refractivity constant b
 
 ! constants used in CRTM interface
 real(kind_real), parameter, public :: kg_to_g = 1000.0_kind_real

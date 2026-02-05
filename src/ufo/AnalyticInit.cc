@@ -17,11 +17,11 @@ namespace ufo {
 
 // Ideally, we would have five separate analytic init classes for the below cases,
 // but for now we'll use the same class to do all.
-static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic1_("invent_state");
-static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic2_("dcmip-test-1-1");
-static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic3_("dcmip-test-1-2");
-static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic4_("dcmip-test-3-1");
-static oops::AnalyticInitMaker<ObsTraits, AnalyticInit> makerAnalytic5_("dcmip-test-4-0");
+static AnalyticInitMaker<AnalyticInit> makerAnalytic1_("invent_state");
+static AnalyticInitMaker<AnalyticInit> makerAnalytic2_("dcmip-test-1-1");
+static AnalyticInitMaker<AnalyticInit> makerAnalytic3_("dcmip-test-1-2");
+static AnalyticInitMaker<AnalyticInit> makerAnalytic4_("dcmip-test-3-1");
+static AnalyticInitMaker<AnalyticInit> makerAnalytic5_("dcmip-test-4-0");
 
 // -----------------------------------------------------------------------------
 /// \brief Constructor for tests

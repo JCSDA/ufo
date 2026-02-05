@@ -547,7 +547,7 @@ void Cal_SpecificHumidity::methodQSat(
 /************************************************************************************/
 
 void Cal_SpecificHumidity::methodDEFAULT(
-    const std::vector<bool> &,
+    const std::vector<bool> &apply,
     formulas::Formulation SatVaporPres_fromTemp_form) {
 
   const size_t nlocs = obsdb_.nlocs();
@@ -613,6 +613,8 @@ void Cal_SpecificHumidity::methodDEFAULT(
 
   if (have_dewpoint) {
     for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+      // if the data have been excluded by the where statement
+      if (!apply[jobs]) continue;
       if (pressure[jobs] != missingValueFloat && dewPointTemperature[jobs] != missingValueFloat) {
         satVaporPres = formulas::SatVaporPres_fromTemp(
             dewPointTemperature[jobs], SatVaporPres_fromTemp_form);
@@ -623,6 +625,8 @@ void Cal_SpecificHumidity::methodDEFAULT(
     }
   } else {
     for (size_t jobs = 0; jobs < nlocs; ++jobs) {
+      // if the data have been excluded by the where statement
+      if (!apply[jobs]) continue;
       if (pressure[jobs] != missingValueFloat && airTemperature[jobs] != missingValueFloat &&
                 relativeHumidity[jobs] != missingValueFloat) {
         satVaporPres = formulas::SatVaporPres_fromTemp(

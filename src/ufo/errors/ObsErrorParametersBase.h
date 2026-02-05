@@ -18,7 +18,7 @@ namespace ufo {
 
 /// \brief Base obs errors parameters class
 class ObsErrorParametersBase : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObsErrorParametersBase, Parameters)
+  OOPS_ABSTRACT_PARAMETERS(ObsErrorParametersBase, Parameters)
  public:
   /// \brief Name of the covariance model.
   oops::Parameter<std::string> model{"covariance model", "diagonal", this};

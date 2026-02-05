@@ -4,7 +4,7 @@ time window:
 
 observations:
 - obs space:
-    name: Sondes (within group covariances for one variable)
+    name: Sondes (within group covariances for one variable using linear distance)
     obsdatain:
       engine:
         type: H5File
@@ -17,10 +17,10 @@ observations:
   obs error:
     covariance model: within group covariances
     correlation variable names: [pressure]
-    correlation lengthscale: 5000.  # 5000 Pa
+    correlation lengthscale: 5000.  # in Pa
 
 - obs space:
-    name: Sondes (within group covariances for haversine distance)
+    name: Sondes (within group covariances using haversine distance and correlations to 3 times the lengthscale)
     obsdatain:
       engine:
         type: H5File
@@ -33,4 +33,23 @@ observations:
   obs error:
     covariance model: within group covariances
     distance function: haversine
-    correlation lengthscale: 13000.  # 13000 m
+    correlation function: gc99
+    correlation lengthscale: 13000.  # in m
+
+- obs space:
+    name: Sondes (within group covariances for haversine distance and markov correlation to 2 times the lengthscale)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsgrouping:
+        group variables: [sequenceNumber]
+        sort variable: pressure
+        sort order: ascending
+    simulated variables: [airTemperature, windEastward, windNorthward]
+  obs error:
+    covariance model: within group covariances
+    distance function: haversine
+    correlation function: markov
+    lengthscale factor for markov correlation limit: 2.0
+    correlation lengthscale: 13000.  # in m

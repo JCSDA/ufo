@@ -15,7 +15,7 @@ module ufo_radiancecrtm_mod
  use iso_c_binding
  use kinds
  use missing_values_mod
-
+ use ufo_reconradop_crtm_mod
  use obsspace_mod
  use obsdatavector_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -36,6 +36,7 @@ module ufo_radiancecrtm_mod
    integer, allocatable                          :: channels(:)
    type(crtm_conf) :: conf
    logical :: use_qc_flags
+   type(ufo_reconradop_crtm) :: reconradop_crtm
  contains
    procedure :: setup  => ufo_radiancecrtm_setup
    procedure :: delete => ufo_radiancecrtm_delete
@@ -218,9 +219,7 @@ character(len=maxvarlen), dimension(10), parameter :: more_hydrometeors = &
  ! save channels
  allocate(self%channels(size(channels)))
  self%channels(:) = channels(:)
-
  call f_confOpts%final()
-
 end subroutine ufo_radiancecrtm_setup
 
 ! ------------------------------------------------------------------------------
@@ -250,7 +249,7 @@ use CRTM_SpcCoeff, only: SC, &
 
 implicit none
 
-class(ufo_radiancecrtm),  intent(in) :: self         !Radiance object
+class(ufo_radiancecrtm),  intent(in) :: self      !Radiance object
 type(ufo_geovals),        intent(in) :: geovals      !Inputs from the model
 integer(c_size_t),        intent(in) :: nvars, nlocs
 real(c_double),        intent(inout) :: hofx(nvars, nlocs) !h(x) to return
@@ -562,7 +561,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
          end do
          rts_K%Radiance                = ZERO
          rts_K%Brightness_Temperature  = ZERO
-      else if (Is_Vis_or_UV) then
+      else if (Is_Vis_or_UV .or. self % conf % read_Cmatrix) then
          rts_K%Radiance                = ONE
          rts_K%Brightness_Temperature  = ZERO
       else
@@ -698,14 +697,28 @@ integer, allocatable :: zeroCloudInCRTM0(:)
                                 hofxdiags,&
                                 err_stat)
    else
-      call ufo_crtm_passive_sim(rts, &
-                                Options, &
-                                nvars, &
-                                nlocs, &
-                                n_Profiles, &
-                                n_Channels, &
-                                hofx)
-
+      if (self % conf % read_Cmatrix) then 
+         call self%reconradop_crtm%apply(self%conf % Cmatrix_path,& 
+                                         rts, &
+                                         n, &
+                                         n_Profiles, &
+                                         n_Channels, &
+                                         self%conf%n_Absorbers,&
+                                         n_Layers,& 
+                                         self%channels, & 
+                                         rts_K, &
+                                         atm_K, & 
+                                         sfc_K, jacobian_needed )
+      end if 
+      
+     call ufo_crtm_passive_sim(rts, &
+                               Options, &
+                               nvars, &
+                               nlocs, &
+                               n_Profiles, &
+                               n_Channels, &
+                               hofx) 
+ 
       call ufo_crtm_passive_diag(rts, &
                                  rts_K, &
                                  atm, &

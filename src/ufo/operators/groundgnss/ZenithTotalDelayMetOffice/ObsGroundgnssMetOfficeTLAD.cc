@@ -31,12 +31,18 @@ ObsGroundgnssMetOfficeTLAD::ObsGroundgnssMetOfficeTLAD(const ioda::ObsSpace & od
                                                const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), keyOperGroundgnssMetOffice_(0), varin_()
 {
-  ufo_groundgnss_metoffice_tlad_setup_f90(keyOperGroundgnssMetOffice_,
-                                          parameters.toConfiguration());
   const std::vector<std::string> vv{"air_pressure_levels",
       "water_vapor_mixing_ratio_wrt_moist_air"};
 
   varin_.reset(new oops::Variables(vv));
+
+  ufo_groundgnss_metoffice_tlad_setup_f90(keyOperGroundgnssMetOffice_,
+                                          parameters.vertInterpOPS.value(),
+                                          parameters.pseudoLevels.value(),
+                                          parameters.minTempGrad.value(),
+                                          parameters.dryRefractivityConstant.value(),
+                                          parameters.wetRefractivityConstant.value());
+
   oops::Log::info() << "ObsGroundgnssMetOfficeTLAD vars: " << *varin_ << std::endl;
   oops::Log::trace() << "ObsGroundgnssMetOfficeTLAD constructor done" << std::endl;
 }

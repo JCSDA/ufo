@@ -15,12 +15,19 @@
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
 
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/utils/GeometryCalculations.h"
 #include "ufo/utils/IodaGroupIndices.h"
 
 namespace ufo {
+
+// -----------------------------------------------------------------------------
+
+static ObsErrorMaker<ObsErrorWithinGroupCov> makerWithinGroupCov_("within group covariances");
+
+// -----------------------------------------------------------------------------
 
 namespace {
 
@@ -39,6 +46,18 @@ double gc99(const double & distnorm) {
                 20.0/3.0*pow(distnorm, 2.0)-10.0*distnorm+4.0-1.0/(3.0*distnorm);
   }
   return gc99value;
+}
+
+double markov(const double & distnorm, const double & maxnormdist) {
+  // computes Markov localization
+  // distnorm - normalized distance
+  // maxdist - maximum distance for localization
+  // Returns 0.0 for distances larger than maxdist
+  double markovvalue = 0.0;
+  if (distnorm < maxnormdist) {
+    markovvalue = std::exp(-distnorm);
+  }
+  return markovvalue;
 }
 
 // -----------------------------------------------------------------------------
@@ -67,21 +86,25 @@ ioda::ObsDataVector<float> coord_constructor(const ObsErrorWithinGroupCovParamet
       }
       vars = params.var.value().get();
       assert(vars.size() == 1);
-      return ioda::ObsDataVector<float>(obspace, oops::ObsVariables(vars), "MetaData");
+      break;
     case DistanceFunctions::HAVERSINE:
       vars = {"latitude", "longitude"};
-      oops::ObsVariables variables(vars);
-      return ioda::ObsDataVector<float>(obspace, variables, "MetaData");
+      break;
+    default:
+      throw eckit::BadParameter("ObsErrorWithinGroupCov: unimplemented distance function", Here());
   }
+  return ioda::ObsDataVector<float>(obspace, oops::ObsVariables(vars), "MetaData");
 }
 
 }  // anonymous namespace
 
-ObsErrorWithinGroupCov::ObsErrorWithinGroupCov(const eckit::Configuration & obsErrGrpConf,
-                                             ioda::ObsSpace & obspace,
-                                             const eckit::mpi::Comm &timeComm)
-  : ObsErrorBase(timeComm), params_(oops::validateAndDeserialize<Parameters_>(obsErrGrpConf)),
-    obspace_(obspace), coord_(coord_constructor(params_, obspace)),
+ObsErrorWithinGroupCov::ObsErrorWithinGroupCov(const Parameters_ & params,
+                                               ioda::ObsSpace & obspace,
+                                               const eckit::mpi::Comm &timeComm)
+  : ObsErrorBase(timeComm),
+    params_(params),
+    obspace_(obspace),
+    coord_(coord_constructor(params_, obspace)),
     stddev_(obspace, "ObsError")
 {
   correlations_.reserve(obspace.nrecs());
@@ -113,7 +136,31 @@ ObsErrorWithinGroupCov::ObsErrorWithinGroupCov(const eckit::Configuration & obsE
           }
         }
         // Compute correlation value
-        corr(jloc, iloc) = gc99(distance / params_.lscale.value());
+        switch (params_.correlationFunction.value()) {
+          case CorrelationFunctions::GC99:
+            corr(jloc, iloc) = gc99(distance / params_.lscale.value());
+            break;
+          case CorrelationFunctions::MARKOV:
+            corr(jloc, iloc) = markov(distance / params_.lscale.value(),
+                                      params_.markovLengthscaleFactor.value());
+            break;
+        }
+      }
+    }
+    // The Markov correlation method does not guarantee a positive definite matrix therefore a
+    // check is needed. If the matrix is not positive definite the diagonal is slightly inflated
+    // to make it positive definite which has the effect of slightly inflating the observation
+    // errors.
+    if (params_.correlationFunction.value() == CorrelationFunctions::MARKOV) {
+      Eigen::SelfAdjointView<Eigen::MatrixXd, Eigen::Lower> corr_view(corr);
+      Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> es(corr_view);
+      double min_eigenvalue = es.eigenvalues().minCoeff();
+      if (min_eigenvalue < 0.0) {
+        oops::Log::trace() << "ObsErrorWithinGroupCov::ObsErrorWithinGroupCov "
+                          << "Inflating diagonal of correlation matrix to make it positive "
+                          << "definite. Minimum eigenvalue was " << min_eigenvalue << std::endl;
+        // Make positive definite by adding a small value to the diagonal
+        corr += 1.1 * std::abs(min_eigenvalue) * Eigen::MatrixXd::Identity(rec_nobs, rec_nobs);
       }
     }
     correlations_.push_back(corr);
@@ -169,7 +216,7 @@ void ObsErrorWithinGroupCov::multiplyCorrelations(ioda::ObsVector & dy) const {
       for (size_t iloc = 0; iloc < nused; ++iloc) {
         int ind = usedobs_indices[iloc];
         dy_at_rec(iloc) = dy[rec_idx[ind]*nvars + jvar];
-        for (size_t jloc = iloc+1; jloc < nused; ++jloc) {
+        for (size_t jloc = iloc; jloc < nused; ++jloc) {
           int ind2 = usedobs_indices[jloc];
           corr(jloc, iloc) = correlations_[recnumLocal](ind2, ind);
         }
@@ -221,7 +268,7 @@ void ObsErrorWithinGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
       for (size_t iloc = 0; iloc < nused; ++iloc) {
         int ind = usedobs_indices[iloc];
         dy_at_rec(iloc) = dy[rec_idx[ind]*nvars + jvar];
-        for (size_t jloc = iloc+1; jloc < nused; ++jloc) {
+        for (size_t jloc = iloc; jloc < nused; ++jloc) {
           int ind2 = usedobs_indices[jloc];
           // only need the lower triangle for llt() below; not filling upper triangle
           corr(jloc, iloc) = correlations_[recnumLocal](ind2, ind);

@@ -1,0 +1,60 @@
+time window:
+  begin: 2019-12-30T03:00:00Z
+  end: 2019-12-30T09:00:00Z
+
+observations:
+- obs operator:
+    name: GnssroRefMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+    dry_refractivity_constant: 0.774
+    wet_refractivity_constant: 3730
+  obs space:
+    name: GnssroRef
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
+    simulated variables: [atmosphericRefractivity]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2019123006_refractivity_k1_ukmo_opr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity.nc4
+  norm ref: MetOffice_k1_hofx
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL:  10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-13
+- obs operator:
+    name: GnssroRefMetOffice
+    vert_interp_ops: true
+    pseudo_ops: true
+    min_temp_grad: 1.0e-6
+    dry_refractivity_constant: 0.776
+    wet_refractivity_constant: 3000
+  obs space:
+    name: GnssroRef
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
+    simulated variables: [atmosphericRefractivity]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2019123006_refractivity_k2_ukmo_opr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity.nc4
+  norm ref: MetOffice_k2_hofx
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL:  10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-13
+

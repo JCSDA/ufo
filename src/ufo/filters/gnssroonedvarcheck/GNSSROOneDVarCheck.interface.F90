@@ -48,7 +48,9 @@ subroutine ufo_gnssroonedvarcheck_create_c(c_self, &
                                            c_onedvarflag, &
                                            nchans, &
                                            chanList, &
-                                           noSuperCheck) &
+                                           noSuperCheck, &
+                                           dryRefractivityConstant, &
+                                           wetRefractivityConstant) &
                         bind(c,name='ufo_gnssroonedvarcheck_create_f90')
 
 !> \brief Interface to the Fortran create method
@@ -79,6 +81,8 @@ integer(c_int), intent(in)                :: c_onedvarflag     !< flag for qc ma
 integer(c_int), intent(in)                :: nchans            !< Number of channels (levels) to be used
 integer(c_int), intent(in)                :: chanList(nchans)  !< List of channels to use
 logical(c_bool), intent(in)               :: noSuperCheck      !< Whether to avoid using super-refraction check in operator
+real(c_float), intent(in)                 :: dryRefractivityConstant  !< Dry refractivity constant
+real(c_float), intent(in)                 :: wetRefractivityConstant  !< Wet refractivity constant
 
 character(len=filename_length) :: bmatrix_filename  ! Location of the B-matrix file
 integer(c_int), allocatable    :: localChanList(:)  ! Allocated list of channels (even if nchans=0)
@@ -113,7 +117,9 @@ call ufo_gnssroonedvarcheck_create(self, &
                                    y_test, &
                                    c_onedvarflag, &
                                    localChanList, &
-                                   noSuperCheck)
+                                   noSuperCheck, &
+                                   dryRefractivityConstant, &
+                                   wetRefractivityConstant)
 
 end subroutine ufo_gnssroonedvarcheck_create_c
 

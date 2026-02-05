@@ -16,13 +16,18 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsErrorDiagonal::ObsErrorDiagonal(const eckit::Configuration & obsErrConf,
+static ObsErrorMaker<ObsErrorDiagonal> makerDiagUFO_("diagonal");
+
+// -----------------------------------------------------------------------------
+
+ObsErrorDiagonal::ObsErrorDiagonal(const Parameters_ & params,
                                    ioda::ObsSpace & obsgeom,
                                    const eckit::mpi::Comm &timeComm)
   : ObsErrorBase(timeComm),
-    stddev_(obsgeom, "ObsError"), inverseVariance_(obsgeom)
+    stddev_(obsgeom, "ObsError"),
+    inverseVariance_(obsgeom),
+    params_(params)
 {
-  options_.validateAndDeserialize(obsErrConf);
   inverseVariance_ = stddev_;
   inverseVariance_ *= stddev_;
   inverseVariance_.invert();
@@ -55,9 +60,11 @@ void ObsErrorDiagonal::inverseMultiply(ioda::ObsVector & dy) const {
 // -----------------------------------------------------------------------------
 
 void ObsErrorDiagonal::randomize(ioda::ObsVector & dy) const {
-  dy.random();
-  dy *= stddev_;
-  dy *= options_.zeroMeanPerturbations;
+  if (params_.zeroMeanPerturbations.value()) {
+    randomizeWithZeroEnsembleMean(dy);
+  } else {
+    randomizeWithoutZeroEnsembleMean(dy);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -86,5 +93,36 @@ void ObsErrorDiagonal::print(std::ostream & os) const {
 
 // -----------------------------------------------------------------------------
 
+void ObsErrorDiagonal::randomizeWithoutZeroEnsembleMean(ioda::ObsVector & dy) const {
+  dy.random();
+  dy *= this->stddev_;
+  dy *= params_.pert.value();
+}
 
+// -----------------------------------------------------------------------------
+
+void ObsErrorDiagonal::randomizeWithZeroEnsembleMean(ioda::ObsVector & dy) const {
+  ioda::ObsVector perturbation(dy);
+  ioda::ObsVector sum(dy);
+  sum.zero();
+
+  // Generate initial independent perturbations for all ensemble members.
+  // Calculate their sum and store this member's perturbations in 'dy'.
+  for (int member = 1; member <= params_.numberOfMembers.value().value(); ++member) {
+    perturbation.random();
+    sum += perturbation;
+    if (member == params_.member.value().value())
+      dy = perturbation;
+  }
+
+  // Subtract the ensemble mean of perturbations from this member's perturbations.
+  dy.axpy(-1.0 / params_.numberOfMembers.value().value(), sum);
+
+  // Scale perturbations to the requested amplitude.
+  dy *= stddev_;
+  dy *= std::sqrt(params_.numberOfMembers.value().value() /
+                 (params_.numberOfMembers.value().value() - 1.0)) * params_.pert.value();
+}
+
+// -----------------------------------------------------------------------------
 }  // namespace ufo

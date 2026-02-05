@@ -27,8 +27,8 @@ ObsSeaIceThicknessTLAD::ObsSeaIceThicknessTLAD(const ioda::ObsSpace & odb,
                                                const Parameters_ & params)
   : LinearObsOperatorBase(odb), keyOper_(0), varin_()
 {
-  const std::vector<std::string> vv{"sea_ice_category_area_fraction",
-                                    "sea_ice_category_thickness"};
+  const std::vector<std::string> vv{"sea_ice_area_fraction",
+                                    "sea_ice_thickness"};
   varin_.reset(new oops::Variables(vv));
   ufo_seaicethickness_tlad_setup_f90(keyOper_, params.toConfiguration(),
                                      odb.assimvariables());

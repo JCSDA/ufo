@@ -45,3 +45,5 @@ variable maps:
     alias: height_above_mean_sea_level_levels_minus_one
   - name: soilMoistureContentSurface
     alias: mass_content_of_water_in_top_soil_layer
+  - name: snowArealDensity
+    alias: surface_snow_amount_over_land

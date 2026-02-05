@@ -31,6 +31,71 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
     simulated variables: [variable1, variable2, variable3]
   obs filters:
+  - filter: Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+    min_exclusive: true        # minvalue now excluded (max_exclusive still defaults to false)
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 11
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+    min_exclusive: false      # tests that value can be set to false explicitly
+    max_exclusive: true       # maxvalue now excluded
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 11
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
+  - filter: Bounds Check        # test min/max value with all variables
+    filter variables:
+    - name: variable1
+    - name: variable2
+    - name: variable3
+    minvalue: 14.0
+    maxvalue: 19.0
+    min_exclusive: true       # exclude both min and max values
+    max_exclusive: true
+# Compare variables with minvalue/maxvalue
+#  ObsValue/variable1 = 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+#  ObsValue/variable2 = 10, 12, 14, 16, 18, 20, 22, 24, 26, 28
+#  ObsValue/variable3 = 25, 24, 23, 22, 21, 20, 19, 18, 17, 16
+  passedBenchmark: 9
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1, variable2, variable3]
+  obs filters:
   - filter: Bounds Check        # test min/max value with all variables and a where statement
     where:
     - variable:

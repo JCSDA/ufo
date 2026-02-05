@@ -23,7 +23,8 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Met Office GNSS-RO refractivity TL/AD observation operators
 // -----------------------------------------------------------------------------
-  void ufo_gnssro_refmetoffice_tlad_setup_f90(F90hop &, const bool &, const bool &, const float &);
+  void ufo_gnssro_refmetoffice_tlad_setup_f90(F90hop &, const bool &, const bool &, const float &,
+                                              const float &, const float &);
   void ufo_gnssro_refmetoffice_tlad_delete_f90(F90hop &);
   void ufo_gnssro_refmetoffice_tlad_settraj_f90(const F90hop &, const F90goms &,
                                              const ioda::ObsSpace &);

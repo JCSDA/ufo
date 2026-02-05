@@ -21,9 +21,7 @@ use fckit_log_module,  only : fckit_log
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
-    grav,                    &    ! Gravitational field strength
-    n_alpha,                 &    ! Refractivity constant a
-    n_beta                        ! Refractivity constant b
+    grav                          ! Gravitational field strength
 use gnssro_mod_transform, only: geometric2geop
 
 
@@ -36,6 +34,8 @@ type :: ufo_gnssro_RefMetOffice
   logical :: vert_interp_ops
   logical :: pseudo_ops
   real(kind_real) :: min_temp_grad
+  real(kind_real) :: dryRefractivityConstant
+  real(kind_real) :: wetRefractivityConstant
   contains
     procedure :: setup     => ufo_gnssro_refmetoffice_setup
     procedure :: simobs    => ufo_gnssro_refmetoffice_simobs
@@ -55,7 +55,8 @@ contains
 !! \date 20 March 2021
 !!
 !-------------------------------------------------------------------------------
-subroutine ufo_gnssro_refmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad)
+subroutine ufo_gnssro_refmetoffice_setup(self, vert_interp_ops, pseudo_ops, min_temp_grad, &
+                                        dryRefractivityConstant, wetRefractivityConstant)
 
 implicit none
 
@@ -63,10 +64,14 @@ class(ufo_gnssro_refmetoffice), intent(inout) :: self
 logical(c_bool), intent(in)  :: vert_interp_ops
 logical(c_bool), intent(in)  :: pseudo_ops
 real(c_float), intent(in)  :: min_temp_grad
+real(c_float), intent(in)  :: dryRefractivityConstant
+real(c_float), intent(in)  :: wetRefractivityConstant
 
 self % vert_interp_ops = vert_interp_ops
 self % pseudo_ops = pseudo_ops
 self % min_temp_grad = min_temp_grad
+self % dryRefractivityConstant = dryRefractivityConstant
+self % wetRefractivityConstant = wetRefractivityConstant
 
 end subroutine ufo_gnssro_refmetoffice_setup
 
@@ -180,6 +185,8 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
                                    self % pseudo_ops, &
                                    self % vert_interp_ops, &
                                    self % min_temp_grad, &
+                                   self % dryRefractivityConstant, &
+                                   self % wetRefractivityConstant, &
                                    1, &
                                    obs_height(iobs:iobs), &
                                    hofx(iobs:iobs), &
@@ -257,6 +264,8 @@ SUBROUTINE RefMetOffice_ForwardModel(nlevp, &
                                      GPSRO_pseudo_ops, &
                                      GPSRO_vert_interp_ops, &
                                      GPSRO_min_temp_grad, &
+                                     dryRefractivityConstant, &
+                                     wetRefractivityConstant, &
                                      nobs, &
                                      zobs, &
                                      ycalc, &
@@ -264,21 +273,23 @@ SUBROUTINE RefMetOffice_ForwardModel(nlevp, &
                                      refractivity, &
                                      model_heights)
 
-INTEGER, INTENT(IN)            :: nlevp                  ! no. of p levels in state vec.
-INTEGER, INTENT(IN)            :: nlevq                  ! no. of theta levels
-REAL(kind_real), INTENT(IN)    :: za(1:nlevp)            ! geopotential heights of rho levs
-REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)            ! geopotential heights of theta levs
-REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)      ! Model background pressure
-REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)      ! Model background specific humidity
-LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops       ! Option: Use pseudo-levels in vertical interpolation?
-LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops  ! Option: Use ln(p) for vertical interpolation? (rather than exner)
-REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad    ! The minimum temperature gradient which is used
-INTEGER, INTENT(IN)            :: nobs                   ! Number of observations in the profile
-REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)           ! Geopotential height of the obs
-REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)          ! Model forecast of the observations
-LOGICAL, INTENT(OUT)           :: BAErr                  ! Was an error encountered during the calculation?
-REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)     ! Model refractivity on model/pseudo levels
-REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:)    ! Geopotential heights of the refractivity levels
+INTEGER, INTENT(IN)            :: nlevp                   !< no. of p levels in state vec.
+INTEGER, INTENT(IN)            :: nlevq                   !< no. of theta levels
+REAL(kind_real), INTENT(IN)    :: za(1:nlevp)             !< geopotential heights of rho levs
+REAL(kind_real), INTENT(IN)    :: zb(1:nlevq)             !< geopotential heights of theta levs
+REAL(kind_real), INTENT(IN)    :: pressure(1:nlevp)       !< Model background pressure
+REAL(kind_real), INTENT(IN)    :: humidity(1:nlevq)       !< Model background specific humidity
+LOGICAL, INTENT(IN)            :: GPSRO_pseudo_ops        !< Option: Use pseudo-levels in vertical interpolation?
+LOGICAL, INTENT(IN)            :: GPSRO_vert_interp_ops   !< Option: Use ln(p) for vertical interpolation? (rather than exner)
+REAL(kind_real), INTENT(IN)    :: GPSRO_min_temp_grad     !< The minimum temperature gradient which is used
+REAL(kind_real), INTENT(IN)    :: dryRefractivityConstant !< Dry refractivity constant
+REAL(kind_real), INTENT(IN)    :: wetRefractivityConstant !< Wet refractivity constant
+INTEGER, INTENT(IN)            :: nobs                    !< Number of observations in the profile
+REAL(kind_real), INTENT(IN)    :: zobs(1:nobs)            !< Geopotential height of the obs
+REAL(kind_real), INTENT(INOUT) :: ycalc(1:nobs)           !< Model forecast of the observations
+LOGICAL, INTENT(OUT)           :: BAErr                   !< Was an error encountered during the calculation?
+REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)     !< Model refractivity on model/pseudo levels
+REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:)    !< Geopotential heights of the refractivity levels
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
 ! 
@@ -319,19 +330,21 @@ BAErr = .FALSE.
 ycalc(:) = missing_value(ycalc(1))
 
 ! Calculate the refractivity on model or pseudo levels
-CALL ufo_calculate_refractivity (nlevp,                 &
-                                 nlevq,                 &
-                                 za,                    &
-                                 zb,                    &
-                                 pressure,              &
-                                 humidity,              &
-                                 GPSRO_pseudo_ops,      &
-                                 GPSRO_vert_interp_ops, &
-                                 GPSRO_min_temp_grad,   &
-                                 BAerr,                 &
-                                 nRefLevels,            &
-                                 refractivity,          &
-                                 model_heights,         &
+CALL ufo_calculate_refractivity (nlevp,                   &
+                                 nlevq,                   &
+                                 za,                      &
+                                 zb,                      &
+                                 pressure,                &
+                                 humidity,                &
+                                 GPSRO_pseudo_ops,        &
+                                 GPSRO_vert_interp_ops,   &
+                                 GPSRO_min_temp_grad,     &
+                                 dryRefractivityConstant, &
+                                 wetRefractivityConstant, &
+                                 BAerr,                   &
+                                 nRefLevels,              &
+                                 refractivity,            &
+                                 model_heights,           &
                                  temperature=temperature, &
                                  interp_pressure=Pb)
 
@@ -385,8 +398,9 @@ DO iObs = 1, nobs
 
       ! Calculate refractivity
 
-      ycalc(iObs) = n_alpha * P_ob / T_ob + n_beta * P_ob * humidity_ob / (T_ob ** 2 * &
-                (rd_over_rv + (1.0 - rd_over_rv) * humidity_ob))
+      ycalc(iObs) = dryRefractivityConstant * P_ob / T_ob + &
+                    wetRefractivityConstant * P_ob * humidity_ob / &
+                    (T_ob ** 2 * (rd_over_rv + (1.0 - rd_over_rv) * humidity_ob))
     END IF
 
   ELSE

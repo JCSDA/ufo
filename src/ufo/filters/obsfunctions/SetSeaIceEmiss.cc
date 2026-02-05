@@ -134,8 +134,9 @@ namespace ufo {
           float szen2 = 1.0f - czen2;
 
           // view angle to satellite accounting for Earth curvature
-          float orbit_height_frac = Constants::mean_earth_rad /
-                                   (Constants::mean_earth_rad + orbit_height);
+          float mean_earth_rad_km = static_cast<float>(Constants::mean_earth_rad_m / 1000.0);
+          float orbit_height_frac = static_cast<float>(mean_earth_rad_km /
+                                   (mean_earth_rad_km + orbit_height) );
           float sinsatview = sin(satzenith_rad) * orbit_height_frac;
           float snad2 = sinsatview * sinsatview;
           float cnad2 = 1.0f - snad2;

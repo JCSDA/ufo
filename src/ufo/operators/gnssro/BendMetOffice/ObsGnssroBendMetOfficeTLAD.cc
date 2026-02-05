@@ -48,7 +48,9 @@ ObsGnssroBendMetOfficeTLAD::ObsGnssroBendMetOfficeTLAD(const ioda::ObsSpace & od
                                           parameters.minTempGrad,
                                           channels.size(),
                                           channels[0],
-                                          parameters.noSuperCheck);
+                                          parameters.noSuperCheck,
+                                          parameters.dryRefractivityConstant,
+                                          parameters.wetRefractivityConstant);
 
   oops::Log::trace() << "ObsGnssroBendMetOfficeTLAD constructor done" << std::endl;
 }

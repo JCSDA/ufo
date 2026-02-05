@@ -14,6 +14,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/utils/Constants.h"
 
 namespace ufo {
 
@@ -78,6 +79,18 @@ class GNSSROOneDVarCheckParameters : public FilterParametersBase {
 
   /// Whether to turn off the super-refraction check in the operator
   oops::Parameter<bool> noSuperCheck{"no super check", false, this};
+
+  oops::Parameter<float> dryRefractivityConstant
+    {"dry_refractivity_constant",
+     "Constant used to multiply the dry refractivity components",
+     Constants::dry_refractivity_constant,
+     this};
+
+  oops::Parameter<float> wetRefractivityConstant
+    {"wet_refractivity_constant",
+     "Constant used to multiply the wet refractivity components",
+     Constants::wet_refractivity_constant,
+     this};
 };
 
 }  // namespace ufo

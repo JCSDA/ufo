@@ -57,7 +57,9 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
                                     GNSSROOneDVarCheck::qcFlag(),
                                     channels.size(),
                                     channels[0],
-                                    parameters_.noSuperCheck.value());
+                                    parameters_.noSuperCheck.value(),
+                                    parameters_.dryRefractivityConstant.value(),
+                                    parameters_.wetRefractivityConstant.value());
 
   allvars_ += Variable("GeoVaLs/air_pressure_levels");
   allvars_ += Variable("GeoVaLs/water_vapor_mixing_ratio_wrt_moist_air");

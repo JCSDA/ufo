@@ -65,7 +65,7 @@ class ObsLogarithmTLAD : public LinearObsOperatorBase,
   std::vector<int> operatorVarIndices_;
 
   /// Log base (0 for natural logarithm)
-  float logBase_ = 0.0;
+  double logBase_ = 0.0;
 
   /// Values of derivative at the lowest model level - length of the vector is
   /// the number of required variables in the operator multiplied by the number

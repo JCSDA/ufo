@@ -1,0 +1,31 @@
+time window:
+  begin: 2021-05-21T08:59:59Z
+  end: 2021-05-21T15:00:00Z
+
+# check AOD operator works for UKCA_Dust as expected
+# NB the parameters are dummy values for testing purposes
+observations:
+- obs operator:
+    name: AodMassFraction
+    aerosolModel: UKCA_Dust
+    extinctionMethod: MetOfficeLUTFit
+    coarseModeParams: [0.00001, -1.2, 30000, 5.2]
+    accumulationModeParams: [-78694.00351517955, -33703.77308488245, -5961.088273152457,
+                             -557.8611937150873, -29.158406179998607, -0.8077018771540053,
+                             -0.009270394299237103]
+  obs space:
+    name: Aod
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_20210521T1200Z_aodukca.nc4
+    simulated variables: [aerosolOpticalDepth]
+    observed variables: [aerosolOpticalDepth]
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/aod_obs_20210521T1200Z_aodukca_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_20210521T1200Z_aodukca.nc4
+  rms ref: 0.4283027277
+  tolerance: 1.e-7
