@@ -147,6 +147,7 @@ alpha(:) = missing_value(alpha(1))
 
 DO n = 1, nobs
 
+  IF (nGood < 1) CYCLE
   IF (a(n) < nr(indices(1)) .OR. a(n) > nr(indices(nGood))) CYCLE
 
   Root_2PIa = SQRT (2.0 * pi * a(n))
