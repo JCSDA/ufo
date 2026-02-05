@@ -1531,6 +1531,12 @@ integer :: nlocs
       where (geo_hf(:)%Sensor_Azimuth_Angle < 0.0_kind_real .or. &
             geo_hf(:)%Sensor_Azimuth_Angle > 360.0_kind_real) &
         geo_hf(:)%Sensor_Azimuth_Angle = 0.0_kind_real
+      where (geo_hf(:)%Sensor_Zenith_Angle > 80.0_kind_real) &
+        geo_hf(:)%Sensor_Zenith_Angle = 80.0_kind_real
+      where (abs(geo_hf(:)%Source_Zenith_Angle) > 180.0_kind_real) &
+        geo_hf(:)%Source_Zenith_Angle = 100.0_kind_real
+      where (abs(geo_hf(:)%Sensor_Scan_Angle) > 80.0_kind_real) &
+        geo_hf(:)%Sensor_Scan_Angle = 0.0_kind_real
     endif
   endif
  endif
