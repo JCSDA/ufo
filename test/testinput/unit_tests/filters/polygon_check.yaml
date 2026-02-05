@@ -19,3 +19,4 @@ observations:
     action:
       name: reduce obs space
   passedBenchmark: 30
+  failedBenchmark: 230
