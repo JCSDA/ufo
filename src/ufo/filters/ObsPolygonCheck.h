@@ -16,13 +16,11 @@
 #ifndef UFO_FILTERS_OBSPOLYGONCHECK_H_
 #define UFO_FILTERS_OBSPOLYGONCHECK_H_
 
-#include <exception>
 #include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include <eckit/exception/Exceptions.h>
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"
 #include "ufo/filters/QCflags.h"
@@ -54,27 +52,6 @@ class ObsPolygonCheckParameters : public FilterParametersBase {
     "inside point latitude",
     "Latitude of a point inside the polygon (used to determine which side is inside).",
     this};
-};
-
-/// ObsPolygonLatLonSizeMismatch: thrown when the parameters vertex_longitudes
-/// and vertex_latitudes have different lengths.
-
-class ObsPolygonLatLonSizeMismatch: public eckit::BadValue {
- public:
-  explicit ObsPolygonLatLonSizeMismatch(const std::string &message,
-                                        const eckit::CodeLocation &location = {}):
-    eckit::BadValue(message, location)
-  {}
-};
-
-/// ObsPolygonIsInvalid: thrown when boost::geometry::is_valid doesn't like a polygon.
-
-class ObsPolygonIsInvalid: public eckit::BadValue {
- public:
-  explicit ObsPolygonIsInvalid(const std::string &message,
-                               const eckit::CodeLocation &location = {}):
-    eckit::BadValue(message, location)
-  {}
 };
 
 /// PolygonCheck: flags all obs that aren't inside a specified

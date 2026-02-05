@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <boost/geometry.hpp>
+#include <eckit/exception/Exceptions.h>
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 
@@ -71,7 +72,7 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
     std::ostringstream what;
     what << "Mismatch between vertex longitude count (" << nlon
          << ") and vertex latitude count (" << nlat << ").";
-    throw ObsPolygonLatLonSizeMismatch(what.str(), Here());
+    throw eckit::BadValue(what.str(), Here());
   }
   poly.outer().reserve(nlon);
   for (size_t i = 0; i < nlon; i++)
@@ -87,7 +88,7 @@ void ObsPolygonCheck::applyFilter(const std::vector<bool> &apply,
   if (std::string reason; !bg::is_valid(poly, reason)) {
     std::ostringstream what;
     what << "ObsPolygonCheck: boost::geometry does not like your polygon (\"" << reason << "\")";
-    throw ObsPolygonIsInvalid(what.str(), Here());
+    throw eckit::BadValue(what.str(), Here());
   }
 
   // Get the observation locations.
