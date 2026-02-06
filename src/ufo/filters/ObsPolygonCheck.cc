@@ -20,8 +20,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/geometry.hpp>
 #include <eckit/exception/Exceptions.h>
+
+#include <boost/geometry.hpp>
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 
