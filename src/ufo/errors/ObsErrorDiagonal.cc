@@ -5,11 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <vector>
+
 #include "ufo/errors/ObsErrorDiagonal.h"
 
 #include "eckit/config/Configuration.h"
+#include "eckit/exception/Exceptions.h"
 
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 
 namespace ufo {
@@ -55,6 +59,49 @@ void ObsErrorDiagonal::multiply(ioda::ObsVector & dy) const {
 
 void ObsErrorDiagonal::inverseMultiply(ioda::ObsVector & dy) const {
   dy *= inverseVariance_;
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsErrorDiagonal::localize(ioda::ObsVector & locvector) const {
+  oops::Log::trace() << "ufo::ObsErrorDiagonal::localize start" << std::endl;
+
+  const double missing = util::missingValue<double>();
+
+  assert(locvector.size() == stddev_.size());
+  std::vector<double> localstdev;
+  std::vector<double> localinvvar;
+  for (size_t jj = 0; jj < locvector.size(); ++jj) {
+    if (locvector[jj] != missing && locvector[jj] <= 0) {
+      throw eckit::BadValue("Localization weights must be positive. Use "
+                            "oops::util::missingValue<double>() to indicate "
+                            "an observation with a weight of zero.");
+    }
+    if (locvector[jj] != missing && stddev_[jj] != missing) {
+      localstdev.push_back(stddev_[jj] * std::pow(locvector[jj], -0.5));
+      localinvvar.push_back(locvector[jj] * std::pow(stddev_[jj], -2.0));
+    }
+  }
+  local_stddev_ = Eigen::Map<Eigen::VectorXd>(localstdev.data(), localstdev.size());
+  local_inverseVariance_ =
+    Eigen::Map<Eigen::VectorXd>(localinvvar.data(), localinvvar.size());
+}
+
+// -----------------------------------------------------------------------------
+
+Eigen::MatrixXf ObsErrorDiagonal::localInverseMultiply(const Eigen::MatrixXf & zz) const {
+  Eigen::MatrixXf zzRinv(zz.rows(), zz.cols());
+  for (int ii = 0; ii < zz.rows(); ++ii) {
+    zzRinv(ii, Eigen::all) = zz(ii, Eigen::all)
+                                 .cwiseProduct(local_inverseVariance_.cast<float>().transpose());
+  }
+  return zzRinv;
+}
+
+// -----------------------------------------------------------------------------
+
+int ObsErrorDiagonal::localDim() const {
+  return local_inverseVariance_.size();
 }
 
 // -----------------------------------------------------------------------------

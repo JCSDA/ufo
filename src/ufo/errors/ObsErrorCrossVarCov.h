@@ -77,6 +77,15 @@ class ObsErrorCrossVarCov : public ObsErrorBase {
   ///       C - correlations
   void inverseMultiply(ioda::ObsVector & y) const override;
 
+  /// Create local R matrix
+  void localize(ioda::ObsVector & locvector) const override;
+
+  /// Return dimension of local R matrix.
+  int localDim() const override;
+
+  /// Multiply a local obs vector \p zz by \f$R^{-1}\f$.
+  Eigen::MatrixXf localInverseMultiply(const Eigen::MatrixXf &zz) const override;
+
   /// Generate \p y as a random perturbation
   void randomize(ioda::ObsVector & y) const override;
 
@@ -91,6 +100,8 @@ class ObsErrorCrossVarCov : public ObsErrorBase {
 
   /// Return inverse of obs error variance
   std::unique_ptr<ioda::ObsVector> getInverseVariance() const override;
+
+  Eigen::VectorXd local_invVarR() const;
 
  private:
   /// Print covariance details (for logging)

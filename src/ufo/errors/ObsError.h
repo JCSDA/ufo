@@ -19,7 +19,6 @@
 
 #include "ufo/errors/ObsErrorBase.h"
 
-
 namespace ufo {
 
 // wrapper class for ufo ObsError implementations which appears in the
@@ -43,6 +42,11 @@ class ObsError : public util::Printable,
   virtual std::unique_ptr<ioda::ObsVector> getObsErrors() const;
   virtual std::unique_ptr<ioda::ObsVector> getInverseVariance() const;
   virtual double getRMSE() const;
+
+  void localize(ioda::ObsVector & locvector) const;
+  int localDim() const;
+  Eigen::MatrixXf localInverseMultiply(const Eigen::MatrixXf &zz) const;
+  Eigen::VectorXd local_invVarR() const;
 
  private:
   void print(std::ostream &) const;

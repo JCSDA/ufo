@@ -17,6 +17,8 @@ obs error:
   covariance model: within group covariances
   correlation variable names: [pressure]
   correlation lengthscale: 15000.
+obs error test:
+  test localization: false
 obs error diagnostics:
   output filename: Data/sondes_obserrorcorr_diags.nc4
   record number: 2

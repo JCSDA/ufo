@@ -54,6 +54,22 @@ double ObsError::getRMSE() const {
   return R_->getRMSE();
 }
 
+void ObsError::localize(ioda::ObsVector & locvector) const {
+  R_->localize(locvector);
+}
+
+int ObsError::localDim() const {
+  return R_->localDim();
+}
+
+Eigen::MatrixXf ObsError::localInverseMultiply(const Eigen::MatrixXf &zz) const {
+  return R_->localInverseMultiply(zz);
+}
+
+Eigen::VectorXd ObsError::local_invVarR() const {
+  return R_->local_invVarR();
+}
+
 void ObsError::print(std::ostream & os) const {
   os << *R_;
 }

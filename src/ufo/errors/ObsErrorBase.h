@@ -59,6 +59,18 @@ class ObsErrorBase : public util::Printable,
   /// Get mean error for Jo table.
   virtual double getRMSE() const = 0;
 
+  /// Create local R matrix.
+  virtual void localize(ioda::ObsVector & locvector) const = 0;
+
+  /// Return dimension of local R matrix.
+  virtual int localDim() const = 0;
+
+  /// Multiply a local obs vector \p zz by \f$R^{-1}\f$.
+  virtual Eigen::MatrixXf localInverseMultiply(const Eigen::MatrixXf & zz) const = 0;
+
+  /// Get local inverse variance
+  virtual Eigen::VectorXd local_invVarR() const = 0;
+
  private:
   virtual void print(std::ostream &) const = 0;
   const eckit::mpi::Comm & timeComm_;

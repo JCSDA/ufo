@@ -18,6 +18,8 @@ observations:
     covariance model: within group covariances
     correlation variable names: [pressure]
     correlation lengthscale: 5000.  # in Pa
+  obs error test:
+    test localization: false
 
 - obs space:
     name: Sondes (within group covariances using haversine distance and correlations to 3 times the lengthscale)
@@ -35,6 +37,8 @@ observations:
     distance function: haversine
     correlation function: gc99
     correlation lengthscale: 13000.  # in m
+  obs error test:
+    test localization: false
 
 - obs space:
     name: Sondes (within group covariances for haversine distance and markov correlation to 2 times the lengthscale)
@@ -53,3 +57,5 @@ observations:
     correlation function: markov
     lengthscale factor for markov correlation limit: 2.0
     correlation lengthscale: 13000.  # in m
+  obs error test:
+    test localization: false

@@ -290,6 +290,27 @@ void ObsErrorWithinGroupCov::inverseMultiply(ioda::ObsVector & dy) const {
 
 // -----------------------------------------------------------------------------
 
+void ObsErrorWithinGroupCov::localize(ioda::ObsVector & locvector) const {
+  throw eckit::BadParameter("Trying to localize a correlated R matrix, this is "
+                            "not yet implemented.");
+}
+
+int ObsErrorWithinGroupCov::localDim() const {
+  throw eckit::BadParameter("Trying to localize a correlated R matrix, this is "
+                            "not yet implemented.");
+}
+
+Eigen::MatrixXf ObsErrorWithinGroupCov::localInverseMultiply(const Eigen::MatrixXf & zz) const {
+  throw eckit::BadParameter("Localisation not implemented for correlated R matrices");
+}
+
+Eigen::VectorXd ObsErrorWithinGroupCov::local_invVarR() const {
+  throw eckit::BadParameter("Local inverse variance not implemented for "
+                            "correlated R matrices");
+}
+
+// -----------------------------------------------------------------------------
+
 void ObsErrorWithinGroupCov::randomize(ioda::ObsVector & dy) const {
   dy.random();
   multiply(dy);

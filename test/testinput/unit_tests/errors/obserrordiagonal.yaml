@@ -16,6 +16,8 @@ observations:
     simulated variables: [airTemperature]
   obs error:
     covariance model: diagonal
+  obs error test:
+    test localization: true
 - obs space:
     name: Aircraft
     obsdatain:
@@ -29,12 +31,14 @@ observations:
     simulated variables: [airTemperature,specificHumidity]
   obs error:
     covariance model: diagonal
+  obs error test:
+    test localization: true
 - obs space:
     name: Satwind
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_s.nc4
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
 #   obsdataout:
 #     engine:
 #       type: H5File
@@ -42,3 +46,5 @@ observations:
     simulated variables: [windEastward, windNorthward]
   obs error:
     covariance model: diagonal
+  obs error test:
+    test localization: true

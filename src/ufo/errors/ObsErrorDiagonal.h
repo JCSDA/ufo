@@ -62,6 +62,15 @@ class ObsErrorDiagonal : public ObsErrorBase {
 /// Multiply a Departure by \f$R^{-1}\f$
   void inverseMultiply(ioda::ObsVector &) const override;
 
+/// Create local R matrix
+  void localize(ioda::ObsVector &) const override;
+
+/// Return dimension of local R matrix.
+  int localDim() const override;
+
+/// Multiply a local obs vector \p zz by \f$R^{-1}\f$.
+  Eigen::MatrixXf localInverseMultiply(const Eigen::MatrixXf &zz) const override;
+
 /// Generate random perturbation
   void randomize(ioda::ObsVector &) const override;
 
@@ -77,6 +86,8 @@ class ObsErrorDiagonal : public ObsErrorBase {
 /// Return inverseVariance
   std::unique_ptr<ioda::ObsVector> getInverseVariance() const override;
 
+  Eigen::VectorXd local_invVarR() const {return local_inverseVariance_;}
+
  private:
   void print(std::ostream &) const override;
   void randomizeWithoutZeroEnsembleMean(ioda::ObsVector &) const;
@@ -84,6 +95,8 @@ class ObsErrorDiagonal : public ObsErrorBase {
 
   ioda::ObsVector stddev_;
   ioda::ObsVector inverseVariance_;
+  mutable Eigen::VectorXd local_stddev_;
+  mutable Eigen::VectorXd local_inverseVariance_;
   Parameters_ params_;
 };
 
