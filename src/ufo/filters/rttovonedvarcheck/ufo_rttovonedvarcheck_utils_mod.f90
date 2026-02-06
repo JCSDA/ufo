@@ -19,7 +19,7 @@ use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
-use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat, cmp_strings
+use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat
 
 implicit none
 private
@@ -126,7 +126,7 @@ if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
   ! Assign values to geovals q
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+    if (varname == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
@@ -163,7 +163,7 @@ if (profindex % q2 > 0) then
   ! Assign values to geovals q
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+    if (varname == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(1,1) = q(1)
 
@@ -213,7 +213,7 @@ if (profindex % qt(1) > 0) then
   varname = trim(var_q)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+    if (varname == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(:,1) = q(:)
 
@@ -221,7 +221,7 @@ if (profindex % qt(1) > 0) then
   varname = trim(var_clw)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+    if (varname == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index) % vals(:,1) = ql(:)
 
@@ -229,7 +229,7 @@ if (profindex % qt(1) > 0) then
   varname = trim(var_cli)  ! kg/kg
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+    if (varname == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = qi(:)
 
@@ -280,7 +280,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      gv_index = 0
      varname = trim(var_ts)
      do i=1,geovals%nvar
-       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+       if (varname == geovals%variables(i)) gv_index = i
      end do
      geovals%geovals(gv_index) % vals(level_1000hPa,1) = temperature(level_1000hPa)
 
@@ -288,7 +288,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      gv_index = 0
      varname = trim(var_sfc_t2m)
      do i=1,geovals%nvar
-       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+       if (varname == geovals%variables(i)) gv_index = i
      end do
      geovals%geovals(gv_index) % vals(1,1) = temperature_2m
 
@@ -296,7 +296,7 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      gv_index = 0
      varname = trim(var_sfc_tskin)
      do i=1,geovals%nvar
-       if (cmp_strings(varname, geovals%variables(i))) gv_index = i
+       if (varname == geovals%variables(i)) gv_index = i
      end do
      geovals%geovals(gv_index) % vals(1,1) = skin_t
 

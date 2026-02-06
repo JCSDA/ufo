@@ -20,7 +20,6 @@ use ufo_vars_mod
 use ufo_ghg_utils_mod, only: co2_mauna_loa_rise
 use obsspace_mod
 use ufo_constants_mod, only: kg_to_g, co2_rescale_to_ppmv, co2_ppmv_value, midpoint_julday
-use ufo_utils_mod, only: cmp_strings
 use CRTM_SpcCoeff, only: CRTM_SpcCoeff_Load, SC
 
 implicit none
@@ -336,15 +335,15 @@ character(max_string) :: cloud_reff_method
    if (f_confOper%has("method for cloud fraction within fov")) then
      call f_confOper%get_or_die("method for cloud fraction within fov",str)
      cloud_fract_method = str
-     if (cmp_strings(cloud_fract_method,'thompson') .or. &
-             cmp_strings(cloud_fract_method,'Thompson')) then
+     if (cloud_fract_method == 'thompson' .or. &
+             cloud_fract_method == 'Thompson') then
        conf%cal_cloud_frac_in_fov = .true.
        !  Get scale-aware mass-flux deep conv scheme flag used in calculating
        !  cloud fraction by the Thompson method
        if (f_confOper%has("convection_mass_flux_flag")) then
          call f_confOper%get_or_die("convection_mass_flux_flag",conf%flag_deep_conv_mass_flux)
        end if
-     else if (.not. cmp_strings(cloud_fract_method,'none')) then
+     else if (cloud_fract_method /= 'none') then
        write(message,*) trim(ROUTINE_NAME),' error: ' // &
                         ' "method for cloud fraction within fov"' // &
                         ' can only be "thompson", "Thompson", or "none".'
@@ -354,10 +353,10 @@ character(max_string) :: cloud_reff_method
    if (f_confOper%has("method for hydrometeor effective radii within fov")) then
      call f_confOper%get_or_die("method for hydrometeor effective radii within fov",str)
      cloud_reff_method = str
-     if (cmp_strings(cloud_reff_method,'thompson') .or. &
-             cmp_strings(cloud_reff_method,'Thompson')) then
+     if (cloud_reff_method == 'thompson' .or. &
+             cloud_reff_method == 'Thompson') then
        conf%cal_cloud_reff_in_fov = .true.
-     else if (.not. cmp_strings(cloud_reff_method,'none')) then
+     else if (cloud_reff_method /= 'none') then
        write(message,*) trim(ROUTINE_NAME),' error: ' // &
                         ' "method for hydrometeor effective radii within fov"' // &
                         ' can only be "thompson", "Thompson", or "none".'
@@ -929,9 +928,9 @@ integer  :: id_cld(1)
 
   do jspec = 1, conf%n_Absorbers
     ! O3 Absorber has special treatment for Aerosols
-    if (cmp_strings(conf%Absorbers(jspec), var_oz) .AND. &
+    if (conf%Absorbers(jspec) == var_oz .AND. &
       ufo_vars_getindex(geovals%variables, var_oz) < 0 .AND. &
-      (.NOT. cmp_strings(conf%aerosol_option,""))) then
+      (conf%aerosol_option /= "")) then
       do k1 = 1, n_Profiles
         atm(k1)%Absorber(1:n_Layers, jspec) = ozone_default_value
       end do
@@ -958,7 +957,7 @@ integer  :: id_cld(1)
       end select
     else
       geoval_unit_rescale = one
-      if (cmp_strings(conf%Absorbers(jspec), var_mixr)) then
+      if (conf%Absorbers(jspec) == var_mixr) then
         ! NOTE if "water_vapor_mixing_ratio_wrt_dry_air", convert from JEDI's kg/kg to CRTM's g/kg
         geoval_unit_rescale = kg_to_g
       end if
@@ -1421,7 +1420,7 @@ real(kind_real), allocatable :: ObsTb(:,:)
   end do
 
   !Sea_Surface_Salinity
-  if (cmp_strings(conf%salinity_option, "on")) THEN
+  if (conf%salinity_option == "on") THEN
     call ufo_geovals_get_var(geovals, var_sfc_sss, geoval)
     do k1 = 1, n_Profiles
       sfc(k1)%Salinity = geoval%vals(1, k1)
@@ -1500,7 +1499,7 @@ integer :: nlocs
 
  ! Read geophysical values for gmi high frequency channels 10-13.
  if (present(sensor_id)) then
-   if (cmp_strings(trim(sensor_id),'gmi_gpm')) then
+   if (sensor_id == 'gmi_gpm') then
     if ( present(geo_hf) ) then
       geo_hf = geo
       if (obsspace_has(obss, "MetaData", "sensorZenithAngle1")) then
@@ -1648,16 +1647,16 @@ end function uv_to_wdir
 
     CHARACTER(max_string) :: err_msg
 
-    IF (cmp_strings(aerosol_option,"aerosols_gocart_default")) THEN
+    IF (aerosol_option == "aerosols_gocart_default") THEN
        ALLOCATE(var_aerosols(n_aerosols_gocart_default))
        var_aerosols=var_aerosols_gocart_default
-    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_gefs")) THEN
+    ELSEIF (aerosol_option == "aerosols_gocart_gefs") THEN
        ALLOCATE(var_aerosols(n_aerosols_gocart_gefs))
        var_aerosols=var_aerosols_gocart_gefs
-    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_ufs")) THEN
+    ELSEIF (aerosol_option == "aerosols_gocart_ufs") THEN
        ALLOCATE(var_aerosols(n_aerosols_gocart_ufs))
        var_aerosols=var_aerosols_gocart_ufs
-    ELSEIF (cmp_strings(aerosol_option,"aerosols_gocart_geos")) THEN
+    ELSEIF (aerosol_option == "aerosols_gocart_geos") THEN
        ALLOCATE(var_aerosols(n_aerosols_gocart_geos))
        var_aerosols=var_aerosols_gocart_geos
     ELSE
@@ -1714,7 +1713,7 @@ end function uv_to_wdir
                &aerosol_concentration_minvalue_layer)
 
 
-          IF (cmp_strings(TRIM(aerosol_model), "CRTM")) THEN
+          IF (aerosol_model == "CRTM") THEN
 
             !Indices for CRTM default LUT
             !DUST_AEROSOL = 1
@@ -1788,7 +1787,7 @@ end function uv_to_wdir
             END SELECT
 
 
-         ELSEIF (cmp_strings(TRIM(aerosol_model), "GOCART-GEOS5")) THEN
+         ELSEIF (aerosol_model == "GOCART-GEOS5") THEN
 
             ! This is for the NASA GOCART tables, aerosol scheme GOCART-GEOS5 in CRTM
             ! Reff are bin effective radius from NASA tables
@@ -1874,7 +1873,7 @@ end function uv_to_wdir
                atm(m)%aerosol(i)%TYPE  = -1
             END SELECT
 
-          ELSEIF (cmp_strings(trim(aerosol_model), "CMAQ")) THEN
+          ELSEIF (aerosol_model == "CMAQ") THEN
             ! Aerosol scheme CMAQ in CRTM
             ! CMAQ table:
             ! Dust - 1
@@ -1976,7 +1975,7 @@ end function uv_to_wdir
 
             END SELECT
 
-          ELSEIF (cmp_strings(TRIM(aerosol_model), "NAAPS")) THEN
+          ELSEIF (aerosol_model == "NAAPS") THEN
             ! This is for the NRL NAAPS tables, aerosol scheme NAAPS in CRTM
             ! Similar to GOCART-GEOS5 LUT, no Reff needs to be assigned
             ! NAAPS table is recommended for AOD calculation only due to
@@ -2169,7 +2168,7 @@ end function uv_to_wdir
      INTEGER i
      getindex=-1
      DO i=1,SIZE(names)
-        IF(cmp_strings(usrname, names(i))) THEN
+        IF(usrname == names(i)) THEN
            getindex=i
            EXIT
         ENDIF

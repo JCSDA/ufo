@@ -12,7 +12,6 @@ use fckit_configuration_module, only: fckit_configuration
 use iso_c_binding
 use kinds
 use ufo_rttovonedvarcheck_constants_mod
-use ufo_utils_mod, only: cmp_strings
 
 implicit none
 private
@@ -137,7 +136,7 @@ self % retrieval_variables(size_geovals+1 : size_geovals+size_extravars) = str_a
 ! Check if cloud retrievals needed
 self % cloud_retrieval = .false.
 do iret = 1, size(self % retrieval_variables)
-  if (cmp_strings(self % retrieval_variables(iret), "cloud_top_pressure")) then
+  if (self % retrieval_variables(iret) == "cloud_top_pressure") then
     write(*,*) "Simple cloud is part of the state vector"
     self % cloud_retrieval = .true.
   end if

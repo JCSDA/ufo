@@ -101,7 +101,6 @@ end subroutine ufo_crtm_passive_sim
 subroutine ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
-use ufo_utils_mod,      only: cmp_strings
 
 implicit none
 
@@ -169,7 +168,7 @@ do jvar = 1, hofxdiags%nvar
       deallocate(hofxdiags%geovals(jvar)%vals)
 
    angle_hf=achar(0)
-   if (cmp_strings(conf%SENSOR_ID(n_Sensor),'gmi_gpm')) then
+   if (conf%SENSOR_ID(n_Sensor) == 'gmi_gpm') then
       if (ch_diags(jvar) > 9) then
          angle_hf="1"
       endif
@@ -177,7 +176,7 @@ do jvar = 1, hofxdiags%nvar
    !============================================
    ! Diagnostics used for QC and bias correction
    !============================================
-   if (cmp_strings(xstr_diags(jvar), "")) then
+   if (xstr_diags(jvar) == "") then
       ! forward h(x) diags
       select case(ystr_diags(jvar))
          ! variable: optical_thickness_of_atmosphere_layer_CH

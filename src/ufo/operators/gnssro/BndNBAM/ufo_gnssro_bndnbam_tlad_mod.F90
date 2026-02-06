@@ -21,7 +21,6 @@ use gnssro_mod_transform, only: geop2geometric
 use fckit_log_module,  only : fckit_log
 use iso_c_binding, only: c_ptr, c_double
 use ufo_constants_mod, only: zero, half, one, two, three, rd_over_g, rd_over_rv, rv_over_rd
-use ufo_utils_mod, only: cmp_strings
 
 
 implicit none
@@ -216,7 +215,7 @@ if (nlocs > 0 ) then
     write(err_msg,*) "record number is not consistent :", icount, nrecs
     call fckit_log%info(err_msg)
   end if
-  if(cmp_strings(self%roconf%GSI_version, "GEOS")) then
+  if(self%roconf%GSI_version == "GEOS") then
      ngrd = nint(61.0/63.0 * nlev + 18)
      ModelsigLevelcheck = one
   else

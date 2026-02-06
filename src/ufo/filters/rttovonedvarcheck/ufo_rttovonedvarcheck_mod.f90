@@ -96,7 +96,6 @@ end subroutine ufo_rttovonedvarcheck_delete
 !! \date 09/06/2020: Created
 !!
 subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geovals, apply)
-  use ufo_utils_mod, only: cmp_strings
 
   implicit none
   type(ufo_rttovonedvarcheck), intent(inout) :: self     !< rttovonedvarcheck main object
@@ -297,7 +296,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       if (self % skinTemperatureFromObsSpace) then
         gv_index = 0
         do igval = 1, geovals % nvar
-          if (cmp_strings(var_sfc_tskin, firstguess_geovals % variables(igval))) gv_index = igval
+          if (var_sfc_tskin == firstguess_geovals % variables(igval)) gv_index = igval
         end do
         firstguess_geovals % geovals(gv_index) % vals(1,1) = obs % skinTemperature(jobs)
       end if

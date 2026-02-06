@@ -19,7 +19,7 @@ use ufo_rttovonedvarcheck_profindex_mod
 use ufo_rttovonedvarcheck_rsubmatrix_mod
 use ufo_rttovonedvarcheck_setup_mod, only: ufo_rttovonedvarcheck
 use ufo_vars_mod
-use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat, cmp_strings
+use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QSat, Ops_QSatWat
 
 implicit none
 private
@@ -264,7 +264,7 @@ nlevels = profindex % nlevels
 if (profindex % t(1) > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_ts, geovals%variables(i))) gv_index = i
+    if (var_ts == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = prof_x(profindex % t(1):profindex % t(2)) ! K
 end if
@@ -274,7 +274,7 @@ end if
 if (profindex % q(1) > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_q, geovals%variables(i))) gv_index = i
+    if (var_q == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = EXP (prof_x(profindex % q(1):profindex % q(2))) / &
                                              1000.0_kind_real ! ln(g/kg) => kg/kg
@@ -313,19 +313,19 @@ if (profindex % qt(1) > 0) then
   ! Assign values to geovals
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_q, geovals%variables(i))) gv_index = i
+    if (var_q == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = q(:)
 
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_clw, geovals%variables(i))) gv_index = i
+    if (var_clw == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = ql(:)
 
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_cli, geovals%variables(i))) gv_index = i
+    if (var_cli == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(:,1) = qi(:)
 
@@ -345,7 +345,7 @@ end if
 if (profindex % t2 > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_sfc_t2m, geovals%variables(i))) gv_index = i
+    if (var_sfc_t2m == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % t2) ! K
 end if
@@ -355,7 +355,7 @@ end if
 if (profindex % q2 > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_sfc_q2m, geovals%variables(i))) gv_index = i
+    if (var_sfc_q2m == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = EXP (prof_x(profindex % q2)) / 1000.0_kind_real ! ln(g/kg) => kg/kg
 end if
@@ -364,7 +364,7 @@ end if
 if (profindex % pstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_ps, geovals%variables(i))) gv_index = i
+    if (var_ps == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % pstar) * 100.0_kind_real
 end if
@@ -373,7 +373,7 @@ end if
 if (profindex % tstar > 0) then
   gv_index = 0
   do i=1,geovals%nvar
-    if (cmp_strings(var_sfc_tskin, geovals%variables(i))) gv_index = i
+    if (var_sfc_tskin == geovals%variables(i)) gv_index = i
   end do
   geovals%geovals(gv_index)%vals(1,1) = prof_x(profindex % tstar)
 end if

@@ -19,7 +19,6 @@ module ufo_gnssro_bndnbam_mod
   use gnssro_mod_grids,  only : get_coordinate_value
   use fckit_log_module,  only : fckit_log
   use ufo_gnssro_bndnbam_util_mod
-  use ufo_utils_mod, only: cmp_strings
   use ufo_constants_mod, only: zero, half, one, two, three, five, six, grav, rd, rv_over_rd
 
   implicit none
@@ -230,7 +229,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   nlevAdd   = 13   ! default parameter in GSIv16.3
   nlevCheck = int(nlev/2.0)  !number of levels to check super refaction
 
-  if(cmp_strings(self%roconf%GSI_version, "GEOS")) then
+  if(self%roconf%GSI_version == "GEOS") then
 !    This ngrd definitioni is copied from "ns=(r61/r63)*nsig+r18" in  GSI. June 8, 2023.
      ngrd = nint(61.0/63.0 * nlev + 18)
      SRcheckHeight = six
@@ -296,7 +295,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       RecordIdx(icount) = irec
       iobs = icount
 !     super refracticion chek height defination
-      if (cmp_strings(self%roconf%GSI_version, "GEOS")) then
+      if (self%roconf%GSI_version == "GEOS") then
          obsHgt = (obsImpP(iobs) - obsLocR(iobs)) * r1em3
       else
          obsHgt = (obsImpP(iobs) - obsLocR(iobs) - obsGeoid(iobs) - gesZs(iobs)) * r1em3  ! GSI v16.3
@@ -339,7 +338,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
 !     (2) super-refaction
 !     (2.1) GSI style super refraction check
-      if(cmp_strings(self%roconf%super_ref_qc, "NBAM")) then
+      if(self%roconf%super_ref_qc == "NBAM") then
 
         if (obsHgt <= SRcheckHeight) then
            kloop: do k = nlevCheck, 1, -1
@@ -398,7 +397,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
               end do kloop2
 
            end if   ! end if(self%roconf%sr_steps > 1
-!          top_layer_SR= 0 if cmp_strings(self%roconf%GSI_version /= "GEOS".
+!          top_layer_SR= 0 if self%roconf%GSI_version /= "GEOS".
            if (top_layer_SR  >= 1) then
               if (obsImpP(iobs) >  refXrad(top_layer_SR+2)) then
                  qcfail = .false.
@@ -416,7 +415,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
         end if ! obsHgt <= SRcheckHeight
 
 !    ROPP style super refraction check
-     else if(cmp_strings(self%roconf%super_ref_qc, "ECMWF")) then
+     else if(self%roconf%super_ref_qc == "ECMWF") then
 
        sr_hgt_idx = 1
        do k = nlev, 2, -1
@@ -448,7 +447,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
     end do obs_loop
   end do rec_loop
 
-  if (cmp_strings(self%roconf%super_ref_qc, "NBAM") .and. self%roconf%sr_steps > 1 ) then
+  if (self%roconf%super_ref_qc == "NBAM" .and. self%roconf%sr_steps > 1 ) then
    if (.not.super_ref_GEOS) then
      rec_loop2: do irec = 1, nrecs
 

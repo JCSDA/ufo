@@ -130,7 +130,7 @@ end subroutine ufo_roobserror_delete
 subroutine ufo_roobserror_prior(self)
 
 use fckit_log_module, only : fckit_log
-use ufo_utils_mod, only: cmp_strings, sort_and_unique
+use ufo_utils_mod, only: sort_and_unique
 
 implicit none
 
@@ -236,7 +236,7 @@ case ("bendingAngle")
   case ("MetOffice")
     write(err_msg,*) "ufo_roobserror_mod: setting up bending_angle obs error with the Met Office method"
     call fckit_log%debug(err_msg)
-    if (cmp_strings(self % rmatrix_filename, "")) then
+    if (self % rmatrix_filename == "") then
       err_msg = "If you choose the Met Office method, then you must specify rmatrix_filename"
       call abor1_ftn(err_msg)
     end if
@@ -309,7 +309,7 @@ case ("atmosphericRefractivity")
   case ("MetOffice")
     write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with the Met Office method"
     call fckit_log%debug(err_msg)
-    if (cmp_strings(self % rmatrix_filename, "")) then
+    if (self % rmatrix_filename == "") then
       err_msg = "If you choose the Met Office method, then you must specify rmatrix_filename"
       call abor1_ftn(err_msg)
     end if

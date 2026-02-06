@@ -55,7 +55,6 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_setup(self, f_confOper, channels, midPointJulday, comm)
-use ufo_utils_mod, only: cmp_strings
 use CRTM_SpcCoeff, only: CRTM_SpcCoeff_Load, SC
 
 implicit none
@@ -124,7 +123,7 @@ character(len=maxvarlen), dimension(10), parameter :: more_hydrometeors = &
  request_cldfrac = self%conf%n_Clouds > 0 .and. self%conf%Cloud_Fraction < 0.0 &
                    .and. (.not. self%conf%cal_cloud_frac_in_fov)
 
- request_salinity = cmp_strings(self%conf%salinity_option, "on")
+ request_salinity = self%conf%salinity_option == "on"
 
  request_more_hydrometeors = self%conf%cal_cloud_frac_in_fov .or. self%conf%cal_cloud_reff_in_fov
 
@@ -240,7 +239,6 @@ use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,  only : fckit_log
 use obsdatavector_mod,  only: obsdatavector_int
 use iso_fortran_env,    only: int64
-use ufo_utils_mod,      only: cmp_strings
 use CRTM_SpcCoeff, only: SC, &
                          SpcCoeff_IsMicrowaveSensor , &
                          SpcCoeff_IsInfraredSensor  , &
@@ -428,7 +426,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf, SC(n)%Is_Active_Sensor, &
                       zeroCloudInCRTM0)
    deallocate(zeroCloudInCRTM0)
-   if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+   if (self%conf%SENSOR_ID(n) == 'gmi_gpm') then
      allocate( geo_hf( n_Profiles ))
      call Load_Geom_Data(obss,geo,geo_hf,self%conf%SENSOR_ID(n))
    else
@@ -582,7 +580,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
                                 Options       )  ! Input
       message = 'Error calling CRTM (setTraj) K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
-      if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+      if (self%conf%SENSOR_ID(n) == 'gmi_gpm') then
          allocate( atm_Ka( n_Channels, n_Profiles ),               &
                    sfc_Ka( n_Channels, n_Profiles ),   &
                    rts_Ka( n_Channels, n_Profiles ),   &
@@ -624,7 +622,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
             endif
          enddo
          deallocate(atm_Ka,sfc_Ka,rts_Ka,rtsa)
-      endif ! cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')
+      endif ! self%conf%SENSOR_ID(n) == 'gmi_gpm'
    else
       ! Call the forward model call for each sensor
       ! -------------------------------------------
@@ -636,7 +634,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
                                Options       )  ! Input
       message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
       call crtm_comm_stat_check(err_stat, PROGRAM_NAME, message, f_comm)
-      if (cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')) then
+      if (self%conf%SENSOR_ID(n) == 'gmi_gpm') then
          allocate( rtsa( n_Channels, n_Profiles ),     &
                    STAT = alloc_stat )
          message = 'Error allocating K structure arrays rtsa.'
@@ -660,7 +658,7 @@ integer, allocatable :: zeroCloudInCRTM0(:)
             endif
          enddo
          deallocate(rtsa)
-      endif ! cmp_strings(self%conf%SENSOR_ID(n),'gmi_gpm')
+      endif ! self%conf%SENSOR_ID(n) == 'gmi_gpm'
    end if ! jacobian_needed
 
    !call CRTM_RTSolution_Inspect(rts)

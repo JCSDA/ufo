@@ -17,7 +17,6 @@ module ufo_seaicethickness_tlad_mod
  use obsspace_mod
  use missing_values_mod
  use obs_variables_mod
- use ufo_utils_mod, only: cmp_strings
 
  implicit none
  private
@@ -92,7 +91,7 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick)
 ! check if sea ice fraction variables is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
 
-if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
+if (self%obsvars%variable(1) == "seaIceFreeboard") then
    call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
    self%snowthick= snowthick
 endif
@@ -140,7 +139,7 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
 ! check if sea ice thickness variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
-if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
+if (self%obsvars%variable(1) == "seaIceFreeboard") then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
    rho_wsw = (-self%rho_snow)/self%rho_water  
 endif
@@ -220,7 +219,7 @@ if (geovals%nlocs /= size(hofx,1)) then
   call abor1_ftn(err_msg)
 endif
 
-if (cmp_strings(self%obsvars%variable(1), "seaIceFreeboard")) then
+if (self%obsvars%variable(1) == "seaIceFreeboard") then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
    rho_wsw = (-self%rho_snow)/self%rho_water   
 endif

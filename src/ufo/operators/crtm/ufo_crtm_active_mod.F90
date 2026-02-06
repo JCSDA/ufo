@@ -80,7 +80,6 @@ subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, O
              ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
-use ufo_utils_mod,      only: cmp_strings
 
 implicit none
 
@@ -159,7 +158,7 @@ do jvar = 1, hofxdiags%nvar
    !============================================
    ! Diagnostics used for QC and bias correction
    !============================================
-   if (cmp_strings(xstr_diags(jvar), "")) then
+   if (xstr_diags(jvar) == "") then
       ! forward h(x) diags
       select case(ystr_diags(jvar))
          ! variable: reflectivity_CH Non attenuated

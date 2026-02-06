@@ -1420,7 +1420,6 @@ use dcmip_initial_conditions_test_1_2_3, only : test1_advection_deformation, &
                                   test1_advection_hadley, test3_gravity_wave
 use dcmip_initial_conditions_test_4, only : test4_baroclinic_wave
 use ufo_sampled_locations_mod
-use ufo_utils_mod, only: cmp_strings
 use ufo_constants_mod, only : one, pi, deg2rad, t2tv
 
 implicit none
@@ -1452,10 +1451,10 @@ endif
 ! - air_pressure
 ! Error if the GeoVaLs is set up requesting fields that can't be populated
 do ivar = 1, self%nvar
-   if (.not. (cmp_strings(self%variables(ivar), var_ts) &
-              .or. cmp_strings(self%variables(ivar), var_tv) &
-              .or. cmp_strings(self%variables(ivar), var_q) &
-              .or. cmp_strings(self%variables(ivar), var_prs))) then
+   if (.not. (self%variables(ivar) == var_ts &
+              .or. self%variables(ivar) == var_tv &
+              .or. self%variables(ivar) == var_q &
+              .or. self%variables(ivar) == var_prs)) then
       call abor1_ftn("ufo_geovals_analytic_init: unable to fill variable " // trim(self%variables(ivar)))
    endif
 enddo
@@ -1512,14 +1511,14 @@ do ivar = 1, self%nvar-1
 
          end select init_option
 
-         if (cmp_strings(self%variables(ivar), var_ts)) then
+         if (self%variables(ivar) == var_ts) then
             ! air_temperature
             self%geovals(ivar)%vals(ival,iprofile) = t0
-         else if (cmp_strings(self%variables(ivar), var_tv)) then
+         else if (self%variables(ivar) == var_tv) then
             ! virtual_temperture from specific_humidity & air_temperature
             qv = max(1.0e-12_kind_real, hum0/(one - hum0))
             self%geovals(ivar)%vals(ival,iprofile) = t0 * (one + (t2tv * qv))
-         else if (cmp_strings(self%variables(ivar), var_q)) then
+         else if (self%variables(ivar) == var_q) then
             ! specific humidity / water_vapor_mixing_ratio_wrt_moist_air
             self%geovals(ivar)%vals(ival,iprofile) = hum0
          endif
