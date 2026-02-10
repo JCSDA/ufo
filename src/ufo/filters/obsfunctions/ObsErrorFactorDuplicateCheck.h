@@ -30,6 +30,11 @@ class ObsErrorFactorDuplicateCheckParameters : public oops::Parameters {
   oops::RequiredParameter<std::string> variable{"variable", this};
   oops::Parameter<std::string> original_obserr{"original_obserr", "ObsErrorData", this};
   oops::Parameter<std::string> testQCflag{"test_qcflag", "QCflagsData", this};
+  // Weighting factor for error inflation due to duplicates. Value between 0 and 1.
+  // Low values increase error inflation, high values decrease it.
+  oops::Parameter<double> duplicate_retention_weight{"duplicate_retention_weight", 0.75, this};
+  // Time window in hours sensitive to assimilation window for duplicate checking.
+  oops::Parameter<double> time_window_hours{"time_window_hours", 3.0, this};
 };
 
 // -----------------------------------------------------------------------------
