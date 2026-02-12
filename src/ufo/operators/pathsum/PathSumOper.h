@@ -145,6 +145,11 @@ class PathSumOper : public ObsOperatorBase {
                                   float lat, float lon,
                                   std::size_t nlevs) const;
 
+  // Interpolate upper/lower boundary if needed
+  void interpolateBoundaries(std::vector<double> &heights,
+                             std::vector<double> &vals,
+                             double hmin, double hmax) const;
+
   /// Parameters stored
   const ioda::ObsSpace & odb_;
   PathType pathType_;

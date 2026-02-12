@@ -137,6 +137,7 @@ inline bool isValidValue(double v) {
 
 //------------------------------------------------------------------------------
 /// TrapezoidalWeight = 0.5 * (segment ending at lev) + 0.5 * (segment starting at lev)
+/// Assumes heights are ordered monotonicly, either increasing or decreasing
 double PathSumOper::computeTrapezoidalWeight(std::size_t lev,
                                              const std::vector<double> &heights,
                                              float lat, float lon,
@@ -187,6 +188,108 @@ inline double linearInterpolate(double x, double x0, double x1, double y0, doubl
 }
 
 // -----------------------------------------------------------------------------
+// Detect height order
+enum class HeightOrder {INCREASING, DECREASING, UNKNOWN};
+HeightOrder detectHeightOrder(const std::vector<double> &heights) {
+  double prev = util::missingValue<double>();
+  for (double hcurr : heights) {
+    if (!isValidValue(hcurr)) continue;
+
+    if (isValidValue(prev)) {
+      if (hcurr > prev) return HeightOrder::INCREASING;
+      if (hcurr < prev) return HeightOrder::DECREASING;
+      // if equal, keep scanning
+    }
+    prev = hcurr;
+  }
+  return HeightOrder::UNKNOWN;
+}
+
+// -----------------------------------------------------------------------------
+// Interpolation function (order-agnostic, missing-value safe)
+void PathSumOper::interpolateBoundaries(std::vector<double> &heights,
+                                        std::vector<double> &vals,
+                                        double hmin, double hmax) const
+{
+  if (heights.size() < 2) {
+    oops::Log::warning() << "pathSumOper::interpolateBoundaries: " <<
+          "interpolateBoundaries called with less than 2 heights" << std::endl;
+    return;
+  }
+
+  const std::size_t nlevs = heights.size();
+  HeightOrder order = detectHeightOrder(heights);
+  if (order == HeightOrder::UNKNOWN) {
+    oops::Log::warning()
+          << "pathSumOper::interpolateBoundaries: "
+          << "Height order could not be determined (missing or non-monotonic heights). "
+          << "Boundary interpolation will be skipped for such profiles. "
+          << std::endl;
+    return;
+  }
+
+  bool lowerInterpolated = false, upperInterpolated = false;
+  bool lowerNeeded = false, upperNeeded = false;
+
+  for (std::size_t lev = 1; lev < nlevs; ++lev) {  // Increasing
+    if (order == HeightOrder::INCREASING) {
+      // Lower boundary
+      if (isValidValue(heights[lev-1]) && heights[lev-1] < hmin) {
+        lowerNeeded = true;
+        if (isValidValue(heights[lev]) && heights[lev] >= hmin) {
+          vals[lev-1] = linearInterpolate(hmin,
+                        heights[lev-1], heights[lev], vals[lev-1], vals[lev]);
+          heights[lev-1] = hmin;
+          lowerInterpolated = true;
+          break;
+        }
+      }
+      // Upper boundary
+      if (isValidValue(heights[lev]) && heights[lev] >= hmax) {
+        upperNeeded = true;
+        if (isValidValue(heights[lev-1]) && heights[lev-1] < hmax) {
+          vals[lev] = linearInterpolate(hmax,
+                      heights[lev-1], heights[lev], vals[lev-1], vals[lev]);
+          heights[lev] = hmax;
+          upperInterpolated = true;
+          break;
+        }
+      }
+    } else {  // Decreasing
+      // Lower boundary
+      if (isValidValue(heights[lev-1]) && heights[lev-1] > hmin) {
+        lowerNeeded = true;
+        if (isValidValue(heights[lev]) && heights[lev] <= hmin) {
+          vals[lev-1] = linearInterpolate(hmin,
+                        heights[lev-1], heights[lev], vals[lev-1], vals[lev]);
+          heights[lev-1] = hmin;
+          lowerInterpolated = true;
+          break;
+        }
+      }
+      // Upper boundary
+      if (isValidValue(heights[lev]) && heights[lev] <= hmax) {
+        upperNeeded = true;
+        if (isValidValue(heights[lev-1]) && heights[lev-1] > hmax) {
+          vals[lev] = linearInterpolate(hmax,
+                      heights[lev-1], heights[lev], vals[lev-1], vals[lev]);
+          heights[lev] = hmax;
+          upperInterpolated = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if (lowerNeeded && !lowerInterpolated)
+    oops::Log::debug() << "pathSumOper::interpolateBoundaries: "
+                       << "Could not interpolate lower boundary at hmin=" << hmin << std::endl;
+  if (upperNeeded && !upperInterpolated)
+    oops::Log::debug() << "pathSumOper::interpolateBoundaries: "
+                       << "Could not interpolate upper boundary at hmax=" << hmax << std::endl;
+}
+
+// -----------------------------------------------------------------------------
 void PathSumOper::simulateObs(const GeoVaLs & geovals,
                               ioda::ObsVector & hofx,
                               ObsDiagnostics &, const QCFlags_t &) const {
@@ -210,92 +313,58 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
     ASSERT(lats.size() == nlocs && lons.size() == nlocs);
   }
 
-  if (pathType_ == PathType::VERTICAL) {
-    // Case 1: Vertical integration
+  if (weightsVar_) {
+    oops::Log::debug() << "PathSumOper: using weights from GeoVaLs" << std::endl;
+  } else if (!weights_.empty()) {
+    oops::Log::debug() << "PathSumOper: using weights from YAML" << std::endl;
+  } else {
+    oops::Log::debug() << "PathSumOper: using operator-computed weights" << std::endl;
+  }
 
+  // Apply height range restriction and interpolate boundaries if needed
+  const bool useHeightRange = !heightRange_.empty();
+  const double hmin = useHeightRange ? heightRange_[0] : std::numeric_limits<double>::lowest();
+  const double hmax = useHeightRange ? heightRange_[1] : std::numeric_limits<double>::max();
+
+  // Vertical integration
+  if (pathType_ == PathType::VERTICAL) {
     // Loop over locations
     for (std::size_t loc = 0; loc < nlocs; ++loc) {
       hofx[loc] = missing;
 
       // Extract profile for main variable
-      std::vector<double> valueProfile(nlevs);
-      geovals.getAtLocation(valueProfile, geovalVar_, loc);
+      std::vector<double> vals(nlevs);
+      geovals.getAtLocation(vals, geovalVar_, loc);
 
       // Extract weights for integration computation if WeightsVar is defined in yaml
       std::vector<double> wts(nlevs, missing);  // default = missing, dimension nlevs
+      // weights from geovals
       if (weightsVar_) {
         geovals.getAtLocation(wts, *weightsVar_, loc);
+      // weights from yaml
+      } else if (!weights_.empty()) {
+        const std::size_t ncopy_size = std::min(weights_.size(), nlevs);
+        std::copy(weights_.begin(), weights_.begin() + ncopy_size, wts.begin());
       }
-
-      // Apply height range restriction and interpolate boundaries if needed
-      const bool useHeightRange = !heightRange_.empty();
-      const double hmin = useHeightRange ? heightRange_[0] : std::numeric_limits<double>::lowest();
-      const double hmax = useHeightRange ? heightRange_[1] : std::numeric_limits<double>::max();
 
       // Get vertical coordinate if no weights are defined or height range is defined in yaml
-      std::vector<double> heights;
-      if ((!weightsVar_ && weights_.empty()) || useHeightRange) {
-        std::vector<double> heightProfile(nlevs);
-        geovals.getAtLocation(heightProfile, oops::Variable{"height_wrt_surface"}, loc);
-        if (heightProfile.empty()) {
-          oops::Log::warning() << "height_wrt_surface is empty," <<
-                                  " therefore height range can not be applied" << std::endl;
-          continue;  // safety check
+      // or interpolateBoundaries is true
+      const bool needHeights = useHeightRange || interpolateBoundaries_ ||
+                               (!weightsVar_ && weights_.empty());
+      std::vector<double> heights(nlevs);
+      if (needHeights) {
+        geovals.getAtLocation(heights, oops::Variable{"height_wrt_surface"}, loc);
+
+        if (heights.empty()) {
+          oops::Log::debug() << "pathSumOper: height_wrt_surface is empty, PathSum skipped at loc"
+                            << loc << std::endl;
+            continue;  // safety check
         }
-        heights = heightProfile;  // Copy to heights for use in interpolation and integration
       }
 
-      // Create working copies so original GeoVaLs remain untouched
-      std::vector<double> vals = valueProfile;
-
+      // Interpolate boundaries
       if (useHeightRange && interpolateBoundaries_ && heights.size() > 1) {
-        // Ensure increasing order. Note: heights should be monotonic
-        if (heights.front() > heights.back()) {
-          std::reverse(heights.begin(), heights.end());
-          std::reverse(vals.begin(), vals.end());
-        }
-
-        // Interpolate upper/lower boundary if needed
-        bool lowerBoundaryInterpolated = false;
-        bool upperBoundaryInterpolated = false;
-        bool lowerBoundaryNeeded = false;
-        bool upperBoundaryNeeded = false;
-        for (std::size_t lev = 1; lev < nlevs; ++lev) {
-          if (isValidValue(heights[lev-1]) && heights[lev-1] < hmin) {
-            lowerBoundaryNeeded = true;
-            if (isValidValue(heights[lev]) && heights[lev] >= hmin) {
-              double interpVal = linearInterpolate(hmin,
-                                                   heights[lev-1], heights[lev],
-                                                   vals[lev-1], vals[lev]);
-              heights[lev-1] = hmin;
-              vals[lev-1] = interpVal;
-              lowerBoundaryInterpolated = true;
-              break;
-            }
-          }
-          if (isValidValue(heights[lev]) && heights[lev] >= hmax) {
-            upperBoundaryNeeded = true;
-            if (isValidValue(heights[lev-1]) && heights[lev-1] < hmax) {
-              double interpVal = linearInterpolate(hmax,
-                                                   heights[lev-1], heights[lev],
-                                                   vals[lev-1], vals[lev]);
-              heights[lev] = hmax;
-              vals[lev] = interpVal;
-              upperBoundaryInterpolated = true;
-              break;
-            }
-          }
-        }
-        if (lowerBoundaryNeeded && !lowerBoundaryInterpolated) {
-            oops::Log::warning() << "Could not interpolate lower boundary at hmin=" << hmin
-                                 << " for location " << loc
-                                 << ": no valid level pair found spanning hmin" << std::endl;
-        }
-        if (upperBoundaryNeeded && !upperBoundaryInterpolated) {
-           oops::Log::warning() << "Could not interpolate upper boundary at hmax=" << hmax
-                                 << " for location " << loc
-                                 << ": no valid level pair found spanning hmax" << std::endl;
-        }
+          interpolateBoundaries(heights, vals, hmin, hmax);
       }
 
       // Prepare for vertical path integration
@@ -305,60 +374,41 @@ void PathSumOper::simulateObs(const GeoVaLs & geovals,
 
       for (std::size_t lev = 0; lev < nlevs; ++lev) {
         // Check if this level is within height range (if defined)
-        bool withinHeightRange = true;
-        if (useHeightRange) {
-          if (!heights.empty() && isValidValue(heights[lev])) {
-            withinHeightRange = (heights[lev] >= hmin && heights[lev] <= hmax);
-          } else {
-            withinHeightRange = false;
-          }
-        }
+        bool withinHeightRange = !useHeightRange ||
+                                (!heights.empty() && isValidValue(heights[lev]) &&
+                                 heights[lev] >= hmin && heights[lev] <= hmax);
 
-        if (!withinHeightRange) {
-          oops::Log::trace() << "Beyond height range, skip level " << heights[lev] << std::endl;
-          continue;
-        }
+        if (!withinHeightRange || !isValidValue(vals[lev])) continue;
 
         // ---- Determine weight (wt) depending on configuration ----
         double wt = missing;
-        if (weightsVar_) {
-          // option 1: read from GeoVaLs (dimension nlevs)
-          if (lev < wts.size()) {
-            wt = wts[lev];
-            oops::Log::trace() << "wts from geoval" << std::endl;
-          }
-        } else if (!weights_.empty()) {
-          if (lev < weights_.size()) {
-            wt = weights_[lev];
-            oops::Log::trace() << "wts from yaml" << std::endl;
-          }
+        if (lev < wts.size() && isValidValue(wts[lev])) {
+          wt = wts[lev];
         } else {
-          // option 3: compute trapezoidal weight based on segment length
           wt = computeTrapezoidalWeight(lev, heights, lats[loc], lons[loc], nlevs);
-          oops::Log::trace() << "wts from operator" << std::endl;
         }
 
         // Compute sum using weight * value
-        if (isValidValue(vals[lev]) && isValidValue(wt)) {
-          sum += wt * vals[lev];
-          anyValid = true;
-        }
+        if (!isValidValue(wt)) continue;
+
+        sum += wt * vals[lev];
+        anyValid = true;
       }
 
-      // Store result in hofx
-      if (anyValid) {
-        // convert to certain unit if needed. scalingFactor default is 1.0
-        hofx[loc] = sum * scalingFactor_;
-      }
+      // Store result in hofx and convert to certain unit if needed. scalingFactor default is 1.0
+      if (anyValid) hofx[loc] = sum * scalingFactor_;
     }
-  } else if (pathType_ == PathType::SLANT) {
-      oops::Log::warning() << "[PathSumOper] Slant path computation is currently a placeholder "
+  }
+
+  // Slant path integration
+  if (pathType_ == PathType::SLANT) {
+      oops::Log::warning() << "PathSumOper: "
+                           << "Slant path computation is currently a placeholder "
                            << "and will be implemented in a future update. "
                            << "Exiting now to prevent use of incomplete results." << std::endl;
 
       throw eckit::NotImplemented
                 ("Slant path computation not yet implemented in PathSumOper.", Here());
-      return;
   }  // End of vertical or slant path
 
   oops::Log::trace() << "PathSumOper::simulateObs done" << std::endl;
