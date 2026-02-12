@@ -36,6 +36,7 @@
 #include "ufo/filters/ObsDiagnosticsWriter.h"
 #include "ufo/filters/ObsDomainCheck.h"
 #include "ufo/filters/ObsDomainErrCheck.h"
+#include "ufo/filters/ObsPolygonCheck.h"
 #include "ufo/filters/ObsRefractivityGradientCheck.h"
 #include "ufo/filters/ParameterSubstitution.h"
 #include "ufo/filters/PerformAction.h"
@@ -110,6 +111,8 @@ void instantiateObsFilterFactory() {
            domainCheckMaker("Domain Check");
   static FilterMaker<ObsDomainErrCheck>
            domainErrCheckMaker("DomainErr Check");
+  static FilterMaker<ObsPolygonCheck>
+           polygonCheckMaker("Polygon Check");
   static FilterMaker<FinalCheck>
            finalCheckMaker("Final Check");
   static FilterMaker<Gaussian_Thinning>
