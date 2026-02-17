@@ -8,9 +8,9 @@
 module ufo_radiancerttov_tlad_mod
 
   use fckit_configuration_module, only: fckit_configuration
-  use fckit_log_module, only : fckit_log
   use iso_c_binding
   use kinds
+  use logger_mod, only : oops_log
   use missing_values_mod
 
   use obsspace_mod
@@ -203,12 +203,12 @@ contains
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
     write(message,'(2A, I0, A, I0, A)') &
       trim(routine_name), ': Allocating ', self % nprofiles, ' profiles with ', self % nlevels, ' levels'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
     call self % RTprof_K % alloc_profiles(errorstatus, self % conf, self % nprofiles, self % nlevels, init=.true., asw=1)
 
     !Assign the atmospheric and surface data from the GeoVaLs
     message = trim(routine_name) // ': Creating RTTOV profiles from geovals'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
     call self % RTprof_K % setup_rtprof(geovals,obss,self % conf)
     do_profile_diagnostics = .false.
     if (any(self % RTProf_K % print_profile(:))) do_profile_diagnostics = .true.
@@ -253,12 +253,12 @@ contains
     ! Allocate structures for RTTOV direct and K code
     write(message,'(2A,I0,A,I0,A)') &
       trim(routine_name), ': Allocating resources for RTTOV direct (K): ', nprof_sim, ' and ', nchan_sim, ' channels'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
     call self % RTprof_K % alloc_direct(errorstatus, self % conf, nprof_sim, nchan_sim, self % nlevels, init=.true., asw=1)
 
     write(message,'(2A,I0,A,I0,A)') &
       trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
     call self % RTprof_K % alloc_k(errorstatus, self % conf, nprof_sim, nchan_sim, self % nlevels, init=.true., asw=1)
 
     prof_start = 1
@@ -524,7 +524,7 @@ contains
       if ( errorstatus /= errorstatus_success ) then
         write(message,'(3A, I6, A, I6)') trim(routine_name), 'after rttov_k: error\n', 'skipping profiles ', &
                                          prof_start, ' -- ', prof_start + nprof_sim - 1
-        call fckit_log%info(message)
+        call oops_log%warning(message)
       else
         ! Put simulated diagnostics into hofxdiags
         ! ----------------------------------------------
@@ -580,7 +580,7 @@ contains
     ! Check for zero profiles on a rank
     if (self % nprofiles == 0) then
       message = myname_ // ' zero profiles on this rank!'
-      call fckit_log % info(message)
+      call oops_log%info(message)
       return
     end if
 
@@ -721,7 +721,7 @@ contains
     ! Check for zero profiles on a rank
     if (self % nprofiles == 0) then
       message = myname_ // ' zero profiles on this rank!'
-      call fckit_log % info(message)
+      call oops_log%info(message)
       return
     end if
 

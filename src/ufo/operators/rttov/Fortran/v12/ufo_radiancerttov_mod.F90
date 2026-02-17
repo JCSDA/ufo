@@ -8,9 +8,9 @@
 module ufo_radiancerttov_mod
 
   use fckit_configuration_module, only: fckit_configuration
-  use fckit_log_module, only : fckit_log
   use iso_c_binding
   use kinds
+  use logger_mod, only : oops_log
   use missing_values_mod
 
   use obsspace_mod
@@ -131,7 +131,7 @@ contains
     if (self % conf % debug) then
       do j=1,size(self%varin)
         write(message,'(I4,1x,A)') j, trim(self%varin(j))
-        call fckit_log % debug(message)
+        call oops_log%trace(message)
       enddo
     end if
 
@@ -139,7 +139,7 @@ contains
       call self % reconradop % setup(self % RTprof, self % conf)
 
     message = 'Finished setting up rttov'
-    call fckit_log%info(message)
+    call oops_log%info(message)
     call f_confOpts%final()
 
   end subroutine ufo_radiancerttov_setup
@@ -211,7 +211,7 @@ contains
     include 'rttov_scatt_ad.interface'
 
     message = trim(routine_name) // ': Simulating observations'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
 
     !Initialisations
     missing = missing_value(missing)
@@ -244,13 +244,13 @@ contains
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
     write(message,'(2A, I0, A, I0, A)') &
       trim(routine_name), ': Allocating ', nprofiles, ' profiles with ', nlevels, ' levels'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
 
     call self % RTprof % alloc_profiles(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
 
     ! Assign the atmospheric and surface data from the GeoVaLs
     message = trim(routine_name) // ': Creating RTTOV profiles from geovals'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
     if(present(ob_info)) then
       call self % RTprof % setup_rtprof(geovals,obss,self % conf,ob_info=ob_info)
     else
@@ -283,13 +283,13 @@ contains
     ! Allocate structures for RTTOV direct code (and, if needed, K code and any structures for RTTOV-SCATT)
     write(message,'(2A,I0,A,I0,A)')                                                   &
       trim(routine_name), ': Allocating resources for RTTOV direct code: ', nprof_sim, ' and ', nchan_sim, ' channels'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
     call self % RTprof % alloc_direct(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
 
     if (jacobian_needed) then
       write(message,'(2A,I0,A,I0,A)')                                                 &
         trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
-      call fckit_log%debug(message)
+      call oops_log%trace(message)
 
       call self % RTprof % alloc_profiles_k(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
       call self % RTprof % alloc_k(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
@@ -490,7 +490,7 @@ contains
           if ( errorstatus /= errorstatus_success ) then
             write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, &
               ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
-            call fckit_log%info(message)
+            call oops_log%warning(message)
           end if
         else ! direct
           if (self % conf % do_mw_scatt) then
@@ -524,7 +524,7 @@ contains
           if ( errorstatus /= errorstatus_success ) then
             write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
                                          ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
-            call fckit_log%info(message)
+            call oops_log%warning(message)
             if (present(ob_info)) ob_info % rterror = .true.
           end if
 
@@ -590,7 +590,7 @@ contains
     end do RTTOV_loop
 
     message = 'Deallocating resource for RTTOV...'
-    call fckit_log%debug(message)
+    call oops_log%trace(message)
 
     if (allocated(sfc_emiss)) deallocate(sfc_emiss)
     if (allocated(RTTOV_Atlas_Emissivity)) deallocate (RTTOV_Atlas_Emissivity)
@@ -616,7 +616,7 @@ contains
       call abor1_ftn(message)
     else
       message = 'Done. Returning'
-      call fckit_log%debug(message)
+      call oops_log%trace(message)
     end if
     call f_comm%final()
 

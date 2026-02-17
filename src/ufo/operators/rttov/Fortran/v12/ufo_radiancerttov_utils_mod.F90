@@ -14,8 +14,9 @@ module ufo_radiancerttov_utils_mod
   use datetime_mod, only : datetime, datetime_to_yyyymmddhhmmss, datetime_delete
   use fckit_configuration_module, only : fckit_configuration
   use fckit_exception_module, only: fckit_exception
-  use fckit_log_module, only : fckit_log
   use kinds, only : kind_real ! from oops
+  use logger_mod, only: oops_log
+
   use missing_values_mod, only : missing_value
   use obsspace_mod, only : obsspace_get_nlocs, obsspace_has, obsspace_get_db, &
     obsspace_get_window
@@ -319,7 +320,7 @@ contains
       if ( any(RTTOV_Absorbers(gas_id_watervapour) == str_array)  ) then
         message = trim(routine_name) // trim(RTTOV_Absorbers(gas_id_watervapour)) // &
                   ' is mandatory and not required to be listed in Absorbers'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
         conf%ngas = conf%ngas - 1
       end if
 
@@ -328,7 +329,7 @@ contains
         do jspec = 1, size(str_array) - 1
           if (any(trim(str_array(jspec)) == str_array(jspec+1:)) ) then
             message = trim(routine_name) // trim(str_array(jspec)) // ' is duplicated in Absorbers'
-            call fckit_log%info(message)
+            call oops_log%trace(message)
             conf%ngas = conf%ngas - 1
           else
             absorber_mask(jspec) = .true.
@@ -478,7 +479,7 @@ contains
 
     if (conf % nSensors > 1) then
       message = 'Where more than one sensor is processed, fall back to profile-by-profile processing. Setting prof_by_prof to TRUE'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
       conf % prof_by_prof = .true.
     end if
 
@@ -493,7 +494,7 @@ contains
 
     if (conf % do_mw_scatt .and. .not. conf % prof_by_prof) then
       message = 'RTTOV-SCATT does not support batch processing. Setting prof_by_prof to TRUE'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
       conf % prof_by_prof = .true.
     end if
 
@@ -501,7 +502,7 @@ contains
     call f_confOpts % get_or_die("UseQCFlagsToSkipHofX", conf % UseQCFlagsToSkipHofX)
     if (conf % UseQCFlagsToSkipHofX .and. .not. conf % prof_by_prof) then
       message = 'UseQCFlagsToSkipHofX does not support batch processing. Setting prof_by_prof to TRUE'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
       conf % prof_by_prof = .true.
     end if
 
@@ -933,7 +934,7 @@ contains
           call abor1_ftn(message)
         else
           message = 'successfully read RT coefficients: ' // trim(self % coeffname(i_inst))
-          call fckit_log%info(message)
+          call oops_log%trace(message)
         end if
       end do
 
@@ -952,7 +953,7 @@ contains
           call abor1_ftn(message)
         else
           message = 'successfully read compatible MWscatt coefficients for: ' // trim(self % coeffname(1))
-          call fckit_log%info(message)
+          call oops_log%trace(message)
         end if
       end if
 
@@ -1093,7 +1094,7 @@ contains
         end do
       else
         message = 'Warning: Optional input Date/Time not in database'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
       end if
     end if
 
@@ -1121,7 +1122,7 @@ contains
        end select
 
        write(message,*) 'Setting up ', trim(conf % emissivity_atlas_name), ' emissivity atlas for month ', profiles(1) % date(2)
-       call fckit_log%info(message)
+       call oops_log%trace(message)
        call rttov_setup_emis_atlas (               &
             rttov_errorstatus,                   & ! in
             conf % rttov_opts,                   & ! in
@@ -1269,7 +1270,7 @@ contains
       profiles(1:nprofiles)%s2m%p = geoval%vals(1,:) * Pa_to_hPa
     else
       message = 'No near-surface pressure. Using bottom pressure level'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
 
       do iprof = 1, nprofiles
         profiles(iprof)%s2m%p = profiles(iprof)%p(nlevels)
@@ -1282,7 +1283,7 @@ contains
       profiles(1:nprofiles)%s2m%t = geoval%vals(1,1:nprofiles)
     else
       message = 'No near-surface temperature. Using bottom temperature level'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
       do iprof = 1, nprofiles
         profiles(iprof)%s2m%t = profiles(iprof)%t(nlevels)
       enddo
@@ -1295,7 +1296,7 @@ contains
       profiles(1:nprofiles)%s2m%q = geoval%vals(1,1:nprofiles) * conf%scale_fac(gas_id_watervapour)
     else
       message = 'No near-surface specific humidity. Using bottom q level'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
 
       do iprof = 1, nprofiles
         profiles(iprof)%s2m%q = profiles(iprof)%q(nlevels)
@@ -1681,7 +1682,7 @@ contains
       else
         message = 'MetaData elevation not in database'
       end if
-      call fckit_log%info(message)
+      call oops_log%trace(message)
 
       if (allocated(TmpVar)) deallocate(TmpVar)
 
@@ -1691,7 +1692,7 @@ contains
         call obsspace_get_db(obss, "MetaData", "latitude", profiles(1:nprofiles)%latitude)
       else
         message = 'Warning: Optional input MetaData/latitude not in database'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
       end if
 
       variable_present = obsspace_has(obss, "MetaData", "longitude")
@@ -1699,7 +1700,7 @@ contains
         call obsspace_get_db(obss, "MetaData", "longitude", profiles(1:nprofiles)%longitude)
       else
         message = 'MetaData longitude not in database: check implicit filtering'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
       end if
 
 !Set RTTOV viewing geometry
@@ -1719,7 +1720,7 @@ contains
         call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle", profiles(1:nprofiles)%azangle)
       else
         message = 'Warning: Optional input MetaData/sensorAzimuthAngle not in database: setting to zero for RTTOV'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
         profiles(1:nprofiles)%azangle = zero
       end if
 
@@ -1729,7 +1730,7 @@ contains
         call obsspace_get_db(obss, "MetaData", "solarZenithAngle", profiles(1:nprofiles)%sunzenangle)
       else
         message = 'Warning: Optional input MetaData/solarZenithAngle not in database: setting to zero'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
         profiles(1:nprofiles)%sunzenangle = zero
       end if
 
@@ -1739,7 +1740,7 @@ contains
         call obsspace_get_db(obss, "MetaData", "solarAzimuthAngle", profiles(1:nprofiles)%sunazangle)
       else
         message = 'Warning: Optional input MetaData/solarAzimuthAngle not in database: setting to zero for RTTOV'
-        call fckit_log%info(message)
+        call oops_log%trace(message)
         profiles(1:nprofiles)%sunazangle = zero
       end if
 
@@ -1795,7 +1796,7 @@ contains
       write(message, '(A,I4,A,I4,A)') &
       'Bad sensor index (', sensor_idx, ') for profile ', iprof, &
       ' which will not be processed and no further checking will be performed'
-      call fckit_log%info(message)
+      call oops_log%trace(message)
     else
       if(conf % RTTOV_profile_checkinput) then
         call rttov_user_profile_checkinput(errorstatus, &
@@ -1809,7 +1810,7 @@ contains
           self % profiles(iprof) % id = prof_str
           call rttov_print_profile(self % profiles(iprof), lu = stderr)
           write(message, '(A,I0)') 'Error in profile ', iprof
-          call fckit_log%info(message)
+          call oops_log%trace(message)
         end if
         
         if ((conf % rttov_opts % rt_mw % fastem_version >= 3) .and. &
@@ -1819,7 +1820,7 @@ contains
           errorstatus = errorstatus_fatal
           write(message, '(A,I0,A)') 'Bad azimuth angle for requested FASTEM version >= 3 for profile ', &
                                      iprof, ' which will not be processed'
-          call fckit_log%info(message)
+          call oops_log%trace(message)
         endif
 
         if (self % profiles(iprof) % longitude < -180.0_kind_real .or. & 
@@ -1827,7 +1828,7 @@ contains
           errorstatus = errorstatus_fatal
           write(message, '(A,I0,A)') 'Bad longitude when using emissivity atlas for profile ', iprof, &
                                      ' which will not be processed'
-          call fckit_log%info(message)
+          call oops_log%trace(message)
         endif
       endif
     endif
@@ -2316,7 +2317,7 @@ contains
     character(len=max_string)        :: message
 
     message = 'Setting RTTOV default options to ' // trim(default_opts_set)
-    call fckit_log%info(message)
+    call oops_log%trace(message)
 
     ! Get PS number if it exists
     if(default_opts_set(1:4) == 'UKMO') then
@@ -2324,7 +2325,7 @@ contains
       read(default_opts_set(8:9),*) PS_Number
 
       write(message,'(A, I3)') 'Setting RTTOV default options for PS', PS_Number
-      call fckit_log%info(message)
+      call oops_log%trace(message)
     else
       PS_configuration = .false.
       PS_Number = -1
@@ -2667,7 +2668,7 @@ contains
           if(conf % debug) then
             write(message,*) 'ufo_radiancerttov_simobs: ObsDiagnostic is unsupported but allocating anyway, ', &
                              trim(hofxdiags%variables(jvar)), shape(hofxdiags%geovals(jvar)%vals)
-            call fckit_log%info(message)
+            call oops_log%trace(message)
           end if
 
         end select
@@ -2718,7 +2719,7 @@ contains
                   hofxdiags%geovals(jvar)%vals(:,prof) = zero
                   if (conf % debug) then
                     message = 'ufo_radiancerttov_simobs: Cloud Ice Water only supported for RTTOV-SCATT'
-                    call fckit_log%info(message)
+                    call oops_log%trace(message)
                   end if
                 end if
               end if
@@ -2774,13 +2775,13 @@ contains
         case default
           if (conf % debug) then
             message = 'ufo_radiancerttov_simobs: Jacobian ObsDiagnostic is unsupported, ' // trim(hofxdiags%variables(jvar))
-            call fckit_log%info(message)
+            call oops_log%trace(message)
           end if  
         end select
       else
         if (conf % debug) then
           message = 'ufo_radiancerttov_simobs: ObsDiagnostic is not recognised, ' // trim(hofxdiags%variables(jvar))
-          call fckit_log%info(message)
+          call oops_log%trace(message)
         end if
       end if
 
