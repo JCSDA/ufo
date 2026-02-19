@@ -19,7 +19,7 @@ use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod   
 use missing_values_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 use gnssro_mod_conf
 
 implicit none
@@ -64,8 +64,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs: begin"
+  call oops_log%trace(err_msg)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -104,8 +104,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: complete"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs: complete"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs
 ! ------------------------------------------------------------------------------

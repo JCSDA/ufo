@@ -19,7 +19,7 @@ use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
-use fckit_log_module, only : fckit_log
+use logger_mod, only: oops_log
 
 integer, parameter         :: max_string=800
 
@@ -60,8 +60,8 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   type(ufo_geoval), pointer   :: t, q, prs, gph, gph_sfc
   integer                     :: iobs
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_tlad_settraj: begin"
-  call fckit_log%debug(err_msg) 
+  write(err_msg,*) "ufo_gnssro_bndropp1d_tlad_settraj: begin"
+  call oops_log%trace(err_msg)
 
 ! get model state variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
@@ -116,8 +116,8 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
 ! hack - set local geopotential height to zero for ropp routines
 
   use_compress = self%roconf%use_compress
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: begin"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs_tl: begin"
+  call oops_log%trace(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -162,8 +162,8 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_tl: complete"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs_tl: complete"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs_tl
  
@@ -187,8 +187,8 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp1d_simobs_ad"
   character(max_string)           :: err_msg
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: begin"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs_ad: begin"
+  call oops_log%trace(err_msg)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
@@ -235,8 +235,8 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   deallocate(obsGeoid)
   deallocate(gph_d_zero)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs_ad: complete"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs_ad: complete"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs_ad
     

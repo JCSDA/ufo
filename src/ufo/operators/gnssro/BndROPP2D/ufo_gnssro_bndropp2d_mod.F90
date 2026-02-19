@@ -21,7 +21,7 @@ use ufo_gnssro_ropp2d_utils_mod
 use ufo_gnssro_ropp1d_utils_mod
 
 use gnssro_mod_conf
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 
 implicit none
 public             :: ufo_gnssro_bndropp2d
@@ -96,8 +96,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   ro_type = self%roconf%ro_type
   use_compress = self%roconf%use_compress
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: begin"
+  call oops_log%trace(err_msg)
 
 #ifndef ropp_aro
 ! airborne ro_type can only be used with the ROPP ropp_fm_bangle_2d_aro routine.
@@ -137,7 +137,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
     write(err_msg,'(a)') '  ufo_gnssro_bndropp2d_simobs:'//new_line('a')//                         &
                          '  Model vertical height profile is in descending order,'//new_line('a')// &
                          '  but ROPP requires it to be ascending order, need flip'
-    call fckit_log%debug(err_msg)
+    call oops_log%debug(err_msg)
   end if
 
 ! set obs space struture
@@ -175,8 +175,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   ob_time = 0.0
   allocate(ichk(nvprof))
   ichk(:) = 0
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nlocs =  ", nlocs
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: begin observation loop, nlocs =  ", nlocs
+  call oops_log%trace(err_msg)
 
 ! loop through the obs
   obs_loop: do iobs = 1, nlocs
@@ -271,8 +271,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(y2%refrac)
   deallocate(y2%geop)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: complete"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: complete"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp2d_simobs
 ! ------------------------------------------------------------------------------

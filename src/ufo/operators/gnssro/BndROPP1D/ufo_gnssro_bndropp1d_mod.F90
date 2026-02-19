@@ -18,7 +18,7 @@ use vert_interp_mod
 use obsspace_mod  
 use missing_values_mod
 use ufo_gnssro_ropp1d_utils_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 use gnssro_mod_conf
 
 implicit none
@@ -76,8 +76,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
 
   use_compress = self%roconf%use_compress
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs: begin"
+  call oops_log%trace(err_msg)
 
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -104,7 +104,7 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
        write(err_msg,'(a)') '  ufo_gnssro_bndropp1d_simobs:'//new_line('a')//                         &
                             '  Model vertical height profile is in descending order,'//new_line('a')// &
                             '  but ROPP requires it to be ascending order, need flip'
-       call fckit_log%debug(err_msg)
+       call oops_log%debug(err_msg)
      end if
 
    ! set obs space struture
@@ -124,8 +124,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
      allocate(ichk(nvprof))
      ichk(:) = 0   ! this will hold QC values for observation from QC flags
 
-     write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: begin observation loop, nobs =  ", nobs
-     call fckit_log%debug(err_msg)
+     write(err_msg,*) "ufo_gnssro_bndropp1d_simobs: begin observation loop, nobs =  ", nobs
+     call oops_log%trace(err_msg)
 
      obs_loop: do iobs = 1, nobs 
 
@@ -172,8 +172,8 @@ subroutine ufo_gnssro_bndropp1d_simobs(self, geovals, hofx, obss)
      deallocate(obsGeoid)
   end if ! nobs > 0
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp1d_simobs: complete"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp1d_simobs: complete"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs
 ! ------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ use obsspace_mod
 use oops_variables_mod
 use obs_variables_mod
 use missing_values_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 use fckit_exception_module,  only : fckit_exception
 use vert_interp_mod
 use ufo_scatwind_neutralmetoffice_mod, only: &
@@ -208,8 +208,8 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_tl(self, geovals, obss, nvars, &
   real(kind_real)                    :: u10               ! eastward wind at 10m
   real(kind_real)                    :: v10               ! northward wind at 10m
 
-  write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs_tl: begin"
+  call oops_log%trace(err_msg)
 
   ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx(1,:))) then
@@ -235,14 +235,14 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_tl(self, geovals, obss, nvars, &
   end if
 
   write(message, *) myname_, ' Running TL of Met Office neutral wind operator'
-  call fckit_log%info(message)
+  call oops_log%trace(message)
 
   ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_u, u_d)                        ! Eastward wind
   call ufo_geovals_get_var(geovals, var_v, v_d)                        ! Northward wind
 
-  write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs_tl: begin observation loop, nobs =  ", nlocs
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs_tl: begin observation loop, nobs =  ", nlocs
+  call oops_log%trace(err_msg)
 
   obs_loop: do iobs = 1, nlocs
     ! Get u,v wind components at 10m using Tl of interpolate from geovals to observational location
@@ -272,8 +272,8 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_tl(self, geovals, obss, nvars, &
     end do chan_loop
   end if
 
-  write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs_tl: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs_tl: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_scatwind_neutralmetoffice_simobs_tl
 
@@ -313,8 +313,8 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_ad(self, geovals, obss, nvars, &
   real(kind_real)                    :: u10               ! eastward wind at 10m
   real(kind_real)                    :: v10               ! northward wind at 10m
 
-  write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs_ad: begin"
+  call oops_log%trace(err_msg)
 
   ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx(1,:))) then
@@ -340,14 +340,14 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_ad(self, geovals, obss, nvars, &
   end if
 
   write(message, *) myname_, ' Running adjoint of Met Office neutral wind operator'
-  call fckit_log%info(message)
+  call oops_log%trace(message)
 
   ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_u, u_d)                        ! Eastward wind
   call ufo_geovals_get_var(geovals, var_v, v_d)                        ! Northward wind
 
-  write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs_ad: begin observation loop, nobs =  ", nlocs
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs_ad: begin observation loop, nobs =  ", nlocs
+  call oops_log%trace(err_msg)
 
   obs_loop: do iobs = 1, nlocs
     if (self%CDR10(iobs) /= missing_value(self%CDR10(iobs)) .and. self%CDR10(iobs) > 0.0) then
@@ -372,8 +372,8 @@ subroutine ufo_scatwind_neutralmetoffice_simobs_ad(self, geovals, obss, nvars, &
 
   end do obs_loop
 
-  write(err_msg,*) "TRACE: ufo_scatwind_neutralmetoffice_simobs_tl: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs_tl: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_scatwind_neutralmetoffice_simobs_ad
 

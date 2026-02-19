@@ -18,7 +18,7 @@ use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod   
 use missing_values_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 
 implicit none
 public             :: ufo_gnssgb_refropp1d
@@ -51,8 +51,8 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: t, q, prs, gph, gph_sfc
   real(kind_real), allocatable       :: obsLat(:), obsLon(:)
 
-  write(err_msg,*) "TRACE: ufo_gnssgb_refropp1d_simobs_stub: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssgb_refropp1d_simobs_stub: begin"
+  call oops_log%trace(err_msg)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -85,8 +85,8 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
   deallocate(obsLat) 
   deallocate(obsLon)
 
-  write(err_msg,*) "TRACE: ufo_gnssgb_refropp1d_simobs_stub: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssgb_refropp1d_simobs_stub: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssgb_refropp1d_simobs
 ! ------------------------------------------------------------------------------

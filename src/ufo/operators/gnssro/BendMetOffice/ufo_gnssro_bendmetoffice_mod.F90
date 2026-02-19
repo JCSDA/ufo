@@ -18,7 +18,7 @@ use obsspace_mod
 use missing_values_mod
 use ufo_gnssro_ukmo1d_utils_mod
 use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 use fckit_exception_module, only: fckit_exception
 
 implicit none
@@ -74,24 +74,24 @@ self % dryRefractivityConstant = dryRefractivityConstant
 self % wetRefractivityConstant = wetRefractivityConstant
 
 write(message, *) myname_, ' Setting up Met Office GNSS-RO forward operator with'
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, *) 'vert_interp_ops =', self % vert_interp_ops
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, *) 'pseudo_ops =', self % pseudo_ops
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, *) 'min_temp_grad =', self % min_temp_grad
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, *) 'no super check =', self % noSuperCheck
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, *) 'dryRefractivityConstant =', self % dryRefractivityConstant
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, *) 'wetRefractivityConstant =', self % wetRefractivityConstant
-call fckit_log%info(message)
+call oops_log%info(message)
 write(message, '(A)') 'chanList = '
-call fckit_log % debug(message)
+call oops_log % debug(message)
 do i = 1, SIZE(chanList), 100
   write(message, '(100I5)') chanList(i:min(i+99, size(chanList)))
-  call fckit_log % debug(message)
+  call oops_log % debug(message)
 end do
 
 end subroutine ufo_gnssro_bendmetoffice_setup
@@ -138,8 +138,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   real(kind_real)              :: calculated_hofx(nlevels)      ! Array to receive the calculated h(x) on levels
   real(kind_real), allocatable :: tobs(:)                       ! Virtual temperature at observation locations
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs: begin"
+  call oops_log%trace(err_msg)
 
   ! If output to refractivity (and heights of the refractivity levels) is needed,
   ! then use nval as a way to check whether the array has been initialised (since
@@ -148,9 +148,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
     IF (obs_diags % variables(ivar) == "atmosphericRefractivity_model" .OR. &
         obs_diags % variables(ivar) == "geopotentialHeight_model" .OR. &
         obs_diags % variables(ivar) == "virtualTemperature") THEN
-      write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: initialising obs_diags for " // &
+      write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs: initialising obs_diags for " // &
         obs_diags % variables(ivar)
-      call fckit_log%info(err_msg)
+      call oops_log%trace(err_msg)
       obs_diags % geovals(iVar) % nval = 0
     END IF
   END DO
@@ -168,9 +168,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
   write(message, '(A,10I6)') 'Q: ', q%nval, q%nprofiles, shape(q%vals)
-  call fckit_log%info(message)
+  call oops_log%info(message)
   write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nprofiles, shape(prs%vals)
-  call fckit_log%info(message)
+  call oops_log%info(message)
 
   nlocs_check = obsspace_get_nlocs(obss)
   ! nchans is used to define the number of vertical levels available in the data
@@ -237,7 +237,7 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
 
     if (BAErr) then
       write(err_msg,*) "Error with observation processing ", iloc
-      call fckit_log % info(err_msg)
+      call oops_log % info(err_msg)
     end if
 
     ! If output to refractivity is needed, then initialise things
@@ -293,8 +293,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   deallocate(radius_curv)
   deallocate(undulation)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bendmetoffice_simobs
 ! ------------------------------------------------------------------------------
@@ -366,7 +366,7 @@ integer                      :: iobs              ! Loop variable, observation n
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
     write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
-    call fckit_log % warning(err_msg)
+    call oops_log % warning(err_msg)
     write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
     call abor1_ftn(err_msg)
 END IF

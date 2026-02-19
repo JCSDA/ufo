@@ -17,7 +17,7 @@ use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
-use fckit_log_module, only : fckit_log
+use logger_mod, only : oops_log
 use ufo_utils_refractivity_calculator, only: &
     ufo_refractivity_partial_derivatives
 use ufo_constants_mod, only: &
@@ -129,8 +129,8 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable       :: obs_height(:)          ! Geopotential height of the observation
   real(kind_real), allocatable       :: obsLat(:)              ! Observed latitude - used in geopotential height calculation
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_tlad_settraj: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_tlad_settraj: begin"
+  call oops_log%trace(err_msg)
 
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
@@ -227,8 +227,8 @@ subroutine ufo_gnssro_refmetoffice_simobs_tl(self, geovals, hofx, obss)
   type(ufo_geoval), pointer    :: prs_d     ! Increment to the air pressure
   real(kind_real), allocatable :: x_d(:)    ! Increment to the complete state
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_simobs_tl: begin"
+  call oops_log%trace(err_msg)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
@@ -260,8 +260,8 @@ subroutine ufo_gnssro_refmetoffice_simobs_tl(self, geovals, hofx, obss)
 
   deallocate(x_d)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs_tl: complete"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_simobs_tl: complete"
+  call oops_log%trace(err_msg)
 
   return
     
@@ -304,8 +304,8 @@ subroutine ufo_gnssro_refmetoffice_simobs_ad(self, geovals, hofx, obss)
   real(kind_real), allocatable :: x_d(:)   ! Perturbation to the full model state
   character(max_string)        :: err_msg  ! Message to be output
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_simobs_ad: begin"
+  call oops_log%trace(err_msg)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
@@ -339,8 +339,8 @@ subroutine ufo_gnssro_refmetoffice_simobs_ad(self, geovals, hofx, obss)
 
   deallocate(x_d)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs_ad: complete"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_simobs_ad: complete"
+  call oops_log%trace(err_msg)
 
   return
 

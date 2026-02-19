@@ -265,8 +265,8 @@ subroutine ufo_refractivityonedvarcheck_apply(self, geovals, apply)
   real(kind_real), allocatable       :: final_cost(:)         ! Final cost-function value
   real(kind_real), allocatable       :: dfs_list(:)           ! Degrees of freedom for signal
 
-  write(Message,*) "TRACE: ufo_refractivityonedvarcheck_refractivityonedvarcheck_apply: begin"
-  call oops_log % debug(Message)
+  write(Message,*) "ufo_refractivityonedvarcheck_refractivityonedvarcheck_apply: begin"
+  call oops_log % trace(Message)
 
   ! Get the obs-space information
   nobs = obsspace_get_nlocs(self % obsdb)
@@ -474,8 +474,8 @@ subroutine ufo_refractivityonedvarcheck_apply(self, geovals, apply)
   call obsspace_put_db(self % obsdb, "OneDVarDiags", "finalCost", final_cost)
   call obsspace_put_db(self % obsdb, "OneDVarDiags", "DFS", dfs_list)
 
-  write(Message,*) "TRACE: ufo_refractivityonedvarcheck_refractivityonedvarcheck_apply: begin"
-  call oops_log % debug(Message)
+  write(Message,*) "ufo_refractivityonedvarcheck_refractivityonedvarcheck_apply: complete"
+  call oops_log % trace(Message)
 
 end subroutine ufo_refractivityonedvarcheck_apply
 

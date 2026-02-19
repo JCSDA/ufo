@@ -19,7 +19,7 @@ use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod  
 use missing_values_mod
 use ufo_gnssgb_ropp1d_utils_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 
 implicit none
 public             :: ufo_gnssgb_refropp1d
@@ -64,8 +64,8 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
   real(kind_real)                    :: station_phi, model_ztd
   integer                            :: iflip 
   logical                            :: l_linear
-  write(err_msg,*) "TRACE: ufo_gnssgb_refropp1d_simobs: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssgb_refropp1d_simobs: begin"
+  call oops_log%trace(err_msg)
 
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
@@ -92,7 +92,7 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
        write(err_msg,'(a)') '  ufo_gnssgb_refropp1d_simobs:'//new_line('a')//                         &
                             '  Model vertical height profile is in descending order,'//new_line('a')// &
                             '  but ROPP requires it to be ascending order, need flip'
-       call fckit_log%info(err_msg)
+       call oops_log%info(err_msg)
      end if
 
    ! set obs space struture
@@ -114,8 +114,8 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
      allocate(ichk(nlev))
      ichk(:) = 0   ! this will hold QC values for observation from QC flags
 
-     write(err_msg,*) "TRACE: ufo_gnssgb_refropp1d_simobs: begin observation loop, nobs =  ", nobs
-     call fckit_log%info(err_msg)   ! always print
+     write(err_msg,*) "ufo_gnssgb_refropp1d_simobs: begin observation loop, nobs =  ", nobs
+     call oops_log%trace(err_msg)
 
      obs_loop: do iobs = 1, nobs 
 
@@ -152,9 +152,9 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
 
        ! matching a print format used in initialization of obvec
        write(err_msg,'(a9,2a11,2a15)') 'ROPPsim: ', 'ob', 'bk', 'station_hgt',  'model_terr'
-       call fckit_log%debug(err_msg)   ! print when MAIN_DEBUG=1
+       call oops_log%debug(err_msg)   ! print when MAIN_DEBUG=1
        write(err_msg,'(9x,2f11.3,2f15.3)') obsValue(iobs), model_ztd, obsHeight(iobs), model_z(1)
-       call fckit_log%debug(err_msg)   ! print when MAIN_DEBUG=1
+       call oops_log%debug(err_msg)   ! print when MAIN_DEBUG=1
 
        hofx(iobs) = model_ztd
 
@@ -170,8 +170,8 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
      deallocate(obsValue)
   end if ! nobs > 0
 
-  write(err_msg,*) "TRACE: ufo_gnssgb_refropp1d_simobs: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssgb_refropp1d_simobs: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssgb_refropp1d_simobs
 ! ------------------------------------------------------------------------------

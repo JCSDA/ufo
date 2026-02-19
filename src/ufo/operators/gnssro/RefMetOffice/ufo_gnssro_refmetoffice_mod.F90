@@ -17,7 +17,7 @@ use vert_interp_mod
 use obsspace_mod  
 use missing_values_mod
 use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     rd_over_rv,              &    ! Ratio of molecular weights of water and dry air
@@ -117,8 +117,8 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   real(kind_real), allocatable       :: refractivity(:)       ! Refractivity on various model levels
   real(kind_real), allocatable       :: model_heights(:)      ! Geopotential heights that refractivity is calculated on
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_simobs: begin"
+  call oops_log%trace(err_msg)
 
   ! If output to refractivity (and heights of the refractivity levels) is needed,
   ! then use nval as a way to check whether the array has been initialised (since
@@ -126,9 +126,9 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   DO iVar = 1, obs_diags % nvar
     IF (obs_diags % variables(ivar) == "atmosphericRefractivity" .OR. &
         obs_diags % variables(ivar) == "geopotentialHeight") THEN
-      write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: initialising obs_diags for " // &
+      write(err_msg,*) "ufo_gnssro_refmetoffice_simobs: initialising obs_diags for " // &
         obs_diags % variables(ivar)
-      call fckit_log%info(err_msg)
+      call oops_log%trace(err_msg)
       obs_diags % geovals(iVar) % nval = 0
     END IF
   END DO
@@ -140,10 +140,10 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   endif
 
   write(message, *) myname_, ' Running Met Office GNSS-RO forward operator with:'
-  call fckit_log%info(message)
+  call oops_log%info(message)
   write(message, *) 'vert_interp_ops =', self % vert_interp_ops, &
     'pseudo_ops =', self % pseudo_ops, 'min_temp_grad =', self % min_temp_grad
-  call fckit_log%info(message)
+  call oops_log%info(message)
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
@@ -152,9 +152,9 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
   write(message, '(A,10I6)') 'Q: ', q%nval, q%nprofiles, shape(q%vals)
-  call fckit_log%info(message)
+  call oops_log%info(message)
   write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nprofiles, shape(prs%vals)
-  call fckit_log%info(message)
+  call oops_log%info(message)
 
   nobs  = obsspace_get_nlocs(obss)
 
@@ -196,7 +196,7 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
     if (BAErr) then
       write(err_msg,*) "Error with observation processing ", iobs
-      call fckit_log % info(err_msg)
+      call oops_log % info(err_msg)
     end if
 
     ! If required, then save the refractivity and model heights to the obs diagnostics.
@@ -238,8 +238,8 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   deallocate(obsLon)
   deallocate(obs_height)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_refmetoffice_simobs: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_refmetoffice_simobs: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_refmetoffice_simobs
 
@@ -321,7 +321,7 @@ REAL(kind_real)              :: obs_height_diff   ! Height difference between ob
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
     write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
-    call fckit_log % warning(err_msg)
+    call oops_log % warning(err_msg)
     write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
     call abor1_ftn(err_msg)
 END IF

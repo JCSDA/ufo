@@ -18,7 +18,7 @@ use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
-use fckit_log_module, only : fckit_log
+use logger_mod, only: oops_log
 use ufo_gnssro_bendmetoffice_tlad_utils_mod, only: &
     Ops_GPSROcalc_alphaK, Ops_GPSROcalc_nrK
 use ufo_gnssro_ukmo1d_utils_mod, only: Ops_GPSROcalc_nr
@@ -140,8 +140,8 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable       :: obsLocR(:)             ! Earth's radius of curvature at the observation tangent point
   real(kind_real), allocatable       :: obsGeoid(:)            ! Undulation - height of the geoid above the ellipsoid
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_tlad_settraj: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_tlad_settraj: begin"
+  call oops_log%trace(err_msg)
 
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
@@ -258,8 +258,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
   type(ufo_geoval), pointer    :: prs_d     ! Increment to the air pressure
   real(kind_real), allocatable :: x_d(:)    ! Increment to the complete state
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs_tl: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs_tl: begin"
+  call oops_log%trace(err_msg)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
@@ -291,8 +291,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
 
   deallocate(x_d)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs_tl: complete"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs_tl: complete"
+  call oops_log%trace(err_msg)
 
   return
     
@@ -335,8 +335,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
   real(kind_real), allocatable :: x_d(:)   ! Perturbation to the full model state
   character(max_string)        :: err_msg  ! Message to be output
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs_ad: begin"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs_ad: begin"
+  call oops_log%trace(err_msg)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
@@ -370,8 +370,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
 
   deallocate(x_d)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bendmetoffice_simobs_ad: complete"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_gnssro_bendmetoffice_simobs_ad: complete"
+  call oops_log%trace(err_msg)
 
   return
 
@@ -524,7 +524,7 @@ IF (.NOT. BAErr) THEN
 ELSE
     K = 0
     write(err_msg,*) "Error in refractivity calculation"
-    CALL fckit_log % warning(err_msg)
+    CALL oops_log % warning(err_msg)
 END IF
 
 DEALLOCATE(nr)

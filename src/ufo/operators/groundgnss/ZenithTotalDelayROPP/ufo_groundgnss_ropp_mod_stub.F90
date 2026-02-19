@@ -16,7 +16,7 @@ use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_basis_mod,     only: ufo_basis
 use obsspace_mod   
 use missing_values_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 
 implicit none
 public             :: ufo_groundgnss_ropp
@@ -57,8 +57,8 @@ subroutine ufo_groundgnss_ropp_simobs(self, geovals, hofx, obss)
 ! initialize HofX to missing
   hofx(:) = missingDouble
 
-  write(err_msg,*) "TRACE: ufo_groundgnss_ropp_simobs_stub: completed"
-  call fckit_log%info(err_msg)
+  write(err_msg,*) "ufo_groundgnss_ropp_simobs_stub: completed"
+  call oops_log%trace(err_msg)
 
 end subroutine ufo_groundgnss_ropp_simobs
 ! ------------------------------------------------------------------------------

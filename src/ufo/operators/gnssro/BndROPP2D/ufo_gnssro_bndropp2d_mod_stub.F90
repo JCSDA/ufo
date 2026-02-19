@@ -19,7 +19,7 @@ use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
 use obsspace_mod
 use gnssro_mod_conf
 use missing_values_mod
-use fckit_log_module,  only : fckit_log
+use logger_mod, only: oops_log
 
 implicit none
 public             :: ufo_gnssro_bndropp2d
@@ -69,8 +69,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   integer                         :: n_horiz
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: begin"
+  call oops_log%trace(err_msg)
 
   n_horiz = self%roconf%n_horiz
 
@@ -106,8 +106,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid)
 
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: begin observation loop, nobs =  ", nobs
+  call oops_log%trace(err_msg)
 
   deallocate(obsLat)
   deallocate(obsLon)
@@ -115,8 +115,8 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
   deallocate(obsLocR)
   deallocate(obsGeoid)
 
-  write(err_msg,*) "TRACE: ufo_gnssro_bndropp2d_simobs: complete"
-  call fckit_log%debug(err_msg)
+  write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: complete"
+  call oops_log%trace(err_msg)
      
 end subroutine ufo_gnssro_bndropp2d_simobs
 ! ------------------------------------------------------------------------------
