@@ -208,7 +208,6 @@ jobs:
             --env REPO="${REPO}" \
             --env REPO_TEST_DATA='ufo-data' \
             --workdir="${WORKDIR}" \
-            --entrypoint="${WORKDIR}/build-and-test.sh" \
             'ngmssboxjediacr.azurecr.io/jedibase:alma9'
 
       - name: Cleanup workspace
