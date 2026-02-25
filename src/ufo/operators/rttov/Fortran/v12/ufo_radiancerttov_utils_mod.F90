@@ -1342,7 +1342,7 @@ contains
     end if
 
     ! Setup cloud values
-    ! presuure at the top of cloud - ctp
+    ! pressure at the top of cloud - ctp
     ! pressureAtTopOfCloud is stored in the ObsSpace in Pa conversion needed as
     ! rttov needs hPa.
     if (ctpIndexFromObsSpace > 0) then
@@ -1352,6 +1352,11 @@ contains
     else
       profiles(1:nprofiles) % ctp = 850.0_kind_real
     end if
+
+    ! Ensure cloud top pressure is no greater than the surface pressure
+    where (profiles(:) % ctp > profiles(:) % s2m % p)
+      profiles(:) % ctp = profiles(:) % s2m % p
+    end where
 
     ! cloudAmount - eca
     if (ecaIndexFromObsSpace > 0) then
