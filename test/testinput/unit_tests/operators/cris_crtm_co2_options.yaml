@@ -10,7 +10,6 @@ observations:
     SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
-      CO2AbsorberMethod: Background
       Surfaces: [Water_Temperature, Land_Temperature, Ice_Temperature, Snow_Temperature]
     obs options:
       Sensor_ID: cris-fsr_npp
@@ -46,7 +45,6 @@ observations:
     SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
-      CO2AbsorberMethod: MaunaLoa
       Surfaces: [Water_Temperature, Land_Temperature, Ice_Temperature, Snow_Temperature]
     obs options:
       Sensor_ID: cris-fsr_npp
@@ -80,8 +78,6 @@ observations:
     SurfaceWindGeoVars: uv
     linear obs operator:
       Absorbers: [H2O,O3,CO2]
-      CO2AbsorberMethod: EternalConstant
-      CO2ppmvValue: 380
       Surfaces: [Water_Temperature, Land_Temperature, Ice_Temperature, Snow_Temperature]
     obs options:
       Sensor_ID: cris-fsr_npp

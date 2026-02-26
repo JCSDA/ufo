@@ -40,12 +40,3 @@ observations:
     filename: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_geoval_2009113003.nc4
   vector ref: GsiHofX
   tolerance: 2.e-1
-obs prior filters:  
-- filter: Average Observations To GeoVals Model Levels
-  filter variables:
-  - name: ObsValue/ReflectivityAttenuated
-    channels: 1
-  observation vertical coordinate: MetaData/height
-  model vertical coordinate: GeoVaLs/height_above_mean_sea_level
-
-
