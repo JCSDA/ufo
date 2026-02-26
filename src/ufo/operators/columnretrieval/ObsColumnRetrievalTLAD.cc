@@ -52,8 +52,8 @@ void ObsColumnRetrievalTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnosti
 
 // -----------------------------------------------------------------------------
 
-void ObsColumnRetrievalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                           const QCFlags_t & qc_flags) const {
+void ObsColumnRetrievalTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                           ioda::ObsVector & ovec) const {
   ufo_columnretrieval_simobs_tl_f90(keyOperColumnRetrieval_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsColumnRetrievalTLAD::simulateObsTL done" << std::endl;
@@ -61,8 +61,8 @@ void ObsColumnRetrievalTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVec
 
 // -----------------------------------------------------------------------------
 
-void ObsColumnRetrievalTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                           const QCFlags_t & qc_flags) const {
+void ObsColumnRetrievalTLAD::simulateObsAD(GeoVaLs & geovals,
+                                           const ioda::ObsVector & ovec) const {
   ufo_columnretrieval_simobs_ad_f90(keyOperColumnRetrieval_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsColumnRetrievalTLAD::simulateObsAD done" << std::endl;

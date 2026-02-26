@@ -75,8 +75,7 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
 
 // -----------------------------------------------------------------------------
 
-void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                    const QCFlags_t & qc_flags) const {
+void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsTimeOperTLAD::simulateObsTL start" << std::endl;
 
   // oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
@@ -92,21 +91,20 @@ void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
   // oops::Log::debug() << "ObsTimeOperTLAD::simulateObsTL final geovals gv1 "
   //                    << gv1 << std::endl;
 
-  actualoperator_->simulateObsTL(gv1, ovec, qc_flags);
+  actualoperator_->simulateObsTL(gv1, ovec);
 
   oops::Log::trace() << "ObsTimeOperTLAD::simulateObsTL done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsTimeOperTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                    const QCFlags_t & qc_flags) const {
+void ObsTimeOperTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsTimeOperTLAD::simulateObsAD start" << std::endl;
 
   // oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD input geovals "
   //                    << geovals << std::endl;
 
-  actualoperator_->simulateObsAD(geovals, ovec, qc_flags);
+  actualoperator_->simulateObsAD(geovals, ovec);
 
   GeoVaLs gv2(geovals);
 

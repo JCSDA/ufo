@@ -45,18 +45,16 @@ void ReflectivityAlgorithmBase::setTrajectory(const GeoVaLs & gv,
 }
 
 void ReflectivityAlgorithmBase::simulateObsTL(const GeoVaLs & dx,
-                                              ioda::ObsVector & dy,
-                                              const QCFlags_t & flag) const {
+                                              ioda::ObsVector & dy) const {
   oops::Log::trace() << "ReflectivityAlgorithmBase::simulateObsTL start" << std::endl;
-  this->simulateObsTLImpl(dx, dy, flag);
+  this->simulateObsTLImpl(dx, dy);
   oops::Log::trace() << "ReflectivityAlgorithmBase::simulateObsTL done" << std::endl;
 }
 
 void ReflectivityAlgorithmBase::simulateObsAD(GeoVaLs & dx,
-                                              const ioda::ObsVector & dy,
-                                              const QCFlags_t & flag) const {
+                                              const ioda::ObsVector & dy) const {
   oops::Log::trace() << "ReflectivityAlgorithmBase::simulateObsAD start" << std::endl;
-  this->simulateObsADImpl(dx, dy, flag);
+  this->simulateObsADImpl(dx, dy);
   oops::Log::trace() << "ReflectivityAlgorithmBase::simulateObsAD done" << std::endl;
 }
 

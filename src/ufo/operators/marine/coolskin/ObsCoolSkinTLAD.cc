@@ -54,8 +54,7 @@ void ObsCoolSkinTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
- const QCFlags_t& qc_flags) const {
+void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_CoolSkin_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                              ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD::simulateObsTL done" << std::endl;
@@ -63,8 +62,7 @@ void ObsCoolSkinTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 
 // -----------------------------------------------------------------------------
 
-void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                    const QCFlags_t & qc_flags) const {
+void ObsCoolSkinTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_CoolSkin_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                              ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsCoolSkinTLAD::simulateObsAD done" << std::endl;

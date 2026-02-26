@@ -61,8 +61,7 @@ void ObsADTTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
 // -----------------------------------------------------------------------------
 
-void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                               const QCFlags_t & qc_flags) const {
+void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsADTTLAD::simulateObsTL start" << std::endl;
 
   const double missing = util::missingValue<double>();
@@ -99,8 +98,7 @@ void ObsADTTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
 
 // -----------------------------------------------------------------------------
 
-void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                               const QCFlags_t & qc_flags) const {
+void ObsADTTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsADTTLAD::simulateObsAD start" << std::endl;
 
   const double missing = util::missingValue<double>();

@@ -65,12 +65,12 @@ void ObsDensityReductionTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnost
 
 // -----------------------------------------------------------------------------
 
-void ObsDensityReductionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                     const QCFlags_t & qc_flags) const {
+void ObsDensityReductionTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                            ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsDensityReductionTLAD::simulateObsTL start" << std::endl;
 
   ScopedDefaultGeoVaLFormatChange change(geovals, GeoVaLFormat::REDUCED);
-  operator_->simulateObsTL(geovals, ovec, qc_flags);
+  operator_->simulateObsTL(geovals, ovec);
   ScopedDefaultGeoVaLFormatChange changeback(geovals, GeoVaLFormat::SAMPLED);
 
   oops::Log::trace() << "ObsDensityReductionTLAD::simulateObsTL done " <<  std::endl;
@@ -78,12 +78,12 @@ void ObsDensityReductionTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVe
 
 // -----------------------------------------------------------------------------
 
-void ObsDensityReductionTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                     const QCFlags_t & qc_flags) const {
+void ObsDensityReductionTLAD::simulateObsAD(GeoVaLs & geovals,
+                                            const ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsDensityReductionTLAD::simulateObsAD start" << std::endl;
 
   ScopedDefaultGeoVaLFormatChange change(geovals, GeoVaLFormat::REDUCED);
-  operator_->simulateObsAD(geovals, ovec, qc_flags);
+  operator_->simulateObsAD(geovals, ovec);
   ScopedDefaultGeoVaLFormatChange changeback(geovals, GeoVaLFormat::SAMPLED);
 
   oops::Log::trace() << "ObsDensityReductionTLAD::simulateObsAD done" <<  std::endl;

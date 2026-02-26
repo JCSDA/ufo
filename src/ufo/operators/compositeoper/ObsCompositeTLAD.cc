@@ -62,24 +62,22 @@ void ObsCompositeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & y
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                     const QCFlags_t & qc_flags) const {
+void ObsCompositeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsCompositeTLAD::simulateObsTL start" << std::endl;
 
   for (const std::unique_ptr<LinearObsOperatorBase> &component : components_) {
-    component->simulateObsTL(geovals, ovec, qc_flags);
+    component->simulateObsTL(geovals, ovec);
   }
   oops::Log::trace() << "ObsCompositeTLAD::simulateObsTL done" <<  std::endl;
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsCompositeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                     const QCFlags_t & qc_flags) const {
+void ObsCompositeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsCompositeTLAD::simulateObsAD start" << std::endl;
 
   for (const std::unique_ptr<LinearObsOperatorBase> &component : components_) {
-    component->simulateObsAD(geovals, ovec, qc_flags);
+    component->simulateObsAD(geovals, ovec);
   }
   oops::Log::trace() << "ObsCompositeTLAD::simulateObsAD done" <<  std::endl;
 }

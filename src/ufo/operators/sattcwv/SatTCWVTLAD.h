@@ -68,7 +68,7 @@ class SatTCWVTLAD : public LinearObsOperatorBase,
   * \date Sept. 2021: Created by J. Hocking (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
 
   // -----------------------------------------------------------------------------
   /*! \brief Given an increment to the observation, calculate the equivalent
@@ -80,7 +80,7 @@ class SatTCWVTLAD : public LinearObsOperatorBase,
   * \date Sept. 2021: Created by J. Hocking (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
 
 

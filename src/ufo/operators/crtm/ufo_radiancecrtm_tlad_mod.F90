@@ -653,7 +653,7 @@ end subroutine ufo_radiancecrtm_tlad_settraj
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, nvars, nlocs, hofx, qcf_p)
+subroutine ufo_radiancecrtm_simobs_tl(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(in)    :: self
@@ -661,7 +661,6 @@ type(ufo_geovals),        intent(in)    :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 integer,                  intent(in)    :: nvars, nlocs
 real(c_double),           intent(inout) :: hofx(nvars, nlocs)
-type(c_ptr), value,       intent(in)    :: qcf_p
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_tl"
 character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec
@@ -886,7 +885,7 @@ end subroutine ufo_radiancecrtm_simobs_tl
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, nvars, nlocs, hofx, qcf_p)
+subroutine ufo_radiancecrtm_simobs_ad(self, geovals, obss, nvars, nlocs, hofx)
 
 implicit none
 class(ufo_radiancecrtm_tlad), intent(in)    :: self
@@ -894,7 +893,6 @@ type(ufo_geovals),        intent(inout) :: geovals
 type(c_ptr), value,       intent(in)    :: obss
 integer,                  intent(in)    :: nvars, nlocs
 real(c_double),           intent(in)    :: hofx(nvars, nlocs)
-type(c_ptr), value,       intent(in)    :: qcf_p
 character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_ad"
 character(max_string) :: err_msg
 integer :: jprofile, jchannel, jlevel, jspec, ispec

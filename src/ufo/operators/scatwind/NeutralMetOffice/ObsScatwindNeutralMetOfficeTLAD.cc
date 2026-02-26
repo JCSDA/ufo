@@ -66,8 +66,7 @@ void ObsScatwindNeutralMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, Obs
 // -----------------------------------------------------------------------------
 
 void ObsScatwindNeutralMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals,
-                                                    ioda::ObsVector & ovec,
-                                                    const QCFlags_t & qc_flags) const {
+                                                    ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsScatwindNeutralMetOfficeTLAD::simulateObsTL start" << std::endl;
 
   ufo_scatwind_neutralmetoffice_simobs_tl_f90(keyOperScatwindNeutralMetOffice_,
@@ -80,8 +79,7 @@ void ObsScatwindNeutralMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsScatwindNeutralMetOfficeTLAD::simulateObsAD(GeoVaLs & geovals,
-                                                    const ioda::ObsVector & ovec,
-                                                    const QCFlags_t & qc_flags) const {
+                                                    const ioda::ObsVector & ovec) const {
   oops::Log::trace() << "ObsScatwindNeutralMetOfficeTLAD::simulateObsAD start" << std::endl;
 
   ufo_scatwind_neutralmetoffice_simobs_ad_f90(keyOperScatwindNeutralMetOffice_,

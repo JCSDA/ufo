@@ -69,7 +69,7 @@ class ObsAodMetOfficeTLAD : public LinearObsOperatorBase,
   * \date Oct. 2021: Created by H. Lawrence (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
 
   // -----------------------------------------------------------------------------
   /*! \brief Given an increment to the observation (AOD), calculate the equivalent
@@ -78,7 +78,7 @@ class ObsAodMetOfficeTLAD : public LinearObsOperatorBase,
   * \date Oct. 2021: Created by H. Lawrence (Met Office)
   */
   // -----------------------------------------------------------------------------
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
 
   // Other

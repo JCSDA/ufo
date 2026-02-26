@@ -86,10 +86,10 @@ class ReflectivityAlgorithmBase {
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &);
 
   /// Public interface to the `simulateObsTLImpl` method.
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const;
 
   /// Public interface to the `simulateObsADImpl` method.
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const;
 
   /// Public interface to the `printImpl` method.
   void print(std::ostream & os) const;
@@ -111,14 +111,12 @@ class ReflectivityAlgorithmBase {
   /// TL operator.
   /// Abstract function to be overwritten in subclasses.
   virtual void simulateObsTLImpl(const GeoVaLs &,
-                                 ioda::ObsVector &,
-                                 const QCFlags_t &) const = 0;
+                                 ioda::ObsVector &) const = 0;
 
   /// AD operator.
   /// Abstract function to be overwritten in subclasses.
   virtual void simulateObsADImpl(GeoVaLs &,
-                                 const ioda::ObsVector &,
-                                 const QCFlags_t &) const = 0;
+                                 const ioda::ObsVector &) const = 0;
 
   /// Print operator information.
   virtual void printImpl(std::ostream & os) const {

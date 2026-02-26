@@ -65,8 +65,7 @@ void ObsAodCRTMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                   const QCFlags_t & qc_flags) const {
+void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_aodcrtm_simobs_tl_f90(keyOperAodCRTM_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAodCRTMTLAD::simulateObsTL done" <<  std::endl;
@@ -74,8 +73,7 @@ void ObsAodCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 // -----------------------------------------------------------------------------
 
-void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                   const QCFlags_t & qc_flags) const {
+void ObsAodCRTMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_aodcrtm_simobs_ad_f90(keyOperAodCRTM_, geovals.toFortran(), obsspace(),
                              ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAodCRTMTLAD::simulateObsAD done" <<  std::endl;

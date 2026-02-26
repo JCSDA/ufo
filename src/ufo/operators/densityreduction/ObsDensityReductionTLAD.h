@@ -47,8 +47,8 @@ class ObsDensityReductionTLAD : public LinearObsOperatorBase,
   ~ObsDensityReductionTLAD() override;
 
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) override;
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
   const oops::Variables & requiredVars() const override { return requiredVars_; }
 

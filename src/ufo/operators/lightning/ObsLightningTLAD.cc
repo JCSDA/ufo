@@ -53,8 +53,7 @@ void ObsLightningTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &, 
 
 // -----------------------------------------------------------------------------
 
-void ObsLightningTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                     const QCFlags_t & qc_flags) const {
+void ObsLightningTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_lightning_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsLightningTLAD::simulateObsTL done" << std::endl;
@@ -62,8 +61,7 @@ void ObsLightningTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & 
 
 // -----------------------------------------------------------------------------
 
-void ObsLightningTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                     const QCFlags_t & qc_flags) const {
+void ObsLightningTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_lightning_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                               ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsLightningTLAD::simulateObsAD done" << std::endl;

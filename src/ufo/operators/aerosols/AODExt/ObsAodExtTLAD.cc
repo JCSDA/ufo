@@ -53,8 +53,7 @@ void ObsAodExtTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
 // -----------------------------------------------------------------------------
 
-void ObsAodExtTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                  const QCFlags_t & qc_flags) const {
+void ObsAodExtTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_aodext_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAodExtTLAD::simulateObsTL done" << std::endl;
@@ -62,8 +61,7 @@ void ObsAodExtTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ove
 
 // -----------------------------------------------------------------------------
 
-void ObsAodExtTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                  const QCFlags_t & qc_flags) const {
+void ObsAodExtTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_aodext_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsAodExtTLAD::simulateObsAD done" << std::endl;

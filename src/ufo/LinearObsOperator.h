@@ -47,10 +47,8 @@ class LinearObsOperator : public util::Printable,
 
 /// Obs Operator
   void setTrajectory(const GeoVaLs &, const ObsBias &, const QCFlags_t &);
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &,
-                     const QCFlags_t &) const;
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &,
-                     const QCFlags_t &) const;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const ObsBiasIncrement &) const;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, ObsBiasIncrement &) const;
 
 /// Operator input required from Model
   const oops::Variables & requiredVars() const;

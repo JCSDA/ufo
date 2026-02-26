@@ -56,8 +56,7 @@ void ObsIdentityTLAD::setTrajectory(const GeoVaLs &, ObsDiagnostics &,
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
-                                    const QCFlags_t & qc_flags) const {
+void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsIdentityTLAD::simulateObsTL start" << std::endl;
   std::vector<double> vec(dy.nlocs());
   for (int jvar : operatorVarIndices_) {
@@ -79,8 +78,7 @@ void ObsIdentityTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
 
 // -----------------------------------------------------------------------------
 
-void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
-                                    const QCFlags_t & qc_flags) const {
+void ObsIdentityTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsIdentityTLAD::simulateObsAD start" << std::endl;
 
   const double missing = util::missingValue<double>();

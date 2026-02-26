@@ -57,8 +57,8 @@ void ObsGnssroRefNCEPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRefNCEPTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                         const QCFlags_t & qc_flags) const {
+void ObsGnssroRefNCEPTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                         ioda::ObsVector & ovec) const {
   ufo_gnssro_refncep_simobs_tl_f90(keyOperGnssroRefNCEP_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsGnssroRefNCEPTLAD::simulateObsTL done." << std::endl;
@@ -66,8 +66,8 @@ void ObsGnssroRefNCEPTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVecto
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroRefNCEPTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                         const QCFlags_t & qc_flags) const {
+void ObsGnssroRefNCEPTLAD::simulateObsAD(GeoVaLs & geovals,
+                                         const ioda::ObsVector & ovec) const {
   ufo_gnssro_refncep_simobs_ad_f90(keyOperGnssroRefNCEP_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsGnssroRefNCEPTLAD::simulateObsAD done." << std::endl;

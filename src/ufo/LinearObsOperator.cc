@@ -75,10 +75,9 @@ void LinearObsOperator::setTrajectory(const GeoVaLs & gvals, const ObsBias & bia
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & yy,
-                                      const ObsBiasIncrement & bias,
-                                      const QCFlags_t & qc_flags) const {
+                                      const ObsBiasIncrement & bias) const {
   ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
-  oper_->simulateObsTL(gvals, yy, qc_flags);
+  oper_->simulateObsTL(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(odb_);
     biasoper_->computeObsBiasTL(bias, ybiasinc);
@@ -89,10 +88,9 @@ void LinearObsOperator::simulateObsTL(const GeoVaLs & gvals, ioda::ObsVector & y
 // -----------------------------------------------------------------------------
 
 void LinearObsOperator::simulateObsAD(GeoVaLs & gvals, const ioda::ObsVector & yy,
-                                      ObsBiasIncrement & bias,
-                                      const QCFlags_t & qc_flags) const {
+                                      ObsBiasIncrement & bias) const {
   ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
-  oper_->simulateObsAD(gvals, yy, qc_flags);
+  oper_->simulateObsAD(gvals, yy);
   if (bias) {
     ioda::ObsVector ybiasinc(yy);
     biasoper_->computeObsBiasAD(bias, ybiasinc);

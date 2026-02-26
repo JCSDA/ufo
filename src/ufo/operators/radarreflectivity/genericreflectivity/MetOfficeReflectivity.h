@@ -101,10 +101,10 @@ class MetOfficeReflectivity : public ReflectivityAlgorithmBase {
   void setTrajectoryImpl(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) override;
 
   /// TL operator.
-  void simulateObsTLImpl(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsTLImpl(const GeoVaLs &, ioda::ObsVector &) const override;
 
   /// AD operator.
-  void simulateObsADImpl(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsADImpl(GeoVaLs &, const ioda::ObsVector &) const override;
 
   /// Print operator information.
   void printImpl(std::ostream & os) const override;

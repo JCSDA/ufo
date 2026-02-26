@@ -48,9 +48,9 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
   // Calculate Jacobian H(x_g) of obs operator
   void setTrajectory(const GeoVaLs &, ObsDiagnostics &, const QCFlags_t &) override;
   // Calculate dy = H dx
-  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsTL(const GeoVaLs &, ioda::ObsVector &) const override;
   // Calculate H^T dy
-  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &, const QCFlags_t &) const override;
+  void simulateObsAD(GeoVaLs &, const ioda::ObsVector &) const override;
 
 
 // Other: declare variable function with return type of oops:Variables

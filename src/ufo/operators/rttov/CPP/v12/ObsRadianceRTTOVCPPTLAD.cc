@@ -75,8 +75,7 @@ void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnost
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy,
-                                            const QCFlags_t & qc_flags) const {
+void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::simulateObsTL start" << std::endl;
   std::size_t nprofiles = dy.nlocs();
   std::size_t nchannels = aRttov_.getNchannels();
@@ -123,8 +122,7 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
 
 // -----------------------------------------------------------------------------
 
-void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
-                                            const QCFlags_t & qc_flags) const {
+void ObsRadianceRTTOVCPPTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::simulateObsAD start" << std::endl;
   std::size_t nprofiles = dy.nlocs();
   std::size_t nchannels = aRttov_.getNchannels();

@@ -188,8 +188,7 @@ void MetOfficeReflectivity::setTrajectoryImpl(const GeoVaLs & gv,
 }
 
 void MetOfficeReflectivity::simulateObsTLImpl(const GeoVaLs & dx,
-                                              ioda::ObsVector & dy,
-                                              const QCFlags_t &) const {
+                                              ioda::ObsVector & dy) const {
   // This routine does the following:
   // - Retrieves GeoVaLs of qrain and qice increments.
   // - Uses stored GeoVaLs of z.
@@ -285,8 +284,7 @@ void MetOfficeReflectivity::simulateObsTLImpl(const GeoVaLs & dx,
 }
 
 void MetOfficeReflectivity::simulateObsADImpl(GeoVaLs & dx,
-                                              const ioda::ObsVector & dy,
-                                              const QCFlags_t &) const {
+                                              const ioda::ObsVector & dy) const {
   // This routine does the following:
   // - Retrieves GeoVaLs of qrain and qice increments.
   // - Uses stored GeoVaLs of z.

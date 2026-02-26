@@ -47,8 +47,7 @@ void ObsExampleTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydi
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                   const QCFlags_t & qc_flags) const {
+void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_example_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: TL observation operator run" << std::endl;
@@ -56,8 +55,7 @@ void ObsExampleTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ov
 
 // -----------------------------------------------------------------------------
 
-void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                   const QCFlags_t & qc_flags) const {
+void ObsExampleTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_example_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsExampleTLAD: adjoint observation operator run" << std::endl;

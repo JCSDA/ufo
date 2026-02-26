@@ -64,8 +64,8 @@ void ObsGnssroBndNBAMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                         const QCFlags_t & qc_flags) const {
+void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals,
+                                         ioda::ObsVector & ovec) const {
   ufo_gnssro_bndnbam_simobs_tl_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsGnssroBndNBAMTLAD::simulateObsTL done" <<  std::endl;
@@ -73,8 +73,8 @@ void ObsGnssroBndNBAMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVecto
 
 // -----------------------------------------------------------------------------
 
-void ObsGnssroBndNBAMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                         const QCFlags_t & qc_flags) const {
+void ObsGnssroBndNBAMTLAD::simulateObsAD(GeoVaLs & geovals,
+                                         const ioda::ObsVector & ovec) const {
   ufo_gnssro_bndnbam_simobs_ad_f90(keyOperGnssroBndNBAM_, geovals.toFortran(), obsspace(),
                                ovec.size(), ovec.toFortran());
   oops::Log::trace() << "ObsGnssroBndNBAMTLAD::simulateObsAD done" <<  std::endl;

@@ -65,8 +65,7 @@ void ObsVertInterpTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics &,
 
 // -----------------------------------------------------------------------------
 
-void ObsVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                      const QCFlags_t & qc_flags) const {
+void ObsVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_vertinterp_simobs_tl_f90(keyOperVertInterp_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 
@@ -75,8 +74,7 @@ void ObsVertInterpTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector &
 
 // -----------------------------------------------------------------------------
 
-void ObsVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                      const QCFlags_t & qc_flags) const {
+void ObsVertInterpTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_vertinterp_simobs_ad_f90(keyOperVertInterp_, geovals.toFortran(), obsspace(),
                                   ovec.nvars(), ovec.nlocs(), ovec.toFortran());
 

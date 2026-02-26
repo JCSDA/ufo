@@ -83,8 +83,7 @@ void ObsRadarDopplerWindTLAD::setTrajectory(const GeoVaLs & gv,
 // -----------------------------------------------------------------------------
 
 void ObsRadarDopplerWindTLAD::simulateObsTL(const GeoVaLs & dx,
-                                            ioda::ObsVector & dy,
-                                            const QCFlags_t &) const {
+                                            ioda::ObsVector & dy) const {
   // This routine does the following:
   // - Retrieves GeoVaLs of u, v and w increments.
   // - Uses stored GeoVaLs of z.
@@ -155,8 +154,7 @@ void ObsRadarDopplerWindTLAD::simulateObsTL(const GeoVaLs & dx,
 
 // -----------------------------------------------------------------------------
 
-void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy,
-                                           const QCFlags_t &) const {
+void ObsRadarDopplerWindTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & dy) const {
   // This routine does the following:
   // - Retrieves GeoVaLs of u, v and w increments.
   // - Uses stored GeoVaLs of z.

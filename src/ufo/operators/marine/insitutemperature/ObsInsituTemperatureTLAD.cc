@@ -66,8 +66,7 @@ void ObsInsituTemperatureTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnos
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
-                                             ioda::ObsVector & ovec,
-                                             const QCFlags_t & qc_flags) const {
+                                             ioda::ObsVector & ovec) const {
   ufo_insitutemperature_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                                       ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD::simulateObsTL done" << std::endl;
@@ -76,8 +75,7 @@ void ObsInsituTemperatureTLAD::simulateObsTL(const GeoVaLs & geovals,
 // -----------------------------------------------------------------------------
 
 void ObsInsituTemperatureTLAD::simulateObsAD(GeoVaLs & geovals,
-                                             const ioda::ObsVector & ovec,
-                                             const QCFlags_t & qc_flags) const {
+                                             const ioda::ObsVector & ovec) const {
   ufo_insitutemperature_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                                       ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituTemperatureTLAD::simulateObsAD done" << std::endl;

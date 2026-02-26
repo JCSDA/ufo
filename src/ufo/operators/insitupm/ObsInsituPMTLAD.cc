@@ -47,8 +47,7 @@ void ObsInsituPMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & d,
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituPMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec,
-                                    const QCFlags_t & qc_flags) const {
+void ObsInsituPMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_insitupm_simobs_tl_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituPMTLAD::simulateObsTL done" << std::endl;
@@ -56,8 +55,7 @@ void ObsInsituPMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
 
 // -----------------------------------------------------------------------------
 
-void ObsInsituPMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec,
-                                    const QCFlags_t & qc_flags) const {
+void ObsInsituPMTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & ovec) const {
   ufo_insitupm_simobs_ad_f90(keyOper_, geovals.toFortran(), obsspace(),
                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsInsituPMTLAD::simulateObsAD done" << std::endl;
