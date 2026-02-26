@@ -3054,7 +3054,7 @@ contains
 ! Conversion from radiance to BT
 subroutine ufo_rttov_Rad_to_BT(self, cwn, rad, bt)
 
-  use ufo_constants_mod, only: hplanck, cspeed, kboltz
+  use ufo_constants_mod, only: hplanck, speed_of_light, kboltz
 
   implicit none
 
@@ -3083,7 +3083,7 @@ subroutine ufo_rttov_Rad_to_BT(self, cwn, rad, bt)
 
   bt(1:nchan) = rad(1:nchan) * cwn * cwn ! rad with lambda in units of m
   ! conversion to brightness temperature based on Planck function with lambda in units of m
-  bt(1:nchan) = (hplanck*cspeed*cwn/kboltz) / log((2.0*hplanck*cspeed*cspeed*cwn**5) &
+  bt(1:nchan) = (hplanck*speed_of_light*cwn/kboltz) / log((2.0*hplanck*speed_of_light*speed_of_light*cwn**5) &
                  / bt(1:nchan) + 1.0) ! brightness temperatures in K
   
 end subroutine ufo_rttov_Rad_to_BT
@@ -3091,7 +3091,7 @@ end subroutine ufo_rttov_Rad_to_BT
 ! Derivative of BT wrt radiance from Planck function
 subroutine ufo_rttov_dBT_dRad(self, cwn, rad, dBT_dRad)
 
-  use ufo_constants_mod, only: hplanck, cspeed, kboltz
+  use ufo_constants_mod, only: hplanck, speed_of_light, kboltz
 
   implicit none
 
@@ -3120,8 +3120,8 @@ subroutine ufo_rttov_dBT_dRad(self, cwn, rad, dBT_dRad)
    call abor1_ftn(message)
   end if
 
-  const1 = (2.0*(hplanck**2)*(cspeed**3)/kboltz)
-  const2 = 2.0*hplanck*cspeed**2
+  const1 = (2.0*(hplanck**2)*(speed_of_light**3)/kboltz)
+  const2 = 2.0*hplanck*speed_of_light**2
   allocate(dBT_dRad(nchan)) 
   dBT_dRad(1:nchan) = const1*cwn(1:nchan)**4/rad(1:nchan)**2 * 1.0/(log(const2*cwn(1:nchan)**3/rad(1:nchan) + 1)**2 &
                       * (const2*cwn(1:nchan)**3/rad(1:nchan) + 1.0))

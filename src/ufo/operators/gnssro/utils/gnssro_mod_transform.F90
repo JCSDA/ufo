@@ -10,17 +10,6 @@ use ufo_constants_mod
 private
 public :: geometric2geop, geop2geometric, compute_refractivity
 
-real(kind_real), parameter ::  semi_major_axis = 6378.1370e3_kind_real     !                     (m)
-real(kind_real), parameter ::  semi_minor_axis = 6356.7523142e3_kind_real  !                     (m)
-real(kind_real), parameter ::  grav_polar      = 9.8321849378_kind_real    !                     (m/s2)
-real(kind_real), parameter ::  grav_equator    = 9.7803253359_kind_real    !                     (m/s2) 
-real(kind_real), parameter ::  earth_omega     = 7.292115e-5_kind_real     !                     (rad/s)
-real(kind_real), parameter ::  grav_constant   = 3.986004418e14_kind_real  !      
-real(kind_real), parameter ::  flattening  = (semi_major_axis-semi_minor_axis)/semi_major_axis
-real(kind_real), parameter ::  somigliana  = (semi_minor_axis/semi_major_axis) * (grav_polar/grav_equator) - one
-real(kind_real), parameter ::  grav_ratio  = (earth_omega*earth_omega * &
-                                              semi_major_axis*semi_major_axis * semi_minor_axis) / grav_constant
-real(kind_real), parameter ::  eccentricity = sqrt(semi_major_axis**2 - semi_minor_axis**2)/semi_major_axis
 
 contains
 

@@ -16,8 +16,8 @@ use ufo_constants_mod, only: &
     grav,                   &    ! Gravitational field strength
     ecc,                    &    ! eccentricity
     k_somig,                &    ! Somigliana's constant
-    g_equat,                &    ! equatorial gravity (ms-2)
-    a_earth,                &    ! semi-major axis of earth (m)
+    grav_equator,           &    ! equatorial gravity (ms-2)
+    semi_major_axis,        &    ! semi-major axis of earth (m)
     flatt,                  &    ! flattening
     m_ratio                      ! gravity ratio
 
@@ -300,9 +300,9 @@ latrad = lat * (Pi / 180.0)             !convert latitude from degrees to radian
 ! 2. Calculate r and g
 !-------------------------
 
-r_eff = a_earth / (1.0 + flatt + m_ratio - 2.0 * flatt * (SIN (latrad)) ** 2)
+r_eff = semi_major_axis / (1.0 + flatt + m_ratio - 2.0 * flatt * (SIN (latrad)) ** 2)
 
-g_somig = g_equat * (1.0 + k_somig * (SIN (latrad)) ** 2) / (SQRT (1.0 - (ecc ** 2) * (SIN (latrad)) ** 2))
+g_somig = grav_equator * (1.0 + k_somig * (SIN (latrad)) ** 2) / (SQRT (1.0 - (ecc ** 2) * (SIN (latrad)) ** 2))
 
 !-------------------------------------------------------------------
 ! 3. convert z (in geopotential height) to geometric wrt ellipsoid

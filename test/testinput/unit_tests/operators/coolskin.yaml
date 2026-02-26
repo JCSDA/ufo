@@ -22,5 +22,5 @@ observations:
 #       obsfile: Data/coolskin_fake_obs_2018041500_out.nc
   geovals:
     filename: Data/ufo/testinput_tier_1/coolskin_fake_geovals_2018041500.nc
-  rms ref: 26.414654358957534
+  rms ref: 26.414654381425862
   tolerance: 1.0e-10

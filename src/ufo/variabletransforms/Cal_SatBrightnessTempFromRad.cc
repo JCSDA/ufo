@@ -117,7 +117,7 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
             }
             case RadianceUnits::FREQUENCY: {
               double freq = static_cast<double>(spectralVariable[ichan]);
-              double wvn = freq / Constants::speedOfLight;  // Hz to m-1
+              double wvn = freq / Constants::speed_of_light;  // Hz to m-1
               double rad = static_cast<double>(radiance[ichan][iloc]) * freq / wvn;
               bt = formulas::inversePlanck(rad, wvn, parameters_.planck1.value(),
                                            parameters_.planck2.value());

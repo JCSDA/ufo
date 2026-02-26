@@ -29,45 +29,53 @@ real(kind_real), parameter, public :: four    = 4.0_kind_real
 real(kind_real), parameter, public :: five    = 5.0_kind_real
 real(kind_real), parameter, public :: six     = 6.0_kind_real
 real(kind_real), parameter, public :: ten     = 10.0_kind_real
-real(kind_real), parameter, public :: k_t   = 0.65       !> Thermal conductivity of water (W m^-1 K^-1)
-real(kind_real), parameter, public :: L_e   = 2.26e+06 !> Latent heat of vaporization at 373.15K (J kg^-1)
-real(kind_real), parameter, public :: eps   = 0.1      !> Albedo of sea water
-real(kind_real), parameter, public :: Stefan_Boltzmann_const = 5.67e-8  !> Stefan-Boltzmann constant (W m^-2 K^-4)
-real(kind_real), parameter, public :: alpha = 2.7e-4 !> Water thermal expansion coefficient (K^1)
-real(kind_real), parameter, public :: cw    = 0.015     !> Water specific heat (cal g^-1 degC^-1)
+real(kind_real), parameter, public :: k_t   = 0.65_kind_real       !> Thermal conductivity of water (W m^-1 K^-1)
+real(kind_real), parameter, public :: L_e   = 2.26e+06_kind_real !> Latent heat of vaporization at 373.15K (J kg^-1)
+real(kind_real), parameter, public :: eps   = 0.1_kind_real      !> Albedo of sea water
+real(kind_real), parameter, public :: Stefan_Boltzmann_const = 5.67e-8_kind_real  !> Stefan-Boltzmann constant (W m^-2 K^-4)
+real(kind_real), parameter, public :: alpha = 2.7e-4_kind_real !> Water thermal expansion coefficient (K^1)
+real(kind_real), parameter, public :: cw    = 0.015_kind_real     !> Water specific heat (cal g^-1 degC^-1)
 ! 4184 J⋅kg−1⋅K−1 is given as specific heat of liquid water, need to fix this
-real(kind_real), parameter, public :: v_w   = 0.8e-6     !> Water kinematic viscosity (m^2/s)
+real(kind_real), parameter, public :: v_w   = 0.8e-6_kind_real    !> Water kinematic viscosity (m^2/s)
 real(kind_real), parameter, public :: c_virtual = 1./rd_over_rv-1. ! Related to gas-constant
-real(kind_real), parameter, public :: S_B   = 0.026   ! S is mean salinity, B is salinity expansion coefficient
+real(kind_real), parameter, public :: S_B   = 0.026_kind_real   ! S is mean salinity, B is salinity expansion coefficient
                                                       ! SB is relatively constant value of 0.026 in ocean
-real(kind_real), parameter, public :: Rou    = 1000.0
-real(kind_real), parameter, public :: DU    = 21.4e-6 !Dobson unit, kg O3/m**2
-real(kind_real), parameter, public :: Lclr   = 0.0065 ! constant dry adiabatic lapse rate (K/m)
-real(kind_real), parameter, public :: t2tv   = 0.608 ! constant moist adiabatic lapse rate (degC/km)
+real(kind_real), parameter, public :: Rou    = 1000.0_kind_real
+real(kind_real), parameter, public :: DU    = 21.4e-6_kind_real !Dobson unit, kg O3/m**2
+real(kind_real), parameter, public :: Lclr   = 0.0065_kind_real ! constant dry adiabatic lapse rate (K/m)
+real(kind_real), parameter, public :: t2tv   = 0.608_kind_real ! constant moist adiabatic lapse rate (degC/km)
 real(kind_real), parameter, public :: es_w_0 = 611.2_kind_real ! saturation vapor pressure of water at 0C
 real(kind_real), parameter, public :: pi      = acos(-one)
 real(kind_real), parameter, public :: deg2rad =  pi/180.0_kind_real
 real(kind_real), parameter, public :: rad2deg = one/deg2rad
-real(kind_real), parameter, public :: pref = 1.0E5
-real(kind_real), parameter, public :: hplanck = 6.62607015e-34 ! Planck's constant in J.s
-real(kind_real), parameter, public :: cspeed = 2.99792458e8 ! Speed of light in m/s
-real(kind_real), parameter, public :: kboltz = 1.380649e-23 ! Boltzmann's constant in J/K
+real(kind_real), parameter, public :: pref = 1.0e5_kind_real
+real(kind_real), parameter, public :: hplanck = 6.62607015e-34_kind_real ! Planck's constant in J.s
+real(kind_real), parameter, public :: speed_of_light = 2.99792458e8_kind_real ! Speed of light in m/s
+real(kind_real), parameter, public :: kboltz = 1.380649e-23_kind_real ! Boltzmann's constant in J/K
 ! constants relating to WGS-84 ellipsoid and gravity above ellipsoid
-real(kind_real), parameter, public :: ecc = 0.081819            ! eccentricity
-real(kind_real), parameter, public :: k_somig = 1.931853E-3     ! Somigliana's constant
-real(kind_real), parameter, public :: g_equat = 9.7803253359    ! equatorial gravity (ms-2)
-real(kind_real), parameter, public :: a_earth = 6378.137E3      ! semi-major axis of earth (m)
-real(kind_real), parameter, public :: b_earth = 6356.7523142E3  ! semi-minor axis of earth (m)
-real(kind_real), parameter, public :: mean_earth_rad_m = ( (2 * a_earth ) + b_earth)/ 3  ! Mean radius of the Earth (m)
-real(kind_real), parameter, public :: flatt = 0.003352811       ! flattening of oblate ellipsoid
-   ! f = (semi_major_axis-semi_minor_axis)/semi_major_axis
-real(kind_real), parameter, public :: m_ratio= 0.003449787      ! gravity ratio
+real(kind_real), parameter, public :: ecc = 0.081819_kind_real            ! eccentricity
+real(kind_real), parameter, public :: k_somig = 1.931853e-3_kind_real     ! Somigliana's constant
+real(kind_real), parameter, public :: semi_major_axis = 6378.137e3_kind_real      ! semi-major axis of earth (m)
+real(kind_real), parameter, public :: semi_minor_axis = 6356.7523142e3_kind_real  ! semi-minor axis of earth (m)
+real(kind_real), parameter, public :: mean_earth_rad_m = ( (2 * semi_major_axis ) + semi_minor_axis)/ 3  ! Mean radius of the Earth (m)
+real(kind_real), parameter, public :: grav_polar = 9.8321849378_kind_real     ! [m/s2]
+real(kind_real), parameter, public :: grav_equator = 9.7803253359_kind_real   ! [m/s2] equatorial gravity
+real(kind_real), parameter, public :: earth_omega = 7.292115e-5_kind_real     ! [rad/s]
+real(kind_real), parameter, public :: grav_constant = 3.986004418e14_kind_real  ! [m3/s2]
+real(kind_real), parameter ::  flattening  = (semi_major_axis-semi_minor_axis)/semi_major_axis
+real(kind_real), parameter ::  somigliana  = (semi_minor_axis/semi_major_axis) * (grav_polar/grav_equator) - one
+real(kind_real), parameter ::  grav_ratio  = (earth_omega*earth_omega * &
+                                              semi_major_axis*semi_major_axis * semi_minor_axis) / grav_constant
+real(kind_real), parameter ::  eccentricity = sqrt(semi_major_axis**2 - semi_minor_axis**2)/semi_major_axis
+
+real(kind_real), parameter, public :: flatt = 0.003352811_kind_real       ! flattening of oblate ellipsoid
+real(kind_real), parameter, public :: m_ratio= 0.003449787_kind_real      ! gravity ratio
    ! ratio of centrifugal to gravitational force on the equator
 
 ! constants used in CRTM interface
 real(kind_real), parameter, public :: kg_to_g = 1000.0_kind_real
 real(kind_real), parameter, public :: co2_rescale_to_ppmv = 1.e6_kind_real
-real(kind_real), parameter, public :: co2_ppmv_value = 407.0
+real(kind_real), parameter, public :: co2_ppmv_value = 407.0_kind_real
 real(kind_real), parameter, public :: midpoint_julday = -1.0_kind_real
 
 ! constants used in RTTOV interface
