@@ -1,0 +1,55 @@
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+#   obsdataout: 
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_s_obserr_diagonal_out.nc4
+    simulated variables: [airTemperature]
+  obs error:
+    covariance model: diagonal inverse gamma 
+    relative variance: 0.0001
+    one-mean perturbations: true
+    member: 1
+    number of members: 1
+  obs error test: 
+    test localization: true 
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_s.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/aircraft_obs_2018041500_s_obserr_diagonal_out.nc4
+    simulated variables: [specificHumidity]
+  obs error:
+    covariance model: diagonal inverse gamma 
+    relative variance: 0.1
+  obs error test: 
+    test localization: true 
+- obs space:
+    name: Satwind
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/satwind_obs_2018041500_m.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/satwind_obs_2018041500_s_obserr_diagonal_out.nc4
+    simulated variables: [windEastward, windNorthward]
+  obs error:
+    covariance model: diagonal
+  obs error test: 
+    test localization: true 

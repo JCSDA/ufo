@@ -71,6 +71,17 @@ ufo_add_test( NAME    test_ufo_obserrordiagonal
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
+ufo_add_test( NAME    test_ufo_obserrordiagonal_inv_gamma
+              TIER    1
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsError.x
+              DEPENDS test_ObsError.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiagonal_inv_gamma.yaml"
+              MPI     4
+              LIBS    ufo
+              LABELS  errors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
 ufo_add_test( NAME    test_ufo_reconditioning
               TIER    1
               ECBUILD
