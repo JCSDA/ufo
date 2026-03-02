@@ -7,6 +7,7 @@
 module ufo_rttovonedvarcheck_minimize_newton_mod
 
 use kinds
+use missing_values_mod
 use ufo_constants_mod, only: zero
 use fckit_log_module, only : fckit_log
 use ufo_geovals_mod
@@ -120,6 +121,7 @@ real(kind_real)                 :: JcostOld  ! previous iteration value
 real(kind_real)                 :: JcostOrig ! initial value
 real(kind_real)                 :: DeltaJ
 real(kind_real)                 :: DeltaJo
+real(kind_real)                 :: missing_real
 
 real(kind_real), allocatable    :: OldProfile(:)
 real(kind_real), allocatable    :: GuessProfile(:)
@@ -147,6 +149,7 @@ onedvar_success = .false.
 Error = .false.
 nchans = size(ob % channels_used)
 inversionstatus = 0
+missing_real = missing_value(missing_real)
 nprofelements = profile_index % nprofelements
 allocate(OldProfile(nprofelements))
 allocate(GuessProfile(nprofelements))
@@ -413,6 +416,9 @@ onedvar_success = converged
 call ufo_rttovonedvarcheck_CostFunction(Xdiff, b_inv, Ydiff, r_matrix, Jout)
 ob % final_cost = Jout(1)
 ob % niter = iter
+
+! Reset the transmittance to missing so that if its not converged its always the same
+if (allocated(ob % transmittance)) ob % transmittance(:) = missing_real
 
 ! Pass output profile, final BTs and final cost out
 if (converged) then

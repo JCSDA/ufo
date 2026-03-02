@@ -1282,7 +1282,7 @@ if( ${rttov_FOUND} )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_transmittance
-                  TIER    2
+                  TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance.yaml"
