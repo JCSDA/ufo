@@ -490,7 +490,7 @@ contains
           if ( errorstatus /= errorstatus_success ) then
             write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, &
               ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
-            call oops_log%warning(message)
+            call oops_log%trace(message)
           end if
         else ! direct
           if (self % conf % do_mw_scatt) then
@@ -524,7 +524,7 @@ contains
           if ( errorstatus /= errorstatus_success ) then
             write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
                                          ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
-            call oops_log%warning(message)
+            call oops_log%trace(message)
             if (present(ob_info)) ob_info % rterror = .true.
           end if
 
