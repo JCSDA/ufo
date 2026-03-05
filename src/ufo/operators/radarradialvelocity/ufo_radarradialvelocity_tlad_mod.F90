@@ -105,6 +105,7 @@ subroutine radarradialvelocity_tlad_settraj_(self, geovals, obss)
   call obsspace_get_db(obss, "MetaData", "sinAzimuthCosTilt", self%sinazm_costilt)
   call obsspace_get_db(obss, "MetaData", "sinTilt", self%sintilt)
 ! call obsspace_get_db(obss, "MetaData", "vterminal", self%vterminal)
+  self%vterminal = 0.0
 
   ! Allocate arrays for interpolation weights
   allocate(self%wi(self%nlocs))
@@ -161,8 +162,9 @@ subroutine radarradialvelocity_simobs_tl_(self, geovals, obss, nvars, nlocs, hof
 
   do ivar = 1, nvars
     do iobs=1,nlocs
-      hofx(ivar,iobs) = vfields(1,iobs)*self%cosazm_costilt(iobs) &
-                      + vfields(2,iobs)*self%sinazm_costilt(iobs)
+      hofx(ivar,iobs) = vfields(1,iobs)*self%sinazm_costilt(iobs) &
+                      + vfields(2,iobs)*self%cosazm_costilt(iobs) &
+                      + vfields(3,iobs)*self%sintilt(iobs)
     enddo
   end do
 
@@ -198,8 +200,9 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
      ! no vertical velocity and terminal velocity in GSI rw observer, it can add
      ! in future after acceptance test
      if (hofx(ivar,iobs) .ne. missing) then
-      vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
-      vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
+      vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
+      vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
+      vfields(3,iobs) = vfields(3,iobs) + hofx(ivar,iobs)*self%sintilt(iobs)
      end if
     enddo
   end do
