@@ -518,11 +518,11 @@ observations:
     flag all filter variables if any test variable is out of bounds: true
     test only filter variables with passed qc when flagging all filter variables: false
     minvalue: 1.2
-# brightnessTemperature_1: [1.1, -3.3687953E38, 1.3, 1.4, 1.5]
-# brightnessTemperature_3: [3.1, 3.2, 3.3, 3.4, 3.5]
+# brightnessTemperature_1: [1.1, -3.3687953E38, 1.3, 1.4]
+# brightnessTemperature_3: [3.1, 3.2, 3.3, 3.4]
 # filter 1 assigns the error so observations are not rejected because of this.
 # filter 2 rejects location 1 and 2 for all_channels.
-  passedBenchmark: 6
+  passedBenchmark: 4
 - obs space:
     name: Test multichannel bounds checking with differing variables
     obsdatain:
@@ -549,14 +549,14 @@ observations:
     treat missing as out of bounds: true
     flag all filter variables if any test variable is out of bounds: true
     test only filter variables with passed qc when flagging all filter variables: true
-    maxvalue: 3.45
-# brightnessTemperature_1: [1.1, -3.3687953E38, 1.3, 1.4, 1.5]
-# brightnessTemperature_3: [3.1, 3.2, 3.3, 3.4, 3.5]
+    maxvalue: 3.35
+# brightnessTemperature_1: [1.1, -3.3687953E38, 1.3, 1.4]
+# brightnessTemperature_3: [3.1, 3.2, 3.3, 3.4]
 # filter 1 assigns the error so observations are not rejected because of this.
-# filter 2 rejects location 5 for BT1 (filter variable) because the BT3 (test variable) value
+# filter 2 rejects location 4 for BT1 (filter variable) because the BT3 (test variable) value
 #          exceeds the threshold.  BT1 location 2 is rejected by the Final Check filter because
 #          of the missing ObsValue.
-  passedBenchmark: 8
+  passedBenchmark: 6
 - obs space:
     name: test data
     obsdatain:
