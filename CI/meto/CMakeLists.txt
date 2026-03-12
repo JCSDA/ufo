@@ -25,7 +25,7 @@ endif()
 
 set(
   include_names
-  "$ENV{REPO}" "orca-jedi" "ops-um-jedi" "jjtests" "lfric-jedi")
+  "$ENV{REPO}" "opsinputs" "orca-jedi" "ops-um-jedi" "jjtests" "lfric-jedi")
 if(DEFINED ENV{REPO_TEST_DATA})
   list(APPEND include_names "$ENV{REPO_TEST_DATA}")
 endif()
