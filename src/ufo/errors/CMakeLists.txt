@@ -14,6 +14,8 @@ set ( errors_files
     ObsErrorDiagonal.h
     ObsErrorDiagonalInvGamma.cc
     ObsErrorDiagonalInvGamma.h
+    ObsErrorDiffusion.cc
+    ObsErrorDiffusion.h
     ObsErrorParametersBase.h
     ObsErrorReconditioner.cc
     ObsErrorReconditioner.h

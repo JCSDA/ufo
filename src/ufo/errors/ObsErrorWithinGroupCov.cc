@@ -36,7 +36,7 @@ namespace {
 // -----------------------------------------------------------------------------
 double gc99(const double & distnorm) {
   // computes Gaspari-Cohn 99 localization
-  // distnorm - normalized distance
+  // distnorm - normalized distance in meters
   double gc99value = 0.0;
   if (distnorm < 0.5) {
     gc99value = -8.0*pow(distnorm, 5.0)+8.0*pow(distnorm, 4.0)+5.0*pow(distnorm, 3.0)-

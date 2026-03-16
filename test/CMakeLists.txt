@@ -154,6 +154,10 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput/unit_tests)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
 
+# Create Data directory for test output files
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput/)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput/unit_tests)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput/unit_tests/errors)
 
 # Add files to cmake resources
 ecbuild_add_resources( TARGET ufo_test_scripts
@@ -167,10 +171,12 @@ list( APPEND ufo_test_ref
   testref/unit_tests/filters/print_filter_data.ref
   testref/unit_tests/filters/print_filter_data_MPI2_rank0.ref
   testref/unit_tests/filters/print_filter_data_time_window_selection.ref
+  testref/unit_tests/errors/diracDiffusion.ref
 )
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref/unit_tests)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref/unit_tests/errors)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testref/unit_tests/filters)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_ref} )
 

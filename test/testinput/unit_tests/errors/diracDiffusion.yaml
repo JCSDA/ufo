@@ -1,0 +1,27 @@
+time window:
+  begin: 2018-04-14T20:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+test settings:
+  test type: dirac
+  dirac location: 50
+
+observations:
+- obs space:
+    name: abi_g16
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/abi_g16_obs_2018041500_m_qc.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 11
+  obs error:
+    covariance model: diffusion
+    correlation variable names: [brightnessTemperature]
+    correlation lengthscale: 200000. # meters
+    normalization iterations: 10000
+
+test:
+  reference filename: testref/unit_tests/errors/diracDiffusion.ref
+  test output filename: testoutput/unit_tests/errors/diracDiffusion.test
+  float relative tolerance: 1e-6

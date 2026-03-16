@@ -22,6 +22,8 @@ class ObsErrorParametersBase : public oops::Parameters {
  public:
   /// \brief Name of the covariance model.
   oops::Parameter<std::string> model{"covariance model", "diagonal", this};
+  oops::Parameter<double> RMSEtolerance{"Obs Error test tolerance", "RMSE tolerance for"
+       "oops::ObsErrorCovariance test", 1.0e-10, this};
 };
 
 }  // namespace ufo
