@@ -1,0 +1,494 @@
+time window:
+  begin: 2019-12-29T21:00:00Z
+  end: 2019-12-30T03:00:00Z
+
+observations:
+# Test Newton minimizer
+- obs operator: &ObsOperator
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW]
+    obs options:
+      RTTOV_default_opts: UKMO_PS43
+      SatRad_compatibility: true
+      RTTOV_GasUnitConv: true
+      WMO_ID: &wmo_id [225]
+      Sat_ID: &sat_id [noaa_20]
+      Instrument_Name: &inst_name ATMS
+      UseRHwaterForQC: &UseRHwaterForQC1 true # default
+      CoefficientPath: Data/
+  obs space: &ObsSpace
+    name: Test 1D-Var Newton Minimizer for ATMS
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_v14.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &ops_channels 1-22
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/atms_n20_obs_20191230T0000_rttov_onedvarcheck_out.nc4
+  geovals: &GeoVaLs
+    filename: Data/ufo/testinput_tier_1/geovals_atms_20191230T0000Z_benchmark.nc4
+  obs bias: &ObsBias
+    static bc:
+      predictors:
+      - name: thickness
+        layer top: 30000
+        layer base: 85000
+        mean: 7.6
+        standard deviation: 1.3
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS43
+        SatRad_compatibility: false # done in filter
+        RTTOV_GasUnitConv: true
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    surface emissivity:
+      type: fixed # default
+      EmissSeaDefault: 0.0 # default
+      EmissLandDefault: 0.95 # default
+      EmissSeaIceDefault: 0.92 # default
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: true
+    UseMLMinimization: false
+    UseJforConvergence: true
+    UseRHwaterForQC: *UseRHwaterForQC1 # setting the same as obs operator
+    FullDiagnostics: false
+    JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0  # turned off
+    ConvergenceFactor: 0.40
+    CostConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    MaxLWPForCloudyCheck: 0.1
+    MaxIWPForCloudyCheck: 3.0
+    Store1DVarLWP: true
+    Store1DVarIWP: true
+    ConvergeCheckChans: [20]
+  passedBenchmark: 1160      # number of passed obs
+# Test Logging with the Newton minimizer
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the full diagnostics for Newton Minimizer
+  geovals: &GeoVaLs
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS43
+        SatRad_compatibility: false # done in filter
+        RTTOV_GasUnitConv: true
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    surface emissivity:
+      type: fixed # default
+      EmissSeaDefault: 0.0 # default
+      EmissLandDefault: 0.95 # default
+      EmissSeaIceDefault: 0.92 # default
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: true
+    UseMLMinimization: false
+    UseJforConvergence: true
+    UseRHwaterForQC: *UseRHwaterForQC1 # setting the same as obs operator
+    FullDiagnostics: true
+    JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0  # turned off
+    ConvergenceFactor: 0.40
+    CostConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    StartOb: 1
+    FinishOb: 1
+  passedBenchmark: 1500      # number of passed obs
+## Test ML minimizer
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers [CLW]
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS43
+      SatRad_compatibility: true
+      RTTOV_GasUnitConv: false
+      WMO_ID: *wmo_id
+      Sat_ID: *sat_id
+      Instrument_Name: *inst_name
+      UseRHwaterForQC: &UseRHwaterForQC2 false # non-default
+      CoefficientPath: Data/
+      QtSplitRain: false
+  obs space:
+    <<: *ObsSpace
+    name:  Test 1D-Var Marquardt-Levenberg Minimizer for ATMS
+  geovals:
+    <<: *GeoVaLs
+  obs bias: 
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS43
+        SatRad_compatibility: false # done in filter
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: false
+    UseMLMinimization: true
+    UseJforConvergence: true
+    UseRHwaterForQC: *UseRHwaterForQC2 # setting the same as obs operator
+    JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0
+    ConvergenceFactor: 0.40
+    CostConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    MaxLWPForCloudyCheck: 0.1
+    MaxIWPForCloudyCheck: 3.0
+    Store1DVarLWP: true
+    Store1DVarIWP: true
+    ConvergeCheckChans: [20]
+  passedBenchmark: 1229      # number of passed obs
+# Test Logging with the ML minimizer
+- obs operator:
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the full diagnostics for ML minimizer
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS43
+        SatRad_compatibility: false # done in filter
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    nlevels: 70
+    qtotal: true
+    UseQtSplitRain: false
+    UseMLMinimization: true
+    UseJforConvergence: true
+    UseRHwaterForQC: *UseRHwaterForQC2 # setting the same as obs operator
+    FullDiagnostics: true
+    JConvergenceOption: 1
+    RetrievedErrorFactor: -1.0
+    ConvergenceFactor: 0.40
+    CostConvergenceFactor: 0.01
+    Max1DVarIterations: 7
+    StartOb: 1
+    FinishOb: 1
+  passedBenchmark: 1500      # number of passed obs
+# Test the 1dvar works with satid calls
+- obs operator: 
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the 1D-Var produces output when two calls to filter
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-5, 16-17
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    where:
+    - variable:
+        name: MetaData/latitude
+      maxvalue: 60.0
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options: 
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    nlevels: 70
+    qtotal: true
+    RetrievedErrorFactor: -1.0
+  - filter: RTTOV OneDVar Check
+    where:
+    - variable:
+        name: MetaData/latitude
+      minvalue: 60.0
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atms_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    nlevels: 70
+    qtotal: true
+    RetrievedErrorFactor: -1.0
+  compareVariables:
+    - reference:
+        name: TestReference/final_cost_onedvar
+      test:
+        name: OneDVar/finalCost
+      absTol: 1.0e-4
+# Test the surface emissivity retrieval works
+- obs operator: 
+    <<: *ObsOperator
+  obs space:
+    <<: *ObsSpace
+    name: Test the 1D-Var surface emissivity retrieval works
+  geovals:
+    <<: *GeoVaLs
+  obs bias:
+    <<: *ObsBias
+  obs filters:
+  # BlackList these channels but still want hofx for monitoring
+  - filter: BlackList
+    filter variables:
+    - name: brightnessTemperature
+      channels: 4-5, 16-17
+  # Setup surface emissivity for test
+  # To be replaced with DrawFromFile
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/emissivity
+      channels: *ops_channels
+      type: float
+      function:
+        name: ObsFunction/Conditional
+        options:
+          firstmatchingcase: false
+          defaultvalue: 0.0
+          cases:
+          - where:
+            - variable:
+                name: MetaData/surfaceQualifier
+              is_in: 0 # land
+            value: 0.95
+          - where:
+            - variable:
+                name: MetaData/surfaceQualifier
+              is_in: 2 # seaice
+            value: 0.92
+  # Setup surface emissivity error for test
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/emissivityError
+      channels: *ops_channels
+      type: float
+      function:
+        name: ObsFunction/Conditional
+        options:
+          firstmatchingcase: false
+          defaultvalue: 0.0
+          cases:
+          - where:
+            - variable:
+                name: MetaData/surfaceQualifier
+              is_in: 0 # land
+            value: 0.8
+  # Do 1D-Var check
+  - filter: RTTOV OneDVar Check
+    ModName: RTTOV
+    ModOptions:
+      Absorbers: *rttov_absorbers
+      obs options:
+        RTTOV_default_opts: UKMO_PS45
+        SatRad_compatibility: false # done in filter
+        WMO_ID: *wmo_id
+        Sat_ID: *sat_id
+        Instrument_Name: *inst_name
+        CoefficientPath: Data/
+    BMatrix: Data/ufo/testinput_tier_1/resources/bmatrix/rttov/atovs_bmatrix_70_test.dat
+    RMatrix: Data/ufo/testinput_tier_1/resources/rmatrix/rttov/atms_noaa_20_rmatrix_test.nc4
+    filter variables:
+    - name: brightnessTemperature
+      channels: *ops_channels
+    retrieval variables from geovals:
+    - air_temperature
+    - water_vapor_mixing_ratio_wrt_moist_air
+    - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+    - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    - air_temperature_at_2m
+    - water_vapor_mixing_ratio_wrt_moist_air_at_2m
+    - skin_temperature_at_surface
+    - air_pressure_at_surface
+    retrieval variables not from geovals:
+    - surface_emissivity
+    surface emissivity:
+      type: readfromdbwitherror # initialize values
+      retrieve mw emissivity: true
+      number of surface emissivity retrieval elements: 5
+      emissivity to channel mapping: [1,2,3,16,17]
+      channel to emissivity mapping: [1,2,3,3,3,3,3,3,3,3,3,
+                                      3,3,3,3,4,5,5,5,5,5,5]
+      group in obs space: MetaData
+    nlevels: 70
+    qtotal: true
+    RetrievedErrorFactor: -1.0
+  passedBenchmark: 774      # number of passed obs
+  compareVariables:
+    - reference:
+        name: TestReferenceOneDVar/brightnessTemperature
+      test:
+        name: OneDVar/brightnessTemperature
+      absTol: 1.0e-4
+    - reference:
+        name: TestReferenceOneDVar/emissivity
+      test:
+        name: OneDVar/emissivity
+      absTol: 1.0e-4
+    - reference:
+        name: TestReferenceOneDVar/skinTemperature
+      test:
+        name: OneDVar/skinTemperature
+      absTol: 1.0e-4
+    - reference:
+        name: TestReferenceOneDVar/numberOfIterations
+      test:
+        name: OneDVar/numberOfIterations
+    - reference:
+        name: TestReferenceOneDVarBack/brightnessTemperature
+      test:
+        name: OneDVarBack/brightnessTemperature
+      absTol: 1.0e-4

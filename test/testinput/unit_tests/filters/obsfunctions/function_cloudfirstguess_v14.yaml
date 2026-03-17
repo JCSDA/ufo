@@ -8,6 +8,7 @@ observations:
 - obs operator: &ObsOperator
     name: RTTOV
     Absorbers: [Ozone]
+    debug: true
     obs options:
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
@@ -26,13 +27,13 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500.nc4
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500_cloud_firstguess_v14.nc4
     simulated variables: [brightnessTemperature]
     channels: *cloud_first_guess_channels
 #   obsdataout:
 #     engine:
 #       type: H5File
-#       obsfile: Data/iasi_metopb_obs_2021011500_cloud_firstguess_out.nc4
+#       obsfile: Data/iasi_metopb_obs_2021011500_cloud_firstguess_out_v14.nc4
   geovals: &geovals
     filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z.nc4
   obs filters:

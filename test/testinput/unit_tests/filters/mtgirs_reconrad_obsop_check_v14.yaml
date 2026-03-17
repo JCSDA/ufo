@@ -158,5 +158,6 @@ observations:
       EmisEigVecPath:  Data/ufo/testinput_tier_1/resources/auxillary/mtgirs_emis_eigen_vec_fstest
     RecalculateBT: true
     RetrievedErrorFactor: -1.0
-  passedBenchmark: 380  
+  passedBenchmark: 242
+  #old (RTTOV 12) passedBenchmark: 380  
   #passedBenchmark: 344 # with ReconstructedRadianceCorrection: false

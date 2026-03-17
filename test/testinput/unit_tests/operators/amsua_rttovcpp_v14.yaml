@@ -1,0 +1,30 @@
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOVCPP
+    SensorID: noaa_19_amsua
+    CoefPath: Data/
+#    linear obs operator:
+  obs space:
+    name: noaa_19_amsua
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_hofxnm_2018041500_m_rttovcpp.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsua_n19_obs_2018041500_m_rttovcpp_out.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_rttovcpp.nc4
+  vector ref: HofX
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

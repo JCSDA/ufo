@@ -1205,100 +1205,100 @@ if( ${rttov_FOUND} )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_rttov_qc.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_rttov_qc${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_amsr2_rttov_ops_qc_rttovonedvarcheck
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_rttov_ops_qc_rttovonedvarcheck.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_rttov_ops_qc_rttovonedvarcheck${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_atms_rttov_qc
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_qc.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_qc${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_atms_rttov_ops_qc_rttovonedvarcheck
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops_qc_rttovonedvarcheck.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops_qc_rttovonedvarcheck${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-#
+# DAR: I cannot make this test work
     ufo_add_test( NAME    test_ufo_iasi_rttov_ops_qc_rttovonedvarcheck
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops_qc_rttovonedvarcheck.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops_qc_rttovonedvarcheck${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     2
                   LIBS    ufo
-                  LABELS  rttov filters CI_exclude_segfault_camelemis_atlas
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters CI_exclude_segfault_camelemis_atlas
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-
+#
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_obsop_check
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_obsop_check.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_obsop_check${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters CI_exclude_segfault_camelemis_atlas
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters CI_exclude_segfault_camelemis_atlas
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_ssmis_rttov_ops_qc_rttovonedvarcheck
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_rttov_ops_qc_rttovonedvarcheck.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_rttov_ops_qc_rttovonedvarcheck${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_multiplatform
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_multiplatform.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_multiplatform${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_transmittance
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttovonedvar_transmittance_multiplatform
                   TIER    2
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance_multiplatform.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttovonedvar_transmittance_multiplatform${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( ${rttov_FOUND} )
 

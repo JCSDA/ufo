@@ -103,30 +103,50 @@ if( rttov_FOUND )
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters obsfunctions
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
     ufo_add_test( NAME    test_ufo_function_cloudcost_scattering
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_scattering.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_scattering${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters obsfunctions
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
     ufo_add_test( NAME    test_ufo_function_cloudcost_surfwind
                   TIER    1
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_surfwind.yaml"
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_surfwind${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov filters obsfunctions
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
+     ufo_add_test( NAME    test_ufo_function_cloudfirstguess
+                   TIER    1
+                   ECBUILD
+                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudfirstguess${RTTOV_VERSION_SUFFIX}.yaml"
+                   MPI     1
+                   LIBS    ufo
+                   LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
+                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
+    ufo_add_test( NAME    test_ufo_function_cloudtoppressure
+                  TIER    1
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudtoppressure${RTTOV_VERSION_SUFFIX}.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( rttov_FOUND )
 #
@@ -159,18 +179,6 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_iasi
               LIBS    ufo
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
-#
-if( rttov_FOUND )
-    ufo_add_test( NAME    test_ufo_function_cloudfirstguess
-                  TIER    1
-                  ECBUILD
-                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudfirstguess.yaml"
-                  MPI     1
-                  LIBS    ufo
-                  LABELS  rttov filters obsfunctions
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
-endif( rttov_FOUND )
 #
 ufo_add_test( NAME    test_ufo_function_clwmatchidx
               TIER    1
@@ -1047,12 +1055,3 @@ ufo_add_test( NAME    test_ufo_qc_velocitycheck
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_cloudtoppressure
-                TIER    1
-                ECBUILD
-                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudtoppressure.yaml"
-                MPI     1
-                LIBS    ufo
-                LABELS  rttov filters obsfunctions
-                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )

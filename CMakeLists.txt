@@ -94,13 +94,18 @@ else( ${crtm_FOUND} )
     message(STATUS "CRTM NOT FOUND; Excluding CRTM Observation Operator")
 endif( ${crtm_FOUND} )
 
-# RTTOV
-find_package( rttov 12.1.0 QUIET )
-if( ${rttov_FOUND} )
-    message(STATUS "RTTOV FOUND; Including RTTOV Radiance Observation Operator (${rttov_VERSION})")
-else( ${rttov_FOUND} )
-    message(STATUS "RTTOV NOT FOUND; Excluding RTTOV Radiance Observation Operator")
-endif( ${rttov_FOUND} )
+# RTTOV: Try v14 first, then v12
+find_package(rttov 14.0.0 QUIET)
+if(rttov_FOUND)
+    message(STATUS "RTTOV v14 FOUND; Including RTTOV v14 Radiance Observation Operator (${rttov_VERSION})")
+else()
+    find_package(rttov 12.3.0 QUIET)
+    if(rttov_FOUND)
+        message(STATUS "RTTOV v12 FOUND; Including RTTOV v12 Radiance Observation Operator (${rttov_VERSION})")
+    else()
+        message(STATUS "RTTOV NOT FOUND; Excluding RTTOV Radiance Observation Operator")
+    endif()
+endif()
 
 # GSW
 find_package( gsw QUIET )

@@ -704,6 +704,17 @@ endif()
 # Files for RTTOV tests
 #####################################################################
 if( ${rttov_FOUND} )
+  # Determine file extension based on RTTOV version
+  if(rttov_VERSION VERSION_GREATER_EQUAL 14.0)
+    set(RTTOV_COEF_EXT "nc")
+    set(RTTOV_VERSION_SUFFIX "_rttov14")
+    set(RTTOV_CAMEL_VERSION "3")
+  else()
+    set(RTTOV_COEF_EXT "H5")
+    set(RTTOV_VERSION_SUFFIX "_rttov12")
+    set(RTTOV_CAMEL_VERSION "2")
+  endif()
+  
   list( APPEND rttov_coef_data
     rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
     rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
@@ -718,19 +729,19 @@ if( ${rttov_FOUND} )
     rttov7pred54L/rtcoef_noaa_19_amsua.dat
     rttov7pred54L/rtcoef_jpss_0_atms.dat
     rttov7pred54L/rtcoef_noaa_20_atms.dat
-    rttov7pred54L/rtcoef_mtg_2_irs.H5
+    rttov7pred101L/rtcoef_mtg_2_irs.${RTTOV_COEF_EXT}
     )
   list( APPEND rttov_emis_atlas_data
-    CAMEL_coef_climatology_01Month_V002.H5
-    CAMEL_coef_climatology_06Month_V002.H5
-    pchsr_v10.2.H5
-    pchsr_v10.3.H5
-    pchsr_v11.3.H5
-    pchsr_v12.2.H5
-    pchsr_v12.3.H5
-    pchsr_v8.2.H5
-    pchsr_v8.3.H5
-    pchsr_v9.3.H5
+    CAMEL_coef_climatology_01Month_V00${RTTOV_CAMEL_VERSION}.${RTTOV_COEF_EXT}
+    CAMEL_coef_climatology_06Month_V00${RTTOV_CAMEL_VERSION}.${RTTOV_COEF_EXT}
+    pchsr_v10.2.${RTTOV_COEF_EXT}
+    pchsr_v10.3.${RTTOV_COEF_EXT}
+    pchsr_v11.3.${RTTOV_COEF_EXT}
+    pchsr_v12.2.${RTTOV_COEF_EXT}
+    pchsr_v12.3.${RTTOV_COEF_EXT}
+    pchsr_v8.2.${RTTOV_COEF_EXT}
+    pchsr_v8.3.${RTTOV_COEF_EXT}
+    pchsr_v9.3.${RTTOV_COEF_EXT}
     )
 
     
@@ -738,9 +749,9 @@ if( ${rttov_FOUND} )
   if(DEFINED ENV{RTTOV_LOCAL_COEF_DIR} AND EXISTS $ENV{RTTOV_LOCAL_COEF_DIR})
     set(RTTOV_COEF_DIR "$ENV{RTTOV_LOCAL_COEF_DIR}")
   elseif(DEFINED rttov_SOURCE_DIR AND EXISTS "${rttov_SOURCE_DIR}")
-    set(RTTOV_COEF_DIR "${rttov_SOURCE_DIR}/rtcoef_rttov12")
+    set(RTTOV_COEF_DIR "${rttov_SOURCE_DIR}/rtcoef${RTTOV_VERSION_SUFFIX}")
   elseif(DEFINED rttov_BASE_DIR AND EXISTS "${rttov_BASE_DIR}/etc")
-    set(RTTOV_COEF_DIR "${rttov_BASE_DIR}/etc/rtcoef_rttov12")
+    set(RTTOV_COEF_DIR "${rttov_BASE_DIR}/etc/rtcoef${RTTOV_VERSION_SUFFIX}")
   endif()
   message(STATUS "RTTOV coefficient directory: ${RTTOV_COEF_DIR}")
 
@@ -753,31 +764,46 @@ if( ${rttov_FOUND} )
   endif()
   message(STATUS "RTTOV emissivity atlas directory: ${RTTOV_EMIS_ATLAS_DIR}")
   
-  # Extract mietable to binDir/Data
-  if(EXISTS "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.tar.zst")
-    set(archive "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.tar.zst")
-    set(out_dir "${CMAKE_CURRENT_BINARY_DIR}/Data/")
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
-      file(ARCHIVE_EXTRACT INPUT ${archive} DESTINATION ${out_dir} VERBOSE)
-    else()
-      file(MAKE_DIRECTORY ${out_dir})
-      execute_process(
-        COMMAND ${CMAKE_COMMAND} -E tar xf ${archive}
-        WORKING_DIRECTORY {out_dir}
-        RESULT_VARIABLE ret
-        )
-      if(NOT ret EQUAL 0)
-        message(FATAL_ERROR "extract ${archive} => ${out_dir}    ${ret}")
-      endif()
+  # Handle mietable (v12) or hydrotable (v14)
+  if(rttov_VERSION VERSION_GREATER_EQUAL 14.0)
+    # RTTOV v14: use NetCDF hydrotable file directly
+    if(EXISTS "${RTTOV_COEF_DIR}/hydrotable/rttov_hydrotable_metop_amsuamhs.nc")
+      list(APPEND rttov_coef_data "hydrotable/rttov_hydrotable_metop_amsuamhs.nc")
     endif()
-  elseif(EXISTS "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.bin")
-    list(APPEND rttov_coef_data "mietable/mietable_metop_amsuamhs.bin")
+  else()
+    # RTTOV v12: extract mietable from tar.zst archive
+    if(EXISTS "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.tar.zst")
+      set(archive "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.tar.zst")
+      set(out_dir "${CMAKE_CURRENT_BINARY_DIR}/Data/")
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+        file(ARCHIVE_EXTRACT INPUT ${archive} DESTINATION ${out_dir} VERBOSE)
+      else()
+        file(MAKE_DIRECTORY ${out_dir})
+        execute_process(
+          COMMAND ${CMAKE_COMMAND} -E tar xf ${archive}
+          WORKING_DIRECTORY {out_dir}
+          RESULT_VARIABLE ret
+          )
+        if(NOT ret EQUAL 0)
+          message(FATAL_ERROR "extract ${archive} => ${out_dir}    ${ret}")
+        endif()
+      endif()
+    elseif(EXISTS "${RTTOV_COEF_DIR}/mietable/mietable_metop_amsuamhs.bin")
+      list(APPEND rttov_coef_data "mietable/mietable_metop_amsuamhs.bin")
+    endif()
   endif()
     
   # Symlink RTcoef files
   create_symlink_filename( ${RTTOV_COEF_DIR}
                            ${CMAKE_CURRENT_BINARY_DIR}/Data
                            ${rttov_coef_data} )
+
+  # Create symlink for noaa hydrotable pointing to metop hydrotable (v14 only)
+  if(rttov_VERSION VERSION_GREATER_EQUAL 14.0)
+    file(CREATE_LINK ${CMAKE_CURRENT_BINARY_DIR}/Data/rttov_hydrotable_metop_amsuamhs.nc
+                     ${CMAKE_CURRENT_BINARY_DIR}/Data/rttov_hydrotable_noaa_amsuamhs.nc
+                     SYMBOLIC)
+  endif()
 
   # Symlink Emissivity atlas files
   create_symlink_filename( ${RTTOV_EMIS_ATLAS_DIR}

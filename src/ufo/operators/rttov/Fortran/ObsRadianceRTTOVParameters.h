@@ -229,9 +229,8 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   oops::OptionalParameter<bool> RTTOVSupplyFoamFraction{"RTTOV_supply_foam_fraction", this};
 
   /// If true user is supplying cloud liquid water profiles.
-  /// This applies to “clear-sky” simulations only: the cloud
-  /// is treated as a purely absorbing medium. For full scattering use
-  /// RTTOV-SCATT instead.
+  /// This applies to "clear-sky" simulations only: the cloud
+  /// is treated as a purely absorbing medium.
   /// default is false
   oops::OptionalParameter<bool> RTTOVCLWData{"RTTOV_clw_data", this};
 
@@ -361,9 +360,12 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// default is -1.0
   oops::OptionalParameter<float> RTTOVCldStrThreshold{"RTTOV_cldstr_threshold", this};
 
-  /// Switch for simplified cloud stream option - USE WITH CAUTION
+  /// Switch for simplified cloud stream option - USE WITH CAUTION - v12 only. No effect in v14
   /// default is false
   oops::OptionalParameter<bool> RTTOVCldStrSimple{"RTTOV_cldstr_simple", this};
+
+  /// Cloud overlap parameter for cldstr_simple_option:
+  oops::OptionalParameter<int> RTTOVCloudOverlapParam{"RTTOV_cloud_overlap_param", this};
 
   /// Upper pressure limit for cldstr_simple_option (hPa)
   /// default is 750.0 hPa
@@ -461,11 +463,6 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// internally in RTTOV-SCATT. Default is false
   oops::OptionalParameter<bool> MWScattLusercfrac{"MW_Scatt_lusercfrac", this};
 
-  /// If the effective cloud fraction for the profile is below this value, it
-  /// is ignored and the simulation is clear-sky. The value must be in
-  /// the range 0-1 (default = 0.05).
-  oops::OptionalParameter<int> MWScattCCthreshold{"MW_Scatt_CC_threshold", this};
-
   /// hydrometeor TL/AD/K sensitivity is usually generated through two mechanisms,
   /// first the direct effect of bulk optical properties on the cloudy radiances;
   /// second the indirect effect through the effective cloud fraction
@@ -481,6 +478,15 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
   /// are susceptible to the 'zero cloud, zero gradient' problem.
   /// The default value (false) yields the old RTTOV behaviour (no sensitivity for clear layers).
   oops::OptionalParameter<bool> MWScattZeroHydroTLAD{"MW_Scatt_zero_hydro_tlad", this};
+
+  /// The name of the hydrometeors as stored in the RTTOV hydrometeor file.
+  /// These are used to determine to index using a lookup function find_hydrotable_index
+  /// cloud-water is standard for RTTOV
+  /// total_ice is non-standard and just used at the Met Office.
+  oops::Parameter<std::string> MWScattHydrometeorNameCLW{
+    "MW_Scatt_hydrometeor_name_clw", "cloud-water", this};
+  oops::Parameter<std::string> MWScattHydrometeorNameCIW{
+    "MW_Scatt_hydrometeor_name_ciw", "total_ice", this};
 };
 
 class ObsRadianceRTTOVParameters : public ObsOperatorParametersBase {

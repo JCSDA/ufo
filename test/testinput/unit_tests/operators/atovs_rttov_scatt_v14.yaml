@@ -1,0 +1,53 @@
+time window:
+  begin: 2021-01-14T09:00:00Z
+  end: 2021-01-15T15:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Debug: false
+    Absorbers: &rttov_absorbers [CIW]
+    linear obs operator:
+      increment variables:
+      - air_temperature
+      - water_vapor_mixing_ratio_wrt_moist_air
+      - cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+      - cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      RTTOV_GasUnitConv: true
+      UseRHwaterForQC: &UseRHwaterForQC true # default
+      Do_MW_Scatt: true
+      # nooa_18 added just to test RTTOV coefficient reading
+      # regardless its data presence in the obsfile
+      WMO_ID: &wmo_id [3,209]
+      Sat_ID: &sat_id [metop_1,noaa_18]
+      Instrument_Name: &inst_name AMSUAMHS
+      CoefficientPath: &coef_path Data/
+      InspectProfileNumber: [1]
+      MW_Scatt_zero_hydro_tlad: false
+      MW_Scatt_hydro_cfrac_tlad: true
+      MW_Scatt_zero_jac_press: 300.0
+      RTTOV_clw_data: false
+  obs space:
+    name: metop_1_amsua_mhs
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atovs_metopb_obs_2021011512_rttov_scatt_v14.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &ops_channels 1-20
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/atovs_metopb_obs_2021011512_rttov_scatt_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_rttov_scatt.nc4
+  rms ref: 239.40968838
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 5.0e-2
+    tolerance AD: 1.0e-11
+

@@ -1,0 +1,92 @@
+_: &stable_layers_cloud_top_pressure_channels 5, 6, 7, 9, 10, 11
+
+time window:
+  begin: 2021-01-14T21:00:00Z
+  end: 2021-01-15T03:00:00Z
+
+observations:
+- obs space:
+    name: GeoCloud
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/cloudtoppressure_testdata_obs.nc4
+    simulated variables: [brightnessTemperature]
+    channels: *stable_layers_cloud_top_pressure_channels
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/ufo/testinput_tier_1/cloudtoppressure_testdata_out_v14.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/cloudtoppressure_testdata_geovals.nc4
+  HofX: HofX
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/cloudtoppressure_testdata_obsdiags.nc4
+  obs filters:
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: NoStableLayers
+      initial value: false
+  - filter: Variable Assignment
+    assignments:
+      - name: MetaData/pressureAtTopOfCloudStableLayers
+        type: float
+        function:
+          name: ObsFunction/StableLayersCloudTopPressure
+          options:
+            channels: *stable_layers_cloud_top_pressure_channels
+            window channel: 9
+            tropopause level: MetaData/TropHeight
+            corrected brightness temperature: OneDVar/brightnessTemperature
+            temperature limit warm: 5.0
+            temperature limit cold: -10.0
+            stable density: 0.1
+            relative humidity density: 40.0
+            relative humidity offset: -1.0
+            relative humidity minimum: 0.0
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: MetaData/callNumber
+      is_in: 2
+    assignments:
+    - name: MetaData/pressureAtTopOfCloudStableLayers
+      type: float
+      function:
+        name: ObsFunction/StableLayersCloudTopPressure
+        options:
+          channels: *stable_layers_cloud_top_pressure_channels
+          brightness temperature constraint: true
+          window channel: 9
+          tropopause level: MetaData/TropHeight
+          corrected brightness temperature: OneDVar/brightnessTemperature
+          temperature limit warm: 5.0
+          temperature limit cold: -10.0
+          stable density: 0.1
+          relative humidity density: 80.0
+          relative humidity offset: -0.1
+          relative humidity minimum: 0.1
+          where:
+          - variable:
+              name: MetaData/callNumber
+            is_in: 2
+  compareVariables:
+  - reference:
+      name: TestReference/pressureAtTopOfCloudStableLayers
+    test:
+      name: MetaData/pressureAtTopOfCloudStableLayers
+    relTol: 1.0e-4
+  - reference:
+      name: TestReference/overcastBriTempAtCloudTop
+    test:
+      name: MetaData/overcastBriTempAtCloudTop
+    relTol: 1.0e-4
+  - reference:
+      name: TestReference/pressureAtTopOfCloudErrorStableLayers
+    test:
+      name: MetaData/standardDeviationAtCloudTop
+    relTol: 1.0e-4
+  - reference:
+      name: TestReference/NoStableLayers
+    test:
+      name: DiagnosticFlags/NoStableLayers/brightnessTemperature

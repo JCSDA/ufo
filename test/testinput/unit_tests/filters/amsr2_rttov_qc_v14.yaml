@@ -1,0 +1,56 @@
+time window:
+  begin: 2019-12-29T21:00:00Z
+  end: 2019-12-30T03:00:00Z
+
+observations:
+- obs operator:
+    name: RTTOV
+    Absorbers: &rttov_absorbers []
+    obs options: &rttov_options
+      RTTOV_default_opts: UKMO_PS45
+      SatRad_compatibility: true
+      WMO_ID: &wmo_id [122]
+      Sat_ID: &sat_id [gcom-w_1]
+      Instrument_Name: &inst_name AMSR2
+      CoefficientPath: Data/
+      InspectProfileNumber: [1] # optional parameter
+  obs space:
+    name: amsr2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsr2_obs_20191230T0000Z_100subset.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 7-9, 11-13 
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/amsr2_obs_20191230T0000Z_100subset_rttov_qc_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsr2_geovals_20191230T0000Z_100subset.nc4
+  obs filters:
+  # Equivalent to OPS Im36HCloud = T, OminBCloud_36H = 4.3
+  - filter: Difference Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: 7-9,11-13
+    reference: ObsValue/brightnessTemperature_11
+    value: HofX/brightnessTemperature_11
+    threshold: 4.3
+    action:
+      name: reject
+  # Equivalent to OPS ImCloudAnomaly = T, ImCloudThresh = 5
+  - filter: Bounds Check
+    test variables:
+    - name: ObsFunction/BgdDepartureAnomaly
+      options:
+        channel_low_freq: 11 
+        channel_high_freq: 13
+        ObsBias: ObsBias
+    maxvalue: 5
+    action:
+      name: reject
+  # QC amsr2 brightnessTemperature_13: 17 out of bounds.
+  # QC amsr2 brightnessTemperature_13: 70 rejected by difference check.
+  # QC amsr2 brightnessTemperature_13: 13 passed out of 100 observations.      
+  passedBenchmark: 78

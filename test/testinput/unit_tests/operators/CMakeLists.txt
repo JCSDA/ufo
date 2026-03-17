@@ -1833,7 +1833,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_smap_crtm
+ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
@@ -1969,164 +1969,167 @@ endif( crtm_FOUND )
 
 if( ${rttov_FOUND} )
 
+# RTTOVCPP tests (optional, controlled by ENABLE_RTTOVCPP_TESTS option)
+if(ENABLE_RTTOVCPP_TESTS)
     ufo_add_test( NAME    test_ufo_opr_amsua_rttovcpp
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} rttovcpp operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_linopr_amsua_rttovcpp
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} rttovcpp operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+endif(ENABLE_RTTOVCPP_TESTS)
 #
     ufo_add_test( NAME    test_ufo_opr_atms_rttov_allsurfacetypes
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_allsurfacetypes.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_allsurfacetypes${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atms_rttov_bad_data
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_bad_data.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_bad_data${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atms_rttov_ops
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atms_rttov_multiplatform
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_multiplatform.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_multiplatform${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_linopr_atms_rttov_ops
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_atovs_rttov_scatt
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_linopr_atovs_rttov_scatt
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_iasi_rttov_ops
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_linopr_iasi_rttov_ops
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_linopr_iasi_rttov_ops_2pe
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_check
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators CI_exclude_segfault_camelemis_atlas
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators CI_exclude_segfault_camelemis_atlas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_tlad_check
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators CI_exclude_segfault_camelemis_atlas
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators CI_exclude_segfault_camelemis_atlas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_tlad_2pe_check
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  rttov operators CI_exclude_segfault_camelemis_atlas
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators CI_exclude_segfault_camelemis_atlas
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_opr_ssmis_rttov_ops
               TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_rttov_ops.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  rttov operators
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 endif( ${rttov_FOUND} )
