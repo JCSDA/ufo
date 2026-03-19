@@ -1,0 +1,137 @@
+time window:
+  begin: 2020-11-01T09:00:00Z
+  end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: &Sensor_ID atms_n20
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: atms_n20
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/atms_n20_obs_2020110112_m.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/atms_n20_outfile_2020110112_hubernorm_test_out.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &all_channels 1-22
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/atms_n20_geoval_2020110112_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_atms_n20.2020110106.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        tlapse: &atms_n20_tlap Data/ufo/testinput_tier_1/instruments/radiance/atms_n20_tlapmean.txt
+      - name: lapseRate
+        tlapse: *atms_n20_tlap
+      - name: emissivityJacobian
+      - name: sensorScanAngle
+        order: 4
+      - name: sensorScanAngle
+        order: 3
+      - name: sensorScanAngle
+        order: 2
+      - name: sensorScanAngle
+
+  obs post filters:
+# Set DerivedObsValue/observation_minus_background = ObsValue - HofX for all channels
+  - filter: Variable Assignment
+    assignments:
+      - name: DerivedObsValue/observation_minus_background
+        channels: *all_channels
+        type: float
+        function:
+          name: ObsFunction/LinearCombination
+          options:
+            variables:
+            - name: ObsValue/brightnessTemperature
+              channels: *all_channels
+            - name: HofX/brightnessTemperature
+              channels: *all_channels
+            coefs: [1.0,-1.0]
+# Set error as piece-wise linear fucntion of the x variable,
+# which is the absolute value of observation-minus-backgrounid
+# Result is piecewise linear approximation to the Huber norm
+  - filter: Perform Action
+    filter variables:
+    - name: brightnessTemperature
+      channels: *all_channels
+    action:
+      name: assign error
+      error function:
+        name: ObsFunction/ObsErrorModelRamp
+        channels: *all_channels
+        options:
+          xvar:
+            name: ObsFunction/Arithmetic
+            channels: *all_channels
+            options:
+              variables:
+              - name: DerivedObsValue/observation_minus_background
+                channels: *all_channels
+              absolute value: [true]
+          channels: *all_channels
+          x0:    [ 2.500,  2.000,  1.500,  0.750,  0.500,
+                   0.500,  0.500,  0.650,  0.650,  0.650,
+                   0.750,  0.750,  0.850,  1.150,  1.850,
+                   3.500,  3.000,  2.000,  1.850,  1.750,
+                   1.750,  1.750]
+          x1:    [ 10.00,  8.500,  7.500,  4.500,  3.500,
+                   2.500,  2.500,  3.000,  3.000,  3.000,
+                   3.000,  3.000,  3.500,  4.500,  5.000,
+                   15.00,  15.00,  7.500,  6.000,  6.000,
+                   5.500,  5.500]
+          err0:  [ 4.500,  4.500,  2.500,  2.000,  0.500,
+                   0.300,  0.300,  0.400,  0.400,  0.400,
+                   0.450,  0.450,  0.550,  0.800,  1.500,
+                   2.000,  2.000,  1.850,  1.500,  1.500,
+                   1.500,  1.500]
+          err1:  [ 25.00,  20.00,  10.00,  7.500,  3.000,
+                   2.000,  1.500,  0.850,  0.850,  0.850,
+                   0.600,  0.600,  0.750,  1.000,  6.000,
+                   20.00,  30.00,  25.00,  15.00,  12.00,
+                   9.000,  6.500]
+# not a decaying ramp
+          save: true # save x-variable
+
+#Gross Check
+  - filter: Background Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: *all_channels
+    threshold: 3.0
+    action:
+      name: reject
+
+# Useflag check, reject channels where use_flag <= 0
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: *all_channels
+    test variables:
+    - name: ObsFunction/ChannelUseflagCheckRad
+      channels: *all_channels
+      options:
+        channels: *all_channels
+        use_flag: [ -1, -1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    -1, -1]
+    minvalue: 1.0e-12
+    actions:
+      - name: reject
+  passedBenchmark: 180
+# Start with 220 obs (22 channel, with 10 location each),
+# reject 4 channels with useflag check (-40)
+

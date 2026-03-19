@@ -72,6 +72,17 @@ if( crtm_FOUND )
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
+    # creating Huber Norm like filter
+    ufo_add_test( NAME  instrument_atms_n20_gfs_HofX_qc_huber
+        TIER    2
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_n20_gfs_HofX_qc_huber.yaml"
+        MPI     1
+        LABELS  crtm atms n20 qc instrument
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo )
+
     ufo_add_test( NAME  instrument_atms_npp_gfs_HofX_qc
         TIER    2
         ECBUILD
