@@ -24,13 +24,13 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/atovs_obs_2021011512_multiplatform.nc4
+        obsfile: Data/ufo/testinput_tier_1/atovs_obs_2021011512_multiplatform_v14.nc4
     simulated variables: [brightnessTemperature]
     channels: &all_channels 1-20
     # obsdataout:
     #   engine:
     #     type: H5File
-    #     obsfile: Data/atovs_obs_2021011512_multiplatform_out.nc4
+    #     obsfile: Data/atovs_obs_2021011512_multiplatform_out_v14.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_atovs_20210115T1200Z_multiplatform.nc4
   obs prior filters:

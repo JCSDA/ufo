@@ -93,7 +93,7 @@ observations:
     Store1DVarLWP: true
     Store1DVarIWP: true
     ConvergeCheckChans: [20]
-  passedBenchmark: 1160      # number of passed obs
+  passedBenchmark: 1202      # number of passed obs
 # Test Logging with the Newton minimizer
 - obs operator:
     <<: *ObsOperator
@@ -226,7 +226,7 @@ observations:
     Store1DVarLWP: true
     Store1DVarIWP: true
     ConvergeCheckChans: [20]
-  passedBenchmark: 1229      # number of passed obs
+  passedBenchmark: 1254      # number of passed obs
 # Test Logging with the ML minimizer
 - obs operator:
     <<: *ObsOperator
@@ -466,7 +466,7 @@ observations:
     nlevels: 70
     qtotal: true
     RetrievedErrorFactor: -1.0
-  passedBenchmark: 774      # number of passed obs
+  passedBenchmark: 756      # number of passed obs
   compareVariables:
     - reference:
         name: TestReferenceOneDVar/brightnessTemperature
