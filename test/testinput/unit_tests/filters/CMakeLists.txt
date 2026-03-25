@@ -76,7 +76,7 @@ ufo_add_test( NAME    test_ufo_gnssrobendmetoffice_qc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_qc.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters CI_exclude_hang_gnssro_ukmo_intel_O1
+              LABELS  filters ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_gnssrobendmetoffice_qc_profile
@@ -96,7 +96,7 @@ ufo_add_test( NAME    test_ufo_gnssrobendmetoffice_obserror
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_obserror.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters CI_exclude_hang_gnssro_ukmo_intel_O1
+              LABELS  filters ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_gnssrorefmetoffice_qc
@@ -157,7 +157,7 @@ ufo_add_test( NAME    test_ufo_gnssro_super_refraction_check
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssro_super_refraction_check.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters CI_exclude_hang_gnssro_ukmo_intel_O1
+              LABELS  filters ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    test_ufo_metar_qc_filters
@@ -1248,7 +1248,7 @@ if( ${rttov_FOUND} )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops_qc_rttovonedvarcheck${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     2
                   LIBS    ufo
-                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters CI_exclude_segfault_camelemis_atlas
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters ci_oneapi_disable
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_mtgirs_reconrad_obsop_check
@@ -1258,7 +1258,7 @@ if( ${rttov_FOUND} )
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_obsop_check${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters CI_exclude_segfault_camelemis_atlas
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters ci_oneapi_disable
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_ssmis_rttov_ops_qc_rttovonedvarcheck
