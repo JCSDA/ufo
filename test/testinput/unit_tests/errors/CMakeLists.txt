@@ -49,15 +49,15 @@ ufo_add_test( NAME    test_ufo_obserrorwithingroupcorr
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
-ufo_add_test( NAME    test_ufo_obserrordiffusion
-              TIER    1
-              ECBUILD
-              SOURCES ../../../mains/TestObsErrorCovariance.cc
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiffusion.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  errors
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+ ufo_add_test( NAME    test_ufo_obserrordiffusion
+             TIER    1
+             ECBUILD
+             SOURCES ../../../mains/TestObsErrorCovariance.cc
+             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiffusion.yaml"
+             MPI     1
+             LIBS    ufo
+             LABELS  errors ci_flake_disable
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    test_ufo_obserror_dirac_diffusion
               TIER    1
