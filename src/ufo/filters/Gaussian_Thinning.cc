@@ -118,7 +118,8 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
           priorityVariable.group(), priorityVariable.variable());
   }
   if (options_.selectMedian) {
-    ASSERT(filtervars.size() == 1);  // only works on one variable at a time
+    ASSERT_MSG(filtervars.size() == 1,
+      "filtervars must contain only one variable to calculate the median.");
     const size_t filterVarIndex = 0;
     std::vector<float> obs = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
                               filtervars.variable(filterVarIndex).variable());
@@ -128,7 +129,8 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     isThinned = identifyThinnedObservationsMedian(
                               validObsIds, obsAccessor, splitter, obs, options_.minNumObsPerBin);
   } else if (options_.selectMean) {
-    ASSERT(filtervars.size() == 1);  // only works on one variable at a time
+    ASSERT_MSG(filtervars.size() == 1,
+      "filtervars must contain only one variable to calculate the mean.");
     const size_t filterVarIndex = 0;
     const std::string varname = filtervars.variable(filterVarIndex).variable();
     // Gather obs from all MPI ranks
