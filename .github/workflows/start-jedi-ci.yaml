@@ -42,7 +42,7 @@ jobs:
         with:
           container_version: 'latest'
           unittest_tag: ufo
-          unittest_dependencies: crtm ioda ioda-data oops gsw ufo-data oasim ropp-ufo rttov jedi-model-data
+          test_dependencies: crtm ioda ioda-data oops gsw ufo-data oasim ropp-ufo rttov jedi-model-data
           test_script: run_tests.sh
           target_repo_dir: target_repository
           bundle_branch: develop
