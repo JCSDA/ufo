@@ -126,7 +126,6 @@ list( APPEND ufo_test_input
   testinput/geovals.yaml
   testinput/locations.yaml
   testinput/operatorutils.yaml
-  testinput/parameters_older_eckit.yaml
   testinput/parameters.yaml
   testinput/primitive_variables.yaml
   testinput/recordhandler.yaml
@@ -322,20 +321,11 @@ ecbuild_add_test( TARGET  test_ufo_superob_radar_template
                   LIBS    ufo)
 
 # Test Parameters
-if(eckit_VERSION VERSION_GREATER_EQUAL 1.16)
-  ecbuild_add_test( TARGET  test_ufo_parameters
-                    SOURCES mains/TestParameters.cc
-                    ARGS    "testinput/parameters.yaml"
-                    ENVIRONMENT OOPS_TRAPFPE=1 VALIDATE_PARAMETERS=1
-                    LIBS    ufo )
-else()
-  # Due to changes in eckit 1.16 a different input file is required.
-  ecbuild_add_test( TARGET  test_ufo_parameters
-                    SOURCES mains/TestParameters.cc
-                    ARGS    "testinput/parameters_older_eckit.yaml"
-                    ENVIRONMENT OOPS_TRAPFPE=1 VALIDATE_PARAMETERS=1
-                    LIBS    ufo )
-endif()
+ecbuild_add_test( TARGET  test_ufo_parameters
+                  SOURCES mains/TestParameters.cc
+                  ARGS    "testinput/parameters.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1 VALIDATE_PARAMETERS=1
+                  LIBS    ufo )
 
 # Test operator utils
 ecbuild_add_test( TARGET  test_ufo_operator_utils
