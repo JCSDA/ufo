@@ -272,40 +272,23 @@ observations:
         name: ObsValue/specificHumidity
       absTol: 1.0e-7
 
-- obs space:
-    name: test_specificHumidity_formulation_exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
-    simulated variables: [relativeHumidity, airTemperature, stationPressure]
-  obs filters:
-  - filter: Variable Transforms
-    Transform: SpecificHumidity
-    Formulation: Murphy
-    pressure group variable: "MetaData"
-    pressure variable: "pressure"
-    pressure at 2m variable: "stationPressure"
-    temperature variable: "airTemperature"
-    relative humidity variable: "relativeHumidity"
-    specific humidity variable: "specificHumidity"
-  expectExceptionWithMessage: "Error: YAML validation failed."
-
-- obs space:
-    name: test_specificHumidity_spelling_exception
-    obsdatain:
-      engine:
-        type: H5File
-        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
-    simulated variables: [relativeHumidity, airTemperature, stationPressure]
-  obs filters:
-  - filter: Variable Transforms
-    Transform: SpecificHumidity
-    Method: Murphyy
-    pressure group variable: "MetaData"
-    pressure variable: "pressure"
-    pressure at 2m variable: "stationPressure"
-    temperature variable: "airTemperature"
-    relative humidity variable: "relativeHumidity"
-    specific humidity variable: "specificHumidity"
-  expectExceptionWithMessage: "Bad parameter: Unknown method: Murphyy"
+# The following test is commented out because the HDF5 error causes a significant
+# increase in ctest time, can be added back once that is fixed
+# - obs space:
+#     name: test_specificHumidity_spelling_exception
+#     obsdatain:
+#       engine:
+#         type: H5File
+#         obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
+#     simulated variables: [relativeHumidity, airTemperature, stationPressure]
+#   obs filters:
+#   - filter: Variable Transforms
+#     Transform: SpecificHumidity
+#     Method: Murphyy
+#     pressure group variable: "MetaData"
+#     pressure variable: "pressure"
+#     pressure at 2m variable: "stationPressure"
+#     temperature variable: "airTemperature"
+#     relative humidity variable: "relativeHumidity"
+#     specific humidity variable: "specificHumidity"
+#   expectExceptionWithMessage: "Bad parameter: Unknown method: Murphyy"

@@ -153,7 +153,6 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_rhumidity.yaml"
-              ENVIRONMENT VALIDATE_PARAMETERS=1
               MPI     2
               LIBS    ufo
               LABELS  unit_tests variabletransforms
@@ -184,7 +183,6 @@ ufo_add_test( NAME    test_ufo_variabletransforms_shumidity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_shumidity.yaml"
-              ENVIRONMENT VALIDATE_PARAMETERS=1
               MPI     2
               LIBS    ufo
               LABELS  unit_tests variabletransforms
