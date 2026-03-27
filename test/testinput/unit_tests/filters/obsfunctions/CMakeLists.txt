@@ -1,4 +1,4 @@
-# (C) Copyright 2022 UCAR.
+# (C) Copyright 2026 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,19 +7,17 @@
 
 
 if( crtm_FOUND )
-    ufo_add_test( NAME    test_ufo_amsr2_clw_ret
-                  TIER    2
+    ufo_add_test( NAME    amsr2_clw_ret
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_clw_ret.yaml"
                   MPI     1
                   LIBS    ufo
-                  LABELS  crtm filters obsfunctions
+                  LABELS  crtm filters obsfunctions tier2
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( crtm_FOUND )
 #
-ufo_add_test( NAME    test_ufo_function_osw_windspeed
-              TIER    1
+ufo_add_test( NAME    function_osw_windspeed
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_osw_windspeed.yaml"
@@ -28,8 +26,7 @@ ufo_add_test( NAME    test_ufo_function_osw_windspeed
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_atovs_lwpfirstguess
-              TIER    1
+ufo_add_test( NAME    atovs_lwpfirstguess
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_lwpfirstguess.yaml"
@@ -38,8 +35,7 @@ ufo_add_test( NAME    test_ufo_atovs_lwpfirstguess
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_atovs_scenedeperrors
-              TIER    1
+ufo_add_test( NAME    atovs_scenedeperrors
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_scenedeperrors.yaml"
@@ -48,8 +44,7 @@ ufo_add_test( NAME    test_ufo_atovs_scenedeperrors
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_arithmetic
-              TIER    1
+ufo_add_test( NAME    function_arithmetic
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_arithmetic.yaml"
@@ -58,8 +53,7 @@ ufo_add_test( NAME    test_ufo_function_arithmetic
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_aircraft_bc_offline
-              TIER    1
+ufo_add_test( NAME    function_aircraft_bc_offline
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_aircraftBCOffline.yaml"
@@ -68,8 +62,7 @@ ufo_add_test( NAME    test_ufo_function_aircraft_bc_offline
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_averagetemperaturebelow
-              TIER    1
+ufo_add_test( NAME    function_averagetemperaturebelow
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_averagetemperaturebelow.yaml"
@@ -78,8 +71,7 @@ ufo_add_test( NAME    test_ufo_function_averagetemperaturebelow
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_bennartzscatindex
-              TIER    1
+ufo_add_test( NAME    function_bennartzscatindex
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_bennartzscatindex.yaml"
@@ -88,8 +80,7 @@ ufo_add_test( NAME    test_ufo_function_bennartzscatindex
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_bgddepartureanomaly
-              TIER    1
+ufo_add_test( NAME    function_bgddepartureanomaly
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_bgddepartureanomaly.yaml"
@@ -99,8 +90,7 @@ ufo_add_test( NAME    test_ufo_function_bgddepartureanomaly
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 if( rttov_FOUND )
-    ufo_add_test( NAME    test_ufo_function_cloudcost
-                  TIER    1
+    ufo_add_test( NAME    function_cloudcost
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost${RTTOV_VERSION_SUFFIX}.yaml"
@@ -109,8 +99,7 @@ if( rttov_FOUND )
                   LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-    ufo_add_test( NAME    test_ufo_function_cloudcost_scattering
-                  TIER    1
+    ufo_add_test( NAME    function_cloudcost_scattering
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_scattering${RTTOV_VERSION_SUFFIX}.yaml"
@@ -119,8 +108,7 @@ if( rttov_FOUND )
                   LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-    ufo_add_test( NAME    test_ufo_function_cloudcost_surfwind
-                  TIER    1
+    ufo_add_test( NAME    function_cloudcost_surfwind
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudcost_surfwind${RTTOV_VERSION_SUFFIX}.yaml"
@@ -129,8 +117,7 @@ if( rttov_FOUND )
                   LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-     ufo_add_test( NAME    test_ufo_function_cloudfirstguess
-                   TIER    1
+     ufo_add_test( NAME    function_cloudfirstguess
                    ECBUILD
                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                    ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudfirstguess${RTTOV_VERSION_SUFFIX}.yaml"
@@ -139,8 +126,7 @@ if( rttov_FOUND )
                    LABELS  rttov ${RTTOV_VERSION_LABEL} filters obsfunctions
                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-    ufo_add_test( NAME    test_ufo_function_cloudtoppressure
-                  TIER    1
+    ufo_add_test( NAME    function_cloudtoppressure
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_cloudtoppressure${RTTOV_VERSION_SUFFIX}.yaml"
@@ -150,8 +136,7 @@ if( rttov_FOUND )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( rttov_FOUND )
 #
-ufo_add_test( NAME    test_ufo_function_clouddetect_airs
-              TIER    1
+ufo_add_test( NAME    function_clouddetect_airs
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clouddetect_airs.yaml"
@@ -160,28 +145,25 @@ ufo_add_test( NAME    test_ufo_function_clouddetect_airs
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clouddetect_cris
-              TIER    2
+ufo_add_test( NAME    function_clouddetect_cris
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clouddetect_cris.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters obsfunctions
+              LABELS  filters obsfunctions tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clouddetect_iasi
-              TIER    2
+ufo_add_test( NAME    function_clouddetect_iasi
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clouddetect_iasi.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters obsfunctions
+              LABELS  filters obsfunctions tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwmatchidx
-              TIER    1
+ufo_add_test( NAME    function_clwmatchidx
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwmatchidx.yaml"
@@ -190,8 +172,7 @@ ufo_add_test( NAME    test_ufo_function_clwmatchidx
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwmatchidx_atms
-              TIER    1
+ufo_add_test( NAME    function_clwmatchidx_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwmatchidx_atms.yaml"
@@ -200,8 +181,7 @@ ufo_add_test( NAME    test_ufo_function_clwmatchidx_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret
-              TIER    1
+ufo_add_test( NAME    function_clwret
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret.yaml"
@@ -210,8 +190,7 @@ ufo_add_test( NAME    test_ufo_function_clwret
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret_atms
-              TIER    1
+ufo_add_test( NAME    function_clwret_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret_atms.yaml"
@@ -220,8 +199,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret_hofx_atms
-              TIER    1
+ufo_add_test( NAME    function_clwret_hofx_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret_hofx_atms.yaml"
@@ -230,8 +208,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_hofx_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret_hofx
-              TIER    1
+ufo_add_test( NAME    function_clwret_hofx
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret_hofx.yaml"
@@ -240,8 +217,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_hofx
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret_ssmis
-              TIER    1
+ufo_add_test( NAME    function_clwret_ssmis
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret_ssmis.yaml"
@@ -250,8 +226,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_ssmis
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwretmean
-              TIER    1
+ufo_add_test( NAME    function_clwretmean
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwretmean.yaml"
@@ -260,8 +235,7 @@ ufo_add_test( NAME    test_ufo_function_clwretmean
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwretmean_atms
-              TIER    1
+ufo_add_test( NAME    function_clwretmean_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwretmean_atms.yaml"
@@ -270,8 +244,7 @@ ufo_add_test( NAME    test_ufo_function_clwretmean_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret_obsval
-              TIER    1
+ufo_add_test( NAME    function_clwret_obsval
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret_obsval.yaml"
@@ -280,8 +253,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_obsval
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_clwret_obsval_atms
-              TIER    1
+ufo_add_test( NAME    function_clwret_obsval_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_clwret_obsval_atms.yaml"
@@ -290,8 +262,7 @@ ufo_add_test( NAME    test_ufo_function_clwret_obsval_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_conditional
-              TIER    1
+ufo_add_test( NAME    function_conditional
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_conditional.yaml"
@@ -300,8 +271,7 @@ ufo_add_test( NAME    test_ufo_function_conditional
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_assignvalueequalchannels
-              TIER    1
+ufo_add_test( NAME    function_assignvalueequalchannels
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_assignvalueequalchannels.yaml"
@@ -310,8 +280,7 @@ ufo_add_test( NAME    test_ufo_function_assignvalueequalchannels
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_datetimeoffset
-              TIER    1
+ufo_add_test( NAME    function_datetimeoffset
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_datetimeoffset.yaml"
@@ -320,8 +289,7 @@ ufo_add_test( NAME    test_ufo_function_datetimeoffset
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_drawvaluefromfile
-              TIER    1
+ufo_add_test( NAME    function_drawvaluefromfile
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_drawvaluefromfile.yaml"
@@ -330,8 +298,7 @@ ufo_add_test( NAME    test_ufo_function_drawvaluefromfile
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_elementmultiply
-              TIER    1
+ufo_add_test( NAME    function_elementmultiply
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_elementmultiply.yaml"
@@ -340,8 +307,7 @@ ufo_add_test( NAME    test_ufo_function_elementmultiply
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errfgrosschk
-              TIER    1
+ufo_add_test( NAME    function_errfgrosschk
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errfgrosschk.yaml"
@@ -350,8 +316,7 @@ ufo_add_test( NAME    test_ufo_function_errfgrosschk
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errfjsfc
-              TIER    1
+ufo_add_test( NAME    function_errfjsfc
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errfjsfc.yaml"
@@ -360,8 +325,7 @@ ufo_add_test( NAME    test_ufo_function_errfjsfc
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errflat
-              TIER    1
+ufo_add_test( NAME    function_errflat
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errflat.yaml"
@@ -370,8 +334,7 @@ ufo_add_test( NAME    test_ufo_function_errflat
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errfsdoei
-              TIER    1
+ufo_add_test( NAME    function_errfsdoei
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errfsdoei.yaml"
@@ -380,8 +343,7 @@ ufo_add_test( NAME    test_ufo_function_errfsdoei
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errfsdoei_atms
-              TIER    1
+ufo_add_test( NAME    function_errfsdoei_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errfsdoei_atms.yaml"
@@ -390,8 +352,7 @@ ufo_add_test( NAME    test_ufo_function_errfsdoei_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errftopo
-              TIER    1
+ufo_add_test( NAME    function_errftopo
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errftopo.yaml"
@@ -400,18 +361,15 @@ ufo_add_test( NAME    test_ufo_function_errftopo
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errftransmittop
-              TIER    1
+ufo_add_test( NAME    function_errftransmittop
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errftransmittop.yaml"
-              MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_errfwavenum
-              TIER    1
+ufo_add_test( NAME    function_errfwavenum
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_errfwavenum.yaml"
@@ -420,8 +378,7 @@ ufo_add_test( NAME    test_ufo_function_errfwavenum
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_exponential
-              TIER    1
+ufo_add_test( NAME    function_exponential
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_exponential.yaml"
@@ -430,8 +387,7 @@ ufo_add_test( NAME    test_ufo_function_exponential
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_hydrometeorchk
-              TIER    1
+ufo_add_test( NAME    function_hydrometeorchk
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_hydrometeorchk.yaml"
@@ -440,8 +396,7 @@ ufo_add_test( NAME    test_ufo_function_hydrometeorchk
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_hydrometeorchk_atms
-              TIER    1
+ufo_add_test( NAME    function_hydrometeorchk_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_hydrometeorchk_atms.yaml"
@@ -450,8 +405,7 @@ ufo_add_test( NAME    test_ufo_function_hydrometeorchk_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_lam_domaincheck
-              TIER    1
+ufo_add_test( NAME    function_lam_domaincheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_lam_domaincheck.yaml"
@@ -460,8 +414,7 @@ ufo_add_test( NAME    test_ufo_function_lam_domaincheck
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_lam_domaincheck_circle
-              TIER    1
+ufo_add_test( NAME    function_lam_domaincheck_circle
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_lam_domaincheck_circle.yaml"
@@ -470,8 +423,7 @@ ufo_add_test( NAME    test_ufo_function_lam_domaincheck_circle
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_linear_combination_int
-              TIER    1
+ufo_add_test( NAME    function_linear_combination_int
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_linear_combination_int.yaml"
@@ -480,8 +432,7 @@ ufo_add_test( NAME    test_ufo_function_linear_combination_int
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_linear_combination_multichannel
-              TIER    1
+ufo_add_test( NAME    function_linear_combination_multichannel
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_linear_combination_multichannel.yaml"
@@ -490,8 +441,7 @@ ufo_add_test( NAME    test_ufo_function_linear_combination_multichannel
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_modellevelindex
-              TIER    1
+ufo_add_test( NAME    function_modellevelindex
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_modellevelindex.yaml"
@@ -500,8 +450,7 @@ ufo_add_test( NAME    test_ufo_function_modellevelindex
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_metoffice_rh_corr
-              TIER    1
+ufo_add_test( NAME    function_metoffice_rh_corr
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_metoffice_rh_corr.yaml"
@@ -510,8 +459,7 @@ ufo_add_test( NAME    test_ufo_function_metoffice_rh_corr
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustMarineWinds
-              TIER    1
+ufo_add_test( NAME    function_ModelSurfaceHeightAdjustMarineWinds
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_ModelSurfaceHeightAdjustMarineWinds.yaml"
@@ -520,8 +468,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustMarineWinds
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustRelativeHumidity
-              TIER    1
+ufo_add_test( NAME    function_ModelSurfaceHeightAdjustRelativeHumidity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_ModelSurfaceHeightAdjustRelativeHumidity.yaml"
@@ -530,8 +477,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustRelativeHumidity
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustTemperature
-              TIER    1
+ufo_add_test( NAME    function_ModelSurfaceHeightAdjustTemperature
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_ModelSurfaceHeightAdjustTemperature.yaml"
@@ -540,8 +486,7 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustTemperature
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustWindVector
-              TIER    1
+ufo_add_test( NAME    function_ModelSurfaceHeightAdjustWindVector
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_ModelSurfaceHeightAdjustWindVector.yaml"
@@ -550,18 +495,16 @@ ufo_add_test( NAME    test_ufo_function_ModelSurfaceHeightAdjustWindVector
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_nsstret
-              TIER    2
+ufo_add_test( NAME    function_nsstret
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_nsstret.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters obsfunctions
+              LABELS  filters obsfunctions tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrmean
-              TIER    1
+ufo_add_test( NAME    function_obserrmean
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrmean.yaml"
@@ -570,8 +513,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrmean_abi
-              TIER    1
+ufo_add_test( NAME    function_obserrmean_abi
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrmean_abi.yaml"
@@ -580,8 +522,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean_abi
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrmean_atms
-              TIER    1
+ufo_add_test( NAME    function_obserrmean_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrmean_atms.yaml"
@@ -590,8 +531,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrmean_mhs
-              TIER    1
+ufo_add_test( NAME    function_obserrmean_mhs
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrmean_mhs.yaml"
@@ -600,8 +540,7 @@ ufo_add_test( NAME    test_ufo_function_obserrmean_mhs
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrorfactorconv
-              TIER    1
+ufo_add_test( NAME    function_obserrorfactorconv
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorfactorconv.yaml"
@@ -610,8 +549,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorfactorconv
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrorfactorpressurecheck
-              TIER    1
+ufo_add_test( NAME    function_obserrorfactorpressurecheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorfactorpressurecheck.yaml"
@@ -620,8 +558,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorfactorpressurecheck
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrorfactorquotient
-              TIER    1
+ufo_add_test( NAME    function_obserrorfactorquotient
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorfactorquotient.yaml"
@@ -630,8 +567,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorfactorquotient
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrorhumidity
-              TIER    1
+ufo_add_test( NAME    function_obserrorhumidity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorhumidity.yaml"
@@ -640,8 +576,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorhumidity
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrorinflatesfcp
-              TIER    1
+ufo_add_test( NAME    function_obserrorinflatesfcp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorinflatesfcp.yaml"
@@ -650,8 +585,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorinflatesfcp
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_obserrorstepwiselinear
-              TIER    1
+ufo_add_test( NAME    function_obserrorstepwiselinear
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorstepwiselinear.yaml"
@@ -660,8 +594,7 @@ ufo_add_test( NAME    test_ufo_function_obserrorstepwiselinear
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_oceanpressuretodepth
-              TIER    1
+ufo_add_test( NAME    function_oceanpressuretodepth
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_oceanpressuretodepth.yaml"
@@ -670,8 +603,7 @@ ufo_add_test( NAME    test_ufo_function_oceanpressuretodepth
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_orbitangle_ssmis
-              TIER    1
+ufo_add_test( NAME    function_orbitangle_ssmis
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_orbitangle_ssmis.yaml"
@@ -680,8 +612,7 @@ ufo_add_test( NAME    test_ufo_function_orbitangle_ssmis
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_profilelevelcount
-              TIER    1
+ufo_add_test( NAME    function_profilelevelcount
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_profilelevelcount.yaml"
@@ -690,8 +621,7 @@ ufo_add_test( NAME    test_ufo_function_profilelevelcount
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_radarscanedgeflag
-              TIER    1
+ufo_add_test( NAME    function_radarscanedgeflag
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_radarscanedgeflag.yaml"
@@ -700,8 +630,7 @@ ufo_add_test( NAME    test_ufo_function_radarscanedgeflag
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_writerecnumobsspace_1PE
-              TIER    1
+ufo_add_test( NAME    function_writerecnumobsspace_1PE
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_writerecnumobsspace.yaml"
@@ -710,8 +639,7 @@ ufo_add_test( NAME    test_ufo_function_writerecnumobsspace_1PE
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_writerecnumobsspace_3PE
-              TIER    1
+ufo_add_test( NAME    function_writerecnumobsspace_3PE
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_writerecnumobsspace.yaml"
@@ -720,8 +648,7 @@ ufo_add_test( NAME    test_ufo_function_writerecnumobsspace_3PE
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_mpirank_2PE
-              TIER    1
+ufo_add_test( NAME    function_mpirank_2PE
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_mpirank_2pe.yaml"
@@ -730,8 +657,7 @@ ufo_add_test( NAME    test_ufo_function_mpirank_2PE
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_mpirank_3PE
-              TIER    1
+ufo_add_test( NAME    function_mpirank_3PE
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_mpirank_3pe.yaml"
@@ -740,8 +666,7 @@ ufo_add_test( NAME    test_ufo_function_mpirank_3PE
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_reperr
-              TIER    1
+ufo_add_test( NAME    function_reperr
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_reperr.yaml"
@@ -750,18 +675,16 @@ ufo_add_test( NAME    test_ufo_function_reperr
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_satwind_indiv_errors
-              TIER    2
+ufo_add_test( NAME    function_satwind_indiv_errors
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_satwind_indiv_errors.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters obsfunctions
+              LABELS  filters obsfunctions tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_satwindsLNVDcheck
-              TIER    1
+ufo_add_test( NAME    function_satwindsLNVDcheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_satwindsLNVDcheck.yaml"
@@ -770,8 +693,7 @@ ufo_add_test( NAME    test_ufo_function_satwindsLNVDcheck
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_satwindsSPDBcheck
-              TIER    1
+ufo_add_test( NAME    function_satwindsSPDBcheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_satwindsSPDBcheck.yaml"
@@ -780,8 +702,7 @@ ufo_add_test( NAME    test_ufo_function_satwindsSPDBcheck
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_scatret
-              TIER    1
+ufo_add_test( NAME    function_scatret
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_scatret.yaml"
@@ -790,8 +711,7 @@ ufo_add_test( NAME    test_ufo_function_scatret
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_scatret_atms
-              TIER    1
+ufo_add_test( NAME    function_scatret_atms
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_scatret_atms.yaml"
@@ -800,8 +720,7 @@ ufo_add_test( NAME    test_ufo_function_scatret_atms
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_selectstatistic
-              TIER    1
+ufo_add_test( NAME    function_selectstatistic
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_selectstatistic.yaml"
@@ -810,8 +729,7 @@ ufo_add_test( NAME    test_ufo_function_selectstatistic
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setseaiceemiss
-              TIER    1
+ufo_add_test( NAME    function_setseaiceemiss
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setseaiceemiss.yaml"
@@ -820,8 +738,7 @@ ufo_add_test( NAME    test_ufo_function_setseaiceemiss
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype.yaml"
@@ -830,8 +747,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype_aappsg
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype_aappsg
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_aappsg.yaml"
@@ -840,8 +756,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_aappsg
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype_landfrac
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype_landfrac
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_landfrac.yaml"
@@ -851,8 +766,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_landfrac
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype_default
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype_default
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_default.yaml"
@@ -861,8 +775,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_default
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype_airs
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype_airs
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_airs.yaml"
@@ -871,8 +784,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_airs
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype_ssmis
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype_ssmis
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_ssmis.yaml"
@@ -881,8 +793,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_ssmis
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_setsurfacetype_tolerance
-              TIER    1
+ufo_add_test( NAME    function_setsurfacetype_tolerance
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_setsurfacetype_tolerance.yaml"
@@ -891,8 +802,7 @@ ufo_add_test( NAME    test_ufo_function_setsurfacetype_tolerance
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_solarzenith
-              TIER    1
+ufo_add_test( NAME    function_solarzenith
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_solarzenith.yaml"
@@ -901,8 +811,7 @@ ufo_add_test( NAME    test_ufo_function_solarzenith
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_solarzenith_skiprejected
-              TIER    1
+ufo_add_test( NAME    function_solarzenith_skiprejected
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_solarzenith_skiprejected.yaml"
@@ -912,8 +821,7 @@ ufo_add_test( NAME    test_ufo_function_solarzenith_skiprejected
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 	      
 # Test for the string manipulation obsfucntion
-ufo_add_test( NAME    test_ufo_function_stringmanipulation
-              TIER    1
+ufo_add_test( NAME    function_stringmanipulation
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_stringmanipulation.yaml"
@@ -923,8 +831,7 @@ ufo_add_test( NAME    test_ufo_function_stringmanipulation
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )	      
 	      
 #
-ufo_add_test( NAME    test_ufo_function_surfacecloudmodellevelcbh
-              TIER    1
+ufo_add_test( NAME    function_surfacecloudmodellevelcbh
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_surfacecloudmodellevelCBH.yaml"
@@ -933,8 +840,7 @@ ufo_add_test( NAME    test_ufo_function_surfacecloudmodellevelcbh
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_surfacecloudcreatecloudcolumn
-              TIER    1
+ufo_add_test( NAME    function_surfacecloudcreatecloudcolumn
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_surfacecloudcreatecloudcolumn.yaml"
@@ -943,8 +849,7 @@ ufo_add_test( NAME    test_ufo_function_surfacecloudcreatecloudcolumn
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_geocloudcreatecloudcolumn
-              TIER    1
+ufo_add_test( NAME    function_geocloudcreatecloudcolumn
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_geocloudcreatecloudcolumn.yaml"
@@ -953,8 +858,7 @@ ufo_add_test( NAME    test_ufo_function_geocloudcreatecloudcolumn
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 
-ufo_add_test( NAME    test_ufo_function_tropo_estimate
-              TIER    1
+ufo_add_test( NAME    function_tropo_estimate
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_tropo_estimate.yaml"
@@ -963,8 +867,7 @@ ufo_add_test( NAME    test_ufo_function_tropo_estimate
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_tropopause_height
-              TIER    1
+ufo_add_test( NAME    function_tropopause_height
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_tropopauseheight.yaml"
@@ -973,8 +876,7 @@ ufo_add_test( NAME    test_ufo_function_tropopause_height
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_velocity_channels
-              TIER    1
+ufo_add_test( NAME    function_velocity_channels
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_velocity_channels.yaml"
@@ -983,8 +885,7 @@ ufo_add_test( NAME    test_ufo_function_velocity_channels
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_velocity
-              TIER    1
+ufo_add_test( NAME    function_velocity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_velocity.yaml"
@@ -993,8 +894,7 @@ ufo_add_test( NAME    test_ufo_function_velocity
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_visibilitydiagnostic
-              TIER    1
+ufo_add_test( NAME    function_visibilitydiagnostic
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_visibilitydiagnostic.yaml"
@@ -1003,8 +903,7 @@ ufo_add_test( NAME    test_ufo_function_visibilitydiagnostic
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_wdirdiff
-              TIER    1
+ufo_add_test( NAME    function_wdirdiff
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_wdirdiff.yaml"
@@ -1013,8 +912,7 @@ ufo_add_test( NAME    test_ufo_function_wdirdiff
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_scatambiguity
-              TIER    1
+ufo_add_test( NAME    function_scatambiguity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_scatambiguity.yaml"
@@ -1023,8 +921,7 @@ ufo_add_test( NAME    test_ufo_function_scatambiguity
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
-ufo_add_test( NAME    test_ufo_function_satwindserrnorm
-              TIER    1
+ufo_add_test( NAME    function_satwindserrnorm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_satwindsErrnormCheck.yaml"
@@ -1034,8 +931,7 @@ ufo_add_test( NAME    test_ufo_function_satwindserrnorm
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
 if( crtm_FOUND )
-    ufo_add_test( NAME    test_ufo_gmi_clw_ret
-                  TIER    1
+    ufo_add_test( NAME    gmi_clw_ret
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_clw_ret.yaml"
@@ -1045,8 +941,7 @@ if( crtm_FOUND )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( crtm_FOUND )
 #
-ufo_add_test( NAME    test_ufo_qc_velocitycheck
-              TIER    1
+ufo_add_test( NAME    qc_velocitycheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_velocitycheck.yaml"

@@ -6,8 +6,7 @@
 # Unit tests for operators and TLAD
 
 
-ufo_add_test( NAME    test_ufo_opr_adt
-              TIER    1
+ufo_add_test( NAME    opr_adt
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/adt.yaml"
@@ -16,8 +15,7 @@ ufo_add_test( NAME    test_ufo_opr_adt
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_adt
-              TIER    1
+ufo_add_test( NAME    linopr_adt
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/adt.yaml"
@@ -26,8 +24,7 @@ ufo_add_test( NAME    test_ufo_linopr_adt
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_aircraft
-              TIER    1
+ufo_add_test( NAME    opr_aircraft
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aircraft.yaml"
@@ -36,8 +33,7 @@ ufo_add_test( NAME    test_ufo_opr_aircraft
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_aircraft
-              TIER    1
+ufo_add_test( NAME    linopr_aircraft
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aircraft.yaml"
@@ -46,8 +42,7 @@ ufo_add_test( NAME    test_ufo_linopr_aircraft
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_aod_extinction
-              TIER    1
+ufo_add_test( NAME    opr_aod_extinction
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_extinction.yaml"
@@ -56,8 +51,7 @@ ufo_add_test( NAME    test_ufo_opr_aod_extinction
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_aod_extinction
-              TIER    1
+ufo_add_test( NAME    linopr_aod_extinction
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_extinction.yaml"
@@ -66,8 +60,7 @@ ufo_add_test( NAME    test_ufo_linopr_aod_extinction
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_aod_metoffice
-              TIER    1
+ufo_add_test( NAME    opr_aod_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_metoffice.yaml"
@@ -76,8 +69,7 @@ ufo_add_test( NAME    test_ufo_opr_aod_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
- ufo_add_test( NAME    test_ufo_opr_aod_ukca
-               TIER    1
+ ufo_add_test( NAME    opr_aod_ukca
                ECBUILD
                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_ukca.yaml"
@@ -86,8 +78,7 @@ ufo_add_test( NAME    test_ufo_opr_aod_metoffice
                LABELS  operators
                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_aod_metoffice
-              TIER    1
+ufo_add_test( NAME    linopr_aod_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_metoffice.yaml"
@@ -96,8 +87,7 @@ ufo_add_test( NAME    test_ufo_linopr_aod_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_background_error_identity
-              TIER    1
+ufo_add_test( NAME    opr_background_error_identity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/background_error_identity.yaml"
@@ -106,8 +96,7 @@ ufo_add_test( NAME    test_ufo_opr_background_error_identity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_diag_background_error_identity
-              TIER    1
+ufo_add_test( NAME    diag_background_error_identity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_identity.yaml"
@@ -116,8 +105,7 @@ ufo_add_test( NAME    test_ufo_diag_background_error_identity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_background_error_vert_interp
-              TIER    1
+ufo_add_test( NAME    opr_background_error_vert_interp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/background_error_vert_interp.yaml"
@@ -126,8 +114,7 @@ ufo_add_test( NAME    test_ufo_opr_background_error_vert_interp
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_background_error_vert_interp_pmissing
-              TIER    1
+ufo_add_test( NAME    opr_background_error_vert_interp_pmissing
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/background_error_vert_interp_pmissing.yaml"
@@ -136,8 +123,7 @@ ufo_add_test( NAME    test_ufo_opr_background_error_vert_interp_pmissing
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_categorical
-              TIER    1
+ufo_add_test( NAME    opr_categorical
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/categorical.yaml"
@@ -146,18 +132,16 @@ ufo_add_test( NAME    test_ufo_opr_categorical
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_categorical
-              TIER    2
+ufo_add_test( NAME    linopr_categorical
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/categorical.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_chleuzintegr
-              TIER    1
+ufo_add_test( NAME    opr_chleuzintegr
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/chleuzintegr.yaml"
@@ -166,8 +150,7 @@ ufo_add_test( NAME    test_ufo_opr_chleuzintegr
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_composite
-              TIER    1
+ufo_add_test( NAME    opr_composite
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/composite.yaml"
@@ -176,8 +159,7 @@ ufo_add_test( NAME    test_ufo_opr_composite
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_composite
-              TIER    1
+ufo_add_test( NAME    linopr_composite
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/composite.yaml"
@@ -186,8 +168,7 @@ ufo_add_test( NAME    test_ufo_linopr_composite
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_composite_vertInterp_SfcPCorrected
-              TIER    1
+ufo_add_test( NAME    opr_composite_vertInterp_SfcPCorrected
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/composite_vertInterp_SfcPCorrected.yaml"
@@ -196,8 +177,7 @@ ufo_add_test( NAME    test_ufo_opr_composite_vertInterp_SfcPCorrected
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_coolskin
-              TIER    1
+ufo_add_test( NAME    opr_coolskin
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/coolskin.yaml"
@@ -206,8 +186,7 @@ ufo_add_test( NAME    test_ufo_opr_coolskin
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_coolskin
-              TIER    1
+ufo_add_test( NAME    linopr_coolskin
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/coolskin.yaml"
@@ -216,8 +195,7 @@ ufo_add_test( NAME    test_ufo_linopr_coolskin
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssroref
-              TIER    1
+ufo_add_test( NAME    opr_gnssroref
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssroref.yaml"
@@ -226,8 +204,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssroref
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssroref
-              TIER    1
+ufo_add_test( NAME    linopr_gnssroref
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssroref.yaml"
@@ -236,8 +213,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssroref
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrorefmetoffice
-              TIER    1
+ufo_add_test( NAME    opr_gnssrorefmetoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice.yaml"
@@ -246,8 +222,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrorefmetoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice
-              TIER    1
+ufo_add_test( NAME    linopr_gnssrorefmetoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice.yaml"
@@ -256,8 +231,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrorefmetoffice_refractivity_changes
-              TIER    1
+ufo_add_test( NAME    opr_gnssrorefmetoffice_refractivity_changes
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_refractivity_changes.yaml"
@@ -266,8 +240,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrorefmetoffice_refractivity_changes
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice_refractivity_changes
-              TIER    1
+ufo_add_test( NAME    linopr_gnssrorefmetoffice_refractivity_changes
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrorefmetoffice_refractivity_changes.yaml"
@@ -276,8 +249,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrorefmetoffice_refractivity_changes
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobendmetoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice.yaml"
@@ -286,8 +258,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice
-              TIER    1
+ufo_add_test( NAME    linopr_gnssrobendmetoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice.yaml"
@@ -296,8 +267,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nopseudo
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobendmetoffice_nopseudo
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nopseudo.yaml"
@@ -306,8 +276,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nopseudo
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nopseudo
-              TIER    1
+ufo_add_test( NAME    linopr_gnssrobendmetoffice_nopseudo
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nopseudo.yaml"
@@ -316,8 +285,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nopseudo
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_profile
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobendmetoffice_profile
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_profile.yaml"
@@ -326,8 +294,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_profile
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nosupercheck
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobendmetoffice_nosupercheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck.yaml"
@@ -336,8 +303,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_nosupercheck
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nosupercheck
-              TIER    1
+ufo_add_test( NAME    linopr_gnssrobendmetoffice_nosupercheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck.yaml"
@@ -346,8 +312,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_nosupercheck
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_refractivity_changes
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobendmetoffice_refractivity_changes
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
@@ -356,8 +321,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobendmetoffice_refractivity_changes
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_refractivity_changes
-              TIER    1
+ufo_add_test( NAME    linopr_gnssrobendmetoffice_refractivity_changes
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
@@ -366,8 +330,7 @@ ufo_add_test( NAME    test_ufo_linopr_gnssrobendmetoffice_refractivity_changes
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobndnbam
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam.yaml"
@@ -376,18 +339,16 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gnssrobndnbam
-              TIER    2
+ufo_add_test( NAME    linopr_gnssrobndnbam
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam.yaml"
               MPI     2
               LIBS    ufo
-              LABELS  operators
+              LABELS  operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_super_refraction
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobndnbam_super_refraction
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam_super_refraction.yaml"
@@ -396,8 +357,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_super_refraction
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_0obs
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobndnbam_0obs
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam_0obs.yaml"
@@ -406,8 +366,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_0obs
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_1obs
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobndnbam_1obs
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam_1obs.yaml"
@@ -416,8 +375,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_1obs
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_1obs_2pe
-              TIER    1
+ufo_add_test( NAME    opr_gnssrobndnbam_1obs_2pe
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndnbam_1obs.yaml"
@@ -426,8 +384,7 @@ ufo_add_test( NAME    test_ufo_opr_gnssrobndnbam_1obs_2pe
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_groundgnssmetoffice
-              TIER    1
+ufo_add_test( NAME    opr_groundgnssmetoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/groundgnssmetoffice.yaml"
@@ -436,8 +393,7 @@ ufo_add_test( NAME    test_ufo_opr_groundgnssmetoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_groundgnssmetoffice
-              TIER    1
+ufo_add_test( NAME    linopr_groundgnssmetoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/groundgnssmetoffice.yaml"
@@ -450,8 +406,7 @@ ufo_add_test( NAME    test_ufo_linopr_groundgnssmetoffice
 
 if( ${ropp-ufo_FOUND} )
 
-    ufo_add_test( NAME    test_ufo_opr_groundgnssropp
-              TIER    1
+    ufo_add_test( NAME    opr_groundgnssropp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/groundgnssropp.yaml"
@@ -460,8 +415,7 @@ if( ${ropp-ufo_FOUND} )
               LABELS  ropp-ufo operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_gnssrobndropp1d
-              TIER    1
+    ufo_add_test( NAME    opr_gnssrobndropp1d
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndropp1d.yaml"
@@ -470,8 +424,7 @@ if( ${ropp-ufo_FOUND} )
               LABELS  ropp-ufo operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_gnssrobndropp1d
-              TIER    1
+    ufo_add_test( NAME    linopr_gnssrobndropp1d
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndropp1d.yaml"
@@ -480,8 +433,7 @@ if( ${ropp-ufo_FOUND} )
               LABELS  ropp-ufo operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_gnssrobndropp2d
-              TIER    1
+    ufo_add_test( NAME    opr_gnssrobndropp2d
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndropp2d.yaml"
@@ -490,8 +442,7 @@ if( ${ropp-ufo_FOUND} )
               LABELS  ropp-ufo operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_gnssroBndROPP2d
-              TIER    1
+    ufo_add_test( NAME    linopr_gnssroBndROPP2d
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobndropp2d.yaml"
@@ -501,8 +452,7 @@ if( ${ropp-ufo_FOUND} )
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 if ( ROPP_ARO)
-    ufo_add_test( NAME    test_ufo_opr_gnssarobndropp2d
-              TIER    1
+    ufo_add_test( NAME    opr_gnssarobndropp2d
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssarobndropp2d.yaml"
@@ -511,8 +461,7 @@ if ( ROPP_ARO)
               LABELS  ropp-ufo operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_gnssaroBndROPP2d
-              TIER    1
+    ufo_add_test( NAME    linopr_gnssaroBndROPP2d
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssarobndropp2d.yaml"
@@ -524,8 +473,7 @@ endif()
 
 endif( ${ropp-ufo_FOUND} )
 #
-ufo_add_test( NAME    test_ufo_opr_gome_metop-a
-              TIER    1
+ufo_add_test( NAME    opr_gome_metop-a
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gome_metop-a.yaml"
@@ -534,8 +482,7 @@ ufo_add_test( NAME    test_ufo_opr_gome_metop-a
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gome_metop-a
-              TIER    1
+ufo_add_test( NAME    linopr_gome_metop-a
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gome_metop-a.yaml"
@@ -544,8 +491,7 @@ ufo_add_test( NAME    test_ufo_linopr_gome_metop-a
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_gome_metop-a_flipz
-              TIER    1
+ufo_add_test( NAME    opr_gome_metop-a_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gome_metop-a_flipz.yaml"
@@ -554,8 +500,7 @@ ufo_add_test( NAME    test_ufo_opr_gome_metop-a_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_gome_metop-a_flipz
-              TIER    1
+ufo_add_test( NAME    linopr_gome_metop-a_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gome_metop-a_flipz.yaml"
@@ -564,8 +509,7 @@ ufo_add_test( NAME    test_ufo_linopr_gome_metop-a_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_identity
-              TIER    1
+ufo_add_test( NAME    opr_identity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/identity.yaml"
@@ -574,8 +518,7 @@ ufo_add_test( NAME    test_ufo_opr_identity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_identity
-              TIER    1
+ufo_add_test( NAME    linopr_identity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/identity.yaml"
@@ -584,8 +527,7 @@ ufo_add_test( NAME    test_ufo_linopr_identity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_logarithm
-              TIER    1
+ufo_add_test( NAME    opr_logarithm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/logarithm.yaml"
@@ -594,8 +536,7 @@ ufo_add_test( NAME    test_ufo_opr_logarithm
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_logarithm
-              TIER    1
+ufo_add_test( NAME    linopr_logarithm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/logarithm.yaml"
@@ -604,8 +545,7 @@ ufo_add_test( NAME    test_ufo_linopr_logarithm
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_product
-              TIER    1
+ufo_add_test( NAME    opr_product
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/product.yaml"
@@ -614,8 +554,7 @@ ufo_add_test( NAME    test_ufo_opr_product
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_product
-              TIER    1
+ufo_add_test( NAME    linopr_product
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/product.yaml"
@@ -624,8 +563,7 @@ ufo_add_test( NAME    test_ufo_linopr_product
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_insitupm
-              TIER    1
+ufo_add_test( NAME    opr_insitupm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/insitupm.yaml"
@@ -634,8 +572,7 @@ ufo_add_test( NAME    test_ufo_opr_insitupm
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_insitupm
-              TIER    1
+ufo_add_test( NAME    linopr_insitupm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/insitupm.yaml"
@@ -644,8 +581,7 @@ ufo_add_test( NAME    test_ufo_linopr_insitupm
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_mopitt_co
-              TIER    1
+ufo_add_test( NAME    opr_mopitt_co
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mopitt_co.yaml"
@@ -654,8 +590,7 @@ ufo_add_test( NAME    test_ufo_opr_mopitt_co
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_mopitt_co
-              TIER    1
+ufo_add_test( NAME    linopr_mopitt_co
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mopitt_co.yaml"
@@ -664,8 +599,7 @@ ufo_add_test( NAME    test_ufo_linopr_mopitt_co
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_obsdiag_background_error_upper_air_and_surface_variables
-              TIER    1
+ufo_add_test( NAME    opr_obsdiag_background_error_upper_air_and_surface_variables
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_upper_air_and_surface_variables.yaml"
@@ -674,8 +608,7 @@ ufo_add_test( NAME    test_ufo_opr_obsdiag_background_error_upper_air_and_surfac
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_obsdiag_background_error_vert_interp_air_pressure
-              TIER    1
+ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_air_pressure
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_vert_interp_air_pressure.yaml"
@@ -684,8 +617,7 @@ ufo_add_test( NAME    test_ufo_opr_obsdiag_background_error_vert_interp_air_pres
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_obsdiag_background_error_vert_interp_height
-              TIER    1
+ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_height
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_vert_interp_height.yaml"
@@ -694,8 +626,7 @@ ufo_add_test( NAME    test_ufo_opr_obsdiag_background_error_vert_interp_height
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_omi_aura
-              TIER    1
+ufo_add_test( NAME    opr_omi_aura
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/omi_aura.yaml"
@@ -704,8 +635,7 @@ ufo_add_test( NAME    test_ufo_opr_omi_aura
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_omi_aura
-              TIER    1
+ufo_add_test( NAME    linopr_omi_aura
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/omi_aura.yaml"
@@ -714,8 +644,7 @@ ufo_add_test( NAME    test_ufo_linopr_omi_aura
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_omi_aura_flipz
-              TIER    1
+ufo_add_test( NAME    opr_omi_aura_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/omi_aura_flipz.yaml"
@@ -724,8 +653,7 @@ ufo_add_test( NAME    test_ufo_opr_omi_aura_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_omi_aura_flipz
-              TIER    1
+ufo_add_test( NAME    linopr_omi_aura_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/omi_aura_flipz.yaml"
@@ -734,8 +662,7 @@ ufo_add_test( NAME    test_ufo_linopr_omi_aura_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_ompslp_npp
-              TIER    1
+ufo_add_test( NAME    opr_ompslp_npp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompslp_npp.yaml"
@@ -744,8 +671,7 @@ ufo_add_test( NAME    test_ufo_opr_ompslp_npp
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompslp_npp
-              TIER    1
+ufo_add_test( NAME    linopr_ompslp_npp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompslp_npp.yaml"
@@ -754,8 +680,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompslp_npp
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_ompsnp_npp
-              TIER    1
+ufo_add_test( NAME    opr_ompsnp_npp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp.yaml"
@@ -764,8 +689,7 @@ ufo_add_test( NAME    test_ufo_opr_ompsnp_npp
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp
-              TIER    1
+ufo_add_test( NAME    linopr_ompsnp_npp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp.yaml"
@@ -774,8 +698,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_ompsnp_npp_flipz
-              TIER    1
+ufo_add_test( NAME    opr_ompsnp_npp_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_flipz.yaml"
@@ -784,8 +707,7 @@ ufo_add_test( NAME    test_ufo_opr_ompsnp_npp_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp_flipz
-              TIER    1
+ufo_add_test( NAME    linopr_ompsnp_npp_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_flipz.yaml"
@@ -794,8 +716,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_ompsnp_npp_L127
-              TIER    1
+ufo_add_test( NAME    opr_ompsnp_npp_L127
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_L127.yaml"
@@ -804,8 +725,7 @@ ufo_add_test( NAME    test_ufo_opr_ompsnp_npp_L127
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp_L127
-              TIER    1
+ufo_add_test( NAME    linopr_ompsnp_npp_L127
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_L127.yaml"
@@ -814,8 +734,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp_L127
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_ompstc_npp
-              TIER    1
+ufo_add_test( NAME    opr_ompstc_npp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompstc_npp.yaml"
@@ -824,8 +743,7 @@ ufo_add_test( NAME    test_ufo_opr_ompstc_npp
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompstc_npp
-              TIER    1
+ufo_add_test( NAME    linopr_ompstc_npp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompstc_npp.yaml"
@@ -835,8 +753,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompstc_npp
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 #
-ufo_add_test( NAME    test_ufo_opr_ompstc_npp_columnop
-              TIER    1
+ufo_add_test( NAME    opr_ompstc_npp_columnop
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompstc_npp_columnop.yaml"
@@ -845,8 +762,7 @@ ufo_add_test( NAME    test_ufo_opr_ompstc_npp_columnop
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompstc_npp_columnop
-              TIER    1
+ufo_add_test( NAME    linopr_ompstc_npp_columnop
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompstc_npp_columnop.yaml"
@@ -856,8 +772,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompstc_npp_columnop
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 #
-ufo_add_test( NAME    test_ufo_opr_ompsnp_npp_columnop
-              TIER    1
+ufo_add_test( NAME    opr_ompsnp_npp_columnop
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_columnop.yaml"
@@ -866,8 +781,7 @@ ufo_add_test( NAME    test_ufo_opr_ompsnp_npp_columnop
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp_columnop
-              TIER    1
+ufo_add_test( NAME    linopr_ompsnp_npp_columnop
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_columnop.yaml"
@@ -877,8 +791,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompsnp_npp_columnop
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 #
-ufo_add_test( NAME    test_ufo_opr_ompstc_npp_flipz
-              TIER    1
+ufo_add_test( NAME    opr_ompstc_npp_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompstc_npp_flipz.yaml"
@@ -887,8 +800,7 @@ ufo_add_test( NAME    test_ufo_opr_ompstc_npp_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_ompstc_npp_flipz
-              TIER    1
+ufo_add_test( NAME    linopr_ompstc_npp_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompstc_npp_flipz.yaml"
@@ -897,8 +809,7 @@ ufo_add_test( NAME    test_ufo_linopr_ompstc_npp_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_radiosonde
-              TIER    1
+ufo_add_test( NAME    opr_radiosonde
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radiosonde.yaml"
@@ -907,8 +818,7 @@ ufo_add_test( NAME    test_ufo_opr_radiosonde
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_radiosonde
-              TIER    1
+ufo_add_test( NAME    linopr_radiosonde
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radiosonde.yaml"
@@ -917,8 +827,7 @@ ufo_add_test( NAME    test_ufo_linopr_radiosonde
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
               #
-ufo_add_test( NAME    test_ufo_opr_pibal
-             TIER    1
+ufo_add_test( NAME    opr_pibal
              ECBUILD
              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pibal.yaml"
@@ -927,8 +836,7 @@ ufo_add_test( NAME    test_ufo_opr_pibal
              LABELS  operators
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_pibal
-             TIER    1
+ufo_add_test( NAME    linopr_pibal
              ECBUILD
              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pibal.yaml"
@@ -937,8 +845,7 @@ ufo_add_test( NAME    test_ufo_linopr_pibal
              LABELS  operators
              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_nearest_neighbor_soil
-              TIER    1
+ufo_add_test( NAME    nearest_neighbor_soil
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/hofx_smc.yaml"
@@ -947,8 +854,7 @@ ufo_add_test( NAME    test_ufo_nearest_neighbor_soil
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_radialvelocity
-              TIER    1
+ufo_add_test( NAME    opr_radialvelocity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radialvelocity.yaml"
@@ -957,8 +863,7 @@ ufo_add_test( NAME    test_ufo_opr_radialvelocity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_reflectivity
-              TIER    1
+ufo_add_test( NAME    opr_reflectivity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reflectivity.yaml"
@@ -967,8 +872,7 @@ ufo_add_test( NAME    test_ufo_opr_reflectivity
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_reflectivity_oucaps
-              TIER    1
+ufo_add_test( NAME    opr_reflectivity_oucaps
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reflectivity_oucaps.yaml"
@@ -978,8 +882,7 @@ ufo_add_test( NAME    test_ufo_opr_reflectivity_oucaps
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_opr_radar_reflectivity_metoffice
-              TIER    1
+ufo_add_test( NAME    opr_radar_reflectivity_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_reflectivity_metoffice.yaml"
@@ -988,8 +891,7 @@ ufo_add_test( NAME    test_ufo_opr_radar_reflectivity_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_radar_reflectivity_metoffice_composite
-              TIER    1
+ufo_add_test( NAME    opr_radar_reflectivity_metoffice_composite
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_reflectivity_metoffice_composite.yaml"
@@ -998,8 +900,7 @@ ufo_add_test( NAME    test_ufo_opr_radar_reflectivity_metoffice_composite
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_radar_doppler_wind
-              TIER    1
+ufo_add_test( NAME    opr_radar_doppler_wind
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_doppler_wind.yaml"
@@ -1008,8 +909,7 @@ ufo_add_test( NAME    test_ufo_opr_radar_doppler_wind
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_radar_doppler_wind
-              TIER    1
+ufo_add_test( NAME    linopr_radar_doppler_wind
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_doppler_wind.yaml"
@@ -1018,8 +918,7 @@ ufo_add_test( NAME    test_ufo_linopr_radar_doppler_wind
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_radar_reflectivity_metoffice
-              TIER    1
+ufo_add_test( NAME    linopr_radar_reflectivity_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radar_reflectivity_metoffice.yaml"
@@ -1028,8 +927,7 @@ ufo_add_test( NAME    test_ufo_linopr_radar_reflectivity_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_sattcwv
-              TIER    1
+ufo_add_test( NAME    opr_sattcwv
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sattcwv.yaml"
@@ -1038,8 +936,7 @@ ufo_add_test( NAME    test_ufo_opr_sattcwv
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_sattcwv
-              TIER    1
+ufo_add_test( NAME    linopr_sattcwv
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sattcwv.yaml"
@@ -1048,8 +945,7 @@ ufo_add_test( NAME    test_ufo_linopr_sattcwv
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_lightning
-              TIER    1
+ufo_add_test( NAME    opr_lightning
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/goesr_glm_fed_lightning.yaml"
@@ -1059,8 +955,7 @@ ufo_add_test( NAME    test_ufo_opr_lightning
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_linopr_lightning
-              TIER    1
+ufo_add_test( NAME    linopr_lightning
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/goesr_glm_fed_lightning.yaml"
@@ -1071,8 +966,7 @@ ufo_add_test( NAME    test_ufo_linopr_lightning
               TEST_DEPENDS ufo_get_ufo_test_data )
 
 #
-ufo_add_test( NAME    test_ufo_opr_satwind
-              TIER    1
+ufo_add_test( NAME    opr_satwind
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/satwind.yaml"
@@ -1081,8 +975,7 @@ ufo_add_test( NAME    test_ufo_opr_satwind
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_satwind_metoffice
-              TIER    1
+ufo_add_test( NAME    opr_satwind_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/satwind_metoffice.yaml"
@@ -1091,8 +984,7 @@ ufo_add_test( NAME    test_ufo_opr_satwind_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_sbuv2_n19
-              TIER    1
+ufo_add_test( NAME    opr_sbuv2_n19
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sbuv2_n19.yaml"
@@ -1101,8 +993,7 @@ ufo_add_test( NAME    test_ufo_opr_sbuv2_n19
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_sbuv2_n19
-              TIER    1
+ufo_add_test( NAME    linopr_sbuv2_n19
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sbuv2_n19.yaml"
@@ -1111,8 +1002,7 @@ ufo_add_test( NAME    test_ufo_linopr_sbuv2_n19
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_sbuv2_n19_flipz
-              TIER    1
+ufo_add_test( NAME    opr_sbuv2_n19_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sbuv2_n19_flipz.yaml"
@@ -1121,8 +1011,7 @@ ufo_add_test( NAME    test_ufo_opr_sbuv2_n19_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_sbuv2_n19_flipz
-              TIER    1
+ufo_add_test( NAME    linopr_sbuv2_n19_flipz
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sbuv2_n19_flipz.yaml"
@@ -1131,8 +1020,7 @@ ufo_add_test( NAME    test_ufo_linopr_sbuv2_n19_flipz
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_sbuv2_n19_L127
-              TIER    1
+ufo_add_test( NAME    opr_sbuv2_n19_L127
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sbuv2_n19_L127.yaml"
@@ -1141,8 +1029,7 @@ ufo_add_test( NAME    test_ufo_opr_sbuv2_n19_L127
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_sbuv2_n19_L127
-              TIER    1
+ufo_add_test( NAME    linopr_sbuv2_n19_L127
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sbuv2_n19_L127.yaml"
@@ -1151,8 +1038,7 @@ ufo_add_test( NAME    test_ufo_linopr_sbuv2_n19_L127
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_scatwind_neutral_metoffice
-              TIER    1
+ufo_add_test( NAME    opr_scatwind_neutral_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/scatwind_neutral_metoffice.yaml"
@@ -1161,8 +1047,7 @@ ufo_add_test( NAME    test_ufo_opr_scatwind_neutral_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_scatwind_neutral_metoffice
-              TIER    1
+ufo_add_test( NAME    linopr_scatwind_neutral_metoffice
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/scatwind_neutral_metoffice_tlad.yaml"
@@ -1171,8 +1056,7 @@ ufo_add_test( NAME    test_ufo_linopr_scatwind_neutral_metoffice
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_seaicefrac
-              TIER    1
+ufo_add_test( NAME    opr_seaicefrac
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/seaicefrac.yaml"
@@ -1181,8 +1065,7 @@ ufo_add_test( NAME    test_ufo_opr_seaicefrac
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_seaicefrac
-              TIER    1
+ufo_add_test( NAME    linopr_seaicefrac
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/seaicefrac.yaml"
@@ -1191,8 +1074,7 @@ ufo_add_test( NAME    test_ufo_linopr_seaicefrac
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_seaicethick
-              TIER    1
+ufo_add_test( NAME    opr_seaicethick
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/seaicethick.yaml"
@@ -1201,8 +1083,7 @@ ufo_add_test( NAME    test_ufo_opr_seaicethick
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_seaicethick
-              TIER    1
+ufo_add_test( NAME    linopr_seaicethick
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/seaicethick.yaml"
@@ -1211,8 +1092,7 @@ ufo_add_test( NAME    test_ufo_linopr_seaicethick
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_identity_sst
-              TIER    1
+ufo_add_test( NAME    opr_identity_sst
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sea_surface_temp.yaml"
@@ -1221,8 +1101,7 @@ ufo_add_test( NAME    test_ufo_opr_identity_sst
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_identity_sst
-              TIER    1
+ufo_add_test( NAME    linopr_identity_sst
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sea_surface_temp.yaml"
@@ -1231,8 +1110,7 @@ ufo_add_test( NAME    test_ufo_linopr_identity_sst
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_sfccorrected_pressure
-              TIER    1
+ufo_add_test( NAME    opr_sfccorrected_pressure
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sfccorrected_pressure.yaml"
@@ -1241,8 +1119,7 @@ ufo_add_test( NAME    test_ufo_opr_sfccorrected_pressure
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_sfccorrected_temperature
-              TIER    1
+ufo_add_test( NAME    opr_sfccorrected_temperature
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sfccorrected_temperature.yaml"
@@ -1251,8 +1128,7 @@ ufo_add_test( NAME    test_ufo_opr_sfccorrected_temperature
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_timeoper
-              TIER    1
+ufo_add_test( NAME    opr_timeoper
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/timeoper.yaml"
@@ -1261,8 +1137,7 @@ ufo_add_test( NAME    test_ufo_opr_timeoper
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_timeoper_pe4
-              TIER    1
+ufo_add_test( NAME    opr_timeoper_pe4
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/timeoper.yaml"
@@ -1271,8 +1146,7 @@ ufo_add_test( NAME    test_ufo_opr_timeoper_pe4
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_timeoper
-              TIER    1
+ufo_add_test( NAME    linopr_timeoper
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/timeoper.yaml"
@@ -1281,8 +1155,7 @@ ufo_add_test( NAME    test_ufo_linopr_timeoper
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_tropomi_no2
-              TIER    1
+ufo_add_test( NAME    opr_tropomi_no2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/tropomi_no2.yaml"
@@ -1291,8 +1164,7 @@ ufo_add_test( NAME    test_ufo_opr_tropomi_no2
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_tropomi_no2
-              TIER    1
+ufo_add_test( NAME    linopr_tropomi_no2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/tropomi_no2.yaml"
@@ -1301,8 +1173,7 @@ ufo_add_test( NAME    test_ufo_linopr_tropomi_no2
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_vert_interp_pmissing
-              TIER    1
+ufo_add_test( NAME    opr_vert_interp_pmissing
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vert_interp_pmissing.yaml"
@@ -1311,8 +1182,7 @@ ufo_add_test( NAME    test_ufo_opr_vert_interp_pmissing
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_vert_interp_pmissing
-              TIER    1
+ufo_add_test( NAME    linopr_vert_interp_pmissing
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vert_interp_pmissing.yaml"
@@ -1321,8 +1191,7 @@ ufo_add_test( NAME    test_ufo_linopr_vert_interp_pmissing
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_tropomi_co
-              TIER    1
+ufo_add_test( NAME    opr_tropomi_co
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/tropomi_co.yaml"
@@ -1331,8 +1200,7 @@ ufo_add_test( NAME    test_ufo_opr_tropomi_co
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_tropomi_co
-              TIER    1
+ufo_add_test( NAME    linopr_tropomi_co
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/tropomi_co.yaml"
@@ -1341,8 +1209,7 @@ ufo_add_test( NAME    test_ufo_linopr_tropomi_co
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_windspeed
-              TIER    1
+ufo_add_test( NAME    opr_windspeed
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/windspeed.yaml"
@@ -1351,8 +1218,7 @@ ufo_add_test( NAME    test_ufo_opr_windspeed
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_ionosonde
-              TIER    1
+ufo_add_test( NAME    opr_ionosonde
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ionosonde.yaml"
@@ -1361,8 +1227,7 @@ ufo_add_test( NAME    test_ufo_opr_ionosonde
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_pathsum
-              TIER    1
+ufo_add_test( NAME    opr_pathsum
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pathsum.yaml"
@@ -1371,8 +1236,7 @@ ufo_add_test( NAME    test_ufo_opr_pathsum
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_opr_densityreduction_simple
-              TIER    1
+ufo_add_test( NAME    opr_densityreduction_simple
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/densityreduction_simple.yaml"
@@ -1381,8 +1245,7 @@ ufo_add_test( NAME    test_ufo_opr_densityreduction_simple
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_densityreduction_simple
-              TIER    1
+ufo_add_test( NAME    linopr_densityreduction_simple
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/densityreduction_simple.yaml"
@@ -1390,8 +1253,7 @@ ufo_add_test( NAME    test_ufo_linopr_densityreduction_simple
               LIBS    ufo
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-ufo_add_test( NAME    test_ufo_opr_densityreduction_latlon
-              TIER    1
+ufo_add_test( NAME    opr_densityreduction_latlon
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/densityreduction_latlon.yaml"
@@ -1400,8 +1262,7 @@ ufo_add_test( NAME    test_ufo_opr_densityreduction_latlon
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_densityreduction_latlon
-              TIER    1
+ufo_add_test( NAME    linopr_densityreduction_latlon
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/densityreduction_latlon.yaml"
@@ -1414,8 +1275,7 @@ ufo_add_test( NAME    test_ufo_linopr_densityreduction_latlon
 
 if( ${gsw_FOUND} )
 
-    ufo_add_test( NAME    test_ufo_opr_marinevertinterp
-              TIER    1
+    ufo_add_test( NAME    opr_marinevertinterp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/genericprof.yaml"
@@ -1424,8 +1284,7 @@ if( ${gsw_FOUND} )
               LABELS  gsw operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_marinevertinterp
-              TIER    1
+    ufo_add_test( NAME    linopr_marinevertinterp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/genericprof.yaml"
@@ -1434,8 +1293,7 @@ if( ${gsw_FOUND} )
               LABELS  gsw operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_insitutemperature
-              TIER    1
+    ufo_add_test( NAME    opr_insitutemperature
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/tprof.yaml"
@@ -1444,8 +1302,7 @@ if( ${gsw_FOUND} )
               LABELS  gsw operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_insitutemperature
-              TIER    1
+    ufo_add_test( NAME    linopr_insitutemperature
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/tprof.yaml"
@@ -1454,8 +1311,7 @@ if( ${gsw_FOUND} )
               LABELS  gsw operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_composite_marineinsitu
-              TIER    1
+    ufo_add_test( NAME    opr_composite_marineinsitu
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/composite_marineinsitu.yaml"
@@ -1464,8 +1320,7 @@ if( ${gsw_FOUND} )
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_composite_marineinsitu
-              TIER    1
+    ufo_add_test( NAME    linopr_composite_marineinsitu
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/composite_marineinsitu.yaml"
@@ -1480,8 +1335,7 @@ endif( ${gsw_FOUND} )
 
 if( crtm_FOUND )
 
-    ufo_add_test( NAME    test_ufo_opr_abi_ahi_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_abi_ahi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/abi_ahi_crtm.yaml"
@@ -1490,8 +1344,7 @@ if( crtm_FOUND )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_abi_ahi_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_abi_ahi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/abi_ahi_crtm.yaml"
@@ -1500,8 +1353,7 @@ if( crtm_FOUND )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_airs_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_airs_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/airs_crtm.yaml"
@@ -1510,8 +1362,7 @@ if( crtm_FOUND )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_airs_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_airs_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/airs_crtm.yaml"
@@ -1520,8 +1371,7 @@ if( crtm_FOUND )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_amsr2_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_amsr2_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_crtm.yaml"
@@ -1530,19 +1380,17 @@ if( crtm_FOUND )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_amsr2_crtm
-              TIER    2
+    ufo_add_test( NAME    linopr_amsr2_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_crtm.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 if( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-    ufo_add_test( NAME    test_ufo_opr_aod_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_aod_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_crtm.yaml"
@@ -1551,8 +1399,7 @@ if( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_aod_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_aod_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/aod_crtm.yaml"
@@ -1561,8 +1408,7 @@ if( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_crtm_vis_albedo
-              TIER    1
+    ufo_add_test( NAME    opr_crtm_vis_albedo
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vis_albedo_crtm.yaml"
@@ -1572,8 +1418,7 @@ if( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
 #
-    ufo_add_test( NAME    test_ufo_opr_amsua_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_amsua_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm.yaml"
@@ -1582,8 +1427,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_amsua_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_amsua_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm.yaml"
@@ -1592,8 +1436,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_amsua_geos_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_amsua_geos_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_geos.yaml"
@@ -1602,8 +1445,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_amsua_geos_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_amsua_geos_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_crtm_geos.yaml"
@@ -1612,8 +1454,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_atms_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_atms_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_crtm.yaml"
@@ -1622,8 +1463,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_atms_crtm_optional_lut
-              TIER    1
+    ufo_add_test( NAME    opr_atms_crtm_optional_lut
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_crtm_optional_lut.yaml"
@@ -1633,8 +1473,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
-    ufo_add_test( NAME    test_ufo_linopr_atms_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_atms_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_crtm.yaml"
@@ -1643,8 +1482,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_cris_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_cris_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris_crtm.yaml"
@@ -1653,8 +1491,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_cris_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_cris_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris_crtm.yaml"
@@ -1663,8 +1500,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_cris_crtm_co2_options
-              TIER    1
+    ufo_add_test( NAME    opr_cris_crtm_co2_options
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris_crtm_co2_options.yaml"
@@ -1673,8 +1509,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_cris_crtm_co2_options
-              TIER    1
+    ufo_add_test( NAME    linopr_cris_crtm_co2_options
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/cris_crtm_co2_options.yaml"
@@ -1683,8 +1518,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_gmi_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_gmi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_crtm.yaml"
@@ -1693,38 +1527,34 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_gmi_crtm
-              TIER    2
+    ufo_add_test( NAME    linopr_gmi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_crtm.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_gmi_scan_angles
-              TIER    2
+    ufo_add_test( NAME    opr_gmi_scan_angles
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_scan_angles.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_gmi_scan_angles
-              TIER    2
+    ufo_add_test( NAME    linopr_gmi_scan_angles
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_scan_angles.yaml"
               MPI     4
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_hirs4_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_hirs4_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/hirs4_crtm.yaml"
@@ -1733,8 +1563,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_hirs4_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_hirs4_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/hirs4_crtm.yaml"
@@ -1743,8 +1572,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_iasi_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_iasi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtm.yaml"
@@ -1753,8 +1581,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_iasi_crtmreconrad_linop_check
-              TIER    1
+    ufo_add_test( NAME    iasi_crtmreconrad_linop_check
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtmreconrad_linop_check.yaml"
@@ -1763,8 +1590,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_iasi_crtmreconrad_linop_tlad_check
-              TIER    1
+    ufo_add_test( NAME    iasi_crtmreconrad_linop_tlad_check
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtmreconrad_linop_check.yaml"
@@ -1773,18 +1599,16 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_iasi_crtm
-              TIER    2
+    ufo_add_test( NAME    linopr_iasi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_crtm.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_mhs_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_mhs_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_crtm.yaml"
@@ -1793,8 +1617,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_mhs_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_mhs_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_crtm.yaml"
@@ -1803,8 +1626,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_seviri_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_seviri_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/seviri_crtm.yaml"
@@ -1813,8 +1635,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_seviri_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_seviri_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/seviri_crtm.yaml"
@@ -1823,8 +1644,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_smap_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_smap_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/smap_crtm.yaml"
@@ -1833,8 +1653,7 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_linopr_smap_crtm
-              TIER    1
+ufo_add_test( NAME    linopr_smap_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/smap_crtm.yaml"
@@ -1843,8 +1662,7 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_sndrd1-4_crtm
-              TIER    1
+    ufo_add_test( NAME    opr_sndrd1-4_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sndrd1-4_crtm.yaml"
@@ -1853,8 +1671,7 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_sndrd1-4_crtm
-              TIER    1
+    ufo_add_test( NAME    linopr_sndrd1-4_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/sndrd1-4_crtm.yaml"
@@ -1863,18 +1680,16 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-   ufo_add_test( NAME    test_ufo_obsdiag_crtm_airs_jacobian
-             TIER    2
-             ECBUILD
-             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_airs_jacobian.yaml"
-             MPI     1
-             LIBS    ufo
-             LABELS  crtm operators
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    ufo_add_test( NAME    obsdiag_crtm_airs_jacobian
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_airs_jacobian.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators tier2
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_obsdiag_crtm_airs_optics
-              TIER    1
+    ufo_add_test( NAME    obsdiag_crtm_airs_optics
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_airs_optics.yaml"
@@ -1883,18 +1698,16 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-   ufo_add_test( NAME    test_ufo_obsdiag_crtm_amsua_jacobian
-             TIER    1
-             ECBUILD
-             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_amsua_jacobian.yaml"
-             MPI     1
-             LIBS    ufo
-             LABELS  crtm operators
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    ufo_add_test( NAME    obsdiag_crtm_amsua_jacobian
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_amsua_jacobian.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_obsdiag_crtm_amsua_optics
-              TIER    1
+    ufo_add_test( NAME    obsdiag_crtm_amsua_optics
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_amsua_optics.yaml"
@@ -1903,18 +1716,16 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-   ufo_add_test( NAME    test_ufo_obsdiag_crtm_atms_jacobian
-             TIER    1
-             ECBUILD
-             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_atms_jacobian.yaml"
-             MPI     1
-             LIBS    ufo
-             LABELS  crtm operators
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    ufo_add_test( NAME    obsdiag_crtm_atms_jacobian
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_atms_jacobian.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_obsdiag_crtm_atms_optics
-              TIER    1
+    ufo_add_test( NAME    obsdiag_crtm_atms_optics
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_atms_optics.yaml"
@@ -1923,44 +1734,40 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-   ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_jacobian
-             TIER    2
-             ECBUILD
-             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_jacobian.yaml"
-             MPI     1
-             LIBS    ufo
-             LABELS  crtm operators
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    ufo_add_test( NAME    obsdiag_crtm_cris_jacobian
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_jacobian.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators tier2
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_optics
-              TIER    2
+    ufo_add_test( NAME    obsdiag_crtm_cris_optics
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_optics.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-   ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_jacobian
-             TIER    2
-             ECBUILD
-             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_jacobian.yaml"
-             MPI     1
-             LIBS    ufo
-             LABELS  crtm operators
-             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    ufo_add_test( NAME    obsdiag_crtm_iasi_jacobian
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_jacobian.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators tier2
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_optics
-              TIER    2
+    ufo_add_test( NAME    obsdiag_crtm_iasi_optics
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_optics.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  crtm operators
+              LABELS  crtm operators tier2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 endif( crtm_FOUND )
@@ -1971,8 +1778,7 @@ if( ${rttov_FOUND} )
 
 # RTTOVCPP tests (optional, controlled by ENABLE_RTTOVCPP_TESTS option)
 if(ENABLE_RTTOVCPP_TESTS)
-    ufo_add_test( NAME    test_ufo_opr_amsua_rttovcpp
-              TIER    1
+    ufo_add_test( NAME    opr_amsua_rttovcpp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp${RTTOV_VERSION_SUFFIX}.yaml"
@@ -1981,8 +1787,7 @@ if(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} rttovcpp operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_amsua_rttovcpp
-              TIER    1
+    ufo_add_test( NAME    linopr_amsua_rttovcpp
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp${RTTOV_VERSION_SUFFIX}.yaml"
@@ -1992,8 +1797,7 @@ if(ENABLE_RTTOVCPP_TESTS)
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif(ENABLE_RTTOVCPP_TESTS)
 #
-    ufo_add_test( NAME    test_ufo_opr_atms_rttov_allsurfacetypes
-              TIER    1
+    ufo_add_test( NAME    opr_atms_rttov_allsurfacetypes
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_allsurfacetypes${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2002,8 +1806,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_atms_rttov_bad_data
-              TIER    1
+    ufo_add_test( NAME    opr_atms_rttov_bad_data
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_bad_data${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2012,8 +1815,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_atms_rttov_ops
-              TIER    1
+    ufo_add_test( NAME    opr_atms_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2022,8 +1824,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_atms_rttov_multiplatform
-              TIER    1
+    ufo_add_test( NAME    opr_atms_rttov_multiplatform
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_multiplatform${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2032,8 +1833,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_atms_rttov_ops
-              TIER    1
+    ufo_add_test( NAME    linopr_atms_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2042,8 +1842,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_atovs_rttov_scatt
-              TIER    1
+    ufo_add_test( NAME    opr_atovs_rttov_scatt
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2052,8 +1851,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_atovs_rttov_scatt
-              TIER    1
+    ufo_add_test( NAME    linopr_atovs_rttov_scatt
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atovs_rttov_scatt${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2062,8 +1860,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_iasi_rttov_ops
-              TIER    1
+    ufo_add_test( NAME    opr_iasi_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2072,8 +1869,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_iasi_rttov_ops
-              TIER    1
+    ufo_add_test( NAME    linopr_iasi_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2082,8 +1878,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_linopr_iasi_rttov_ops_2pe
-              TIER    1
+    ufo_add_test( NAME    linopr_iasi_rttov_ops_2pe
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2092,8 +1887,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_check
-              TIER    1
+    ufo_add_test( NAME    mtgirs_reconrad_linop_check
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2102,8 +1896,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_tlad_check
-              TIER    1
+    ufo_add_test( NAME    mtgirs_reconrad_linop_tlad_check
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2112,8 +1905,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_mtgirs_reconrad_linop_tlad_2pe_check
-              TIER    1
+    ufo_add_test( NAME    mtgirs_reconrad_linop_tlad_2pe_check
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mtgirs_reconrad_linop_check${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2122,8 +1914,7 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-    ufo_add_test( NAME    test_ufo_opr_ssmis_rttov_ops
-              TIER    1
+    ufo_add_test( NAME    opr_ssmis_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
@@ -2136,8 +1927,7 @@ endif( ${rttov_FOUND} )
 
 if( ${oasim_FOUND} )
 #
-    ufo_add_test( NAME    test_ufo_opr_pace_oasim
-              TIER    1
+    ufo_add_test( NAME    opr_pace_oasim
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pace_oasim.yaml"

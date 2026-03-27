@@ -6,8 +6,7 @@
 # Unit tests for variabletransforms
 
 #
-ufo_add_test( NAME    test_ufo_observed_derived_and_simulated_variables
-              TIER    1
+ufo_add_test( NAME    observed_derived_and_simulated_variables
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/observed_derived_and_simulated_variables.yaml"
@@ -16,8 +15,7 @@ ufo_add_test( NAME    test_ufo_observed_derived_and_simulated_variables
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_logarithm
-              TIER    1
+ufo_add_test( NAME    variabletransforms_logarithm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_logarithm.yaml"
@@ -26,8 +24,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_logarithm
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_icefreeboardtothickness
-              TIER    1
+ufo_add_test( NAME    variabletransforms_icefreeboardtothickness
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_icefreeboardtothickness.yaml"
@@ -37,8 +34,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_icefreeboardtothickness
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 if( ${gsw_FOUND} )
-    ufo_add_test( NAME    test_ufo_variabletransforms_oceandensity
-                TIER    1
+    ufo_add_test( NAME    variabletransforms_oceandensity
                 ECBUILD
                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_oceandensity.yaml"
@@ -47,8 +43,7 @@ if( ${gsw_FOUND} )
                 LABELS  unit_tests variabletransforms
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
-    ufo_add_test( NAME    test_ufo_variabletransforms_oceandepthtopressure
-                TIER    1
+    ufo_add_test( NAME    variabletransforms_oceandepthtopressure
                 ECBUILD
                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_oceandepthtopressure.yaml"
@@ -57,8 +52,7 @@ if( ${gsw_FOUND} )
                 LABELS  unit_tests variabletransforms
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
-    ufo_add_test( NAME    test_ufo_variabletransforms_oceantemptotheta
-                TIER    1
+    ufo_add_test( NAME    variabletransforms_oceantemptotheta
                 ECBUILD
                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_oceantemptotheta.yaml"
@@ -67,8 +61,7 @@ if( ${gsw_FOUND} )
                 LABELS  unit_tests variabletransforms
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
-    ufo_add_test( NAME    test_ufo_variabletransforms_oceantemptoconservativetemp
-                TIER    1
+    ufo_add_test( NAME    variabletransforms_oceantemptoconservativetemp
                 ECBUILD
                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_oceantemptoconservativetemp.yaml"
@@ -77,8 +70,7 @@ if( ${gsw_FOUND} )
                 LABELS  unit_tests variabletransforms
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
     #
-    ufo_add_test( NAME    test_ufo_variabletransforms_oceanpracticalsalinitytoabsolutesalinity
-                TIER    1
+    ufo_add_test( NAME    variabletransforms_oceanpracticalsalinitytoabsolutesalinity
                 ECBUILD
                 COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                 ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_oceanpracticalsalinitytoabsolutesalinity.yaml"
@@ -88,8 +80,7 @@ if( ${gsw_FOUND} )
                 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( ${gsw_FOUND} )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_potentialT
-              TIER    1
+ufo_add_test( NAME    variabletransforms_potentialT
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_potentialT.yaml"
@@ -98,8 +89,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_potentialT
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift
-              TIER    1
+ufo_add_test( NAME    variabletransforms_profilehorizontaldrift
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_profilehorizontaldrift.yaml"
@@ -108,8 +98,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_zero_obs
-              TIER    1
+ufo_add_test( NAME    variabletransforms_profilehorizontaldrift_zero_obs
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_profilehorizontaldrift_zero_obs.yaml"
@@ -118,8 +107,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_zero_ob
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_keepinwindow
-              TIER    1
+ufo_add_test( NAME    variabletransforms_profilehorizontaldrift_keepinwindow
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_profilehorizontaldrift_keepinwindow.yaml"
@@ -128,8 +116,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_profilehorizontaldrift_keepinw
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_pstar
-              TIER    1
+ufo_add_test( NAME    variabletransforms_pstar
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_pstar.yaml"
@@ -138,8 +125,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_pstar
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_QFEtoQNH
-              TIER    1
+ufo_add_test( NAME    variabletransforms_QFEtoQNH
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_QFEtoQNH.yaml"
@@ -148,8 +134,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_QFEtoQNH
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity
-              TIER    1
+ufo_add_test( NAME    variabletransforms_rhumidity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_rhumidity.yaml"
@@ -158,8 +143,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part2
-              TIER    1
+ufo_add_test( NAME    variabletransforms_rhumidity_part2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_rhumidity_part2.yaml"
@@ -168,8 +152,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part2
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part3
-              TIER    1
+ufo_add_test( NAME    variabletransforms_rhumidity_part3
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_rhumidity_part3.yaml"
@@ -178,8 +161,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_rhumidity_part3
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_shumidity
-              TIER    1
+ufo_add_test( NAME    variabletransforms_shumidity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_shumidity.yaml"
@@ -188,8 +170,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_shumidity
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_shumidity2
-              TIER    1
+ufo_add_test( NAME    variabletransforms_shumidity2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_shumidity2.yaml"
@@ -198,8 +179,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_shumidity2
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_virtualTemperature
-              TIER    1
+ufo_add_test( NAME    variabletransforms_virtualTemperature
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_virtualtemperature.yaml"
@@ -208,8 +188,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_virtualTemperature
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_SondeHeightFromPressure
-              TIER    1
+ufo_add_test( NAME    variabletransforms_SondeHeightFromPressure
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_SondeHeightFromPressure.yaml"
@@ -218,8 +197,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_SondeHeightFromPressure
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeight
-              TIER    1
+ufo_add_test( NAME    variabletransforms_SondePressureFromHeight
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_SondePressureFromHeight.yaml"
@@ -228,8 +206,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeight
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeightICAO
-              TIER    1
+ufo_add_test( NAME    variabletransforms_SondePressureFromHeightICAO
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_SondePressureFromHeightICAO.yaml"
@@ -238,8 +215,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_SondePressureFromHeightICAO
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_szacorrection
-              TIER    1
+ufo_add_test( NAME    variabletransforms_szacorrection
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_szacorrection.yaml"
@@ -248,8 +224,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_szacorrection
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents
-              TIER    1
+ufo_add_test( NAME    variabletransforms_windcomponents
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_windcomponents.yaml"
@@ -258,8 +233,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_windspeedanddirection
-              TIER    1
+ufo_add_test( NAME    variabletransforms_windspeedanddirection
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_windspeedanddirection.yaml"
@@ -268,8 +242,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_windspeedanddirection
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents_scatwind
-              TIER    1
+ufo_add_test( NAME    variabletransforms_windcomponents_scatwind
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_windcomponents_scatwind.yaml"
@@ -278,8 +251,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_windcomponents_scatwind
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_btfromradiance
-              TIER    1
+ufo_add_test( NAME    variabletransforms_btfromradiance
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_btfromradiance.yaml"
@@ -289,33 +261,28 @@ ufo_add_test( NAME    test_ufo_variabletransforms_btfromradiance
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_radiancefrompcscores
-              TIER    1
+ufo_add_test( NAME    variabletransforms_radiancefrompcscores
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_radiancefrompcscores.yaml"
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_radiancefrompcscores_mean
-              TIER    1
+ufo_add_test( NAME    variabletransforms_radiancefrompcscores_mean
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_radiancefrompcscores_mean.yaml"
               MPI     1
               LIBS    ufo
               LABELS  unit_tests variabletransforms
-
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_scanposition
-              TIER    1
+ufo_add_test( NAME    variabletransforms_scanposition
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_scanposition.yaml"
@@ -325,8 +292,7 @@ ufo_add_test( NAME    test_ufo_variabletransforms_scanposition
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
               TEST_DEPENDS ufo_get_ufo_test_data )
 #
-ufo_add_test( NAME    test_ufo_variabletransforms_radarbeamgeometry
-              TIER    1
+ufo_add_test( NAME    variabletransforms_radarbeamgeometry
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_radarbeamgeometry.yaml"

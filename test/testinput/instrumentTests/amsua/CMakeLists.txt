@@ -9,215 +9,194 @@
 if( crtm_FOUND )
     # H(x) test
     ufo_add_test( NAME  instrument_amsua_aqua_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_aqua_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua aqua HofX instrument
+        LABELS  crtm amsua aqua HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-a_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-a_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua metop-a HofX instrument
+        LABELS  crtm amsua metop-a HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-b_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-b_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua metop-b HofX instrument
+        LABELS  crtm amsua metop-b HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-c_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-c_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua metop-c HofX instrument
+        LABELS  crtm amsua metop-c HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n15_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n15_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua n15 HofX instrument
+        LABELS  crtm amsua n15 HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n18_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua n18 HofX instrument
+        LABELS  crtm amsua n18 HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n19_gfs_HofX
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n19_gfs_HofX.yaml"
         MPI     1
-        LABELS  crtm amsua n19 HofX instrument
+        LABELS  crtm amsua n19 HofX instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     # H(x) with Bias Correction (bc)
     ufo_add_test( NAME  instrument_amsua_aqua_gfs_HofX_bc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_aqua_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  crtm amsua aqua bc instrument
+        LABELS  crtm amsua aqua bc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-a_gfs_HofX_bc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-a_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  crtm amsua metop-a bc instrument
+        LABELS  crtm amsua metop-a bc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-b_gfs_HofX_bc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-b_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  crtm amsua metop-b bc instrument
+        LABELS  crtm amsua metop-b bc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-c_gfs_HofX_bc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-c_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  crtm amsua metop-c bc instrument
+        LABELS  crtm amsua metop-c bc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n15_gfs_HofX_bc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n15_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  crtm amsua n15 bc instrument
+        LABELS  crtm amsua n15 bc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
-    #  test not matching GSI with small tolerance consider update obs and geovals or remove
+    #  test matching GSI with small tolerance, is this still valid test consider update or remove
     ufo_add_test( NAME  instrument_amsua_n18_gfs_HofX_bc
-      TIER    2
-      ECBUILD
-      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-      ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_bc.yaml"
-      MPI     1
-      LABELS  crtm amsua n18 bc instrument ci_flake_disable
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-      LIBS    ufo )
+        ECBUILD
+        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_bc.yaml"
+        MPI     1
+        LABELS  crtm amsua n18 bc instrument ci_flake_disable tier2
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+        LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n19_gfs_HofX_bc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n19_gfs_HofX_bc.yaml"
         MPI     1
-        LABELS  crtm amsua n19 bc instrument
+        LABELS  crtm amsua n19 bc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     # H(x) with QC
     ufo_add_test( NAME  instrument_amsua_aqua_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_aqua_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua aqua qc instrument
+        LABELS  crtm amsua aqua qc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-a_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-a_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua metop-a qc instrument
+        LABELS  crtm amsua metop-a qc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-b_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-b_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua metop-b qc instrument
+        LABELS  crtm amsua metop-b qc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_metop-c_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_metop-c_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua metop-c qc instrument
+        LABELS  crtm amsua metop-c qc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n15_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n15_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua n15 qc instrument
+        LABELS  crtm amsua n15 qc instrument  tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n18_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua n18 qc instrument
+        LABELS  crtm amsua n18 qc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n19_gfs_HofX_qc
-        TIER    2
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n19_gfs_HofX_qc.yaml"
         MPI     1
-        LABELS  crtm amsua n19 qc instrument
+        LABELS  crtm amsua n19 qc instrument tier2
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 endif( crtm_FOUND )

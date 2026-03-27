@@ -7,7 +7,6 @@
 
 # H(x) test
 ufo_add_test( NAME    instrument_radarVAD_gfs_HofX
-              TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radarVAD_gfs_HofX.yaml"
@@ -18,7 +17,6 @@ ufo_add_test( NAME    instrument_radarVAD_gfs_HofX
 
 # H(x) with QC
 ufo_add_test( NAME    instrument_vadwinds_gfs_qc
-              TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vadwinds_gfs_qc.yaml"

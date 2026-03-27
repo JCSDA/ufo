@@ -1,4 +1,4 @@
-# (C) Copyright 2020-2021 UCAR.
+# (C) Copyright 2020-2026 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -8,7 +8,6 @@
 
 # H(x) test
 ufo_add_test( NAME    instrument_ompsnp_npp_gfs_HofX
-              TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_gfs_HofX.yaml"
@@ -18,7 +17,6 @@ ufo_add_test( NAME    instrument_ompsnp_npp_gfs_HofX
 
 # H(x) with QC
 ufo_add_test( NAME    instrument_ompsnp_npp_gfs_qc
-              TIER    1
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ompsnp_npp_gfs_qc.yaml"

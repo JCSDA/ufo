@@ -73,23 +73,11 @@ function(ufo_add_test)
     set ( ECBUILD_EXTRA "" )
   endif()
 
-  # Set the tier for the test
-  if (NOT ARG_TIER)
-    set( TESTTIER 1 )
-  else()
-    set( TESTTIER ${ARG_TIER} )
-  endif()
-
-  # Add the test only if the test tier is sufficiently high.
-  if ( TESTTIER LESS_EQUAL UFO_TEST_TIER )
-
-      ecbuild_add_test( TARGET  ufo_test_tier${TESTTIER}_${ARG_NAME}
-                        WORKING_DIRECTORY ${WORKDIR}
-                        ENVIRONMENT ${TRAPFPE_ENV}
-                        ${ECBUILD_EXTRA}
-                        )
-
-  endif()
+  ecbuild_add_test( TARGET  ufo_${ARG_NAME}
+                    WORKING_DIRECTORY ${WORKDIR}
+                    ENVIRONMENT ${TRAPFPE_ENV}
+                    ${ECBUILD_EXTRA}
+                  )
 
 endfunction()
 
