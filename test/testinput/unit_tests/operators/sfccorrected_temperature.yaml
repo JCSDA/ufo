@@ -1,7 +1,6 @@
 time window:
-  begin: 2024-05-26T21:00:00Z
-  end: 2024-05-27T03:00:00Z
-
+  begin: 2025-08-31T21:00:00Z
+  length: PT6H
 observations:
 - obs operator:
     name: SfcCorrected
@@ -11,15 +10,15 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2022052700.nc4
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
     # obsdataout:
     #   engine:
     #     type: H5File
-    #     obsfile: Data/ufo/surface_tquv_obs_2022052700_out_WRFDA.nc4
+    #     obsfile: Data/ufo/surface_tquv_obs_2025090100_out_WRFDA.nc4
     simulated variables: [airTemperatureAt2M]
   geovals:
-    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2022052700.nc4
-  rms ref: 290.0725
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.5268
   tolerance: 1.e-5
 - obs operator:
     name: SfcCorrected
@@ -31,15 +30,15 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2022052700.nc4
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
     # obsdataout:
     #   engine:
     #     type: H5File
-    #     obsfile: Data/ufo/surface_tquv_obs_2022052700_out_UKMO.nc4
+    #     obsfile: Data/ufo/surface_tquv_obs_2025090100_out_UKMO.nc4
     simulated variables: [airTemperatureAt2M]
   geovals:
-    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2022052700.nc4
-  rms ref: 290.0725
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.5303
   tolerance: 1.e-5
 - obs operator:
     name: SfcCorrected
@@ -49,15 +48,15 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2022052700.nc4
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
     # obsdataout:
     #   engine:
     #     type: H5File
-    #     obsfile: Data/ufo/surface_tquv_obs_2022052700_out_UKMO.nc4
+    #     obsfile: Data/ufo/surface_tquv_obs_2025090100_out_UKMO.nc4
     simulated variables: [airTemperatureAt2M]
   geovals:
-    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2022052700.nc4
-  rms ref: 290.1876
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 291.4262
   tolerance: 1.e-5
 - obs operator:
     name: SfcCorrected
@@ -69,15 +68,15 @@ observations:
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2022052700.nc4
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
     # obsdataout:
     #   engine:
     #     type: H5File
-    #     obsfile: Data/ufo/surface_tquv_obs_2022052700_out_UKMO.nc4
+    #     obsfile: Data/ufo/surface_tquv_obs_2025090100_out_UKMO.nc4
     simulated variables: [airTemperatureAt2M]
   geovals:
-    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2022052700.nc4
-  rms ref: 290.1876
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 291.4309
   tolerance: 1.e-5
 - obs operator:
     name: SfcCorrected
@@ -85,30 +84,100 @@ observations:
     geovar_sfc_geomz: geopotential_height_at_surface
     geovar_geomz: geopotential_height
   obs space:
-    name: Surface operator 2M temperature UKMO method with missing geopotential values
+    name: Surface operator 2M temperature UKMO method with missing geopotential value
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2022052700.nc4
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
     # obsdataout:
     #   engine:
     #     type: H5File
-    #     obsfile: Data/ufo/surface_tquv_obs_2022052700_out_UKMO.nc4
+    #     obsfile: Data/ufo/surface_tquv_obs_missing_geovals_2025090100_out_UKMO.nc4
     simulated variables: [airTemperatureAt2M]
   geovals:
-    filename: Data/ufo/testinput_tier_1/surface_tquv_missing_geovals_2022052700.nc4
-  rms ref: 1.375305e+38
+    filename: Data/ufo/testinput_tier_1/surface_tquv_missing_geovals_2025090100.nc4
+  rms ref: 1.684398e+38
   tolerance: 1.e-5
 - obs operator:
     name: SfcCorrected
     correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Local
   obs space:
-    name: Surface operator 2M temperature GSL method, not yet implemented
+    name: Surface operator 2M temperature GSL method with local default lapse rate
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2022052700.nc4
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
     simulated variables: [airTemperatureAt2M]
   geovals:
-    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2022052700.nc4
-  expect constructor to throw exception with message: airTemperatureAt2M_GSL not yet implemented
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.8244
+  tolerance: 1.e-5
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Local
+      temperature local lapse rate level: 2
+  obs space:
+    name: Surface operator 2M temperature GSL method with local lapse rate
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.8070
+  tolerance: 1.e-5
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Constant
+  obs space:
+    name: Surface operator 2M temperature GSL method with constant default lapse rate
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.8234
+  tolerance: 1.e-5
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Constant
+      temperature lapse rate: 10
+  obs space:
+    name: Surface operator 2M temperature GSL method with constant lapse rate
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.8359
+  tolerance: 1.e-5
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: NoAdjustment
+  obs space:
+    name: Surface operator 2M temperature GSL method with no adjustment
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  rms ref: 289.2157
+  tolerance: 1.e-5
+
