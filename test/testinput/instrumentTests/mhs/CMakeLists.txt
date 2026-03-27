@@ -69,34 +69,4 @@ if( crtm_FOUND )
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
-#   # H(x) with QC
-#   ufo_add_test( NAME  instrument_mhs_metop-b_gfs_HofX_qc
-#       TIER    2
-#       ECBUILD
-#       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#       ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_metop-b_gfs_HofX_qc.yaml"
-#       MPI     1
-#       LABELS  crtm mhs metop-b qc instrument
-#       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#       LIBS    ufo )
-
-#   ufo_add_test( NAME  instrument_mhs_metop-c_gfs_HofX_qc
-#       TIER    2
-#       ECBUILD
-#       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#       ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_metop-c_gfs_HofX_qc.yaml"
-#       MPI     1
-#       LABELS  crtm mhs metop-c qc instrument
-#       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#       LIBS    ufo )
-
-#   ufo_add_test( NAME  instrument_mhs_n19_gfs_HofX_qc
-#       TIER    2
-#       ECBUILD
-#       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-#       ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/mhs_n19_gfs_HofX_qc.yaml"
-#       MPI     1
-#       LABELS  crtm mhs n19 qc instrument
-#       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#       LIBS    ufo )
 endif( crtm_FOUND )

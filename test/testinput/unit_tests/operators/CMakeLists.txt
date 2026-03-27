@@ -1,4 +1,4 @@
-# (C) Copyright 2022 UCAR.
+# (C) Copyright 2026 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -1863,15 +1863,15 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-#    ufo_add_test( NAME    test_ufo_obsdiag_crtm_airs_jacobian
-#              TIER    2
-#              ECBUILD
-#              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-#              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_airs_jacobian.yaml"
-#              MPI     1
-#              LIBS    ufo
-#              LABELS  crtm operators
-#              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+   ufo_add_test( NAME    test_ufo_obsdiag_crtm_airs_jacobian
+             TIER    2
+             ECBUILD
+             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_airs_jacobian.yaml"
+             MPI     1
+             LIBS    ufo
+             LABELS  crtm operators
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_airs_optics
               TIER    1
@@ -1883,15 +1883,15 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-#    ufo_add_test( NAME    test_ufo_obsdiag_crtm_amsua_jacobian
-#              TIER    1
-#              ECBUILD
-#              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-#              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_amsua_jacobian.yaml"
-#              MPI     1
-#              LIBS    ufo
-#              LABELS  crtm operators
-#              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+   ufo_add_test( NAME    test_ufo_obsdiag_crtm_amsua_jacobian
+             TIER    1
+             ECBUILD
+             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_amsua_jacobian.yaml"
+             MPI     1
+             LIBS    ufo
+             LABELS  crtm operators
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_amsua_optics
               TIER    1
@@ -1903,15 +1903,15 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-#    ufo_add_test( NAME    test_ufo_obsdiag_crtm_atms_jacobian
-#              TIER    1
-#              ECBUILD
-#              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-#              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_atms_jacobian.yaml"
-#              MPI     1
-#              LIBS    ufo
-#              LABELS  crtm operators
-#              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+   ufo_add_test( NAME    test_ufo_obsdiag_crtm_atms_jacobian
+             TIER    1
+             ECBUILD
+             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_atms_jacobian.yaml"
+             MPI     1
+             LIBS    ufo
+             LABELS  crtm operators
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_atms_optics
               TIER    1
@@ -1923,15 +1923,15 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-#    ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_jacobian
-#              TIER    2
-#              ECBUILD
-#              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-#              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_jacobian.yaml"
-#              MPI     1
-#              LIBS    ufo
-#              LABELS  crtm operators
-#              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+   ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_jacobian
+             TIER    2
+             ECBUILD
+             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_cris_jacobian.yaml"
+             MPI     1
+             LIBS    ufo
+             LABELS  crtm operators
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_cris_optics
               TIER    2
@@ -1943,15 +1943,15 @@ ufo_add_test( NAME    test_ufo_linopr_smap_crtm
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-#    ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_jacobian
-#              TIER    2
-#              ECBUILD
-#              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
-#              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_jacobian.yaml"
-#              MPI     1
-#              LIBS    ufo
-#              LABELS  crtm operators
-#              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+   ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_jacobian
+             TIER    2
+             ECBUILD
+             COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+             ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_crtm_iasi_jacobian.yaml"
+             MPI     1
+             LIBS    ufo
+             LABELS  crtm operators
+             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    test_ufo_obsdiag_crtm_iasi_optics
               TIER    2

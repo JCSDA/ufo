@@ -1,4 +1,4 @@
-# (C) Copyright 2020-2021 UCAR.
+# (C) Copyright 2020-2026 UCAR.
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -129,15 +129,16 @@ if( crtm_FOUND )
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
-#   ufo_add_test( NAME  instrument_amsua_n18_gfs_HofX_bc
-#       TIER    2
-#       ECBUILD
-#       COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-#       ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_bc.yaml"
-#       MPI     1
-#       LABELS  crtm amsua n18 bc instrument
-#       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-#       LIBS    ufo )
+    #  test not matching GSI with small tolerance consider update obs and geovals or remove
+    ufo_add_test( NAME  instrument_amsua_n18_gfs_HofX_bc
+      TIER    2
+      ECBUILD
+      COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+      ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_bc.yaml"
+      MPI     1
+      LABELS  crtm amsua n18 bc instrument ci_flake_disable
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
+      LIBS    ufo )
 
     ufo_add_test( NAME  instrument_amsua_n19_gfs_HofX_bc
         TIER    2
