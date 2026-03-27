@@ -179,7 +179,6 @@ endif( ${crtm_FOUND} )
 # Sources
 ################################################################################
 add_subdirectory( src )
-add_subdirectory( tools )
 add_subdirectory( resources )
 
 if( ENABLE_UFO_DOC )
@@ -201,11 +200,16 @@ if( BUILD_TESTING )
   # scope so that downstream repos have access to it
   set (UFO_CRTM_TESTFILES_PATH ${UFO_CRTM_TESTFILES_PATH} PARENT_SCOPE)
   set (UFO_UFO_TESTFILES_PATH ${UFO_UFO_TESTFILES_PATH} PARENT_SCOPE)
+
+  execute_process( COMMAND ${CMAKE_COMMAND} -E copy
+     ${PROJECT_SOURCE_DIR}/tools/ufo_cpplint.py
+     ${CMAKE_BINARY_DIR}/bin/ufo_cpplint.py )
   ecbuild_add_test( TARGET ufo_coding_norms
                     TYPE SCRIPT
-                    COMMAND ${CMAKE_BINARY_DIR}/bin/${PROJECT_NAME}_cpplint.py
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/ufo_cpplint.py
                     ARGS --quiet --recursive ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/test
-                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+                    LABELS tier2 )
 endif()
 
 ## Export package
