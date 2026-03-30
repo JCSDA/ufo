@@ -95,8 +95,8 @@ class ObsErrorDiagonalInvGamma : public ObsErrorBase {
   void randomizeWithoutOneEnsembleMean(ioda::ObsVector &) const;
   void randomizeWithOneEnsembleMean(ioda::ObsVector &) const;
 
-  ioda::ObsVector stddev_;
   ioda::ObsVector yobs_;
+  ioda::ObsVector stddev_;
   ioda::ObsVector inverseVariance_;
   mutable Eigen::VectorXd local_stddev_;
   mutable Eigen::VectorXd local_inverseVariance_;

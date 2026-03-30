@@ -188,8 +188,8 @@ class GeoCloudCreateCloudColumn : public ObsFunctionBase<float> {
 
  private:
     GeoCloudCreateCloudColumnParameters options_;
-    std::vector<int> channels_;
     ufo::Variables invars_;
+    std::vector<int> channels_;
 };
 }  // namespace ufo
 

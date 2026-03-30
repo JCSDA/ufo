@@ -81,11 +81,11 @@ class OceanPracticalSalinityToAbsoluteSalinity : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  std::string absolutesalinityvariable_;
   std::string practicalsalinityvariable_;
   std::string practicalsalinitygroup_;
   std::string pressurevariable_;
   std::string pressuregroup_;
-  std::string absolutesalinityvariable_;
 };
 
 // -----------------------------------------------------------------------------

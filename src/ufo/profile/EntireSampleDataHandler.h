@@ -74,7 +74,7 @@ namespace ufo {
           // Provide additional information if that occurs.
           try {
             return boost::get<std::vector<T>> (it_entireSampleData->second);
-          } catch (boost::bad_get) {
+          } catch (const boost::bad_get&) {
             throw eckit::BadParameter("Template parameter passed to boost::get for " +
                                       fullname + " probably has the wrong type", Here());
           }

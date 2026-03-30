@@ -26,12 +26,8 @@ namespace ufo {
                          std::vector<float> *TotalPd)
   {
     const float missingValueFloat = util::missingValue<float>();
-    // PGE multiplication factor used to store PGE values for later use.
-    const double PGEMult = 1000.0;
     // Missing data indicator for stored PGEs.
     const double PGEMDI = 1.111;
-    // PGEMDI * PGEMult to avoid truncation errors
-    const double PGEMDIMult = 1111.0;
     // Maximum value of exponent in background QC.
     const double ExpArgMax = options.PGE_ExpArgMax.value();
     // PGE rejection limit.

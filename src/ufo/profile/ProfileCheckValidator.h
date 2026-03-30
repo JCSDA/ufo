@@ -56,8 +56,16 @@ namespace ufo {
 
     /// Determine difference between two values within a certain tolerance.
     template <typename T>
-      bool differenceWithinTol(const T A, const T B, const float tol = 1e-10) const
-      {return (std::fabs(A - B) <= tol);}
+      bool differenceWithinTol(const T A, const T B, const float tol = 1e-10) const {
+      // Prevent integer overflow which occurs in certain unit tests.
+      if (std::is_same<T, int>::value) {
+        const int64_t Along = static_cast<int64_t>(A);
+        const int64_t Blong = static_cast<int64_t>(B);
+        const int64_t tollong = static_cast<int64_t>(tol);
+        return (std::abs(Along - Blong) <= tollong);
+      }
+      return (std::fabs(A - B) <= tol);
+    }
 
     bool differenceWithinTol(const bool A, const bool B, const float tol = 1e-10) const
     {return A == B;}

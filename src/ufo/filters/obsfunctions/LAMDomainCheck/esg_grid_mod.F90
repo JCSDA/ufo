@@ -116,7 +116,9 @@ real(kind_real),dimension(2):: xs,xt
 !=============================================================================
 ff=F
 call xctoxs(xc,xs)
-call xstoxt(k,xs,xt,ff); if(ff)return
+call xstoxt(k,xs,xt,ff)
+xm = 0
+if(ff) return
 call xttoxm(a,xt,xm,ff)
 end subroutine xctoxm_ak
 !=============================================================================

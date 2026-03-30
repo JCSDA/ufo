@@ -52,10 +52,11 @@ class ObsRadarDopplerWindTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
 
  private:
-  const Parameters_ params_;
-
   /// ObsSpace.
   const ioda::ObsSpace& odb_;
+
+  /// Parameters.
+  const Parameters_ params_;
 
   /// GeoVaLs required by this linear operator.
   oops::Variables requiredVars_;

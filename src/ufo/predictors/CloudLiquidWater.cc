@@ -337,7 +337,6 @@ void CloudLiquidWater::clwDerivative_amsua(const std::vector<float> & tsavg,
   ///
   const float t0c = Constants::t0c;
   const float d1 = 0.754, d2 = -2.265;
-  const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
   const float tbmax = 550.0, r284 = 284.0, r285 = 285.0;
   const float fmiss = util::missingValue<float>();
 

@@ -463,14 +463,10 @@ void PoissonDiskThinning::groupObservationsByPriority(
                                            priorityVariable.get().variable(),
                                            apply);
 
-  auto reverse = [](int i) {
-      return -i - std::numeric_limits<int>::lowest() + std::numeric_limits<int>::max();
-  };
-
   std::vector<int> validObsPriorities(validObsIds.size());
   for (size_t validObsIndex = 0; validObsIndex < validObsIds.size(); ++validObsIndex)
     // reversing because we want to start with the highest-priority items
-    validObsPriorities[validObsIndex] = reverse(priority[validObsIds[validObsIndex]]);
+    validObsPriorities[validObsIndex] = priority[validObsIds[validObsIndex]] * -1;
   splitter.groupBy(validObsPriorities);
 }
 

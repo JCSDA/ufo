@@ -91,7 +91,6 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
       int numTotal = 0;
       // For each channel and vertical level count the number of valid observations
       for (size_t iChan=0; iChan < nChans; ++iChan) {
-        const size_t iFilterVar = iVar * nChans + iChan;
         const size_t jVar = variableIndicesMap[iChan];
 
         // Count the number of valid observations in this profile

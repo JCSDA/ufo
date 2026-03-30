@@ -87,8 +87,6 @@ double PathSumOper::computeSegmentLength(const std::array<double, 3> &p1,
   // WGS-84 ellipsoid parameters
   const double a_scaled = Constants::semi_major_axis * scale;   // semi-major axis of Earth
                                                                 // default [m] or [km] if scaled
-  const double b_scaled = Constants::semi_minor_axis * scale;   // semi-minor axis of Earth
-                                                                // default [m] or [km] if scaled
   const double ecc2 = Constants::eccentricity_sq;       // eccentricity squared of the ellipsoid
 
   auto geodeticToECEF = [&](const std::array<double, 3>& p) -> std::array<double, 3> {

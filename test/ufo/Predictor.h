@@ -41,7 +41,6 @@ namespace test {
 // -----------------------------------------------------------------------------
 void testPredictor() {
   typedef ::test::ObsTestsFixture<ObsTraits> Test_;
-  typedef oops::ObsDiagnostics<ufo::ObsTraits>    ObsDiags_;
   typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
   std::vector<eckit::LocalConfiguration> typeconfs;

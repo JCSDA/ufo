@@ -79,13 +79,13 @@ namespace ufo {
     // In order to correctly handle MPI ranks with zero entries,
     // ensure that all of the variables defined above have been added to the ObsSpace
     // on each rank. This prevents a hang when saving the ObsSpace.
-    for (const auto variableInt : variableNamesInt) {
+    for (const auto & variableInt : variableNamesInt) {
       const auto & vectorInt = profileDataHandler.get<int>(variableInt);
     }
-    for (const auto variableFloat : variableNamesFloat) {
+    for (const auto & variableFloat : variableNamesFloat) {
       const auto & vectorFloat = profileDataHandler.get<float>(variableFloat);
     }
-    for (const auto variableBool : variableNamesBool) {
+    for (const auto & variableBool : variableNamesBool) {
       const auto & vectorBool = profileDataHandler.get<bool>(variableBool);
     }
 
@@ -153,7 +153,6 @@ namespace ufo {
     profileExtended.checkObsSpaceSection(ufo::ObsSpaceSection::Extended);
 
     const size_t numProfileLevels = profileOriginal.getNumProfileLevels();
-    const size_t numModelLevels = profileExtended.getNumProfileLevels();
 
     const std::vector<std::string> diagFlagNamesU {
       ufo::ProfileVariableNames::diagflags_final_reject_u,

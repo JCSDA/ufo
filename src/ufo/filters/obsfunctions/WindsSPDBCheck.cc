@@ -31,8 +31,6 @@ WindsSPDBCheck::WindsSPDBCheck(const eckit::LocalConfiguration & conf)
   // Initialize error_min, and max from options. Make sure they are sane.
   const std::vector<float> &error_min = options_.error_min.value();
   const std::vector<float> &error_max = options_.error_max.value();
-  const std::vector<float> &cgross = options_.cgross.value();
-  const std::vector<int> &wndtype = options_.wndtype.value();
   const std::string checkvars = options_.checkvars.value();
 
   ASSERT(error_min < error_max);

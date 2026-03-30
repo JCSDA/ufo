@@ -336,7 +336,7 @@ void PrintFilterData::printAllData() const {
     os_ << std::endl;
     // Print division bar below header.
     os_ << std::string(maxVariableNameLength, '-') << "-+-";
-    for (int loc : locGroup)
+    for (size_t loc = 0; loc < locGroup.size(); ++loc)
       os_ << std::string(columnWidth, '-') << "-+-";
     os_ << std::endl;
     // Print each variable in turn.

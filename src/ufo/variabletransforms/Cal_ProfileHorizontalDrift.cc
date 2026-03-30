@@ -65,9 +65,6 @@ void Cal_ProfileHorizontalDrift::runTransform(const std::vector<bool> &apply) {
     throw eckit::BadValue("At least one vector is the wrong size", Here());
   }
 
-  // Number of locations in the ObsSpace.
-  const size_t nlocs = obsdb_.nlocs();
-
   // Output values are initialised to input values.
   std::vector<float> latitude_out = latitude_in;
   std::vector<float> longitude_out = longitude_in;

@@ -167,7 +167,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       previousVariableWasFirstComponentOfTwo = true;
     } else {
       std::string varname1, varname2;
-      size_t iv1, iv2;
       // H(x):
       std::vector<float> hofx1, hofx2;
       // H(x) error:
@@ -198,8 +197,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       if (previousVariableWasFirstComponentOfTwo) {
         varname1 = filtervars.variable(filterVarIndex-1).variable();
         varname2 = filtervars.variable(filterVarIndex).variable();
-        iv1 = observed.find(varname1);
-        iv2 = observed.find(varname2);
         // H(x):
         data_.get(varhofx.variable(filterVarIndex-1), hofx1);
         data_.get(varhofx.variable(filterVarIndex), hofx2);
@@ -241,7 +238,6 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
         }
       } else {
         varname1 = filtervars.variable(filterVarIndex).variable();
-        iv1 = observed.find(varname1);
         // H(x):
         data_.get(varhofx.variable(filterVarIndex), hofx1);
         // observation values:

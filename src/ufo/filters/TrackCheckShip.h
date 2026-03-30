@@ -162,9 +162,9 @@ class TrackCheckShip: public FilterBase,
     }
 
    private:
+    TrackCheckUtils::ObsLocationTime obsLocationTime_;
     std::shared_ptr<TrackStatistics> fullTrackStatistics_;
     ObservationStatistics observationStatistics_;
-    TrackCheckUtils::ObsLocationTime obsLocationTime_;
     size_t observationNumber_;
     bool rejected_;
   };

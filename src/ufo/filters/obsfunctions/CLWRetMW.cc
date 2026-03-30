@@ -101,7 +101,6 @@ CLWRetMW::CLWRetMW(const eckit::LocalConfiguration & conf)
     ASSERT(options_.ch18v.value().get() != 0 && options_.ch18h.value().get() != 0 &&
            options_.ch36v.value().get() != 0 && options_.ch36h.value().get() != 0 &&
            channels.size() == 4);
-    const std::vector<float> &sys_bias = options_.origbias.value().get();
     ASSERT(options_.origbias.value() != boost::none);
     // Include list of required data from ObsSpace
     for (size_t igrp = 0; igrp < options_.varGroup.value().size(); ++igrp) {

@@ -153,7 +153,6 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
     ioda::ObsSpace::RecIdxIter irec;   // Using obs grouping/sorting indices
     // record (profile) loop
     for ( irec = obsdb.recidx_begin(); irec != obsdb.recidx_end(); ++irec ) {
-      std:: size_t rNum = obsdb.recidx_recnum(irec);
       std::vector<std::size_t> rSort = obsdb.recidx_vector(irec);
 
       profCount++;

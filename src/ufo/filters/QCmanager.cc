@@ -63,9 +63,6 @@ QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
   ASSERT(flags_->nvars() == allObservedVars.size());
   ASSERT(flags_->nlocs() == obsdb_.nlocs());
 
-  const float rmiss = util::missingValue<float>();
-  const int imiss = util::missingValue<int>();
-
   const ioda::ObsDataVector<float> obs(obsdb, initialObservedVars, "ObsValue");
 
   // Iterate over initial observed variables

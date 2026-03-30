@@ -111,7 +111,6 @@ const typename DataExtractorPayload<T>::template const_array_view<1>::type get1D
         "Unable to fetch a 1D array slice with the provided constraints.", Here());
 
   typedef boost::multi_array_types::index_range range_t;
-  typedef typename DataExtractorPayload<T>::template const_array_view<1>::type view1D;
   typename DataExtractorPayload<T>::index_gen indices;
 
   if (dimIndex == 0) {
@@ -178,7 +177,6 @@ const typename DataExtractorPayload<T>::template const_array_view<2>::type get2D
         "Unable to fetch a 2D array slice with the provided constraints.", Here());
 
   typedef boost::multi_array_types::index_range range_t;
-  typedef typename DataExtractorPayload<T>::template const_array_view<2>::type view2D;
   typename DataExtractorPayload<T>::index_gen indices;
 
   size_t sumIndex = dimIndex0 + dimIndex1;

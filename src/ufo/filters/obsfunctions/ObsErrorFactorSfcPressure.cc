@@ -33,9 +33,6 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
   : invars_() {
   oops::Log::trace() << "ObsErrorFactorSfcPressure constructor" << std::endl;
   oops::Log::debug() << "ObsErrorFactorSfcPressure: config = " << config << std::endl;
-  const float tiny_float = FLT_MIN;
-  const float huge_float = FLT_MAX;
-  const float missing = util::missingValue<float>();
   // Initialize options
   options_.reset(new ObsErrorFactorSfcPressureParameters());
   options_->deserialize(config);

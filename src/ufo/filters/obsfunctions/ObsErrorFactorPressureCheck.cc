@@ -86,19 +86,14 @@ static ObsFunctionMaker<ObsErrorFactorPressureCheck> makerSteps_("ObsErrorFactor
 ObsErrorFactorPressureCheck::ObsErrorFactorPressureCheck(const eckit::Configuration &config)
   : invars_() {
   oops::Log::trace() << "ObsErrorFactorPressureCheck constructor" << std::endl;
-  const float missing = util::missingValue<float>();
   // Initialize options
   options_.reset(new ObsErrorFactorPressureCheckParameters());
   options_->deserialize(config);
 
   const std::string inflatevars = options_->inflatevars.value();
-  const float infl_coeff = options_->infl_coeff.value();
 
   const std::string errgrp = options_->testObserr.value();
   const std::string flaggrp = options_->testQCflag.value();
-
-  const bool obsErrorRamp = options_->obsErrorRamp.value();
-  const float max_levels_below_surface = options_->maxLevelsBelowSurface.value();
 
   invars_ += Variable("ObsType/"+inflatevars);
   invars_ += Variable(errgrp+"/"+inflatevars);
@@ -219,7 +214,6 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   const float grav_ratio = Constants::grav_ratio;
   float fact, slat, sin2, termg, termr, termrg;
   float dpres, sfcchk, logobspres, logsfcpres, rlow, ramp, rhgh, drpx;
-  float obserror, new_error, error_factor;
   std::vector<float> zges_mh(nlevs);
   std::vector<float> logprsl(nlevs), airtemp_prof(nlevs);
   std::vector<double> qs_profile(nlevs);

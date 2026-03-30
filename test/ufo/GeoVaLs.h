@@ -66,8 +66,6 @@ void testGeoVaLs() {
     const oops::Variables ingeovars(gconf, "state variables");
     const GeoVaLs gval(geovalsconf, ospace, ingeovars);
 
-    const double tol = gconf.getDouble("tolerance");
-
 /// Check that GeoVaLs default constructor works
      oops::Log::trace() <<
       "GeoVaLs default constructor - does not allocate fields" << std::endl;

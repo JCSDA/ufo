@@ -117,14 +117,14 @@ class ObsErrorDiffusion : public ObsErrorBase {
  private:
   /// Print covariance details
   void print(std::ostream &) const override;
-  const eckit::mpi::Comm & comm_;
   std::shared_ptr<oops::GeometryData> geom_;
   std::shared_ptr<oops::Diffusion::DerivedGeom> diffusionGeom_;
 
   /// Observation error standard deviations
+  Parameters_ params_;
   ioda::ObsVector stddev_;
   ioda::ObsVector inverseVariance_;
-  Parameters_ params_;
+  const eckit::mpi::Comm & comm_;
   std::unique_ptr<oops::Diffusion> diffusion_;
   atlas::Field hzNorm_;
 };

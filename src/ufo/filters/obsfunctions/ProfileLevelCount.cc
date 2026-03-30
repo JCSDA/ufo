@@ -49,9 +49,6 @@ void ProfileLevelCount::compute(const ObsFilterData & in,
   if (obsdb.obs_group_vars().empty())
     throw eckit::UserError("Group variables configuration is empty", Here());
 
-  // Number of locations.
-  const size_t nlocs = obsdb.nlocs();
-
   // Correspondence between record numbers and indices in the data sample.
   const std::vector<std::size_t> &recnums = obsdb.recidx_all_recnums();
 

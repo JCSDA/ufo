@@ -295,7 +295,7 @@ std::vector<float> SpikeAndStepCheck::set_tolerances(const std::vector<float> &x
       }  // while there are more tolerance sections to populate
     }  // for obs in record
   } else {  // no toleranceBoundaries given
-    for (size_t obsIndex : obs_indices) {
+    for (size_t jj = 0; jj < obs_indices.size(); ++jj) {
       tolerances.push_back(tolerance);
     }
   }  // nSections > 0 or not

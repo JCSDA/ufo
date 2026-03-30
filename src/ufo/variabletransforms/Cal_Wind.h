@@ -66,10 +66,10 @@ class Cal_WindSpeedAndDirection : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
-  std::string eastwardwindvariable_;
-  std::string northwardwindvariable_;
   /// Group name.
   std::string group_;
+  std::string eastwardwindvariable_;
+  std::string northwardwindvariable_;
 };
 
 /*!

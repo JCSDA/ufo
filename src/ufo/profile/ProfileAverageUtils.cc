@@ -172,9 +172,7 @@ namespace ufo {
                             const std::vector<int> &flags,
                             const std::vector<float> &hofx,
                             std::vector<float> &obs) {
-    const int64_t missingValInt = util::missingValue<int64_t>();  // size_t type
     const float missingValFloat = util::missingValue<float>();
-    const size_t nlocs_obs = locsOriginal.size();
     const size_t nlocs_ext = locsExt.size();
     const size_t nlocs = hofx.size();
 

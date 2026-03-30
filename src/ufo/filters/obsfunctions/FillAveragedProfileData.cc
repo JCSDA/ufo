@@ -69,8 +69,6 @@ template <typename FunctionValue>
 void FillAveragedProfileData<FunctionValue>::fillAverageProfile
 (const ObsFilterData & in,
  ioda::ObsDataVector<FunctionValue> & out) const {
-  const FunctionValue missing = util::missingValue<FunctionValue>();
-
   // ObsSpace.
   ioda::ObsSpace & obsdb = in.obsspace();
 

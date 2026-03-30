@@ -41,7 +41,6 @@ ObsErrorFactorDuplicateCheck::ObsErrorFactorDuplicateCheck(const eckit::Configur
   options_->deserialize(config);
   const std::string errgrp = options_->original_obserr.value();
   const std::string flaggrp = options_->testQCflag.value();
-  const bool use_air_pres = options_->use_air_pressure.value();
   const std::string var = options_->variable.value();
 
   // Include list of required data from MetaData
@@ -146,7 +145,6 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
 
   int qc_len_local = inds.size();
   int qc_len_global = inds_global.size();
-  int obserr_rank = obsdb.comm().rank();
 
   // Option to use pressure
   if (use_air_pres) {

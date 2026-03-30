@@ -68,10 +68,11 @@ class ObsRadarDopplerWind : public ObsOperatorBase,
   void print(std::ostream &) const override;
 
  private:
-  const Parameters_ params_;
-
   /// ObsSpace.
   const ioda::ObsSpace& odb_;
+
+  // Parameters.
+  const Parameters_ params_;
 
   /// GeoVaLs required by this operator.
   oops::Variables requiredVars_;

@@ -87,16 +87,18 @@ void DensityReductionLatLonGrid::fillModifiedLocations(std::vector<float> & lats
 
   // Assign each location a bin index in the lat-lon grid.
   // The grid is flattened to 1D.
-  std::vector<int> bin(gnlocs);
+  std::vector<int64_t> bin(gnlocs);
   for (int gloc = 0; gloc < gnlocs; ++gloc) {
-    const int binLat = std::trunc((globalLatitude[gloc] - latMin) / dLat);
-    const int binLon = std::trunc((globalLongitude[gloc] - lonMin) / dLon);
+    const int64_t binLat =
+      static_cast<int64_t>(std::trunc((globalLatitude[gloc] - latMin) / dLat));
+    const int64_t binLon =
+      static_cast<int64_t>(std::trunc((globalLongitude[gloc] - lonMin) / dLon));
     bin[gloc] = binLat + numBinsLat * binLon;
   }
 
   // Determine all locations associated with each populated lat-lon bin.
   // Unpopulated bins are not considered further.
-  std::unordered_map<int, std::vector<int>> binLocs;
+  std::unordered_map<int64_t, std::vector<int>> binLocs;
   for (int gloc = 0; gloc < gnlocs; ++gloc) {
     binLocs[bin[gloc]].push_back(gloc);
   }
@@ -121,7 +123,7 @@ void DensityReductionLatLonGrid::fillModifiedLocations(std::vector<float> & lats
     // Only process each location on its patch rank.
     if (globalPatchRanks[gloc] == rank) {
       // Bin associated with this location.
-      const int binLoc = bin[gloc];
+      const int64_t binLoc = bin[gloc];
       // First location associated with this bin.
       const int firstBinLoc = binLocs[binLoc].front();
       // Determine whether this bin location has been used before.

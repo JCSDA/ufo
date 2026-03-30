@@ -80,7 +80,6 @@ void LAMDomainCheck::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   oops::Log::trace() << "LAMDomainCheck compute start" << std::endl;
   const size_t nlocs = in.nlocs();
-  const float missing = util::missingValue<float>();
 
   // Ensure that only one output variable is expected.
   ASSERT(out.nvars() == 1);

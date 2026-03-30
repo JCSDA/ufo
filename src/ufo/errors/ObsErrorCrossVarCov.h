@@ -108,6 +108,8 @@ class ObsErrorCrossVarCov : public ObsErrorBase {
   void print(std::ostream &) const override;
   /// Recondition the R matrix - called by update
   void recondition(const ioda::ObsVector & mask);
+  /// Configuration as a Parameters_
+  Parameters_ params_;
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
   /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
@@ -116,8 +118,6 @@ class ObsErrorCrossVarCov : public ObsErrorBase {
   Eigen::MatrixXd varcorrelations_;
   /// Create reconditioner
   std::unique_ptr<ObsErrorReconditioner> reconditioner_;
-  /// Configuration as a Parameters_
-  Parameters_ params_;
 };
 
 // -----------------------------------------------------------------------------

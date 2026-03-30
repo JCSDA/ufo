@@ -43,15 +43,11 @@ void ProbabilityGrossErrorWholeReport::applyFilter(const std::vector<bool> & app
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProbabilityGrossErrorWholeReport applyFilter start" << std::endl;
-  // Missing value indicator
-  const float missingValueFloat = util::missingValue<float>();
   // Dimensions
   const size_t nlocs = obsdb_.nlocs();
   const size_t nvars = filtervars.nvars();
   // Missing data indicator for stored PGEs.
   const float PGEMDI = 1.111f;
-  // PGE multiplication factor used to store PGE values for later use.
-  const float PGEMult = 1000.0;
   // PGE rejection limit.
   const float PGECrit = parameters_.PGEParameters.PGE_PGECrit.value();
 

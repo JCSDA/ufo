@@ -58,7 +58,6 @@ ObsErrorSatSpecHumidity::~ObsErrorSatSpecHumidity() {
 void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
                                      ioda::ObsDataVector<float> & obserr) const {
   oops::Log::trace() << "ObsErrorSatSpecHumidity compute start" << std::endl;
-  const float missing = util::missingValue<float>();
   float logp_ob, satSpecificHumidity;
   double d_err;
 

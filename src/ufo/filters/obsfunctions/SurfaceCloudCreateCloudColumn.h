@@ -181,8 +181,8 @@ class SurfaceCloudCreateCloudColumn : public ObsFunctionBase<float> {
 
  private:
     SurfaceCloudCreateCloudColumnParameters options_;
-    std::vector<int> channels_;
     ufo::Variables invars_;
+    std::vector<int> channels_;
 };
 }  // namespace ufo
 

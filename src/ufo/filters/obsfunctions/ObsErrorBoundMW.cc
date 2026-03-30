@@ -76,10 +76,6 @@ ObsErrorBoundMW::ObsErrorBoundMW(const eckit::LocalConfiguration & conf)
     const boost::optional<Variable> &obserrvar = options_.obserrFunction.value();
     invars_ += *obserrvar;
   }
-
-  if (options_.obserrOriginal.value() != boost::none) {
-    const std::vector<float> &obserr0 = options_.obserrOriginal.value().get();
-  }
 }
 
 // -----------------------------------------------------------------------------

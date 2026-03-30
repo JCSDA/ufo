@@ -119,9 +119,11 @@ void SuperRefractionCheckNBAM::applyFilter(
   const std::vector<size_t> & record_numbers = obsdb_.recidx_all_recnums();
 
   oops::Log::debug() << "Unique record numbers" << std::endl;
-  for (size_t iProfile : record_numbers)
+  for (size_t iProfile : record_numbers) {
     oops::Log::debug() << iProfile << ' ';
-    oops::Log::debug() << std::endl;
+  }
+  oops::Log::debug() << std::endl;
+
 
   // Loop over the unique profiles
   for (size_t iProfile : record_numbers) {
@@ -223,7 +225,6 @@ std::vector<float> SuperRefractionCheckNBAM::calcImpactParameterModel(
             float lat,
             float geoid,
             float radiusCurv) const {
-  const float missingFloat = util::missingValue<float>();
   std::vector<float> impactParameterModel;
   float geometricHeight;
   for (size_t iLevel = 0; iLevel < geopotentialHeight.size(); ++iLevel) {
