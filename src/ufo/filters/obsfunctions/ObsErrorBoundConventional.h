@@ -31,7 +31,7 @@ class ObsErrorBoundConventionalParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsErrorBoundConventionalParameters, Parameters)
 
  public:
-  oops::RequiredParameter<std::string> obsvar{"obsvar", "stationPressure", this};
+  oops::RequiredParameter<std::string> obsvar{"obsvar", this};
   /// The maximum value of the observation error bound for each channel in channelList
   oops::RequiredParameter<float> obserrBoundMax{"obserr_bound_max", this};
   /// The maximum value of the observation error bound for each channel in channelList

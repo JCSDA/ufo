@@ -540,6 +540,15 @@ ufo_add_test( NAME    function_obserrmean_mhs
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    test_ufo_function_obserrorboundconv
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorboundconv.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_obserrorfactorconv
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x

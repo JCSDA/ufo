@@ -1,0 +1,37 @@
+time window:
+  begin: 2020-12-01T09:00:00Z
+  end: 2020-12-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
+  obs space:
+    name: test_obserrorboundconv
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/converr_vadwind_obs_2020120112_s.nc4
+      obsgrouping:
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "pressure"
+        sort order: "descending"  
+    simulated variables: [windEastward]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/converr_vadwind_geoval_2020120112_s.nc4
+  obs filters:
+  - filter: Background Check
+    filter variables:
+    - name: windEastward
+    function absolute threshold:
+    - name: ObsFunction/ObsErrorBoundConventional
+      options:
+        obsvar: windEastward
+        obserr_bound_max: 10
+        obserr_bound_min: -10
+        obserr_bound_factor: 1
+    action:
+      name: reject
+  passedBenchmark: 15
