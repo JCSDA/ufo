@@ -345,7 +345,6 @@ class GeoVaLs : public util::Printable,
       std::vector<util::Range<size_t>> &profileIndicesGroupedByLocation,
       GeoVaLFormat format = GeoVaLFormat::DEFAULT) const;
 
-  void read(const eckit::Configuration &, const ioda::ObsSpace &);
   void write(const eckit::Configuration &) const;
 
   /// \brief Return the number of observation locations.
