@@ -1094,6 +1094,63 @@ observations:
 
 - obs space:
     <<: *ObsSpace
+    name: Check variable assignment updates QC flags - float variable
+    derived variables: [myFloat]
+    simulated variables: [myFloat]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/myFloat
+      value: 1.0
+      type: int
+  - filter: Perform Action
+    filter variables:
+    - name: DerivedObsValue/myFloat
+    action:
+      name: assign error # needed to stop finalcheck assigning missing to myFloat
+      error parameter: 1.0 # arbitrary
+  passedBenchmark: 5  # myFloat should be valid for all 5 observations
+
+- obs space:
+    <<: *ObsSpace
+    name: Check variable assignment updates QC flags - integer variable
+    derived variables: [myInt]
+    simulated variables: [myInt]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/myInt
+      value: 1
+      type: int
+  - filter: Perform Action
+    filter variables:
+    - name: DerivedObsValue/myInt
+    action:
+      name: assign error # needed to stop finalcheck assigning missing to myInt
+      error parameter: 1.0 # arbitrary
+  passedBenchmark: 5  # myInt should be valid for all 5 observations
+
+- obs space:
+    <<: *ObsSpace
+    name: Check variable assignment updates QC flags - datetime variable
+    derived variables: [myDateTime]
+    simulated variables: [myDateTime]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/myDateTime
+      source variable: MetaData/dateTime
+      type: datetime
+  - filter: Perform Action
+    filter variables:
+    - name: DerivedObsValue/myDateTime
+    action:
+      name: assign error # needed to stop finalcheck assigning missing to myDateTime
+      error parameter: 1.0 # arbitrary
+  passedBenchmark: 5  # myDateTime should be valid for all 5 observations
+
+- obs space:
+    <<: *ObsSpace
     name: Attempt to copy a datetime variable to an integer variable without defining an epoch
   obs filters:
   - filter: Variable Assignment

@@ -329,12 +329,14 @@ void saveValues(const ufo::Variable &variable,
 
 /// Change the QC flag from `miss` to `pass` if the obs value is no longer missing or from `pass` to
 /// `miss` if the obs value is now missing.
-void updateQCFlags(const ioda::ObsDataVector<float> &obsvalues, ioda::ObsDataVector<int> &qcflags) {
-  const float missing = util::missingValue<float>();
+template <typename VariableType>
+void updateQCFlags(const ioda::ObsDataVector<VariableType> &obsvalues,
+                         ioda::ObsDataVector<int> &qcflags) {
+  const VariableType missing = util::missingValue<VariableType>();
 
   for (size_t ivar = 0; ivar < obsvalues.nvars(); ++ivar) {
     if (qcflags.varnames().has(obsvalues.varnames()[ivar])) {
-      const ioda::ObsDataRow<float> &currentValues = obsvalues[ivar];
+      const ioda::ObsDataRow<VariableType> &currentValues = obsvalues[ivar];
       ioda::ObsDataRow<int> &currentFlags = qcflags[obsvalues.varnames()[ivar]];
       for (size_t iloc = 0; iloc < obsvalues.nlocs(); ++iloc) {
         if (currentFlags[iloc] == QCflags::missing && currentValues[iloc] != missing) {
@@ -354,10 +356,14 @@ void assignToIntVariable(const ufo::Variable &variable,
                          const AssignmentParameters &params,
                          const std::vector<bool> &apply,
                          const ObsFilterData &data,
-                         ioda::ObsSpace &obsdb) {
+                         ioda::ObsSpace &obsdb,
+                         ioda::ObsDataVector<int> &qcflags) {
   ioda::ObsDataVector<int> values = getCurrentValues<int>(variable, obsdb, params.skipDerived);
   assignNumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
+  if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue") {
+    updateQCFlags<int>(values, qcflags);
+  }
 }
 
 /// Works like `assignToIntVariable()`, but in addition if \p variable belongs to the `ObsValue` or
@@ -375,7 +381,7 @@ void assignToFloatVariable(const ufo::Variable &variable,
   assignNumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
   if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue") {
-    updateQCFlags(values, qcflags);
+    updateQCFlags<float>(values, qcflags);
   }
 }
 
@@ -387,11 +393,15 @@ void assignToNonnumericVariable(const ufo::Variable &variable,
                                 const AssignmentParameters &params,
                                 const std::vector<bool> &apply,
                                 const ObsFilterData &data,
-                                ioda::ObsSpace &obsdb) {
+                                ioda::ObsSpace &obsdb,
+                                ioda::ObsDataVector<int> &qcflags) {
   ioda::ObsDataVector<VariableType> values =
     getCurrentValues<VariableType>(variable, obsdb, params.skipDerived);
   assignNonnumericValues(params, variable, apply, data, values);
   saveValues(variable, values, obsdb);
+  if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue") {
+    updateQCFlags<VariableType>(values, qcflags);
+  }
 }
 
 /// Delegate work to an appropriate function depending on whether \p dtype is a numeric
@@ -408,13 +418,13 @@ void assignToVariable(const ufo::Variable &variable,
     assignToFloatVariable(variable, params, apply, data, obsdb, qcflags);
     break;
   case ioda::ObsDtype::Integer:
-    assignToIntVariable(variable, params, apply, data, obsdb);
+    assignToIntVariable(variable, params, apply, data, obsdb, qcflags);
     break;
   case ioda::ObsDtype::String:
-    assignToNonnumericVariable<std::string>(variable, params, apply, data, obsdb);
+    assignToNonnumericVariable<std::string>(variable, params, apply, data, obsdb, qcflags);
     break;
   case ioda::ObsDtype::DateTime:
-    assignToNonnumericVariable<util::DateTime>(variable, params, apply, data, obsdb);
+    assignToNonnumericVariable<util::DateTime>(variable, params, apply, data, obsdb, qcflags);
     break;
   case ioda::ObsDtype::Empty:
     oops::Log::info() << "ufo::VariableAssignment::assignToVariable "
