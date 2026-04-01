@@ -141,6 +141,10 @@ void testGeoVaLs() {
       rms2 = 2.0 * gval.rms();
       oops::Log::debug()<< "rms1, rms2 = " <<  rms1  << "  " << rms2 << std::endl;
       EXPECT(rms1 == rms2);
+      double nrms1 = gv1.normalizedrms(gval);
+      double nrms2 = 4.0 * gval.normalizedrms(gv1);
+      oops::Log::debug() << "nrms1, nrms2 " << nrms1 << " " << nrms2 << std::endl;
+      EXPECT(nrms1 == nrms2);
     }
     oops::Log::trace() <<
       "GeoVaLs & operator *= (const std::vector<float>); test succeeded" << std::endl;

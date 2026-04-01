@@ -200,4 +200,29 @@ observations:
       - 123
   expectExceptionWithMessage: Invalid number of repetitions for `random_seed`
 
+- obs space:
+    name: prior filter testing
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/pibal_obs_2021121200_m.nc4
+      obsgrouping:
+        group variables: ["stationIdentification", "releaseTime"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [windEastward, windNorthward]
+
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/pibal_geovals_2021121200_m.nc4
+    levels_are_top_down: false
+  obs prior filters:
+  - filter: Parameter Substitution
+    section to repeat:
+      filter: Variable Transforms
+      Transform: {}
+    repetitions:
+    - Transform:
+      - AdjustedHeightCoordinate
+      - AdjustedHeightCoordinate
+  passedBenchmark: 200   #windEastward: 100, #windNorthward: 100
 

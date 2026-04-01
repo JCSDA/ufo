@@ -1,0 +1,32 @@
+time window:
+  begin: '2018-04-14T20:30:00Z'
+  end: '2018-04-15T03:30:00Z'
+
+observations:
+  - obs space:
+      name: Aircraft
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+      simulated variables:
+      - windEastward
+      - windNorthward
+      - airTemperature
+      obsdataout:
+        engine:
+          type: H5File
+          obsfile: Data/aircraft_dataout_2018041500_m.nc4
+    geovals:
+      filename: Data/ufo/testinput_tier_1/aircraft_geoval_2018041500_m.nc4
+    obs operator:
+      name: VertInterp
+      vertical coordinate: air_pressure
+      observation vertical coordinate: pressure
+      observation vertical coordinate group: MetaData
+      interpolation method: log-linear
+    obs filters:
+    - filter: GOMsaver
+      filename: Data/ufo/aircraft_hofx_gomsaver_20260300.nc
+    passedBenchmark: 1573 #airTemperature: 421, windEastward: 576, windNorthward: 576, specificHumidity: 0
+# The file is not compared
