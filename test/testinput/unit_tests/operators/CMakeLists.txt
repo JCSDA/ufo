@@ -303,6 +303,15 @@ ufo_add_test( NAME    opr_gnssrobendmetoffice_nosupercheck
               LABELS  operators ci_oneapi_disable
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    opr_gnssrobendmetoffice_nosupercheck_missingdata
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck_missingdata.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators ci_oneapi_disable
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    linopr_gnssrobendmetoffice_nosupercheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
