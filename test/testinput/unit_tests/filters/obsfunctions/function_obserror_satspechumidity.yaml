@@ -1,0 +1,39 @@
+time window:
+  begin: 2021-12-11T20:00:00Z
+  end: 2021-12-11T22:00:00Z
+
+observations:
+- obs operator:
+    name: VertInterp
+    vertical coordinate: air_pressure
+    observation vertical coordinate: pressure
+    interpolation method: log-linear
+  obs space:
+    name: test_obserrorsatspechumidity
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_obs_2021121200_m_satspechum.nc4
+      obsgrouping:
+        group variables: ["stationIdentification", "dateTime"]
+        sort variable: "pressure"
+        sort order: "descending"  
+    observed variables: [specificHumidity]
+    simulated variables: [specificHumidity]
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/obserror_satspechumidity_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/conventional/sfcship_geovals_2021121200_m_satspechum.nc4
+
+  obs function:
+    name: ObsFunction/ObsErrorSatSpecHumidity
+    variables: [specificHumidity]
+    tolerance: 1.e-6
+    options:
+      variable: specificHumidity
+      input_error_name: GsiInputObsError
+      adjusted_error_name: TempObsErrorData
+      test_obserr: TestReference
+      expect missing value locations to match: false
