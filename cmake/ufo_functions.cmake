@@ -35,9 +35,7 @@ endfunction(PREPEND)
 #  2) interface tests  (SRC must be given)
 #
 # Arguments:
-#  NAME      - the name of the test. "ufo_test_tier#_" is prepended.
-#  TIER      - The testing tier. Defaults to 1.
-#  NOTRAPFPE - Disable FPE trapping.
+#  NAME      - the name of the test. "ufo_" is prepended.
 #  WORKING_DIRECTORY - Set working directory.
 #                      If unset, default to ${PROJECT_SOURCE_DIR}/test.
 #  ECBUILD   - Beyond this point, pass the remaining options to ecbuild_add_test
@@ -45,19 +43,12 @@ endfunction(PREPEND)
 function(ufo_add_test)
   # parse the passed arguments
   set(prefix     ARG)
-  set(novals     NOTRAPFPE)
-  set(singlevals NAME TIER WORKING_DIRECTORY)
+  set( options )
+  set(singlevals NAME WORKING_DIRECTORY)
   set(multivals  ECBUILD )
   cmake_parse_arguments(${prefix}
-                        "${novals}" "${singlevals}" "${multivals}"
+                        "${options}" "${singlevals}" "${multivals}"
                         ${ARGN})
-
-  # determine if floating point error trapping should be set
-  if ( ARG_NOTRAPFPE )
-    set ( TRAPFPE_ENV "OOPS_TRAPFPE=0")
-  else()
-    set ( TRAPFPE_ENV "OOPS_TRAPFPE=1")
-  endif()
 
   # determine working directory
   if ( ARG_WORKING_DIRECTORY )
@@ -75,7 +66,6 @@ function(ufo_add_test)
 
   ecbuild_add_test( TARGET  ufo_${ARG_NAME}
                     WORKING_DIRECTORY ${WORKDIR}
-                    ENVIRONMENT ${TRAPFPE_ENV}
                     ${ECBUILD_EXTRA}
                   )
 
