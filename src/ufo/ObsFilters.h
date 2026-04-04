@@ -95,6 +95,9 @@ class ObsFilters : public util::Printable,
                            std::vector<ObsFilter> & filters);
 
   ioda::ObsSpace & obsspace_;
+  /// QCmanager filter to handle QC flags and collect statistics,
+  /// whenever at least one filter is configured.
+  std::unique_ptr<ObsFilter> qcmanager_;
   // List of filters for which the stage (pre/prior/post) will be determined automatically.
   std::vector<ObsFilter> autoFilters_;
   // List of filters which have been designated to run at the pre stage.
@@ -107,6 +110,7 @@ class ObsFilters : public util::Printable,
   oops::ObsVariables diagvars_;
   ObsDataPtr_<int> qcflags_;
   ObsDataPtr_<float> obserrfilter_;
+  bool atLeastOneFilterConfigured_ = false;
   const int iteration_;
 };
 
