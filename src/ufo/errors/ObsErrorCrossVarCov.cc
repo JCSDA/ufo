@@ -34,7 +34,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & params,
     varcorrelations_(Eigen::MatrixXd::Identity(stddev_.nvars(), stddev_.nvars())),
     reconditioner_(nullptr)
 {
-  // deserialize configuration into ObsErrorCrossVarCovParameters
+  oops::Log::trace() << "ObsErrorCrossVarCov::ObsErrorCrossVarCov starting" << std::endl;
   // Create reconditioner
   reconditioner_.reset(new ObsErrorReconditioner(params_.reconditioning.value()));
   // Open and read error correlations from the hdf5 file
@@ -107,6 +107,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & params,
                          << " channels/variables in file: " << params.inputFile.value()
                          << ". To see which channels, turn on OOPS_TRACE\n" << std::endl;
   }
+  oops::Log::trace() << "ObsErrorCrossVarCov::ObsErrorCrossVarCov finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

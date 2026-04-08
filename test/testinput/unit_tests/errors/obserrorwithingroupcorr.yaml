@@ -59,3 +59,23 @@ observations:
     correlation lengthscale: 13000.  # in m
   obs error test:
     test localization: false
+
+- obs space:
+    name: Sondes (within group covariances with gaussian correlation function and basic reconditioning)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+      obsgrouping:
+        group variables: [sequenceNumber]
+        sort variable: pressure
+        sort order: ascending
+    simulated variables: [airTemperature, windEastward, windNorthward]
+  obs error:
+    covariance model: within group covariances
+    distance function: haversine
+    correlation function: gaussian
+    apply basic reconditioning: true
+    correlation lengthscale: 1400.  # in m
+  obs error test:
+    test localization: false

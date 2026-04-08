@@ -38,9 +38,6 @@ class ObsErrorCrossVarCovParameters : public ObsErrorParametersBase {
   /// Input file containing correlations or covariances. If covariances are
   /// specified, they will be converted to correlations.
   oops::RequiredParameter<std::string> inputFile{"input file", this};
-
-  oops::Parameter<ObsErrorReconditionerParameters> reconditioning{"reconditioning",
-    ObsErrorReconditionerParameters(), this};
 };
 // -----------------------------------------------------------------------------
 /// \brief Observation error covariance matrix with cross-variable
