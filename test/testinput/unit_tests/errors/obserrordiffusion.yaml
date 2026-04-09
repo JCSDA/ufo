@@ -17,5 +17,9 @@ observations:
     correlation lengthscale: 5000.  
     normalization iterations: 1000
     Obs Error test tolerance: 1.e-8
+    control grid:
+      grid spacing in degrees: 10 # control grid resolution in degrees
+      remove within meters: 200000 # remove control points within this distance from observations (meters) 
+                          # use lengthscale plus some padding to impact mesh not diffusion
   obs error test:
     test localization: false

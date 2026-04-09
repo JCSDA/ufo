@@ -51,7 +51,7 @@ ufo_add_test( NAME    obserrordiffusion
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiffusion.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  errors ci_flake_disable
+              LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    obserror_dirac_diffusion

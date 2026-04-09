@@ -20,6 +20,10 @@ observations:
     correlation variable names: [brightnessTemperature]
     correlation lengthscale: 200000. # meters
     normalization iterations: 10000
+    control grid:
+      grid spacing in degrees: 10 # control grid resolution in degrees
+      remove within meters: 200000 # remove control points within this distance from observations (meters) 
+                          # use lengthscale plus some padding to impact mesh not diffusion
 
 test:
   reference filename: testref/unit_tests/errors/diracDiffusion.ref
