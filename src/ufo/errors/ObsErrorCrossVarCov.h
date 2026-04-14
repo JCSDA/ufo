@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ioda/ObsVector.h"
 
@@ -109,6 +110,12 @@ class ObsErrorCrossVarCov : public ObsErrorBase {
   Parameters_ params_;
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
+  /// Localised observation error standard deviations
+  mutable Eigen::VectorXd local_stddev_;
+  /// Variable indices of local obs, used to construct local correlations
+  mutable std::vector<int> local_jvars_;
+  /// Number of local obs at each location, used to construct local correlations
+  mutable std::vector<int> local_nobs_;
   /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
   const oops::ObsVariables vars_;
   /// Correlations between variables
