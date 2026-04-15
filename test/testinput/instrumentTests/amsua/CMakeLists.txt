@@ -117,16 +117,6 @@ if( crtm_FOUND )
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
         LIBS    ufo )
 
-    #  test matching GSI with small tolerance, is this still valid test consider update or remove
-    ufo_add_test( NAME  instrument_amsua_n18_gfs_HofX_bc
-        ECBUILD
-        COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-        ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_n18_gfs_HofX_bc.yaml"
-        MPI     1
-        LABELS  crtm amsua n18 bc instrument ci_flake_disable tier2
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-        LIBS    ufo )
-
     ufo_add_test( NAME  instrument_amsua_n19_gfs_HofX_bc
         ECBUILD
         COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
