@@ -79,7 +79,7 @@ class ImpactHeightCheck : public FilterBase,
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
-  int qcFlag() const override {return QCflags::domain;}
+  int qcFlag() const override {return QCflags::superrefraction;}
   Parameters_ parameters_;
   std::vector<float> calcVerticalGradient(const std::vector<float> &,
                                           const std::vector<float> &) const;
