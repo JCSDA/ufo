@@ -48,8 +48,7 @@ ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_
                                       "cyano-bacteria_concentration",
                                       "coccolithophore_concentration",
                                       "dinoflagellate_concentration",
-                                      "phaeocystis_concentration",
-                                      "cyano-bacteria_concentration"};
+                                      "phaeocystis_concentration"};
 
   varin_.reset(new oops::Variables(vvin));
   // parse channels from the config and create variable names
