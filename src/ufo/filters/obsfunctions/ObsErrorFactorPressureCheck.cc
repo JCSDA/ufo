@@ -203,7 +203,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
   formulas::Formulation formulation = formulas::Formulation::Rogers;
 
   int iflag;
-  double sat_specific_humidity;
+  double sat_specific_humidity = 0.0;
   const float grav = Constants::grav;
   const float deg2rad = Constants::deg2rad;
   const float grav_equator = Constants::grav_equator;
@@ -270,6 +270,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         }
       }
 
+      sfcchk = 0.0f;
       if (reported_height) {
         fact = 0.0f;
         if (obs_height[iloc]-dstn[iloc] > 10.0f) {

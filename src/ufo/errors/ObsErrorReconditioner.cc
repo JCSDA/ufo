@@ -64,8 +64,7 @@ void ObsErrorReconditioner::recondition(Eigen::MatrixXd & R) const {
 
     // Check square matrix
     size_t nrows = R.rows();
-    size_t ncols = R.cols();
-    assert(nrows == ncols);
+    assert(nrows == R.cols());
 
     // Performing eigendecomposition
     oops::Log::trace() << "R before reconditioning:\n" << R << std::endl << std::endl;

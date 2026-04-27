@@ -77,7 +77,7 @@ class AbsoluteToleranceCreator {
   static std::unique_ptr<AbsoluteTolerance> create_unique(std::string name,
     const ProfileUnFlagObsCheck::Parameters_& parameters, const ioda::ObsSpace& obsdb) {
     std::unique_ptr<AbsoluteTolerance> absoluteTolerance =
-        std::move(getFactory()[name]->create_unique(parameters, obsdb));
+       getFactory()[name]->create_unique(parameters, obsdb);
     return absoluteTolerance;
   }
   static std::map<std::string, AbsoluteToleranceCreator*> &getFactory() {

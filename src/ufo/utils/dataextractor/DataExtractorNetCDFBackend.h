@@ -88,7 +88,7 @@ namespace ufo
 /// group: ErrorVariance {
 ///   variables:
 ///     float airTemperature(sensorChannelNumber, MetaData/sensorChannelNumber, index) ;
-///       airTemperature:coordinates = "MetaData/latitudeBand \
+///       airTemperature:coordinates = "MetaData/latitudeBand
 ///       MetaData/processingCenter MetaData/satelliteIdentifier" ;
 /// }
 /// \endcode

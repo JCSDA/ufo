@@ -76,11 +76,6 @@ template <typename OBS> class RunCRTM : public oops::Application {
       ObsDiags_ diag(obsdb[jj], hop.locations(), diagvars);
 
       hop.simulateObs(gval, hofx, ybias, qcflags, bias, diag);
-
-      const double zz = hofx.rms();
-      const double xx = conf[jj].getDouble("rms ref");
-      const double tol = conf[jj].getDouble("tolerance");
-//      BOOST_CHECK_CLOSE(xx, zz, tol);
     }
 
     return 0;

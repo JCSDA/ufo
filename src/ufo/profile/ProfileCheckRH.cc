@@ -36,7 +36,6 @@ namespace ufo {
        profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_dew_point_temperature);
     const std::vector <bool> &diagFlagsTTropopause =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_tropo_t);
-    const std::vector <bool> &diagFlagsTFinalReject =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
     std::vector <bool> &diagFlagsRHInterp =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_rh);

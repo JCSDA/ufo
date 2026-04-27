@@ -96,10 +96,10 @@ class Cal_WindComponents : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
-  std::string windspeedvariable_;
-  std::string winddirectionvariable_;
   /// Group name.
   std::string group_;
+  std::string windspeedvariable_;
+  std::string winddirectionvariable_;
 };
 }  // namespace ufo
 

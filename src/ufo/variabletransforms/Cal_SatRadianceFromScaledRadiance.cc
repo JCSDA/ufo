@@ -105,8 +105,8 @@ void Cal_SatRadianceFromScaledRadiance::runTransform(const std::vector<bool> &ap
         if (radiance[ichan][iloc] != missingValueFloat  &&
             radiance[ichan][iloc] > 0.0f) {
           for (size_t iscale = 0; iscale < numScaleFactors; ++iscale) {
-            if (channels_[ichan] >= startChannelScale[iscale] &
-                channels_[ichan] <= endChannelScale[iscale]) {
+            if ( (channels_[ichan] >= startChannelScale[iscale]) &&
+                (channels_[ichan] <= endChannelScale[iscale]) ) {
               radiance[ichan][iloc] *= std::pow(10, (-1.0f*channelScaleFactor[iscale]));
               break;
             }  // if channels_
