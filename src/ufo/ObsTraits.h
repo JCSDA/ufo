@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2020 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSTRAITS_H_
@@ -11,6 +11,7 @@
 #include <string>
 
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsIterator.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
@@ -39,6 +40,7 @@ struct ObsTraits {
   template <typename DATATYPE> using ObsDataVector = ioda::ObsDataVector<DATATYPE>;
   typedef ufo::ObsError              ObsError;
   typedef ufo::ObsFilters            ObsFilter;
+  typedef ioda::ObsIterator          GeometryIterator;
 
   typedef ufo::ObsOperator           ObsOperator;
   typedef ufo::LinearObsOperator     LinearObsOperator;
