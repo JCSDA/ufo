@@ -128,7 +128,7 @@ void Cal_SatRadianceFromPCScores::runTransform(const std::vector<bool> &apply) {
   // multiplying also by a scaling factor to produce radiances in W m^-2 sr^-1 (m^-1)^-1
   float scalingFactor = parameters_.scalingFactor.value();
   Eigen::MatrixXf reconMatrix \
-    = reconstructor(Eigen::all, destinationChannelIndex).transpose() * pcScoresMatrix;
+    = reconstructor(Eigen::placeholders::all, destinationChannelIndex).transpose() * pcScoresMatrix;
   reconMatrix *= scalingFactor;
 
   // Loop over channels and obs locations to populate derived observation variable
