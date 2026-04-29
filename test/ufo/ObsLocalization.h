@@ -56,10 +56,11 @@ void testObsLocalizationPoint3() {
       conf.getSubConfigurations("obs localizations");
 
   for (const auto & locConf : locConfs) {
-    const std::string name = locConf.getString("localization method");
+    const eckit::LocalConfiguration locSubConf(locConf, "localization");
+    const std::string name = locSubConf.getString("localization method");
     oops::Log::info() << "Testing obs localization point3/point3: " << name << std::endl;
 
-    ObsLocalization<Iterator_> obsloc(locConf, obsspace);
+    ObsLocalization<Iterator_> obsloc(locSubConf, obsspace);
 
     const std::vector<eckit::LocalConfiguration> pairConfs =
         locConf.getSubConfigurations("point pair tests");
