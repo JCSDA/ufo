@@ -1,0 +1,47 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+  - obs space:
+      name: Test ObsFunction CircularDifference
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/circular_difference_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      # signed between windDirectionA and windDirectionB (windDirectionB - windDirectionA)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/signedWindDirectionCircularDiff
+            type: float
+            function:
+              name: ObsFunction/CircularDifference
+              options:
+                variable start: ObsValue/windDirectionA
+                variable end: ObsValue/windDirectionB
+                signed: true
+                circular period: 360.0
+      # unsigned between windDirectionA and windDirectionB (absolute value of windDirectionB - windDirectionA)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/unsignedWindDirectionCircularDiff
+            type: float
+            function:
+              name: ObsFunction/CircularDifference
+              options:
+                variable start: ObsValue/windDirectionA
+                variable end: ObsValue/windDirectionB
+                signed: false
+                circular period: 360.0
+    compareVariables:
+      - test:
+          name: MetaData/signedWindDirectionCircularDiff
+        reference:
+          name: TestReference/signedWindDirectionCircularDiff
+        relTol: 1e-6
+      - test:
+          name: MetaData/unsignedWindDirectionCircularDiff
+        reference:
+          name: TestReference/unsignedWindDirectionCircularDiff
