@@ -214,7 +214,7 @@ void ObsErrorWithinGroupCov::recondition(const ioda::ObsVector & mask) {
 
   for (Eigen::MatrixXd groupCorr : correlations_) {
     // preallocate data
-    Eigen::MatrixXd avgcorr = Eigen::MatrixXd::Zero(nvars, nvars);
+    Eigen::MatrixXd avgcorr = Eigen::MatrixXd::Zero(groupCorr.rows(), groupCorr.cols());
     size_t nused_locs = 0;
     const double dnlocs = static_cast<double>(nlocs);
 
