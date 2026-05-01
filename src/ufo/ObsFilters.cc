@@ -20,11 +20,13 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 
-ObsFilters::ObsFilters(ioda::ObsSpace& os, const eckit::Configuration& config,
-                       ObsDataPtr_<int> qcflags, ObsDataPtr_<float> obserr,
+ObsFilters::ObsFilters(ioda::ObsSpace & os,
+                       const eckit::Configuration & config,
+                       ioda::ObsDataVector<int> & flags,
+                       ioda::ObsDataVector<float> & obserr,
                        const int iteration)
   : obsspace_(os), qcmanager_(nullptr), autoFilters_(), preFilters_(), priorFilters_(),
-    postFilters_(), geovars_(), diagvars_(), qcflags_(qcflags), obserrfilter_(obserr),
+    postFilters_(), geovars_(), diagvars_(), qcflags_(flags), obserr_(obserr),
     iteration_(iteration) {
   oops::Log::trace() << "ObsFilters::ObsFilters starting" << std::endl;
 
@@ -60,7 +62,7 @@ ObsFilters::ObsFilters(ioda::ObsSpace& os, const eckit::Configuration& config,
     ObsFilterParametersWrapper filterParams;
     filterParams.validateAndDeserialize(conf);
     qcmanager_ = std::make_unique<ObsFilter>(os, filterParams.filterParameters,
-                                             qcflags_, obserrfilter_);
+                                             qcflags_, obserr_);
   }
 
   // Create the filters, only at 0-th iteration, or at iterations specified in
@@ -81,10 +83,10 @@ ObsFilters::ObsFilters(ioda::ObsSpace& os, const eckit::Configuration& config,
     filterParams.validateAndDeserialize(conf);
     if (atLeastOneAutoFilterConfigured)
       autoFilters_.emplace_back(os, filterParams.filterParameters, qcflags_,
-                                obserrfilter_);
+                                obserr_);
     else
       postFilters_.emplace_back(os, filterParams.filterParameters, qcflags_,
-                                obserrfilter_);
+                                obserr_);
   }
 
   oops::Log::trace() << "ObsFilters::ObsFilters done" << std::endl;
@@ -105,7 +107,7 @@ void ObsFilters::appendToFiltersList(const FilterParams_& filtersParams,
     }
     if (apply) {
       filters.emplace_back(obsspace_, filterParams.filterParameters,
-                           qcflags_, obserrfilter_);
+                           qcflags_, obserr_);
       geovars_ += filters.back().requiredVars();
       diagvars_ += filters.back().requiredHdiagnostics();
     }

@@ -49,8 +49,8 @@ class VariableTransforms : public FilterBase,
   // This Constructor function initializes an instance of the
   // filter based on options specified in the YAML configuration file.
   VariableTransforms(ioda::ObsSpace &, const eckit::Configuration &,
-                     std::shared_ptr<ioda::ObsDataVector<int>>,
-                     std::shared_ptr<ioda::ObsDataVector<float>>);
+                     ioda::ObsDataVector<int> &,
+                     ioda::ObsDataVector<float> &);
   // Destructor
   ~VariableTransforms();
 

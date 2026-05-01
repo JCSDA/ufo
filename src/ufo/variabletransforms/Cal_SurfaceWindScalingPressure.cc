@@ -28,8 +28,8 @@ namespace ufo {
   Cal_SurfaceWindScalingPressure::Cal_SurfaceWindScalingPressure(
                                   const GenericVariableTransformParameters &options,
                                   const ObsFilterData &data,
-                                  const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                                  const std::shared_ptr<ioda::ObsDataVector<float>> &obserr) :
+                                  ioda::ObsDataVector<int> &flags,
+                                  ioda::ObsDataVector<float> &obserr) :
   TransformBase(options, data, flags, obserr), gvals_() {
     oops::Log::trace() << "Cal_SurfaceWindScalingPressure::Constructor start" << std::endl;
     // List of GeoVaLs this transform will need access to

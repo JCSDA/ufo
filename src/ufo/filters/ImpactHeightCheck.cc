@@ -30,8 +30,8 @@ namespace ufo {
 ImpactHeightCheck::ImpactHeightCheck(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        std::shared_ptr<ioda::ObsDataVector<int> > flags,
-        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+        ioda::ObsDataVector<int> & flags,
+        ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ImpactHeightCheck constructor" << std::endl;
@@ -250,7 +250,7 @@ void ImpactHeightCheck::applyFilter(const std::vector<bool> & apply,
       // Loop over all observations in the profile
       for (size_t jobs : obs_numbers) {
         // Check that this observation should be considered in this routine
-        if (apply[jobs] && (*flags_)[iVar][jobs] == QCflags::pass) {
+        if (apply[jobs] && flags_[iVar][jobs] == QCflags::pass) {
           // Reject observation if it is below the minimum (either surface or sharp gradient)
           const float obsImpactHeight = impactParameter[iVar][jobs] - radiusCurvature[jobs];
           if (parameters_.verboseOutput.value())

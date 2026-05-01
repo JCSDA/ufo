@@ -78,8 +78,8 @@ class SatName : public FilterBase,
   typedef SatNameParameters Parameters_;
   static const std::string classname() {return "ufo::SatName";}
   SatName(ioda::ObsSpace &, const Parameters_ &,
-                 std::shared_ptr<ioda::ObsDataVector<int> >,
-                 std::shared_ptr<ioda::ObsDataVector<float> >);
+          ioda::ObsDataVector<int> &,
+          ioda::ObsDataVector<float> &);
   ~SatName();
  private:
   void print(std::ostream &) const override;

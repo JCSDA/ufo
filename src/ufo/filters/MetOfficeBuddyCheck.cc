@@ -283,9 +283,9 @@ struct MetOfficeBuddyCheck::MetaData {
 };
 
 MetOfficeBuddyCheck::MetOfficeBuddyCheck(ioda::ObsSpace& obsdb, const Parameters_& parameters,
-                                         std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                         std::shared_ptr<ioda::ObsDataVector<float> > obserr)
-  : FilterBase(obsdb, parameters, std::move(flags), std::move(obserr),
+                                         ioda::ObsDataVector<int>& flags,
+                                         ioda::ObsDataVector<float>& obserr)
+  : FilterBase(obsdb, parameters, flags, obserr,
                 VariableNameMap(parameters.AliasFile.value())), options_(parameters)
 {
   oops::Log::trace() << "MetOfficeBuddyCheck constructor" << std::endl;
@@ -999,7 +999,7 @@ std::vector<size_t> MetOfficeBuddyCheck::getValidObservationIds(
     const std::vector<bool> & apply,
     const boost::optional<Eigen::ArrayXXi> & profileIndex) const {
   std::vector<bool> isValid = apply;
-  unselectRejectedLocations(isValid, filtervars_, *flags_,
+  unselectRejectedLocations(isValid, filtervars_, flags_,
                             UnselectLocationIf::ALL_FILTER_VARIABLES_REJECTED);
 
   std::vector<int> isValidAsInt(apply.begin(), apply.end());

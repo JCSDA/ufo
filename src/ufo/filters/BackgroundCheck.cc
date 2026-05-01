@@ -29,8 +29,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                 ioda::ObsDataVector<int> & flags,
+                                 ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr, VariableNameMap(parameters.AliasFile.value())),
     parameters_(parameters)
 {
@@ -94,7 +94,7 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "BackgroundCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
   const float missing = util::missingValue<float>();
-  oops::Log::debug() << "BackgroundCheck obserr: " << *obserr_ << std::endl;
+  oops::Log::debug() << "BackgroundCheck obserr: " << obserr_ << std::endl;
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
 
   std::string test_hofx = parameters_.test_hofx.value();
@@ -115,10 +115,10 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
         // and its underlying type could in principle change without it being obvious here.
-        const bool obserrNotMissing = ((*obserr_)[iv][jobs]
+        const bool obserrNotMissing = (obserr_[iv][jobs]
                                        != util::missingValue<std::remove_reference_t<
-                                                             decltype((*obserr_)[iv][jobs])>>());
-        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass && obserrNotMissing) {
+                                                             decltype(obserr_[iv][jobs])>>());
+        if (apply[jobs] && flags_[iv][jobs] == QCflags::pass && obserrNotMissing) {
           ASSERT(obs[jv][jobs] != missing);
           ASSERT(hofx[jobs] != missing);
 
@@ -176,16 +176,16 @@ void BackgroundCheck::applyFilter(const std::vector<bool> & apply,
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
         // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
         // and its underlying type could in principle change without it being obvious here.
-        const bool obserrNotMissing = ((*obserr_)[iv][jobs]
+        const bool obserrNotMissing = (obserr_[iv][jobs]
                                        != util::missingValue<std::remove_reference_t<
-                                                             decltype((*obserr_)[iv][jobs])>>());
-        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass && obserrNotMissing) {
+                                                             decltype(obserr_[iv][jobs])>>());
+        if (apply[jobs] && flags_[iv][jobs] == QCflags::pass && obserrNotMissing) {
           ASSERT(obs[jv][jobs] != missing);
           ASSERT(hofx[jobs] != missing);
           ASSERT(bias[jobs] != missing);
 
           const std::vector<float> &errorMultiplier =
-              (thresholdWrtBGerror || thresholdWrtEnsembleSpread) ? hofxerr : (*obserr_)[iv];
+              (thresholdWrtBGerror || thresholdWrtEnsembleSpread) ? hofxerr : obserr_[iv];
 //        Threshold for current observation
           float zz = (thr[jobs] == std::numeric_limits<float>::max()) ? abs_thr[jobs] :
             std::min(abs_thr[jobs], thr[jobs] * errorMultiplier[jobs]);

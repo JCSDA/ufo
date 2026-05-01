@@ -27,8 +27,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 RTTOVOneDVarCheck::RTTOVOneDVarCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                 ioda::ObsDataVector<int> & flags,
+                                 ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr), channels_(), retrieved_vars_(),
     hoxdiags_retrieved_vars_(), parameters_(parameters)
 {
@@ -117,7 +117,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
   }
 
 // Save qc flags to database for retrieval in fortran - needed for channel selection
-  flags_->save("FortranQC");    // temporary measure as per ROobserror qc
+  flags_.save("FortranQC");    // temporary measure as per ROobserror qc
 
 // Read in ObsBias for all channels in the database and save to db for access in Fortran
 // there is currently no mechanism for passing ioda::ObsDataVectors to Fortran.
@@ -138,7 +138,7 @@ void RTTOVOneDVarCheck::applyFilter(const std::vector<bool> & apply,
                                   apply_char.size(), apply_char[0]);
 
 // Read qc flags from database
-  flags_->read("FortranQC");    // temporary measure as per ROobserror qc
+  flags_.read("FortranQC");    // temporary measure as per ROobserror qc
 
   oops::Log::trace() << "RTTOVOneDVarCheck applyFilter complete" << std::endl;
 }

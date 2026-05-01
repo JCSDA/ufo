@@ -23,8 +23,8 @@ static TransformMaker<OceanPracticalSalinityToAbsoluteSalinity>
 OceanPracticalSalinityToAbsoluteSalinity::OceanPracticalSalinityToAbsoluteSalinity(
         const Parameters_ &options,
         const ObsFilterData &data,
-        const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-        const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+        ioda::ObsDataVector<int> &flags,
+        ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr),
       absolutesalinityvariable_(options.AbsoluteSalinityVariable),
       practicalsalinityvariable_(options.PracticalSalinityVariable),

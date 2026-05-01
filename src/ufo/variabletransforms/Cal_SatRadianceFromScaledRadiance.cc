@@ -25,8 +25,8 @@ static TransformMaker<Cal_SatRadianceFromScaledRadiance>
 Cal_SatRadianceFromScaledRadiance::Cal_SatRadianceFromScaledRadiance(
     const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    ioda::ObsDataVector<int> &flags,
+    ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
       variables_({parameters_.transformVariable.value()}),
       channels_(parameters_.transformVariable.value().channels()) {

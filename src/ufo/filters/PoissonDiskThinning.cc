@@ -166,8 +166,8 @@ struct PoissonDiskThinning::ObsData
 
 PoissonDiskThinning::PoissonDiskThinning(ioda::ObsSpace & obsdb,
                                          const Parameters_ &parameters,
-                                         std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                         std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                         ioda::ObsDataVector<int> & flags,
+                                         ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters) {
   oops::Log::trace() << "PoissonDiskThinning constructor" << std::endl;
   oops::Log::debug() << "PoissonDiskThinning: config = " << options_ << std::endl;
@@ -413,7 +413,7 @@ std::vector<size_t> PoissonDiskThinning::getValidObservationIds(
     const std::vector<bool> & apply,
     const Variables & filtervars,
     const ObsAccessor &obsAccessor) const {
-  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
+  std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply, flags_, filtervars);
 
   if (!options_.shuffle) {
     // The user wants to process observations in fixed (non-random) order. Ensure the filter

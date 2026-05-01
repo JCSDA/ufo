@@ -23,8 +23,8 @@ static TransformMaker<OceanDensity>
 OceanDensity::OceanDensity(
         const Parameters_ &options,
         const ObsFilterData &data,
-        const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-        const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+        ioda::ObsDataVector<int> &flags,
+        ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr),
       salinityvariable_(options.SalinityVariable),
       salinitygroup_(options.SalinityGroup),

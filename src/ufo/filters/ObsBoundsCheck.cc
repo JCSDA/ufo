@@ -67,8 +67,8 @@ void flagWhereOutOfBounds(const std::vector<bool> & apply,
 // -----------------------------------------------------------------------------
 
 ObsBoundsCheck::ObsBoundsCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                               std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                               ioda::ObsDataVector<int> & flags,
+                               ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ObsBoundsCheck constructor" << std::endl;
@@ -143,7 +143,7 @@ void ObsBoundsCheck::applyFilter(const std::vector<bool> & apply,
       std::vector<bool> testAtLocations = apply;
       if (onlyTestGoodFilterVarsForFlagAllFilterVars) {
         for (size_t iloc=0; iloc < testAtLocations.size(); iloc++)
-          if ((*flags_)[filtervarslist[ifiltervar]][iloc] != QCflags::pass) {
+          if (flags_[filtervarslist[ifiltervar]][iloc] != QCflags::pass) {
             testAtLocations[iloc] = false;
           }
       }

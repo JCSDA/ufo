@@ -41,8 +41,8 @@ class QCmanager : public ObsFilterBase {
   typedef QCmanagerParameters Parameters_;
 
   QCmanager(ioda::ObsSpace &, const Parameters_ &,
-            std::shared_ptr<ioda::ObsDataVector<int> >,
-            std::shared_ptr<ioda::ObsDataVector<float> >);
+            ioda::ObsDataVector<int> &,
+            ioda::ObsDataVector<float> &);
   ~QCmanager();
 
   void preProcess() override {}
@@ -62,7 +62,7 @@ class QCmanager : public ObsFilterBase {
   ioda::ObsSpace & obsdb_;
   const oops::Variables nogeovals_;
   const oops::ObsVariables nodiags_;
-  std::shared_ptr<ioda::ObsDataVector<int>> flags_;
+  ioda::ObsDataVector<int> & flags_;
 };
 
 }  // namespace ufo

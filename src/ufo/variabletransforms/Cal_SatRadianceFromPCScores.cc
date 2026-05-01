@@ -29,8 +29,8 @@ static TransformMaker<Cal_SatRadianceFromPCScores>
 Cal_SatRadianceFromPCScores::Cal_SatRadianceFromPCScores(
     const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    ioda::ObsDataVector<int> &flags,
+    ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
       variables_({parameters_.pcVariable.value()}),
       channels_(parameters_.destinationVariable.value().channels()) {

@@ -28,8 +28,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsDerivativeCheck::ObsDerivativeCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                               std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                       ioda::ObsDataVector<int> & flags,
+                                       ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {

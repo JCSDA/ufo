@@ -124,8 +124,8 @@ static AbsoluteTolerancePiecewiseCreator absoluteTolerancePiecewiseCreator;
 ProfileUnFlagObsCheck::ProfileUnFlagObsCheck(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        std::shared_ptr<ioda::ObsDataVector<int> > flags,
-        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+        ioda::ObsDataVector<int> & flags,
+        ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ProfileUnFlagObsCheck constructor" << std::endl;
@@ -201,21 +201,21 @@ void ProfileUnFlagObsCheck::applyFilter(const std::vector<bool> & apply,
         for (size_t jObsProfile = 0; jObsProfile < obsNumbers.size(); ++jObsProfile) {
           size_t jObsGlobal = obsNumbers[jObsProfile];
           const float absTol = (*absoluteToleranceCalculate)(jObsGlobal);
-          if (((*flags_)[jVar][jObsGlobal] != QCflags::pass) &&
-              ((*flags_)[jVar][jObsGlobal] != QCflags::passive) &&
-              ((*flags_)[jVar][jObsGlobal] != QCflags::missing)) {
+          if ((flags_[jVar][jObsGlobal] != QCflags::pass) &&
+              (flags_[jVar][jObsGlobal] != QCflags::passive) &&
+              (flags_[jVar][jObsGlobal] != QCflags::missing)) {
             bool makeValid = false;
             if (jObsProfile == 0) {
               makeValid = true;
             } else {
               const size_t jObsMinus = obsNumbers[jObsProfile-1];
-              makeValid = (*flags_)[jVar][jObsMinus] == QCflags::pass &&
+              makeValid = flags_[jVar][jObsMinus] == QCflags::pass &&
                   (std::abs(variableData[jObsMinus] - variableData[jObsGlobal]) < absTol);
             }
             if (jObsProfile < obsNumbers.size()-1) {
               const size_t jObsPlus = obsNumbers[jObsProfile+1];
               makeValid = makeValid &&
-                  ((*flags_)[jVar][jObsPlus] == QCflags::pass) &&
+                  (flags_[jVar][jObsPlus] == QCflags::pass) &&
                   (std::abs(variableData[jObsPlus] - variableData[jObsGlobal]) < absTol);
             }
             if (makeValid) {

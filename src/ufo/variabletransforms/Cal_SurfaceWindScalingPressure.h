@@ -31,9 +31,9 @@ namespace ufo {
   class Cal_SurfaceWindScalingPressure : public TransformBase {
    public:
     Cal_SurfaceWindScalingPressure(const GenericVariableTransformParameters &options,
-              const ObsFilterData &data,
-              const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-              const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
+                                   const ObsFilterData &data,
+                                   ioda::ObsDataVector<int> &flags,
+                                   ioda::ObsDataVector<float> &obserr);
     // Run variable conversion
     void runTransform(const std::vector<bool> &apply) override;
     Variables requiredVariables() const override { return gvals_; }

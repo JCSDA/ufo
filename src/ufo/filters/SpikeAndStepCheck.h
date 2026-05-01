@@ -161,8 +161,8 @@ class SpikeAndStepCheck : public FilterBase,
   static const std::string classname() {return "ufo::SpikeAndStepCheck";}
 
   SpikeAndStepCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                  std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                  std::shared_ptr<ioda::ObsDataVector<float> > obserr);
+                    ioda::ObsDataVector<int> & flags,
+                    ioda::ObsDataVector<float> & obserr);
   ~SpikeAndStepCheck();
 
   /// \brief Vectors of dependent and independent variables, their differences, and gradient

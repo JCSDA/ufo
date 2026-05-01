@@ -25,8 +25,8 @@ static TransformMaker<Cal_SatBrightnessTempFromRad>
 Cal_SatBrightnessTempFromRad::Cal_SatBrightnessTempFromRad(
     const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    ioda::ObsDataVector<int> &flags,
+    ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
       variables_(), channels_(parameters_.transformVariable.value().channels()) {
   variables_ += parameters_.transformVariable.value();

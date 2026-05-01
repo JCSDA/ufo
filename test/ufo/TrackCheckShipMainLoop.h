@@ -41,10 +41,8 @@ void testFirstRejectionSimultaneousIncluded(const eckit::LocalConfiguration &con
     obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
-      obsspace, obsspace.obsvariables(), "ObsError"));
-  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
-      obsspace, obsspace.obsvariables()));
+  ioda::ObsDataVector<float> obserr(obsspace, obsspace.obsvariables(), "ObsError");
+  ioda::ObsDataVector<int> qcflags(obsspace, obsspace.obsvariables());
 
   eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
   ufo::TrackCheckShipParameters filterParameters;
@@ -124,7 +122,7 @@ void testFirstRejectionSimultaneousIncluded(const eckit::LocalConfiguration &con
   }
 
   for (auto const& i : expectedFirstRejectionIndices) {
-    EXPECT_EQUAL((*qcflags)[0][i], ufo::QCflags::track);
+    EXPECT_EQUAL(qcflags[0][i], ufo::QCflags::track);
     // tests that the rejected observations are changing the qc flags correctly
   }
 }

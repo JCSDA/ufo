@@ -24,14 +24,13 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsDomainErrCheck::ObsDomainErrCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                               std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                               std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                     ioda::ObsDataVector<int> & flags,
+                                     ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr),
     parameters_(parameters)
 {
   oops::Log::trace() << "ObsDomainErrCheck constructor" << std::endl;
   oops::Log::debug() << "ObsDomainErrCheck: config = " << parameters_ << std::endl;
-  ASSERT(obserr);
 }
 
 // -----------------------------------------------------------------------------
@@ -70,13 +69,13 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
       } else {
         // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
         // and its underlying type could in principle change without it being obvious here.
-        ASSERT((*obserr_)[iv][jobs] != util::missingValue<std::remove_reference_t<
-                                                          decltype((*obserr_)[iv][jobs])>>());
+        ASSERT(obserr_[iv][jobs] != util::missingValue<std::remove_reference_t<
+                                                          decltype(obserr_[iv][jobs])>>());
         ASSERT(obs[jv][jobs] != util::missingValue<float>());
-        float bound = 2.5 * (*obserr_)[iv][jobs];
-        float obserrinc = parameter * std::max((values[jobs]-9.0), 0.0) * (*obserr_)[iv][jobs];
-        obserrinc = std::max((*obserr_)[iv][jobs], bound);
-        (*obserr_)[iv][jobs] = sqrt(pow((*obserr_)[iv][jobs], 2) + pow(obserrinc, 2));
+        float bound = 2.5 * obserr_[iv][jobs];
+        float obserrinc = parameter * std::max((values[jobs]-9.0), 0.0) * obserr_[iv][jobs];
+        obserrinc = std::max(obserr_[iv][jobs], bound);
+        obserr_[iv][jobs] = sqrt(pow(obserr_[iv][jobs], 2) + pow(obserrinc, 2));
         ++count;
         }
       }
