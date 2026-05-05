@@ -1,0 +1,26 @@
+time window:
+  begin: 1998-01-01T00:00:00Z
+  end: 1999-01-01T00:00:00Z
+
+observations:
+
+- obs space: &ObsSpace
+    name: Map a string variable to an int result by exact matching (with a fallback value), CSV
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/variable_assignment_testdata.nc
+    simulated variables: [airTemperature]
+  obs function:
+    name: IntObsFunction/DrawValueFromFile
+    options:
+      file: Data/ufo/testinput_tier_1/drawvaluefromfile_simple.csv
+      group: IntResult
+      interpolation:
+      # ["ABC", "DEF", "GHI", "JKL", "MNO"]
+      - name: MetaData/string_variable_1
+        method: exact
+    # Variable from the TestReference group storing the reference result,
+    # [1, 75, 75, 75, 5]
+    variables: [assigned_int_variable_1]
+

@@ -317,6 +317,8 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
         case ioda::ObsDtype::DateTime:
           updateObDataDateTime(in, allvars_[ind], obData);
           break;
+        case ioda::ObsDtype::Empty:
+          return;
         default:
           throw eckit::UserError("Data type not yet handled.", Here());
       }
@@ -334,6 +336,8 @@ void DrawValueFromFile<T>::compute(const ObsFilterData & in,
         case ioda::ObsDtype::DateTime:
           updateObDataDateTime(in, allvars_[ind], obData);
           break;
+        case ioda::ObsDtype::Empty:
+          return;
         default:
           throw eckit::UserError("Data type not yet handled.", Here());
       }

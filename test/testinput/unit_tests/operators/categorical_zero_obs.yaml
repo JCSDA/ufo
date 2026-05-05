@@ -1,0 +1,47 @@
+# Time window selected to exclude all obs
+time window:
+  begin: 2017-04-14T21:00:00Z
+  end: 2017-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s.nc4
+    simulated variables: [windEastward, windNorthward, airTemperature]
+  obs operator:
+    name: Categorical
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    categorical variable: stationIdentification
+    fallback operator: "Composite"
+    categorised operators: {"47418": "Composite",
+    "54857": "Composite",
+    "94332": "Composite",
+    "96935": "Composite"}
+    operator configurations:
+    - name: Identity
+      observation alias file: ../resources/namemap/test_name_map.yaml
+    - name: Composite
+      components:
+       - name: Identity
+         observation alias file: ../resources/namemap/test_name_map.yaml
+         variables:
+         - name: airTemperature
+       - name: VertInterp
+         observation alias file: ../resources/namemap/test_name_map.yaml
+         variables:
+         - name: windNorthward
+         - name: windEastward
+         vertical coordinate: air_pressure
+         observation vertical coordinate: pressure
+         interpolation method: log-linear
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13
+  rms ref: 0.0
+  tolerance: 1.0e-06

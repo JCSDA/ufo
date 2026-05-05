@@ -175,6 +175,8 @@ void RecordHandler::checkRecordCategories(const Variable & categoryVariableName)
   case ioda::ObsDtype::String:
     checkRecordCategoriesImpl<std::string>(categoryVariableName);
     break;
+  case ioda::ObsDtype::Empty:
+    break;
   default:
     throw eckit::UserError(categoryVariableName.fullName() +
           " is neither an integer nor a string variable", Here());

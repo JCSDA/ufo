@@ -44,12 +44,14 @@ void DateTimeOffset::compute(const ObsFilterData & in,
 
   // Apply offsets to datetimes.
   // todo(ctgh): add Integer_64 when it becomes available.
-  if (in.dtype(Variable(options_.offset_name.value())) == ioda::ObsDtype::Integer)
+  const auto dtype = in.dtype(Variable(options_.offset_name.value()));
+  if (dtype == ioda::ObsDtype::Integer) {
     applyOffsets<int>(in, out);
-  else if (in.dtype(Variable(options_.offset_name.value())) == ioda::ObsDtype::Float)
+  } else if (dtype == ioda::ObsDtype::Float) {
     applyOffsets<float>(in, out);
-  else
+  } else if (dtype != ioda::ObsDtype::Empty) {
     throw eckit::BadParameter("Offset variable has incorrect type", Here());
+  }
 
   oops::Log::trace() << "DateTimeOffset compute complete" << std::endl;
 }

@@ -30,6 +30,10 @@ ObsCategorical::ObsCategorical(const ioda::ObsSpace & odb,
                                const Parameters_ & params)
   : ObsOperatorBase(odb), odb_(odb)
 {
+  if (odb_.nlocs() == 0) {
+    return;
+  }
+
   data_.configure(odb, params);
 
   oops::Log::trace() << "ObsCategorical constructor done" << std::endl;
@@ -46,6 +50,10 @@ ObsCategorical::~ObsCategorical() {
 void ObsCategorical::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
                                  ObsDiagnostics & ydiags, const QCFlags_t & qc_flags) const {
   oops::Log::trace() << "ObsCategorical::simulateObs start" << std::endl;
+
+  if (odb_.nlocs() == 0) {
+    return;
+  }
 
   oops::Log::debug() << "Running operators" << std::endl;
 

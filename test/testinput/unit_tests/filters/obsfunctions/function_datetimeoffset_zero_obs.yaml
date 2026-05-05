@@ -1,0 +1,24 @@
+time window:
+  begin: 2007-12-31T23:30:00Z
+  end: 2008-01-01T00:00:01Z
+  bound to include: begin
+
+observations:
+- obs space:
+    name: DateTime offset by seconds
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_datetimeoffset.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/dateTime
+      type: datetime
+      function:
+        name: DateTimeObsFunction/DateTimeOffset
+        options:
+          offset variable name: MetaData/level_time_displacement
+          offset unit: seconds
+  passedBenchmark: 0

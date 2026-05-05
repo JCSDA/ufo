@@ -496,7 +496,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             applyMinMax<util::DateTime>(whereTest, currentParams, filterdata, varname);
           } else if (dtype == ioda::ObsDtype::Integer) {
             applyMinMax<int>(whereTest, currentParams, filterdata, varname);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             applyMinMax<float>(whereTest, currentParams, filterdata, varname);
           }
           applyWhereOperator(whereOperator, whereTest, where);
@@ -702,7 +702,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             std::vector<std::string> data;
             filterdata.get(varname, data);
             processWhereMatchesRegex(data, pattern, whereTest);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only string and integer variables may be used for processWhere 'matches_regex'",
               Here());
@@ -724,7 +724,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             std::vector<std::string> data;
             filterdata.get(varname, data);
             processWhereMatchesAnyWildcardPattern(data, {pattern}, whereTest);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only string and integer variables may be used for processWhere 'matches_wildcard'",
               Here());
@@ -746,7 +746,7 @@ std::vector<bool> processWhere(const std::vector<WhereParameters> & params,
             std::vector<std::string> data;
             filterdata.get(varname, data);
             processWhereMatchesAnyWildcardPattern(data, patterns, whereTest);
-          } else {
+          } else if (dtype != ioda::ObsDtype::Empty) {
             throw eckit::UserError(
               "Only string and integer variables may be used for processWhere "
               "'matches_any_wildcard'",
