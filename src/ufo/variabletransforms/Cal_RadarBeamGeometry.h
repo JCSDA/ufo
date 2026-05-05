@@ -63,8 +63,8 @@ class Cal_RadarBeamGeometry : public TransformBase {
 
   Cal_RadarBeamGeometry(const Parameters_ & options,
                         const ObsFilterData & data,
-                        const std::shared_ptr<ioda::ObsDataVector<int>> & flags,
-                        const std::shared_ptr<ioda::ObsDataVector<float>> & obserr);
+                        ioda::ObsDataVector<int> & flags,
+                        ioda::ObsDataVector<float> & obserr);
   void runTransform(const std::vector<bool> &apply) override;
 
  private:

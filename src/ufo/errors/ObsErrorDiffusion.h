@@ -37,6 +37,13 @@ namespace ufo {
 class ObsErrorDiffusionParameters : public ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorDiffusionParameters, ObsErrorParametersBase)
  public:
+  class ControlGrid : public oops::Parameters {
+    OOPS_CONCRETE_PARAMETERS(ControlGrid, oops::Parameters)
+   public:
+    oops::RequiredParameter<int> gridSpacing{"grid spacing in degrees", this};
+    oops::RequiredParameter<double> removeWithin{"remove within meters", this};
+  };
+
   oops::RequiredParameter<std::vector<std::string>> var{"correlation variable names",
         "Group/Name obs variable that correlations should be computed for (note: "
         "this variable should be the same variable as obs space is grouped on", this};
@@ -47,7 +54,10 @@ class ObsErrorDiffusionParameters : public ObsErrorParametersBase {
       100, this};
   oops::Parameter<double> InverseAccuracy{"Accuracy of inverse", 1.0e-7, this};
   oops::Parameter<bool> outputDiffusionMesh{"Output diffusion mesh", false, this};
+  // Add parameter for control grid
+  oops::OptionalParameter<ControlGrid> controlGrid{"control grid", this};
 };
+
 
 // -----------------------------------------------------------------------------
 /// \brief Correlated observation error covariance matrix.
@@ -127,6 +137,17 @@ class ObsErrorDiffusion : public ObsErrorBase {
   const eckit::mpi::Comm & comm_;
   std::unique_ptr<oops::Diffusion> diffusion_;
   atlas::Field hzNorm_;
+
+  // Offset where obs locations start in the merged function space
+  // (0 if no control grid, nRemainingControlPoints otherwise)
+  atlas::idx_t obsOffset_ = 0;  // <-- add here
+
+  /// Creates control grid, removes close control points and
+  //  returns merged grid points (remaining control grid + obs locations)
+  std::vector<atlas::PointLonLat> createControlGrid(
+    const std::vector<atlas::PointLonLat>& obsnodes,
+    const double removeWithin,
+    const int gridSpacing);
 };
 
 // -----------------------------------------------------------------------------

@@ -29,8 +29,8 @@ static TransformMaker<Cal_SatRadianceFromPCScores>
 Cal_SatRadianceFromPCScores::Cal_SatRadianceFromPCScores(
     const Parameters_ &options,
     const ObsFilterData &data,
-    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
+    ioda::ObsDataVector<int> &flags,
+    ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
       variables_({parameters_.pcVariable.value()}),
       channels_(parameters_.destinationVariable.value().channels()) {
@@ -128,7 +128,7 @@ void Cal_SatRadianceFromPCScores::runTransform(const std::vector<bool> &apply) {
   // multiplying also by a scaling factor to produce radiances in W m^-2 sr^-1 (m^-1)^-1
   float scalingFactor = parameters_.scalingFactor.value();
   Eigen::MatrixXf reconMatrix \
-    = reconstructor(Eigen::all, destinationChannelIndex).transpose() * pcScoresMatrix;
+    = reconstructor(Eigen::placeholders::all, destinationChannelIndex).transpose() * pcScoresMatrix;
   reconMatrix *= scalingFactor;
 
   // Loop over channels and obs locations to populate derived observation variable

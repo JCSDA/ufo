@@ -21,7 +21,7 @@ namespace ufo {
 
 ObsFilter::ObsFilter(ioda::ObsSpace & os,
                      const ObsFilterParametersBase & parameters,
-                     ObsDataPtr_<int> flags, ObsDataPtr_<float> obserr)
+                     ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & obserr)
   : ofilt_(), filterName_("ObsFilter::"+parameters.filter.value().value())
 {
   oops::Log::trace() << "ObsFilter::ObsFilter starting" << std::endl;

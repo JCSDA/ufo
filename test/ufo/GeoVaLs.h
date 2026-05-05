@@ -103,7 +103,7 @@ void testGeoVaLs() {
       gv.reorderzdir("air_pressure_levels", flipto);
       std::vector<float> gvar(nobs);
       std::vector<float> gvarref(nobs);
-      float sum;
+      float sum = 0.0f;
       for (size_t i = 0; i < ingeovars.size(); ++i) {
         size_t nlevs = gv.nlevs(ingeovars[i]);
         sum = 0;

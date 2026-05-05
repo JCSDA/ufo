@@ -259,6 +259,8 @@ set ( filters_files
       obsfunctions/CloudDetectMinResidualIR.h
       obsfunctions/CloudFirstGuessMinimumResidual.cc
       obsfunctions/CloudFirstGuessMinimumResidual.h
+      obsfunctions/CircularDifference.cc
+      obsfunctions/CircularDifference.h
       obsfunctions/MetOfficeAllSkyErrorModel.cc
       obsfunctions/MetOfficeAllSkyErrorModel.h
       obsfunctions/ModelHeightAdjustedWindVectorComponent.cc
@@ -327,6 +329,8 @@ set ( filters_files
       obsfunctions/SatwindIndivErrors.h
       obsfunctions/SatWindsLNVDCheck.cc
       obsfunctions/SatWindsLNVDCheck.h
+      obsfunctions/TimeBinner.cc
+      obsfunctions/TimeBinner.h
       obsfunctions/WindsSPDBCheck.cc
       obsfunctions/WindsSPDBCheck.h
       obsfunctions/SatWindsErrnormCheck.cc

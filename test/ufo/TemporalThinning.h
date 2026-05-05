@@ -55,10 +55,8 @@ void testTemporalThinning(const eckit::LocalConfiguration &conf) {
     obsspace.put_db("MetaData", "priority", priorities);
   }
 
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
-      obsspace, obsspace.obsvariables(), "ObsError"));
-  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
-      obsspace, obsspace.obsvariables()));
+  ioda::ObsDataVector<float> obserr(obsspace, obsspace.obsvariables(), "ObsError");
+  ioda::ObsDataVector<int> qcflags(obsspace, obsspace.obsvariables());
 
   eckit::LocalConfiguration filterConf(conf, "TemporalThinning");
   ufo::TemporalThinningParameters filterParameters;
@@ -70,8 +68,8 @@ void testTemporalThinning(const eckit::LocalConfiguration &conf) {
   const std::vector<size_t> expectedThinnedObsIndices =
       conf.getUnsignedVector("expected_thinned_obs_indices");
   std::vector<size_t> thinnedObsIndices;
-  for (size_t i = 0; i < qcflags->nlocs(); ++i)
-    if ((*qcflags)[0][i] == ufo::QCflags::thinned)
+  for (size_t i = 0; i < qcflags.nlocs(); ++i)
+    if (qcflags[0][i] == ufo::QCflags::thinned)
       thinnedObsIndices.push_back(i);
   EXPECT_EQUAL(thinnedObsIndices, expectedThinnedObsIndices);
 }

@@ -60,8 +60,8 @@ class Cal_WindSpeedAndDirection : public TransformBase {
 
   Cal_WindSpeedAndDirection(const Parameters_ &options,
                             const ObsFilterData &data,
-                            const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                            const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
+                            ioda::ObsDataVector<int> &flags,
+                            ioda::ObsDataVector<float> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 
@@ -90,16 +90,16 @@ class Cal_WindComponents : public TransformBase {
 
   Cal_WindComponents(const Parameters_ &options,
                      const ObsFilterData &data,
-                     const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                     const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
+                     ioda::ObsDataVector<int> &flags,
+                     ioda::ObsDataVector<float> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
-  std::string windspeedvariable_;
-  std::string winddirectionvariable_;
   /// Group name.
   std::string group_;
+  std::string windspeedvariable_;
+  std::string winddirectionvariable_;
 };
 }  // namespace ufo
 

@@ -21,6 +21,7 @@
 
 #include "ufo/errors/ObsErrorBase.h"
 #include "ufo/errors/ObsErrorParametersBase.h"
+#include "ufo/errors/ObsErrorReconditioner.h"
 
 namespace ioda {
   class ObsSpace;
@@ -44,7 +45,8 @@ struct DistanceFunctionsParameterTraitsHelper {
 
 enum class CorrelationFunctions {
       GC99,
-      MARKOV
+      MARKOV,
+      GAUSSIAN
 };
 
 struct CorrelationFunctionsParameterTraitsHelper {
@@ -52,7 +54,8 @@ struct CorrelationFunctionsParameterTraitsHelper {
   static constexpr char enumTypeName[] = "CorrelationFunctions";
   static constexpr util::NamedEnumerator<CorrelationFunctions> namedValues[] = {
     { CorrelationFunctions::GC99, "gc99" },
-    { CorrelationFunctions::MARKOV, "markov" }
+    { CorrelationFunctions::MARKOV, "markov" },
+    { CorrelationFunctions::GAUSSIAN, "gaussian"}
   };
 };
 
@@ -84,7 +87,7 @@ class ObsErrorWithinGroupCovParameters : public ObsErrorParametersBase {
  public:
   oops::Parameter<CorrelationFunctions> correlationFunction{"correlation function",
         "Correlation function to use for correlation computations. "
-        "Currently only 'gc99' and 'markov' are supported",
+        "Currently only 'gc99', 'markov', and 'gaussian' are supported",
         CorrelationFunctions::GC99, this};
   oops::RequiredParameter<double> lscale{"correlation lengthscale",
         "Correlation lengthscale used with the correlation functions", this};
@@ -99,6 +102,10 @@ class ObsErrorWithinGroupCovParameters : public ObsErrorParametersBase {
         "The lengthscale factor is multiplied by the lengthscale to provide the limit in "
         "which correlations are evaluated. Beyond this distance correlation values are set to "
         "zero.", 1.0, this};
+  oops::Parameter<bool> applyBasicReconditioning{"apply basic reconditioning",
+        "Apply a simple ridge regression reconditiong to the gaussian correlation profile."
+        "This is the same reconditioning that is applied to the markov correlation method",
+        false, this};
 };
 
 // -----------------------------------------------------------------------------
@@ -174,6 +181,8 @@ class ObsErrorWithinGroupCov : public ObsErrorBase {
   void print(std::ostream &) const override;
   /// Multiply only by correlations (diagnostics)
   void multiplyCorrelations(ioda::ObsVector & y) const;
+  /// Recondition the R matrix - called by update
+  void recondition(const ioda::ObsVector & mask);
   /// ObsError configuration as oops::Paramters
   Parameters_ params_;
   /// ObsSpace reference
@@ -185,6 +194,8 @@ class ObsErrorWithinGroupCov : public ObsErrorBase {
   /// Each element holds a lower-triangle of the correlation matrix for all locations
   /// within one group
   std::vector<Eigen::MatrixXd> correlations_;
+  /// Create reconditioner
+  std::unique_ptr<ObsErrorReconditioner> reconditioner_;
 };
 
 // -----------------------------------------------------------------------------

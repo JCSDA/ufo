@@ -160,9 +160,11 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   
 ! Check that the number of vertical levels in the observations is consistent
 ! with what we were given in setup
-  if (self % nlevels > 1 .AND. self % nlevels /= size(self % chanList)) then
-    write(err_msg,'(2A,4I8)') myname_, ' error: channel list must match nlevels', self % nlevels, size(self%chanList)
-    call fckit_exception%throw(err_msg)
+  if (self % nlevels > 1) then
+    if (self % nlevels /= size(self % chanList)) then
+      write(err_msg,'(2A,4I8)') myname_, ' error: channel list must match nlevels', self % nlevels, size(self%chanList)
+      call fckit_exception%throw(err_msg)
+    end if
   end if
 
 ! Get the meta-data from the observations

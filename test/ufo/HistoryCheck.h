@@ -51,10 +51,8 @@ void testHistoryCheck(const eckit::LocalConfiguration &conf) {
     obsspace.put_db("MetaData", "stationIdentification", stationIds);
   }
 
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
-      obsspace, obsspace.obsvariables(), "ObsError"));
-  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
-      obsspace, obsspace.obsvariables()));
+  ioda::ObsDataVector<float> obserr(obsspace, obsspace.obsvariables(), "ObsError");
+  ioda::ObsDataVector<int> qcflags(obsspace, obsspace.obsvariables());
 
   ufo::HistoryCheck filter(obsspace, filterParameters, qcflags, obserr, conf);
   filter.preProcess();
@@ -62,8 +60,8 @@ void testHistoryCheck(const eckit::LocalConfiguration &conf) {
   const std::vector<size_t> expectedRejectedObsIndices =
       conf.getUnsignedVector("expected rejected obs indices");
   std::vector<size_t> rejectedObsIndices;
-  for (size_t i = 0; i < qcflags->nlocs(); ++i)
-    if ((*qcflags)[0][i] == ufo::QCflags::history)
+  for (size_t i = 0; i < qcflags.nlocs(); ++i)
+    if (qcflags[0][i] == ufo::QCflags::history)
       rejectedObsIndices.push_back(i);
   EXPECT_EQUAL(rejectedObsIndices, expectedRejectedObsIndices);
 }

@@ -51,7 +51,7 @@ ufo_add_test( NAME    obserrordiffusion
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiffusion.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  errors ci_flake_disable
+              LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    obserror_dirac_diffusion
@@ -107,6 +107,16 @@ ufo_add_test( NAME    reconditioning_mpi
               SOURCES ../../../mains/TestReconditioning.cc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reconditioning.yaml"
               MPI     2
+              LIBS    ufo
+              LABELS  errors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+ufo_add_test( NAME    reconditioning_within_group
+              TIER    1
+              ECBUILD
+              SOURCES ../../../mains/TestReconditioning.cc
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reconditioning_withinGroup.yaml"
+              MPI     1
               LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

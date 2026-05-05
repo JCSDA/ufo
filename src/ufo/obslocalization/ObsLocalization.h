@@ -30,6 +30,8 @@ class ObsLocalization : public util::Printable {
   ~ObsLocalization();
 
   void computeLocalization(const ITERATOR &, ioda::ObsVector &) const;
+  double computeLocalization(const eckit::geometry::Point3 &,
+                             const eckit::geometry::Point3 &) const;
 
  private:
   void print(std::ostream &) const override;
@@ -57,6 +59,14 @@ template<typename ITERATOR>
 void ObsLocalization<ITERATOR>::computeLocalization(const ITERATOR & iter,
                                                     ioda::ObsVector & loc) const {
   obsloc_->computeLocalization(iter, loc);
+}
+
+// -----------------------------------------------------------------------------
+
+template<typename ITERATOR>
+double ObsLocalization<ITERATOR>::computeLocalization(const eckit::geometry::Point3 & p1,
+                                                      const eckit::geometry::Point3 & p2) const {
+  return obsloc_->computeLocalization(p1, p2);
 }
 
 // -----------------------------------------------------------------------------

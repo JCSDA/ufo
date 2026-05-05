@@ -93,6 +93,8 @@ class ObsErrorParametersWrapper : public oops::Parameters {
   /// is deserialized.
   oops::PolymorphicParameter<ObsErrorParametersBase, ObsErrorFactory>
     errorParameters{"covariance model", "diagonal", this};
+
+  const ObsErrorParametersBase & errorParams() const {return this->errorParameters;}
 };
 
 // -----------------------------------------------------------------------------

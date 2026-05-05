@@ -51,10 +51,8 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(
     obsspace.put_db("ObsValue", "airTemperature", air_temperature);
   }
 
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
-      obsspace, obsspace.obsvariables(), "ObsError"));
-  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
-      obsspace, obsspace.obsvariables()));
+  ioda::ObsDataVector<float> obserr(obsspace, obsspace.obsvariables(), "ObsError");
+  ioda::ObsDataVector<int> qcflags(obsspace, obsspace.obsvariables());
 
   eckit::LocalConfiguration filterConf(conf, "Ship Track Check");
   ufo::TrackCheckShipParameters filterParameters;
@@ -62,8 +60,8 @@ const boost::optional<ufo::TrackCheckShipDiagnostics> setupRunFilter(
   ufo::TrackCheckShip filter(obsspace, filterParameters, qcflags, obserr);
   filter.preProcess();
   if (filterConf.getBool("comparison test", false) && rejectedObsIndices) {
-    for (size_t i = 0; i < qcflags->nlocs(); ++i)
-      if ((*qcflags)[0][i] == ufo::QCflags::track)
+    for (size_t i = 0; i < qcflags.nlocs(); ++i)
+      if (qcflags[0][i] == ufo::QCflags::track)
         rejectedObsIndices->push_back(i);
     return boost::none;
   } else if (filterConf.getBool("unit testing mode", false)) {

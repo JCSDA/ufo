@@ -14,9 +14,9 @@ namespace ufo {
 
 TransformBase::TransformBase(const VariableTransformParametersBase& options,
                              const ObsFilterData& data,
-                             const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
-                             const std::shared_ptr<ioda::ObsDataVector<float>>& obserr)
-  : options_(options), data_(data) , flags_(*flags), obserr_(*obserr) {
+                             ioda::ObsDataVector<int> & flags,
+                             ioda::ObsDataVector<float> & obserr)
+  : options_(options), data_(data) , flags_(flags), obserr_(obserr) {
   method_ = formulas::resolveMethods(options.Method.value());
   UseValidDataOnly_ = options.UseValidDataOnly.value();
   obsName_ = data_.obsspace().obsname();
@@ -37,8 +37,8 @@ TransformFactory::TransformFactory(const std::string& name) {
 std::unique_ptr<TransformBase> TransformFactory::create(
     const std::string& name, const VariableTransformParametersBase& options,
     const ObsFilterData& data,
-    const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
-    const std::shared_ptr<ioda::ObsDataVector<float>>& obserr) {
+    ioda::ObsDataVector<int> & flags,
+    ioda::ObsDataVector<float> & obserr) {
 
   oops::Log::trace() << "          --> TransformFactory::create" << std::endl;
   oops::Log::trace() << "              --> name: " << name << std::endl;

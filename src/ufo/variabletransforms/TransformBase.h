@@ -54,8 +54,8 @@ class TransformBase {
  public:
   TransformBase(const VariableTransformParametersBase &options,
                 const ObsFilterData& data,
-                const std::shared_ptr<ioda::ObsDataVector<int>>& flags,
-                const std::shared_ptr<ioda::ObsDataVector<float>>& obserr);
+                ioda::ObsDataVector<int> & flags,
+                ioda::ObsDataVector<float> & obserr);
   /// Destructor
   virtual ~TransformBase() {}
   /// Run variable conversion
@@ -141,15 +141,14 @@ class TransformBase {
     // Update QC flags to account for values that were previously missing but
     // are now present (or vice versa).
     if (flags_.has(varName)) {
-      std::vector<int> &varFlags = flags_[varName];
-      ASSERT(varFlags.size() == outputObsVector.size());
+      ASSERT(flags_[varName].size() == outputObsVector.size());
 
       const T missing = util::missingValue<T>();
       for (size_t iloc = 0; iloc < outputObsVector.size(); ++iloc) {
-        if (varFlags[iloc] == QCflags::missing && outputObsVector[iloc] != missing)
-          varFlags[iloc] = QCflags::pass;
-        else if (varFlags[iloc] == QCflags::pass && outputObsVector[iloc] == missing)
-          varFlags[iloc] = QCflags::missing;
+        if (flags_[varName][iloc] == QCflags::missing && outputObsVector[iloc] != missing)
+          flags_[varName][iloc] = QCflags::pass;
+        else if (flags_[varName][iloc] == QCflags::pass && outputObsVector[iloc] == missing)
+          flags_[varName][iloc] = QCflags::missing;
       }
     }
   }
@@ -170,15 +169,16 @@ class TransformBase {
                       const std::vector<std::string> & dimList,
                       const std::string &outputTag = "DerivedObsValue") {
     std::vector<T> outputObsVector(obsVector);
+    const std::string fullVarName = varName + "_" + channel;
     // Fill in missing values with values of non-derived group
     if (options_.FillMissingDerivedFromOriginal &&
         outputTag.substr(0, 7) == "Derived") {
       std::string originalTag = outputTag;
       originalTag.erase(0, 7);  // Remove Derived from group name
-      if (obsdb_.has(originalTag, varName + "_" + channel)) {
+      if (obsdb_.has(originalTag, fullVarName)) {
         std::vector <T> originalValues(obsdb_.nlocs());
         // Need to skipDerived so we pickup original ObsValues
-        obsdb_.get_db(originalTag, varName + "_" + channel, originalValues, {}, true);
+        obsdb_.get_db(originalTag, fullVarName, originalValues, {}, true);
         const T missing = util::missingValue<T>();
         for (size_t jloc = 0; jloc < obsdb_.nlocs(); ++jloc) {
           if (outputObsVector[jloc] == missing &&
@@ -188,17 +188,16 @@ class TransformBase {
         }
       }
     }
-    obsdb_.put_db(outputTag, varName + "_" + channel, outputObsVector, dimList);
-    if (flags_.has(varName + "_" + channel)) {
-      std::vector<int> &varFlags = flags_[varName + "_" + channel];
-      ASSERT(varFlags.size() == outputObsVector.size());
+    obsdb_.put_db(outputTag, fullVarName, outputObsVector, dimList);
+    if (flags_.has(fullVarName)) {
+      ASSERT(flags_[fullVarName].size() == outputObsVector.size());
 
       const T missing = util::missingValue<T>();
       for (size_t iloc = 0; iloc < outputObsVector.size(); ++iloc) {
-        if (varFlags[iloc] == QCflags::missing && outputObsVector[iloc] != missing)
-          varFlags[iloc] = QCflags::pass;
-        else if (varFlags[iloc] == QCflags::pass && outputObsVector[iloc] == missing)
-          varFlags[iloc] = QCflags::missing;
+        if (flags_[fullVarName][iloc] == QCflags::missing && outputObsVector[iloc] != missing)
+          flags_[fullVarName][iloc] = QCflags::pass;
+        else if (flags_[fullVarName][iloc] == QCflags::pass && outputObsVector[iloc] == missing)
+          flags_[fullVarName][iloc] = QCflags::missing;
       }
     }
   }
@@ -232,8 +231,8 @@ class TransformFactory {
   static std::unique_ptr<TransformBase> create(
       const std::string &, const VariableTransformParametersBase &,
       const ObsFilterData &,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &,
-      const std::shared_ptr<ioda::ObsDataVector<float>> &);
+      ioda::ObsDataVector<int> &,
+      ioda::ObsDataVector<float> &);
   static std::unique_ptr<VariableTransformParametersBase> createParameters(
       const std::string &);
   virtual ~TransformFactory() = default;
@@ -245,8 +244,8 @@ class TransformFactory {
   virtual std::unique_ptr<TransformBase> make(
       const VariableTransformParametersBase &,
       const ObsFilterData &,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &,
-      const std::shared_ptr<ioda::ObsDataVector<float>> &) = 0;
+      ioda::ObsDataVector<int> &,
+      ioda::ObsDataVector<float> &) = 0;
   virtual std::unique_ptr<VariableTransformParametersBase> makeParameters() const = 0;
   static std::map<std::string, TransformFactory *> &getMakers() {
     static std::map<std::string, TransformFactory *> makers_;
@@ -267,8 +266,8 @@ class TransformMaker : public TransformFactory {
   std::unique_ptr<TransformBase> make(
       const VariableTransformParametersBase &options,
       const ObsFilterData& data,
-      const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-      const std::shared_ptr<ioda::ObsDataVector<float>> &obserr) override {
+      ioda::ObsDataVector<int> &flags,
+      ioda::ObsDataVector<float> &obserr) override {
     const auto &stronglyTypedParams = dynamic_cast<const Parameters_&>(options);
     return std::unique_ptr<TransformBase>(new T(stronglyTypedParams, data, flags, obserr));
   }

@@ -92,10 +92,10 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
 
   // Set channel index (AMSU-A like channels)
   int ich238 = 0, ich314 = 1, ich503 = 2, ich528 = 4, ich536 = 5;
-  int ich544 = 6, ich549 = 7, ich890 = 15;
+  int ich544 = 6, ich890 = 15;
 
   // Set channel index (MHS like channels)
-  int ich1650 = 16, ich1830a = 17, ich1830b = 18, ich1830c = 19, ich1830d = 20, ich1830e = 21;
+  int ich1650 = 16, ich1830e = 21;
 
   // Get test groups from options
   const std::string &biastermgrp = options_.testBiasTerm.value();
@@ -209,7 +209,7 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
 
   // Set parameters
   float w1f6 = 1.0/10.0, w2f6 = 1.0/0.80;
-  float w1f4 = 1.0/0.30, w2f4 = 1.0/1.80;
+  float w2f4 = 1.0/1.80;
 
   std::vector<std::vector<int>> affected_channels(nchans, std::vector<int>(nlocs));
   // Loop over locations

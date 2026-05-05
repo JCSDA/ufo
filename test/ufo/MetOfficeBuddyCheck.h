@@ -58,10 +58,8 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
     obsSpace.put_db(varGroup, varName, values);
   }
 
-  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
-      obsSpace, obsSpace.obsvariables(), "ObsError"));
-  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
-      obsSpace, obsSpace.obsvariables()));
+  ioda::ObsDataVector<float> obserr(obsSpace, obsSpace.obsvariables(), "ObsError");
+  ioda::ObsDataVector<int> qcflags(obsSpace, obsSpace.obsvariables());
 
   eckit::LocalConfiguration filterConf(conf, "Met Office Buddy Check");
   ufo::MetOfficeBuddyCheckParameters filterParameters;

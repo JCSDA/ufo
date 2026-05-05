@@ -30,8 +30,8 @@ namespace ufo {
 
 BackgroundCheckRONBAM::BackgroundCheckRONBAM(ioda::ObsSpace & obsdb,
                                            const eckit::Configuration & config,
-                                           std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                                           std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                                           ioda::ObsDataVector<int> & flags,
+                                           ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, config, flags, obserr)
 {
   oops::Log::trace() << "BackgroundCheckRONBAM contructor start "
@@ -75,7 +75,7 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
     data_.get(varhofx.variable(jv), hofx);
 
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (apply[jobs] && (*flags_)[iv][jobs] == 0) {
+      if (apply[jobs] && flags_[iv][jobs] == 0) {
         ASSERT(obs[jv][jobs] != missing);
         ASSERT(hofx[jobs] != missing);
         ASSERT(impactparameter[0][jobs] != missing);

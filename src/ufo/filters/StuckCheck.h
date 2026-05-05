@@ -48,8 +48,8 @@ class StuckCheck: public FilterBase,
   static const std::string classname() {return "ufo::StuckCheck";}
 
   StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
-                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                 std::shared_ptr<ioda::ObsDataVector<float> > obserr);
+             ioda::ObsDataVector<int> & flags,
+             ioda::ObsDataVector<float> & obserr);
 
   ~StuckCheck() override;
 

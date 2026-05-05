@@ -61,8 +61,8 @@ class ProfileMaxDifferenceCheck : public FilterBase,
   static const std::string classname() {return "ufo::ProfileMaxDifferenceCheck";}
 
   ProfileMaxDifferenceCheck(ioda::ObsSpace &, const Parameters_ &,
-                  std::shared_ptr<ioda::ObsDataVector<int> >,
-                  std::shared_ptr<ioda::ObsDataVector<float> >);
+                            ioda::ObsDataVector<int> &,
+                            ioda::ObsDataVector<float> &);
   ~ProfileMaxDifferenceCheck();
 
  private:

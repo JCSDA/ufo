@@ -1360,7 +1360,11 @@
  distance_east  =  r2*cos(lat*deg2rad)*dellon
 
 ! angle to the test point
- bearing_to_test = mod(atan2(distance_north,distance_east),2*pi )
+ if (distance_north == 0 .and. distance_east == 0) then
+   bearing_to_test = 0
+ else
+   bearing_to_test = mod(atan2(distance_north,distance_east),2*pi )
+ endif
  bearing_to_test_deg = bearing_to_test*rad2deg ! convert to degrees
 
 ! this is the arc distance to the test point

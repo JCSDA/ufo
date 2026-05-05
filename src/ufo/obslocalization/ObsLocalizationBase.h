@@ -13,6 +13,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "eckit/config/Configuration.h"
+#include "eckit/geometry/Point3.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/util/Logger.h"
@@ -32,6 +33,17 @@ class ObsLocalizationBase : public util::Printable,
   /// localization values between observations and \p point in model-space.
   /// Set \p locfactor to missing value for observations that are not local.
   virtual void computeLocalization(const ITERATOR & point, ioda::ObsVector & locfactor) const = 0;
+
+  /// compute localization between an observation and a point in model-space, or
+  /// between two observations. Return values should be between 0.0 and 1.0, inclusive,
+  /// with 0 indicating that the points are outside of localization.
+  virtual double computeLocalization(const eckit::geometry::Point3 &,
+                                     const eckit::geometry::Point3 &) const {
+    // NOTE, this really should be a pure virtual method, but since not all
+    // ObsLocalizationBase derived classes will be implementing this method yet,
+    // we are providing a default implementation.
+    ABORT("computeLocalization(Point3,Point3) not implemented for this ObsLocalization class");
+    return 0.0;}
 };
 
 // =============================================================================

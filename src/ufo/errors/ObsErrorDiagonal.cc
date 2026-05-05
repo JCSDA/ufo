@@ -92,7 +92,7 @@ void ObsErrorDiagonal::localize(ioda::ObsVector & locvector) const {
 Eigen::MatrixXf ObsErrorDiagonal::localInverseMultiply(const Eigen::MatrixXf & zz) const {
   Eigen::MatrixXf zzRinv(zz.rows(), zz.cols());
   for (int ii = 0; ii < zz.rows(); ++ii) {
-    zzRinv(ii, Eigen::all) = zz(ii, Eigen::all)
+    zzRinv(ii, Eigen::placeholders::all) = zz(ii, Eigen::placeholders::all)
                                  .cwiseProduct(local_inverseVariance_.cast<float>().transpose());
   }
   return zzRinv;

@@ -59,7 +59,7 @@ enum class FilterStage {AUTO,
 /// In the former case, they should provide a constructor with the following signature:
 ///
 ///    ObsFilter(ObsSpace_ &, const eckit::Configuration &,
-///              ObsDataPtr_<int>, ObsDataPtr_<float>);
+///              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &);
 ///
 /// In the latter case, the implementer should first define a subclass of ObsFilterParametersBase
 /// holding the settings of the filter in question. The implementation of the ObsFilter interface
@@ -67,7 +67,7 @@ enum class FilterStage {AUTO,
 /// the following signature:
 ///
 ///    ObsFilter(ObsSpace_ &, const Parameters_ &,
-///              ObsDataPtr_<int>, ObsDataPtr_<float>);
+///              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &);
 // TODO(someone): check whether we can just keep Parameters here and remove the
 //                Configuration option.
 class ObsFilterBase : public util::Printable,
@@ -136,8 +136,6 @@ class ObsFilterParametersWrapper : public oops::Parameters {
 
 /// ObsFilter factory
 class FilterFactory {
-  template <typename DATA> using ObsDataPtr_ = std::shared_ptr<ioda::ObsDataVector<DATA> >;
-
  public:
   /// \brief Create and return a new observation filter.
   ///
@@ -146,8 +144,8 @@ class FilterFactory {
   /// otherwise an exception will be thrown.
   static std::unique_ptr<ObsFilterBase> create(ioda::ObsSpace &,
                                                const ObsFilterParametersBase & params,
-                                               ObsDataPtr_<int> flags = ObsDataPtr_<int>(),
-                                               ObsDataPtr_<float> obserr = ObsDataPtr_<float>());
+                                               ioda::ObsDataVector<int> & flags,
+                                               ioda::ObsDataVector<float> & obserr);
 
   /// \brief Create and return an instance of the subclass of ObsFilterParametersBase
   /// storing parameters of observation filters of the specified type.
@@ -169,7 +167,8 @@ class FilterFactory {
  private:
   virtual std::unique_ptr<ObsFilterBase> make(ioda::ObsSpace &,
                                               const ObsFilterParametersBase &,
-                                              ObsDataPtr_<int>, ObsDataPtr_<float>) = 0;
+                                              ioda::ObsDataVector<int> &,
+                                              ioda::ObsDataVector<float> &) = 0;
 
   virtual std::unique_ptr<ObsFilterParametersBase> makeParameters() const = 0;
 
@@ -188,12 +187,10 @@ class FilterMaker : public FilterFactory {
   typedef oops::TParameters_IfAvailableElseFallbackType_t<T, GenericObsFilterParameters>
           Parameters_;
 
-  template <typename DATA> using ObsDataPtr_ = std::shared_ptr<ioda::ObsDataVector<DATA> >;
-
   std::unique_ptr<ObsFilterBase> make(ioda::ObsSpace & os,
                                       const ObsFilterParametersBase & params,
-                                      ObsDataPtr_<int> flags,
-                                      ObsDataPtr_<float> obserr) override {
+                                      ioda::ObsDataVector<int> & flags,
+                                      ioda::ObsDataVector<float> & obserr) override {
         const auto &stronglyTypedParams = dynamic_cast<const Parameters_&>(params);
         return std::make_unique<T>(os,
                oops::parametersOrConfiguration<oops::HasParameters_<T>::value>(stronglyTypedParams),

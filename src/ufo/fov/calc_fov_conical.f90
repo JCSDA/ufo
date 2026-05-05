@@ -1032,7 +1032,11 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
   distance_east  =  r2*cos(lat*deg2rad)*dellon
 
 ! Angle to the test point
-  bearing_to_test = mod(atan2(distance_north,distance_east),two*pi)
+ if (distance_north == 0 .and. distance_east == 0) then
+   bearing_to_test = 0
+ else
+   bearing_to_test = mod(atan2(distance_north,distance_east),2*pi )
+ endif
   bearing_to_test_deg = bearing_to_test*rad2deg ! convert to degrees
 
 ! This is the arc distance to the test point

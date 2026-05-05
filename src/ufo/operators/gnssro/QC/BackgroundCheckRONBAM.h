@@ -36,8 +36,8 @@ class BackgroundCheckRONBAM : public FilterBase,
   static const std::string classname() {return "ufo::BackgroundCheckRONBAM";}
 
   BackgroundCheckRONBAM(ioda::ObsSpace &, const eckit::Configuration &,
-                       std::shared_ptr<ioda::ObsDataVector<int> >,
-                       std::shared_ptr<ioda::ObsDataVector<float> >);
+                        ioda::ObsDataVector<int> &,
+                        ioda::ObsDataVector<float> &);
   ~BackgroundCheckRONBAM();
 
  private:

@@ -30,8 +30,8 @@ namespace ufo {
 AverageObsToGeoValLevels::AverageObsToGeoValLevels(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        std::shared_ptr<ioda::ObsDataVector<int> > flags,
-        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+        ioda::ObsDataVector<int> & flags,
+        ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "AverageObsToGeoValLevels constructor" << std::endl;
@@ -63,7 +63,7 @@ void AverageObsToGeoValLevels::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "AverageObsToGeoValLevels applyFilter start" << std::endl;
-  oops::Log::debug() << "AverageObsToGeoValLevels obserr: " << *obserr_ << std::endl;
+  oops::Log::debug() << "AverageObsToGeoValLevels obserr: " << obserr_ << std::endl;
 
   const float missing = util::missingValue<float>();
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");

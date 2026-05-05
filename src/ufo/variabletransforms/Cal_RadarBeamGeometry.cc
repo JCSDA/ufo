@@ -20,8 +20,8 @@ static TransformMaker<Cal_RadarBeamGeometry> makerCal_RadarBeamGeometry_("RadarB
 Cal_RadarBeamGeometry::Cal_RadarBeamGeometry(
         const Parameters_ & options,
         const ObsFilterData & data,
-        const std::shared_ptr<ioda::ObsDataVector<int>> & flags,
-        const std::shared_ptr<ioda::ObsDataVector<float>> & obserr)
+        ioda::ObsDataVector<int> & flags,
+        ioda::ObsDataVector<float> & obserr)
   : TransformBase(options, data, flags, obserr),
     params_(options)
 {}

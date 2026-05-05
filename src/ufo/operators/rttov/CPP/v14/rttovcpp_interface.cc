@@ -220,7 +220,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
   //---------------------------------------------------------------------------------
       util::DateTime time1;
       int year, month, day, hour, minute, second;
-      int surftype;
+      int surftype = 0;
       int isurf = 0;
 
       for (std::size_t i = 0; i < nprofiles; i++) {
@@ -368,12 +368,6 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
                         ydiag_varnames_3d.end());
     // get ydiag object
     ufo::GeoVaLs & ydiag = d.geovals();
-
-    // get variables in ydiag; just for debug
-    const oops::Variables & vars = ydiag.getVars();
-    for (const oops::Variable var : vars) {
-      oops::Log::trace() << "ydiag name: " << var << std::endl;
-    }
 
     size_t iSurface = 0;  // support only one surface type for now.
     for (const std::string &varname : ydiag_varnames) {

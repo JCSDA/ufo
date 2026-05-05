@@ -47,8 +47,8 @@ class Cal_Logarithm : public TransformBase {
   typedef Cal_LogarithmParameters Parameters_;
 
   Cal_Logarithm(const Parameters_ &options, const ObsFilterData &data,
-                const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
-                const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
+                ioda::ObsDataVector<int> &flags,
+                ioda::ObsDataVector<float> &obserr);
   // Run check
   void runTransform(const std::vector<bool> &apply) override;
 

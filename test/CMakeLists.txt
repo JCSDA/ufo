@@ -146,11 +146,13 @@ list( APPEND ufo_test_input
   testinput/ufo_geovals_set_invalid_default_format.yaml
   testinput/ufo_geovals_get_nonexistent_var.yaml
   testinput/variables.yaml
+  testinput/unit_tests/obslocalization/obs_localization.yaml
 )
 
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput/unit_tests)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput/unit_tests/obslocalization)
 CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_test_input} )
 
 # Create Data directory for test output files
@@ -359,6 +361,14 @@ ecbuild_add_test( TARGET  ufo_sampled_locations
                           ufo/SampledLocations.h
                           ufo/sampled_locations_test.F90
                   ARGS    "testinput/locations.yaml"
+                  ENVIRONMENT OOPS_TRAPFPE=1
+                  LIBS    ufo )
+
+# Test obs-space localization computeLocalization(Point3, Point3) for Box car, GC99, SOAR
+ecbuild_add_test( TARGET  ufo_obs_localization
+                  SOURCES mains/TestObsLocalization.cc
+                          ufo/ObsLocalization.h
+                  ARGS    "testinput/unit_tests/obslocalization/obs_localization.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
                   LIBS    ufo )
 
@@ -692,7 +702,7 @@ if( ${rttov_FOUND} )
     set(RTTOV_VERSION_SUFFIX "_rttov12")
     set(RTTOV_CAMEL_VERSION "2")
   endif()
-  
+
   list( APPEND rttov_coef_data
     rttov7pred54L/rtcoef_dmsp_17_ssmis.dat
     rttov7pred54L/rtcoef_gcom-w_1_amsr2.dat
@@ -722,7 +732,7 @@ if( ${rttov_FOUND} )
     pchsr_v9.3.${RTTOV_COEF_EXT}
     )
 
-    
+
   # Set RTTOV coefficient directory
   if(DEFINED ENV{RTTOV_LOCAL_COEF_DIR} AND EXISTS $ENV{RTTOV_LOCAL_COEF_DIR})
     set(RTTOV_COEF_DIR "$ENV{RTTOV_LOCAL_COEF_DIR}")
@@ -741,7 +751,7 @@ if( ${rttov_FOUND} )
     set(RTTOV_EMIS_ATLAS_DIR "${rttov_BASE_DIR}/etc/emis_data")
   endif()
   message(STATUS "RTTOV emissivity atlas directory: ${RTTOV_EMIS_ATLAS_DIR}")
-  
+
   # Handle mietable (v12) or hydrotable (v14)
   if(rttov_VERSION VERSION_GREATER_EQUAL 14.0)
     # RTTOV v14: use NetCDF hydrotable file directly
@@ -770,7 +780,7 @@ if( ${rttov_FOUND} )
       list(APPEND rttov_coef_data "mietable/mietable_metop_amsuamhs.bin")
     endif()
   endif()
-    
+
   # Symlink RTcoef files
   create_symlink_filename( ${RTTOV_COEF_DIR}
                            ${CMAKE_CURRENT_BINARY_DIR}/Data

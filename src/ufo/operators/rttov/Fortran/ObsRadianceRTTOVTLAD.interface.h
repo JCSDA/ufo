@@ -27,15 +27,15 @@ extern "C" {
 // -----------------------------------------------------------------------------
 
   void ufo_radiancerttov_tlad_setup_f90(F90hop &, const eckit::Configuration &,
-                                       const int &, const int &,
-                                       oops::Variables &);
+                                        const int &, const int &,
+                                        oops::Variables &, const int &, const int &);
   void ufo_radiancerttov_tlad_delete_f90(F90hop &);
   void ufo_radiancerttov_tlad_settraj_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                         const F90goms &);
+                                          const F90goms &, const ioda::ObsDataVector<int> &);
   void ufo_radiancerttov_simobs_tl_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                  const int &, const int &, double &);
+                                       const int &, const int &, double &);
   void ufo_radiancerttov_simobs_ad_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
-                                  const int &, const int &, const double &);
+                                       const int &, const int &, const double &);
 // -----------------------------------------------------------------------------
 
 }  // extern C

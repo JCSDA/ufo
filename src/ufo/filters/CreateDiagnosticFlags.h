@@ -98,8 +98,8 @@ class CreateDiagnosticFlags : public ObsProcessorBase,
   static const std::string classname() {return "ufo::CreateDiagnosticFlags";}
 
   CreateDiagnosticFlags(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                        std::shared_ptr<ioda::ObsDataVector<int>> qcflags,
-                        std::shared_ptr<ioda::ObsDataVector<float>> obserr);
+                        ioda::ObsDataVector<int> & flags,
+                        ioda::ObsDataVector<float> & obserr);
   ~CreateDiagnosticFlags() override;
 
  private:

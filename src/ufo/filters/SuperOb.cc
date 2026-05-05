@@ -16,8 +16,8 @@ namespace ufo {
 
 SuperOb::SuperOb(ioda::ObsSpace & obsdb,
                  const Parameters_ & parameters,
-                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+                 ioda::ObsDataVector<int> & flags,
+                 ioda::ObsDataVector<float> & obserr)
   : FilterBase(obsdb, parameters, flags, obserr),
     options_(parameters) {
   oops::Log::trace() << "SuperOb constructor start" << std::endl;
@@ -37,7 +37,7 @@ SuperOb::SuperOb(ioda::ObsSpace & obsdb,
 
   std::unique_ptr<SuperObBase> superOb =
     SuperObFactory::create(params.superObName,
-                           data_, apply, filtervars_, *flags, flagged);
+                           data_, apply, filtervars_, flags, flagged);
 
   if (superOb->requireHofX()) {
     allvars_ += Variables(filtervars_, "HofX");
@@ -60,7 +60,7 @@ void SuperOb::applyFilter(const std::vector<bool> & apply,
 
   std::unique_ptr<SuperObBase> superOb =
     SuperObFactory::create(params.superObName,
-                           data_, apply, filtervars, *flags_, flagged);
+                           data_, apply, filtervars, flags_, flagged);
 
   superOb->runAlgorithm();
   oops::Log::trace() << "SuperOb applyFilter complete" << std::endl;

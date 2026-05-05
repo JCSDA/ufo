@@ -31,6 +31,8 @@ class ObsHorLocGC99: public ufo::ObsHorLocalization<ITERATOR> {
  public:
   ObsHorLocGC99(const eckit::Configuration &, ioda::ObsSpace &);
 
+  double computeLocalization(const eckit::geometry::Point3 &,
+                             const eckit::geometry::Point3 &) const override;
  protected:
   /// Compute GC99 localization using the set of \p localobs, the same lengthscale
   /// used to search for those obs, and save localization values in \p locvector.
@@ -49,6 +51,20 @@ ObsHorLocGC99<ITERATOR>::ObsHorLocGC99(const eckit::Configuration & conf,
                                     ioda::ObsSpace & obsspace)
   : ObsHorLocalization<ITERATOR>::ObsHorLocalization(conf, obsspace)
 {}
+
+// -----------------------------------------------------------------------------
+
+template<typename ITERATOR>
+double ObsHorLocGC99<ITERATOR>::computeLocalization(
+      const eckit::geometry::Point3 & p1,
+      const eckit::geometry::Point3 & p2) const {
+  eckit::geometry::Point2 p1_2(p1[0], p1[1]);
+  eckit::geometry::Point2 p2_2(p2[0], p2[1]);
+  double distance = atlas::util::Earth::distance(p1_2, p2_2);
+  double lengthscale = ObsHorLocalization<ITERATOR>::lengthscale();
+  double loc = oops::gc99(distance / lengthscale);
+  return (distance >= lengthscale) ? 0.0 : loc;
+}
 
 // -----------------------------------------------------------------------------
 

@@ -15,7 +15,13 @@
 #include <unordered_map>
 #include <vector>
 
+// To skip the warning about maybe-uninitialized variables in boost multi_array headers.
+// Will only skip this warning for the boost multi_array headers,
+// and only for this file so that we can still get the warning for our own code.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include <boost/multi_array.hpp>
+#pragma GCC diagnostic pop
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <boost/variant/multivisitors.hpp>

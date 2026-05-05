@@ -22,10 +22,11 @@ namespace ufo {
 
 ObsFilters::ObsFilters(ioda::ObsSpace & os,
                        const eckit::Configuration & config,
-                       ObsDataPtr_<int> qcflags, ObsDataPtr_<float> obserr,
+                       ioda::ObsDataVector<int> & flags,
+                       ioda::ObsDataVector<float> & obserr,
                        const int iteration)
-  : obsspace_(os), autoFilters_(), preFilters_(), priorFilters_(), postFilters_(),
-    geovars_(), diagvars_(), qcflags_(qcflags), obserrfilter_(obserr),
+  : obsspace_(os), qcmanager_(nullptr), autoFilters_(), preFilters_(), priorFilters_(),
+    postFilters_(), geovars_(), diagvars_(), qcflags_(flags), obserr_(obserr),
     iteration_(iteration) {
   oops::Log::trace() << "ObsFilters::ObsFilters starting" << std::endl;
 
@@ -51,22 +52,21 @@ ObsFilters::ObsFilters(ioda::ObsSpace & os,
 
   // If at least one filter has been configured, prepend the QC manager and
   // append the Final Check to the list of filters.
-  const bool atLeastOneFilterConfigured =
-    atLeastOneAutoFilterConfigured || atLeastOnePrePriorPostFilterConfigured;
+  atLeastOneFilterConfigured_ =
+      atLeastOneAutoFilterConfigured || atLeastOnePrePriorPostFilterConfigured;
 
-// Prepare QC handling and statistics if any filters are present
-  if (atLeastOneFilterConfigured) {
+  // Prepare QC handling and statistics if any filters are present
+  if (atLeastOneFilterConfigured_) {
     eckit::LocalConfiguration conf;
     conf.set("filter", "QCmanager");
     ObsFilterParametersWrapper filterParams;
     filterParams.validateAndDeserialize(conf);
-    if (atLeastOneAutoFilterConfigured)
-      autoFilters_.emplace_back(os, filterParams.filterParameters, qcflags_, obserrfilter_);
-    else
-      preFilters_.emplace_back(os, filterParams.filterParameters, qcflags_, obserrfilter_);
+    qcmanager_ = std::make_unique<ObsFilter>(os, filterParams.filterParameters,
+                                             qcflags_, obserr_);
   }
 
-// Create the filters, only at 0-th iteration, or at iterations specified in "apply at iterations"
+  // Create the filters, only at 0-th iteration, or at iterations specified in
+  // "apply at iterations"
   if (atLeastOneAutoFilterConfigured)
     appendToFiltersList(autoFiltersParams, autoFilters_);
   if (atLeastOnePrePriorPostFilterConfigured) {
@@ -75,16 +75,18 @@ ObsFilters::ObsFilters(ioda::ObsSpace & os,
     appendToFiltersList(postFiltersParams, postFilters_);
   }
 
-// Create the final filter run at the end of the pipeline
-  if (atLeastOneFilterConfigured) {
+  // Create the final filter run at the end of the pipeline
+  if (atLeastOneFilterConfigured_) {
     eckit::LocalConfiguration conf;
     conf.set("filter", "Final Check");
     ObsFilterParametersWrapper filterParams;
     filterParams.validateAndDeserialize(conf);
     if (atLeastOneAutoFilterConfigured)
-      autoFilters_.emplace_back(os, filterParams.filterParameters, qcflags_, obserrfilter_);
+      autoFilters_.emplace_back(os, filterParams.filterParameters, qcflags_,
+                                obserr_);
     else
-      postFilters_.emplace_back(os, filterParams.filterParameters, qcflags_, obserrfilter_);
+      postFilters_.emplace_back(os, filterParams.filterParameters, qcflags_,
+                                obserr_);
   }
 
   oops::Log::trace() << "ObsFilters::ObsFilters done" << std::endl;
@@ -92,18 +94,20 @@ ObsFilters::ObsFilters(ioda::ObsSpace & os,
 
 // -----------------------------------------------------------------------------
 
-void ObsFilters::appendToFiltersList(const FilterParams_ & filtersParams,
-                                     std::vector<ObsFilter> & filters) {
-  for (const ObsFilterParametersWrapper & filterParams : filtersParams) {
+void ObsFilters::appendToFiltersList(const FilterParams_& filtersParams,
+                                     std::vector<ObsFilter>& filters) {
+  for (const ObsFilterParametersWrapper& filterParams : filtersParams) {
     // Only create filters for the 0-th iteration by default
     bool apply = (iteration_ == 0);
     // If "apply at iterations" is set, check if this is the right iteration
     if (filterParams.applyAtIterations.value() != boost::none) {
-      const std::set<int> iters = oops::parseIntSet(*filterParams.applyAtIterations.value());
+      const std::set<int> iters =
+          oops::parseIntSet(*filterParams.applyAtIterations.value());
       apply = oops::contains(iters, iteration_);
     }
     if (apply) {
-      filters.emplace_back(obsspace_, filterParams.filterParameters, qcflags_, obserrfilter_);
+      filters.emplace_back(obsspace_, filterParams.filterParameters,
+                           qcflags_, obserr_);
       geovars_ += filters.back().requiredVars();
       diagvars_ += filters.back().requiredHdiagnostics();
     }
@@ -113,71 +117,78 @@ void ObsFilters::appendToFiltersList(const FilterParams_ & filtersParams,
 // -----------------------------------------------------------------------------
 
 void ObsFilters::preProcess() {
-  if (autoFilters_.size() > 0) {
-    for (ObsFilter & filter : autoFilters_) {
-      filter.checkFilterData(FilterStage::AUTO);
-      filter.preProcess();
-    }
-  } else {
-    for (ObsFilter & filter : preFilters_) {
-      filter.checkFilterData(FilterStage::PRE);
-      filter.preProcess();
-    }
-  }
-}
-
-// -----------------------------------------------------------------------------
-
-void ObsFilters::priorFilter(const GeoVaLs & gv) {
-  if (autoFilters_.size() > 0) {
-    for (ObsFilter & filter : autoFilters_) {
-      filter.checkFilterData(FilterStage::AUTO);
-      filter.priorFilter(gv);
-    }
-  } else {
-    for (ObsFilter & filter : priorFilters_) {
-      filter.checkFilterData(FilterStage::PRIOR);
-      filter.priorFilter(gv);
+  if (atLeastOneFilterConfigured_) {
+    if (autoFilters_.size() > 0) {
+      qcmanager_->preProcess();  // No operation, placeholder
+      for (ObsFilter& filter : autoFilters_) {
+        filter.checkFilterData(FilterStage::AUTO);
+        filter.preProcess();
+      }
+    } else {
+      qcmanager_->preProcess();  // No operation, placeholder
+      for (ObsFilter& filter : preFilters_) {
+        filter.checkFilterData(FilterStage::PRE);
+        filter.preProcess();
+      }
     }
   }
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsFilters::postFilter(const GeoVaLs & gv,
-                            const ioda::ObsVector & hofx,
-                            const ioda::ObsVector & bias,
-                            const ObsDiagnostics & diags) {
-  if (autoFilters_.size() > 0) {
-    for (ObsFilter & filter : autoFilters_) {
-      filter.checkFilterData(FilterStage::AUTO);
-      filter.postFilter(gv, hofx, bias, diags);
-    }
-  } else {
-    for (ObsFilter & filter : postFilters_) {
-      filter.checkFilterData(FilterStage::POST);
-      filter.postFilter(gv, hofx, bias, diags);
+void ObsFilters::priorFilter(const GeoVaLs& gv) {
+  if (atLeastOneFilterConfigured_) {
+    qcmanager_->priorFilter(gv);  // No operation, placeholder
+    if (autoFilters_.size() > 0) {
+      for (ObsFilter& filter : autoFilters_) {
+        filter.checkFilterData(FilterStage::AUTO);
+        filter.priorFilter(gv);
+      }
+    } else {
+      qcmanager_->priorFilter(gv);  // No operation, placeholder
+      for (ObsFilter& filter : priorFilters_) {
+        filter.checkFilterData(FilterStage::PRIOR);
+        filter.priorFilter(gv);
+      }
     }
   }
 }
 
 // -----------------------------------------------------------------------------
 
-void ObsFilters::print(std::ostream & os) const {
+void ObsFilters::postFilter(const GeoVaLs& gv, const ioda::ObsVector& hofx,
+                            const ioda::ObsVector& bias,
+                            const ObsDiagnostics& diags) {
+  if (atLeastOneFilterConfigured_) {
+    if (autoFilters_.size() > 0) {
+      qcmanager_->postFilter(gv, hofx, bias, diags);
+      for (ObsFilter& filter : autoFilters_) {
+        filter.checkFilterData(FilterStage::AUTO);
+        filter.postFilter(gv, hofx, bias, diags);
+      }
+    } else {
+      qcmanager_->postFilter(gv, hofx, bias, diags);
+      for (ObsFilter& filter : postFilters_) {
+        filter.checkFilterData(FilterStage::POST);
+        filter.postFilter(gv, hofx, bias, diags);
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsFilters::print(std::ostream& os) const {
   if (autoFilters_.size() > 0) {
     os << "ObsFilters: " << autoFilters_.size() << " elements:" << std::endl;
-    for (const ObsFilter & filter : autoFilters_)
-      os << filter << std::endl;
+    for (const ObsFilter& filter : autoFilters_) os << filter << std::endl;
   } else {
     os << "Pre filters: " << preFilters_.size() << " elements:" << std::endl;
-    for (const ObsFilter & preFilter : preFilters_)
-      os << preFilter << std::endl;
+    for (const ObsFilter& preFilter : preFilters_) os << preFilter << std::endl;
     os << "Prior filters: " << priorFilters_.size() << " elements:" << std::endl;
-    for (const ObsFilter & priorFilter : priorFilters_)
-      os << priorFilter << std::endl;
+    for (const ObsFilter& priorFilter : priorFilters_) os << priorFilter << std::endl;
     os << "Post filters: " << postFilters_.size() << " elements:" << std::endl;
-    for (const ObsFilter & postFilter : postFilters_)
-      os << postFilter << std::endl;
+    for (const ObsFilter& postFilter : postFilters_) os << postFilter << std::endl;
   }
 }
 

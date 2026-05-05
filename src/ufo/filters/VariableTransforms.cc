@@ -31,8 +31,8 @@ namespace ufo {
 
 VariableTransforms::VariableTransforms(
     ioda::ObsSpace& obsdb, const eckit::Configuration& config,
-    std::shared_ptr<ioda::ObsDataVector<int>> flags,
-    std::shared_ptr<ioda::ObsDataVector<float>> obserr)
+    ioda::ObsDataVector<int> & flags,
+    ioda::ObsDataVector<float> & obserr)
     : FilterBase(obsdb, config, flags, obserr), parameters_()
 {
   oops::Log::trace() << "VariableTransforms constructor" << std::endl;

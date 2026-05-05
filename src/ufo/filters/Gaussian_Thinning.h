@@ -62,8 +62,8 @@ class Gaussian_Thinning : public FilterBase,
   static const std::string classname() {return "ufo::Gaussian_Thinning";}
 
   Gaussian_Thinning(ioda::ObsSpace &obsdb, const GaussianThinningParameters &params,
-                    std::shared_ptr<ioda::ObsDataVector<int> > flags,
-                    std::shared_ptr<ioda::ObsDataVector<float> > obserr);
+                    ioda::ObsDataVector<int> & flags,
+                    ioda::ObsDataVector<float> & obserr);
 
  private:
   void print(std::ostream &) const override;

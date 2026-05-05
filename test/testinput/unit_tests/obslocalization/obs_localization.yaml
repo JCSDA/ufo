@@ -1,0 +1,78 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2000-01-01T06:00:00Z
+
+obs space:
+  name: simple obs
+  simulated variables: [windEastward]
+  obsdatain:
+    engine:
+      type: GenList
+      lons: [10.0, 20.0, 30.0]
+      lats: [5.0, 15.0, 25.0]
+      dateTimes: [3600, 3600, 3600]
+      epoch: "seconds since 2000-01-01T00:00:00Z"
+      obs errors: [1.0]
+
+obs localizations:
+  # Box car: returns 1.0 if distance <= lengthscale, 0.0 otherwise
+- localization:
+    localization method: Horizontal Box car
+    lengthscale: 1000000.0   # 1000 km
+  point pair tests:
+    # Same point -> distance = 0 -> returns 1.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 0.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # Points ~1111 km apart (10 deg longitude at equator) -> outside 1000 km -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [10.0, 0.0, 0.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+    # Points ~556 km apart (5 deg longitude at equator) -> inside 1000 km -> 1.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [5.0, 0.0, 0.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+
+  # GC99: applies Gaspari-Cohn taper; cutoff at lengthscale (r > 1 -> 0)
+- localization:
+    localization method: Horizontal Gaspari-Cohn
+    lengthscale: 1000000.0   # 1000 km
+  point pair tests:
+    # Same point -> distance = 0 -> gc99(0) = 1.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 0.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # Points ~1111 km apart -> outside 1000 km cutoff -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [10.0, 0.0, 0.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+  # SOAR: applies (1 + x)*exp(-x) taper; cutoff at lengthscale
+- localization:
+    localization method: Horizontal SOAR
+    lengthscale: 1000000.0   # 1000 km
+    soar horizontal decay: 1.0e-6  # 1/m -> x = distance * decay
+  point pair tests:
+    # Same point -> distance = 0 -> soar(0) = (1+0)*exp(0) = 1.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 0.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # Points ~1111 km apart -> outside 1000 km cutoff -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [10.0, 0.0, 0.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+    # Points ~556 km apart (5 deg longitude at equator) -> inside cutoff
+    # distance ~ 555995 m (using atlas Earth radius 6371229 m)
+    # x = 555995 * 1e-6 = 0.555995
+    # soar(0.555995) = (1 + 0.555995) * exp(-0.555995) ~= 0.89237
+  - p1: [0.0, 0.0, 0.0]
+    p2: [5.0, 0.0, 0.0]
+    reference value: 0.89237
+    tolerance: 1.0e-3

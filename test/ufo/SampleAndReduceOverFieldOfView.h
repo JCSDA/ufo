@@ -226,7 +226,6 @@ void testReduceOverFieldOfView() {
 
   // Make up fake samples for 3 obs with {4,5,6} samples each
   const int nlocs = 3;
-  const int nsamples = 15;
   const std::vector<util::Range<size_t>> ranges({{{0, 4}, {4, 9}, {9, 15}}});
   std::vector<double> samples({{0.2, 0.3, 0.6, 0.9,
                                 1.7, 1.2, 1.9, 4.2, 2.9,

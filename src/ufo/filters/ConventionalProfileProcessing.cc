@@ -31,8 +31,8 @@ namespace ufo {
   ConventionalProfileProcessing::ConventionalProfileProcessing
   (ioda::ObsSpace & obsdb,
    const Parameters_ & parameters,
-   std::shared_ptr<ioda::ObsDataVector<int> > flags,
-   std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+   ioda::ObsDataVector<int> & flags,
+   ioda::ObsDataVector<float> & obserr)
     : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
   {
     oops::Log::trace() << "ConventionalProfileProcessing constructor" << std::endl;
@@ -207,7 +207,7 @@ namespace ufo {
 
     // Handles individual profile data
     ProfileDataHandler profileDataHandler(data_,
-                                          *flags_,
+                                          flags_,
                                           options_.DHParameters,
                                           apply,
                                           filtervars,

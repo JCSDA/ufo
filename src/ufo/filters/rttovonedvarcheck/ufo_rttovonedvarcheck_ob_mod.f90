@@ -243,8 +243,10 @@ write(*,"(A)") "Background T profile: "
 write(*,"(10F8.2)") self % background_T
 write(*,"(A)") "Emissivity: "
 write(*,"(10F8.2)") self % emiss(:)
-write(*,"(A)") "Emissivity PC: "
-write(*,"(10F18.8)") self % pcemiss(:)
+if (allocated(self % pcemiss)) then
+  write(*,"(A)") "Emissivity PC: "
+  write(*,"(10F18.8)") self % pcemiss(:)
+endif
 
 end subroutine
 

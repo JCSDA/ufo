@@ -16,8 +16,8 @@ namespace ufo {
 
 ObsDiagnosticsWriter::ObsDiagnosticsWriter(
                        ioda::ObsSpace &, const Parameters_ & params,
-                       std::shared_ptr<ioda::ObsDataVector<int> >,
-                       std::shared_ptr<ioda::ObsDataVector<float> >)
+                       ioda::ObsDataVector<int> &,
+                       ioda::ObsDataVector<float> &)
   : params_(params), extradiagvars_()
 {
   oops::Log::trace() << "ObsDiagnosticsWriter constructor" << std::endl;

@@ -53,6 +53,15 @@ ufo_add_test( NAME    function_arithmetic
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    function_circulardifference
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_circulardifference.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_aircraft_bc_offline
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -837,7 +846,7 @@ ufo_add_test( NAME    function_solarzenith_skiprejected
               LIBS    ufo
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
-	      
+
 # Test for the string manipulation obsfucntion
 ufo_add_test( NAME    function_stringmanipulation
               ECBUILD
@@ -846,8 +855,8 @@ ufo_add_test( NAME    function_stringmanipulation
               MPI     1
               LIBS    ufo
               LABELS  filters obsfunctions
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )	      
-	      
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+
 #
 ufo_add_test( NAME    function_surfacecloudmodellevelcbh
               ECBUILD
@@ -875,7 +884,24 @@ ufo_add_test( NAME    function_geocloudcreatecloudcolumn
               LIBS    ufo
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
-
+#
+ufo_add_test( NAME    function_timebinner
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_timebinner.yaml"
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
+ufo_add_test( NAME    function_timebinner_mpi
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_timebinner.yaml"
+              MPI     3
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_tropo_estimate
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

@@ -47,35 +47,33 @@ void updateQCFlags(const std::vector<float> *obsValues, std::vector<int>& qcflag
 // -----------------------------------------------------------------------------
 
 QCmanager::QCmanager(ioda::ObsSpace & obsdb, const Parameters_ & /*parameters*/,
-                     std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
-                     std::shared_ptr<ioda::ObsDataVector<float> > /*obserr*/)
-  : obsdb_(obsdb), nogeovals_(), nodiags_(), flags_(qcflags)
+                     ioda::ObsDataVector<int> & flags,
+                     ioda::ObsDataVector<float> & /*obserr*/)
+  : obsdb_(obsdb), nogeovals_(), nodiags_(), flags_(flags)
 {
   oops::Log::trace() << "QCmanager constructor start" << std::endl;
-
-  ASSERT(qcflags);
 
   const oops::ObsVariables &allObservedVars = obsdb.obsvariables();
   const oops::ObsVariables &initialObservedVars = obsdb.initial_obsvariables();
   const oops::ObsVariables &derivedObservedVars = obsdb.derived_obsvariables();
 
   ASSERT(allObservedVars.size() == initialObservedVars.size() + derivedObservedVars.size());
-  ASSERT(flags_->nvars() == allObservedVars.size());
-  ASSERT(flags_->nlocs() == obsdb_.nlocs());
+  ASSERT(flags_.nvars() == allObservedVars.size());
+  ASSERT(flags_.nlocs() == obsdb_.nlocs());
 
   const ioda::ObsDataVector<float> obs(obsdb, initialObservedVars, "ObsValue");
 
   // Iterate over initial observed variables
   for (size_t jv = 0; jv < initialObservedVars.size(); ++jv) {
     const ioda::ObsDataRow<float> &currentObsValues = obs[jv];
-    ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[obs.varnames()[jv]];
+    ioda::ObsDataRow<int> &currentQCFlags = flags[obs.varnames()[jv]];
     updateQCFlags(&currentObsValues, currentQCFlags);
   }
 
   // Iterate over derived variables and if they don't exist yet, set their QC flags to
   // 'missing'.
   for (size_t jv = 0; jv < derivedObservedVars.size(); ++jv) {
-    ioda::ObsDataRow<int> &currentQCFlags = (*qcflags)[derivedObservedVars[jv]];
+    ioda::ObsDataRow<int> &currentQCFlags = flags[derivedObservedVars[jv]];
     if (!obsdb.has("ObsValue", derivedObservedVars[jv])) {
       updateQCFlags(nullptr, currentQCFlags);
     } else {
@@ -103,8 +101,8 @@ void QCmanager::postFilter(const GeoVaLs &, /*geovals*/
   for (size_t jv = 0; jv < allObservedVars.size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
       const size_t iobs = allObservedVars.size() * jobs + jv;
-      if ((*flags_)[allObservedVars[jv]][jobs] == 0 && hofx[iobs] == missing) {
-        (*flags_)[allObservedVars[jv]][jobs] = QCflags::Hfailed;
+      if (flags_[allObservedVars[jv]][jobs] == 0 && hofx[iobs] == missing) {
+        flags_[allObservedVars[jv]][jobs] = QCflags::Hfailed;
       }
     }
   }
@@ -165,9 +163,8 @@ void QCmanager::print(std::ostream & os) const {
     const std::string varName = allObservedVars[jvar];
     std::unique_ptr<ioda::Accumulator<std::vector<size_t>>> accumulator =
         obsdb_.distribution()->createAccumulator<size_t>(cases.size());
-
     for (size_t jobs = 0; jobs < nlocs; ++jobs) {
-      const int actualFlag = (*flags_)[jvar][jobs];
+      const int actualFlag = flags_[jvar][jobs];
       for (size_t jcase = 0; jcase < cases.size(); ++jcase)
         if (actualFlag == cases[jcase].first)
           accumulator->addTerm(jobs, jcase, 1);
@@ -226,7 +223,7 @@ void QCmanager::print(std::ostream & os) const {
     const std::vector<std::size_t> countDiags = accumulatorDiags->computeResult();
 
     if (obsdb_.comm().rank() == 0) {
-      const std::string info = "QC " + flags_->obstype() + " " + varName + ": ";
+      const std::string info = "QC " + flags_.obstype() + " " + varName + ": ";
 
       // Normal cases
       for (size_t i = numSpecialCases; i < counts.size(); ++i)
