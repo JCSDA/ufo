@@ -134,6 +134,36 @@ observations:
       name: MetaData/thinningPriority
   passedBenchmark: 34
   passedObservationsBenchmark: *referencePassedObsIds
+# Same as above, but with records not grouped, and 'account for where' used
+- obs space:
+    name: Aircraft
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_poisson_disk_thinning.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/met_office_poisson_disk_thinning_out2.nc4
+      obsgrouping:
+        group variables: [ "scan_index" ]
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: Domain Check
+    filter variables:
+    - name: airTemperature
+    where:
+    - variable:
+        name: MetaData/superObservation
+      is_in: 1
+  - filter: Poisson Disk Thinning
+    min_horizontal_spacing: { "0": 2000, "1": 1000 }
+    exclusion_volume_shape: ellipsoid
+    shuffle: false # visit observations in the same order as the Met Office function did
+    account_for_where_in_gather: true
+    priority_variable:
+      name: MetaData/thinningPriority
+  passedBenchmark: 34
 - obs space:
     name: Aircraft
     obsdatain:
