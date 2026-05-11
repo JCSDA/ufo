@@ -1,0 +1,45 @@
+time window:
+  begin: 2020-05-01T03:00:00Z
+  end: 2020-05-01T09:00:00Z
+
+observations:
+- obs space:
+    name: GnssroBnd
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2020050106_1dvar.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [bendingAngle]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/gnssro_obs_2020050106_1dvar_vert_smooth.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gnssro_geoval_2020050106_1dvar.nc4
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/impactHeightRO
+      type: float
+      function:
+        name: ObsFunction/ImpactHeight
+  - filter: Variable Assignment
+    assignments:
+    - name: TestResult/smoothBendingAngle
+      type: float
+      function:
+        name: ObsFunction/ProfileVerticalSmoothing
+        options:
+          variable: ObsValue/bendingAngle
+          heightVariable: MetaData/impactHeightRO
+          filterWidth: "150,250,400,600,850,1200,1500,2000,2200,2500"
+          filterHeight: "2000,4000,6000,8000,10000,15000,20000,30000,40000,60000"
+          polynomialOrder: 3
+  compareVariables:
+    - reference:
+        name: TestReference/smoothBendingAngle
+      test:
+        name: TestResult/smoothBendingAngle
+      relTol: 1.0e-4

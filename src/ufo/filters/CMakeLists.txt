@@ -374,6 +374,8 @@ set ( filters_files
       obsfunctions/ProfileAverageObsPressure.h
       obsfunctions/ProfileLevelCount.cc
       obsfunctions/ProfileLevelCount.h
+      obsfunctions/ProfileVerticalSmoothing.cc
+      obsfunctions/ProfileVerticalSmoothing.h
       obsfunctions/DateTimeOffset.cc
       obsfunctions/DateTimeOffset.h
       obsfunctions/FillAveragedProfileData.cc
