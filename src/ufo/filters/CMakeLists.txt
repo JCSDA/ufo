@@ -329,6 +329,8 @@ set ( filters_files
       obsfunctions/SatwindIndivErrors.h
       obsfunctions/SatWindsLNVDCheck.cc
       obsfunctions/SatWindsLNVDCheck.h
+      obsfunctions/Statistic.cc
+      obsfunctions/Statistic.h
       obsfunctions/TimeBinner.cc
       obsfunctions/TimeBinner.h
       obsfunctions/WindsSPDBCheck.cc

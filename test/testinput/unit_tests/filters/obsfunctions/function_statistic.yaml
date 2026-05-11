@@ -1,0 +1,421 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+  - obs space:
+      name: Test ObsFunction Statistic - arithmetic mean method
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/meanPressure
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: arithmetic mean
+                variable: ObsValue/pressure
+    compareVariables:
+      - test:
+          name: MetaData/meanPressure
+        reference:
+          name: TestReference/meanPressure
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - harmonic mean method
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/harmonicMeanPressure
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: harmonic mean
+                variable: ObsValue/pressure
+    compareVariables:
+      - test:
+          name: MetaData/harmonicMeanPressure
+        reference:
+          name: TestReference/harmonicMeanPressure
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - harmonic mean with zero values (abort if invalid operation true - default)
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      # Create a variable with zero values mixed in
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/pressureWithZero
+            type: float
+            value: 0.0
+      # Override with actual pressure values but leave some as zero
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/pressureWithZero
+            type: float
+            source variable: ObsValue/pressure
+        where:
+          - variable: { name: MetaData/stationIdentification }
+            matches_regex: "Station0"
+      # Compute harmonic mean with abort if invalid operation = false
+      # Should return missing for all locations due to zero values
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/harmonicMeanWithZero
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: harmonic mean
+                variable: MetaData/pressureWithZero
+                abort if invalid operation: true
+    expectExceptionWithMessage: "Statistic: harmonic mean encountered zero or negative"
+
+  - obs space:
+      name: Test ObsFunction Statistic - harmonic mean with zero values (abort if invalid operation false)
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      # Create a variable with zero values mixed in and a reference
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/pressureWithZero
+            type: float
+            value: 0.0
+          - name: TestReference/missingValues
+            type: float
+            value: missing
+      # Override with actual pressure values but leave some as zero
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/pressureWithZero
+            type: float
+            source variable: ObsValue/pressure
+        where:
+          - variable: { name: MetaData/stationIdentification }
+            matches_regex: "Station0"
+      # Compute harmonic mean with abort if invalid operation = false
+      # Should return missing for all locations due to zero values
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/harmonicMeanWithZeroNoAbort
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: harmonic mean
+                variable: MetaData/pressureWithZero
+                abort if invalid operation: false
+
+    compareVariables:
+      - test:
+          name: MetaData/harmonicMeanWithZeroNoAbort
+        reference:
+          name: TestReference/missingValues
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - where clause
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      # (A)
+      # Should have mean of all pressure but only where stationIdentification is
+      # "Station0" in the Obs Space
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/meanPressureAtStation0
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: arithmetic mean
+                variable: ObsValue/pressure
+        where: &isStation0
+          - variable: { name: MetaData/stationIdentification }
+            matches_regex: "Station0"
+      # (B)
+      # Get just station 0 pressures - will be missing values for other stations
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/station0Pressure
+            type: float
+            source variable: ObsValue/pressure
+        where: *isStation0
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/meanStation0Pressure
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: arithmetic mean
+                variable: MetaData/station0Pressure
+      # (C)
+      # Where clause again gives station 0 pressures at station 0 locations only
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/meanStation0PressureAtStation0
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: arithmetic mean
+                variable: MetaData/station0Pressure
+        where: *isStation0
+    compareVariables:
+      # (A)
+      - test:
+          name: MetaData/meanPressureAtStation0
+        reference:
+          name: TestReference/meanPressureAtStation0
+        relTol: 1e-6
+      # (B)
+      - test:
+          name: MetaData/meanStation0Pressure
+        reference:
+          name: TestReference/meanStation0Pressure
+        relTol: 1e-6
+      # (C)
+      - test:
+          name: MetaData/meanStation0PressureAtStation0
+        reference:
+          name: TestReference/meanStation0PressureAtStation0
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - median method
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/medianPressure
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: median
+                variable: ObsValue/pressure
+    compareVariables:
+      - test:
+          name: MetaData/medianPressure
+        reference:
+          name: TestReference/medianPressure
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - mode method
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      # (A) single mode value
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/modePressure
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: mode
+                variable: ObsValue/pressure
+      # (B) Multiple mode values (should return the smallest)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/modeTemperatureMultipleModes
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: mode
+                variable: ObsValue/temperature
+      # (C) No mode - should return missing values
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/noMode
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: mode
+                variable: ObsValue/noMode
+      # Create TestReference/noMode as all missing values for comparison
+      - filter: Variable Assignment
+        assignments:
+          - name: TestReference/noMode
+            type: float
+            value: missing
+
+    compareVariables:
+      # (A)
+      - test:
+          name: MetaData/modePressure
+        reference:
+          name: TestReference/modePressure
+        relTol: 1e-6
+      # (B)
+      - test:
+          name: MetaData/modeTemperatureMultipleModes
+        reference:
+          name: TestReference/smallestModeTemperature
+        relTol: 1e-6
+      # (C)
+      - test:
+          name: MetaData/noMode
+        reference:
+          name: TestReference/noMode
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - weighted mean
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/weightedMeanPressure
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: weighted mean
+                variable: ObsValue/pressure
+                weight variable: MetaData/weights
+    compareVariables:
+      - test:
+          name: MetaData/weightedMeanPressure
+        reference:
+          name: TestReference/weightedMeanPressure
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - standard deviation
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/sampleStdTemperature
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: standard deviation
+                variable: ObsValue/temperature
+                delta degrees of freedom: 1
+          - name: MetaData/populationStdTemperature
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: standard deviation
+                variable: ObsValue/temperature
+                delta degrees of freedom: 0
+          - name: MetaData/stdTemperature # default is population std dev (ddof=0) like numpy
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: standard deviation
+                variable: ObsValue/temperature
+    compareVariables:
+      - test:
+          name: MetaData/sampleStdTemperature
+        reference:
+          name: TestReference/sampleStdTemperature
+        relTol: 1e-6
+      - test:
+          name: MetaData/populationStdTemperature
+        reference:
+          name: TestReference/populationStdTemperature
+        relTol: 1e-6
+      - test:
+          name: MetaData/stdTemperature
+        reference:
+          name: TestReference/populationStdTemperature
+        relTol: 1e-6
+
+  - obs space:
+      name: Test ObsFunction Statistic - variance
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/statistic_test_obs.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/sampleVarianceTemperature
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: variance
+                variable: ObsValue/temperature
+                delta degrees of freedom: 1
+          - name: MetaData/populationVarianceTemperature
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: variance
+                variable: ObsValue/temperature
+                delta degrees of freedom: 0
+          - name: MetaData/varianceTemperature # default is population variance (ddof=0) like numpy
+            type: float
+            function:
+              name: ObsFunction/Statistic
+              options:
+                statistic: variance
+                variable: ObsValue/temperature
+    compareVariables:
+      - test:
+          name: MetaData/sampleVarianceTemperature
+        reference:
+          name: TestReference/sampleVarianceTemperature
+        relTol: 1e-6
+      - test:
+          name: MetaData/populationVarianceTemperature
+        reference:
+          name: TestReference/populationVarianceTemperature
+        relTol: 1e-6
+      - test:
+          name: MetaData/varianceTemperature
+        reference:
+          name: TestReference/populationVarianceTemperature
+        relTol: 1e-6
