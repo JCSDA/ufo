@@ -36,6 +36,15 @@ ufo_add_test( NAME    ensemblestatistics
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    ensemblestatistics_IGObsStdDev
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_EnsembleObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ensemblestatistics_IGObsStdDev.yaml"
+              MPI     8
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    ensemblestatistics_channels
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_EnsembleObsFilters.x

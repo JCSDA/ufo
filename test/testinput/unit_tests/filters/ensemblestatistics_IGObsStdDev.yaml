@@ -1,0 +1,82 @@
+members:
+# Member 0
+- time window: &time_window
+    begin: 2018-01-01T00:00:00Z
+    end: 2019-01-01T00:00:00Z
+
+  observations:
+  - obs space: &obsspace_member0
+      name: test data
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/ensemble_statistics_ig_stddev_member0.nc4
+      simulated variables: [variable1, variable2, variable3]
+    HofX: HofX
+    obs filters: &compute_ig_stddev
+    - filter: Ensemble Statistics
+      statistics:
+      - IGObsStdDev 
+      filter variables:
+      - name: variable1
+      - name: variable2
+      relative variance: 0.1
+    compareVariables: &compare_ig_stddev
+    - test:
+        name: IGObsError/variable1
+      reference:
+        name: TestReference/variable1_IGObsStddev
+      relTol: 1e-6
+    - test:
+        name: IGObsError/variable2
+      reference:
+        name: TestReference/variable2_IGObsStddev
+      relTol: 1e-6
+  
+###############################################################################  
+# Member 1  
+- time window: *time_window
+
+  observations:
+  - obs space: &obsspace_member1
+      name: test data
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/ensemble_statistics_ig_stddev_member1.nc4
+      simulated variables: [variable1, variable2, variable3]
+    HofX: HofX
+    obs filters: *compute_ig_stddev
+    compareVariables: *compare_ig_stddev
+
+###############################################################################  
+# Member 2  
+- time window: *time_window
+
+  observations:
+  - obs space: &obsspace_member2
+      name: test data
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/ensemble_statistics_ig_stddev_member2.nc4
+      simulated variables: [variable1, variable2, variable3]
+    HofX: HofX
+    obs filters: *compute_ig_stddev
+    compareVariables: *compare_ig_stddev
+
+###############################################################################  
+# Member 3
+- time window: *time_window
+
+  observations:
+  - obs space: &obsspace_member3
+      name: test data
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/ensemble_statistics_ig_stddev_member3.nc4
+      simulated variables: [variable1, variable2, variable3]
+    HofX: HofX
+    obs filters: *compute_ig_stddev
+    compareVariables: *compare_ig_stddev

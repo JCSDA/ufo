@@ -123,9 +123,10 @@ void EnsembleStatistics::doFilter() {
 
     std::vector<float> meanHofxValues;
     if (oops::contains(statistics, EnsembleStatistic::HOFX_MEAN) ||
-        oops::contains(statistics, EnsembleStatistic::HOFX_STDDEV)) {
+        oops::contains(statistics, EnsembleStatistic::HOFX_STDDEV) ||
+        oops::contains(statistics, EnsembleStatistic::IG_OBS_STDDEV)) {
       // Calculate the ensemble mean of H(x) vectors. (It is needed also for the calculation of the
-      // ensemble spread.)
+      // ensemble spread and other quantities.)
       meanHofxValues.resize(hofxValues.size());
 
       // Step 1: Sum over ensemble members.
@@ -175,6 +176,67 @@ void EnsembleStatistics::doFilter() {
                   hofxStdDevValues.begin() + (i + 1) * nlocs,
                   statValues.begin());
         obsdb_.put_db("HofXEnsembleStdDev", hofx.varnames()[i], statValues);
+      }
+    }
+
+    if (oops::contains(statistics, EnsembleStatistic::IG_OBS_STDDEV)) {
+      // Calculate EFFECTIVE Inverse-Gamma (IG) obs std dev. Note that this is an effective std dev
+      // value needed to make downstream stochastic filters that are based on Gaussian assumptions
+      // work for IG distributed obs.
+      std::vector<float> IGObsStdDevValues(hofxValues.size());
+      ioda::ObsDataVector<float> yobs(obsdb_, filterVariables, "");
+
+      // Read yobs from "DerivedObsValue"; if not available, read from "ObsValue"
+      if (obsdb_.has("ObsValue")) {
+        data_.get(Variable("ObsValue/" + filterVariables[0]), yobs);
+      } else {
+        throw eckit::Exception("ObsValue not found");
+      }
+
+      // Concatenate the local yobs vectors of all filter variables so that they can be transferred
+      // to other MPI processes in one go.
+      std::vector<float> obsValues;
+      obsValues.reserve(nlocs * nvars);
+
+      // Identify missing values
+      const float missing = util::missingValue<float>();
+
+      // Get relative variance from input file.
+      if (parameters_.relvar.value() == boost::none) {
+        throw eckit::Exception("Relative variance value not specified");
+      }
+      if (parameters_.relvar.value() <= 0.0) {
+        throw eckit::Exception("Relative variance needs to be greater than zero");
+      }
+      const double Rr = parameters_.relvar.value().value();
+      oops::Log::trace() << "relvar: " << parameters_.relvar.value().value() << std::endl;
+
+      // Compute the effective IG obs std dev values, checking for missing and negative values
+      const double RrInvP1 = 1.0 + 1.0 / Rr;
+      for (size_t i = 0; i < nvars; ++i) {
+        obsValues.insert(obsValues.end(), yobs[i].begin(), yobs[i].end());
+      }
+      for (size_t i = 0; i < hofxValues.size(); ++i) {
+        if (obsValues[i] != missing) {
+          if (obsValues[i] < 0.0) {
+            throw eckit::Exception("Observation of bounded variable is negative");
+          }
+          if (meanHofxValues[i] < 0.0) {
+            throw eckit::Exception("Mean H(x) of bounded variable is negative");
+          }
+          IGObsStdDevValues[i] = std::sqrt(meanHofxValues[i] * obsValues[i] / RrInvP1);
+        } else {
+          IGObsStdDevValues[i] = missing;
+        }
+      }
+
+      // Save the calculated effective IG obs std dev values to the ObsSpace.
+      std::vector<float> statValues(hofx.nlocs());
+      for (size_t i = 0; i < hofx.nvars(); ++i) {
+        std::copy(IGObsStdDevValues.begin() + i * nlocs,
+                  IGObsStdDevValues.begin() + (i + 1) * nlocs,
+                  statValues.begin());
+        obsdb_.put_db("IGObsError", hofx.varnames()[i], statValues);
       }
     }
   }

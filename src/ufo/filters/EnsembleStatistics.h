@@ -29,7 +29,9 @@ enum class EnsembleStatistic {
   /// \brief Ensemble mean of H(x) vectors.
   HOFX_MEAN,
   /// \brief Ensemble spread of H(x) vectors.
-  HOFX_STDDEV
+  HOFX_STDDEV,
+  /// \brief Effective std dev of inverse-gamma obs vectors.
+  IG_OBS_STDDEV
 };
 
 struct EnsembleStatisticParameterTraitsHelper {
@@ -37,7 +39,8 @@ struct EnsembleStatisticParameterTraitsHelper {
   static constexpr char enumTypeName[] = "EnsembleStatistic";
   static constexpr util::NamedEnumerator<EnsembleStatistic> namedValues[] = {
     { EnsembleStatistic::HOFX_MEAN, "HofXEnsembleMean" },
-    { EnsembleStatistic::HOFX_STDDEV, "HofXEnsembleStdDev" }
+    { EnsembleStatistic::HOFX_STDDEV, "HofXEnsembleStdDev" },
+    { EnsembleStatistic::IG_OBS_STDDEV, "IGObsStdDev" }
   };
 };
 
@@ -73,6 +76,9 @@ class EnsembleStatisticsParameters : public ObsFilterParametersBase {
   /// Each statistic will be saved in ObsSpace variables from the group with matching name (e.g.
   /// ensemble means of H(x) vectors will be saved in variables from the `HofXEnsembleMean`group).
   oops::Parameter<std::vector<EnsembleStatistic>> statistics{"statistics", {}, this};
+
+  /// Optional relative variance parameter - used when employing Gamma-Inverse-Gamma filters
+  oops::OptionalParameter<double> relvar{"relative variance", this};
 };
 
 /// \brief Compute ensemble statistics and store them in ObsSpace variables.
