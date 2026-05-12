@@ -9,207 +9,67 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/develop' }}
 
-env:
-  REPO: ${{ github.event.repository.name }}
-  PR: pr-${{ github.event.number }}
-
 jobs:
-  build-and-test:
+  build:
     if: |
       ( github.repository_owner == 'JCSDA-internal' && github.event.pull_request.draft == false )
     name: gnu-openmpi
     runs-on: jedi-self-hosted-ext
+    env:
+      NAMESPACE: pr-${{ github.event.number }}
+      MOBB_CI_PR_BODY_OUT: mobb-ci-gh-pr-body.out
+      REPO: ${{ github.event.repository.name }}
+      REPO_TEST_DATA: ${{ github.event.repository.name }}-data
+      TIMEOUT_MINUTE: 301
 
     steps:
-      - name: Pre-submit cleanup
+      - name: Cleanup (pre)
         run: |
-          rm -fr ./${{ env.PR }} || true
-          ls -lgo ./
+          rm -fr "./${NAMESPACE}"
 
-      - name: Checkout ${{ env.REPO }}
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          path: ./${{ env.PR }}/${{ env.REPO }}
-          lfs: true
-      - name: Initiate bundle
-        working-directory: ${{ env.PR }}
-        run: ln -sf ./${{ env.REPO }}/CI/meto/* .
+          path: ./${{ env.NAMESPACE }}
 
-      - name: Checkout jedicmake
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/jedicmake
-          repository: JCSDA-internal/jedi-cmake
-          submodules: recursive
-          token: ${{ secrets.GH_PAT }}
-
-      - name: Checkout ufo-data
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/ufo-data
-          repository: JCSDA-internal/ufo-data
-          token: ${{ secrets.GH_PAT }}
-          lfs: true
-      - name: Check build-group for ufo-data
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/ufo-data
-
-      - name: Checkout oops
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/oops
-          repository: JCSDA-internal/oops
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for oops
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/oops
-
-      - name: Checkout jedi-model-data
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/jedi-model-data
-          repository: JCSDA-internal/jedi-model-data
-          token: ${{ secrets.GH_PAT }}
-          lfs: true
-      - name: Check build-group for jedi-model-data
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/jedi-model-data
-
-      - name: Checkout vader
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/vader
-          repository: JCSDA-internal/vader
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for vader
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/vader
-
-      - name: Checkout saber
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/saber
-          repository: JCSDA-internal/saber
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for saber
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/saber
-
-      - name: Checkout ioda-data
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/ioda-data
-          repository: JCSDA-internal/ioda-data
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for ioda-data
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/ioda-data
-
-      - name: Checkout ioda
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/ioda
-          repository: JCSDA-internal/ioda
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for ioda
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/ioda
-
-      - name: Checkout monio
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/monio
-          repository: MetOffice/monio
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for monio
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/monio
-
-      - name: Checkout opsinputs
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/opsinputs
-          repository: MetOffice/opsinputs
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for opsinputs
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/opsinputs
-
-      - name: Checkout nemo-feedback
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/nemo-feedback
-          repository: MetOffice/nemo-feedback
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for nemo-feedback
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/nemo-feedback
-
-      - name: Checkout orca-jedi
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/orca-jedi
-          repository: MetOffice/orca-jedi
-          token: ${{ secrets.GH_PAT }}
-          lfs: true
-      - name: Check build-group for orca-jedi
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/orca-jedi
-
-      - name: Checkout jjtests
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/jjtests
-          repository: MetOffice/jjtests
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for jjtests
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/jjtests
-
-      - name: Checkout ops-um-jedi
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/ops-um-jedi
-          repository: JCSDA-internal/ops-um-jedi
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for ops-um-jedi
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/ops-um-jedi
-
-      - name: Checkout lfric-jedi
-        uses: actions/checkout@v4
-        with:
-          path: ./${{ env.PR }}/lfric-jedi
-          repository: JCSDA-internal/lfric-jedi
-          token: ${{ secrets.GH_PAT }}
-      - name: Check build-group for lfric-jedi
-        if: github.event_name == 'pull_request'
-        run: ./${{ env.PR }}/check-build-group.sh ./${{ env.PR }}/lfric-jedi
-
-      - name: Build and Test
-        env:
-          # Container environment
-          WORKDIR: /var/tmp/${{ env.REPO }}/${{ env.PR }}
-          MOBB_DATA: /var/tmp/mobb-data
-        shell: bash
+      - name: Set CI variables
         run: |
-          az acr login --name ngmssboxjediacr
-          ln -sf /testdata/mobb-data -t ${{ github.workspace }}
+          gh pr view --json 'body' --jq '.body' --repo "${GITHUB_REPOSITORY}" \
+            "${GITHUB_HEAD_REF}" >"./${MOBB_CI_PR_BODY_OUT}"
+          image_tag="${GITHUB_BASE_REF##*/}"
+          declare -A settings
+          settings['MOBB_CI_IMAGE_TAG']="${image_tag}"
+          settings['MOBB_CI_TEST_TIER']='1'
+          for name in "${!settings[@]}"; do
+            default="${settings[${name}]}"
+            value="$( \
+              sed -n \
+              -e 's/^[[:space:]]*'"${name}"'=\([^[:space:]]\+\).*$/\1/p' \
+              "./${MOBB_CI_PR_BODY_OUT}")"
+            value="${value:-${default}}"
+            echo "${name}=${value}"
+          done >>"${GITHUB_ENV}"
 
+      - name: Run
+        run: |
           docker run --rm \
-            --name ${REPO}_${PR}_${GITHUB_SHA::7} \
-            --volume ${{ github.workspace }}/${PR}:${WORKDIR} \
-            --volume ${{ github.workspace }}/mobb-data:${MOBB_DATA} \
-            --env ATLAS_DATA_PATH="${MOBB_DATA}" \
-            --env LFRICJEDI_TEST_TIER=0 \
-            --env MOBB_DATA="${MOBB_DATA}" \
-            --env OMPI_ALLOW_RUN_AS_ROOT=1 \
-            --env OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+            --name "${REPO}-${NAMESPACE}-${GITHUB_SHA::7}" \
+            --volume "./${MOBB_CI_PR_BODY_OUT}:/var/tmp/${MOBB_CI_PR_BODY_OUT}" \
+            --volume "./${NAMESPACE}:/var/tmp/mobb-ci-${NAMESPACE}" \
+            --volume '/testdata/mobb-data:/var/tmp/mobb-data' \
+            --env GH_TOKEN="${{ secrets.GH_PAT }}" \
+            --env GITHUB_HEAD_REF="${GITHUB_HEAD_REF}" \
+            --env GITHUB_REPOSITORY="${GITHUB_REPOSITORY}" \
+            --env MOBB_CI_PR_BODY_OUT="/var/tmp/${MOBB_CI_PR_BODY_OUT}" \
+            --env MOBB_CI_TEST_TIER="${MOBB_CI_TEST_TIER}" \
+            --env MOBB_DATA='/var/tmp/mobb-data' \
             --env REPO="${REPO}" \
-            --env REPO_TEST_DATA='ufo-data' \
-            --workdir="${WORKDIR}" \
-            'ngmssboxjediacr.azurecr.io/jedibase:alma9'
+            --env REPO_TEST_DATA="${REPO_TEST_DATA}" \
+            --entrypoint '/usr/bin/env' \
+            --workdir="/var/tmp/mobb-ci-${NAMESPACE}" \
+            "ngmssboxjediacr.azurecr.io/jedibase:${MOBB_CI_IMAGE_TAG}" \
+            'timeout' "$((TIMEOUT_MINUTE - 1))m" '/usr/local/bin/mobb-ci'
+        timeout-minutes: ${{ fromJSON(env.TIMEOUT_MINUTE) }}
 
-      - name: Cleanup workspace
-        working-directory: ${{github.workspace}}
-        run: rm -fr ${{ env.PR }} || true
+      - name: Cleanup (post)
+        run: rm -fr "./${NAMESPACE}"
