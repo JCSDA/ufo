@@ -70,6 +70,7 @@ observations:
     Obs Error test tolerance: 1e-9
   obs error test:
     test localization: true
+    RMS localInverseMultiply: 3.00312328
 
 - obs space:
     name: iasi_metop-b (channels == all channels in the correlations file)
@@ -101,3 +102,4 @@ observations:
     Obs Error test tolerance: 1e-9
   obs error test:
     test localization: true
+    RMS localInverseMultiply: 2.18051791

@@ -22,6 +22,7 @@ observations:
     number of members: 1
   obs error test: 
     test localization: true 
+    RMS localInverseMultiply: 0.989223
 - obs space:
     name: Aircraft
     obsdatain:
@@ -38,6 +39,7 @@ observations:
     relative variance: 0.1
   obs error test: 
     test localization: true 
+    RMS localInverseMultiply: 4834.77783
 - obs space:
     name: Satwind
     obsdatain:
@@ -53,3 +55,4 @@ observations:
     covariance model: diagonal
   obs error test: 
     test localization: true 
+    RMS localInverseMultiply: 0.140291

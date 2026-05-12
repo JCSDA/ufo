@@ -18,6 +18,7 @@ observations:
     covariance model: diagonal
   obs error test:
     test localization: true
+    RMS localInverseMultiply: 0.989223
 - obs space:
     name: Aircraft
     obsdatain:
@@ -33,6 +34,7 @@ observations:
     covariance model: diagonal
   obs error test:
     test localization: true
+    RMS localInverseMultiply: 4806.25
 - obs space:
     name: Satwind
     obsdatain:
@@ -48,3 +50,4 @@ observations:
     covariance model: diagonal
   obs error test:
     test localization: true
+    RMS localInverseMultiply: 0.140291
