@@ -130,8 +130,11 @@ void ProfileVerticalSmoothing::compute(const ObsFilterData & in,
 
       // Normalize the heights by the filter width, centring them on the mean height
       // in the profile.
-      double meanHeight = std::reduce(heightProfile.begin(),
-                                      heightProfile.end()) / heightProfile.size();
+      double meanHeight = 0;
+      for (double height : heightProfile) {
+        meanHeight += height;
+      }
+      meanHeight = meanHeight / heightProfile.size();
       std::vector<double> normalisedHeights(heightProfile.size());
       std::transform(heightProfile.begin(), heightProfile.end(), normalisedHeights.begin(),
                       [=](double x) { return (x - meanHeight) / filterWidth; });
