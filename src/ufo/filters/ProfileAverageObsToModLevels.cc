@@ -133,7 +133,7 @@ void ProfileAverageObsToModLevels::applyFilter(const std::vector<bool> & apply,
                                  obs[jv]);
     }  // profile jprof
     // Save new obs to obsSpace:
-    obsdb_.put_db("DerivedObsValue", varname, obs[jv]);
+    obsdb_.put_db("DerivedObsValue", varname, obs[jv], filtervars.variable(jv).dimList());
   }  // filter variable jv
   oops::Log::trace() << "ProfileAverageObsToModLevels applyFilter complete" << std::endl;
 }

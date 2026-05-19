@@ -45,7 +45,8 @@ std::string BayesianBackgroundQCFlags::getPGEsubstituteName(const std::string &v
 
 void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
                                          const std::vector<bool>& apply,
-                                         std::vector<bool>& flagged) const {
+                                         std::vector<bool>& flagged,
+                                         const std::vector<std::string>& dimList) const {
   const float missingValueFloat = util::missingValue<float>();
   const size_t nlocs = obsdb_.nlocs();
   // Missing data indicator for PGEs (for compatibility with OPS).
@@ -98,8 +99,8 @@ void BayesianBackgroundQCFlags::setFlags(const std::string& varname,
   }
 
   // Save modified flags.
-  obsdb_.put_db("DiagnosticFlags/BuddyCheckRejection", varname, diagFlagsBuddyReject);
-  obsdb_.put_db("DiagnosticFlags/FinalQCRejection", varname, diagFlagsFinalReject);
+  obsdb_.put_db("DiagnosticFlags/BuddyCheckRejection", varname, diagFlagsBuddyReject, dimList);
+  obsdb_.put_db("DiagnosticFlags/FinalQCRejection", varname, diagFlagsFinalReject, dimList);
 }
 
 void BayesianBackgroundQCFlags::applyFilter(const std::vector<bool> & apply,
@@ -109,7 +110,7 @@ void BayesianBackgroundQCFlags::applyFilter(const std::vector<bool> & apply,
 
   for (size_t ivar = 0; ivar < filtervars.nvars(); ++ivar) {
     const std::string varname = filtervars.variable(ivar).variable();
-    setFlags(varname, apply, flagged[ivar]);
+    setFlags(varname, apply, flagged[ivar], filtervars.variable(ivar).dimList());
   }
   oops::Log::trace() << "BayesianBackgroundQCFlags applyFilter complete" << std::endl;
 }

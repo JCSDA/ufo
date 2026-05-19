@@ -113,7 +113,7 @@ void CreateDiagnosticFlags::createFlag(const Variable & var,
     // current flag and observed variable.
     for (size_t jv = 0; jv < var.size(); ++jv) {
       obsdb_.put_db(var.group(), var.variable(jv),
-                    std::vector<T>(obsdb_.nlocs(), initialValue));
+                    std::vector<T>(obsdb_.nlocs(), initialValue), var.dimList());
     }
   }
 }

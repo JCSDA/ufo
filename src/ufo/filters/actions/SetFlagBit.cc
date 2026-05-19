@@ -55,7 +55,8 @@ void SetFlagBit::apply(const Variables &vars,
         diagnosticFlags[iobs] |= bitsetter_;
       }
     }
-    data.obsspace().put_db(group, variableName, diagnosticFlags);
+    data.obsspace().put_db(group, variableName, diagnosticFlags,
+                           vars.variable(ifiltervar).dimList());
   }
   oops::Log::trace() << "SetFlagBit apply complete" << std::endl;
 }

@@ -236,7 +236,7 @@ void EnsembleStatistics::doFilter() {
         std::copy(IGObsStdDevValues.begin() + i * nlocs,
                   IGObsStdDevValues.begin() + (i + 1) * nlocs,
                   statValues.begin());
-        obsdb_.put_db("IGObsError", hofx.varnames()[i], statValues);
+        obsdb_.put_db("IGObsError", hofx.varnames()[i], statValues, hofx.varnames().dimList());
       }
     }
   }

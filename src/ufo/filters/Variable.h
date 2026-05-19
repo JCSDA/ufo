@@ -51,6 +51,14 @@ class Variable: public util::Printable {
   /// `MetaData/pressure`.
   std::string fullName() const;
 
+  /// Return the dimension list suitable for use as the dimList argument of ObsSpace::put_db.
+  /// Returns {"Location"} for non-channel variables and {"Location", "Channel"} for
+  /// channel-indexed variables.
+  std::vector<std::string> dimList() const {
+    return channels_.empty() ? std::vector<std::string>{"Location"}
+                             : std::vector<std::string>{"Location", "Channel"};
+  }
+
   oops::Variables toOopsVariables() const;
   oops::ObsVariables toOopsObsVariables() const;
   const eckit::LocalConfiguration & options() const {return options_;}

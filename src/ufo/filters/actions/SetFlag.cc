@@ -116,7 +116,8 @@ void SetFlag<value>::apply(const Variables &vars,
     // Do not do this if the flag will later be set to the value of the observation report
     // diagnostic flag.
     if (!parameters_.setFlagsToObservationReport)
-      data.obsspace().put_db(group, variableName, diagnosticFlags);
+      data.obsspace().put_db(group, variableName, diagnosticFlags,
+                             vars.variable(ifiltervar).dimList());
   }
 
   if (parameters_.setObservationReportFlags) {
@@ -124,7 +125,8 @@ void SetFlag<value>::apply(const Variables &vars,
     if (parameters_.setFlagsToObservationReport) {
       for (size_t ifiltervar = 0, nvars = vars.nvars(); ifiltervar < nvars; ++ifiltervar) {
         const std::string variableName = vars.variable(ifiltervar).variable();
-        data.obsspace().put_db(group, variableName, diagnosticFlagsObsRep);
+        data.obsspace().put_db(group, variableName, diagnosticFlagsObsRep,
+                               vars.variable(ifiltervar).dimList());
       }
     }
   }

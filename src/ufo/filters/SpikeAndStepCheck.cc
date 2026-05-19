@@ -105,7 +105,8 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
     ObsAccessor::toObservationsSplitIntoIndependentGroupsByRecordId(obsdb_);
   const size_t totalNumObs = obsAccessor.totalNumObservations();
 
-  const std::string yVarName = parameters_.yVar.value().variable();
+  const ufo::Variable yVar = parameters_.yVar.value();
+  const std::string yVarName = yVar.variable();
   const std::string xVarName = parameters_.xVar.value().variable();
   const std::vector<float> y =
     obsAccessor.getFloatVariableFromObsSpace(parameters_.yVar.value().group(),
@@ -172,8 +173,8 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
                                 parameters_);
   }  // for each record
   obsAccessor.flagRejectedObservations(isThinned, flagged);
-  obsdb_.put_db("DiagnosticFlags/ProfileSpike", yVarName, spikeFlag);
-  obsdb_.put_db("DiagnosticFlags/ProfileStep", yVarName, stepFlag);
+  obsdb_.put_db("DiagnosticFlags/ProfileSpike", yVarName, spikeFlag, yVar.dimList());
+  obsdb_.put_db("DiagnosticFlags/ProfileStep", yVarName, stepFlag, yVar.dimList());
   oops::Log::trace() << "SpikeAndStepCheck applyFilter complete" << std::endl;
 }
 

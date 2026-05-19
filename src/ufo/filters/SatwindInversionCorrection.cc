@@ -211,15 +211,16 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
     }  // apply
   }  // location loop
   //  write back corrected pressure, updated flags and original pressure
-  obsdb_.put_db(parameters_.obs_pressure.value().group(),
-                parameters_.obs_pressure.value().variable(), obs_pressure);
+  const ufo::Variable obsPressureVar = parameters_.obs_pressure.value();
+  obsdb_.put_db(obsPressureVar.group(), obsPressureVar.variable(), obs_pressure,
+                obsPressureVar.dimList());
   obsdb_.put_db("DiagnosticFlags/InversionCorrectionPerformed", "windEastward",
                 diagFlagsUSatwindInversion);
   obsdb_.put_db("DiagnosticFlags/InversionCorrectionPerformed", "windNorthward",
                 diagFlagsVSatwindInversion);
-  obsdb_.put_db(parameters_.obs_pressure.value().group(),
-                parameters_.obs_pressure.value().variable() + std::string("_original"),
-                original_pressure);
+  obsdb_.put_db(obsPressureVar.group(),
+                obsPressureVar.variable() + std::string("_original"),
+                original_pressure, obsPressureVar.dimList());
 
   // sum number corrected and pressure differences
   const std::size_t count = countAccumulator->computeResult();

@@ -115,7 +115,7 @@ void CopyFlagsFromExtendedToOriginalSpace::applyFilter(const std::vector<bool> &
           }
         }  // obs location jlev
     }  // profile jprof
-    obsdb_.put_db(flagName, varName, varToCopy);
+    obsdb_.put_db(flagName, varName, varToCopy, filtervars.variable(jv).dimList());
   }
   oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace applyFilter complete" << std::endl;
 }

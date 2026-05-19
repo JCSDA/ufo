@@ -215,9 +215,11 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
       }
     }
     // Assign the calculated local mean to the derived obs value of the filter variable.
-    obsdb_.put_db("DerivedObsValue", varname, localMean);
+    obsdb_.put_db("DerivedObsValue", varname, localMean,
+                  filtervars.variable(filterVarIndex).dimList());
     if (totalErrorStandardDeviation.size() > 0) {
-      obsdb_.put_db("DerivedObsError", varname, totalErrorStandardDeviation);
+      obsdb_.put_db("DerivedObsError", varname, totalErrorStandardDeviation,
+                    filtervars.variable(filterVarIndex).dimList());
     }
   } else {  // default function, thinning obs according to distance_norm:
     isThinned = identifyThinnedObservations(

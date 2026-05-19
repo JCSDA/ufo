@@ -172,7 +172,7 @@ void AverageObsToGeoValLevels::applyFilter(const std::vector<bool> & apply,
       }
     }  // record iseq
     // Save new obs to obsSpace:
-    obsdb_.put_db("DerivedObsValue", varname, obs[jv]);
+    obsdb_.put_db("DerivedObsValue", varname, obs[jv], filtervars.variable(jv).dimList());
   }  // filter variable jv
 
   obsdb_.put_db("MetaData", "sequenceNumber", sequenceNumber);

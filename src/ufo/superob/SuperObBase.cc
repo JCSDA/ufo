@@ -79,7 +79,7 @@ void SuperObBase::runAlgorithm() const {
                      obs, hofx, flags_[jvar], superobs, flagged_[jvar]);
     }
     // Save the superob values to the ObsSpace.
-    obsdb_.put_db("DerivedObsValue", variableName, superobs);
+    obsdb_.put_db("DerivedObsValue", variableName, superobs, filtervars_[jvar].dimList());
     // Save any auxiliary variables to the ObsSpace.
     saveAuxiliaryVariables(variableName);
   }

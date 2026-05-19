@@ -324,7 +324,7 @@ void saveValues(const ufo::Variable &variable,
                 const ioda::ObsDataVector<VariableType> &values,
                 ioda::ObsSpace &obsdb) {
   for (size_t ich = 0; ich < variable.size(); ++ich)
-    obsdb.put_db(variable.group(), variable.variable(ich), values[ich]);
+    obsdb.put_db(variable.group(), variable.variable(ich), values[ich], variable.dimList());
 }
 
 /// Change the QC flag from `miss` to `pass` if the obs value is no longer missing or from `pass` to

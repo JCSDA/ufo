@@ -298,7 +298,8 @@ void PoissonDiskThinning::applyFilter(const std::vector<bool> & apply,
         localObs[localObsId] = obsForMedian[globalObsId];
       }
     }
-    obsdb_.put_db("DerivedObsValue", filtervars_.variable(0).variable(), localObs);
+    obsdb_.put_db("DerivedObsValue", filtervars_.variable(0).variable(), localObs,
+                  filtervars_.variable(0).dimList());
   }
   oops::Log::trace() << "PoissonDiskThinning applyFilter complete" << std::endl;
 }
