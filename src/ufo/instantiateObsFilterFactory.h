@@ -18,6 +18,7 @@
 #include "ufo/filters/CopyFlagsFromExtendedToOriginalSpace.h"
 #include "ufo/filters/CreateDiagnosticFlags.h"
 #include "ufo/filters/DifferenceCheck.h"
+#include "ufo/filters/DuplicateThinning.h"
 #include "ufo/filters/EnsembleStatistics.h"
 #include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
@@ -111,6 +112,8 @@ void instantiateObsFilterFactory() {
            domainCheckMaker("Domain Check");
   static FilterMaker<ObsDomainErrCheck>
            domainErrCheckMaker("DomainErr Check");
+  static FilterMaker<DuplicateThinning>
+           duplicateThinningMaker("DuplicateThinning");
   static FilterMaker<ObsPolygonCheck>
            polygonCheckMaker("Polygon Check");
   static FilterMaker<FinalCheck>

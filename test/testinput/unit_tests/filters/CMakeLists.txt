@@ -1080,13 +1080,31 @@ if( crtm_FOUND )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    qc_flags_true
-              	  ECBUILD
-              	  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
-              	  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/abi_g16_qc_flags.yaml"
-              	  MPI     1
-              	  LIBS    ufo
-              	  LABELS  filters
-		  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/abi_g16_qc_flags.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    qc_duplicate_thinning
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_duplicate_thinning.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm filters
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    qc_duplicate_thinning_2PE
+                    ECBUILD
+                    COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                    ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_duplicate_thinning.yaml"
+                    MPI     2
+                    LIBS    ufo
+                    LABELS  crtm filters
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( crtm_FOUND )
 
 # Filters that require RTTOV in ObsOperator
