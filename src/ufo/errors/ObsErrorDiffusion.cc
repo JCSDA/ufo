@@ -271,6 +271,7 @@ void ObsErrorDiffusion::multiply(ioda::ObsVector & dy) const {
 
     // copy data from obsVector to field
     auto obsView = atlas::array::make_view<double, 2>(obs);
+    obsView.assign(0.0);
     for (atlas::idx_t i = 0; i < nlocs; ++i) {
       obsView(obsOffset_ + i, 0) = dy.data()[i];
     }
