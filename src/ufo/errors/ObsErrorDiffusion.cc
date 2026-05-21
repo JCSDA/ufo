@@ -47,30 +47,55 @@ ObsErrorDiffusion::ObsErrorDiffusion(const Parameters_ & params,
     inverseVariance_(odb),
     comm_(odb.comm())
 {
+  oops::Log::trace() << "ObsErrorDiffusion::ObsErrorDiffusion constructor start" << std::endl;
+  ASSERT(params_.var.value().size() == 1);  // only one variable for now
+  ASSERT(comm_.size() == 1);  // does not support mesh generation on multiple PEs
   inverseVariance_ = stddev_;
   inverseVariance_ *= stddev_;
   inverseVariance_.invert();
-  oops::Log::trace() << "ObsErrorDiffusion::ObsErrorDiffusion constructor start" << std::endl;
+  oops::Log::trace() << "ObsErrorDiffusion::ObsErrorDiffusion constructed" << std::endl;
+}
 
-  // Set up diffusion grid as atlas functionspace
-  const atlas::idx_t nlocs = stddev_.nlocs();
+// -----------------------------------------------------------------------------
+
+void ObsErrorDiffusion::update(const ioda::ObsVector & obserr) {
+  oops::Log::trace() << "ObsErrorDiffusion update: start " << std::endl;
+
+  stddev_ = obserr;
+  inverseVariance_ = stddev_;
+  inverseVariance_ *= stddev_;
+  inverseVariance_.invert();
+
+  // *for single channel/var* all obs locations on this PE (including obs not passing qc)
+  const int nlocs = obserr.nlocs();
+  // *for single channel/var* nobs is number of obs passing QC across all mpi tasks
+  const int nobs = obserr.nobs();
   std::vector<float> lons(nlocs);
   std::vector<float> lats(nlocs);
-  std::vector<double> gridXY(2*nlocs);
-  std::vector<atlas::PointLonLat> obsnodes(nlocs);
+  std::vector<atlas::PointLonLat> obsnodes;
+  obsnodes.reserve(nlocs);
+  std::vector<double> gridXY;  // this will have length of 2*(nobs + control_grid_size)
+  gridXY.reserve(2*nlocs);  // overestimate with QC; underestimate (possibly) with a control grid
 
-  // Get obs locations from obs space
-  odb.get_db("MetaData", "longitude", lons);
-  odb.get_db("MetaData", "latitude", lats);
+  // lons/lats arrays contains ALL obs locations
+  obserr.space().get_db("MetaData", "longitude", lons);
+  obserr.space().get_db("MetaData", "latitude", lats);
 
-  // fill vector in form: [ lon_0, lat_0, lon_1, lat_1, ... ]
-  for (atlas::idx_t i = 0; i < nlocs; ++i) {
-    gridXY[2*i]   = lons[i];
-    gridXY[2*i+1] = lats[i];
-    obsnodes[i] = atlas::PointLonLat(lons[i], lats[i]);
-    obsnodes[i].normalise();
+  const double missing = util::missingValue<double>();
+
+  // loop over all the obs
+  for (int i = 0; i < nlocs; ++i) {
+    if (obserr[i] != missing) {  // currently, passivated obs are set to missingValue
+      // fill vector in form: [ lon_0, lat_0, lon_1, lat_1, ... ]
+      gridXY.push_back(lons[i]);
+      gridXY.push_back(lats[i]);
+      atlas::PointLonLat p(lons[i], lats[i]);
+      p.normalise();
+      obsnodes.push_back(p);
+    }
   }
 
+  // build config to create mesh
   eckit::LocalConfiguration fspaceConfig;
   fspaceConfig.set("function space", "NodeColumns");  // always will be NodeColumns
   fspaceConfig.set("grid.type", "unstructured");      // always will be unstructured
@@ -84,15 +109,18 @@ ObsErrorDiffusion::ObsErrorDiffusion(const Parameters_ & params,
   atlas::Mesh mesh{};
   atlas::FieldSet fset{};
 
-//------------------------------------------------------------------------------
-// If control grid parameters are provided,
-// use them to create a coarser grid for the diffusion operator
-//
-// NOTE: not setting control grid as default as the grid spacing and
-// remove within parameters should be explicitly set,
-// depending on the observation network geometry,
-// to ensure the control grid is created as intended
-//------------------------------------------------------------------------------
+  oops::Log::trace() << "Constructing diffusion mesh with " << obserr.nobs()
+                     << " valid observations" << std::endl;
+
+  //------------------------------------------------------------------------------
+  // If control grid parameters are provided,
+  // use them to create a coarser grid for the diffusion operator
+  //
+  // NOTE: not setting control grid as default as the grid spacing and
+  // remove within parameters should be explicitly set,
+  // depending on the observation network geometry,
+  // to ensure the control grid is created as intended
+  //------------------------------------------------------------------------------
   if (params_.controlGrid.value()) {
     const int gridSpacing = params_.controlGrid.value()->gridSpacing.value();
     const double removeWithin = params_.controlGrid.value()->removeWithin.value();
@@ -100,9 +128,10 @@ ObsErrorDiffusion::ObsErrorDiffusion(const Parameters_ & params,
     // returns merged obs + remaining control grid points
     std::vector<atlas::PointLonLat> mergedPoints =
                createControlGrid(obsnodes, removeWithin, gridSpacing);
-    // store offset before updating gridXY
+    // nMerged is (final number of control points) + (nobs)
     const atlas::idx_t nMerged = mergedPoints.size();
-    obsOffset_ = nMerged - nlocs;
+    // obsOffset_ is number of control points
+    obsOffset_ = nMerged - nobs;
 
     // update gridXY with merged points for mesh creation
     gridXY.resize(2 * mergedPoints.size());
@@ -127,8 +156,10 @@ ObsErrorDiffusion::ObsErrorDiffusion(const Parameters_ & params,
         atlas::option::levels(1) | atlas::option::name("pointType"));
     auto v_marker = atlas::array::make_view<double, 2>(markerField);
     v_marker.assign(0.0);
-    for (atlas::idx_t i = 0; i < nlocs; ++i) {
-        v_marker(obsOffset_ + i, 0) = 1.0;  // set marker for obspoints to 1
+
+    for (atlas::idx_t i = 0; i < nobs; ++i) {
+        // control grid points at BEGINNING of array
+        v_marker(obsOffset_ + i, 0) = 1.0;
     }
     fset.add(markerField);  // Add to fieldset before writing
     // Write mesh with the marker field
@@ -222,18 +253,7 @@ ObsErrorDiffusion::ObsErrorDiffusion(const Parameters_ & params,
       v_norm(i, 0) = 1.0 / std::sqrt(v_s(i, 0) / (randomizationIterations - 1));
     }
   }
-  oops::Log::trace() << "ObsErrorDiffusion::ObsErrorDiffusion constructed nobs = "
-                     << stddev_.nobs() << std::endl;
-}  // end constructor
-
-// -----------------------------------------------------------------------------
-
-void ObsErrorDiffusion::update(const ioda::ObsVector & obserr) {
-  stddev_ = obserr;
-  inverseVariance_ = stddev_;
-  inverseVariance_ *= stddev_;
-  inverseVariance_.invert();
-  oops::Log::info() << "ObsErrorDiffusion update: does nothing for now " << std::endl;
+  oops::Log::trace() << "ObsErrorDiffusion update: end" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -261,21 +281,28 @@ void ObsErrorDiffusion::multiply(ioda::ObsVector & dy) const {
   // NOTE: This will only work for reading a single variable
   //       (with single channel) from the obsSpace
 
+  const atlas::idx_t nobs = dy.nobs();  // store as class member? works with mult vars??
   const atlas::idx_t nlocs = dy.nlocs();
   const atlas::idx_t npts = geom_->functionSpace().size();
+  const double missing = util::missingValue<double>();
 
   atlas::FieldSet fset;
   for (std::string var : params_.var.value()) {
     atlas::Field obs = geom_->functionSpace().createField<double>(
                        atlas::option::levels(1) | atlas::option::name(var));
 
-    // copy data from obsVector to field
     auto obsView = atlas::array::make_view<double, 2>(obs);
     obsView.assign(0.0);
+    atlas::idx_t validObsIn = 0;
+    // dy has length = nlocs (for single var/channel)
     for (atlas::idx_t i = 0; i < nlocs; ++i) {
-      obsView(obsOffset_ + i, 0) = dy.data()[i];
+      if (dy[i] != missing) {
+        // only copy obs from valid locations
+        obsView(obsOffset_ + validObsIn, 0) = dy.data()[i];
+        ++validObsIn;
+      }
     }
-
+    ASSERT(validObsIn == nobs);
     // add obs "var" to fieldSet
     fset.add(obs);
   }
@@ -308,10 +335,15 @@ void ObsErrorDiffusion::multiply(ioda::ObsVector & dy) const {
   // move this step into diffusion loop (above) for multiple variables?
   for (auto field : fset) {
     auto fieldView = atlas::array::make_view<double, 2>(field);
-    // using nlocs here since only copying obs points back to dy
+    atlas::idx_t validObsOut = 0;
+    // using nlocs to fully iterate through dy
     for (atlas::idx_t i = 0; i < nlocs; ++i) {
-      dy[i] = fieldView(obsOffset_ + i, 0);
+      if (dy[i] != missing) {
+        dy[i] = fieldView(obsOffset_ + validObsOut, 0);
+        ++validObsOut;
+      }
     }
+    ASSERT(validObsOut == nobs);
   }
 
   // STEP 5: D^{1/2} * C * D^{1/2} * dy
@@ -358,16 +390,23 @@ void ObsErrorDiffusion::randomize(ioda::ObsVector & dy) const {
 
   std::vector<std::string> vars = params_.var.value();
 
-  // creates a 2D field (even though there is only 1 level)
   atlas::FieldSet rand = util::createRandomFieldSet(
         geom_->comm(), geom_->functionSpace(),
         std::vector<size_t>{1}, vars);
+
+  const atlas::idx_t npts = geom_->functionSpace().size();  // can do this with rand?
+  const atlas::idx_t nobs = npts - obsOffset_;
+
+  ASSERT(nobs == dy.nobs());  // ensure valid obs locs in diffusion grid equals num_valid obs in dy
+  ASSERT(nobs == dy.nlocs());  // assumes no QC has been performed (all obs locations are valid)
 
   diffusion_->multiplySqrtTL(rand);
 
   // NOTE:: double check this works for list of more than one var in yaml
   for (std::string var : vars) {
     auto randView = atlas::array::make_view<double, 2>(rand[var]);
+    // iterating over nlocs will not work if obs have been QC'ed out of dy, but
+    // since this is only used in the obsErrorCovariance test, this should be okay
     for (atlas::idx_t i = 0; i < dy.nlocs(); ++i) {
       dy[i] = randView(obsOffset_ + i, 0);
     }
@@ -379,7 +418,7 @@ void ObsErrorDiffusion::randomize(ioda::ObsVector & dy) const {
 void ObsErrorDiffusion::save(const std::string & name) const {
   // should this save the normalization coefficients to a file?
   stddev_.save(name);
-  oops::Log::info() << "ObsErrorDiffusion Save: does nothing for now " << std::endl;
+  oops::Log::trace() << "ObsErrorDiffusion Save: does nothing for now " << std::endl;
 }
 
 // -----------------------------------------------------------------------------

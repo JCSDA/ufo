@@ -53,7 +53,7 @@ class ObsErrorDiffusionParameters : public ObsErrorParametersBase {
   oops::Parameter<int> InverseIterations{"Number of iterations for computing the inverse",
       100, this};
   oops::Parameter<double> InverseAccuracy{"Accuracy of inverse", 1.0e-7, this};
-  oops::Parameter<bool> outputDiffusionMesh{"Output diffusion mesh", false, this};
+  oops::Parameter<bool> outputDiffusionMesh{"output diffusion mesh", false, this};
   // Add parameter for control grid
   oops::OptionalParameter<ControlGrid> controlGrid{"control grid", this};
 };
@@ -140,7 +140,7 @@ class ObsErrorDiffusion : public ObsErrorBase {
 
   // Offset where obs locations start in the merged function space
   // (0 if no control grid, nRemainingControlPoints otherwise)
-  atlas::idx_t obsOffset_ = 0;  // <-- add here
+  atlas::idx_t obsOffset_ = 0;
 
   /// Creates control grid, removes close control points and
   //  returns merged grid points (remaining control grid + obs locations)

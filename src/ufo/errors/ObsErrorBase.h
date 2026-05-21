@@ -46,7 +46,7 @@ class ObsErrorBase : public util::Printable,
   /// Save obs errors to the group \p name.
   virtual void save(const std::string &name) const = 0;
 
-  /// Set the diagonal of the covariance matrix to \p stddev squared.
+  /// Update the ObsError after ALL qc is finished
   virtual void update(const ioda::ObsVector &stddev) = 0;
 
   /// Return a copy of obs error std. dev. If this ObsVector is modified (e.g. by obs filters),

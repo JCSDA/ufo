@@ -76,10 +76,10 @@ void diracDiffusion() {
   oops::Log::info() << " ObsErr Conf [0]:" << std::endl;
   oops::Log::info() << obsErrorDiff << std::endl;
 
-
-  ioda::ObsVector dy(odb_geo_diff);
+  ioda::ObsVector dy(odb_geo_diff, "ObsError");
   // create diffusion obsError
   ObsErrorDiffusion R_diff(diffParams, odb_geo_diff, oops::mpi::myself());
+  R_diff.update(dy);
 
   R_diff.randomize(dy);
   ioda::ObsVector dy_diff(dy);
