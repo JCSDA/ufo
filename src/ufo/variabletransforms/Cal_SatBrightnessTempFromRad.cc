@@ -60,8 +60,8 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
   // If no locations to process, add to obs space and return
   if (nlocs == 0) {
     for (size_t ichan = 0; ichan < nvars; ++ichan) {
-      putObservation("brightnessTemperature_" + std::to_string(channels_[ichan]),
-                     brightnessTemperature[ichan]);
+      putObservation("brightnessTemperature", std::to_string(channels_[ichan]),
+                     brightnessTemperature[ichan], radianceVar.dimList());
     }
     return;
   }
@@ -146,8 +146,8 @@ void Cal_SatBrightnessTempFromRad::runTransform(const std::vector<bool> &apply) 
 
   //  Write out the resulting data to Derived group and update qcflags
   for (size_t ichan =0; ichan < nvars; ++ichan) {
-    putObservation("brightnessTemperature_" + std::to_string(channels_[ichan]),
-                   brightnessTemperature[ichan]);
+    putObservation("brightnessTemperature", std::to_string(channels_[ichan]),
+                   brightnessTemperature[ichan], radianceVar.dimList());
   }
 }  // runTransform
 }  // namespace ufo

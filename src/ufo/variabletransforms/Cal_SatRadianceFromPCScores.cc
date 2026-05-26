@@ -146,8 +146,8 @@ void Cal_SatRadianceFromPCScores::runTransform(const std::vector<bool> &apply) {
 
   //  Write out the radiances to the Derived group and update qcflags
   for (size_t ichan = 0; ichan < nDestinationChannels; ++ichan) {
-    putObservation(radianceVar.variable() + "_" + std::to_string(destinationChannels[ichan]),
-                   reconRadiance[ichan]);
+    putObservation(radianceVar.variable(), std::to_string(destinationChannels[ichan]),
+                   reconRadiance[ichan], radianceVar.dimList());
   }
 
   oops::Log::trace() << "Cal_SatRadianceFromPCScores::runTransform done" << std::endl;

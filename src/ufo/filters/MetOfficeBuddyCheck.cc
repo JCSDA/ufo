@@ -414,7 +414,10 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
 
   // Gross error probabilities updated by buddy check, indexed by variable name.
   // (The updated values are copied to the ObsSpace only after all variables have been processed).
+  // Keep track of the dimList that goes with each variable's gross error probabilities for later
+  // use when writing to the ObsSpace.
   std::map<std::string, std::vector<float>> calculatedGrossErrProbsByVarName;
+  std::map<std::string, std::vector<std::string>> calculatedGepDimListByVarName;
 
   bool previousVariableWasFirstComponentOfTwo = false;
   for (size_t filterVarIndex = 0; filterVarIndex < filtervars.size(); ++filterVarIndex) {
@@ -450,10 +453,12 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                      firstComponentData.grossErrorProbabilities, profileIndex);
       std::vector<float> localFlatGrossErrorProbabilities = localValues(
             firstComponentData.flatGrossErrorProbabilities, obsdb_.nlocs(), *distribution);
-      calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex - 1)] =
-          localFlatGrossErrorProbabilities;
-      calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
-          std::move(localFlatGrossErrorProbabilities);
+      std::string varName = getFilterVariableName(filterVarIndex - 1);
+      calculatedGrossErrProbsByVarName[varName] = localFlatGrossErrorProbabilities;
+      calculatedGepDimListByVarName[varName] = filtervars[filterVarIndex - 1].dimList();
+      varName = getFilterVariableName(filterVarIndex);
+      calculatedGrossErrProbsByVarName[varName] = std::move(localFlatGrossErrorProbabilities);
+      calculatedGepDimListByVarName[varName] = filtervars[filterVarIndex].dimList();
 
       previousVariableWasFirstComponentOfTwo = false;
     } else {
@@ -482,8 +487,9 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
                        data.grossErrorProbabilities, profileIndex);
         std::vector<float> localFlatGrossErrorProbabilities = localValues(
               data.flatGrossErrorProbabilities, obsdb_.nlocs(), *distribution);
-        calculatedGrossErrProbsByVarName[getFilterVariableName(filterVarIndex)] =
-            std::move(localFlatGrossErrorProbabilities);
+        const std::string varName = getFilterVariableName(filterVarIndex);
+        calculatedGrossErrProbsByVarName[varName] = std::move(localFlatGrossErrorProbabilities);
+        calculatedGepDimListByVarName[varName] = filtervars[filterVarIndex].dimList();
       }
     }
   }
@@ -492,7 +498,8 @@ void MetOfficeBuddyCheck::applyFilter(const std::vector<bool> & apply,
 
   for (const auto &varNameAndGrossErrProbs : calculatedGrossErrProbsByVarName)
     obsdb_.put_db("GrossErrorProbability", varNameAndGrossErrProbs.first,
-                  varNameAndGrossErrProbs.second);
+                  varNameAndGrossErrProbs.second,
+                  calculatedGepDimListByVarName.at(varNameAndGrossErrProbs.first));
 
   flagRejectedObservations(filtervars, calculatedGrossErrProbsByVarName, flagged);
   oops::Log::trace() << "MetOfficeBuddyCheck applyFilter complete" << std::endl;

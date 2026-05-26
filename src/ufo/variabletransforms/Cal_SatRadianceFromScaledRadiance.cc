@@ -57,8 +57,8 @@ void Cal_SatRadianceFromScaledRadiance::runTransform(const std::vector<bool> &ap
   // If no locations to process, add to obs space and return
   if (radiance.nlocs() == 0) {
     for (size_t ichan =0; ichan < radiance.nvars(); ++ichan) {
-      putObservation("radiance_" + std::to_string(channels_[ichan]),
-                     radiance[ichan]);
+      putObservation("radiance", std::to_string(channels_[ichan]),
+                     radiance[ichan], radianceVar.dimList());
     }
     return;
   }
@@ -118,8 +118,8 @@ void Cal_SatRadianceFromScaledRadiance::runTransform(const std::vector<bool> &ap
 
   //  Write out the resulting data to Derived group and update qcflags
   for (size_t ichan =0; ichan < nvars; ++ichan) {
-    putObservation("radiance_" + std::to_string(channels_[ichan]),
-                   radiance[ichan]);
+    putObservation("radiance", std::to_string(channels_[ichan]),
+                   radiance[ichan], radianceVar.dimList());
   }
 }  // runTransform
 }  // namespace ufo

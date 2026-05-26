@@ -144,7 +144,8 @@ void EnsembleStatistics::doFilter() {
           std::copy(meanHofxValues.begin() + i * nlocs,
                     meanHofxValues.begin() + (i + 1) * nlocs,
                     statValues.begin());
-          obsdb_.put_db("HofXEnsembleMean", hofx.varnames()[i], statValues);
+          obsdb_.put_db("HofXEnsembleMean", hofx.varnames()[i], statValues,
+                        hofx.varnames().dimList());
         }
       }
     }
@@ -175,7 +176,8 @@ void EnsembleStatistics::doFilter() {
         std::copy(hofxStdDevValues.begin() + i * nlocs,
                   hofxStdDevValues.begin() + (i + 1) * nlocs,
                   statValues.begin());
-        obsdb_.put_db("HofXEnsembleStdDev", hofx.varnames()[i], statValues);
+        obsdb_.put_db("HofXEnsembleStdDev", hofx.varnames()[i], statValues,
+                     hofx.varnames().dimList());
       }
     }
 
