@@ -9,7 +9,7 @@
 
 cmake_minimum_required( VERSION 3.12 )
 
-project( ufo VERSION 1.10.0 LANGUAGES C CXX Fortran )
+project( ufo VERSION 1.13.0 LANGUAGES C CXX Fortran )
 
 ## Ecbuild integration
 find_package( ecbuild 3.3.2 REQUIRED )
@@ -68,7 +68,7 @@ find_package( eckit 1.24.4 REQUIRED )
 find_package( fckit 0.11.0 REQUIRED )
 
 # ioda
-find_package( ioda 2.9.0 REQUIRED )
+find_package( ioda 2.12.0 REQUIRED )
 
 # leaky inherited dependency from ioda
 # will be removed these once the ioda issue is fixed
@@ -76,7 +76,7 @@ find_package( bufr 12.0.1 QUIET )
 find_package( bufr_query QUIET )
 
 # oops
-find_package( oops 1.10.0 REQUIRED )
+find_package( oops 1.13.0 REQUIRED )
 
 # crtm
 find_package( crtm 2.4.1 QUIET )
