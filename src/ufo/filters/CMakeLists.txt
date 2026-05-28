@@ -380,6 +380,8 @@ set ( filters_files
       obsfunctions/ProfileVerticalSmoothing.h
       obsfunctions/DateTimeOffset.cc
       obsfunctions/DateTimeOffset.h
+      obsfunctions/LinearTimeInterpolate.cc
+      obsfunctions/LinearTimeInterpolate.h
       obsfunctions/FillAveragedProfileData.cc
       obsfunctions/FillAveragedProfileData.h
       obsfunctions/MetOfficeRelativeHumidityCorrection.cc

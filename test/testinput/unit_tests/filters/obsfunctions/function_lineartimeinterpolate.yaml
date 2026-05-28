@@ -1,0 +1,125 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+  - obs space:
+      name: Test ObsFunction LinearTimeInterpolate Direct Interpolation
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/linear_time_interpolate_direct_interpolation_test_file.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/airTemperatureInterpolated
+            type: float
+            function:
+              name: ObsFunction/LinearTimeInterpolate
+              options:
+                input variables:
+                  - name: ObsValue/airTemperature2
+                  - name: ObsValue/airTemperature1
+                input timestamps:
+                  - MetaData/dateTime2
+                  - MetaData/dateTime1
+                target datetime: MetaData/dateTime
+
+    compareVariables:
+      - test:
+          name: MetaData/airTemperatureInterpolated
+        reference:
+          name: TestReference/airTemperatureInterpolated
+
+  - obs space:
+      name: Test ObsFunction LinearTimeInterpolate Derived Interpolation
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/linear_time_interpolate_derived_interpolation_test_file.nc4
+      simulated variables: []
+    obs filters:
+      # Time-only interpolation with literal timestamps (tests midnight wraparound)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/airTemperaturePiecewiseInterpolatedTimeOnly
+            type: float
+            function:
+              name: ObsFunction/LinearTimeInterpolate
+              options:
+                input variables:
+                  - name: ObsValue/airTemperatureAt230000Z
+                  - name: ObsValue/airTemperatureAt000000Z
+                  - name: ObsValue/airTemperatureAt010000Z
+                input timestamps:
+                  - T23:00:00Z
+                  - T00:00:00Z
+                  - T01:00:00Z
+      # Time-only interpolation with literal timestamps (tests midnight wraparound)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/airTemperaturePiecewiseInterpolatedTimeOnlyNoGaps
+            type: float
+            function:
+              name: ObsFunction/LinearTimeInterpolate
+              options:
+                input variables:
+                  - name: ObsValue/airTemperatureAt230000Z
+                  - name: ObsValue/airTemperatureAt000000Z
+                  - name: ObsValue/airTemperatureAt010000Z
+                input timestamps:
+                  - T23:00:00Z
+                  - T00:00:00Z
+                  - T01:00:00Z
+                allow gap interpolation: false
+      # Full-datetime interpolation with literal timestamps (date changes at midnight)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/airTemperaturePiecewiseInterpolated
+            type: float
+            function:
+              name: ObsFunction/LinearTimeInterpolate
+              options:
+                input variables:
+                  - name: ObsValue/airTemperatureAt20180413T230000Z
+                  - name: ObsValue/airTemperatureAt20180414T000000Z
+                  - name: ObsValue/airTemperatureAt20180414T010000Z
+                input timestamps:
+                  - 2018-04-13T23:00:00Z
+                  - 2018-04-14T00:00:00Z
+                  - 2018-04-14T01:00:00Z
+      # Full-datetime interpolation with literal timestamps (date changes at midnight)
+      - filter: Variable Assignment
+        assignments:
+          - name: MetaData/airTemperaturePiecewiseInterpolatedNoGaps
+            type: float
+            function:
+              name: ObsFunction/LinearTimeInterpolate
+              options:
+                input variables:
+                  - name: ObsValue/airTemperatureAt20180413T230000Z
+                  - name: ObsValue/airTemperatureAt20180414T000000Z
+                  - name: ObsValue/airTemperatureAt20180414T010000Z
+                input timestamps:
+                  - 2018-04-13T23:00:00Z
+                  - 2018-04-14T00:00:00Z
+                  - 2018-04-14T01:00:00Z
+                allow gap interpolation: false
+    compareVariables:
+      - test:
+          name: MetaData/airTemperaturePiecewiseInterpolatedTimeOnly
+        reference:
+          name: TestReference/airTemperaturePiecewiseInterpolatedIgnoreGaps
+      - test:
+          name: MetaData/airTemperaturePiecewiseInterpolated
+        reference:
+          name: TestReference/airTemperaturePiecewiseInterpolatedIgnoreGaps
+      - test:
+          name: MetaData/airTemperaturePiecewiseInterpolatedTimeOnlyNoGaps
+        reference:
+          name: TestReference/airTemperaturePiecewiseInterpolatedNoGaps
+      - test:
+          name: MetaData/airTemperaturePiecewiseInterpolatedNoGaps
+        reference:
+          name: TestReference/airTemperaturePiecewiseInterpolatedNoGaps
