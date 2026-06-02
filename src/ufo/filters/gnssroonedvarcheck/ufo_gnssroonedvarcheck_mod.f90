@@ -148,9 +148,9 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   end do
   write(message, '(A,L1)') 'no super check = ', noSuperCheck
   call fckit_log % debug(message)
-  write(message, '(A,F16.6)') 'Dry refractivity constant = ', dryRefractivityConstant
+  write(message, '(A,L1)') 'Dry refractivity constant = ', dryRefractivityConstant
   call fckit_log % debug(message)
-  write(message, '(A,F16.6)') 'Wet refractivity constant = ', wetRefractivityConstant
+  write(message, '(A,L1)') 'Wet refractivity constant = ', wetRefractivityConstant
   call fckit_log % debug(message)
 
 end subroutine ufo_gnssroonedvarcheck_create
@@ -238,11 +238,11 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 !
 ! Diagnostics to push back to the obs-space
 !
+  integer, allocatable               :: indices(:)            ! The indices of the diagnostic elements to be updated
   integer, allocatable               :: niter(:)              ! Number of iterations required to converge
   real(kind_real), allocatable       :: initial_cost(:)       ! Initial cost-function value
   real(kind_real), allocatable       :: final_cost(:)         ! Final cost-function value
   real(kind_real), allocatable       :: dfs_list(:)           ! Degrees of freedom for signal
-  integer                            :: ind
 
   ! Get the obs-space information
   nobs = obsspace_get_nlocs(self % obsdb)
@@ -426,13 +426,15 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
     end if
 
     ! Save the diagnostic information
+    allocate(indices(1:nobs_profile))
     do ipoint = 0, nobs_profile-1
-      ind = 1 + ((index_vals(start_point+ipoint) - 1) / nlevels)
-      niter(ind) = Ob % niter
-      initial_cost(ind) = O_Bdiff
-      final_cost(ind) = Ob % jcost
-      dfs_list(ind) = DFS
+      indices(ipoint+1) = 1 + ((index_vals(start_point+ipoint) - 1) / nlevels)
     end do
+    niter(indices) = Ob % niter
+    initial_cost(indices) = O_Bdiff
+    final_cost(indices) = Ob % jcost
+    dfs_list(indices) = DFS
+    deallocate(indices)
 
     call deallocate_singleob(Ob)
   end do

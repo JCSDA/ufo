@@ -235,6 +235,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
 
   // Minimum Residual Method (MRM) for Cloud Detection:
   // Determine model level index of the cloud top (lcloud)
+  // Find pressure of the cloud top (cldprs)
   // Estimate cloud fraction (cldfrac)
   // output: out = 0 clear channel
   //         out = 1 cloudy channel
@@ -258,12 +259,8 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
       dtempf = dtempf_in[2];
     } else if (snow) {
       dtempf = dtempf_in[3];
-    } else if (mixed) {
-      dtempf = dtempf_in[4];
     } else {
-      std::string errString = "The surface type is not defined for location: ";
-      oops::Log::error() << errString  << iloc << std::endl;
-      throw eckit::BadValue(errString);
+      dtempf = dtempf_in[4];
     }
     std::vector<std::vector<float>> dbt(nchans, std::vector<float>(nlevs));
     for (size_t ichan=0; ichan < nchans; ++ichan) {
@@ -276,6 +273,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     // Set initial cloud condition
     int lcloud = 0;
     float cldfrac = 0.0;
+    float cldprs = prsl[0][iloc] * 0.01;     // convert from [Pa] to [hPa]
 
     // Loop through vertical layer from surface to model top
     for (size_t k = 0 ; k < nlevs ; ++k) {
@@ -307,6 +305,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
           sum3 = sum;
           lcloud = k + 1;   // array index + 1 -> model coordinate index
           cldfrac = cloudp;
+          cldprs = prsl[k][iloc] * 0.01;
         }
       }
     // end of vertical loop
@@ -335,6 +334,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     }
     if (fabs(sumx2) < FLT_MIN) sumx2 = copysign(1.0e-12, sumx2);
     dts = std::fabs(sumx / sumx2);
+    float dts_save = dts;
     if (std::abs(dts) > 1.0) {
       if (sea == false) {
         dts = std::min(dtempf, dts);

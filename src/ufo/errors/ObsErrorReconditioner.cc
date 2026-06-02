@@ -16,7 +16,6 @@ ObsErrorReconditionerMethodParameterTraitsHelper::namedValues[];
 
 ObsErrorReconditioner::ObsErrorReconditioner(const Parameters_ & params)
   : params_(params) {
-  oops::Log::trace() << "ObsErrorReconditioner::ObsErrorReconditioner starting" << std::endl;
   // Checking valid reconditioning options if reconditioning specified.
   ufo::ObsErrorReconditionerMethod recon_method = params_.ReconMethod.value();
   size_t nvalid_options = 0;
@@ -45,12 +44,10 @@ ObsErrorReconditioner::ObsErrorReconditioner(const Parameters_ & params)
       break;
     case ufo::ObsErrorReconditionerMethod::NORECONDITIONING:
       oops::Log::trace() << "'No reconditioning' option selected, "
-                            "for advanced reconditioning; "
                             "recondition method can be tested, "
                             "R matrix should not change.\n";
       break;
   }
-  oops::Log::trace() << "ObsErrorReconditioner::ObsErrorReconditioner finished" << std::endl;
 }  // ObsErrorReconditioner::ObsErrorReconditioner
 
 void ObsErrorReconditioner::recondition(Eigen::MatrixXd & R) const {
@@ -64,7 +61,8 @@ void ObsErrorReconditioner::recondition(Eigen::MatrixXd & R) const {
 
     // Check square matrix
     size_t nrows = R.rows();
-    assert(nrows == R.cols());
+    size_t ncols = R.cols();
+    assert(nrows == ncols);
 
     // Performing eigendecomposition
     oops::Log::trace() << "R before reconditioning:\n" << R << std::endl << std::endl;

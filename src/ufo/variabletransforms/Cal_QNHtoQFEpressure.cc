@@ -21,8 +21,8 @@ static TransformMaker<Cal_QNHtoQFEpressure>
 Cal_QNHtoQFEpressure::Cal_QNHtoQFEpressure(
         const GenericVariableTransformParameters &options,
         const ObsFilterData &data,
-        ioda::ObsDataVector<int> &flags,
-        ioda::ObsDataVector<float> &obserr)
+        const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+        const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
       : TransformBase(options, data, flags, obserr) {}
 
 /************************************************************************************/

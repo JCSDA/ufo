@@ -35,8 +35,8 @@ namespace ufo {
 class ObsProcessorBase : public ObsFilterBase {
  public:
   ObsProcessorBase(ioda::ObsSpace &, bool deferToPost,
-                   ioda::ObsDataVector<int> &,
-                   ioda::ObsDataVector<float> &);
+                   std::shared_ptr<ioda::ObsDataVector<int> >,
+                   std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsProcessorBase();
 
   void preProcess() override;
@@ -54,8 +54,8 @@ class ObsProcessorBase : public ObsFilterBase {
 
  protected:
   ioda::ObsSpace & obsdb_;
-  ioda::ObsDataVector<int> & flags_;
-  ioda::ObsDataVector<float> & obserr_;
+  std::shared_ptr<ioda::ObsDataVector<int>> flags_;
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr_;
   ufo::Variables allvars_;
   ObsFilterData data_;
   bool prior_;

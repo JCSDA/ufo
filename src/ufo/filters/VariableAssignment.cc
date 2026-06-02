@@ -492,9 +492,9 @@ void AssignmentParameters::deserialize(util::CompositePath &path,
 
 
 VariableAssignment::VariableAssignment(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                                       ioda::ObsDataVector<int> & flags,
-                                       ioda::ObsDataVector<float> & obserr)
-  : ObsProcessorBase(obsdb, parameters.deferToPost, flags, obserr),
+                                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+  : ObsProcessorBase(obsdb, parameters.deferToPost, std::move(flags), std::move(obserr)),
     parameters_(parameters)
 {
   oops::Log::trace() << "VariableAssignment constructor" << std::endl;
@@ -521,7 +521,7 @@ void VariableAssignment::doFilter() {
   for (const AssignmentParameters &assignment : parameters_.assignments.value()) {
     const ufo::Variable variable = getVariable(assignment);
     const ioda::ObsDtype dtype = getDataType(assignment.type, variable, obsdb_);
-    assignToVariable(variable, dtype, assignment, apply, data_, obsdb_, flags_);
+    assignToVariable(variable, dtype, assignment, apply, data_, obsdb_, *flags_);
   }
 
   oops::Log::trace() << "VariableAssignment doFilter complete" << std::endl;

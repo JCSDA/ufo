@@ -42,7 +42,7 @@ void saveBiasCoeffsWithChannels(ioda::Group & parent,
     ioda::Variable biasVar = ogrp.vars.createWithScales<float>(
                              "BiasCoefficients/"+predictors[jpred],
                              {ogrp.vars["Record"], ogrp.vars["Channel"]}, float_params);
-    biasVar.writeWithEigenRegular(coeffs(jpred, Eigen::placeholders::all));
+    biasVar.writeWithEigenRegular(coeffs(jpred, Eigen::all));
   }
 
   // Save the Channel
@@ -78,7 +78,7 @@ void saveBiasCoeffsWithRecords(ioda::Group & parent,
     ioda::Variable biasVar = ogrp.vars.createWithScales<float>(
                              "BiasCoefficients/"+predictors[jpred],
                              {ogrp.vars["Record"], ogrp.vars["Variable"]}, float_params);
-    biasVar.writeWithEigenRegular(coeffs(jpred, Eigen::placeholders::all));
+    biasVar.writeWithEigenRegular(coeffs(jpred, Eigen::all));
   }
 
   // Save the stationIdentification

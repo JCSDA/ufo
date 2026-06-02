@@ -63,8 +63,8 @@ std::string get_sat_name(int SatID, const std::vector<SatIDRangeParameters> &Sat
 
 // -----------------------------------------------------------------------------
 SatName::SatName(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                 ioda::ObsDataVector<int> & flags,
-                 ioda::ObsDataVector<float> & obserr)
+                               std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                               std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "SatName constructor" << std::endl;

@@ -38,8 +38,8 @@ class ROobserror : public FilterBase,
   static const std::string classname() {return "ufo::ROobserror";}
 
   ROobserror(ioda::ObsSpace &, const eckit::Configuration &,
-             ioda::ObsDataVector<int> &,
-             ioda::ObsDataVector<float> &);
+             std::shared_ptr<ioda::ObsDataVector<int> >,
+             std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ROobserror();
 
  private:

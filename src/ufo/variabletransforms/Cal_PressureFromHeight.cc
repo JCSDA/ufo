@@ -18,8 +18,8 @@ static TransformMaker<Cal_PressureFromHeightForProfile>
 
 Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
     const Parameters_ &options, const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr),
       heightCoord_(options.HeightCoord),
       pressureCoord_(options.PressureCoord),
@@ -236,8 +236,8 @@ static TransformMaker<Cal_PressureFromHeightForICAO>
 
 Cal_PressureFromHeightForICAO::Cal_PressureFromHeightForICAO(
     const Parameters_ &options, const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr),
       heightCoord_(options.HeightCoord),
       pressureCoord_(options.PressureCoord),

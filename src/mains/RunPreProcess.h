@@ -57,8 +57,10 @@ class RunPreProcess : public oops::Application {
                          util::TimeWindow(params.timeWindow.value()),
                          this->getComm());
 
-    ioda::ObsDataVector<float> obserr_(obsdb, obsdb.obsvariables(), "ObsError");
-    ioda::ObsDataVector<int> qcflags_(obsdb, obsdb.obsvariables());
+    std::shared_ptr<ioda::ObsDataVector<float>> obserr_ =
+      std::make_shared<ioda::ObsDataVector<float>>(obsdb, obsdb.obsvariables(), "ObsError");
+    std::shared_ptr<ioda::ObsDataVector<int>> qcflags_ =
+      std::make_shared<ioda::ObsDataVector<int>>(obsdb, obsdb.obsvariables());
 
     ufo::ObsFilters filters(obsdb,
                             params.filtersParams.toConfiguration(),

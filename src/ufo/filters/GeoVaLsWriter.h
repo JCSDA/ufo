@@ -29,11 +29,13 @@ class ObsDiagnostics;
 // -----------------------------------------------------------------------------
 
 class GeoVaLsWriter : public ObsFilterBase {
+  template <typename DATA> using ObsDataPtr_ = std::shared_ptr<ioda::ObsDataVector<DATA> >;
+
  public:
   typedef GenericFilterParameters       Parameters_;
 
   GeoVaLsWriter(const ioda::ObsSpace &, const Parameters_ &,
-                ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &);
+                ObsDataPtr_<int>, ObsDataPtr_<float>);
   ~GeoVaLsWriter() = default;
 
   void preProcess() override {}

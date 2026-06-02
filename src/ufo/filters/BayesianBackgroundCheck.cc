@@ -35,8 +35,8 @@ namespace ufo {
 BayesianBackgroundCheck::BayesianBackgroundCheck(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        ioda::ObsDataVector<int> & flags,
-        ioda::ObsDataVector<float> & obserr)
+        std::shared_ptr<ioda::ObsDataVector<int> > flags,
+        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr, VariableNameMap(parameters.AliasFile.value())),
     parameters_(parameters)
 
@@ -100,7 +100,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "BayesianBackgroundCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
-  oops::Log::debug() << "BayesianBackgroundCheck obserr: " << obserr_ << std::endl;
+  oops::Log::debug() << "BayesianBackgroundCheck obserr: " << *obserr_ << std::endl;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
 
@@ -280,7 +280,7 @@ void BayesianBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // create reduced vectors, copied from full ones, fulfilling applycondition:
       std::vector<float> firstComponentObVal_reduced = reduceVector(firstComponentObVal,
                                                                     j_reduced);
-      std::vector<float> ObsErr_reduced = reduceVector(obserr_[varname1], j_reduced);
+      std::vector<float> ObsErr_reduced = reduceVector((*obserr_)[varname1], j_reduced);
       std::vector<float> hofx1_reduced = reduceVector(hofx1, j_reduced);
       std::vector<float> hofxerr_reduced = reduceVector(hofxerr, j_reduced);
       std::vector<float> PdBad_reduced = reduceVector(PdBad, j_reduced);

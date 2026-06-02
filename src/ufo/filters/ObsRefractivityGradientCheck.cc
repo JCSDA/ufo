@@ -26,8 +26,8 @@ namespace ufo {
 ObsRefractivityGradientCheck::ObsRefractivityGradientCheck(
                                  ioda::ObsSpace & obsdb,
                                  const Parameters_ & parameters,
-                                 ioda::ObsDataVector<int> & flags,
-                                 ioda::ObsDataVector<float> & obserr)
+                                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                 std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ObsRefractivityGradientCheck: "
@@ -91,7 +91,7 @@ void ObsRefractivityGradientCheck::applyFilter(
     for (size_t jv = 0; jv < filtervars.nvars(); ++jv) {
       const size_t iv = observed.find(filtervars.variable(jv).variable());
       for (size_t isort : idx) {
-        if (apply[obs_numbers[isort]] && flags_[iv][obs_numbers[isort]] == QCflags::pass) {
+        if ( apply[obs_numbers[isort]] && (*flags_)[iv][obs_numbers[isort]] == QCflags::pass ) {
           if ((gradient[isort] <= parameters_.gradientMin.value() ||
               gradient[isort] >= parameters_.gradientMax.value() ||
               gradient[isort] == 0 ||
@@ -100,7 +100,7 @@ void ObsRefractivityGradientCheck::applyFilter(
               height[obs_numbers[isort]] < parameters_.maxCheckHeight.value()) {
             // reject all observations below isort
             for (size_t jobs = isort; jobs < idx.size(); ++jobs) {
-              if (apply[obs_numbers[jobs]] && flags_[iv][obs_numbers[jobs]] == QCflags::pass) {
+              if (apply[obs_numbers[jobs]] && (*flags_)[iv][obs_numbers[jobs]] == QCflags::pass) {
                 flagged[jv][obs_numbers[jobs]] = true;
               }
             }

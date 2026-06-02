@@ -42,8 +42,8 @@ namespace ufo {
 /// In the former case, `Filter` should provide a constructor with the following signature:
 ///
 ///    Filter(ioda::ObsSpace &os, const eckit::Configuration &conf,
-///           ioda::ObsDataVector<int> &flags,
-///           ioda::ObsDataVector<float> &obserr);
+///           std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
+///           std::shared_ptr<ioda::ObsDataVector<float> > obserrors);
 ///
 /// In the latter case, a subclass of FilterParametersBaseWithAbstractAction holding the settings
 /// of the filter in question should be defined. (Usually it can in fact be a subclass of
@@ -53,18 +53,18 @@ namespace ufo {
 /// of that subclass and provide a constructor with the following signature:
 ///
 ///    Filter(ioda::ObsSpace &os, const Parameters_ &params,
-///           ioda::ObsDataVector<int> &flags,
-///           ioda::ObsDataVector<float> &obserr);
+///           std::shared_ptr<ioda::ObsDataVector<int> > qcflags,
+///           std::shared_ptr<ioda::ObsDataVector<float> > obserrors);
 ///
 class FilterBase : public ObsProcessorBase {
  public:
   FilterBase(ioda::ObsSpace &, const FilterParametersBaseWithAbstractActions &parameters,
-             ioda::ObsDataVector<int> &,
-             ioda::ObsDataVector<float> &,
+             std::shared_ptr<ioda::ObsDataVector<int> >,
+             std::shared_ptr<ioda::ObsDataVector<float> >,
              const VariableNameMap & nameMap = VariableNameMap(boost::none));
   FilterBase(ioda::ObsSpace &, const eckit::Configuration &,
-             ioda::ObsDataVector<int> &,
-             ioda::ObsDataVector<float> &,
+             std::shared_ptr<ioda::ObsDataVector<int> >,
+             std::shared_ptr<ioda::ObsDataVector<float> >,
              const VariableNameMap & nameMap = VariableNameMap(boost::none));
   ~FilterBase();
 

@@ -22,10 +22,9 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 FinalCheck::FinalCheck(ioda::ObsSpace & obsdb, const Parameters_ &,
-                       ioda::ObsDataVector<int> & flags,
-                       ioda::ObsDataVector<float> & obserr)
-
-  : ObsProcessorBase(obsdb, true /*deferToPost?*/, flags, obserr)
+                       std::shared_ptr<ioda::ObsDataVector<int>> qcflags,
+                       std::shared_ptr<ioda::ObsDataVector<float>> obserr)
+  : ObsProcessorBase(obsdb, true /*deferToPost?*/, std::move(qcflags), std::move(obserr))
 {
   oops::Log::trace() << "FinalCheck constructor" << std::endl;
 }
@@ -54,8 +53,8 @@ void FinalCheck::doFilter() {
   const float missing = util::missingValue<float>();
   for (size_t jv = 0; jv < obsdb_.obsvariables().size(); ++jv) {
     for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-      if (flags_[jv][jobs] == QCflags::pass && obserr_[jv][jobs] == missing) {
-        flags_[jv][jobs] = QCflags::missing;
+      if ((*flags_)[jv][jobs] == QCflags::pass && (*obserr_)[jv][jobs] == missing) {
+        (*flags_)[jv][jobs] = QCflags::missing;
       }
     }
   }
@@ -65,7 +64,7 @@ void FinalCheck::doFilter() {
   for (size_t jv = 0; jv < obsdb_.obsvariables().size(); ++jv) {
     if (!obsdb_.assimvariables().has(obsdb_.obsvariables()[jv])) {
       for (size_t jobs = 0; jobs < obsdb_.nlocs(); ++jobs) {
-        flags_[jv][jobs] = QCflags::processed;
+        (*flags_)[jv][jobs] = QCflags::processed;
       }
     }
   }

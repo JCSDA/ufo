@@ -30,8 +30,8 @@ namespace ufo {
 ProfileAverageObsToModLevels::ProfileAverageObsToModLevels(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        ioda::ObsDataVector<int> & flags,
-        ioda::ObsDataVector<float> & obserr)
+        std::shared_ptr<ioda::ObsDataVector<int> > flags,
+        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ProfileAverageObsToModLevels constructor" << std::endl;
@@ -64,7 +64,7 @@ void ProfileAverageObsToModLevels::applyFilter(const std::vector<bool> & apply,
                                   const Variables & filtervars,
                                   std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ProfileAverageObsToModLevels applyFilter start" << std::endl;
-  oops::Log::debug() << "ProfileAverageObsToModLevels obserr: " << obserr_ << std::endl;
+  oops::Log::debug() << "ProfileAverageObsToModLevels obserr: " << *obserr_ << std::endl;
 
   const oops::ObsVariables observed = obsdb_.obsvariables();
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
@@ -121,14 +121,14 @@ void ProfileAverageObsToModLevels::applyFilter(const std::vector<bool> & apply,
       ufo::setModLevelFlags(locsExt,
                             link_obs_and_mod_inds,
                             flagged[jv],
-                            (flags_)[iv]);
+                            (*flags_)[iv]);
       // Compute increments at each obs level, take their average for each model level,
       //  and add the average to the HofX at that model level:
       ufo::averageObsToModLevels(locsOriginal,
                                  locsExt,
                                  link_obs_and_mod_inds,
                                  apply,
-                                 flags_[iv],
+                                 (*flags_)[iv],
                                  hofx,
                                  obs[jv]);
     }  // profile jprof

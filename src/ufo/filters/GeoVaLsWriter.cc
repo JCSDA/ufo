@@ -18,7 +18,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 GeoVaLsWriter::GeoVaLsWriter(const ioda::ObsSpace &, const Parameters_ & params,
-                             ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &)
+                ObsDataPtr_<int>, ObsDataPtr_<float>)
   : config_(params.config), novars_() {
   oops::Log::trace() << "GeoVaLsWriter constructor" << std::endl;
 }

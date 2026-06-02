@@ -28,8 +28,8 @@ namespace ufo {
   Cal_AdjustedHeightCoordinate::Cal_AdjustedHeightCoordinate(
                                 const GenericVariableTransformParameters & options,
                                 const ObsFilterData &data,
-                                ioda::ObsDataVector<int> &flags,
-                                ioda::ObsDataVector<float> &obserr) :
+                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                                const std::shared_ptr<ioda::ObsDataVector<float>> &obserr) :
   TransformBase(options, data, flags, obserr), gvals_() {
     oops::Log::trace() << "Cal_AdjustedHeightCoordinate::Constructor start" << std::endl;
     // List of GeoVaLs this transform will need access to

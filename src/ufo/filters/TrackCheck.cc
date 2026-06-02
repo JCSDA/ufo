@@ -100,8 +100,8 @@ float TrackCheck::TrackObservation::getFailedChecksFraction() {
 
 
 TrackCheck::TrackCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                       ioda::ObsDataVector<int> & flags,
-                       ioda::ObsDataVector<float> & obserr)
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
   oops::Log::trace() << "TrackCheck constructor" << std::endl;
@@ -125,7 +125,7 @@ void TrackCheck::applyFilter(const std::vector<bool> & apply,
   const std::vector<size_t> validObsIds =
     options_.ignoreExistingQCFlags ?
     obsAccessor.getValidObservationIds(apply) :
-    obsAccessor.getValidObservationIds(apply, flags_, filtervars);
+    obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   TrackCheckUtils::sortTracksChronologically(validObsIds, obsAccessor, splitter);
 

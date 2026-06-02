@@ -46,8 +46,8 @@ namespace ufo {
 ProfileBackgroundCheck::ProfileBackgroundCheck(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        ioda::ObsDataVector<int> & flags,
-        ioda::ObsDataVector<float> & obserr)
+        std::shared_ptr<ioda::ObsDataVector<int> > flags,
+        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ProfileBackgroundCheck constructor" << std::endl;
@@ -71,7 +71,7 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
   oops::Log::trace() << "ProfileBackgroundCheck applyFilter start" << std::endl;
   const oops::ObsVariables observed = obsdb_.obsvariables();
 
-  oops::Log::debug() << "ProfileBackgroundCheck obserr: " << obserr_;
+  oops::Log::debug() << "ProfileBackgroundCheck obserr: " << *obserr_;
 
   ioda::ObsDataVector<float> obs(obsdb_, filtervars.toOopsObsVariables(), "ObsValue");
   ioda::ObsDataVector<float> bias(obsdb_, filtervars.toOopsObsVariables(), "ObsBias", false);
@@ -114,11 +114,11 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
       // Determine whether this profile uses threshold or abs_threshold based
       // on the first value in the profile.
       for (size_t jobs : obs_numbers) {
-        if (apply[jobs] && flags_[iv][jobs] == QCflags::pass) {
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
           // style note: use missingValue<decltype(foo)> because obserr_ is declared in another file
           // and its underlying type could in principle change without it being obvious here.
-          ASSERT(obserr_[iv][jobs] !=
-              util::missingValue<std::remove_reference_t<decltype((obserr_)[iv][jobs])>>());
+          ASSERT((*obserr_)[iv][jobs] !=
+              util::missingValue<std::remove_reference_t<decltype((*obserr_)[iv][jobs])>>());
           ASSERT(obs[jv][jobs] != util::missingValue<float>());
           ASSERT(hofx[jobs] != util::missingValue<float>());
 
@@ -139,11 +139,11 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
           const float yy = obs[jv][jobs] - bias[jv][jobs];
 
           // Accumulate distance from background
-          if (obserr_[iv][jobs] > 0) {
+          if ((*obserr_)[iv][jobs] > 0) {
             total_nobs++;
             if (using_rel_thresh) {
               // Normalise by observation error
-              total_diff += std::pow((hofx[jobs] - yy) / obserr_[iv][jobs], 2);
+              total_diff += std::pow((hofx[jobs] - yy) / (*obserr_)[iv][jobs], 2);
             } else {
               // Use the absolute differences
               total_diff += std::pow(hofx[jobs] - yy, 2);
@@ -161,7 +161,7 @@ void ProfileBackgroundCheck::applyFilter(const std::vector<bool> & apply,
 
       // Second run through the observations to apply the threshold to reject profiles
       for (size_t jobs : obs_numbers) {
-        if (apply[jobs] && flags_[iv][jobs] == QCflags::pass) {
+        if (apply[jobs] && (*flags_)[iv][jobs] == QCflags::pass) {
           // If rejecting this profile, then flag all elements
           if (total_diff > static_cast<double>(profile_threshold)) flagged[jv][jobs] = true;
         }

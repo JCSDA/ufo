@@ -19,8 +19,8 @@ static TransformMaker<Cal_RemapScanPosition>
 Cal_RemapScanPosition::Cal_RemapScanPosition(
     const Parameters_ &options,
     const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options) {}
 
 /************************************************************************************/

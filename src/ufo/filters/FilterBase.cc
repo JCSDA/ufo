@@ -30,10 +30,10 @@ namespace ufo {
 
 FilterBase::FilterBase(ioda::ObsSpace & os,
                        const FilterParametersBaseWithAbstractActions & parameters,
-                       ioda::ObsDataVector<int> & flags,
-                       ioda::ObsDataVector<float> & obserr,
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr,
                        const VariableNameMap & nameMap)
-  : ObsProcessorBase(os, parameters.deferToPost, flags, obserr),
+  : ObsProcessorBase(os, parameters.deferToPost, std::move(flags), std::move(obserr)),
     filtervars_(),
     nameMap_(nameMap),
     whereParameters_(parameters.where),
@@ -75,13 +75,13 @@ FilterBase::FilterBase(ioda::ObsSpace & os,
 // -----------------------------------------------------------------------------
 
 FilterBase::FilterBase(ioda::ObsSpace & os, const eckit::Configuration & config,
-                       ioda::ObsDataVector<int> & flags,
-                       ioda::ObsDataVector<float> & obserr,
+                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                       std::shared_ptr<ioda::ObsDataVector<float> > obserr,
                        const VariableNameMap & nameMap)
   : FilterBase(os,
                oops::validateAndDeserialize<GenericFilterParameters>(config),
-               flags,
-               obserr,
+               std::move(flags),
+               std::move(obserr),
                nameMap)
 {}
 
@@ -127,7 +127,7 @@ void FilterBase::doFilter() {
 // Take actions
   for (const std::unique_ptr<FilterActionParametersBase> &actionParameters : actionsParameters_) {
     FilterAction action(*actionParameters);
-    action.apply(vars, flagged, data_, this->qcFlag(), flags_, obserr_);
+    action.apply(vars, flagged, data_, this->qcFlag(), *flags_, *obserr_);
   }
 
 // Done

@@ -33,7 +33,7 @@ FilterFactory::FilterFactory(const std::string & name) {
 
 std::unique_ptr<ObsFilterBase>
 FilterFactory::create(ioda::ObsSpace & os, const ObsFilterParametersBase & params,
-                      ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & obserr) {
+                      ObsDataPtr_<int> flags, ObsDataPtr_<float> obserr) {
   oops::Log::trace() << "FilterFactory::create starting" << std::endl;
   const std::string &id = params.filter.value().value();
   typename std::map<std::string, FilterFactory*>::iterator

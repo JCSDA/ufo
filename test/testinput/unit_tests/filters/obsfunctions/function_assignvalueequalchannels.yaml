@@ -74,7 +74,7 @@ observations:
           variable:
             name: QCflagsData/bendingAngle
             channels: *all_levels
-          testValue: 30
+          testValue: 13
           assignEqual: 0.9
           assignNotEqual: 0.2
   #

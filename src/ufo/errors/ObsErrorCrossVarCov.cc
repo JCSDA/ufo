@@ -34,7 +34,7 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & params,
     varcorrelations_(Eigen::MatrixXd::Identity(stddev_.nvars(), stddev_.nvars())),
     reconditioner_(nullptr)
 {
-  oops::Log::trace() << "ObsErrorCrossVarCov::ObsErrorCrossVarCov starting" << std::endl;
+  // deserialize configuration into ObsErrorCrossVarCovParameters
   // Create reconditioner
   reconditioner_.reset(new ObsErrorReconditioner(params_.reconditioning.value()));
   // Open and read error correlations from the hdf5 file
@@ -107,7 +107,6 @@ ObsErrorCrossVarCov::ObsErrorCrossVarCov(const Parameters_ & params,
                          << " channels/variables in file: " << params.inputFile.value()
                          << ". To see which channels, turn on OOPS_TRACE\n" << std::endl;
   }
-  oops::Log::trace() << "ObsErrorCrossVarCov::ObsErrorCrossVarCov finished" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -310,80 +309,22 @@ void ObsErrorCrossVarCov::inverseMultiply(ioda::ObsVector & dy) const {
 // -----------------------------------------------------------------------------
 
 void ObsErrorCrossVarCov::localize(ioda::ObsVector & locvector) const {
-  oops::Log::trace() << "ufo::ObsErrorCrossVarCov::localize start" << std::endl;
-
-  const double missing = util::missingValue<double>();
-
-  ASSERT_MSG(locvector.size() == stddev_.size(),
-             "ObsErrorCrossVarCov::localize: "
-             "Localization vector dimension must match dimension of obs space.");
-  std::vector<double> localstddev;
-  const size_t nlocs = locvector.nlocs();
-  const size_t nvars = locvector.nvars();
-  local_jvars_.clear();
-  local_nobs_.clear();
-  for (size_t jloc = 0; jloc < nlocs; ++jloc) {
-    size_t nused = 0;
-    for (size_t jvar = 0; jvar < nvars; ++jvar) {
-      size_t jj = jloc*nvars + jvar;
-      if (locvector[jj] != missing && locvector[jj] <= 0) {
-        throw eckit::BadValue("Localization weights must be positive. Use "
-                              "oops::util::missingValue<double>() to indicate "
-                              "an observation with a weight of zero.");
-      }
-      if (locvector[jj] != missing && stddev_[jj] != missing) {
-        localstddev.push_back(stddev_[jj] * std::pow(locvector[jj], -0.5));
-        local_jvars_.push_back(jvar);
-        ++nused;
-      }
-    }
-    if (nused > 0) local_nobs_.push_back(nused);
-  }
-  local_stddev_ = Eigen::Map<Eigen::VectorXd>(localstddev.data(), localstddev.size());
+  throw eckit::BadParameter("Trying to localize a correlated R matrix, this is "
+                            "not yet implemented.");
 }
 
 int ObsErrorCrossVarCov::localDim() const {
-  return local_stddev_.size();
+  throw eckit::BadParameter("Trying to localize a correlated R matrix, this is "
+      "not yet implemented.");
 }
 
 Eigen::MatrixXf ObsErrorCrossVarCov::localInverseMultiply(const Eigen::MatrixXf & zz) const {
-  ASSERT_MSG(zz.cols() == localDim(),
-             "ObsErrorCrossVarCov::localInverseMultiply: "
-             "Input vector dimension must match local R matrix dimension");
-  Eigen::MatrixXf zzRinv(zz.rows(), zz.cols());
-  size_t j_obs = 0;
-  // loop over obs locations in local volume
-  for (int pt_nobs : local_nobs_) {
-    // construct pt std dev and correlations for obs at this point
-    Eigen::VectorXf pt_stddev = local_stddev_.segment(j_obs, pt_nobs).cast<float>();
-    Eigen::MatrixXf pt_corr = Eigen::MatrixXf::Identity(pt_nobs, pt_nobs);
-    for (size_t ipt = 0; ipt < pt_nobs; ++ipt) {
-      for (size_t jpt = 0; jpt < ipt; ++jpt) {
-        // only fill lower triangle as that's all we need for LLT
-        pt_corr(ipt, jpt) = static_cast<float>(varcorrelations_(local_jvars_[j_obs+ipt],
-                                                                local_jvars_[j_obs+jpt]));
-      }
-    }
-    // Cholesky decomposition to allow inverse multiplication
-    Eigen::LLT<Eigen::MatrixXf> LLT(pt_corr);
-    for (size_t ii = 0; ii < zz.rows(); ++ii) {
-      Eigen::VectorXf row = zz(ii, Eigen::seq(j_obs, j_obs+pt_nobs-1)).transpose();
-      // D^{-1/2} * row
-      row.array() /= pt_stddev.array();
-      // C^{-1} * D^{-1/2} * row
-      LLT.solveInPlace(row);
-      // D^{-1/2} * C^{-1} * D^{-1/2} * row
-      row.array() /= pt_stddev.array();
-      // store in output
-      zzRinv(ii, Eigen::seq(j_obs, j_obs+pt_nobs-1)) = row.transpose();
-    }
-    j_obs += pt_nobs;
-  }
-  return zzRinv;
+  throw eckit::BadParameter("Localisation not implemented for correlated R matrices");
 }
 
 Eigen::VectorXd ObsErrorCrossVarCov::local_invVarR() const {
-  throw eckit::BadParameter("ObsErrorCrossVarCov::local_invVarR not implemented.");
+  throw eckit::BadParameter("Local inverse variance not implemented for "
+                            "correlated R matrices");
 }
 
 // -----------------------------------------------------------------------------

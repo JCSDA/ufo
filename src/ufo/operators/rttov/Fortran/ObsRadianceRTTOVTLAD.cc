@@ -32,12 +32,9 @@ ObsRadianceRTTOVTLAD::ObsRadianceRTTOVTLAD(const ioda::ObsSpace & odb,
   const oops::ObsVariables & observed = odb.assimvariables();
   std::vector<int> channels_list = observed.channels();
 
-  // values for passed qc
-  std::vector<int> qc_passed = {QCflags::pass};
   // call Fortran setup routine
   ufo_radiancerttov_tlad_setup_f90(keyOperRadianceRTTOV_, parameters.toConfiguration(),
-                                   channels_list.size(), channels_list[0], varin_,
-                                   qc_passed.size(), qc_passed[0]);
+                                  channels_list.size(), channels_list[0], varin_);
 
   oops::Log::trace() << "ObsRadianceRTTOVTLAD constructor done" << std::endl;
 }
@@ -54,7 +51,7 @@ ObsRadianceRTTOVTLAD::~ObsRadianceRTTOVTLAD() {
 void ObsRadianceRTTOVTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags,
                                          const QCFlags_t & qc_flags) {
   ufo_radiancerttov_tlad_settraj_f90(keyOperRadianceRTTOV_, geovals.toFortran(), obsspace(),
-                                     ydiags.toFortran(), qc_flags);
+                                    ydiags.toFortran());
   oops::Log::trace() << "ObsRadianceRTTOVTLAD::setTrajectory done" << std::endl;
 }
 

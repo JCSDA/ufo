@@ -403,11 +403,9 @@ write(*,*) "EmissSeaDefault = ",self % EmissSeaDefault
 write(*,*) "EmissLandDefault = ",self % EmissLandDefault
 write(*,*) "EmissSeaIceDefault = ",self % EmissSeaIceDefault
 write(*,*) "mwEmissRetrieval = ",self % mwEmissRetrieval
-if (self % mwEmissRetrieval) then
-  write(*,*) "NumEmissElements = ",self % NumEmissElements
-  write(*,*) "EmissToChannelMap = ",self % EmissToChannelMap
-  write(*,*) "ChannelToEmissMap = ",self % ChannelToEmissMap
-endif
+write(*,*) "NumEmissElements = ",self % NumEmissElements
+write(*,*) "EmissToChannelMap = ",self % EmissToChannelMap
+write(*,*) "ChannelToEmissMap = ",self % ChannelToEmissMap
 write(*,*) "Use PC for Emissivity = ", self % pcemiss
 write(*,*) "EmisEigVecPath = ",self % EmisEigVecPath
 write(*,*) "EmisAtlas = ",self % EmisAtlas

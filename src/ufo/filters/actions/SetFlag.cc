@@ -63,7 +63,7 @@ void SetFlag<value>::apply(const Variables &vars,
   typedef bool (*Predicate)(int);
   // Pointer to a function taking a QC flag and returning true if observations with this QC flag
   // should be ignored and false otherwise
-  Predicate isIgnored = nullptr;
+  Predicate isIgnored;
   switch (parameters_.ignore.value()) {
   case IgnoredObservations::NONE:
     isIgnored = &returnFalse;

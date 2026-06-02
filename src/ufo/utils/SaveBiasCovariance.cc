@@ -41,7 +41,7 @@ void saveBiasCovarianceWithChannels(ioda::Group & parent,
     ioda::Variable anvarVar = ogrp.vars.createWithScales<float>(
                              "BiasCoefficientErrors/"+predictors[jpred],
                              {ogrp.vars["Record"], ogrp.vars["Channel"]}, float_params);
-    anvarVar.writeWithEigenRegular(allbcerrors(jpred, Eigen::placeholders::all));
+    anvarVar.writeWithEigenRegular(allbcerrors(jpred, Eigen::all));
   }
 
   // write number_obs_assimilated
@@ -82,7 +82,7 @@ void saveBiasCovarianceWithRecords(ioda::Group & parent,
       ioda::Variable biasVar = ogrp.vars.createWithScales<float>(
                                "BiasCoefficientErrors/" + predictors[jpred],
                                {ogrp.vars["Record"], ogrp.vars["Variable"]}, float_params);
-      biasVar.writeWithEigenRegular(allbcerrors(jpred, Eigen::placeholders::all));
+      biasVar.writeWithEigenRegular(allbcerrors(jpred, Eigen::all));
     }
 
     // write number_obs_assimilated

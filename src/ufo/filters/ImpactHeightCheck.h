@@ -71,15 +71,15 @@ class ImpactHeightCheck : public FilterBase,
   static const std::string classname() {return "ufo::ImpactHeightCheck";}
 
   ImpactHeightCheck(ioda::ObsSpace &, const Parameters_ &,
-                     ioda::ObsDataVector<int> &,
-                     ioda::ObsDataVector<float> &);
+                     std::shared_ptr<ioda::ObsDataVector<int> >,
+                     std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ImpactHeightCheck();
 
  private:
   void print(std::ostream &) const override;
   void applyFilter(const std::vector<bool> &, const Variables &,
                    std::vector<std::vector<bool>> &) const override;
-  int qcFlag() const override {return QCflags::superrefraction;}
+  int qcFlag() const override {return QCflags::domain;}
   Parameters_ parameters_;
   std::vector<float> calcVerticalGradient(const std::vector<float> &,
                                           const std::vector<float> &) const;

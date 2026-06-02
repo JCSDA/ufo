@@ -32,10 +32,6 @@
 #include "ufo/obslocalization/ObsHorLocParameters.h"
 #include "ufo/obslocalization/ObsLocalizationBase.h"
 
-namespace eckit::geometry {
-  class Point3;
-}
-
 namespace ufo {
 
 /// Horizontal Box car observation space localization
@@ -49,14 +45,6 @@ class ObsHorLocalization: public ObsLocalizationBase<ITERATOR> {
   /// The lengthscale from ObsHorLocParameters is used.
   void computeLocalization(const ITERATOR &,
                            ioda::ObsVector & locvector) const override;
-
-  /// Compute localization values between two points (regardless of if those are MODEL/OBS
-  /// or OBS/OBS locations) and return the localization value. The lengthscale from
-  /// ObsHorLocParameters is used.
-  /// Return values should be between 0.0 and 1.0, inclusive, with 0 indicating that the points
-  /// are outside of localization.
-  double computeLocalization(const eckit::geometry::Point3 &,
-                             const eckit::geometry::Point3 &) const override;
 
  protected:
   struct LocalObs {
@@ -181,18 +169,6 @@ void ObsHorLocalization<ITERATOR>::computeLocalization(const ITERATOR & i,
   // Reassign cached values
   cachelocvector_ = locvector;
   cachepoint_ = refpoint2D;
-}
-
-// -----------------------------------------------------------------------------
-
-template<typename ITERATOR>
-double ObsHorLocalization<ITERATOR>::computeLocalization(
-      const eckit::geometry::Point3 & p1,
-      const eckit::geometry::Point3 & p2) const {
-  eckit::geometry::Point2 p1_2(p1[0], p1[1]);
-  eckit::geometry::Point2 p2_2(p2[0], p2[1]);
-  double distance = atlas::util::Earth::distance(p1_2, p2_2);
-  return (distance >= options_.lengthscale) ? 0.0 : 1.0;
 }
 
 // -----------------------------------------------------------------------------

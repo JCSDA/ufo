@@ -98,9 +98,9 @@ void SolarZenith::compute(const ObsFilterData & in, ioda::ObsDataVector<float> &
   util::DateTime dayStart = missingDateTime;
   util::DateTime dayEnd = missingDateTime;
   // Equation of time (more details below)
-  double eqnt = 0.0;
+  double eqnt;
   // Sine and cosine of declination
-  double sinDecl = 0.0, cosDecl = 0.0;
+  double sinDecl, cosDecl;
 
   for (size_t loc = 0; loc < nlocs; ++loc) {
     if (skipRejected && rejected[loc]) {

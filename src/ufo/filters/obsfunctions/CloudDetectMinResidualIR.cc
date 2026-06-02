@@ -247,14 +247,23 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
 
   // Minimum Residual Method (MRM) for Cloud Detection:
   // Determine model level index of the cloud top (lcloud)
+  // Find pressure of the cloud top (cldprs)
   // Estimate cloud fraction (cldfrac)
   // output: out = 0 clear channel
   //         out = 1 cloudy channel
   //         out = 2 clear channel but too sensitive to surface condition
 
+  // Set vectors to hold cloud infomation from cloud detection (cab be part of the output)
+  // std::vector<float> cloud_prsl(nlocs);
+  // std::vector<float> cloud_frac(nlocs);
+  // std::vector<int> cloud_lev(nlocs);
 
   // Loop through locations
   for (size_t iloc=0; iloc < nlocs; ++iloc) {
+    // Initialize at each location
+    // cloud_lev[iloc] = 0;
+    // cloud_prsl[iloc] = 0.0;
+    // cloud_frac[iloc] = 0.0;
     float sum = 0.0, sum2 = 0.0, sum3 = 0.0;
     float tmp = 0.0;
     float cloudp = 0.0;
@@ -269,6 +278,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     // Set initial cloud condition
     int lcloud = 0;
     float cldfrac = 0.0;
+    float cldprs = prsl[0][iloc] * 0.01;     // convert from [Pa] to [hPa]
     float sum_min = 1.e20;
 
     // Loop through vertical layer from surface to model top
@@ -304,6 +314,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
           sum_min = sum;
           lcloud = k + 1;   // array index + 1 -> model coordinate index
           cldfrac = cloudp;
+          cldprs = prsl[k][iloc] * 0.01;
         }
       }
     // end of vertical loop
@@ -332,6 +343,10 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
         // Active channels
         if (out[ichan][iloc] < 1 && tao_cld > 0.02) out[ichan][iloc] = 1;
       }
+      // cloud infomation output at model level
+      // cloud_lev[iloc] = lcloud;
+      // cloud_prsl[iloc] = cldprs;
+      // cloud_frac[iloc] = cldfrac;
     } else {
     // If no clouds is detected, do sensivity to surface temperature check
     // Initialize at each location

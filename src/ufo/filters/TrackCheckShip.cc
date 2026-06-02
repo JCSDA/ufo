@@ -35,8 +35,8 @@
 namespace ufo {
 
 TrackCheckShip::TrackCheckShip(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
-                               ioda::ObsDataVector<int> & flags,
-                               ioda::ObsDataVector<float> & obserr)
+                               std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                               std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters)
 {
   oops::Log::trace() << "TrackCheckShip constructor" << std::endl;
@@ -176,12 +176,12 @@ void TrackCheckShip::applyFilter(const std::vector<bool> & apply,
   // returns what it has been passed without modification.
   // The value of `retainOnlyIfAllFilterVariablesAreValid` is set to `false`
   // because that is the default value used in the `ObsAccessor` class.
-  const RecordHandler recordHandler(obsdb_, filtervars, flags_, false);
+  const RecordHandler recordHandler(obsdb_, filtervars, *flags_, false);
 
   const std::vector<size_t> validObsIds =
     obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
                                     recordHandler.changeApplyIfRecordsAreSingleObs(apply) : apply,
-                                    flags_,
+                                    *flags_,
                                     filtervars);
 
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);

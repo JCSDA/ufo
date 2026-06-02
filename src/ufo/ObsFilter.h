@@ -30,6 +30,8 @@ class ObsDiagnostics;
 /// \brief A filter processing observations.
 class ObsFilter : public util::Printable,
                   private util::ObjectCounter<ObsFilter > {
+  template <typename DATA> using ObsDataPtr_ = std::shared_ptr<ioda::ObsDataVector<DATA> >;
+
  public:
   static const std::string classname() {return "ufo::ObsFilter";}
 
@@ -39,13 +41,13 @@ class ObsFilter : public util::Printable,
   ///   Space containing the observations to process.
   /// \param params
   ///   The filter's configuration parameters.
-  /// \param flags
+  /// \param qcflags
   ///   Quality control flags. They may be modified by the filter.
-  /// \param obserr
+  /// \param obserrors
   ///   Estimates of the standard deviations of observation errors. They may be modified by the
   ///   filter.
   ObsFilter(ioda::ObsSpace &obsspace, const ObsFilterParametersBase &params,
-            ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & obserr);
+            ObsDataPtr_<int> qcflags, ObsDataPtr_<float> obserrors);
   ObsFilter(const ObsFilter &) = delete;
   ObsFilter(ObsFilter &&) = default;
   ObsFilter& operator=(const ObsFilter &) = delete;

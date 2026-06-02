@@ -188,6 +188,8 @@ std::vector<MetOfficeBuddyPair> findBuddyPairs(const MetOfficeBuddyCheckParamete
 }
 
 void testInvarianceToLongitude(const eckit::LocalConfiguration &conf) {
+  const float searchRadius = 100;  // km
+
   std::vector<float> referenceLatitudes = conf.getFloatVector("reference.latitudes");
   std::vector<float> referenceLongitudes = conf.getFloatVector("reference.longitudes");
 

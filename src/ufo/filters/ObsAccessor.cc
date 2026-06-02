@@ -416,9 +416,6 @@ RecursiveSplitter ObsAccessor::splitObservationsIntoIndependentGroups(
   case GroupBy::SINGLE_OBS:
     groupObservationsByCategoryVariable(validObsIds, splitter);
     break;
-  case GroupBy::RECORD_ID:
-    groupObservationsByRecordNumber(validObsIds, splitter);
-    break;
   }
   return splitter;
 }

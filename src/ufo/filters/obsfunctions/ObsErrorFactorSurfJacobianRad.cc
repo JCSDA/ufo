@@ -89,7 +89,7 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
   size_t nlocs = in.nlocs();
   size_t nchans = channels_.size();
 
-  size_t ich536 = 0, ich890 = 0;
+  size_t ich536, ich890;
   if (inst == "amsua") {
     ich536 = 5;
     ich890 = 15;

@@ -26,8 +26,8 @@ makerCal_IceThicknessFromFreeboard_("Calculate iceThickness from seaIceFreeboard
 
 Cal_IceThicknessFromFreeboard::Cal_IceThicknessFromFreeboard(
     const Parameters_ &options, const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr), options_(options) {}
 
 // -----------------------------------------------------------------------------

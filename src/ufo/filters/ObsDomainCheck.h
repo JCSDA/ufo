@@ -48,8 +48,8 @@ class ObsDomainCheck : public FilterBase,
   static const std::string classname() {return "ufo::ObsDomainCheck";}
 
   ObsDomainCheck(ioda::ObsSpace &, const Parameters_ &,
-                 ioda::ObsDataVector<int> &,
-                 ioda::ObsDataVector<float> &);
+                 std::shared_ptr<ioda::ObsDataVector<int> >,
+                 std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDomainCheck();
 
  private:

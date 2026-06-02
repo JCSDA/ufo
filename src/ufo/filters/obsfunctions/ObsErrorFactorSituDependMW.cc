@@ -172,13 +172,13 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
   in.get(Variable("GeoVaLs/water_area_fraction"), water_frac);
 
   // Set channel number
-  int ich536 = 0, ich890 = 0;
+  int ich238, ich314, ich503, ich528, ich536, ich544, ich549, ich890;
   if (inst == "amsua") {
-    ich536 = 5;
-    ich890 = 15;
+    ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 4, ich536 = 5;
+    ich544 = 6, ich549 = 7, ich890 = 15;
   } else if (inst == "atms") {
-    ich536 = 6;
-    ich890 = 16;
+    ich238 = 1, ich314 = 2, ich503 = 3, ich528 = 5, ich536 = 6;
+    ich544 = 7, ich549 = 8, ich890 = 16;
   }
 
   // Get Original Observation Error from ObsFunction

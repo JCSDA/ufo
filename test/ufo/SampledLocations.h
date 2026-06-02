@@ -172,6 +172,8 @@ void testFortranTimeMask() {
 // -----------------------------------------------------------------------------
 /// Tests operator+= (concatenation of two SampledLocations)
 void testConcatenate() {
+  typedef SampledLocationsTestFixture Test_;
+
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
   SampledLocations locs1(conf, oops::mpi::world());
   SampledLocations locs2(conf, oops::mpi::world());

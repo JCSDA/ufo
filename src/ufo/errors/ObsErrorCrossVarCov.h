@@ -13,7 +13,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "ioda/ObsVector.h"
 
@@ -39,6 +38,9 @@ class ObsErrorCrossVarCovParameters : public ObsErrorParametersBase {
   /// Input file containing correlations or covariances. If covariances are
   /// specified, they will be converted to correlations.
   oops::RequiredParameter<std::string> inputFile{"input file", this};
+
+  oops::Parameter<ObsErrorReconditionerParameters> reconditioning{"reconditioning",
+    ObsErrorReconditionerParameters(), this};
 };
 // -----------------------------------------------------------------------------
 /// \brief Observation error covariance matrix with cross-variable
@@ -110,12 +112,6 @@ class ObsErrorCrossVarCov : public ObsErrorBase {
   Parameters_ params_;
   /// Observation error standard deviations
   ioda::ObsVector stddev_;
-  /// Localised observation error standard deviations
-  mutable Eigen::VectorXd local_stddev_;
-  /// Variable indices of local obs, used to construct local correlations
-  mutable std::vector<int> local_jvars_;
-  /// Number of local obs at each location, used to construct local correlations
-  mutable std::vector<int> local_nobs_;
   /// Variables for which correlations are defined (same as ObsSpace::obsvariables())
   const oops::ObsVariables vars_;
   /// Correlations between variables

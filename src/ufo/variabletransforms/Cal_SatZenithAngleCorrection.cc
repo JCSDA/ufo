@@ -24,8 +24,8 @@ static TransformMaker<Cal_SatZenithAngleCorrection>
 Cal_SatZenithAngleCorrection::Cal_SatZenithAngleCorrection(
     const Parameters_ &options,
     const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr), parameters_(options),
       variables_({parameters_.transformVariable.value()}) {
   ASSERT(parameters_.coeffA.value().size() == parameters_.transformVariable.value().size());

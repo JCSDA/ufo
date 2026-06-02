@@ -12,7 +12,6 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "ioda/ObsDataVector.h"
 #include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 
@@ -66,6 +65,7 @@ class ObsFiltersParameters : public oops::Parameters {
 class ObsFilters : public util::Printable,
                    private boost::noncopyable {
   typedef std::vector<ObsFilterParametersWrapper> FilterParams_;
+  template <typename DATA> using ObsDataPtr_ = std::shared_ptr<ioda::ObsDataVector<DATA> >;
 
  public:
   /// Initialize all filters for \p obspace, from parameters, using
@@ -74,7 +74,7 @@ class ObsFilters : public util::Printable,
   /// assimilation.
   ObsFilters(ioda::ObsSpace &,
              const eckit::Configuration &,
-             ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & obserr,
+             ObsDataPtr_<int> qcflags, ObsDataPtr_<float> obserr,
              const int iteration = 0);
 
   void preProcess();
@@ -95,9 +95,6 @@ class ObsFilters : public util::Printable,
                            std::vector<ObsFilter> & filters);
 
   ioda::ObsSpace & obsspace_;
-  /// QCmanager filter to handle QC flags and collect statistics,
-  /// whenever at least one filter is configured.
-  std::unique_ptr<ObsFilter> qcmanager_;
   // List of filters for which the stage (pre/prior/post) will be determined automatically.
   std::vector<ObsFilter> autoFilters_;
   // List of filters which have been designated to run at the pre stage.
@@ -108,9 +105,8 @@ class ObsFilters : public util::Printable,
   std::vector<ObsFilter> postFilters_;
   oops::Variables geovars_;
   oops::ObsVariables diagvars_;
-  ioda::ObsDataVector<int> & qcflags_;
-  ioda::ObsDataVector<float> & obserr_;
-  bool atLeastOneFilterConfigured_ = false;
+  ObsDataPtr_<int> qcflags_;
+  ObsDataPtr_<float> obserrfilter_;
   const int iteration_;
 };
 

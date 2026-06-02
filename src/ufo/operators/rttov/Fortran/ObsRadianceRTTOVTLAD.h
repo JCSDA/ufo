@@ -15,7 +15,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
-#include "ufo/filters/QCflags.h"
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/operators/rttov/Fortran/ObsRadianceRTTOVParameters.h"
 #include "ufo/operators/rttov/Fortran/ObsRadianceRTTOVTLAD.interface.h"

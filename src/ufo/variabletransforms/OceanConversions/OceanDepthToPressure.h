@@ -64,8 +64,8 @@ class OceanDepthToPressure : public TransformBase {
   typedef OceanDepthToPressureParameters Parameters_;
   OceanDepthToPressure(const Parameters_ &options,
                        const ObsFilterData &data,
-                       ioda::ObsDataVector<int> &flags,
-                       ioda::ObsDataVector<float> &obserr);
+                       const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                       const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
 
     // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;

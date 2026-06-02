@@ -70,13 +70,13 @@ namespace ufo {
     // ensure that all of the variables defined above have been added to the ObsSpace
     // on each rank. This prevents a hang when saving the ObsSpace.
     for (const auto & variableInt : variableNamesInt) {
-      profileDataHandler.get<int>(variableInt);
+      const auto & vectorInt = profileDataHandler.get<int>(variableInt);
     }
     for (const auto & variableFloat : variableNamesFloat) {
-      profileDataHandler.get<float>(variableFloat);
+      const auto & vectorFloat = profileDataHandler.get<float>(variableFloat);
     }
     for (const auto & variableBool : variableNamesBool) {
-      profileDataHandler.get<bool>(variableBool);
+      const auto & vectorBool = profileDataHandler.get<bool>(variableBool);
     }
 
     std::vector <ProfileDataHolder> profiles =

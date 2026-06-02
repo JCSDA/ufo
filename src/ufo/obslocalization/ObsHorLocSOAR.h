@@ -31,8 +31,6 @@ class ObsHorLocSOAR: public ufo::ObsHorLocalization<ITERATOR> {
  public:
   ObsHorLocSOAR(const eckit::Configuration &, ioda::ObsSpace &);
 
-  double computeLocalization(const eckit::geometry::Point3 &,
-                             const eckit::geometry::Point3 &) const override;
  protected:
   /// Compute SOAR localization using the set of \p localobs and save localization
   /// values in \p locvector.
@@ -54,20 +52,6 @@ ObsHorLocSOAR<ITERATOR>::ObsHorLocSOAR(const eckit::Configuration & config,
   : ObsHorLocalization<ITERATOR>::ObsHorLocalization(config, obsspace), options_()
 {
   options_.validateAndDeserialize(config);
-}
-
-// -----------------------------------------------------------------------------
-
-template<typename ITERATOR>
-double ObsHorLocSOAR<ITERATOR>::computeLocalization(
-      const eckit::geometry::Point3 & p1,
-      const eckit::geometry::Point3 & p2) const {
-  eckit::geometry::Point2 p1_2(p1[0], p1[1]);
-  eckit::geometry::Point2 p2_2(p2[0], p2[1]);
-  double distance = atlas::util::Earth::distance(p1_2, p2_2);
-  double lengthscale = ObsHorLocalization<ITERATOR>::lengthscale();
-  double loc = oops::soar(distance * options_.SOARexpDecayH);
-  return (distance >= lengthscale) ? 0.0 : loc;
 }
 
 // -----------------------------------------------------------------------------

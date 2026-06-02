@@ -28,8 +28,8 @@ namespace ufo {
   Cal_SurfaceWindScalingHeight::Cal_SurfaceWindScalingHeight(
                                 const Parameters_ &options,
                                 const ObsFilterData &data,
-                                ioda::ObsDataVector<int> &flags,
-                                ioda::ObsDataVector<float> &obserr) :
+                                const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+                                const std::shared_ptr<ioda::ObsDataVector<float>> &obserr) :
     TransformBase(options, data, flags, obserr), gvals_(),
     heightVariableGroup_(options.heightVariableGroup),
     heightVariableName_(options.heightVariableName)

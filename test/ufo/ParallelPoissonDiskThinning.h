@@ -48,8 +48,10 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
   const eckit::LocalConfiguration obsSpaceConf(conf, "obs space");
   ioda::ObsSpace obsspace(obsSpaceConf, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
-  ioda::ObsDataVector<float> obserr(obsspace, obsspace.obsvariables(), "ObsError");
-  ioda::ObsDataVector<int> qcflags(obsspace, obsspace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsspace, obsspace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsspace, obsspace.obsvariables()));
 
   eckit::LocalConfiguration filterConf(conf, "Poisson Disk Thinning");
   ufo::PoissonDiskThinningParameters filterParameters;
@@ -62,9 +64,9 @@ void testPoissonDiskThinning(const eckit::LocalConfiguration &conf,
 
   filter.preProcess();
 
-  std::vector<int> isObsRetained(qcflags.nlocs(), 0);
-  for (size_t i = 0; i < qcflags.nlocs(); ++i)
-    isObsRetained[i] = (qcflags[0][i] == ufo::QCflags::pass);
+  std::vector<int> isObsRetained(qcflags->nlocs(), 0);
+  for (size_t i = 0; i < qcflags->nlocs(); ++i)
+    isObsRetained[i] = ((*qcflags)[0][i] == ufo::QCflags::pass);
 
   if (obsspace.distribution()->name() == "InefficientDistribution") {
     // PART 1: Verify that all ranks have retained the same observations.

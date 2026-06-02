@@ -24,8 +24,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ProcessAMVQI::ProcessAMVQI(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                           ioda::ObsDataVector<int> & flags,
-                           ioda::ObsDataVector<float> & obserr)
+                           std::shared_ptr<ioda::ObsDataVector<int>> flags,
+                           std::shared_ptr<ioda::ObsDataVector<float>> obserr)
   : ObsProcessorBase(obsdb, false /*deferToPost?*/, flags, obserr),
     parameters_(parameters)
 {

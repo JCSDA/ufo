@@ -103,8 +103,8 @@ class OceanVerticalStabilityCheck : public FilterBase,
   static const std::string classname() {return "ufo::OceanVerticalStabilityCheck";}
 
   OceanVerticalStabilityCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                              ioda::ObsDataVector<int> & flags,
-                              ioda::ObsDataVector<float> & obserr);
+                              std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                              std::shared_ptr<ioda::ObsDataVector<float> > obserr);
   ~OceanVerticalStabilityCheck();
 
  private:

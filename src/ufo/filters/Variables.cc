@@ -53,7 +53,7 @@ Variables::Variables(const oops::ObsVariables & oopsvars)
     ASSERT(oopsvars.size() % channels.size() == 0);
     std::vector<std::string> varnames(nvars);
     for (size_t joopsvar = 0, jvar = 0;
-         joopsvar < oopsvars.size() && jvar < nvars; ++joopsvar) {
+         joopsvar < oopsvars.size(), jvar < nvars; ++joopsvar) {
       const size_t pos = oopsvars[joopsvar].find_last_of('_');
       const std::string varname = oopsvars[joopsvar].substr(0, pos);
       if (std::find(varnames.begin(), varnames.end(), varname) == varnames.end()) {

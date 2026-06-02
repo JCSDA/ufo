@@ -27,16 +27,18 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 ObsProcessorBase::ObsProcessorBase(ioda::ObsSpace & os, bool deferToPost,
-                                   ioda::ObsDataVector<int> & flags,
-                                   ioda::ObsDataVector<float> & obserr)
+                                   std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                   std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : obsdb_(os),
     flags_(flags), obserr_(obserr),
     data_(obsdb_), prior_(false), post_(false),
     deferToPost_(deferToPost)
 {
   oops::Log::trace() << "ObsProcessorBase constructor" << std::endl;
-  data_.associate(flags_, "QCflagsData");
-  data_.associate(obserr_, "ObsErrorData");
+  ASSERT(flags);
+  ASSERT(obserr);
+  data_.associate(*flags_, "QCflagsData");
+  data_.associate(*obserr_, "ObsErrorData");
 }
 
 // -----------------------------------------------------------------------------

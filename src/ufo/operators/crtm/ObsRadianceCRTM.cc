@@ -503,7 +503,7 @@ void ObsRadianceCRTM::simulateObs(const GeoVaLs & gom, ioda::ObsVector & ovec,
   ufo_radiancecrtm_simobs_f90(keyOperRadianceCRTM_, gom.toFortran(), odb_,
                               ovec.nvars(), ovec.nlocs(), ovec.toFortran(),
                               dvec.toFortran(),
-                              qc_flags);
+                              reinterpret_cast<const void*>(&qc_flags));
 
   oops::Log::trace() << "ObsRadianceCRTM::simulateObs done" << std::endl;
 }

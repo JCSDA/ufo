@@ -31,8 +31,8 @@ namespace ufo {
 SpikeAndStepCheck::SpikeAndStepCheck(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        ioda::ObsDataVector<int> & flags,
-        ioda::ObsDataVector<float> & obserr)
+        std::shared_ptr<ioda::ObsDataVector<int> > flags,
+        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "SpikeAndStepCheck constructor" << std::endl;
@@ -144,7 +144,7 @@ void SpikeAndStepCheck::applyFilter(const std::vector<bool> & apply,
     //  if any filter variable fails QC):
     const std::vector<size_t> obs_indices = obsAccessor.getValidObsIdsInProfile(iProfile,
                                                                                 apply,
-                                                                                flags_,
+                                                                                *flags_,
                                                                                 filtervars,
                                                                                 false);
     // Struct of y, x, dy, dx, dy/dx:

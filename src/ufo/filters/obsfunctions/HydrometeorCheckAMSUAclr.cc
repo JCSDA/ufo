@@ -91,10 +91,10 @@ void HydrometeorCheckAMSUAclr::compute(const ObsFilterData & in,
 
   // Set channel index
   int ich238 = 0, ich314 = 1, ich503 = 2, ich528 = 3, ich536 = 4;
-  int ich544 = 5, ich890 = 14;
+  int ich544 = 5, ich549 = 6, ich890 = 14;
   if (inst == "atms") {
     ich238 = 0, ich314 = 1, ich503 = 2, ich528 = 4, ich536 = 5;
-    ich544 = 6, ich890 = 15;
+    ich544 = 6, ich549 = 7, ich890 = 15;
   }
 
   // Get test groups from options

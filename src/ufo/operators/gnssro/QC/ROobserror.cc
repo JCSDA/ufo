@@ -21,9 +21,9 @@ namespace ufo {
 
 ROobserror::ROobserror(ioda::ObsSpace & obsdb,
                        const eckit::Configuration & config,
-                       ioda::ObsDataVector<int> & flags,
-                       ioda::ObsDataVector<float> & obserr)
-  : FilterBase(obsdb, config, flags, obserr)
+                       std::shared_ptr<ioda::ObsDataVector<int> > qc,
+                       std::shared_ptr<ioda::ObsDataVector<float> > oberr)
+  : FilterBase(obsdb, config, qc, oberr)
 {
   oops::Log::trace() << "ROobserror contructor start" << std::endl;
   // observation errors are always set up for the variables that are
@@ -54,11 +54,11 @@ void ROobserror::applyFilter(const std::vector<bool> & apply,
                              std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "ROobserror::applyFilter using priorFilter start" << std::endl;
   // Call the fortran routines to do the processing
-  flags_.save("FortranQC");    // should pass values to fortran properly
-  obserr_.save("FortranERR");  // should pass values to fortran properly
+  flags_->save("FortranQC");    // should pass values to fortran properly
+  obserr_->save("FortranERR");  // should pass values to fortran properly
   ufo_roobserror_prior_f90(key_);
-  flags_.read("FortranQC");    // should get values from fortran properly
-  obserr_.read("FortranERR");  // should get values from fortran properly
+  flags_->read("FortranQC");    // should get values from fortran properly
+  obserr_->read("FortranERR");  // should get values from fortran properly
   oops::Log::trace() << "ROobserror::applyFilter using priorFilter done" << std::endl;
 }
 

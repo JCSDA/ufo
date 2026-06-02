@@ -41,13 +41,13 @@ class HistoryCheck: public FilterBase,
 ///  2. Apply track check and stuck value check over wider window
 ///  3. Apply flags over wider window to observations in main window.
   HistoryCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
-               ioda::ObsDataVector<int> &flags,
-               ioda::ObsDataVector<float> &obserr);
+                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                 std::shared_ptr<ioda::ObsDataVector<float> > obserr);
 
   // This constructor is needed for unit testing
   HistoryCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
-               ioda::ObsDataVector<int> &flags,
-               ioda::ObsDataVector<float> &obserr,
+                 std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                 std::shared_ptr<ioda::ObsDataVector<float> > obserr,
                const eckit::LocalConfiguration &conf);
 
  private:

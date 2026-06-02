@@ -29,8 +29,8 @@ namespace ufo {
 RefractivityOneDVarCheck::RefractivityOneDVarCheck(
   ioda::ObsSpace & obsdb,
   const Parameters_ & parameters,
-  ioda::ObsDataVector<int> & flags,
-  ioda::ObsDataVector<float> & obserr
+  std::shared_ptr<ioda::ObsDataVector<int> > flags,
+  std::shared_ptr<ioda::ObsDataVector<float> > obserr
 )
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
@@ -94,8 +94,8 @@ void RefractivityOneDVarCheck::applyFilter(
   }
 
   // Save qc flags to database for retrieval in fortran - needed for channel selection
-  flags_.save("FortranQC");      // temporary measure as per ROobserror qc
-  obserr_.save("FortranERR");    // Pass latest errors to 1DVar
+  flags_->save("FortranQC");      // temporary measure as per ROobserror qc
+  obserr_->save("FortranERR");    // Pass latest errors to 1DVar
 
   // Pass it all to fortran
   ufo_refractivityonedvarcheck_apply_f90(
@@ -105,7 +105,7 @@ void RefractivityOneDVarCheck::applyFilter(
     apply_char[0]);
 
   // Read qc flags from database
-  flags_.read("FortranQC");    // temporary measure as per ROobserror qc
+  flags_->read("FortranQC");    // temporary measure as per ROobserror qc
 
   oops::Log::trace() << "RefractivityOneDVarCheck Filter complete" << std::endl;
 }

@@ -31,8 +31,8 @@ namespace ufo {
 ProfileFewObsCheck::ProfileFewObsCheck(
         ioda::ObsSpace & obsdb,
         const Parameters_ & parameters,
-        ioda::ObsDataVector<int> & flags,
-        ioda::ObsDataVector<float> & obserr)
+        std::shared_ptr<ioda::ObsDataVector<int> > flags,
+        std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "ProfileFewObsCheck constructor" << std::endl;
@@ -97,7 +97,7 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
         for (size_t jobs : obs_numbers) {
           if (apply[jobs]) {
             numTotal++;
-            if (flags_[jVar][jobs] == QCflags::pass)
+            if ((*flags_)[jVar][jobs] == QCflags::pass)
               numValid++;
           }
         }
@@ -122,7 +122,7 @@ void ProfileFewObsCheck::applyFilter(const std::vector<bool> & apply,
           const size_t iFilterVar = iVar * nChans + iChan;
           const size_t jVar = variableIndicesMap[iChan];
           for (size_t jobs : obs_numbers)
-            if (apply[jobs] && flags_[jVar][jobs] == QCflags::pass)
+            if (apply[jobs] && (*flags_)[jVar][jobs] == QCflags::pass)
               flagged[iFilterVar][jobs] = true;
         }
       }

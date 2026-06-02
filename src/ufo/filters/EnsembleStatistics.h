@@ -89,8 +89,8 @@ class EnsembleStatistics : public ObsProcessorBase,
   static const std::string classname() {return "ufo::EnsembleStatistics";}
 
   EnsembleStatistics(ioda::ObsSpace &, const Parameters_ &,
-                     ioda::ObsDataVector<int> &,
-                     ioda::ObsDataVector<float> &);
+                     std::shared_ptr<ioda::ObsDataVector<int> >,
+                     std::shared_ptr<ioda::ObsDataVector<float> >);
   ~EnsembleStatistics() override;
 
  private:

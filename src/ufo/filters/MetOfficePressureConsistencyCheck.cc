@@ -18,8 +18,8 @@ namespace ufo {
 MetOfficePressureConsistencyCheck::MetOfficePressureConsistencyCheck
 (ioda::ObsSpace & obsdb,
  const Parameters_ &parameters,
- ioda::ObsDataVector<int> &flags,
- ioda::ObsDataVector<float> &obserr)
+ std::shared_ptr<ioda::ObsDataVector<int> > flags,
+ std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, parameters, flags, obserr), options_(parameters) {
   oops::Log::trace() << "MetOfficePressureConsistencyCheck constructor" << std::endl;
   oops::Log::debug() << "MetOfficePressureConsistencyCheck: config = " << options_ << std::endl;
@@ -37,7 +37,7 @@ void MetOfficePressureConsistencyCheck::applyFilter(const std::vector<bool> & ap
     const ObsAccessor obsAccessor = createObsAccessor();
 
     const std::vector<size_t> validObsIds =
-            obsAccessor.getValidObservationIds(apply, flags_, filtervars);
+            obsAccessor.getValidObservationIds(apply, *flags_, filtervars);
 
     RecursiveSplitter splitter =
             obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);

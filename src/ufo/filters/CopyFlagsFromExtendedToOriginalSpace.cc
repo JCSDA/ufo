@@ -19,8 +19,8 @@ namespace ufo {
 
 CopyFlagsFromExtendedToOriginalSpace::CopyFlagsFromExtendedToOriginalSpace
                                     (ioda::ObsSpace &obsdb, const Parameters_ &parameters,
-                                     ioda::ObsDataVector<int> & flags,
-                                     ioda::ObsDataVector<float> & obserr)
+                                     std::shared_ptr<ioda::ObsDataVector<int>> flags,
+                                     std::shared_ptr<ioda::ObsDataVector<float>> obserr)
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace constructor start" << std::endl;
@@ -55,7 +55,7 @@ void CopyFlagsFromExtendedToOriginalSpace::applyFilter(const std::vector<bool> &
                                           const Variables & filtervars,
                                           std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "CopyFlagsFromExtendedToOriginalSpace applyFilter start" << std::endl;
-  oops::Log::debug() << "CopyFlagsFromExtendedToOriginalSpace obserr: " << obserr_ << std::endl;
+  oops::Log::debug() << "CopyFlagsFromExtendedToOriginalSpace obserr: " << *obserr_ << std::endl;
 
   // Number of locations.
   const size_t nlocs = obsdb_.nlocs();

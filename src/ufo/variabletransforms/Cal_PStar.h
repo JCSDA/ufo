@@ -44,8 +44,8 @@ class Cal_PStar : public TransformBase {
  public:
   Cal_PStar(const GenericVariableTransformParameters &options,
             const ObsFilterData &data,
-            ioda::ObsDataVector<int> &flags,
-            ioda::ObsDataVector<float> &obserr);
+            const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+            const std::shared_ptr<ioda::ObsDataVector<float>> &obserr);
   // Run variable conversion
   void runTransform(const std::vector<bool> &apply) override;
   Variables requiredVariables() const override { return gvals_; }

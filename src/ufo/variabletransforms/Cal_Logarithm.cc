@@ -18,8 +18,8 @@ static TransformMaker<Cal_Logarithm> makerCal_Logarithm_("Logarithm");
 
 Cal_Logarithm::Cal_Logarithm(
     const Parameters_ &options, const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr),
       variable_(options.variable),
       group_(options.group) {

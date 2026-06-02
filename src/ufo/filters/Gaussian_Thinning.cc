@@ -43,8 +43,8 @@ namespace ufo {
 
 Gaussian_Thinning::Gaussian_Thinning(ioda::ObsSpace & obsdb,
                                      const GaussianThinningParameters & params,
-                                     ioda::ObsDataVector<int> & flags,
-                                     ioda::ObsDataVector<float> & obserr)
+                                     std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                     std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : FilterBase(obsdb, params, flags, obserr), options_(params) {
   oops::Log::trace() << "Gaussian_Thinning constructor" << std::endl;
   oops::Log::debug() << "Gaussian_Thinning: config = " << options_ << std::endl;
@@ -66,7 +66,7 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
   // returns what it has been passed without modification.
   const RecordHandler recordHandler(obsdb_,
                                     filtervars,
-                                    flags_,
+                                    *flags_,
                                     retainOnlyIfAllFilterVariablesAreValid);
 
   // If records are treated as single obs and a category variable is also used,
@@ -87,7 +87,7 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
       obsAccessor.getValidObservationIds(options_.recordsAreSingleObs ?
                                          recordHandler.changeApplyIfRecordsAreSingleObs(apply) :
                                          apply,
-                                         flags_,
+                                         *flags_,
                                          filtervars, !retainOnlyIfAllFilterVariablesAreValid);
   }
 
@@ -231,7 +231,7 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
 
   // Optionally reject all filter variables if any has failed QC and ob is invalid for thinning
   if (retainOnlyIfAllFilterVariablesAreValid)
-    obsAccessor.flagObservationsForAnyFilterVariableFailingQC(apply, flags_, filtervars, flagged);
+    obsAccessor.flagObservationsForAnyFilterVariableFailingQC(apply, *flags_, filtervars, flagged);
 
   oops::Log::trace() << "Gaussian_Thinning applyFilter complete" << std::endl;
 }

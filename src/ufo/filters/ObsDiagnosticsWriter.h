@@ -43,8 +43,8 @@ class ObsDiagnosticsWriter : public ObsFilterBase {
  public:
   typedef ObsDiagnosticsWriterParameters Parameters_;
   ObsDiagnosticsWriter(ioda::ObsSpace &, const Parameters_ &,
-                       ioda::ObsDataVector<int> &,
-                       ioda::ObsDataVector<float> &);
+                       std::shared_ptr<ioda::ObsDataVector<int> >,
+                       std::shared_ptr<ioda::ObsDataVector<float> >);
   ~ObsDiagnosticsWriter() {}
 
   void preProcess() override {}

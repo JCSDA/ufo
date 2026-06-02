@@ -21,8 +21,8 @@ namespace ufo {
 
 ParameterSubstitution::ParameterSubstitution(ioda::ObsSpace & obsdb,
                                              const Parameters_ & parameters,
-                                             ioda::ObsDataVector<int> & flags,
-                                             ioda::ObsDataVector<float> & obserr)
+                                             std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                             std::shared_ptr<ioda::ObsDataVector<float> > obserr)
   : parameters_(parameters) {
   oops::Log::trace() << "ParameterSubstitution constructor" << std::endl;
 

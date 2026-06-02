@@ -55,9 +55,9 @@ eckit::mpi::Comm & getOrCreateEnsembleComm(size_t geoCommSize, size_t timeCommSi
 // -----------------------------------------------------------------------------
 
 EnsembleStatistics::EnsembleStatistics(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
-                                       ioda::ObsDataVector<int> & flags,
-                                       ioda::ObsDataVector<float> & obserr)
-: ObsProcessorBase(obsdb, true /*deferToPost?*/, flags, obserr),
+                                       std::shared_ptr<ioda::ObsDataVector<int> > flags,
+                                       std::shared_ptr<ioda::ObsDataVector<float> > obserr)
+: ObsProcessorBase(obsdb, true /*deferToPost?*/, std::move(flags), std::move(obserr)),
   parameters_(parameters)
 {
   oops::Log::trace() << "EnsembleStatistics constructor start" << std::endl;

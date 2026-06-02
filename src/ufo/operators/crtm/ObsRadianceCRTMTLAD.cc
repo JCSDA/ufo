@@ -61,7 +61,7 @@ ObsRadianceCRTMTLAD::~ObsRadianceCRTMTLAD() {
 void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & ydiags,
                                         const QCFlags_t & qc_flags) {
   ufo_radiancecrtm_tlad_settraj_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
-                                    ydiags.toFortran(), qc_flags);
+                                    ydiags.toFortran(), reinterpret_cast<const void*>(&qc_flags));
   oops::Log::trace() << "ObsRadianceCRTMTLAD::setTrajectory done" << std::endl;
 }
 
@@ -69,7 +69,7 @@ void ObsRadianceCRTMTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
 
 void ObsRadianceCRTMTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & ovec) const {
   ufo_radiancecrtm_simobs_tl_f90(keyOperRadianceCRTM_, geovals.toFortran(), obsspace(),
-                                 ovec.nvars(), ovec.nlocs(), ovec.toFortran());
+                             ovec.nvars(), ovec.nlocs(), ovec.toFortran());
   oops::Log::trace() << "ObsRadianceCRTMTLAD::simulateObsTL done" << std::endl;
 }
 

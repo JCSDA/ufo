@@ -49,8 +49,10 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
       obsspace.put_db("MetaData", "stringVar", dat);
   }
 
-  ioda::ObsDataVector<float> obserr(obsspace, obsspace.obsvariables(), "ObsError");
-  ioda::ObsDataVector<int> qcflags(obsspace, obsspace.obsvariables());
+  std::shared_ptr<ioda::ObsDataVector<float>> obserr(new ioda::ObsDataVector<float>(
+      obsspace, obsspace.obsvariables(), "ObsError"));
+  std::shared_ptr<ioda::ObsDataVector<int>> qcflags(new ioda::ObsDataVector<int>(
+      obsspace, obsspace.obsvariables()));
 
   const eckit::LocalConfiguration filterConf(conf, "ObsError assign");
   ufo::BlackListParameters bfparam;
@@ -75,9 +77,9 @@ void testObsErrorAssign(const eckit::LocalConfiguration &conf) {
     }
   }
   int ind = 0;
-  for (size_t varn = 0; varn < obserr.nvars(); ++varn) {
-    for (size_t locn = 0; locn < obserr.nlocs(); ++locn) {
-      EXPECT(oops::is_close_absolute(obserr[varn][locn], expectedObsError[ind], 1e-4f, 0,
+  for (size_t varn = 0; varn < obserr->nvars(); ++varn) {
+    for (size_t locn = 0; locn < obserr->nlocs(); ++locn) {
+      EXPECT(oops::is_close_absolute((*obserr)[varn][locn], expectedObsError[ind], 1e-4f, 0,
                                      oops::TestVerbosity::LOG_SUCCESS_AND_FAILURE));
       ind++;
     }

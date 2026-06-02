@@ -19,8 +19,8 @@ static TransformMaker<Cal_RelativeHumidity>
 Cal_RelativeHumidity::Cal_RelativeHumidity(
     const Parameters_ &options,
     const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
   : TransformBase(options, data, flags, obserr),
       allowSuperSaturation_(options.AllowSuperSaturation),
       specifichumidityvariable_(options.SpecificHumidityVariable),
@@ -427,8 +427,8 @@ static TransformMaker<Cal_SpecificHumidity>
 Cal_SpecificHumidity::Cal_SpecificHumidity(
     const Parameters_ &options,
     const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
     : TransformBase(options, data, flags, obserr),
       specifichumidityvariable_(options.SpecificHumidityVariable),
       pressurevariable_(options.PressureVariable),
@@ -651,8 +651,8 @@ static TransformMaker<Cal_VirtualTemperature>
 Cal_VirtualTemperature::Cal_VirtualTemperature(
     const Parameters_ &options,
     const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    const std::shared_ptr<ioda::ObsDataVector<int>> &flags,
+    const std::shared_ptr<ioda::ObsDataVector<float>> &obserr)
   : TransformBase(options, data, flags, obserr),
       specifichumidityvariable_(options.SpecificHumidityVariable),
       temperaturevariable_(options.TemperatureVariable),

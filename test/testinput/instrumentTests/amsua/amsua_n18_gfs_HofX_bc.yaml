@@ -1,0 +1,44 @@
+time window:
+  begin: 2020-11-01T09:00:00Z
+  end: 2020-11-01T15:00:00Z
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    obs options:
+      Sensor_ID: &Sensor_ID amsua_n18
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n18
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n18_obs_2020110112_m.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &all_channels 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/instruments/radiance/amsua_n18_geoval_2020110112_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/instruments/radiance/satbias_amsua_n18.2020110106.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        tlapse: &amsua_n18_tlap Data/ufo/testinput_tier_1/instruments/radiance/amsua_n18_tlapmean.txt
+      - name: lapseRate
+        tlapse: *amsua_n18_tlap
+      - name: emissivityJacobian
+      - name: sensorScanAngle
+        order: 4
+      - name: sensorScanAngle
+        order: 3
+      - name: sensorScanAngle
+        order: 2
+      - name: sensorScanAngle
+  vector ref: GsiHofXBc
+  tolerance: 1.e-7

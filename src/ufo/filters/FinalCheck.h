@@ -42,8 +42,8 @@ class FinalCheck : public ObsProcessorBase,
   static const std::string classname() {return "ufo::FinalCheck";}
 
   FinalCheck(ioda::ObsSpace & obsdb, const Parameters_ & params,
-             ioda::ObsDataVector<int> & flags,
-             ioda::ObsDataVector<float> & obserr);
+             std::shared_ptr<ioda::ObsDataVector<int>> qcflags,
+             std::shared_ptr<ioda::ObsDataVector<float>> obserr);
   ~FinalCheck() override;
 
   void doFilter() override;
