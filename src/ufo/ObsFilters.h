@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2024 UCAR
+ * (C) Copyright 2017-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -21,6 +21,7 @@
 #include "oops/util/Printable.h"
 
 #include "ufo/ObsFilter.h"
+#include "ufo/QCmanager.h"
 
 namespace ioda {
 class ObsSpace;
@@ -95,9 +96,9 @@ class ObsFilters : public util::Printable,
                            std::vector<ObsFilter> & filters);
 
   ioda::ObsSpace & obsspace_;
-  /// QCmanager filter to handle QC flags and collect statistics,
+  /// QCmanager to handle QC flags and collect statistics,
   /// whenever at least one filter is configured.
-  std::unique_ptr<ObsFilter> qcmanager_;
+  std::unique_ptr<QCmanager> qcmanager_;
   // List of filters for which the stage (pre/prior/post) will be determined automatically.
   std::vector<ObsFilter> autoFilters_;
   // List of filters which have been designated to run at the pre stage.

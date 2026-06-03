@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2019-2024 UCAR
+ * (C) Copyright 2019-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -20,7 +20,6 @@
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/DuplicateThinning.h"
 #include "ufo/filters/EnsembleStatistics.h"
-#include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/GeoVaLsWriter.h"
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
@@ -51,7 +50,6 @@
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/ProfileMaxDifferenceCheck.h"
 #include "ufo/filters/ProfileUnFlagObsCheck.h"
-#include "ufo/filters/QCmanager.h"
 #include "ufo/filters/refractivityonedvarcheck/RefractivityOneDVarCheck.h"
 #include "ufo/filters/SatName.h"
 #include "ufo/filters/SatwindInversionCorrection.h"
@@ -116,8 +114,6 @@ void instantiateObsFilterFactory() {
            duplicateThinningMaker("DuplicateThinning");
   static FilterMaker<ObsPolygonCheck>
            polygonCheckMaker("Polygon Check");
-  static FilterMaker<FinalCheck>
-           finalCheckMaker("Final Check");
   static FilterMaker<Gaussian_Thinning>
            gaussianThinningMaker("Gaussian Thinning");
   static FilterMaker<GNSSROOneDVarCheck>
@@ -170,8 +166,6 @@ void instantiateObsFilterFactory() {
            RefractivityOneDVarCheckMaker("Refractivity 1DVar Check");
   static FilterMaker<ROobserror>
            ROobserrorMaker("ROobserror");
-  static FilterMaker<QCmanager>
-           qcManagerMaker("QCmanager");
   static FilterMaker<SatName>
            satnameCheckMaker("satname");
   static FilterMaker<SatwindInversionCorrection>

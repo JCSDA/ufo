@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2024 UCAR
+ * (C) Copyright 2017-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -34,7 +34,6 @@
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"
 
-#include "ufo/filters/FinalCheck.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/GeoVaLs.h"
@@ -44,6 +43,7 @@
 #include "ufo/ObsFilters.h"
 #include "ufo/ObsOperator.h"
 #include "ufo/ObsTraits.h"
+#include "ufo/QCmanager.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace eckit
@@ -185,7 +185,7 @@ class ObsFiltersParameters : public oops::Parameters {
 // -----------------------------------------------------------------------------
 
 //!
-//! \brief Run the FinalCheck filter.
+//! \brief Run the QCmanager finalSetQc.
 //!
 //! This needs to be done manually if post-filters aren't run because the HofX vector
 //! is not available.
@@ -193,10 +193,10 @@ class ObsFiltersParameters : public oops::Parameters {
 void runFinalCheck(ioda::ObsSpace &obsspace,
                    ioda::ObsDataVector<int> &qcflags,
                    ioda::ObsDataVector<float> &obserr) {
-  FinalCheck finalCheck(obsspace, FinalCheckParameters(),
-                        qcflags,
-                        obserr);
-  finalCheck.doFilter();
+  QCmanager qcmanager(obsspace,
+                      qcflags,
+                      obserr);
+  qcmanager.finalSetQc();
 }
 
 // -----------------------------------------------------------------------------
@@ -458,14 +458,14 @@ void testFilters(size_t obsSpaceIndex, ioda::ObsSpace &obspace,
     filters.priorFilter(gval);
     oops::Log::info() << "HofX or ObsOperator sections not provided for filters, " <<
                          "postFilter not called" << std::endl;
-///   apply the FinalCheck filter (which should always be run after all other filters).
+/// do the QCmanager finalSetQc (which should always be run after all other filters).
     runFinalCheck(obspace, qcflags, obserr);
     obserr.mask(qcflags);
   } else {
 ///   no need to run priorFilter or postFilter
-    oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not "
-                      << "provided for filters, only preProcess was called" << std::endl;
-///   apply the FinalCheck filter (which should always be run after all other filters).
+    oops::Log::info() << "GeoVaLs not required, HofX or ObsOperator sections not " <<
+                         "provided for filters, only preProcess was called" << std::endl;
+/// do the QCmanager finalSetQc (which should always be run after all other filters).
     runFinalCheck(obspace, qcflags, obserr);
     obserr.mask(qcflags);
   }

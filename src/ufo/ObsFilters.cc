@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2024 UCAR
+ * (C) Copyright 2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -57,12 +57,7 @@ ObsFilters::ObsFilters(ioda::ObsSpace & os,
 
   // Prepare QC handling and statistics if any filters are present
   if (atLeastOneFilterConfigured_) {
-    eckit::LocalConfiguration conf;
-    conf.set("filter", "QCmanager");
-    ObsFilterParametersWrapper filterParams;
-    filterParams.validateAndDeserialize(conf);
-    qcmanager_ = std::make_unique<ObsFilter>(os, filterParams.filterParameters,
-                                             qcflags_, obserr_);
+    qcmanager_ = std::make_unique<QCmanager>(os, qcflags_, obserr_);
   }
 
   // Create the filters, only at 0-th iteration, or at iterations specified in
@@ -73,20 +68,6 @@ ObsFilters::ObsFilters(ioda::ObsSpace & os,
     appendToFiltersList(preFiltersParams, preFilters_);
     appendToFiltersList(priorFiltersParams, priorFilters_);
     appendToFiltersList(postFiltersParams, postFilters_);
-  }
-
-  // Create the final filter run at the end of the pipeline
-  if (atLeastOneFilterConfigured_) {
-    eckit::LocalConfiguration conf;
-    conf.set("filter", "Final Check");
-    ObsFilterParametersWrapper filterParams;
-    filterParams.validateAndDeserialize(conf);
-    if (atLeastOneAutoFilterConfigured)
-      autoFilters_.emplace_back(os, filterParams.filterParameters, qcflags_,
-                                obserr_);
-    else
-      postFilters_.emplace_back(os, filterParams.filterParameters, qcflags_,
-                                obserr_);
   }
 
   oops::Log::trace() << "ObsFilters::ObsFilters done" << std::endl;
@@ -118,14 +99,13 @@ void ObsFilters::appendToFiltersList(const FilterParams_& filtersParams,
 
 void ObsFilters::preProcess() {
   if (atLeastOneFilterConfigured_) {
+    qcmanager_->preSetQc();
     if (autoFilters_.size() > 0) {
-      qcmanager_->preProcess();  // No operation, placeholder
       for (ObsFilter& filter : autoFilters_) {
         filter.checkFilterData(FilterStage::AUTO);
         filter.preProcess();
       }
     } else {
-      qcmanager_->preProcess();  // No operation, placeholder
       for (ObsFilter& filter : preFilters_) {
         filter.checkFilterData(FilterStage::PRE);
         filter.preProcess();
@@ -138,14 +118,12 @@ void ObsFilters::preProcess() {
 
 void ObsFilters::priorFilter(const GeoVaLs& gv) {
   if (atLeastOneFilterConfigured_) {
-    qcmanager_->priorFilter(gv);  // No operation, placeholder
     if (autoFilters_.size() > 0) {
       for (ObsFilter& filter : autoFilters_) {
         filter.checkFilterData(FilterStage::AUTO);
         filter.priorFilter(gv);
       }
     } else {
-      qcmanager_->priorFilter(gv);  // No operation, placeholder
       for (ObsFilter& filter : priorFilters_) {
         filter.checkFilterData(FilterStage::PRIOR);
         filter.priorFilter(gv);
@@ -160,19 +138,19 @@ void ObsFilters::postFilter(const GeoVaLs& gv, const ioda::ObsVector& hofx,
                             const ioda::ObsVector& bias,
                             const ObsDiagnostics& diags) {
   if (atLeastOneFilterConfigured_) {
+    qcmanager_->postSetQc(hofx);
     if (autoFilters_.size() > 0) {
-      qcmanager_->postFilter(gv, hofx, bias, diags);
       for (ObsFilter& filter : autoFilters_) {
         filter.checkFilterData(FilterStage::AUTO);
         filter.postFilter(gv, hofx, bias, diags);
       }
     } else {
-      qcmanager_->postFilter(gv, hofx, bias, diags);
       for (ObsFilter& filter : postFilters_) {
         filter.checkFilterData(FilterStage::POST);
         filter.postFilter(gv, hofx, bias, diags);
       }
     }
+    qcmanager_->finalSetQc();
   }
 }
 
