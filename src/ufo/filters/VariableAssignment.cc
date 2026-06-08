@@ -452,8 +452,27 @@ ioda::ObsDtype getDataType(boost::optional<ioda::ObsDtype> dtypeParam,
                            const ufo::Variable &variable,
                            const ioda::ObsSpace &obsdb) {
   if (dtypeParam != boost::none) {
-    // If the dtype option has been set, return its value.
-    return *dtypeParam;
+    // If the dtype option has been set check it matches the
+    // current variable type and return its value.
+    ioda::ObsDtype parametersDType = *dtypeParam;
+    ioda::ObsDtype currentVariableDType = *dtypeParam;
+    std::string variableWithChannel;
+    for (size_t ich = 0; ich < variable.size(); ++ich) {
+      variableWithChannel = variable.variable(ich);
+      if (obsdb.has(variable.group(), variableWithChannel)) {
+        currentVariableDType = obsdb.dtype(variable.group(), variableWithChannel);
+        break;
+      }
+    }
+    if (currentVariableDType != parametersDType) {
+      throw eckit::BadParameter("Variable Assignment getDataType for variable: "
+                                + variableWithChannel +
+                                ". The yaml specified type does not match the type "
+                                "of the variable in the ObsSpace. "
+                                "Either change the 'type' option to match the existing variable "
+                                "or write to a new variable that does not already exist.", Here());
+    }
+    return parametersDType;
   } else {
     // Otherwise, check if the variable to which new values should be assigned already
     // exists and if so, return its data type.

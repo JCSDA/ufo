@@ -1173,3 +1173,15 @@ observations:
         name: TestReference/assigned_dateTime_variable_1
       epoch: 1001-01-01T00:00:00Z
   expectExceptionWithMessage: Invalid epoch causing overflow.
+
+- obs space:
+    <<: *MultichannelObsSpace
+    name: Invalid data type for pre existing variable with channels, throwing an exception
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/float_variable
+      channels: 1, 4
+      type: int
+      value: 75     
+  expectExceptionWithMessage: "Variable Assignment getDataType for variable: float_variable_1. The yaml specified type does not match the type of the variable in the ObsSpace. Either change the 'type' option to match the existing variable or write to a new variable that does not already exist."
