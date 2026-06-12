@@ -454,8 +454,8 @@ ioda::ObsDtype getDataType(boost::optional<ioda::ObsDtype> dtypeParam,
   if (dtypeParam != boost::none) {
     // If the dtype option has been set check it matches the
     // current variable type and return its value.
-    ioda::ObsDtype parametersDType = *dtypeParam;
-    ioda::ObsDtype currentVariableDType = *dtypeParam;
+    ioda::ObsDtype parametersDType = dtypeParam.value_or(ioda::ObsDtype::Empty);
+    ioda::ObsDtype currentVariableDType = dtypeParam.value_or(ioda::ObsDtype::Empty);
     std::string variableWithChannel;
     for (size_t ich = 0; ich < variable.size(); ++ich) {
       variableWithChannel = variable.variable(ich);
@@ -464,7 +464,8 @@ ioda::ObsDtype getDataType(boost::optional<ioda::ObsDtype> dtypeParam,
         break;
       }
     }
-    if (currentVariableDType != parametersDType) {
+    if (currentVariableDType != ioda::ObsDtype::Empty &&
+        currentVariableDType != parametersDType) {
       throw eckit::BadParameter("Variable Assignment getDataType for variable: "
                                 + variableWithChannel +
                                 ". The yaml specified type does not match the type "
