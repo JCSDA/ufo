@@ -83,9 +83,6 @@ void ProfileVerticalSmoothing::compute(const ObsFilterData & in,
   const ioda::ObsSpace & obsdb = in.obsspace();
   const oops::ObsVariables observed = obsdb.obsvariables();
 
-  // Check the number of channels and variables to process
-  const size_t nChans = std::max(obsdb.nchans(), 1LU);
-
   // Get the record numbers from the observation data.  These will be used to identify
   // which observations belong to which profile.
   const std::vector<size_t> & record_numbers = obsdb.recidx_all_recnums();
