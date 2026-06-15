@@ -6,3 +6,6 @@ _templates
 test-data-release
 ._*
 *~
+
+# CTest-generated temporary artifacts
+Testing/

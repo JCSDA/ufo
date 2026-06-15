@@ -21,6 +21,7 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/operators/radarreflectivity/directZDA/ObsDirectZDA.interface.h"
+#include "ufo/operators/radarshared/MicrophysicsOptions.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 /// Forward declarations
@@ -32,33 +33,6 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
   class ObsDiagnostics;
-
-  enum class MicrophysicsOption {
-    THOMPSON, NSSL, LIN, GFDL
-  };
-
-  struct MicrophysicsOptionParameterTraitsHelper {
-    typedef MicrophysicsOption EnumType;
-    static constexpr char enumTypeName[] = "MicrophysicsOption";
-    static constexpr util::NamedEnumerator<MicrophysicsOption> namedValues[] = {
-      { MicrophysicsOption::THOMPSON, "Thompson" },
-      { MicrophysicsOption::NSSL, "NSSL"},
-      { MicrophysicsOption::LIN, "Lin"},
-      { MicrophysicsOption::GFDL, "GFDL"}
-    };
-  };
-}  // namespace ufo
-
-namespace oops {
-
-template <>
-struct ParameterTraits<ufo::MicrophysicsOption> :
-    public EnumParameterTraits<ufo::MicrophysicsOptionParameterTraitsHelper>
-{};
-
-}  // namespace oops
-
-namespace ufo {
 
 
 /// Configuration options recognized by the radar-reflectivity directZDA operator.

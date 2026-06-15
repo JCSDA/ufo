@@ -71,6 +71,7 @@ if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/Data/ufo/testinput_tier_1")
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo)
   file(CREATE_LINK ${ufo_data_testinput_tier_1_local} ${CMAKE_CURRENT_BINARY_DIR}/Data/ufo/testinput_tier_1 SYMBOLIC)
 endif()
+
 # Make UFO_UFO_TESTFILES_PATH available at parent scope so that downstream repos have access to it
 set (UFO_UFO_TESTFILES_PATH ${ufo_data_testinput_tier_1_local} PARENT_SCOPE)
 

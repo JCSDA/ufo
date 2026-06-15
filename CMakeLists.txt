@@ -143,6 +143,9 @@ else( ${oasim_FOUND} )
     message(STATUS "OASIM NOT FOUND: Excluding Ocean Atmosphere Spectral Irradiance Model")
 endif( ${oasim_FOUND} )
 
+# PPRO dual-polarization radar operator (now built-in)
+message(STATUS "PPRO: Including built-in PPRO dual-polarization radar operator")
+
 ################################################################################
 # Test data
 ################################################################################

@@ -39,6 +39,8 @@ endif()
 add_subdirectory( operators/product )
 add_subdirectory( operators/radardopplerwind )
 add_subdirectory( operators/radarradialvelocity )
+add_subdirectory( operators/radarshared)
+add_subdirectory( operators/radarpolarimetric)
 add_subdirectory( operators/radarreflectivity)
 if ( rttov_FOUND )
     if(DEFINED rttov_VERSION_MAJOR AND rttov_VERSION_MAJOR EQUAL 14)
@@ -143,6 +145,7 @@ list( APPEND ufo_src_files
     ${sfccorrected_src_files}
     ${radardopplerwind_src_files}
     ${radarradialvelocity_src_files}
+    ${radarshared_src_files}
     ${radarreflectivity_src_files}
     ${profile_src_files}
     ${groundgnss_src_files}
@@ -163,6 +166,8 @@ list( APPEND ufo_src_files
     ${densityreduction_src_files}
     ${pathsum_src_files}
 )
+
+list( APPEND ufo_src_files ${radarpolarimetric_src_files} )
 
 ## Create Library target
 ecbuild_add_library( TARGET   ufo
@@ -213,6 +218,7 @@ endif()
 if(oasim_FOUND)
     target_link_libraries(ufo PUBLIC oasim)
 endif()
+
 
 
 ## Include paths

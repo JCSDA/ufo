@@ -1,0 +1,32 @@
+time window:
+  begin: 2022-06-24T07:30:00Z
+  end: 2022-06-24T08:30:00Z
+
+observations:
+- obs operator:
+    name: PPRO
+    VertCoord: height_above_mean_sea_level
+    microphysics option: TCWA2
+    polarimetric operator: TCWA2
+    var_rain_mixing_ratio: mixing_ratio_of_rain
+    var_snow_mixing_ratio: mixing_ratio_of_snow
+    var_graupel_mixing_ratio: mixing_ratio_of_graupel
+    var_rain_number_concentration: rain_number_concentration
+    var_snow_number_concentration: snow_number_concentration
+    var_graupel_number_concentration: graupel_number_concentration
+    var_cloud_mixing_ratio: cloud_liquid_water
+    var_ice_mixing_ratio: cloud_liquid_ice
+    var_ice_number_concentration: cloud_ice_number_concentration
+    var_snow_melted_fraction: snow_melted_fraction
+    var_graupel_melted_fraction: graupel_melted_fraction
+  obs space:
+    name: PPRO_TCWA2
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ppro_tcwa2_obs.nc
+    simulated variables: [equivalentReflectivityFactor, differentialReflectivity, specificDifferentialPhase]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ppro_tcwa2_geovals.nc
+  vector ref: TestReference
+  tolerance: 1.0e-03

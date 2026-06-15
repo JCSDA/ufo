@@ -1,0 +1,32 @@
+time window:
+  begin: 2022-06-24T07:30:00Z
+  end: 2022-06-24T08:30:00Z
+
+observations:
+- obs operator:
+    name: PPRO
+    VertCoord: height_above_mean_sea_level
+    microphysics option: NSSL
+    polarimetric operator: Zhang21
+    melting scheme: liu24
+    var_rain_mixing_ratio: mixing_ratio_of_rain
+    var_snow_mixing_ratio: mixing_ratio_of_snow
+    var_graupel_mixing_ratio: mixing_ratio_of_graupel
+    var_hail_mixing_ratio: mixing_ratio_of_hail
+    var_rain_number_concentration: rain_number_concentration
+    var_snow_number_concentration: snow_number_concentration
+    var_graupel_number_concentration: graupel_number_concentration
+    var_hail_number_concentration: hail_number_concentration
+    var_graupel_vol_mixing_ratio: volume_mixing_ratio_of_graupel_in_air
+    var_hail_vol_mixing_ratio: volume_mixing_ratio_of_hail_in_air
+  obs space:
+    name: PPRO_NSSL
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/ppro_nssl_obs.nc
+    simulated variables: [equivalentReflectivityFactor, differentialReflectivity, specificDifferentialPhase]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/ppro_nssl_geovals.nc
+  vector ref: TestReference
+  tolerance: 1.0e-03
