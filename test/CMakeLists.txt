@@ -16,26 +16,35 @@ include( ufo_functions )
 #elseif (crtm_FOUND)
 if (crtm_FOUND)
   get_property(UFO_CRTM_TESTFILES_PATH GLOBAL PROPERTY CRTM_TESTFILES_PATH)
+  message(STATUS "CRTM test data path from global property CRTM_TESTFILES_PATH: ${UFO_CRTM_TESTFILES_PATH}")
   if (EXISTS ${UFO_CRTM_TESTFILES_PATH})
-    message(STATUS "Skipping download of test data from ${crtm_data_download_url}/${crtm_data_tarball_name} since it already exists")
+    # The global property path exists, CRTM has already downloaded the coefficients
+    # and stored the path in a global property so use it and skip the download
+    message(STATUS "Skipping download of test data from ${crtm_data_download_url}/${crtm_data_tarball_name} since it already exists in ${UFO_CRTM_TESTFILES_PATH}")
   else()
-    message(STATUS "Download test data from ${crtm_data_download_url}/${crtm_data_tarball_name}")
-    include(FetchContent)
-    FetchContent_Declare(
-      crtm-testdata
-      DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/test-data-release
-      DOWNLOAD_NO_EXTRACT ON
-      URL      ${crtm_data_download_url}/${crtm_data_tarball_name}
-      URL_HASH MD5=${crtm_data_tarball_hash}
-    )
-    FetchContent_MakeAvailable(crtm-testdata)
-    if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
-       # Tarballs path for versions 3.0.0 and higher
-       file(ARCHIVE_EXTRACT INPUT ${CMAKE_SOURCE_DIR}/test-data-release/${crtm_data_tarball_name} DESTINATION ${CMAKE_SOURCE_DIR}/test-data-release/crtm/)
-    else ()
-       # Tarballs for versions 2.4.0 and 2.4.1 already contain /crtm in the path
-       file(ARCHIVE_EXTRACT INPUT ${CMAKE_SOURCE_DIR}/test-data-release/${crtm_data_tarball_name} DESTINATION ${CMAKE_SOURCE_DIR}/test-data-release/)
-    endif ()
+    # Global Property did not set the path, so create a path to store the crtm coefficient
+    set (UFO_CRTM_TESTFILES_PATH "${CMAKE_SOURCE_DIR}/test-data-release/crtm/${crtm_data_tag}/${crtm_data_tag_postfix}")
+    if (EXISTS ${UFO_CRTM_TESTFILES_PATH})
+       message(STATUS "Skipping download of test data from ${crtm_data_download_url}/${crtm_data_tarball_name} since it already exists in ${UFO_CRTM_TESTFILES_PATH}")
+    else()
+       message(STATUS "Download test data from ${crtm_data_download_url}/${crtm_data_tarball_name} to  ${UFO_CRTM_TESTFILES_PATH}")
+       include(FetchContent)
+       FetchContent_Declare(
+          crtm-testdata
+          DOWNLOAD_DIR ${CMAKE_SOURCE_DIR}/test-data-release
+          DOWNLOAD_NO_EXTRACT ON
+          URL      ${crtm_data_download_url}/${crtm_data_tarball_name}
+          URL_HASH MD5=${crtm_data_tarball_hash}
+       )
+       FetchContent_MakeAvailable(crtm-testdata)
+       if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
+          # Tarballs path for versions 3.0.0 and higher
+          file(ARCHIVE_EXTRACT INPUT ${CMAKE_SOURCE_DIR}/test-data-release/${crtm_data_tarball_name} DESTINATION ${CMAKE_SOURCE_DIR}/test-data-release/crtm/)
+       else ()
+          # Tarballs for versions 2.4.0 and 2.4.1 already contain /crtm in the path
+          file(ARCHIVE_EXTRACT INPUT ${CMAKE_SOURCE_DIR}/test-data-release/${crtm_data_tarball_name} DESTINATION ${CMAKE_SOURCE_DIR}/test-data-release/)
+       endif ()
+    endif()
   endif()
 endif()
 # Make UFO_CRTM_TESTFILES_PATH available at parent scope so that downstream repos have access to it
