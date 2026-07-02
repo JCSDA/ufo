@@ -25,9 +25,9 @@ module ufo_radarradialvelocity_mod
    procedure :: simobs => ufo_radarradialvelocity_simobs
  end type ufo_radarradialvelocity
 
- character(len=maxvarlen), dimension(3), parameter :: geovars_default = (/var_u, &
+ character(len=maxvarlen), dimension(3), parameter :: geovars_default = [var_u, &
                                                                         var_v, &
-                                                                        var_w  /)
+                                                                        var_w  ]
 
 
 contains
@@ -35,7 +35,7 @@ contains
 ! ------------------------------------------------------------------------------
 subroutine ufo_radarradialvelocity_setup(self, yaml_conf)
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 implicit none
 class(ufo_radarradialvelocity), intent(inout)     :: self
 type(fckit_configuration), intent(in) :: yaml_conf
@@ -46,9 +46,9 @@ character(kind=c_char,len=:), allocatable :: coord_name
 
   call yaml_conf%get_or_die("VertCoord",coord_name)
   self%v_coord = coord_name
-  if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_geomz ) then
+  if( trim(self%v_coord) /= var_z .and. trim(self%v_coord) /= var_geomz ) then
       call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
-  endif
+  end if
 
   call self%geovars%push_back(self%v_coord)
 
@@ -113,7 +113,7 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
     tmp = vcoordprofile%vals(:,iobs)
     tmp2 = obsvcoord(iobs)
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
-  enddo
+  end do
 
 ! Number of variables in geovars (without the vertical coordinate)
   nvars_geovars = self%geovars%nvars() - 1
@@ -130,8 +130,8 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
     do iobs = 1, nlocs
       call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
                              & vfields(ivar,iobs), wi(iobs), wf(iobs))
-    enddo
-  enddo
+    end do
+  end do
 
   vterminal=0.0
   do ivar = 1, nvars
@@ -139,7 +139,7 @@ subroutine ufo_radarradialvelocity_simobs(self, geovals, obss, nvars, nlocs, hof
       hofx(ivar,iobs) = vfields(1,iobs)*sinazm_costilt(iobs) &
                       + vfields(2,iobs)*cosazm_costilt(iobs) &
                       + (vfields(3,iobs)-vterminal(iobs))*sintilt(iobs)
-    enddo
+    end do
   end do
 
 ! Cleanup memory

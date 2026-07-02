@@ -57,13 +57,13 @@
 
  integer , parameter, public    :: npoly = 30
  integer , parameter, private   :: maxinstr = 20
- integer , dimension(maxinstr), private:: maxfov = (/ 2048,2048,2048, &
+ integer , dimension(maxinstr), private:: maxfov = [ 2048,2048,2048, &
                                                       56,56,56, &
                                                       56,56, 8, &
                                                       11,30,90, &
                                                       90,96,96, &
                                                       96,90,30, &
-                                                      130,96 /)
+                                                      130,96 ]
 
  real(r_kind) , dimension(:), allocatable, private :: alongtrackangle
  real(r_kind) , dimension(:), allocatable, private :: crosstrackangle
@@ -85,9 +85,9 @@
  real(r_kind), pointer, private, dimension(:,:,:) :: atmscoeff
 
 ! Variables for AMSUA power determination. the number after the underscore is the
-! satellite number.  
+! satellite number.
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_15 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_15 = reshape( [   &
  -1.00367358e-002_r_kind, -1.17344270e-002_r_kind, -9.72701728e-001_r_kind, -7.81457871e-003_r_kind,  &
  -2.11871578e-003_r_kind,  6.00348110e-004_r_kind, -6.77819597e-004_r_kind, -2.68106451e-005_r_kind,  &
  -2.42081527e-002_r_kind,  2.95991510e-001_r_kind, -9.96972978e-001_r_kind, -1.81507263e-002_r_kind,  &
@@ -147,10 +147,10 @@
   3.87737527e-002_r_kind, -2.41649374e-001_r_kind, -9.37661827e-001_r_kind,  1.40356580e-002_r_kind,  &
   1.63714646e-003_r_kind,  1.03963783e-003_r_kind, -4.49913321e-004_r_kind,  2.07235353e-005_r_kind,  &
  -1.22435763e-001_r_kind, -3.87322575e-001_r_kind, -4.49794233e-001_r_kind,  7.79016390e-002_r_kind,  &
- -6.47236556e-002_r_kind,  4.48352861e-004_r_kind,  1.75243057e-003_r_kind, -7.81173076e-005_r_kind/), &
-       (/8,2,15/) )
+ -6.47236556e-002_r_kind,  4.48352861e-004_r_kind,  1.75243057e-003_r_kind, -7.81173076e-005_r_kind], &
+       [8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_16 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_16 = reshape( [   &
   2.36253720e-002_r_kind, -2.01956004e-001_r_kind, -9.42441463e-001_r_kind,  4.67489986e-003_r_kind,  &
  -5.80562279e-003_r_kind, -6.12580625e-004_r_kind, -4.41984390e-004_r_kind, -3.52604752e-006_r_kind,  &
   2.19323412e-002_r_kind, -2.41464257e-001_r_kind, -8.76489699e-001_r_kind,  7.69139780e-003_r_kind,  &
@@ -210,10 +210,10 @@
   2.49365754e-002_r_kind,  2.07554460e-001_r_kind, -9.28714156e-001_r_kind, -3.25016864e-003_r_kind,  &
  -1.66032407e-002_r_kind,  3.08119995e-003_r_kind,  4.82223346e-004_r_kind, -8.70772346e-005_r_kind,  &
  -8.07163268e-002_r_kind,  3.89334202e-001_r_kind, -1.21344244e+000_r_kind,  1.38754621e-001_r_kind,  &
- -7.67704891e-003_r_kind, -9.02157184e-003_r_kind,  6.78973622e-004_r_kind,  1.44773308e-004_r_kind/),&
-       (/ 8,2,15/) )
+ -7.67704891e-003_r_kind, -9.02157184e-003_r_kind,  6.78973622e-004_r_kind,  1.44773308e-004_r_kind],&
+       [ 8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_17 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_17 = reshape( [   &
   1.04546631e-002_r_kind, -1.68463737e-002_r_kind, -9.45984364e-001_r_kind,  1.37877243e-003_r_kind,  &
  -3.02611245e-003_r_kind, -4.58378316e-004_r_kind, -6.50028989e-004_r_kind,  1.92575317e-005_r_kind,  &
   8.65941588e-003_r_kind, -5.86456992e-002_r_kind, -1.05106378e+000_r_kind, -3.31778708e-003_r_kind,  &
@@ -273,10 +273,10 @@
  -4.41915691e-002_r_kind,  1.59778103e-001_r_kind, -9.23613429e-001_r_kind,  6.46106228e-002_r_kind,  &
  -2.46498063e-002_r_kind, -7.18605192e-003_r_kind,  9.84023209e-004_r_kind,  1.64684461e-004_r_kind,  &
  -8.41936469e-002_r_kind,  2.42628723e-001_r_kind, -9.72940922e-001_r_kind, -2.08250862e-002_r_kind,  &
- -2.04343498e-002_r_kind, -3.75839561e-004_r_kind,  8.31458718e-004_r_kind,  2.66584175e-005_r_kind/),&
-       (/ 8,2,15/) )
+ -2.04343498e-002_r_kind, -3.75839561e-004_r_kind,  8.31458718e-004_r_kind,  2.66584175e-005_r_kind],&
+       [ 8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_18 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_18 = reshape( [   &
   9.22924746e-003_r_kind,  1.49358943e-001_r_kind, -1.00322044e+000_r_kind, -3.36418790e-003_r_kind,  &
   7.25480262e-003_r_kind,  5.94239740e-004_r_kind, -1.06518064e-003_r_kind,  8.64808044e-006_r_kind,  &
  -1.35190440e-002_r_kind, -1.06490999e-001_r_kind, -1.07750916e+000_r_kind, -5.29923243e-003_r_kind,  &
@@ -336,10 +336,10 @@
  -1.05498888e-001_r_kind,  1.38700381e-001_r_kind, -9.18839693e-001_r_kind,  5.23423683e-003_r_kind,  &
  -2.72325296e-002_r_kind,  4.52917721e-003_r_kind,  1.03306631e-003_r_kind, -1.61810633e-004_r_kind,  &
  -1.89013511e-001_r_kind, -5.92692830e-002_r_kind, -9.70508218e-001_r_kind,  2.08470389e-001_r_kind,  &
- -3.25677581e-002_r_kind, -7.15242233e-003_r_kind,  1.50414580e-003_r_kind, -4.58021022e-005_r_kind/),&
-       (/ 8,2,15/) )
+ -3.25677581e-002_r_kind, -7.15242233e-003_r_kind,  1.50414580e-003_r_kind, -4.58021022e-005_r_kind],&
+       [ 8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_19 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_19 = reshape( [   &
   2.88968161e-002_r_kind,  5.72211891e-002_r_kind, -8.97529483e-001_r_kind,  1.36518311e-002_r_kind,  &
  -6.98799780e-003_r_kind, -1.08093256e-003_r_kind, -4.31537890e-004_r_kind,  2.89580021e-005_r_kind,  &
  -8.22370946e-002_r_kind,  1.84141174e-001_r_kind, -9.10946906e-001_r_kind, -1.95769705e-002_r_kind,  &
@@ -399,10 +399,10 @@
  -1.09833397e-001_r_kind,  8.32149014e-002_r_kind, -9.15308714e-001_r_kind, -9.75017436e-003_r_kind,  &
  -2.72793751e-002_r_kind,  5.97133115e-003_r_kind,  9.92798945e-004_r_kind, -1.96212786e-004_r_kind,  &
  -1.12866320e-001_r_kind,  7.99755678e-002_r_kind, -1.04918265e+000_r_kind,  2.13572606e-001_r_kind,  &
- -2.87145432e-002_r_kind, -6.76067220e-003_r_kind,  1.32346945e-003_r_kind, -6.15322861e-005_r_kind/),&
-       (/ 8,2,15/) )
+ -2.87145432e-002_r_kind, -6.76067220e-003_r_kind,  1.32346945e-003_r_kind, -6.15322861e-005_r_kind],&
+       [ 8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_20 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_20 = reshape( [   &
  -5.53324930e-002_r_kind,  8.96679163e-002_r_kind, -9.26657975e-001_r_kind,  9.66761820e-003_r_kind,  &
   2.83907837e-004_r_kind, -6.78065931e-004_r_kind, -6.63810060e-004_r_kind,  2.54925835e-005_r_kind,  &
  -5.02091786e-003_r_kind, -1.77881233e-002_r_kind, -1.09147155e+000_r_kind, -4.96294815e-004_r_kind,  &
@@ -462,10 +462,10 @@
  -9.63953212e-002_r_kind,  5.01724146e-002_r_kind, -9.92312431e-001_r_kind, -9.74688586e-003_r_kind,  &
  -7.74239656e-003_r_kind,  1.17365213e-003_r_kind, -2.19702270e-004_r_kind, -4.11848814e-005_r_kind,  &
  -5.69399334e-002_r_kind, -2.14651451e-001_r_kind, -8.92655075e-001_r_kind,  2.09093615e-002_r_kind,  &
- -1.54947042e-002_r_kind, -1.60737406e-003_r_kind, -9.41211692e-005_r_kind,  8.22987568e-005_r_kind/),&
-       (/ 8,2,15/) )
+ -1.54947042e-002_r_kind, -1.60737406e-003_r_kind, -9.41211692e-005_r_kind,  8.22987568e-005_r_kind],&
+       [ 8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_21 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_21 = reshape( [   &
  -5.93122318e-002_r_kind,  1.51160493e-001_r_kind, -9.29837704e-001_r_kind,  1.11907059e-002_r_kind,  &
  -2.92930426e-003_r_kind, -5.37499378e-004_r_kind, -4.92306892e-004_r_kind,  2.17214656e-005_r_kind,  &
   9.18469334e-004_r_kind, -9.17405635e-002_r_kind, -1.02836871e+000_r_kind, -1.24654919e-002_r_kind,  &
@@ -525,10 +525,10 @@
  -1.46404251e-001_r_kind,  1.02264553e-001_r_kind, -8.96511912e-001_r_kind, -8.85267928e-003_r_kind,  &
  -2.83047054e-002_r_kind,  5.31384861e-003_r_kind,  1.06912781e-003_r_kind, -1.96049135e-004_r_kind,  &
  -1.04192808e-001_r_kind, -3.60217482e-001_r_kind, -9.75351274e-001_r_kind,  1.85505807e-001_r_kind,  &
- -2.61770226e-002_r_kind, -6.75599044e-003_r_kind,  1.03888079e-003_r_kind, -2.92561799e-005_r_kind/),&
-       (/ 8,2,15/) )
+ -2.61770226e-002_r_kind, -6.75599044e-003_r_kind,  1.03888079e-003_r_kind, -2.92561799e-005_r_kind],&
+       [ 8,2,15] )
 
- real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_22 = reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,15) :: amsucoeff_22 = reshape( [   &
   9.75104049e-003_r_kind, -2.67954972e-002_r_kind, -1.00441885e+000_r_kind, -4.13552392e-003_r_kind,  &
   4.83619282e-003_r_kind,  2.23311290e-004_r_kind, -9.30484326e-004_r_kind, -1.82476233e-005_r_kind,  &
   8.98046792e-003_r_kind, -1.36037081e-001_r_kind, -1.01462388e+000_r_kind,  2.42774701e-003_r_kind,  &
@@ -588,13 +588,13 @@
  -8.75972584e-002_r_kind, -1.67156681e-001_r_kind, -9.24742103e-001_r_kind, -1.26165589e-002_r_kind,  &
  -1.95397697e-002_r_kind,  5.43559855e-003_r_kind,  6.36994955e-004_r_kind, -1.51825137e-004_r_kind,  &
  -9.06753615e-002_r_kind,  6.05665110e-002_r_kind, -1.01096153e+000_r_kind,  1.62782580e-001_r_kind,  &
- -2.76400503e-002_r_kind, -4.19872068e-003_r_kind,  1.38002378e-003_r_kind, -9.29419766e-005_r_kind/) ,  &
-       (/ 8,2,15/) )
+ -2.76400503e-002_r_kind, -4.19872068e-003_r_kind,  1.38002378e-003_r_kind, -9.29419766e-005_r_kind] ,  &
+       [ 8,2,15] )
 
  real(r_kind), pointer, private, dimension(:,:,:) :: mhscoeff
 
 ! coefficients for mhs.  each satellite in a separate data statement.
- real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_18 = Reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_18 = Reshape( [   &
    3.4965403e-002_r_kind,   2.1628516e+000_r_kind,  -9.5464048e+000_r_kind,  -1.6210480e+000_r_kind,  &
   -1.4857870e+000_r_kind,   1.3150197e+000_r_kind,   5.7198799e-001_r_kind,  -2.8890452e-001_r_kind,  &
   -5.9196603e-002_r_kind,  -6.7636013e-001_r_kind,  -8.6714487e+000_r_kind,  -1.6742078e+000_r_kind,  &
@@ -614,10 +614,10 @@
   -8.0707878e-002_r_kind,   2.7671516e+000_r_kind,  -1.0256569e+001_r_kind,  -1.5148641e+000_r_kind,  &
    2.3168449e-001_r_kind,   6.6968900e-001_r_kind,   1.5130611e-001_r_kind,  -1.0532290e-001_r_kind,  &
   -1.4505735e-001_r_kind,  -1.4259889e+000_r_kind,  -9.2915115e+000_r_kind,   9.5977956e-001_r_kind,  &
-   2.6349644e-003_r_kind,  -6.5305108e-001_r_kind,   1.1358295e-001_r_kind,   1.2522188e-001_r_kind/),  &
-       (/ 8,2,5 /) )
+   2.6349644e-003_r_kind,  -6.5305108e-001_r_kind,   1.1358295e-001_r_kind,   1.2522188e-001_r_kind],  &
+       [ 8,2,5 ] )
 
- real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_19 = Reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_19 = Reshape( [   &
    1.6703354e-001_r_kind,  -8.1146163e-001_r_kind,  -1.0738719e+001_r_kind,   2.2400708e+000_r_kind,  &
   -5.1594537e-001_r_kind,  -1.6325672e+000_r_kind,   4.3368569e-001_r_kind,   3.2888728e-001_r_kind,  &
   -6.6353470e-002_r_kind,  -1.1122364e+000_r_kind,  -9.9416256e+000_r_kind,   1.1250391e+000_r_kind,  &
@@ -637,10 +637,10 @@
    3.6919810e-002_r_kind,   1.3084960e+000_r_kind,  -7.9118624e+000_r_kind,  -2.3499284e+000_r_kind,  &
   -1.2343282e+000_r_kind,   1.0643171e+000_r_kind,   3.3098811e-001_r_kind,  -1.2246436e-001_r_kind,  &
    2.0455542e-001_r_kind,  -4.9476732e-002_r_kind,  -1.0600542e+001_r_kind,   8.5216874e-001_r_kind,  &
-   2.0095403e+000_r_kind,  -7.0319116e-001_r_kind,  -4.6245363e-001_r_kind,   1.1573103e-001_r_kind/),  &
-       (/ 8,2,5 /) )
+   2.0095403e+000_r_kind,  -7.0319116e-001_r_kind,  -4.6245363e-001_r_kind,   1.1573103e-001_r_kind],  &
+       [ 8,2,5 ] )
 
- real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_20 = Reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_20 = Reshape( [   &
   -2.1541499e-002_r_kind,   3.0639741e-001_r_kind,  -8.4143925e+000_r_kind,  -3.7867212e+000_r_kind,  &
   -5.9394364e+000_r_kind,   4.2701573e+000_r_kind,   7.0584254e+000_r_kind,   1.9181076e+000_r_kind,  &
   -1.2439569e-001_r_kind,   2.6713184e-001_r_kind,  -8.2538710e+000_r_kind,  -6.7376202e-001_r_kind,  &
@@ -660,10 +660,10 @@
    3.6925436e-003_r_kind,   8.2820499e-001_r_kind,  -1.0636771e+001_r_kind,  -3.3515611e+000_r_kind,  &
    2.0096780e-001_r_kind,   2.4985476e+000_r_kind,   1.1403252e+000_r_kind,   5.8821380e-002_r_kind,  &
   -6.9040768e-002_r_kind,   6.4781201e-001_r_kind,  -1.1727573e+001_r_kind,  -1.3895519e-001_r_kind,  &
-   3.8286030e+000_r_kind,  -5.2255921e-002_r_kind,  -1.6591578e+000_r_kind,  -4.7322434e-001_r_kind/),  &
-       (/ 8,2,5 /) )
+   3.8286030e+000_r_kind,  -5.2255921e-002_r_kind,  -1.6591578e+000_r_kind,  -4.7322434e-001_r_kind],  &
+       [ 8,2,5 ] )
 
- real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_21 = Reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_21 = Reshape( [   &
    7.6232433e-002_r_kind,   1.3942748e+000_r_kind,  -9.8446512e+000_r_kind,  -2.0756340e+000_r_kind,  &
   -1.3671181e+000_r_kind,   1.6274825e+000_r_kind,   5.9784073e-001_r_kind,  -3.4564933e-001_r_kind,  &
   -3.1608678e-002_r_kind,   2.4189080e-001_r_kind,  -9.2069426e+000_r_kind,  -2.5967264e-001_r_kind,  &
@@ -683,10 +683,10 @@
    1.2025704e-002_r_kind,   1.2674695e+000_r_kind,  -1.0516845e+001_r_kind,  -1.0019062e+000_r_kind,  &
    1.4141989e-001_r_kind,   6.2272865e-001_r_kind,   1.7704187e-001_r_kind,  -1.0959747e-001_r_kind,  &
   -4.0295798e-002_r_kind,   2.1012750e+000_r_kind,  -9.8839283e+000_r_kind,  -9.8200977e-001_r_kind,  &
-   8.2772732e-001_r_kind,   5.4999664e-003_r_kind,  -3.2910269e-002_r_kind,   3.2401454e-002_r_kind/) ,  &
-       (/ 8,2,5 /) )
+   8.2772732e-001_r_kind,   5.4999664e-003_r_kind,  -3.2910269e-002_r_kind,   3.2401454e-002_r_kind] ,  &
+       [ 8,2,5 ] )
 
- real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_22 = Reshape( (/   &
+ real(r_kind), target, private, dimension(0:7,2,5) :: mhscoeff_22 = Reshape( [   &
    2.5050598e-001_r_kind,  -6.2730297e-002_r_kind,  -8.8656340e+000_r_kind,  -6.3468504e-001_r_kind,  &
   -1.9718552e+000_r_kind,   4.9594674e-001_r_kind,   6.9558799e-001_r_kind,  -8.0025569e-002_r_kind,  &
   -3.3202425e-002_r_kind,  -2.3962040e-001_r_kind,  -8.4419193e+000_r_kind,   1.2665473e+000_r_kind,  &
@@ -706,8 +706,8 @@
   -6.4852767e-002_r_kind,   9.2157054e-001_r_kind,  -9.4032297e+000_r_kind,  -2.8345444e+000_r_kind,  &
   -7.5975519e-001_r_kind,   2.1118293e+000_r_kind,   2.9422322e-001_r_kind,  -3.9856154e-001_r_kind,  &
   -6.8119340e-002_r_kind,  -1.2434633e+000_r_kind,  -9.6530972e+000_r_kind,   9.4927631e-002_r_kind,  &
-   8.7302977e-001_r_kind,  -1.0281616e-001_r_kind,  -2.4406007e-002_r_kind,   3.3993088e-002_r_kind/) ,  &
-       (/ 8,2,5 /) )
+   8.7302977e-001_r_kind,  -1.0281616e-001_r_kind,  -2.4406007e-002_r_kind,   3.3993088e-002_r_kind] ,  &
+       [ 8,2,5 ] )
 
  contains
 
@@ -741,7 +741,7 @@
 !                19 = SAPHIR
 !                20 = ATMS 3.3 DEG
 !   satid     - satellite id
-!   expansion - expansion factor.  Must be 1.0 for accurate renderine, 
+!   expansion - expansion factor.  Must be 1.0 for accurate renderine,
 !               > 1.0 makes bigger ellipses, < 1.0 makes smaller ellipses.
 !               do not make bigger than 3.0. use 1.0 for ir and 3.0 for
 !               microwave.
@@ -776,7 +776,7 @@
    write(6,*) "INSTRUMENT_INIT: EXPANSION FACTOR IS OUT OF RANGE."
    valid=.false.
    return
- endif
+ end if
 
  call get_sat_height(satid, height, valid)
  if (.not.valid) return
@@ -790,21 +790,21 @@
  allocate (rmax(1:maxfov(instr)))
  allocate (rmin(1:maxfov(instr)))
  allocate (eccen(1:maxfov(instr)))
- 
+
  do i = 1, npoly
     psi(i) = two*pi*float(i-1)/float(npoly-1) ! Will connect Npoly points
- enddo
- 
-! Precompute angles and sizes for speed. For accurate representation of fov, 
+ end do
+
+! Precompute angles and sizes for speed. For accurate representation of fov,
 ! this computation should go with the height from the 1B.
 
- do ifov = 1 , maxfov(instr)  
+ do ifov = 1 , maxfov(instr)
     call fovanglessizes(instr,height,ifov,ata,cta,atf,ctf)
     alongtrackangle(ifov)   = ata
     crosstrackangle(ifov)   = cta
     alongtrackfovsize(ifov) = atf
     crosstrackfovsize(ifov) = ctf
- enddo  ! ifov
+ end do  ! ifov
 
  rmax = half * crosstrackangle * expansion ! remember, these are semiaxes
  rmin = half * alongtrackangle * expansion
@@ -813,7 +813,7 @@
     ratio = rmin(i)**2/rmax(i)**2
     if(ratio > one ) ratio = one  !  this takes care of some precision issues
     eccen(i) = sqrt(one - ratio)
- enddo
+ end do
 
 ! set antenna power coefficients for amsu-a sensor.  each satellite
 ! has different coefficients.  i had to create separate data
@@ -823,36 +823,36 @@
  nullify(amsucoeff)
  if (instr == 11) then  ! amsu-a sensor
     select case (trim(satid))
-       case('n15')
+       case("n15")
           amsucoeff=>amsucoeff_15
-       case('n16')
+       case("n16")
           amsucoeff=>amsucoeff_16
-       case('n17')
+       case("n17")
           amsucoeff=>amsucoeff_17
-       case('n18')
+       case("n18")
           amsucoeff=>amsucoeff_18
-       case('n19')
+       case("n19")
           amsucoeff=>amsucoeff_19
-       case('metop-a')
+       case("metop-a")
           amsucoeff=>amsucoeff_20
-       case('metop-b')
+       case("metop-b")
           amsucoeff=>amsucoeff_21
-       case('metop-c')
+       case("metop-c")
           amsucoeff=>amsucoeff_22
-       case('aqua')
+       case("aqua")
           amsucoeff=>amsucoeff_19
        case default
           write(6,*) "INSTRUMENT_INIT: NO AMSUA COEFFICIENTS FOR SATELLITE ",trim(satid)
           valid=.false.
           return
     end select
- endif
+ end if
 
  nullify(atmscoeff)
  if (instr == 20) then ! atms 3.3.  we don't have coefficients for atms.
                        ! but it is similar to amsua.
     atmscoeff=>amsucoeff_20
- endif
+ end if
 
 ! set antenna power coefficients for mhs sensor.  each satellite
 ! has different coefficients.  i had to create separate data
@@ -862,22 +862,22 @@
  nullify(mhscoeff)
  if (instr == 13) then  ! mhs sensor
     select case (trim(satid))
-       case('n18')
+       case("n18")
           mhscoeff=>mhscoeff_18
-       case('n19')
+       case("n19")
           mhscoeff=>mhscoeff_19
-       case('metop-a')
+       case("metop-a")
           mhscoeff=>mhscoeff_20
-       case('metop-b')
+       case("metop-b")
           mhscoeff=>mhscoeff_21
-       case('metop-c')
+       case("metop-c")
           mhscoeff=>mhscoeff_22
        case default
           write(6,*) "INSTRUMENT_INIT: NO MHS COEFFICIENTS FOR SATELLITE ",trim(satid)
           valid=.false.
           return
     end select
- endif
+ end if
 
  end subroutine instrument_init
 
@@ -954,20 +954,20 @@
 !                      18 = IASI
 !                      20 = ATMS 3.3 DEG
 !   satellite_azimuth - satellite azimuth angle
-!   lat               - latitude of center of fov 
+!   lat               - latitude of center of fov
 !   lon               - longitude of center of fov
-!  
+!
 ! output argument list:
 !   elats            - ellipse latitudes  centered about lat,lon
 !   elons            - ellipse longitudes centered about lat,lon
 !
 ! remarks:
 !
-!   Set npoly for the order of the polygon that represents the ellipse. 
+!   Set npoly for the order of the polygon that represents the ellipse.
 !
 !   elats and elon must be dimensioned to npoly in the calling routine.
 !
-!   There are several engineering checks to handle things like 
+!   There are several engineering checks to handle things like
 !   arcsin( x>1.0 or x<-1.0). These things can happen because POES navigation
 !   uses an oblate spheroid earth, while here we are using a spherical
 !   earth, so there is a small inconsistency in computing arc angles.
@@ -999,14 +999,14 @@
  fov = ifov
  if(instr == 18) then   ! iasi
     fov = (ifov-1)/4 + 1
- endif
+ end if
 
  pos_ang = satellite_azimuth
  if(pos_ang > 180._r_kind)  pos_ang = pos_ang-360._r_kind
  if(pos_ang < -180._r_kind) pos_ang = 360._r_kind + pos_ang
 
  psip    = psi + pos_ang/rad2deg
- r       = rmax(fov) * sqrt( (one - eccen(fov)**2)/(one - eccen(fov)**2 *cos(psi)**2) ) 
+ r       = rmax(fov) * sqrt( (one - eccen(fov)**2)/(one - eccen(fov)**2 *cos(psi)**2) )
  cosc    = cos((90._r_kind-lat)/rad2deg)*cos(r/rad2deg) + &
            sin((90._r_kind-lat)/rad2deg)*sin(r/rad2deg)*cos(psip)
  c       = acos(cosc)*rad2deg
@@ -1017,11 +1017,11 @@
  do i = 1 , npoly  ! handle numeric imprecision
     if(sinb(i) >  one) sinb(i) =  one
     if(sinb(i) < -(one)) sinb(i) = -(one)
- enddo
+ end do
 
  b              = asin(sinb)*rad2deg
  elons(1:npoly) = lon + b
- 
+
  end subroutine fov_ellipse_crosstrk
  subroutine fovanglessizes(instr,height,fov,alongtrackangle,crosstrackangle,&
                            alongtrackfovsize,crosstrackfovsize)
@@ -1029,8 +1029,8 @@
 !                .      .    .                                       .
 ! subprogram:    fovanglessizes   return cross and along track angles/sizes.
 !
-! abstract: computes the cross track and along track angles of an 
-!      instrument FOV as viewed from the center of the earth, and 
+! abstract: computes the cross track and along track angles of an
+!      instrument FOV as viewed from the center of the earth, and
 !      cross track and along track FOV size in km. presumes a spherical earth.
 !
 ! input argument list:
@@ -1073,7 +1073,7 @@
 !               90 = AIRS
 !               120 = IASI
 !               130 = SAPHIR
-!  
+!
 ! output argument list:
 !   AlongTrackAngle    - along track angle of a fov
 !   CrossTrackAngle    - cross track angle of a fov
@@ -1095,47 +1095,51 @@
 ! Declare local parameters
  real(r_kind), parameter:: radius = 6371.22_r_kind
 
-! assymetry   degrees (+-) that the scanner is assymetric about nadir.  
+! assymetry   degrees (+-) that the scanner is assymetric about nadir.
 !             This thusfar is important only for NOAA-16&17 HIRS.
 ! degscan     FOV step angle
 ! fovangle    angular dimension of the FOV
 ! halfscan    degrees from nadir to the center of outer earth FOV
 
 ! i think AIRS is same as AMSU-B... anyway, have put MHS into old AIRS slot
-! noaa-n parameters presently set to klm.  may need different numbers for 
+! noaa-n parameters presently set to klm.  may need different numbers for
 ! AQUA AMSU-A and HSB amsub=1.1, mhs=10/9.
 
- real(r_kind) , dimension(maxinstr) :: degscan   = (/ 0.0541e0_r_kind, 0.0541e0_r_kind, 0.053981436e0_r_kind, &
-                                                      1.8e0_r_kind, 1.8e0_r_kind, 1.8e0_r_kind,               &
-                                                      1.8e0_r_kind, 1.8e0_r_kind, 10.0e0_r_kind,              &
-                                                      9.4737e0_r_kind, 3.e0_r_kind+one/three,                 &
-                                                      1.1e0_r_kind , 10.e0_r_kind/9.e0_r_kind , 1.1e0_r_kind, &
-                                                      1.1e0_r_kind, 1.1e0_r_kind,                             & 
-                                                      1.1e0_r_kind, 3.e0_r_kind+one/three, 0.6660465_r_kind,  & 
-                                                      1.1e0_r_kind  /)
- real(r_kind) , dimension(maxinstr) :: fovangle  = (/ 0.0745_r_kind,   0.0745_r_kind,  0.0745_r_kind,         &
-                                                      1.22_r_kind,  1.40_r_kind,  1.40_r_kind,                &
-                                                      1.40_r_kind,  0.70_r_kind,  10.0_r_kind,                &
-                                                      7.5_r_kind,  3.3_r_kind,    1.1_r_kind,                 &
-                                                      1.1_r_kind ,   5.2_r_kind,   2.2_r_kind,   1.1_r_kind,  &
-                                                      1.1_r_kind, 0.839383_r_kind, 0.6660465_r_kind,          &
-                                                      3.3_r_kind /)
- real(r_kind) , dimension(maxinstr) :: halfscan  = (/ 55.37_r_kind, 55.37_r_kind, 55.25_r_kind, 49.5_r_kind,  &
-                                                      49.5_r_kind,  49.5_r_kind,  49.5_r_kind,  49.5_r_kind,  &
-                                                      35.0_r_kind,  47.3685_r_kind,                           &
-                                                      48._r_kind+one/three,  48.95_r_kind,          &
-                                                      48.95_r_kind, 52.73_r_kind, 52.73_r_kind, 52.73_r_kind, &
-                                                      44.5_r_kind*10.0_r_kind/9.0_r_kind,                     &
-                                                      48._r_kind+one/three, 42.96_r_kind, 52.73_r_kind  /)
- real(r_kind) , dimension(maxinstr) :: assymetry = (/ zero,         zero,         zero,         zero,         &
-                                                      zero,         zero,        -1.8_r_kind,   zero,         &
-                                                      zero,         zero,         zero,         zero,         &
-                                                      zero,         zero,         zero,         zero,         &
-                                                      zero,         zero,         zero,         zero       /)
+ real(r_kind) , dimension(maxinstr), parameter :: degscan   = [ &
+   0.0541e0_r_kind, 0.0541e0_r_kind, 0.053981436e0_r_kind,      &
+   1.8e0_r_kind, 1.8e0_r_kind, 1.8e0_r_kind,                    &
+   1.8e0_r_kind, 1.8e0_r_kind, 10.0e0_r_kind,                   &
+   9.4737e0_r_kind, 3.e0_r_kind+one/three,                      &
+   1.1e0_r_kind , 10.e0_r_kind/9.e0_r_kind , 1.1e0_r_kind,      &
+   1.1e0_r_kind, 1.1e0_r_kind,                                  &
+   1.1e0_r_kind, 3.e0_r_kind+one/three, 0.6660465_r_kind,       &
+   1.1e0_r_kind ]
+ real(r_kind) , dimension(maxinstr), parameter :: fovangle = [ &
+   0.0745_r_kind,   0.0745_r_kind,  0.0745_r_kind,             &
+   1.22_r_kind,  1.40_r_kind,  1.40_r_kind,                    &
+   1.40_r_kind,  0.70_r_kind,  10.0_r_kind,                    &
+   7.5_r_kind,  3.3_r_kind,    1.1_r_kind,                     &
+   1.1_r_kind ,   5.2_r_kind,   2.2_r_kind,   1.1_r_kind,      &
+   1.1_r_kind, 0.839383_r_kind, 0.6660465_r_kind,              &
+   3.3_r_kind ]
+ real(r_kind) , dimension(maxinstr), parameter :: halfscan = [ &
+   55.37_r_kind, 55.37_r_kind, 55.25_r_kind, 49.5_r_kind,      &
+   49.5_r_kind,  49.5_r_kind,  49.5_r_kind,  49.5_r_kind,      &
+   35.0_r_kind,  47.3685_r_kind,                               &
+   48._r_kind+one/three,  48.95_r_kind,                        &
+   48.95_r_kind, 52.73_r_kind, 52.73_r_kind, 52.73_r_kind,     &
+   44.5_r_kind*10.0_r_kind/9.0_r_kind,                         &
+   48._r_kind+one/three, 42.96_r_kind, 52.73_r_kind ]
+ real(r_kind) , dimension(maxinstr), parameter :: assymetry = [ &
+   zero,         zero,         zero,         zero,              &
+   zero,         zero,        -1.8_r_kind,   zero,              &
+   zero,         zero,         zero,         zero,              &
+   zero,         zero,         zero,         zero,              &
+   zero,         zero,         zero,         zero ]
 
 ! declare local variables
- real(r_kind) nadirangle, nadirangle_m, nadirangle_p
- real(r_kind) compzacenter, compza_m, compza_p, distancetofov
+ real(r_kind) :: nadirangle, nadirangle_m, nadirangle_p
+ real(r_kind) :: compzacenter, compza_m, compza_p, distancetofov
 
 ! initialize to bad value
  alongtrackangle = -999._r_kind
@@ -1145,7 +1149,7 @@
  nadirangle   = halfscan(instr) - (fov-1)*degscan(instr) + assymetry(instr)
  nadirangle_m = nadirangle - fovangle(instr)*half
  nadirangle_p = nadirangle + fovangle(Instr)*half
- 
+
 !Complement of zenith angle for center and crosstrack extremes of fov
  compzacenter = 180._r_kind - asin((radius+height)/radius * sin(nadirangle  /rad2deg))*rad2deg
  compza_m     = 180._r_kind - asin((radius+height)/radius * sin(nadirangle_m/rad2deg))*rad2deg
@@ -1160,7 +1164,7 @@
 !distance from satellite to the center of the fov in km
  distancetofov = (radius+height) * &
                  sin( (180._r_kind-nadirangle-compzacenter)/rad2deg)/sin((compzacenter)/rad2deg)
- 
+
 !along track fov size in km
 ! the following is an approximation, but it is close.  It underestimates the FOV by a smidge
  alongtrackfovsize = two*distancetofov*tan(fovangle(instr)*half/rad2deg)
@@ -1174,7 +1178,7 @@
 !                .      .    .                                       .
 ! subprogram:    get_sat_height   return height of satellite in km
 !
-! abstract: return height of desired satellite in km. 
+! abstract: return height of desired satellite in km.
 !           information from:
 !           1) www.itc.nl/research/products/sensordb
 !           2) a nasa/noaa booklet entitled, "Advanced TIROS-N
@@ -1182,10 +1186,10 @@
 !
 ! input argument list:
 !   satid         - satellite id
-!  
+!
 ! output argument list:
 !   height        - height of satellite in km
-!   valid         - status flag, set to false for 
+!   valid         - status flag, set to false for
 !                   undefined satellites
 !
 !$$$
@@ -1199,28 +1203,28 @@
 
  valid=.true.
  select case (trim(satid))
-    case('tirosn')
+    case("tirosn")
        height=870._r_kind
-    case('dmsp', 'f13', 'f14', 'f15', 'f16', 'f17')
+    case("dmsp", "f13", "f14", "f15", "f16", "f17")
        height=830._r_kind
-    case('trmm')
+    case("trmm")
        height=350._r_kind
-    case('n05')
+    case("n05")
        height=1511._r_kind
-    case('n07', 'n09', 'n11', 'n14', 'n16', 'n18', 'n19')
+    case("n07", "n09", "n11", "n14", "n16", "n18", "n19")
        height=870._r_kind
-    case('n06', 'n08', 'n10', 'n12', 'n15', 'n17')
+    case("n06", "n08", "n10", "n12", "n15", "n17")
        height=833._r_kind
-    case('aura', 'aqua')
+    case("aura", "aqua")
        height=705._r_kind
-    case('metop-a', 'metop-b', 'metop-c')
+    case("metop-a", "metop-b", "metop-c")
        height=817._r_kind
-    case('meghat')
+    case("meghat")
        height=866._r_kind
-    case('npp', 'n20', 'n21')
+    case("npp", "n20", "n21")
        height=840._r_kind
     case default
-       write(6,*) 'GET_SAT_HEIGHT: ERROR, unrecognized satellite id: ', trim(satid)
+       write(6,*) "GET_SAT_HEIGHT: ERROR, unrecognized satellite id: ", trim(satid)
        valid=.false.
        return
  end select
@@ -1264,15 +1268,15 @@
 !   lon                   - longitude of fov center
 !   testlat               - latitude of point to be tested
 !   testlon               - longitude of point to be tested
-!   expansion             - expansion factor. 
+!   expansion             - expansion factor.
 !                           1.0 for 50% power
 !                           2.0 for 95% power
 !                           3.0 for 99% power
 !                           > 1.0 makes bigger ellipses, < 1.0 makes smaller ellipses.
 !                           do not exceed 3.0.
-!                           in general try to use 3.0 for microwave if you can afford it. 
+!                           in general try to use 3.0 for microwave if you can afford it.
 !                           use 1.0 for infrared
-!   ichan                 - channel number for microwave instruments, 1-15 for amsua, 
+!   ichan                 - channel number for microwave instruments, 1-15 for amsua,
 !                           1-5 for mhs, na for all else
 !
 ! output argument list:
@@ -1285,7 +1289,7 @@
 !   these things can happen because POES navigation uses an oblate spheroid earth, while here we are
 !   using a spherical earth, so there is a small inconsistency in computing arc angles.
 !
-!   no provisions are made for spacecraft roll-pitch-yaw errors, which are presumed to be small 
+!   no provisions are made for spacecraft roll-pitch-yaw errors, which are presumed to be small
 !   (SC attitude is usually held to within 0.1 deg)
 !
 !$$$
@@ -1298,24 +1302,25 @@
  integer        ,intent(in   ) :: instr
  integer        ,intent(in   ) :: ifov
  integer        ,intent(in   ) :: ichan
- real(r_kind)   ,intent(in   ) :: lat       
- real(r_kind)   ,intent(in   ) :: lon        
- real(r_kind)   ,intent(in   ) :: testlat    
- real(r_kind)   ,intent(in   ) :: testlon    
- real(r_kind)   ,intent(in   ) :: expansion  
+ real(r_kind)   ,intent(in   ) :: lat
+ real(r_kind)   ,intent(in   ) :: lon
+ real(r_kind)   ,intent(in   ) :: testlat
+ real(r_kind)   ,intent(in   ) :: testlon
+ real(r_kind)   ,intent(in   ) :: expansion
  real(r_kind)   ,intent(in   ) :: satellite_azimuth
- real(r_kind)   ,intent(  out) :: inside 
+ real(r_kind)   ,intent(  out) :: inside
 
 ! Declare local parameters.
  real(r_kind), parameter  :: r1 = one ! equatorial radius. work in angular distance, not km (otherwise r1=6371)
  real(r_kind), parameter  :: r2 = r1  ! assume spherical earth (otherwise r2 = polar radius)
- real(r_kind), dimension(maxinstr) :: fovangle  = (/ 0.0745_r_kind, 0.0745_r_kind, 0.0745_r_kind,           &
-                                                     1.22_r_kind,   1.40_r_kind,   1.40_r_kind,             &
-                                                     1.40_r_kind,   0.70_r_kind,   10.0_r_kind,             &
-                                                     7.5_r_kind,    3.3_r_kind,    1.1_r_kind,              &
-                                                     1.1_r_kind,    5.2_r_kind,    2.2_r_kind, 1.1_r_kind,  &
-                                                     1.1_r_kind, 0.839383_r_kind, 0.6660465_r_kind,         &
-                                                     3.3_r_kind /)
+ real(r_kind), dimension(maxinstr), parameter :: fovangle = [ &
+   0.0745_r_kind, 0.0745_r_kind, 0.0745_r_kind,               &
+   1.22_r_kind,   1.40_r_kind,   1.40_r_kind,                 &
+   1.40_r_kind,   0.70_r_kind,   10.0_r_kind,                 &
+   7.5_r_kind,    3.3_r_kind,    1.1_r_kind,                  &
+   1.1_r_kind,    5.2_r_kind,    2.2_r_kind, 1.1_r_kind,      &
+   1.1_r_kind, 0.839383_r_kind, 0.6660465_r_kind,             &
+   3.3_r_kind ]
 
 ! Declare local variables.
  integer :: fov
@@ -1326,7 +1331,7 @@
  real(r_kind)  :: d      ! angular distance from fov center to test location
  real(r_kind)  :: r      ! angular distance from fov center to ellipse along d
  real(r_kind)  :: psi    ! angle from 3:00 on fov to line from fov center to test location
- real(r_kind)  :: psip   ! angle from latitude parallel through fov center to 
+ real(r_kind)  :: psip   ! angle from latitude parallel through fov center to
                          ! line from fov center to test location
 ! these are the flat earth variables
  real(r_kind)  :: distance_north  ! north angular distance from fov center to test location
@@ -1339,7 +1344,7 @@
  fov = ifov
  if(instr == 18) then
     fov = (ifov-1)/4 + 1
- endif
+ end if
 
 
 ! Get satellite az where we want it.
@@ -1364,7 +1369,7 @@
    bearing_to_test = 0
  else
    bearing_to_test = mod(atan2(distance_north,distance_east),2*pi )
- endif
+ end if
  bearing_to_test_deg = bearing_to_test*rad2deg ! convert to degrees
 
 ! this is the arc distance to the test point
@@ -1382,7 +1387,7 @@
 
  inside = zero
  if (d<r) then
-   
+
     inside = one  ! for other instruments
 
     if(instr == 11) then ! AMSUA
@@ -1394,11 +1399,11 @@
        px = amsucoeff(0,1,ichan) + amsucoeff(1,1,ichan)*x    + amsucoeff(2,1,ichan)*x**2 &
                                  + amsucoeff(3,1,ichan)*x**3 + amsucoeff(4,1,ichan)*x**4 &
                                  + amsucoeff(5,1,ichan)*x**5 + amsucoeff(6,1,ichan)*x**6 &
-                                 + amsucoeff(7,1,ichan)*x**7   
+                                 + amsucoeff(7,1,ichan)*x**7
        py = amsucoeff(0,2,ichan) + amsucoeff(1,2,ichan)*y    + amsucoeff(2,2,ichan)*y**2 &
                                  + amsucoeff(3,2,ichan)*y**3 + amsucoeff(4,2,ichan)*y**4 &
                                  + amsucoeff(5,2,ichan)*y**5 + amsucoeff(6,2,ichan)*y**6 &
-                                 + amsucoeff(7,2,ichan)*y**7   
+                                 + amsucoeff(7,2,ichan)*y**7
 
        p = -(px+py) ! power in dB (positive)
 
@@ -1406,8 +1411,8 @@
 
        p = 10._r_kind**(-p*one_tenth)  ! convert to fraction of max power
        if(p > one) p = one
-       inside = p  
-    endif ! amsuA
+       inside = p
+    end if ! amsuA
 
     if(instr == 20) then ! ATMS 3.3 DEG. Use amsua channel 15 coeffs, which is sfc sensitive.
        fovanglesize = fovangle(instr)
@@ -1431,7 +1436,7 @@
        p = 10._r_kind**(-p*one_tenth)  ! convert to fraction of max power
        if(p > one) p = one
        inside = p
-    endif ! atms
+    end if ! atms
 
     if(instr == 13) then ! mhs
        fovanglesize = fovangle(instr)
@@ -1442,22 +1447,22 @@
        px = mhscoeff(0,1,ichan) + mhscoeff(1,1,ichan)*x    + mhscoeff(2,1,ichan)*x**2 &
                                 + mhscoeff(3,1,ichan)*x**3 + mhscoeff(4,1,ichan)*x**4 &
                                 + mhscoeff(5,1,ichan)*x**5 + mhscoeff(6,1,ichan)*x**6 &
-                                + mhscoeff(7,1,ichan)*x**7   
+                                + mhscoeff(7,1,ichan)*x**7
        py = mhscoeff(0,2,ichan) + mhscoeff(1,2,ichan)*y    + mhscoeff(2,2,ichan)*y**2 &
                                 + mhscoeff(3,2,ichan)*y**3 + mhscoeff(4,2,ichan)*y**4 &
                                 + mhscoeff(5,2,ichan)*y**5 + mhscoeff(6,2,ichan)*y**6 &
-                                + mhscoeff(7,2,ichan)*y**7   
+                                + mhscoeff(7,2,ichan)*y**7
 
        p = -(px+py) ! power in dB (positive)
 
        p = 10._r_kind**(-p*one_tenth)  ! convert to fraction of max power
        if(p > one) then
           p = one
-       endif
-       inside = p  
-    endif ! mhs
-   
- endif   ! is (d<r) ?
+       end if
+       inside = p
+    end if ! mhs
+
+ end if   ! is (d<r) ?
 
  return
 
@@ -1465,15 +1470,15 @@
  subroutine fov_check(fov,instr,ichan,valid)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
-! subprogram:    fov_check        ensure fov number is valid      
+! subprogram:    fov_check        ensure fov number is valid
 !
 ! abstract: ensure fov number is valid for desired instrument
 !
 ! input argument list:
-!   fov           - fov number   
+!   fov           - fov number
 !   instr         - instrument number
 !   ichan         - channel number
-!  
+!
 ! output argument list:
 !   valid         - false if inputs are incorrect.
 !
@@ -1491,38 +1496,38 @@
 
  if(instr == 18) then   ! iasi
     ifov = (fov-1)/4 + 1
- else 
+ else
     ifov = fov
- endif
+ end if
 
 ! test for fov in range
- if (ifov < 1) then 
+ if (ifov < 1) then
     write(6,*) "FOV_CHECK: ERROR, FOV NUMBER LESS THAN ONE "
     valid=.false.
     return
- endif
+ end if
 
- if (ifov > maxfov(instr) ) then 
+ if (ifov > maxfov(instr) ) then
     write(6,*) "FOV_CHECK: ERROR, FOV GREATER THAN ",maxfov(instr), "FOR INSTRUMENT ", instr
     valid=.false.
     return
- endif
+ end if
 
  if (instr == 11) then
    if (ichan < 1 .or. ichan > 15) then
      write(6,*) "FOV_CHECK: ERROR, invalid amsua channel number"
      valid=.false.
      return
-   endif 
+   end if
 
  else if (instr == 13) then
    if (ichan < 1 .or. ichan > 5) then
      write(6,*) "FOV_CHECK: ERROR, invalid mhs channel number"
      valid=.false.
      return
-   endif 
- endif
- 
+   end if
+ end if
+
  return
  end subroutine fov_check
  end module calc_fov_crosstrk

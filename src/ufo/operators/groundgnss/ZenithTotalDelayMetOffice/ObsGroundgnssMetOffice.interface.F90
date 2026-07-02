@@ -1,41 +1,41 @@
 ! (C) Copyright 2021 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle ground based GNSS observations operator at the Met Office
 
 module ufo_groundgnss_metoffice_mod_c
-  
+
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_groundgnss_metoffice_mod
 
   implicit none
   private
-  
+
 #define LISTED_TYPE ufo_groundgnss_MetOffice
-  
+
   !> Linked list interface - defines registry_t type
 #include "oops/util/linkedList_i.f"
-  
+
   !> Global registry
   type(registry_t) :: ufo_groundgnss_MetOffice_registry
-  
+
   ! ------------------------------------------------------------------------------
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
 #include "oops/util/linkedList_c.f"
-  
+
 ! ------------------------------------------------------------------------------
-  
+
 subroutine ufo_groundgnss_metoffice_setup_c(c_key_self, &
                                             c_vertInterpOPS, &
                                             c_pseudoLevels, &
                                             c_minTempGrad, &
                                             c_dryRefractivityConstant, &
-                                            c_wetRefractivityConstant) bind(c,name='ufo_groundgnss_metoffice_setup_f90')
+                                            c_wetRefractivityConstant) bind(c,name="ufo_groundgnss_metoffice_setup_f90")
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 logical(c_bool), intent(in) :: c_vertInterpOPS
@@ -43,7 +43,7 @@ logical(c_bool), intent(in) :: c_pseudoLevels
 real(c_float), intent(in) :: c_minTempGrad
 real(c_float), intent(in) :: c_dryRefractivityConstant
 real(c_float), intent(in) :: c_wetRefractivityConstant
-    
+
 type(ufo_groundgnss_MetOffice), pointer :: self
 
 call ufo_groundgnss_MetOffice_registry%setup(c_key_self, self)
@@ -52,21 +52,21 @@ call self%setup(c_vertInterpOPS, c_pseudoLevels, c_minTempGrad, &
                 c_dryRefractivityConstant, c_wetRefractivityConstant)
 
 end subroutine ufo_groundgnss_MetOffice_setup_c
-  
+
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_groundgnss_metoffice_delete_c(c_key_self) bind(c,name='ufo_groundgnss_metoffice_delete_f90')
+
+subroutine ufo_groundgnss_metoffice_delete_c(c_key_self) bind(c,name="ufo_groundgnss_metoffice_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
 call ufo_groundgnss_MetOffice_registry%remove(c_key_self)
 
 end subroutine ufo_groundgnss_metoffice_delete_c
-  
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_groundgnss_metoffice_simobs_c(c_key_self, c_key_geovals, c_obsspace, &
-                                             c_nobs, c_hofx) bind(c,name='ufo_groundgnss_metoffice_simobs_f90')
+                                             c_nobs, c_hofx) bind(c,name="ufo_groundgnss_metoffice_simobs_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

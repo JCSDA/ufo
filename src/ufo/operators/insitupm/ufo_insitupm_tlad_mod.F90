@@ -7,7 +7,7 @@
 
 module ufo_insitupm_tlad_mod
 
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_vars_mod
@@ -30,9 +30,9 @@ module ufo_insitupm_tlad_mod
   integer(kind=c_int), allocatable :: tracer_modes_cmaq(:)
   real(kind=kind_real), allocatable :: prs(:,:)
   real(kind=kind_real), allocatable :: ts(:,:)
-  real(kind=c_double), allocatable :: facs(:,:,:) 
+  real(kind=c_double), allocatable :: facs(:,:,:)
   real(kind=c_double), allocatable :: wf(:)
-  integer(kind=c_int), allocatable :: wi(:) 
+  integer(kind=c_int), allocatable :: wi(:)
  contains
   procedure :: setup  => ufo_insitupm_tlad_setup_
   procedure :: cleanup  => ufo_insitupm_tlad_cleanup_
@@ -62,7 +62,7 @@ character(kind=c_char,len=:), allocatable :: model_name, coord_name
 
   do iq = 1, self%ntracers
      call self%geovars%push_back(tracer_variables(iq))          ! aerosol species
-  enddo
+  end do
 
   call f_conf%get_or_die("vertical_coordinate", coord_name)     ! vertical coordinate for interpolation
   self%v_coord = coord_name
@@ -71,13 +71,13 @@ character(kind=c_char,len=:), allocatable :: model_name, coord_name
   self%model = model_name
 
   ! To be edited (for non-CMAQ models)
-  if(self%model .ne. "CMAQ") then
+  if(self%model /= "CMAQ") then
     write(err_msg, *) "not CMAQ, not supported by this operator yet"
     call abor1_ftn(err_msg)
   end if
 
   ! CMAQ related
-  if(self%model .eq. "CMAQ") then
+  if(self%model == "CMAQ") then
 
   call f_conf%get_or_die("use_scalefac_cmaq",self%scalefactor)  ! determine whether mode-specific scaling factors will be used
 
@@ -86,7 +86,7 @@ character(kind=c_char,len=:), allocatable :: model_name, coord_name
     call f_conf%get_or_die("tracer_modes_cmaq",self%tracer_modes_cmaq)  ! CMAQ aerosol modes
 
     ! check the lengths of aerosol species and aerosol mode lists, stop if inconsistent
-     if(f_conf%get_size("tracer_modes_cmaq") .ne. self%ntracers) then
+     if(f_conf%get_size("tracer_modes_cmaq") /= self%ntracers) then
      write(err_msg, *) "mode information missing for some CMAQ aeorsol species"
      call abor1_ftn(err_msg)
      end if
@@ -169,7 +169,7 @@ integer :: ilayer, iloc
  allocate(self%wi(self%nlocs))
  allocate(self%wf(self%nlocs))
 
- if(self%v_coord .eq. "height_asl") then  
+ if(self%v_coord == "height_asl") then
  ! Obs station elevation and model heights (asl) at obs loc
  call obsspace_get_db(obss, "MetaData", "stationElevation", obss_metadata)
 
@@ -184,7 +184,7 @@ integer :: ilayer, iloc
  allocate(hgtasl(self%nlayers,self%nlocs))
  do ilayer = 1, self%nlayers
  hgtasl(ilayer,:) = hgt(ilayer,:) + elev(1,:)
- enddo
+ end do
 
  ! Calculate the vertical interpolation weights
  do iloc = 1, self%nlocs
@@ -192,29 +192,29 @@ integer :: ilayer, iloc
                           self%wi(iloc), self%wf(iloc))
  end do
 
- else if(self%v_coord .eq. "log_pressure") then   !log scale
+ else if(self%v_coord == "log_pressure") then   !log scale
  ! Obs air pressure at obs loc
  call obsspace_get_db(obss, "MetaData", "pressure", obss_metadata)
 
  ! Calculate the vertical interpolation weights
  do iloc = 1, self%nlocs
- call vert_interp_weights(self%nlayers, log(obss_metadata(iloc)), & 
+ call vert_interp_weights(self%nlayers, log(obss_metadata(iloc)), &
                           log(self%prs(:,iloc)), self%wi(iloc), self%wf(iloc))
  end do
-  
+
  else
  write(err_msg, *) "coordinate for vertical interpolation not supported"
  call abor1_ftn(err_msg)
  end if
 
   ! To be edited (for non-CMAQ models)
- if(self%model .ne. "CMAQ") then
+ if(self%model /= "CMAQ") then
    write(err_msg, *) "not CMAQ, not supported by this operator yet"
    call abor1_ftn(err_msg)
  end if
 
  ! CMAQ related
- if(self%model .eq. "CMAQ") then
+ if(self%model == "CMAQ") then
 
   if(self%scalefactor) then
  !Get scaling factors
@@ -255,21 +255,21 @@ character(len=MAXVARLEN) :: err_msg
 
  allocate(qm_tl(self%ntracers, self%nlayers, nlocs))
  do iq = 1, self%ntracers
-    geovar = self%geovars%variable(iq)                      
+    geovar = self%geovars%variable(iq)
     call ufo_geovals_get_var(geovals, geovar, aer_profile)
-    qm_tl(iq,:,:) = aer_profile%vals                         
-    qm_tl(iq,:,:) = qm_tl(iq,:,:) * self%prs / self%ts / rd          
+    qm_tl(iq,:,:) = aer_profile%vals
+    qm_tl(iq,:,:) = qm_tl(iq,:,:) * self%prs / self%ts / rd
 
- enddo
+ end do
 
   ! To be edited (for non-CMAQ models)
-  if(self%model .ne. "CMAQ") then
+  if(self%model /= "CMAQ") then
     write(err_msg, *) "not CMAQ, not supported by this operator yet"
     call abor1_ftn(err_msg)
   end if
 
   ! CMAQ related
- if(self%model .eq. "CMAQ") then
+ if(self%model == "CMAQ") then
   if(self%scalefactor) then
   call get_PM_cmaq_tl(self%nlayers, self%nvars, self%nlocs, self%ntracers,    &
                       self%tracer_modes_cmaq, self%facs,   &
@@ -302,17 +302,17 @@ type(ufo_geoval), pointer :: aer_profile
 character(len=MAXVARLEN) :: geovar
 character(len=MAXVARLEN) :: err_msg
 
- allocate(qm_ad(self%ntracers, self%nlayers, nlocs)) 
+ allocate(qm_ad(self%ntracers, self%nlayers, nlocs))
 
   ! To be edited (for non-CMAQ models)
-  if(self%model .ne. "CMAQ") then
+  if(self%model /= "CMAQ") then
     write(err_msg, *) "not CMAQ, not supported by this operator yet"
     call abor1_ftn(err_msg)
   end if
 
   ! CMAQ related
- if(self%model .eq. "CMAQ") then
-  if(self%scalefactor) then  
+ if(self%model == "CMAQ") then
+  if(self%scalefactor) then
 
   call get_PM_cmaq_ad(self%nlayers, self%nvars, self%nlocs, self%ntracers, &
                       self%tracer_modes_cmaq, &
@@ -325,19 +325,19 @@ character(len=MAXVARLEN) :: err_msg
 
  do iq = self%ntracers,1,-1
 
-   geovar = self%geovars%variable(iq)                   
+   geovar = self%geovars%variable(iq)
    call ufo_geovals_get_var(geovals, geovar, aer_profile)
    if (.not. allocated(aer_profile%vals)) then
        aer_profile%nprofiles = self%nlocs
        aer_profile%nval  = self%nlayers
        allocate(aer_profile%vals(aer_profile%nval, aer_profile%nprofiles))
        aer_profile%vals(:,:) = 0.0_kind_real
-   endif
+   end if
 
    qm_ad(iq,:,:) = qm_ad(iq,:,:) * self%prs / self%ts / rd
    aer_profile%vals = qm_ad(iq,:,:)
 
- enddo
+ end do
 
  deallocate(qm_ad)
 

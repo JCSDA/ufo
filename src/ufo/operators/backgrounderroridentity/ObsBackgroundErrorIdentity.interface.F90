@@ -5,9 +5,11 @@
 
 module ufo_backgrounderroridentity_mod_c
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding, only: c_int, c_ptr
 use ufo_backgrounderroridentity_mod, only: ufo_backgrounderroridentity_fillobsdiags
 implicit none
+private
+public :: ufo_backgrounderroridentity_fillobsdiags_c
 
 contains
 
@@ -15,7 +17,7 @@ contains
 
 subroutine ufo_backgrounderroridentity_fillobsdiags_c(c_key_geovals, c_nlocs, &
                                                       c_obsvars, c_key_obsdiags) &
-  bind(c, name='ufo_backgrounderroridentity_fillobsdiags_f90')
+  bind(c, name="ufo_backgrounderroridentity_fillobsdiags_f90")
 
   use oops_variables_mod, only: oops_variables
   use ufo_geovals_mod,    only: ufo_geovals

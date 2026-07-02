@@ -5,11 +5,13 @@
 
 module ufo_basis_tlad_mod
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding, only: c_double, c_int, c_ptr
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
+  implicit none
+  private
 
-  type, abstract :: ufo_basis_tlad
+  type, abstract, public :: ufo_basis_tlad
     private
       logical, public :: ltraj = .false. !< trajectory set?
   contains
@@ -31,7 +33,7 @@ module ufo_basis_tlad_mod
       import ufo_basis_tlad
       implicit none
       class(ufo_basis_tlad), intent(inout) :: self
-    end subroutine
+    end subroutine delete_
 
 ! ------------------------------------------------------------------------------
 
@@ -41,31 +43,29 @@ module ufo_basis_tlad_mod
       class(ufo_basis_tlad), intent(inout) :: self
       type(ufo_geovals),    intent(in) :: geovals
       type(c_ptr), value,   intent(in) :: obss
-    end subroutine
+    end subroutine settraj_
 
 ! ------------------------------------------------------------------------------
 
     subroutine simobs_tl_(self, geovals, hofx, obss)
-      use iso_c_binding
-      import ufo_basis_tlad, ufo_geovals
+      import c_double, c_ptr, ufo_basis_tlad, ufo_geovals
       implicit none
       class(ufo_basis_tlad), intent(in) :: self
       type(ufo_geovals),     intent(in)    :: geovals
       real(c_double),        intent(inout) :: hofx(:)
       type(c_ptr), value,    intent(in)    :: obss
-    end subroutine
+    end subroutine simobs_tl_
 
 ! ------------------------------------------------------------------------------
 
     subroutine simobs_ad_(self, geovals, hofx, obss)
-      use iso_c_binding
-      import ufo_basis_tlad, ufo_geovals
+      import c_double, c_ptr, ufo_basis_tlad, ufo_geovals
       implicit none
       class(ufo_basis_tlad), intent(in)    :: self
       type(ufo_geovals),     intent(inout) :: geovals
       real(c_double),        intent(in)    :: hofx(:)
       type(c_ptr), value,    intent(in)    :: obss
-    end subroutine
+    end subroutine simobs_ad_
 
   ! ------------------------------------------------------------------------------
 

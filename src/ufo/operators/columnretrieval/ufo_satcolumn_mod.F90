@@ -1,7 +1,11 @@
 module satcolumn_mod
-use kinds
+use kinds, only: kind_real
 use ufo_constants_mod, only: zero, one, gas_constant, avogadro, M_dryair, grav
 use vert_interp_mod, only: vert_interp_weights
+implicit none
+private
+public :: simulate_column_ob, simulate_column_ob_ad, simulate_column_ob_tl
+
 contains
 
 subroutine stretch_vertices(nzobs, nzmod, pobsin, pobsout, pmodin, pmodout, &
@@ -78,7 +82,7 @@ subroutine simulate_column_ob(nlayers_obs, nlayers_model, avgkernel_obs, &
         do j=wi_a+1,wi_b-1
            profile_obslayers(k) = profile_obslayers(k) + profile_model(j) * &
                 (pmod(j+1)-pmod(j)) / (M_dryair*grav)
-        enddo
+        end do
         profile_obslayers(k) = profile_obslayers(k) + profile_model(wi_b) * &
              (pmod(wi_b+1)-pmod(wi_b)) * (one-wf_b) / (M_dryair*grav)
 
@@ -94,12 +98,12 @@ subroutine simulate_column_ob(nlayers_obs, nlayers_model, avgkernel_obs, &
         call abor1_ftn(err_msg)
      end if
      ! compute A.x
-     ! force tropopause                                         
+     ! force tropopause
      if ( pobs(k) < tropopause ) then
         avgkernel = zero
      else
         avgkernel = avgkernel_obs(k)
-     end if 
+     end if
      hofx = hofx + (avgkernel * profile_obslayers(k))
   end do
 end subroutine simulate_column_ob
@@ -150,7 +154,7 @@ subroutine simulate_column_ob_tl(nlayers_obs, nlayers_model, avgkernel_obs, &
         do j=wi_a+1,wi_b-1
            profile_obslayers(k) = profile_obslayers(k) + profile_model(j) * &
                 (pmod(j+1)-pmod(j)) / (M_dryair*grav)
-        enddo
+        end do
         profile_obslayers(k) = profile_obslayers(k) + profile_model(wi_b) * &
              (pmod(wi_b+1)-pmod(wi_b)) * (one-wf_b) / (M_dryair*grav)
 
@@ -229,7 +233,7 @@ subroutine simulate_column_ob_ad(nlayers_obs, nlayers_model, avgkernel_obs, &
         do j=wi_a+1,wi_b-1
            profile_model_ad(j) = profile_model_ad(j) + profile_obslayers_ad(k) * &
              (pmod(j+1)-pmod(j)) / (M_dryair*grav)
-        enddo
+        end do
         profile_model_ad(wi_b) = profile_model_ad(wi_b) + profile_obslayers_ad(k) * &
              (pmod(wi_b+1)-pmod(wi_b)) * (one-wf_b) / (M_dryair*grav)
 

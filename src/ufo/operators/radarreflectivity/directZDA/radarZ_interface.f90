@@ -32,7 +32,7 @@ MODULE radarz_iface
   integer(kind_int), public :: hail_ON = 0, graupel_ON = 0, qgh_opt = 0
   integer(kind_int), public :: nscalar = 0
   REAL(kind_real), public :: grpl_miss
-  REAL(kind_real), public :: hl_miss 
+  REAL(kind_real), public :: hl_miss
 
   ! Place/index markers within arrays for each species mixing ratio and number, etc.
   integer(kind_int), public :: P_qc=0, P_qr=0, P_qi=0, P_qs=0, P_qh=0, P_qg=0,    &
@@ -53,7 +53,7 @@ MODULE radarz_iface
   real(kind_real), public :: rhohail = 913.0_kind_real
   real(kind_real), public :: rhogrpl = 500.0_kind_real
   REAL(kind_real),PUBLIC,PARAMETER :: rhoi = 917._kind_real  ! Density of ice (kg m**-3)
- 
+
   ! A few specific snow distribution values for Thompson MP
   REAL(kind_real),PUBLIC,PARAMETER :: thom_lam0 = 20.78_kind_real
   REAL(kind_real),PUBLIC,PARAMETER :: thom_lam1 = 3.29_kind_real
@@ -82,10 +82,10 @@ MODULE radarz_iface
   REAL(kind_real), PUBLIC :: N0g        ! Intercept parameter in 1/(m^4) for hail
   REAL(kind_real), PUBLIC :: N0s2       ! Second intercept parameter in 1/(m^4) for snow
 
-  REAL(kind_real), PUBLIC :: N0ms       !Intercept parameter for melting species 
-  REAL(kind_real), PUBLIC :: N0ms2 
+  REAL(kind_real), PUBLIC :: N0ms       !Intercept parameter for melting species
+  REAL(kind_real), PUBLIC :: N0ms2
   REAL(kind_real), PUBLIC :: N0mh
-  REAL(kind_real), PUBLIC :: N0mg 
+  REAL(kind_real), PUBLIC :: N0mg
 
   REAL(kind_real), PUBLIC :: rhor = 1000._kind_real ! Density of rain (kg m**-3)
   REAL(kind_real), PUBLIC :: rhoh                ! Density of hail (kg m**-3)
@@ -99,21 +99,21 @@ MODULE radarz_iface
   REAL(kind_real), PUBLIC :: alphas2
 
   REAL(kind_real), PUBLIC :: lamdar     !slope parameter for rain (1/m)
-  REAL(kind_real), PUBLIC :: lamdas     
-  REAL(kind_real), PUBLIC :: lamdas2  
+  REAL(kind_real), PUBLIC :: lamdas
+  REAL(kind_real), PUBLIC :: lamdas2
   REAL(kind_real), PUBLIC :: lamdams
-  REAL(kind_real), PUBLIC :: lamdams2  
+  REAL(kind_real), PUBLIC :: lamdams2
   REAL(kind_real), PUBLIC :: lamdag
   REAL(kind_real), PUBLIC :: lamdamg
   REAL(kind_real), PUBLIC :: lamdah
-  REAL(kind_real), PUBLIC :: lamdamh 
+  REAL(kind_real), PUBLIC :: lamdamh
 
   ! Variables to can be changed for meling ice
   REAL(kind_real), PUBLIC :: fos        ! Maximum fraction of rain-snow mixture
   REAL(kind_real), PUBLIC :: foh        ! Maximum fraction of rain-hail mixture
   REAL(kind_real), PUBLIC :: fog        ! Maximum fraction of rain-hail mixture
 
-  ! Additional shape parameter that accomodate gamma-in-volume 
+  ! Additional shape parameter that accomodate gamma-in-volume
   REAL(kind_real), PUBLIC :: T_mur,T_mus,T_mug,T_muh
 
   ! Constants related to radar parameters
@@ -136,7 +136,7 @@ MODULE radarz_iface
   REAL(kind_real),PUBLIC,PARAMETER :: alphaa_ds = 1.94e-5_kind_real ! for dry snow at horz plane
   REAL(kind_real),PUBLIC,PARAMETER :: alphab_ds = 1.91e-5_kind_real ! for dry snow at vert plane
   REAL(kind_real),PUBLIC,PARAMETER :: alphaa_tom_ds = 2.8e-5_kind_real !for dry snow at horz plane for Thomposon scheme
-  REAL(kind_real),PUBLIC,PARAMETER :: alphab_tom_ds = 2.6e-5_kind_real !for dry snow at vert plane for the Thompson scheme 
+  REAL(kind_real),PUBLIC,PARAMETER :: alphab_tom_ds = 2.6e-5_kind_real !for dry snow at vert plane for the Thompson scheme
 
   REAL(kind_real), PUBLIC, PARAMETER :: beta_sa = 3.0_kind_real
   REAL(kind_real), PUBLIC, PARAMETER :: beta_sb = 3.0_kind_real
@@ -160,7 +160,7 @@ MODULE radarz_iface
   REAL(kind_real),PUBLIC,PARAMETER :: alphak_dh = 0.26e-4_kind_real ! alphaa_dh - alphab_dh
   REAL(kind_real),PUBLIC,PARAMETER :: alphak_dg = 0.05e-4_kind_real ! alphaa_dh - alphab_dh
   REAL(kind_real),PUBLIC,PARAMETER :: betak_s = 3.0_kind_real
-  REAL(kind_real),PUBLIC,PARAMETER :: betak_tom_ds = 2.04_kind_real !For Thompson Scheme 
+  REAL(kind_real),PUBLIC,PARAMETER :: betak_tom_ds = 2.04_kind_real !For Thompson Scheme
   REAL(kind_real),PUBLIC,PARAMETER :: betak_h = 3.0_kind_real
   REAL(kind_real),PUBLIC,PARAMETER :: betak_g = 3.0_kind_real
 
@@ -227,7 +227,7 @@ MODULE radarz_iface
 
 !-----------------------------------------------------------------------
 ! Scattering matrix coefficient for graupel
-! 
+!
 ! phi=0._kind_real     (Mean orientation)
 ! sigmag=pi/3*(1-sf*fw)
 ! Ag=1/8*(3+4*cos(2*phi)*exp(-2*sigmag**2)+cos(4*phi)*exp(-8*sigmag**2))
@@ -235,10 +235,10 @@ MODULE radarz_iface
 ! Cg=1/8*(1-cos(4*phi)*exp(-8*sigmag**2))
 ! Dg=1/8*(3+cos(4*phi)*exp(-8*sigmag**2))
 ! Ckg=cos(2*phi)*exp(-2*sigmag**2)
-! 
+!
 ! corresponding coefficient for dry graupel: Agd, Bgd, Cgd, Dgd, Ckgd
 !-----------------------------------------------------------------------
-  
+
   REAL(kind_real),PUBLIC,PARAMETER :: sigmagd = 1.0472_kind_real
   REAL(kind_real),PUBLIC,PARAMETER :: Agd = 0.4308_kind_real
   REAL(kind_real),PUBLIC,PARAMETER :: Bgd = 0.3192_kind_real
@@ -281,7 +281,7 @@ integer(kind_int) function init_mphyopt(mp_option)
   IMPLICIT NONE
 
   integer, intent(in) :: mp_option
-  integer:: iret = -1
+  integer:: iret
 
   IF ( mp_option == 2 .OR. mp_option == 3 .OR. mp_option == 4 ) THEN
     nscalar = 5
@@ -302,9 +302,9 @@ integer(kind_int) function init_mphyopt(mp_option)
     graupel_ON = 1
     hail_ON = 0
   ELSE IF (mp_option == 14) THEN                      ! NSSL
-    P_qc = 1; P_qr =  2; P_qi =  3; P_qs =  4; P_qg =  5; P_qh =  6;
-    P_nc = 7; P_nr =  8; P_ni =  9; P_ns = 10; P_ng = 11; P_nh = 12;
-                                               P_vg = 13; P_vh = 14;
+    P_qc = 1; P_qr =  2; P_qi =  3; P_qs =  4; P_qg =  5; P_qh =  6
+    P_nc = 7; P_nr =  8; P_ni =  9; P_ns = 10; P_ng = 11; P_nh = 12
+                                               P_vg = 13; P_vh = 14
     nscalar = 14
 
     graupel_ON = 1
@@ -353,10 +353,10 @@ INTEGER(kind_int) FUNCTION get_qgh_opt(graupel_ON, hail_ON)
     get_qgh_opt = 3
   ELSE IF(graupel_ON == 1 .and. hail_ON == 1) THEN
     get_qgh_opt = 4
-  ENDIF
+  END IF
 
 END FUNCTION get_qgh_opt
 
 !+---+-----------------------------------------------------------------+
 
-END MODULE
+END MODULE radarz_iface

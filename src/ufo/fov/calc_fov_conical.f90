@@ -53,7 +53,7 @@
 
  integer, parameter, private :: nchan = 24
  integer, parameter, private :: maxinstr = 5
- integer, parameter :: instrumentrange(2) = (/26, 30/)
+ integer, parameter :: instrumentrange(2) = [26, 30]
 
  real(r_kind), parameter, private    :: radius   = 6371.22_r_kind
 
@@ -69,7 +69,7 @@
 ! These SSMIS values are the average of the 0 and 90 deg cuts as determined by
 ! plot_test_conical_fov.f90
  real(r_kind), private, dimension(nchan,instrumentrange(1):instrumentrange(2))   &
-                                  :: fovangle   =  reshape ( (/                  &
+                                  :: fovangle   =  reshape ( [                  &
                          .7950_r_kind, .7950_r_kind, .8350_r_kind, .8000_r_kind, &
                          .7725_r_kind, .7000_r_kind, .7150_r_kind, .4050_r_kind, &
                          .3650_r_kind, .3650_r_kind, .3650_r_kind,1.9450_r_kind, &
@@ -99,11 +99,11 @@
                         0.3750_r_kind,0.3750_r_kind,0.3750_r_kind,1.8725_r_kind, &
                         1.8750_r_kind,1.8525_r_kind,1.1400_r_kind,1.1875_r_kind, &
                         0.4050_r_kind,0.4200_r_kind,0.7050_r_kind,0.7225_r_kind, &
-                        0.7225_r_kind,0.7225_r_kind,0.7225_r_kind,0.7225_r_kind/) , (/nchan,maxinstr/) )
+                        0.7225_r_kind,0.7225_r_kind,0.7225_r_kind,0.7225_r_kind] , [nchan,maxinstr] )
 
- real(r_kind), private, pointer, dimension(:,:,:) :: ssmiscoeff 
+ real(r_kind), private, pointer, dimension(:,:,:) :: ssmiscoeff
 
- real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_26 = reshape( (/    &
+ real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_26 = reshape( [    &
    0.0000000e+000_r_kind,  -2.0421422e+000_r_kind,  -1.8475670e+001_r_kind,   5.8127385e-001_r_kind, &
   -7.0556941e+000_r_kind,  -1.2992365e+001_r_kind,  -6.5335264e+000_r_kind,  -1.4934616e+000_r_kind, &
    0.0000000e+000_r_kind,   1.0068195e+000_r_kind,  -1.8621782e+001_r_kind,   7.0600611e-001_r_kind, &
@@ -199,11 +199,11 @@
    0.0000000e+000_r_kind,   2.4362673e-001_r_kind,  -2.3671696e+001_r_kind,   1.9867196e+000_r_kind, &
   -1.5356319e+001_r_kind,   1.9979763e+001_r_kind,  -1.5665739e+000_r_kind,  -2.4290712e+000_r_kind, &
    0.0000000e+000_r_kind,  -1.3031545e+000_r_kind,  -2.4348703e+001_r_kind,  -2.8804038e+000_r_kind, &
-  -1.2756769e+001_r_kind,   1.9352788e+000_r_kind,   5.8430328e+000_r_kind,  -1.0966378e+000_r_kind/), &
-      (/ 8,2,nchan/) )
- 
- real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_27 = reshape( (/  &
-   0.0000000e+000_r_kind,  -1.3646689e-001_r_kind,  -1.7491594e+001_r_kind,  -1.4631690e+000_r_kind, & 
+  -1.2756769e+001_r_kind,   1.9352788e+000_r_kind,   5.8430328e+000_r_kind,  -1.0966378e+000_r_kind], &
+      [ 8,2,nchan] )
+
+ real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_27 = reshape( [  &
+   0.0000000e+000_r_kind,  -1.3646689e-001_r_kind,  -1.7491594e+001_r_kind,  -1.4631690e+000_r_kind, &
   -7.5684819e+000_r_kind,  -7.6566257e+000_r_kind,  -6.6404605e-001_r_kind,   3.2459021e-001_r_kind, &
    0.0000000e+000_r_kind,   7.6307529e-001_r_kind,  -1.9646463e+001_r_kind,   2.0191465e-001_r_kind, &
   -6.4181051e+000_r_kind,   1.4203938e+000_r_kind,   1.3550677e+000_r_kind,   5.3587806e-001_r_kind, &
@@ -298,11 +298,11 @@
    0.0000000e+000_r_kind,  -1.9054600e+000_r_kind,  -2.4767467e+001_r_kind,   2.2741683e+000_r_kind, &
    2.1102891e+000_r_kind,   5.7827330e+000_r_kind,  -1.3349512e+001_r_kind,   7.7343783e+000_r_kind, &
    0.0000000e+000_r_kind,   2.2701132e+000_r_kind,  -2.4232327e+001_r_kind,   3.1316319e+000_r_kind, &
-  -1.8675348e+001_r_kind,  -3.3524268e+000_r_kind,   1.3261509e+001_r_kind,   2.3453029e-001_r_kind/), & 
-      (/ 8,2,nchan/) )
+  -1.8675348e+001_r_kind,  -3.3524268e+000_r_kind,   1.3261509e+001_r_kind,   2.3453029e-001_r_kind], &
+      [ 8,2,nchan] )
 
- real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_28 = reshape( (/ &
-   0.0000000e+000_r_kind,   2.0570794e-001_r_kind,  -1.9492340e+001_r_kind,  -7.6119816e-001_r_kind, & 
+ real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_28 = reshape( [ &
+   0.0000000e+000_r_kind,   2.0570794e-001_r_kind,  -1.9492340e+001_r_kind,  -7.6119816e-001_r_kind, &
   -4.2826099e+000_r_kind,  -6.4894390e+000_r_kind,  -2.7921066e+000_r_kind,  -1.0449085e+000_r_kind, &
    0.0000000e+000_r_kind,   7.9341185e-001_r_kind,  -1.8895180e+001_r_kind,   5.6425661e-001_r_kind, &
   -6.8573856e+000_r_kind,  -2.7626008e-001_r_kind,   1.0872771e+000_r_kind,   3.7025112e-001_r_kind, &
@@ -397,11 +397,11 @@
    0.0000000e+000_r_kind,  -1.9373071e+000_r_kind,  -2.4036428e+001_r_kind,  -3.9531195e-001_r_kind, &
   -3.8098814e+000_r_kind,   1.0168166e+001_r_kind,  -3.6215985e+000_r_kind,   1.0253588e+000_r_kind, &
    0.0000000e+000_r_kind,  -2.0423832e+000_r_kind,  -2.4063471e+001_r_kind,   6.1321461e-001_r_kind, &
-  -9.7925587e+000_r_kind,  -6.7504501e+000_r_kind,   1.2449081e+000_r_kind,   2.3537226e+000_r_kind/),& 
-      (/ 8,2,nchan/) )
+  -9.7925587e+000_r_kind,  -6.7504501e+000_r_kind,   1.2449081e+000_r_kind,   2.3537226e+000_r_kind],&
+      [ 8,2,nchan] )
 
- real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_29 = reshape( (/  &
-   0.0000000e+000_r_kind,   1.5625407e+000_r_kind,  -1.6123783e+001_r_kind,  -9.1493206e+000_r_kind, & 
+ real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_29 = reshape( [  &
+   0.0000000e+000_r_kind,   1.5625407e+000_r_kind,  -1.6123783e+001_r_kind,  -9.1493206e+000_r_kind, &
   -1.2375475e+001_r_kind,   1.9653361e+000_r_kind,   8.6359787e+000_r_kind,   2.3022599e+000_r_kind, &
    0.0000000e+000_r_kind,  -6.6403961e-001_r_kind,  -1.3765058e+001_r_kind,  -1.9172590e+000_r_kind, &
   -1.7816914e+001_r_kind,   3.9072070e-001_r_kind,   7.7860289e+000_r_kind,   7.8557414e-001_r_kind, &
@@ -496,11 +496,11 @@
    0.0000000e+000_r_kind,  -2.4366511e-002_r_kind,  -2.5216434e+001_r_kind,   4.5976925e-001_r_kind, &
   -7.7533526e+000_r_kind,   1.6154577e+001_r_kind,  -7.4004397e+000_r_kind,   1.9803473e+000_r_kind, &
    0.0000000e+000_r_kind,  -2.2456892e+000_r_kind,  -3.1012749e+001_r_kind,  -4.8632174e+000_r_kind, &
-  -6.1604791e+000_r_kind,   9.9734573e+000_r_kind,   1.3498210e+000_r_kind,  -3.8913133e+000_r_kind/), & 
-      (/ 8,2,nchan/) )
+  -6.1604791e+000_r_kind,   9.9734573e+000_r_kind,   1.3498210e+000_r_kind,  -3.8913133e+000_r_kind], &
+      [ 8,2,nchan] )
 
- real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_30 = reshape( (/  &
-   0.0000000e+000_r_kind,  -8.1242698e-001_r_kind,  -1.7322411e+001_r_kind,  -1.4913555e+000_r_kind, & 
+ real(r_kind), private, target, dimension(0:7,2,nchan) :: ssmiscoeff_30 = reshape( [  &
+   0.0000000e+000_r_kind,  -8.1242698e-001_r_kind,  -1.7322411e+001_r_kind,  -1.4913555e+000_r_kind, &
   -7.5479631e+000_r_kind,  -5.2311492e+000_r_kind,   7.5847095e-001_r_kind,   2.1852940e-001_r_kind, &
    0.0000000e+000_r_kind,  -5.0213617e-001_r_kind,  -1.7320137e+001_r_kind,  -3.5626882e-001_r_kind, &
   -1.0421036e+001_r_kind,  -1.0414523e+000_r_kind,   3.8325624e+000_r_kind,   5.6047857e-001_r_kind, &
@@ -595,8 +595,8 @@
    0.0000000e+000_r_kind,  -4.4566658e-001_r_kind,  -2.1961597e+001_r_kind,   3.6832643e+000_r_kind, &
   -1.3226493e+001_r_kind,   7.3017807e+000_r_kind,   1.1002332e+001_r_kind,  -7.0395536e+000_r_kind, &
    0.0000000e+000_r_kind,  -2.0096771e-002_r_kind,  -2.2113859e+001_r_kind,  -4.5402646e-001_r_kind, &
-  -1.2636704e+001_r_kind,  -8.3116474e+000_r_kind,   4.1869698e+000_r_kind,   3.5938828e+000_r_kind/), &
-      (/ 8,2,nchan/) )
+  -1.2636704e+001_r_kind,  -8.3116474e+000_r_kind,   4.1869698e+000_r_kind,   3.5938828e+000_r_kind], &
+      [ 8,2,nchan] )
 
  contains
 subroutine instrument_init(instr,satid,expansion,valid)
@@ -605,11 +605,11 @@ subroutine instrument_init(instr,satid,expansion,valid)
 ! subprogram:    instrument_init          initalize instrument fields
 !
 ! abstract: initialize variables required by this module.
-!   
+!
 ! program history log:
 !   2008-08-09  kleespies
 !   2008-11-06  gayno - modified for gsi software standards
-!   2009-08-21  kleespies - additional instruments 
+!   2009-08-21  kleespies - additional instruments
 !   2011-09-13  gayno - improve error handling.  pass back
 !                       error flag (variable valid) when
 !                       inputs are incorrect.
@@ -623,10 +623,10 @@ subroutine instrument_init(instr,satid,expansion,valid)
 !                  29 - FM4 SSMIS
 !                  30 - FM5 SSMIS
 !   satid        - satellite id
-!   expansion    - expansion factor.  must be 1.0 for accurate rendering, 
+!   expansion    - expansion factor.  must be 1.0 for accurate rendering,
 !                  > 1.0 makes bigger ellipses, < 1.0 makes smaller ellipses.
 !                  do not make bigger than 3.0.
-!  
+!
 ! output argument list:
 !   valid        - set to false when inputs are incorrect.
 !
@@ -645,8 +645,8 @@ subroutine instrument_init(instr,satid,expansion,valid)
  character(len=*), intent(in   ) :: satid
  integer         , intent(in   ) :: instr
  real(r_kind)    , intent(in   ) :: expansion
+ logical         , intent(  out) :: valid
 
- logical :: valid
 ! Declare local variables.
  integer                            :: i, jchan, minstr
  real(r_kind)                       :: ata, cta, atf, ctf, ratio, height
@@ -655,13 +655,13 @@ subroutine instrument_init(instr,satid,expansion,valid)
 
  minstr = instr
  if(instr == 25) minstr = 26 ! use dmsp 16 for default circular fov size
-  
- if ((minstr < instrumentrange(1)) .or. (minstr > instrumentrange(2))) then 
-    write(6,*) "INSTRUMENT_INIT: INSTRUMENT NUMBER OF: ",minstr," OUT OF RANGE." 
+
+ if ((minstr < instrumentrange(1)) .or. (minstr > instrumentrange(2))) then
+    write(6,*) "INSTRUMENT_INIT: INSTRUMENT NUMBER OF: ",minstr," OUT OF RANGE."
     write(6,*) "VALID VALUES ARE: ", instrumentrange(1)," TO ",instrumentrange(2)
     valid=.false.
     return
- endif
+ end if
 
  nullify(ssmiscoeff)
  select case (minstr)
@@ -684,7 +684,7 @@ subroutine instrument_init(instr,satid,expansion,valid)
 ! fov is polygon.
  do i = 1 , npoly
     psi(i) = two*pi*(i-1)/(npoly-1)  ! will connect npoly points
- enddo
+ end do
 
  call get_sat_height(satid, height, valid)
  if(.not.valid) return
@@ -702,7 +702,7 @@ subroutine instrument_init(instr,satid,expansion,valid)
     ratio = rmin(jchan)**2/rmax(jchan)**2
     if(ratio > one) ratio = one  !  this takes care of some precision issues
     eccen(jchan) = sqrt(one - ratio)
- enddo
+ end do
 
  if(instr == 25) eccen = zero  ! default circular fov
 
@@ -716,7 +716,7 @@ subroutine fovconicalanglessizes(instr,chan,height,alongtrackangle, &
 !                .      .    .                                       .
 ! subprogram:    fovconicalanglessizes    calc conical angle size
 !
-! abstract: computes the cross track and along track angles of a 
+! abstract: computes the cross track and along track angles of a
 !   conical instrument FOV as viewed from the center of the earth;
 !   and cross track and along track FOV size in km. presumes a
 !   spherical earth.
@@ -755,7 +755,7 @@ subroutine fovconicalanglessizes(instr,chan,height,alongtrackangle, &
 !                       23 - 60.792668+-0.357892+-0.016  rcp
 !                       24 - 60.792668+-0.357892+-0.05 rcp
 !   height       - satellite height in km
-!  
+!
 ! output argument list:
 !   alongtrackangle       - along track angle
 !   alongtrackfovsize     - along track fov size
@@ -776,8 +776,8 @@ subroutine fovconicalanglessizes(instr,chan,height,alongtrackangle, &
  real(r_kind)   , intent(  out) :: alongtrackfovsize,crosstrackfovsize
 
 ! Declare local parameters.
- real(r_kind), dimension(instrumentrange(1):instrumentrange(2)) &
-                                  :: conicalangle = (/45._r_kind,45._r_kind,45._r_kind,45._r_kind,45._r_kind/)
+ real(r_kind), dimension(instrumentrange(1):instrumentrange(2)), parameter &
+                                  :: conicalangle = [45._r_kind,45._r_kind,45._r_kind,45._r_kind,45._r_kind]
 
 ! Declare local variables.
  real(r_kind)                     :: nadirangle
@@ -790,8 +790,8 @@ subroutine fovconicalanglessizes(instr,chan,height,alongtrackangle, &
 
 ! Nadir angles of center and crosstrack extremes of fov
  nadirangle   = conicalangle(instr)
- nadirangle_m = nadirangle - fovangle(chan,instr)*half 
- nadirangle_p = nadirangle + fovangle(chan,instr)*half 
+ nadirangle_m = nadirangle - fovangle(chan,instr)*half
+ nadirangle_p = nadirangle + fovangle(chan,instr)*half
 
 ! Complement of zenith angle for center and crosstrack extremes of fov
  compzacenter = 180._r_kind-asin((radius+height)/radius * sin(nadirangle  /rad2deg))*rad2deg
@@ -808,8 +808,8 @@ subroutine fovconicalanglessizes(instr,chan,height,alongtrackangle, &
  distancetofov = (radius+height)* &
                   sin( (180._r_kind-nadirangle-compzacenter)/rad2deg)/sin((compzacenter)/rad2deg)
  if(distancetofov < zero) distancetofov = height ! for nadir fov
-  
-! along track fov size in km. the following is an approximation, but it is close. 
+
+! along track fov size in km. the following is an approximation, but it is close.
 ! it underestimates the FOV by a smidge.
  alongtrackfovsize = two*distancetofov*tan(fovangle(chan,instr)*half/rad2deg)
 
@@ -823,8 +823,8 @@ subroutine fov_ellipse_conical(ichan,satellite_azimuth,lat,lon,elats,elons)
 ! subprogram:    fov_ellipse_conical     computes fov ellipses
 !
 ! abstract: computes fov ellipses in latitude/longitude coordinates of
-!   a conically scanning instrument. 
-!   
+!   a conically scanning instrument.
+!
 ! input argument list:
 !   ichan             - channel number (ghz)
 !                       1  - 50.3 v
@@ -851,17 +851,17 @@ subroutine fov_ellipse_conical(ichan,satellite_azimuth,lat,lon,elats,elons)
 !                       22 - 60.792668+-0.357892+-0.0055 rcp
 !                       23 - 60.792668+-0.357892+-0.016  rcp
 !                       24 - 60.792668+-0.357892+-0.05 rcp
-!   satellite_azimuth - satellite azimuth angle (degrees)  
-!   lat               - latitude of fov center 
+!   satellite_azimuth - satellite azimuth angle (degrees)
+!   lat               - latitude of fov center
 !   lon               - longitude of fov center
-!  
+!
 ! output argument list:
 !   elats             - ellipse latitudes  centered about lat,lon
 !   elons             - ellipse longitudes centered about lat,lon
 !
 ! remarks:
 !
-!  There are several engineering checks to handle things like 
+!  There are several engineering checks to handle things like
 !  arcsin( x>1.0 or x<-1.0).  These things can happen because POES navigation
 !  uses an oblate spheroid earth, while here we are using a spherical earth,
 !  so there is a small inconsistency in computing arc angles.
@@ -893,8 +893,8 @@ subroutine fov_ellipse_conical(ichan,satellite_azimuth,lat,lon,elats,elons)
  real(r_kind), dimension(npoly) :: sinb
  real(r_kind), dimension(npoly) :: b
 
- pos_ang = satellite_azimuth 
- psip    = psi + pos_ang/rad2deg 
+ pos_ang = satellite_azimuth
+ psip    = psi + pos_ang/rad2deg
  r       = rmax(ichan) * sqrt( (one - eccen(ichan)**2)/(one - eccen(ichan)**2 *cos(psi)**2) )
  cosc    = cos((90._r_kind-lat)/rad2deg)*cos(r/rad2deg) + &
            sin((90._r_kind-lat)/rad2deg)*sin(r/rad2deg)*cos(psip)
@@ -903,15 +903,15 @@ subroutine fov_ellipse_conical(ichan,satellite_azimuth,lat,lon,elats,elons)
  elats(1:npoly) = 90._r_kind - c
  sinb = sin(r/rad2deg)*sin(psip)/sin(c/rad2deg)
 
-! handle numeric imprecision 
+! handle numeric imprecision
  do i = 1 , npoly
     if(sinb(i) >  one) sinb(i) =  one
     if(sinb(i) < -one) sinb(i) = -one
- enddo
+ end do
 
  b = asin(sinb)*rad2deg
  elons(1:npoly) = lon + b
- 
+
  return
 end subroutine fov_ellipse_conical
 subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
@@ -956,16 +956,16 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
 !                       28 - FM3 SSMIS
 !                       29 - FM4 SSMIS
 !                       30 - FM5 SSMIS
-!   expansion         - expansion factor.  must be 1.0 for accurate rendering, 
+!   expansion         - expansion factor.  must be 1.0 for accurate rendering,
 !                       > 1.0 makes bigger ellipses, < 1.0 makes smaller ellipses.
-!   satellite_azimuth - satellite azimuth angle (degrees)  
-!   lat               - latitude of fov center 
+!   satellite_azimuth - satellite azimuth angle (degrees)
+!   lat               - latitude of fov center
 !   lon               - longitude of fov center
-!   testlat           - latitude of test point 
+!   testlat           - latitude of test point
 !   testlon           - longitude of test point
-!  
+!
 ! output argument list:
-!   inside            - 0.0-1.0 relative antenna power if [testLat,testLon] is 
+!   inside            - 0.0-1.0 relative antenna power if [testLat,testLon] is
 !                       inside the FOV, 0 if outside.
 !
 !$$$
@@ -977,16 +977,16 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
 ! Declare passed variables
  integer,         intent(in   ) :: instr
  integer,         intent(in   ) :: ichan
- real(r_kind)   , intent(in   ) :: satellite_azimuth 
- real(r_kind)   , intent(in   ) :: lat               
- real(r_kind)   , intent(in   ) :: lon               
- real(r_kind)   , intent(in   ) :: testlat           
- real(r_kind)   , intent(in   ) :: testlon           
- real(r_kind)   , intent(in   ) :: expansion         
- real(r_kind)   , intent(  out) :: inside         
+ real(r_kind)   , intent(in   ) :: satellite_azimuth
+ real(r_kind)   , intent(in   ) :: lat
+ real(r_kind)   , intent(in   ) :: lon
+ real(r_kind)   , intent(in   ) :: testlat
+ real(r_kind)   , intent(in   ) :: testlon
+ real(r_kind)   , intent(in   ) :: expansion
+ real(r_kind)   , intent(  out) :: inside
 
 ! Declare local parameters
- real(r_kind), parameter  :: r1 = one ! Equatorial radius. Work in angular distance, 
+ real(r_kind), parameter  :: r1 = one ! Equatorial radius. Work in angular distance,
                                       ! not km (otherwise r1=6371)
  real(r_kind), parameter  :: r2 = r1  ! assume spherical earth (otherwise r2 = polar radius)
 
@@ -1002,13 +1002,13 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
  real(r_kind)  :: psi    ! angle from 3:00 on fov to line from fov center to test location
  real(r_kind)  :: psip   ! angle from latitude parallel through fov center
                          ! to line from fov center to test location
- 
+
 ! These are the flat earth variables
  real(r_kind)  :: distance_north  ! north angular distance from fov center to test location
  real(r_kind)  :: distance_east   ! east  angular distance from fov center to test location
  real(r_kind)  :: bearing_to_test ! same as psip
  real(r_kind)  :: bearing_to_test_deg ! in degrees
- real(r_kind)  :: fovanglesize 
+ real(r_kind)  :: fovanglesize
  real(r_kind)  :: x,y,px,py,p,rat
 
  integer :: minstr        ! storage for instrument number permitting instr 25 default circular
@@ -1036,11 +1036,11 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
    bearing_to_test = 0
  else
    bearing_to_test = mod(atan2(distance_north,distance_east),2*pi )
- endif
+ end if
   bearing_to_test_deg = bearing_to_test*rad2deg ! convert to degrees
 
 ! This is the arc distance to the test point
-  d=two*asin(sqrt((sin(dellat/two))**2 +     & 
+  d=two*asin(sqrt((sin(dellat/two))**2 +     &
                  cos(testlat*deg2rad)*cos(lat*deg2rad)*(sin(dellon/two))**2))
   d = d*rad2deg  ! convert to degrees
 
@@ -1051,7 +1051,7 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
 
 ! r is the angular distance from the ichan center to the edge of the ellipse in degrees
   r = rmax(ichan)*sqrt( (one - eccen(ichan)**2)/(one - eccen(ichan)**2 *cos(psi)**2) )
- 
+
   inside = zero
 
 
@@ -1063,10 +1063,10 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
      x = rat * cos(psi)
      y = rat * sin(psi)
 
-     px = ssmiscoeff(0,1,ichan) + ssmiscoeff(1,1,ichan)*x    + ssmiscoeff(2,1,ichan)*x**2 & 
+     px = ssmiscoeff(0,1,ichan) + ssmiscoeff(1,1,ichan)*x    + ssmiscoeff(2,1,ichan)*x**2 &
                                 + ssmiscoeff(3,1,ichan)*x**3 + ssmiscoeff(4,1,ichan)*x**4 &
                                 + ssmiscoeff(5,1,ichan)*x**5 + ssmiscoeff(6,1,ichan)*x**6 &
-                                + ssmiscoeff(7,1,ichan)*x**7   
+                                + ssmiscoeff(7,1,ichan)*x**7
 
      py = ssmiscoeff(0,2,ichan) + ssmiscoeff(1,2,ichan)*y    + ssmiscoeff(2,2,ichan)*y**2 &
                                 + ssmiscoeff(3,2,ichan)*y**3 + ssmiscoeff(4,2,ichan)*y**4 &
@@ -1079,10 +1079,10 @@ subroutine inside_fov_conical(instr,ichan,satellite_azimuth,lat,lon, &
 
      p = 10._r_kind**(-p*one_tenth)
 
-     inside = p  
+     inside = p
      if(inside > one) inside = one
-   
-  endif
+
+  end if
 
   return
  end subroutine inside_fov_conical

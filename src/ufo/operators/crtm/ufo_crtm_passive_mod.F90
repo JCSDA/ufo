@@ -10,7 +10,7 @@ module ufo_crtm_passive_mod
  use crtm_module
 
  use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
  use missing_values_mod
 
@@ -36,7 +36,7 @@ subroutine ufo_crtm_passive_sim(rts, Options, nvars, nlocs, n_Profiles, n_Channe
 
 
  USE crtm_SpcCoeff, ONLY: SC, &
-                          SpcCoeff_IsMicrowaveSensor , & 
+                          SpcCoeff_IsMicrowaveSensor , &
                           SpcCoeff_IsInfraredSensor  , &
                           SpcCoeff_IsVisibleSensor   , &
                           SpcCoeff_IsUltravioletSensor
@@ -53,7 +53,7 @@ real(kind=kind_real), parameter :: PI = ACOS(-1.)
 real(kind=kind_real), parameter :: cos85 = COS(85.)
 real(c_double) :: missing
 integer        :: l, m
-logical        :: is_vis_or_uv = .false.
+logical        :: is_vis_or_uv
 
 ! Put simulated brightness temperature (or reflectance/albedo) into hofx
 ! ----------------------------------------------
@@ -75,7 +75,7 @@ end if
 if (is_vis_or_uv) then
    do m = 1, n_Profiles
       if (.not.Options(m)%Skip_Profile) then
-         if (rts(1,m)%Solar_irradiance .gt. 1.0) then    ! .and. rts(1,m)%COS_SUN .gt. cos85) then
+         if (rts(1,m)%Solar_irradiance > 1.0) then    ! .and. rts(1,m)%COS_SUN .gt. cos85) then
             do l = 1, n_Channels
                hofx(l,m) = rts(l,m)%Radiance*PI/rts(l,m)%Solar_irradiance  ! Albedo
             end do
@@ -98,7 +98,10 @@ end if
 end subroutine ufo_crtm_passive_sim
 
 
-subroutine ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
+subroutine ufo_crtm_passive_diag( &
+  rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, &
+  obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, &
+  hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
 
@@ -149,9 +152,9 @@ do jvar = 1, hofxdiags%nvar
 
    if (ch_diags(jvar) > 0) then
       if (size(pack(channels,channels==ch_diags(jvar))) /= 1) then
-         write(err_msg,*) 'ufo_radiancecrtm_simobs: mismatch between// &
-                           & h(x) channels(', channels,') and// &
-                           & ch_diags(jvar) = ', ch_diags(jvar)
+         write(err_msg,*) "ufo_radiancecrtm_simobs: mismatch between// &
+                           & h(x) channels(", channels,") and// &
+                           & ch_diags(jvar) = ", ch_diags(jvar)
          call abor1_ftn(err_msg)
       end if
    end if
@@ -164,15 +167,16 @@ do jvar = 1, hofxdiags%nvar
       end if
    end do
 
-   if (allocated(hofxdiags%geovals(jvar)%vals)) &
-      deallocate(hofxdiags%geovals(jvar)%vals)
+   if (allocated(hofxdiags%geovals(jvar)%vals)) then
+     deallocate(hofxdiags%geovals(jvar)%vals)
+   end if
 
    angle_hf=achar(0)
-   if (conf%SENSOR_ID(n_Sensor) == 'gmi_gpm') then
+   if (conf%SENSOR_ID(n_Sensor) == "gmi_gpm") then
       if (ch_diags(jvar) > 9) then
          angle_hf="1"
-      endif
-   endif
+      end if
+   end if
    !============================================
    ! Diagnostics used for QC and bias correction
    !============================================
@@ -241,7 +245,7 @@ do jvar = 1, hofxdiags%nvar
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % Radiance * PI / rts(jchannel,jprofile) % Solar_irradiance 
+                     rts(jchannel,jprofile) % Radiance * PI / rts(jchannel,jprofile) % Solar_irradiance
                end if
             end do
 
@@ -253,7 +257,7 @@ do jvar = 1, hofxdiags%nvar
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
                   hofxdiags%geovals(jvar)%vals(1,jprofile) = &
-                     rts(jchannel,jprofile) % R_clear * PI / rts(jchannel,jprofile) % Solar_irradiance 
+                     rts(jchannel,jprofile) % R_clear * PI / rts(jchannel,jprofile) % Solar_irradiance
                end if
             end do
 #endif
@@ -342,8 +346,8 @@ do jvar = 1, hofxdiags%nvar
                      if (Wfunc(jlevel) > wfunc_max) then
                         wfunc_max = Wfunc(jlevel)
                         hofxdiags%geovals(jvar)%vals(1,jprofile) = jlevel
-                     endif
-                  enddo
+                     end if
+                  end do
                end if
             end do
             deallocate(TmpVar)
@@ -540,8 +544,8 @@ do jvar = 1, hofxdiags%nvar
             end do
 
          case default
-            write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
-                              & ObsDiagnostic is unsupported, ', &
+            write(err_msg,*) "ufo_radiancecrtm_simobs: //&
+                              & ObsDiagnostic is unsupported, ", &
                               & hofxdiags%variables(jvar)
             call fckit_log%info(err_msg)
             !call abor1_ftn(err_msg)
@@ -661,8 +665,8 @@ do jvar = 1, hofxdiags%nvar
             end do
 
          case default
-            write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
-                              & ObsDiagnostic is unsupported, ', &
+            write(err_msg,*) "ufo_radiancecrtm_simobs: //&
+                              & ObsDiagnostic is unsupported, ", &
                               & hofxdiags%variables(jvar)
             call fckit_log%info(err_msg)
             !call abor1_ftn(err_msg)
@@ -670,8 +674,8 @@ do jvar = 1, hofxdiags%nvar
       end select
 #endif
    else
-      write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
-                        & ObsDiagnostic is unsupported, ', &
+      write(err_msg,*) "ufo_radiancecrtm_simobs: //&
+                        & ObsDiagnostic is unsupported, ", &
                         & hofxdiags%variables(jvar)
       call fckit_log%info(err_msg)
       !call abor1_ftn(err_msg)

@@ -7,7 +7,7 @@
 
 module ufo_insitupm_mod
 
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
  use PM_cmaq_mod
  use oops_variables_mod
@@ -24,9 +24,9 @@ module ufo_insitupm_mod
    type(oops_variables), public :: geovars
    type(obs_variables), public :: obsvars
    integer                      :: ntracers
-   character(len=maxvarlen)     :: model, v_coord        
+   character(len=maxvarlen)     :: model, v_coord
    logical                      :: scalefactor
-   integer, allocatable :: tracer_modes_cmaq(:) 
+   integer, allocatable :: tracer_modes_cmaq(:)
  contains
    procedure :: setup  => ufo_insitupm_setup
    procedure :: simobs => ufo_insitupm_simobs
@@ -34,9 +34,9 @@ module ufo_insitupm_mod
  end type ufo_insitupm
 
 !> Default variables required from model: air pressure, temperature, CMAQ scaling factors, height and surface height
- character(len=maxvarlen), dimension(2), parameter :: varindefault = (/var_prs, var_ts/)
- character(len=maxvarlen), dimension(3), parameter :: varincmaq = (/var_pm25at, var_pm25ac, var_pm25co/)
- character(len=maxvarlen), dimension(2), parameter :: varvertical = (/var_geomz, var_sfc_geomz/)
+ character(len=maxvarlen), dimension(2), parameter :: varindefault = [var_prs, var_ts]
+ character(len=maxvarlen), dimension(3), parameter :: varincmaq = [var_pm25at, var_pm25ac, var_pm25co]
+ character(len=maxvarlen), dimension(2), parameter :: varvertical = [var_geomz, var_sfc_geomz]
 contains
 
 ! ------------------------------------------------------------------------------
@@ -54,47 +54,47 @@ character(kind=c_char,len=:), allocatable :: model_name, coord_name
 
   ! Fill in geovars: variables we need from the model
   ! Let users choose specific aerosol species (defined in the yaml file) needed in the PM2.5/total PM calculation.
-  ! Followed by slots for prs, ts, heights, and mode-specific scaling factors. 
+  ! Followed by slots for prs, ts, heights, and mode-specific scaling factors.
 
   call f_conf%get_or_die("tracer_geovals",tracer_variables)
   self%ntracers = f_conf%get_size("tracer_geovals")
 
   do iq = 1, self%ntracers
      call self%geovars%push_back(tracer_variables(iq))         ! aerosol species
-  enddo
+  end do
 
   ! Size of variables (number of obs type (= 1 for this case))
   nvars = self%obsvars%nvars()
 
-  call self%geovars%push_back(varindefault)                    ! pressure and ts (needed for unit conversion to ug/m3) 
+  call self%geovars%push_back(varindefault)                    ! pressure and ts (needed for unit conversion to ug/m3)
 
   call f_conf%get_or_die("vertical_coordinate", coord_name)    ! vertical coordinate for interpolation
   self%v_coord = coord_name
 
-  if(self%v_coord .eq. "height_asl") then
+  if(self%v_coord == "height_asl") then
   call self%geovars%push_back(varvertical)                     ! height and surface height
-  endif
+  end if
 
-  call f_conf%get_or_die("model", model_name)                  ! model name 
-  self%model = model_name 
+  call f_conf%get_or_die("model", model_name)                  ! model name
+  self%model = model_name
 
   ! To be edited (for non-CMAQ models)
-  if(self%model .ne. "CMAQ") then
+  if(self%model /= "CMAQ") then
     write(err_msg, *) "not CMAQ, not supported by this operator yet"
     call abor1_ftn(err_msg)
   end if
 
   ! CMAQ related
-  if(self%model .eq. "CMAQ") then
+  if(self%model == "CMAQ") then
 
   call f_conf%get_or_die("use_scalefac_cmaq",self%scalefactor)  ! determine whether mode-specific scaling factors will be used
 
    if(self%scalefactor) then
-    if(f_conf%has("tracer_modes_cmaq")) then 
+    if(f_conf%has("tracer_modes_cmaq")) then
     call f_conf%get_or_die("tracer_modes_cmaq",self%tracer_modes_cmaq)  ! CMAQ aerosol modes
 
-    ! check the lengths of aerosol species and aerosol mode lists, stop if inconsistent  
-     if(f_conf%get_size("tracer_modes_cmaq") .ne. self%ntracers) then
+    ! check the lengths of aerosol species and aerosol mode lists, stop if inconsistent
+     if(f_conf%get_size("tracer_modes_cmaq") /= self%ntracers) then
      write(err_msg, *) "mode information missing for some CMAQ aeorsol species"
      call abor1_ftn(err_msg)
      end if
@@ -104,10 +104,10 @@ character(kind=c_char,len=:), allocatable :: model_name, coord_name
     end if
 
     call self%geovars%push_back(varincmaq)                    ! CMAQ scaling factors for three modes
-   end if   
+   end if
 
-  end if  
-   
+  end if
+
   deallocate(tracer_variables, model_name, coord_name)
 
 end subroutine ufo_insitupm_setup
@@ -182,7 +182,7 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
   allocate(wi(nlocs))
   allocate(wf(nlocs))
 
-  if(self%v_coord .eq. "height_asl") then  
+  if(self%v_coord == "height_asl") then
   ! Obs station elevation and model heights (asl) at obs loc
   call obsspace_get_db(obss, "MetaData", "stationElevation", obss_metadata)
 
@@ -197,7 +197,7 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
   allocate(hgtasl(nlayers,nlocs))
   do ilayer = 1, nlayers
   hgtasl(ilayer,:) = hgt(ilayer,:) + elev(1,:)
-  enddo
+  end do
 
   ! Calculate the vertical interpolation weights
   do iloc = 1, nlocs
@@ -205,16 +205,16 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
                            hgtasl(:,iloc), wi(iloc), wf(iloc))
   end do
 
-  else if(self%v_coord .eq. "log_pressure") then  !log scale
+  else if(self%v_coord == "log_pressure") then  !log scale
   ! Obs air pressure at obs loc
   call obsspace_get_db(obss, "MetaData", "pressure", obss_metadata)
 
   ! Calculate the vertical interpolation weights
-  do iloc = 1, nlocs 
-  call vert_interp_weights(nlayers, log(obss_metadata(iloc)), & 
+  do iloc = 1, nlocs
+  call vert_interp_weights(nlayers, log(obss_metadata(iloc)), &
                            log(prs(:,iloc)), wi(iloc), wf(iloc))
   end do
-  
+
   else
   write(err_msg, *) "coordinate for vertical interpolation not supported"
   call abor1_ftn(err_msg)
@@ -224,21 +224,21 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
   allocate(qm(self%ntracers, nlayers, nlocs))
   allocate(tracer_name(self%ntracers))
   do iq = 1, self%ntracers
-     geovar = self%geovars%variable(iq)                   !self%geovars contains tracers 
+     geovar = self%geovars%variable(iq)                   !self%geovars contains tracers
      tracer_name(iq) = geovar
      call ufo_geovals_get_var(geovals, geovar, aer_profile)
      qm(iq,:,:) = aer_profile%vals             ! aerosol mass mixing ratio
-     qm(iq,:,:) = qm(iq,:,:) * prs / ts / rd   ! aerosol concentration (ug/m3) 
-  enddo
+     qm(iq,:,:) = qm(iq,:,:) * prs / ts / rd   ! aerosol concentration (ug/m3)
+  end do
 
   ! To be edited (for non-CMAQ models)
-  if(self%model .ne. "CMAQ") then
+  if(self%model /= "CMAQ") then
     write(err_msg, *) "not CMAQ, not supported by this operator yet"
     call abor1_ftn(err_msg)
   end if
 
   ! CMAQ related
-  if(self%model .eq. "CMAQ") then
+  if(self%model == "CMAQ") then
 
   hofx = 0.0
 
@@ -246,22 +246,22 @@ character(len=MAXVARLEN), dimension(:), allocatable:: tracer_name
   ! Get scaling factors from geovals
    allocate(facs(3, nlayers, nlocs))
    call ufo_geovals_get_var(geovals, var_pm25at, fac1_profile)
-   facs(1,:,:) = fac1_profile%vals           
+   facs(1,:,:) = fac1_profile%vals
    call ufo_geovals_get_var(geovals, var_pm25ac, fac2_profile)
-   facs(2,:,:) = fac2_profile%vals  
+   facs(2,:,:) = fac2_profile%vals
    call ufo_geovals_get_var(geovals, var_pm25co, fac3_profile)
-   facs(3,:,:) = fac3_profile%vals  
- 
+   facs(3,:,:) = fac3_profile%vals
+
    call get_PM_cmaq(nlayers, nvars, nlocs, self%ntracers, &
                     self%tracer_modes_cmaq, &
                     facs, qm, wi, wf, hofx)
    else
-   call get_PM_cmaq(nlayers, nvars, nlocs, self%ntracers, & 
+   call get_PM_cmaq(nlayers, nvars, nlocs, self%ntracers, &
                     qm=qm, wi=wi, wf=wf, pm=hofx)
    end if
 
   end if
- 
+
   ! cleanup memory
   ! --------
   deallocate(qm, ts, prs, tracer_name, wi, wf, obss_metadata)

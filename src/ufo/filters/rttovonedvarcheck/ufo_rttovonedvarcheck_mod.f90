@@ -1,5 +1,5 @@
 ! (C) Copyright 2017-2020 Met Office
-! 
+!
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
 
@@ -10,7 +10,7 @@ module ufo_rttovonedvarcheck_mod
 use ufo_constants_mod, only: zero
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use obsspace_mod
 use oops_variables_mod
@@ -88,7 +88,7 @@ end subroutine ufo_rttovonedvarcheck_delete
 !!
 !! \details Heritage : Ops_SatRad_Do1DVar_RTTOV12.f90
 !!
-!! This routine is called from the c++ apply method.  The filter performs 
+!! This routine is called from the c++ apply method.  The filter performs
 !! a 1D-Var minimization using rttov
 !!
 !! \author Met Office
@@ -142,7 +142,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   integer(c_size_t), allocatable     :: sampling_method_by_var(:)
   type(oops_variables)               :: reduced_vars
   integer(c_size_t)                  :: nreduced_vals(0)
-  logical(c_bool), parameter         :: is_sampling_method_trivial(1) = (/ .true. /)
+  logical(c_bool), parameter         :: is_sampling_method_trivial(1) = [ .true. ]
 
   ! ------------------------------------------
   ! 1. Setup
@@ -153,7 +153,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
   ! Setup full B matrix object
   call full_bmatrix % setup(self % retrieval_variables, self % b_matrix_path, &
                             self % qtotal)
-  
+
   ! Setup full R matrix object
   call full_rmatrix % setup(self % r_matrix_path)
 
@@ -175,7 +175,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       self % Store1DVarCLW = .false.
     end if
   end if
-  
+
   ! Read in observation data from obsspace
   ! geovals are only providing surface information
   call obs % setup(self, prof_index, geovals, vars)
@@ -266,7 +266,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
       ! setup ob data for this observation
       call ob % setup(nchans_used, self %  nlevels, local_profindex % nprofelements, self % nchans, &
            self % Store1DVarCLW, self % Store1DVarTransmittance)
-      
+
       ob % forward_mod_name = self % forward_mod_name
       ob % latitude = obs % lat(jobs)
       ob % longitude = obs % lon(jobs)
@@ -339,9 +339,9 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
         write(*,*) "ob % emiss = ",ob % emiss
         write(*,*) "ob % calc_emiss = ",ob % calc_emiss
         write(*,*) "Channel selection = "
-        write(*,'(15I5)') ob % channels_used
+        write(*,"(15I5)") ob % channels_used
         write(*,*) "All Channels = "
-        write(*,'(15I5)') ob % channels_all
+        write(*,"(15I5)") ob % channels_all
         call local_profindex % info()
       end if
 
@@ -442,7 +442,7 @@ subroutine ufo_rttovonedvarcheck_apply(self, f_conf, vars, hofxdiags_vars, geova
     else
       call fckit_log % debug("Final 1Dvar cost, apply = F")
 
-    endif
+    end if
   end do obs_loop
 
   !---------------------------------------------------

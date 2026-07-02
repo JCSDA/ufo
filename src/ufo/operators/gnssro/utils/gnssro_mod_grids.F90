@@ -2,6 +2,7 @@ module gnssro_mod_grids
 
 use kinds, only: kind_real
 use ufo_constants_mod, only: one
+implicit none
 
 public :: get_coordinate_value
 
@@ -12,7 +13,7 @@ contains
 subroutine get_coordinate_value(fin, fout, x, nx, flag)
 !
 ! Get grid coordinates from monotonically increasing or decreasing points
-! adapted GSI subprogram:    grdcrd1 
+! adapted GSI subprogram:    grdcrd1
 !
   integer,         intent(in)   :: nx    !number of reference grid point
   real(kind_real), intent(in)   :: x(nx) !grid values
@@ -48,9 +49,9 @@ subroutine get_coordinate_value(fin, fout, x, nx, flag)
      fout=float(ix)+(fin-x(ix))/(x(ix+1)-x(ix))
 
 ! Treat special case of nx=1
-  elseif (nx==1) then
+  else if (nx==1) then
      fout = one
-  endif
+  end if
 
   return
 end subroutine get_coordinate_value

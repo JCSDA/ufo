@@ -45,33 +45,33 @@ contains
     character(len=*), intent(in) :: platform  ! note GSI calls this "satellite"
 
     select case(trim(sensor))
-      case('amsua')
+      case("amsua")
         self%instr = 11
         self%ichan = 15
         self%is_crosstrack = .true.
         self%expansion = 2.9_kind_real
-      case('atms')
+      case("atms")
         self%instr = 20
         self%ichan = 16
         self%is_crosstrack = .true.
         self%expansion = 2.9_kind_real
-      case('cris')
+      case("cris")
         self%instr = 17
         self%ichan = -999
         self%is_crosstrack = .true.
         self%expansion = 1.0_kind_real
-      case('cris-fsr')  ! same as 'cris' above
+      case("cris-fsr")  ! same as 'cris' above
         self%instr = 17
         self%ichan = -999
         self%is_crosstrack = .true.
         self%expansion = 1.0_kind_real
-      case('iasi')
+      case("iasi")
         self%instr = 18
         self%ichan = -999
         self%is_crosstrack = .true.
         self%expansion = 1.0_kind_real
-      case('ssmis')
-        if (trim(platform) == 'f17') then
+      case("ssmis")
+        if (trim(platform) == "f17") then
           self%instr = 27
         else
           call abor1_ftn("Error in ufo_fov_mod: unknown satellite/platform " &

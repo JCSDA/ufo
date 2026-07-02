@@ -1,14 +1,14 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module for gnssro bending angle ropp2d tangent linear and adjoint
 !> following the ROPP (2018 Aug) implementation
 
 module ufo_gnssro_bndropp2d_tlad_mod
 
-use fckit_configuration_module, only: fckit_configuration 
+use fckit_configuration_module, only: fckit_configuration
 !use iso_c_binding
 use kinds
 use ufo_vars_mod
@@ -21,6 +21,7 @@ use missing_values_mod
 use ufo_gnssro_ropp1d_utils_mod
 use ufo_gnssro_ropp2d_utils_mod
 use logger_mod, only: oops_log
+implicit none
 
 private
 public :: ufo_gnssro_BndROPP2D_tlad
@@ -55,9 +56,9 @@ subroutine ufo_gnssro_bndropp2d_tlad_setup(self, f_conf)
 
 end subroutine ufo_gnssro_bndropp2d_tlad_setup
 
-! ------------------------------------------------------------------------------    
+! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
-       
+
   implicit none
   class(ufo_gnssro_BndROPP2D_tlad), intent(inout) :: self
   type(ufo_geovals),                intent(in)    :: geovals
@@ -81,7 +82,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
   call ufo_geovals_get_var(geovals, var_sfc_geomz, gph_sfc)   ! surface geopotential height
-  call self%delete()   
+  call self%delete()
 
   self%nval    = prs%nval
   self%nlocs   = obsspace_get_nlocs(obss)
@@ -90,11 +91,11 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   n_horiz = self%roconf%n_horiz
   dtheta  = self%roconf%dtheta
 
-  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
-    self%iflip = 1 
-    write(err_msg,'(a)') '  ufo_gnssro_bndropp2d_tlad_settraj:'//new_line('a')//                   &
-                         '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  but ROPP requires it to be ascending order, need flip'
+  if (prs%vals(1,1) < prs%vals(prs%nval,1) ) then
+    self%iflip = 1
+    write(err_msg,"(a)") "  ufo_gnssro_bndropp2d_tlad_settraj:"//new_line("a")//                   &
+                         "  Model vertical height profile is in descending order,"//new_line("a")// &
+                         "  but ROPP requires it to be ascending order, need flip"
     call oops_log%debug(err_msg)
   end if
 
@@ -130,7 +131,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   allocate(self%gph(self%nval,self%nlocs*n_horiz))
   allocate(self%gph_sfc(1,self%nlocs*n_horiz))
 
-! allocate   
+! allocate
   self%gph     = gph%vals
   self%t       = t%vals
   self%q       = q%vals
@@ -138,11 +139,11 @@ subroutine ufo_gnssro_bndropp2d_tlad_settraj(self, geovals, obss)
   self%gph_sfc = gph_sfc%vals
 
   self%ltraj   = .true.
-       
+
 end subroutine ufo_gnssro_bndropp2d_tlad_settraj
-    
+
 ! ------------------------------------------------------------------------------
-! ------------------------------------------------------------------------------    
+! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
   use ropp_fm_types, only: State2dFM, State1dFM
@@ -160,12 +161,12 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   type(State1dFM)                 :: x1d,x1d_tl
   type(Obs1dBangle)               :: y,y_tl
   type(Obs1dRefrac)               :: y2    ! Observation vector (levels required)
- 
+
   integer                         :: iobs,nlev, nlocs,nvprof
-    
+
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp2d_simobs_tl"
   character(max_string)        :: err_msg
-  type(ufo_geoval), pointer    :: t_d, q_d, prs_d 
+  type(ufo_geoval), pointer    :: t_d, q_d, prs_d
 
 ! hack - set local geopotential height to zero for ropp routines
   real(kind_real), allocatable  :: gph_d_zero(:,:)
@@ -194,10 +195,10 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
-      
+  end if
+
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
@@ -206,9 +207,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 ! check if the number of geoval profiles is correct
   if (t_d%nprofiles /= size(hofx)*n_horiz .or. q_d%nprofiles /= size(hofx)*n_horiz .or. &
       prs_d%nprofiles /= size(hofx)*n_horiz) then
-     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     write(err_msg,*) myname_, " error: npaths inconsistent!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
   nlev    = self%nval
   nlocs   = self%nlocs
@@ -241,12 +242,12 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
   do i = 1, nlocs
     geop(i) = geometric2geopotential(obsLat(i), obsAlt(i))
-  enddo
+  end do
 
   y2%refrac = obsRef(:)
   y2%geop = geop(:)
 
-  nvprof  = 1  ! no. of bending angles in profile 
+  nvprof  = 1  ! no. of bending angles in profile
   ob_time = 0.0
 
 ! loop through the obs
@@ -266,7 +267,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
 !      hack -- make non zero humidity to avoid zero denominator in tangent linear
 !              see  ropp_fm/bangle_1d/ropp_fm_bangle_1d_tl.f90
-       where(x%shum .le. 1e-8)        x%shum = 1e-8
+       where(x%shum <= 1e-8)        x%shum = 1e-8
 !      hack -- make non zero humidity to avoid zero denominator in tangent linear
 
        call init_ropp_2d_statevec(self%obsLon2d( (iobs-1)*n_horiz+1:iobs*n_horiz ), &
@@ -277,7 +278,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                                   gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),  &
                                   nlev, x_tl, n_horiz, dtheta, self%iflip, use_compress)
 
-!      set both y and y_tl structures    
+!      set both y and y_tl structures
        call init_ropp_2d_obvec_tlad(iobs, nvprof, &
                          obsImpP(iobs),           &
                          obsLat(iobs),            &
@@ -287,7 +288,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                              y,y_tl)
 
 !      now call TL of forward model
-       if ( ro_type .eq. "airborne" ) then
+       if ( ro_type == "airborne" ) then
 #ifdef ropp_aro
          call ropp_fm_bangle_2d_tl_aro(x,x_tl,y, y_tl,y2)
 #else
@@ -301,7 +302,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
 
        hofx(iobs) = y_tl%bangle(nvprof) ! this will need to change if profile is passed
 
-!      tidy up -deallocate ropp structures 
+!      tidy up -deallocate ropp structures
        call ropp_tidy_up_tlad_2d(x,x_tl,y,y_tl)
 
     else ! apply ropp1d above top_2d or when azimuth angle is missing
@@ -318,7 +319,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                                 self%gph_sfc(1,(iobs-1)*n_horiz+1+(n_horiz-1)/2), &
                                 x1d, self%iflip, use_compress)
 
-       where(x1d%shum .le. 1e-8)        x1d%shum = 1e-8
+       where(x1d%shum <= 1e-8)        x1d%shum = 1e-8
 
        call init_ropp_1d_statevec( ob_time,      &
                          obsLon(iobs),           &
@@ -331,7 +332,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                          gph_sfc_d_zero,         &
                          x1d_tl, self%iflip, use_compress)
 
-!      y and y_tl structures    
+!      y and y_tl structures
        call init_ropp_1d_obvec_tlad(iobs, nvprof, &
                          obsImpP(iobs),           &
                          obsLat(iobs),            &
@@ -340,17 +341,17 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
                          obsGeoid(iobs),          &
                              y,y_tl)
 
-!     TL 
+!     TL
       call ropp_fm_bangle_1d_tl(x1d,x1d_tl,y,y_tl%bangle(nvprof:nvprof))
       hofx(iobs) = y_tl%bangle(nvprof)
 
-!     tidy up 
+!     tidy up
       call ropp_tidy_up_tlad_1d(x1d,x1d_tl,y,y_tl)
     end if
   end do obs_loop
 
 ! tidy up - deallocate obsspace structures
-  deallocate(obsLat) 
+  deallocate(obsLat)
   deallocate(obsLon)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -366,7 +367,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_tl(self, geovals, hofx, obss)
   call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp2d_simobs_tl
- 
+
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
@@ -385,7 +386,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   type(c_ptr),  value,              intent(in)    :: obss
   real(c_double)              :: missing
 
-  type(ufo_geoval),     pointer   :: t_d, q_d, prs_d 
+  type(ufo_geoval),     pointer   :: t_d, q_d, prs_d
 
 ! set local geopotential height to zero for ropp routines
   real(kind_real),    allocatable :: gph_d_zero(:,:)
@@ -400,7 +401,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   integer                         :: iobs,nlev,nlocs,nvprof
   character(len=*), parameter     :: myname_="ufo_gnssro_bndropp2d_simobs_ad"
   character(max_string)           :: err_msg
-  integer                         :: n_horiz 
+  integer                         :: n_horiz
   real(kind_real)                 :: dtheta
   real(kind_real)                 :: ob_time
   character(len=20)               :: ro_type
@@ -418,10 +419,10 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
-     
+  end if
+
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
@@ -430,9 +431,9 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 ! check if the number of geoval profiles is correct
   if (t_d%nprofiles /= size(hofx)*n_horiz .or. q_d%nprofiles /= size(hofx)*n_horiz .or. &
       prs_d%nprofiles /= size(hofx)*n_horiz) then
-     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     write(err_msg,*) myname_, " error: npaths inconsistent!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
   nlev    = self%nval
   nlocs   = self%nlocs
@@ -465,7 +466,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
   do i = 1, nlocs
     geop(i) = geometric2geopotential(obsLat(i), obsAlt(i))
-  enddo
+  end do
 
   y2%refrac = obsRef(:)
   y2%geop = geop(:)
@@ -473,15 +474,15 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   missing = missing_value(missing)
 
 ! loop through the obs
-  nvprof  = 1  ! no. of bending angles in profile 
+  nvprof  = 1  ! no. of bending angles in profile
   ob_time = 0.0
 
-  obs_loop: do iobs = 1, nlocs 
+  obs_loop: do iobs = 1, nlocs
 
-    if (hofx(iobs) .gt. missing) then
+    if (hofx(iobs) > missing) then
        if ( ( obsImpP(iobs)-obsLocR(iobs)-obsGeoid(iobs) ) <= self%roconf%top_2d .and. &
               obsAzim(iobs) /= missing ) then
- 
+
 !       map the trajectory to ROPP structure x
         call init_ropp_2d_statevec(self%obsLon2d((iobs-1)*n_horiz+1:iobs*n_horiz), &
                                    self%obsLat2d((iobs-1)*n_horiz+1:iobs*n_horiz), &
@@ -504,8 +505,8 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
         x_ad%pres(:,:) = 0.0_wp
         x_ad%shum(:,:) = 0.0_wp
         x_ad%geop(:,:) = 0.0_wp
- 
- !      set both y and y_ad structures    
+
+ !      set both y and y_ad structures
         call init_ropp_2d_obvec_tlad(iobs,  nvprof,  &
                          obsImpP(iobs),              &
                          obsLat(iobs),               &
@@ -520,7 +521,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
 
 !       now call AD of forward model
         y_ad%bangle(nvprof)  = y_ad%bangle(nvprof) + hofx(iobs)
-        if ( ro_type .eq. "airborne" ) then
+        if ( ro_type == "airborne" ) then
 #ifdef ropp_aro
           call ropp_fm_bangle_2d_ad_aro(x,x_ad,y,y_ad,y2)
 #else
@@ -539,7 +540,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
                         gph_d_zero(:,(iobs-1)*n_horiz+1:iobs*n_horiz),      &
                         nlev, x_ad, n_horiz,self%iflip)
 
-!     tidy up - deallocate ropp structures  
+!     tidy up - deallocate ropp structures
       call ropp_tidy_up_tlad_2d(x,x_ad,y,y_ad)
 
       else ! apply ropp1d above top_2d or when azimuth angle is missing
@@ -574,7 +575,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
         x1d_ad%shum(:) = 0.0_wp
         x1d_ad%geop(:) = 0.0_wp
 
- !      set both y and y_ad structures    
+ !      set both y and y_ad structures
         call init_ropp_1d_obvec_tlad(iobs,  nvprof,  &
                          obsImpP(iobs),              &
                          obsLat(iobs),               &
@@ -607,7 +608,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   end do obs_loop
 
 ! tidy up - deallocate obsspace structures
-  deallocate(obsLat) 
+  deallocate(obsLat)
   deallocate(obsLon)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -623,7 +624,7 @@ subroutine ufo_gnssro_bndropp2d_simobs_ad(self, geovals, hofx, obss)
   call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp2d_simobs_ad
-    
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp2d_tlad_delete(self)
@@ -631,7 +632,7 @@ subroutine ufo_gnssro_bndropp2d_tlad_delete(self)
   implicit none
   class(ufo_gnssro_BndROPP2D_tlad), intent(inout) :: self
   character(len=*), parameter :: myname_="ufo_gnssro_bndropp_tlad_delete"
-      
+
   self%nval = 0
   if (allocated(self%prs)) deallocate(self%prs)
   if (allocated(self%t))   deallocate(self%t)
@@ -641,10 +642,10 @@ subroutine ufo_gnssro_bndropp2d_tlad_delete(self)
   if (allocated(self%obsLat2d)) deallocate(self%obsLat2d)
   if (allocated(self%obsLon2d)) deallocate(self%obsLon2d)
 
-  self%ltraj = .false. 
+  self%ltraj = .false.
 
 end subroutine ufo_gnssro_bndropp2d_tlad_delete
 
 !-------------------------------------------------------------------------
-       
+
 end module ufo_gnssro_bndropp2d_tlad_mod

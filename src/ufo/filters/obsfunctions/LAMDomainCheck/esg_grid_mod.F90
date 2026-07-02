@@ -10,19 +10,21 @@
 
 module esg_grid_mod
 
-  use kinds
+  use kinds, only: kind_real
   use ufo_constants_mod, only: deg2rad, zero, one, two
   implicit none
   private
   public :: gtoxm_ak_dd, gtoxm_ak_rr
 
   interface gtoxm_ak_rr
-     module procedure gtoxm_ak_rr_m,gtoxm_ak_rr_g;                end interface
+    module procedure gtoxm_ak_rr_m,gtoxm_ak_rr_g
+  end interface
   interface gtoxm_ak_dd
-     module procedure gtoxm_ak_dd_g;                end interface
+    module procedure gtoxm_ak_dd_g
+  end interface
   interface grtoc
-   module procedure dgrtoc
-                                                                  end interface
+    module procedure dgrtoc
+  end interface
 
   logical ,parameter:: T=.true.,F=.false. !<- for pain-relief in logical ops
 
@@ -44,17 +46,20 @@ real(kind_real),dimension(3,3):: prot,azirot
 real(kind_real)               :: clat,slat,clon,slon,cazi,sazi
 real(kind_real),dimension(3)  :: xc
 !=============================================================================
-clat=cos(plat); slat=sin(plat)
-clon=cos(plon); slon=sin(plon)
-cazi=cos(pazi); sazi=sin(pazi)
+clat=cos(plat)
+slat=sin(plat)
+clon=cos(plon)
+slon=sin(plon)
+cazi=cos(pazi)
+sazi=sin(pazi)
 
-azirot(:,1)=(/ cazi, sazi, zero/)
-azirot(:,2)=(/-sazi, cazi, zero/)
-azirot(:,3)=(/   zero,   zero, one/)
+azirot(:,1)=[ cazi, sazi, zero]
+azirot(:,2)=[-sazi, cazi, zero]
+azirot(:,3)=[   zero,   zero, one]
 
-prot(:,1)=(/     -slon,       clon,    zero/)
-prot(:,2)=(/-slat*clon, -slat*slon,  clat/)
-prot(:,3)=(/ clat*clon,  clat*slon,  slat/)
+prot(:,1)=[     -slon,       clon,    zero]
+prot(:,2)=[-slat*clon, -slat*slon,  clat]
+prot(:,3)=[ clat*clon,  clat*slon,  slat]
 prot=matmul(prot,azirot)
 
 call grtoc(lat,lon,xc)
@@ -75,8 +80,10 @@ real(kind_real),             intent(in ):: a,k,plat,plon,pazi,delx,dely,lat,lon
 real(kind_real),dimension(2),intent(out):: xm
 logical,              intent(out):: ff
 !=============================================================================
-call gtoxm_ak_rr_m(A,K,plat,plon,pazi,lat,lon,xm,ff); if(ff)return
-xm(1)=xm(1)/delx; xm(2)=xm(2)/dely
+call gtoxm_ak_rr_m(A,K,plat,plon,pazi,lat,lon,xm,ff)
+if(ff)return
+xm(1)=xm(1)/delx
+xm(2)=xm(2)/dely
 end subroutine gtoxm_ak_rr_g
 
 !=============================================================================
@@ -132,7 +139,8 @@ real(kind_real),dimension(2),intent(out):: xs
 !-----------------------------------------------------------------------------
 real(kind_real):: zp
 !=============================================================================
-zp=one+xc(3); xs=xc(1:2)/zp
+zp=one+xc(3)
+xs=xc(1:2)/zp
 end subroutine xctoxs
 !=============================================================================
 subroutine xstoxt(k,xs,xt,ff)!                                        [xstoxt]
@@ -147,8 +155,10 @@ logical,              intent(out):: ff
 !-----------------------------------------------------------------------------
 real(kind_real):: s,sc
 !=============================================================================
-s=k*(xs(1)*xs(1)+xs(2)*xs(2)); sc=one-s
-ff=abs(s)>=one; if(ff)return
+s=k*(xs(1)*xs(1)+xs(2)*xs(2))
+sc=one-s
+ff=abs(s)>=one
+if(ff)return
 xt=two*xs/sc
 end subroutine xstoxt
 !=============================================================================
@@ -164,7 +174,10 @@ logical              ,intent(out):: ff
 !-----------------------------------------------------------------------------
 integer:: i
 !=============================================================================
-do i=1,2; call zttozm(a,xt(i),xm(i),ff); if(ff)return; enddo
+do i=1,2
+  call zttozm(a,xt(i),xm(i),ff)
+  if (ff) return
+end do
 end subroutine xttoxm
 !=============================================================================
 subroutine zttozm(a,zt,zm,ff)!                                        [zttozm]
@@ -181,10 +194,15 @@ real(kind_real):: ra,razt
 ff=F
 ra=sqrt(abs(a))
 razt=ra*zt
-if    (a>zero)then; zm=atan(razt)/ra
-elseif(a<zero)then; ff=abs(razt)>=one; if(ff)return; zm=atanh(razt)/ra
-else              ; zm=zt
-endif
+if (a>zero) then
+  zm=atan(razt)/ra
+else if(a<zero) then
+  ff=abs(razt)>=one
+  if (ff) return
+  zm=atanh(razt)/ra
+else
+  zm=zt
+end if
 end subroutine zttozm
 !=============================================================================
 subroutine dgrtoc(rlat,rlon,xe)!                                       [grtoc]
@@ -195,9 +213,13 @@ real(kind_real),dimension(3),intent(OUT):: xe
 !-----------------------------------------------------------------------------
 real(kind_real)                         :: sla,cla,slo,clo
 !=============================================================================
-sla=sin(rlat);  cla=cos(rlat)
-slo=sin(rlon);  clo=cos(rlon)
-xe(1)=cla*clo; xe(2)=cla*slo; xe(3)=sla
+sla=sin(rlat)
+cla=cos(rlat)
+slo=sin(rlon)
+clo=cos(rlon)
+xe(1)=cla*clo
+xe(2)=cla*slo
+xe(3)=sla
 end subroutine dgrtoc
 !=============================================================================
 

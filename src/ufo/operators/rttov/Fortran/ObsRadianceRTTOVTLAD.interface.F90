@@ -8,7 +8,7 @@
 module ufo_radiancerttov_tlad_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_radiancerttov_tlad_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -33,7 +33,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancerttov_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) &
-                                    bind(c,name='ufo_radiancerttov_tlad_setup_f90')
+                                    bind(c,name="ufo_radiancerttov_tlad_setup_f90")
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
@@ -61,10 +61,10 @@ end subroutine ufo_radiancerttov_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_tlad_delete_c(c_key_self) bind(c,name='ufo_radiancerttov_tlad_delete_f90')
+subroutine ufo_radiancerttov_tlad_delete_c(c_key_self) bind(c,name="ufo_radiancerttov_tlad_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_radiancerttov_tlad), pointer :: self
 
 call ufo_radiancerttov_tlad_registry%get(c_key_self, self)
@@ -76,7 +76,7 @@ end subroutine ufo_radiancerttov_tlad_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancerttov_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofxdiags) &
-                                       bind(c,name='ufo_radiancerttov_tlad_settraj_f90')
+                                       bind(c,name="ufo_radiancerttov_tlad_settraj_f90")
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
@@ -101,7 +101,7 @@ end subroutine ufo_radiancerttov_tlad_settraj_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancerttov_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-                                    bind(c,name='ufo_radiancerttov_simobs_tl_f90')
+                                    bind(c,name="ufo_radiancerttov_simobs_tl_f90")
 
 implicit none
 integer(c_int),     intent(in)    :: c_key_self
@@ -125,7 +125,7 @@ end subroutine ufo_radiancerttov_simobs_tl_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancerttov_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-                                    bind(c,name='ufo_radiancerttov_simobs_ad_f90')
+                                    bind(c,name="ufo_radiancerttov_simobs_ad_f90")
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self

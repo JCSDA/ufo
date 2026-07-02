@@ -7,7 +7,7 @@
 
 module ufo_fov_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_fov_mod, only: ufo_fov
 
   implicit none
@@ -33,7 +33,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_fov_setup_c(c_key_self, sensor_len, sensor_cstr, platform_len, platform_cstr, &
-                           valid, npoly) bind(c, name='ufo_fov_setup_f90')
+                           valid, npoly) bind(c, name="ufo_fov_setup_f90")
   use string_f_c_mod, only: c_f_string
 
   integer(c_int), intent(inout) :: c_key_self
@@ -62,7 +62,7 @@ end subroutine ufo_fov_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_fov_delete_c(c_key_self) bind(c, name='ufo_fov_delete_f90')
+subroutine ufo_fov_delete_c(c_key_self) bind(c, name="ufo_fov_delete_f90")
   integer(c_int), intent(inout) :: c_key_self
 
   type(ufo_fov), pointer :: self
@@ -79,7 +79,7 @@ end subroutine ufo_fov_delete_c
 
 subroutine ufo_fov_ellipse_c(c_key_self, sensor_len, sensor_cstr, scan_position, &
                              sat_azimuth_angle, fov_center_lon, fov_center_lat, npoly, &
-                             fov_ellipse_lons, fov_ellipse_lats) bind(c, name='ufo_fov_ellipse_f90')
+                             fov_ellipse_lons, fov_ellipse_lats) bind(c, name="ufo_fov_ellipse_f90")
   use string_f_c_mod, only: c_f_string
 
   integer(c_int), intent(inout) :: c_key_self
@@ -111,7 +111,7 @@ end subroutine ufo_fov_ellipse_c
 subroutine ufo_antenna_power_within_fov_c(c_key_self, sensor_len, sensor_cstr, scan_position, &
                                           sat_azimuth_angle, fov_center_lon, fov_center_lat, &
                                           test_lon, test_lat, antenna_power) &
-                                          bind(c, name='ufo_antenna_power_within_fov_f90')
+                                          bind(c, name="ufo_antenna_power_within_fov_f90")
   use string_f_c_mod, only: c_f_string
 
   integer(c_int), intent(inout) :: c_key_self

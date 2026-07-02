@@ -30,7 +30,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_atmvertinterplay_setup(self, conf)
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 implicit none
 class(ufo_atmvertinterplay), intent(inout) :: self
@@ -41,7 +41,7 @@ character(kind=c_char,len=:), allocatable :: gvars(:)
 real(kind=c_double), allocatable :: coefficients(:)
 integer(kind=c_int), allocatable :: nlevels(:)
 !Local Variables
-integer :: ivar, nlevs=0, nvars=0, ngvars=0, ncoefs=0
+integer :: ivar, nlevs, ngvars, ncoefs
 
 ! Check configurations
 ngvars = conf%get_size("geovals")
@@ -49,7 +49,7 @@ call conf%get_or_die("geovals", gvars)
 ! add to geovars list
 do ivar = 1, ngvars
   call self%geovars%push_back(gvars(ivar))
-enddo
+end do
 
 ncoefs = conf%get_size("coefficients")
 call conf%get_or_die("coefficients", coefficients)
@@ -124,7 +124,7 @@ real(kind_real) :: layer_oz
   call obsspace_get_db(obss, "MetaData", "pressure", airpressure)
 
   do ivar = 1, nvars
-    write(6,*) 'ufo_atmvertinterplay_simobs: self%nlevels = ', self%nlevels
+    write(6,*) "ufo_atmvertinterplay_simobs: self%nlevels = ", self%nlevels
     nlevs = self%nlevels(ivar)
     call get_integral_limits(airpressure, botpressure, toppressure, modelpressures%vals(:,:), nlevs, nlocs, nsig)
 
@@ -137,8 +137,8 @@ real(kind_real) :: layer_oz
     do iobs = 1, nlocs
       call apply_layer_integral(self%coefficients(ivar), modelozone%vals(:,iobs), modelpressures%vals(:,iobs), botpressure(iobs), toppressure(iobs), nsig, layer_oz )
       hofx(ivar,iobs) = layer_oz
-    enddo
-  enddo
+    end do
+  end do
   deallocate(toppressure)
   deallocate(botpressure)
   call ufo_geovals_delete(geovals)

@@ -1,7 +1,7 @@
 ! (C) British Crown Copyright 2017-2018 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module containing profile index
 
@@ -58,7 +58,7 @@ contains
   procedure :: delete => ufo_rttovonedvarcheck_profindex_delete
   procedure :: info   => ufo_rttovonedvarcheck_profindex_print
 
-end type
+end type ufo_rttovonedvarcheck_profindex
 
 contains
 
@@ -179,7 +179,7 @@ do j = 1, bmatrix % nfields
       continue
 
     case default
-      write(*,*) 'invalid field type in b matrix file: ',j
+      write(*,*) "invalid field type in b matrix file: ",j
       cycle
 
   end select

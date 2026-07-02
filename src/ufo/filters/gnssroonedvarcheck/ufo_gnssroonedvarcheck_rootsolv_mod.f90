@@ -12,6 +12,7 @@ module ufo_gnssroonedvarcheck_rootsolv_mod
 use kinds, only: kind_real
 use missing_values_mod, only: missing_value
 use fckit_log_module, only: fckit_log
+implicit none
 
 private
 public :: Ops_GPSRO_rootsolv_BA
@@ -241,13 +242,13 @@ ErrorCode = missing_value(ErrorCode)
 !-----------------------
 
 ! Data to stdout on convergence of iteration loop
-CALL fckit_log % info('J_pen|Conv_test|ct2|lambda|d2|(dJ/dx)^2|')
+CALL fckit_log % info("J_pen|Conv_test|ct2|lambda|d2|(dJ/dx)^2|")
 
 Iteration_loop: DO
 
   IF (it > Iter_max .OR. &
       (Conv_test < Delta  .AND.  &
-      ct2 < Delta_ct2 * (Nobs / 200.0_kind_real))) EXIT   ! exit the iteration
+      ct2 < Delta_ct2 * (Nobs / 200.0_kind_real))) EXIT Iteration_loop
 
   ! Count no. of iterations
 
@@ -258,7 +259,7 @@ Iteration_loop: DO
   ! Call the 1D bending angle forward model
 
   !  1.  First calculate model refractivity on theta levels
-  
+
   ! Unpack the solution to p and q, changing units
   pressure = 100 * x(1:nlevp)
   humidity = 0.001 * x(nlevp+1:nlevp+nlevq)
@@ -281,7 +282,7 @@ Iteration_loop: DO
                                    temperature=T)
 
   ! no point proceeding further if ...
-  IF (BAerr) EXIT
+  IF (BAerr) EXIT Iteration_loop
 
   !  2.  Calculate the refractive index * radius on theta model levels (or model impact parameter)
   CALL Ops_GPSROcalc_nr (nRefLevels,    &           ! number of refractivity levels
@@ -458,7 +459,7 @@ Iteration_loop: DO
                      dx,        &   ! The answer, i.e. the "increment"
                      ErrorCode)
 
-  IF (ErrorCode /= 0) EXIT
+  IF (ErrorCode /= 0) EXIT Iteration_loop
 
   ! Update estimate, but limit magnitude of increment with expected background
   ! error
@@ -486,16 +487,16 @@ Iteration_loop: DO
   sdx(:) = MATMUL (Amat(:,:) , (x(:) - xold(:)))  !S^-1.dx
   d2 = DOT_PRODUCT ((x(:) - xold(:)) , Sdx(:))    !d^2=dx(S^-1)dx, size of step normalized by error size
 
-  WRITE (message,'(6E14.6)') J_pen, Conv_test, ct2, lambda, d2, ct3
+  WRITE (message,"(6E14.6)") J_pen, Conv_test, ct2, lambda, d2, ct3
   CALL fckit_log % info(message)
 
 END DO Iteration_loop
 
 Ts(:) = T(:)                  !1DVAR solution temperature
 
-WRITE (message, '(A,I0)') 'Number of iterations ', it   !write out number of iterations done
+WRITE (message, "(A,I0)") "Number of iterations ", it   !write out number of iterations done
 CALL fckit_log % info(message)
-WRITE (message, '(A,F16.4)') 'O-B size ', O_Bdiff
+WRITE (message, "(A,F16.4)") "O-B size ", O_Bdiff
 CALL fckit_log % info(message)
 
 ! Output the x(:) that gave the lowest cost function
@@ -533,7 +534,7 @@ IF (ErrorCode == 0 .AND. it <= iter_max) THEN
     DFS = DFS + AKOK(i,i)
   END DO
 
-  WRITE (message,'(A,F16.4)') 'DFS', DFS
+  WRITE (message,"(A,F16.4)") "DFS", DFS
   CALL fckit_log % info(message)
 ELSE
 

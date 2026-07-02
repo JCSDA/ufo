@@ -12,7 +12,7 @@ module ufo_columnretrieval_mod
  use ufo_vars_mod
  use missing_values_mod
  use kinds
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  implicit none
  private
@@ -95,7 +95,7 @@ subroutine ufo_columnretrieval_simobs(self, geovals_in, obss, nvars, nlocs, hofx
                              ufo_geovals_copy
   use ufo_constants_mod, only: zero, one
   use satcolumn_mod, only: simulate_column_ob
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use obsspace_mod
   implicit none
   class(ufo_columnretrieval), intent(in)    :: self

@@ -1,7 +1,7 @@
 ! (C) British Crown Copyright 2017-2018 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran derived type to hold data for the observation covariance
 
@@ -69,7 +69,7 @@ if (full_rmatrix % rtype == 1) then
 else if (full_rmatrix % rtype == 2) then
   mat_type = "diagonal"
 else
-  call abor1_ftn('Unknown r matrix type')
+  call abor1_ftn("Unknown r matrix type")
 end if
 
 ! Setup correct r matrix
@@ -87,7 +87,7 @@ select case (trim(mat_type))
       !  self % inv_matrix(ii,ii) = 1.0_kind_real / &
       !                     (obs_error(ii) * obs_error(ii))
       !end do
-      call abor1_ftn('full r matrix under development - use a diagonal')
+      call abor1_ftn("full r matrix under development - use a diagonal")
    case ("diagonal")
       allocate(self % diagonal(nchans))
       allocate(self % channels(nchans))
@@ -103,7 +103,7 @@ select case (trim(mat_type))
         end do
       end do
    case default
-      call abor1_ftn('Unknown r matrix type')
+      call abor1_ftn("Unknown r matrix type")
 end select
 
 end subroutine rsubmatrix_setup
@@ -365,7 +365,7 @@ if (self % full_flag) then
   do ii = 1, self % nchans
     write(*,*) self % inv_matrix(ii,ii)
   end do
-  
+
 end if
 
 if (self % diagonal_flag) then

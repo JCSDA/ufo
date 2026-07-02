@@ -44,36 +44,36 @@ if (vec(1) < vec(nlev)) then !Pressure increases with index
   if (obl < vec(1)) then
      wi = 1
      wf = 1.0
-  elseif (obl > vec(nlev)) then
+  else if (obl > vec(nlev)) then
      wi = nlev - 1
      wf = 0.0
   else
      do k = 1,nlev-1
         if (obl >= vec(k) .and. obl <= vec(k+1)) then
            wi = k
-        endif
-     enddo
+        end if
+     end do
      wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
-  endif
+  end if
 
 else !Pressure decreases with index
 
   if (obl > vec(1)) then
      wi = 1
      wf = 1.0
-  elseif (obl < vec(nlev)) then
+  else if (obl < vec(nlev)) then
      wi = nlev - 1
      wf = 0.0
   else
      do k = 1,nlev-1
         if (obl >= vec(k+1) .and. obl <= vec(k)) then
            wi = k
-        endif
-     enddo
+        end if
+     end do
      wf = (vec(wi+1) - obl)/(vec(wi+1) - vec(wi))
-  endif
+  end if
 
-endif
+end if
 
 end subroutine vert_interp_weights
 
@@ -89,11 +89,11 @@ real(kind_real), intent(out) :: f           !Output at obs location using linear
 
 if (wi == missing_value(nlev)) then
   f = missing_value(f)
-elseif (fvec(wi) == missing_value(f) .or. fvec(wi+1) == missing_value(f)) then
+else if (fvec(wi) == missing_value(f) .or. fvec(wi+1) == missing_value(f)) then
   f = missing_value(f)
 else
   f = fvec(wi)*wf + fvec(wi+1)*(1.0-wf)
-endif
+end if
 
 end subroutine vert_interp_apply
 
@@ -109,11 +109,11 @@ real(kind_real), intent(out) :: f_tl
 
 if (wi == missing_value(nlev)) then
   f_tl = missing_value(f_tl)
-elseif (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
+else if (fvec_tl(wi) == missing_value(f_tl) .or. fvec_tl(wi+1) == missing_value(f_tl)) then
   f_tl = missing_value(f_tl)
 else
   f_tl = fvec_tl(wi)*wf + fvec_tl(wi+1)*(1.0_kind_real-wf)
-endif
+end if
 
 end subroutine vert_interp_apply_tl
 
@@ -138,12 +138,12 @@ if (fvec_ad(wi) == missing .or. f_ad == missing) then
   fvec_ad(wi  ) = 0.0_kind_real
 else
   fvec_ad(wi  ) = fvec_ad(wi  ) + f_ad*wf
-endif
+end if
 if (fvec_ad(wi+1) == missing .or. f_ad == missing) then
   fvec_ad(wi+1) = 0.0_kind_real
 else
   fvec_ad(wi+1) = fvec_ad(wi+1) + f_ad*(1.0_kind_real-wf)
-endif
+end if
 
 end subroutine vert_interp_apply_ad
 
@@ -179,11 +179,11 @@ if (vec(1) < vec(nlev)) then !increases with index
              idx = k - 1
            else
              idx = k
-           endif
+           end if
            exit
-        endif
-     enddo
-  endif
+        end if
+     end do
+  end if
 
 else !decreases with index
 
@@ -197,13 +197,13 @@ else !decreases with index
              idx = k - 1
            else
              idx = k
-           endif
+           end if
            exit
-        endif
-     enddo
-  endif
+        end if
+     end do
+  end if
 
-endif
+end if
 
 end subroutine nearestneighbor_interp_index
 
@@ -220,7 +220,7 @@ if (idx == missing_value(nlev)) then
   f = missing_value(f)
 else
   f = fvec(idx)
-endif
+end if
 
 end subroutine nearestneighbor_interp_apply
 
@@ -239,7 +239,7 @@ else if (fvec_tl(idx) == missing_value(f_tl)) then
   f_tl = missing_value(f_tl)
 else
   f_tl = fvec_tl(idx)
-endif
+end if
 
 end subroutine nearestneighbor_interp_apply_tl
 
@@ -263,7 +263,7 @@ if (fvec_ad(idx) == missing .or. f_ad == missing) then
   fvec_ad(idx) = 0.0_kind_real
 else
   fvec_ad(idx) = fvec_ad(idx) + f_ad
-endif
+end if
 
 end subroutine nearestneighbor_interp_apply_ad
 
@@ -282,7 +282,7 @@ subroutine check_adjustment_function(adjustment_function, observation_vertical_c
   character(255), dimension(1) :: valid_adjustment_functions
 
   ! Populate list
-  valid_adjustment_functions(1) = 'subtract scaled station elevation'
+  valid_adjustment_functions(1) = "subtract scaled station elevation"
 
   ! Check if the input string is in the list
   do i = 1, size(valid_adjustment_functions)
@@ -292,13 +292,14 @@ subroutine check_adjustment_function(adjustment_function, observation_vertical_c
       ! observation vertical coordinate is station elevation
       if (trim(adjustment_function) == "subtract scaled station elevation") then
         ! Add height_above_mean_sea_level_at_surface to the list of geovars
-        if (present(geovars)) call geovars%push_back('height_above_mean_sea_level_at_surface')
+        if (present(geovars)) call geovars%push_back("height_above_mean_sea_level_at_surface")
         ! Check that height is the observation vertical coordinate
-        if (trim(observation_vertical_coordinate) .ne. "height") &
-          call abor1_ftn('Observation vertical coordinate adjustment using ' // &
-                         'subtract scaled station elevation is only supported for height ' // &
-                         'coordinates.')
-      endif
+        if (trim(observation_vertical_coordinate) /= "height") then
+          call abor1_ftn("Observation vertical coordinate adjustment using " // &
+                         "subtract scaled station elevation is only supported for height " // &
+                         "coordinates.")
+        end if
+      end if
       return
     end if
   end do
@@ -331,7 +332,7 @@ missing = missing_value(obsvcoord(1))
 
 ! Allocate and get the station elevation
 allocate(stationElevation(nlocs))
-call obsspace_get_db(obss, 'MetaData', 'stationElevation', stationElevation)
+call obsspace_get_db(obss, "MetaData", "stationElevation", stationElevation)
 
 ! This function needs the surface geometric height from the geovals
 call ufo_geovals_get_var(geovals, "height_above_mean_sea_level_at_surface", sgh)
@@ -351,13 +352,13 @@ do iobs = 1, nlocs
     ! station)
     if (height_above_station > 1000.0) then
       factz = 1.0
-    elseif (height_above_station > 10.0) then
+    else if (height_above_station > 10.0) then
       ! This function seems strange but is consistent with the old code in GSI. Should
       ! be tested in the future to see whether the formula can be improved.
       factz = height_above_station/990.0  ! - 1.0/99.0  ! Should there be a constant -1/99 here?
     else
       factz = 0.0
-    endif
+    end if
 
     ! Subtract off the scaled station elevation
     ! When f is zero (near the station) subtract off the station elevation
@@ -365,7 +366,7 @@ do iobs = 1, nlocs
     obsvcoord(iobs) = obsvcoord(iobs) -  factz        * sgh%vals(1, iobs) + &
                                         (factz - 1.0) * stationElevation(iobs)
 
-enddo
+end do
 
 end subroutine adjust_obs_coordinate_subtract_scaled_station_elevation
 

@@ -1,12 +1,12 @@
 ! (C) Copyright 2017-2020 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 module ufo_rttovonedvarcheck_mod_c
 
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use oops_variables_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -34,7 +34,7 @@ contains
 subroutine ufo_rttovonedvarcheck_create_c(c_self, c_obspace, c_conf, c_nchan, &
                                           c_channels, c_varlist, c_onedvarflag, &
                                           c_passflag) &
-                        bind(c,name='ufo_rttovonedvarcheck_create_f90')
+                        bind(c,name="ufo_rttovonedvarcheck_create_f90")
 
 !> \brief Interface to the Fortran create method
 !!
@@ -71,7 +71,7 @@ end subroutine ufo_rttovonedvarcheck_create_c
 ! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_delete_c(c_self) &
-                      bind(c,name='ufo_rttovonedvarcheck_delete_f90')
+                      bind(c,name="ufo_rttovonedvarcheck_delete_f90")
 
 !> \brief Interface to the Fortran delete method
 !!
@@ -94,7 +94,7 @@ end subroutine ufo_rttovonedvarcheck_delete_c
 ! ------------------------------------------------------------------------------------------------
 
 subroutine ufo_rttovonedvarcheck_apply_c(c_self, c_conf, c_vars, c_retvars, c_geovals, c_nobs, c_apply) &
-               bind(c,name='ufo_rttovonedvarcheck_apply_f90')
+               bind(c,name="ufo_rttovonedvarcheck_apply_f90")
 
 !> \brief Interface to filter apply method
 !!
@@ -129,7 +129,7 @@ retrieval_vars = oops_variables(c_retvars)
 
 ! Convert character to logical for passing to Fortran
 apply(:) = .false.
-where (c_apply == 'T')
+where (c_apply == "T")
   apply = .true.
 end where
 

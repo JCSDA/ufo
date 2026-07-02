@@ -8,7 +8,7 @@
 
 module ufo_columnretrieval_tlad_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use fckit_configuration_module, only: fckit_configuration
   use ufo_columnretrieval_tlad_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -32,7 +32,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_columnretrieval_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_columnretrieval_tlad_setup_f90')
+subroutine ufo_columnretrieval_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name="ufo_columnretrieval_tlad_setup_f90")
 use oops_variables_mod
 use obs_variables_mod
 implicit none
@@ -57,7 +57,7 @@ end subroutine ufo_columnretrieval_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_columnretrieval_tlad_delete_c(c_key_self) bind(c,name='ufo_columnretrieval_tlad_delete_f90')
+subroutine ufo_columnretrieval_tlad_delete_c(c_key_self) bind(c,name="ufo_columnretrieval_tlad_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -69,7 +69,7 @@ end subroutine ufo_columnretrieval_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_columnretrieval_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_columnretrieval_tlad_settraj_f90')
+subroutine ufo_columnretrieval_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name="ufo_columnretrieval_tlad_settraj_f90")
 implicit none
 integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
@@ -88,7 +88,7 @@ end subroutine ufo_columnretrieval_tlad_settraj_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_columnretrieval_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-           c_hofx) bind(c,name='ufo_columnretrieval_simobs_tl_f90')
+           c_hofx) bind(c,name="ufo_columnretrieval_simobs_tl_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -111,7 +111,7 @@ end subroutine ufo_columnretrieval_simobs_tl_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_columnretrieval_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-           c_hofx) bind(c,name='ufo_columnretrieval_simobs_ad_f90')
+           c_hofx) bind(c,name="ufo_columnretrieval_simobs_ad_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals

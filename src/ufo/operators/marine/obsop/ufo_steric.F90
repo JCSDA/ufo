@@ -25,13 +25,13 @@ contains
     !--------------------------------------------------------------------------
     !
     ! z1=0 ----------- Surface
-    !         t1,s1      h1 (thickness)  
+    !         t1,s1      h1 (thickness)
     !  z2  -----------
     !         t2,s2      h2
     !  z3  -----------
     !         t3,s3
     !           .
-    !           .    
+    !           .
     !           .
     !  zN-1  -----------
     !         tN-1,sN-1  hN-1
@@ -48,7 +48,7 @@ contains
     real (r8), dimension(:), intent(in) :: t, s, t0, s0, eta0, z
     real (r8), intent(out) :: etas(1)
     real (r8) :: rho0(1), rho(1), h
-    real (r8) :: p(1), lat=0.0
+    real (r8) :: p(1)
 
     integer :: k, N
 
@@ -61,7 +61,7 @@ contains
        rho = gsw_rho(s(k),t(k),p)
        etas = etas + h*(rho-rho0)/rho0
     end do
-    
+
   end subroutine steric_nl
 
   !==========================================================================
@@ -82,9 +82,9 @@ contains
     ! -------
     ! detas  : steric height                                   [m]
     !
-    ! jac    : Jacobian [detas/dt1, ...,detas/dtN;             [m/deg C]  
+    ! jac    : Jacobian [detas/dt1, ...,detas/dtN;             [m/deg C]
     !                    detas/ds1, ...,detas/dsN]             [m/(g/kg)]
-    !    
+    !
     !--------------------------------------------------------------------------
 
     use gsw_mod_toolbox, only : gsw_rho, gsw_rho_first_derivatives
@@ -94,7 +94,7 @@ contains
 
     real (r8), dimension(:), intent(in) :: dt, ds, t0, s0, z
     real (r8), intent(out) :: detas
-    real (r8), allocatable, dimension(:,:) :: jac 
+    real (r8), allocatable, dimension(:,:) :: jac
     real (r8) :: rho0(1), rho(1), h, deriv(3)
     real (r8) :: p(1), drhods, drhodt, drhodp
 
@@ -123,7 +123,7 @@ contains
     !
     ! Input:
     ! ------
-    ! detas  : Steric Height                                   [m]    
+    ! detas  : Steric Height                                   [m]
     ! s0     : Traj. for Absolute Salinity                     [g/kg]
     ! t0     : Traj. for Conservative Temperature              [deg C]
     ! z      : Depth of t,s                                    [m]
@@ -143,7 +143,7 @@ contains
 
     real (r8), dimension(:), intent(in) :: t0, s0, z
     real (r8), intent(in) :: detas
-    real (r8), allocatable, dimension(:,:) :: jac 
+    real (r8), allocatable, dimension(:,:) :: jac
     real (r8), dimension(:), intent(out) :: dt_ad, ds_ad
 
     real (r8) :: rho0(1), rho(1), h, deriv(3)
@@ -154,7 +154,7 @@ contains
     N=size(dt_ad,1)
     allocate(jac(2,N)) !jac(1,:)=deta/dt; jac(2,:)=deta/ds at t0, s0
     dt_ad = 0.0
-    ds_ad = 0.0    
+    ds_ad = 0.0
     do k=1,N
        h=z(k+1)-z(k)
        p = z(k)+h/2.0 ! assume p~z

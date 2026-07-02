@@ -213,7 +213,7 @@ character(len=maxvarlen), dimension(n_aerosols_gocart_gefs), public, parameter :
 character(len=maxvarlen), dimension(n_aerosols_gocart_ufs), public, parameter :: &
      &var_aerosols_gocart_ufs = [&
      &var_sulfate,&
-     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,& 
+     &var_bcphobic, var_bcphilic, var_ocphobic, var_ocphilic,&
      &var_du001, var_du002, var_du003, var_du004, var_du005,&
      &var_ss001, var_ss002, var_ss003, var_ss004, var_ss005,&
      &var_no3an1, var_no3an2, var_no3an3]
@@ -250,7 +250,7 @@ if (f_vars%has("nvars")) then
   read(str,*) vars
 else
   allocate(vars(0))
-endif
+end if
 
 end subroutine ufo_vars_read
 
@@ -269,8 +269,8 @@ do ivar = 1, size(vars)
   if (vars(ivar) == varname) then
     ufo_vars_getindex = ivar
     exit
-  endif
-enddo
+  end if
+end do
 
 end function ufo_vars_getindex
 

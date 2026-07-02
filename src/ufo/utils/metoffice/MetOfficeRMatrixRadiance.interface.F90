@@ -1,14 +1,14 @@
 !-------------------------------------------------------------------------------
 ! (C) Crown Copyright 2021 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !-------------------------------------------------------------------------------
 
 module ufo_metoffice_rmatrixradiance_mod_c
 
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_metoffice_rmatrixradiance_mod
 
@@ -31,7 +31,7 @@ contains
 
 !-------------------------------------------------------------------------------
 subroutine ufo_metoffice_rmatrixradiance_setup_c(c_self, c_conf, nchans, wmoid, rtype) &
-           bind(c, name='ufo_metoffice_rmatrixradiance_setup_f90')
+           bind(c, name="ufo_metoffice_rmatrixradiance_setup_f90")
 
 implicit none
 integer(c_int), intent(inout)            :: c_self
@@ -67,7 +67,7 @@ end subroutine ufo_metoffice_rmatrixradiance_setup_c
 
 !-------------------------------------------------------------------------------
 subroutine ufo_metoffice_rmatrixradiance_delete_c(c_self) &
-           bind(c, name='ufo_metoffice_rmatrixradiance_delete_f90')
+           bind(c, name="ufo_metoffice_rmatrixradiance_delete_f90")
 
 implicit none
 integer(c_int), intent(inout) :: c_self
@@ -84,7 +84,7 @@ end subroutine ufo_metoffice_rmatrixradiance_delete_c
 
 !-------------------------------------------------------------------------------
 subroutine ufo_metoffice_rmatrixradiance_getelements_c(c_self, nchans, channels, obs_error) &
-                                bind(C, name='ufo_metoffice_rmatrixradiance_getelements_f90')
+                                bind(C, name="ufo_metoffice_rmatrixradiance_getelements_f90")
 
 implicit none
 integer(c_int), intent(inout)    :: c_self
@@ -103,7 +103,7 @@ end subroutine ufo_metoffice_rmatrixradiance_getelements_c
 
 !-------------------------------------------------------------------------------
 subroutine ufo_metoffice_rmatrixradiance_print_c(c_self) &
-           bind(c, name='ufo_metoffice_rmatrixradiance_print_f90')
+           bind(c, name="ufo_metoffice_rmatrixradiance_print_f90")
 
 implicit none
 integer(c_int), intent(inout) :: c_self

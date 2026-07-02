@@ -9,12 +9,12 @@
 
 module ufo_gnssro_refmetoffice_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
 use vert_interp_mod
-use obsspace_mod  
+use obsspace_mod
 use missing_values_mod
 use ufo_utils_refractivity_calculator, only: ufo_calculate_refractivity
 use logger_mod, only: oops_log
@@ -135,14 +135,14 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
 
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+      write(err_msg,*) myname_, " error: nlocs inconsistent!"
       call abor1_ftn(err_msg)
-  endif
+  end if
 
-  write(message, *) myname_, ' Running Met Office GNSS-RO forward operator with:'
+  write(message, *) myname_, " Running Met Office GNSS-RO forward operator with:"
   call oops_log%info(message)
-  write(message, *) 'vert_interp_ops =', self % vert_interp_ops, &
-    'pseudo_ops =', self % pseudo_ops, 'min_temp_grad =', self % min_temp_grad
+  write(message, *) "vert_interp_ops =", self % vert_interp_ops, &
+    "pseudo_ops =", self % pseudo_ops, "min_temp_grad =", self % min_temp_grad
   call oops_log%info(message)
 
 ! get variables from geovals
@@ -151,9 +151,9 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
-  write(message, '(A,10I6)') 'Q: ', q%nval, q%nprofiles, shape(q%vals)
+  write(message, "(A,10I6)") "Q: ", q%nval, q%nprofiles, shape(q%vals)
   call oops_log%info(message)
-  write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nprofiles, shape(prs%vals)
+  write(message, "(A,10I6)") "Pressure: ", prs%nval, prs%nprofiles, shape(prs%vals)
   call oops_log%info(message)
 
   nobs  = obsspace_get_nlocs(obss)
@@ -174,7 +174,7 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
     end if
   end do
 
-  obs_loop: do iobs = 1, nobs 
+  obs_loop: do iobs = 1, nobs
 
     call RefMetOffice_ForwardModel(prs % nval, &
                                    q % nval, &
@@ -292,16 +292,16 @@ REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: refractivity(:)     !< Model refr
 REAL(kind_real), INTENT(INOUT), ALLOCATABLE :: model_heights(:)    !< Geopotential heights of the refractivity levels
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
-! 
+!
 INTEGER                      :: nRefLevels          ! Number of levels in refractivity calculation
-! 
+!
 ! Local parameters
-! 
+!
 integer, parameter           :: max_string = 800  ! Length of strings
 character(len=*), parameter  :: myname_ = "Ops_GPSRO_ForwardModel"
 !
 ! Local variables
-! 
+!
 character(max_string)        :: err_msg           ! Error message to be output
 INTEGER                      :: iObs              ! Loop counter, observation number
 INTEGER                      :: iLevel            ! Number of model level just above observation
@@ -320,9 +320,9 @@ REAL(kind_real)              :: obs_height_diff   ! Height difference between ob
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
-    write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
+    write(err_msg,*) myname_ // ":" // " Data must be on a staggered grid nlevp, nlevq = ", nlevp, nlevq
     call oops_log % warning(err_msg)
-    write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
+    write(err_msg,*) myname_ // ":" // " error: number of levels inconsistent!"
     call abor1_ftn(err_msg)
 END IF
 
@@ -362,7 +362,7 @@ DO iObs = 1, nobs
         IF (zobs(iObs) < zb(iLevel + 1)) EXIT
         iLevel = iLevel + 1
       END DO
-      
+
       model_height_diff = zb(iLevel + 1) - zb(iLevel)
       obs_height_diff = zobs(iObs) - zb(iLevel)
 
@@ -420,7 +420,7 @@ DO iObs = 1, nobs
       ycalc(iObs) = EXP(alpha_interp * LOG (refractivity(iLevel)) + &
                         beta_interp * LOG (refractivity(iLevel + 1)))
     ELSE IF (zobs(iObs) /= missing_value(zobs(iObs))) THEN
-      PRINT*, 'Height out of range', iObs, nRefLevels, model_heights(nRefLevels), zobs(iObs)
+      PRINT*, "Height out of range", iObs, nRefLevels, model_heights(nRefLevels), zobs(iObs)
     END IF
   END IF
 

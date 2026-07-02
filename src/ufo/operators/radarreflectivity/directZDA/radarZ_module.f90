@@ -98,7 +98,7 @@ MODULE RADARZ_MODULE
 !
 ! PURPOSE:
 !
-! Calculates mass-diameter relation based on MP scheme. 
+! Calculates mass-diameter relation based on MP scheme.
 !
 !-----------------------------------------------------------------------
 !
@@ -116,8 +116,8 @@ MODULE RADARZ_MODULE
     CASE(1:12,14,106,109:110,116)
       c_x(4) = (pi/6._kind_real)*rhos
     CASE(108)
-      c_x(4) = .069_kind_real 
-  END SELECT 
+      c_x(4) = .069_kind_real
+  END SELECT
 
   c_x(5) = (pi/6._kind_real)*rhog
   c_x(6) = (pi/6._kind_real)*rhoh
@@ -135,7 +135,7 @@ MODULE RADARZ_MODULE
 !
 !-----------------------------------------------------------------------
 !
-! AUTHOR:  Jonathan Labriola, 10/03/2016 
+! AUTHOR:  Jonathan Labriola, 10/03/2016
 !
 !-----------------------------------------------------------------------
 ! Force explicit declarations.
@@ -172,7 +172,7 @@ MODULE RADARZ_MODULE
   IMPLICIT NONE
 
 !-----------------------------------------------------------------------
-! Variables can vary depend on whether graupel/hail exists. 
+! Variables can vary depend on whether graupel/hail exists.
 !-----------------------------------------------------------------------
   fos = 0.3_kind_real             ! Maximum fraction of rain-snow mixture
   foh = 0.2_kind_real             ! Maximum fraction of rain-hail mixture
@@ -186,7 +186,7 @@ MODULE RADARZ_MODULE
 !
 ! PURPOSE:
 !
-! Setup default maximum fraction of water in the melting ice 
+! Setup default maximum fraction of water in the melting ice
 ! when graupel is suppressed.
 !
 !-----------------------------------------------------------------------
@@ -205,31 +205,31 @@ MODULE RADARZ_MODULE
   fos = 0.5_kind_real         ! Maximum fraction of rain-snow mixture
   foh = 0.3_kind_real         ! Maximum fraction of rain-hail mixture
   fog = 0.0_kind_real         ! Maximum fraction of rain-hail mixture
-      
+
   END SUBROUTINE init_fox_no_grpl
 
 
-  SUBROUTINE init_fox_no_hail() 
+  SUBROUTINE init_fox_no_hail()
 
 !-----------------------------------------------------------------------
 !
-! PURPOSE:  
+! PURPOSE:
 !
-!  Setup default maximum fraction of water in the melting ice 
-!  when hail is suprressed. 
+!  Setup default maximum fraction of water in the melting ice
+!  when hail is suprressed.
 !
 !-----------------------------------------------------------------------
 !
 ! AUTHOR: Bryan Putnam, 12/14/10
 !
 !-----------------------------------------------------------------------
-! Force explicit declarations. 
+! Force explicit declarations.
 !-----------------------------------------------------------------------
 
-  IMPLICIT NONE 
+  IMPLICIT NONE
 
 !-----------------------------------------------------------------------
-! Variables can be changed by parameter retrieval 
+! Variables can be changed by parameter retrieval
 !-----------------------------------------------------------------------
 
   fos = 0.5_kind_real      ! Maximum fraction of rain-snow mixture
@@ -311,7 +311,7 @@ MODULE RADARZ_MODULE
 !-----------------------------------------------------------------------
 
   REAL(kind_real), INTENT(IN   ) :: fw
-  
+
   sf = 0.8_kind_real
 
   sigmah=pi/3_kind_real*(1_kind_real-sf*fw)
@@ -488,12 +488,12 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 !-----------------------------------------------------------------------
 ! Declare local variables.
 !-----------------------------------------------------------------------
- 
+
   TYPE(T_para_dsd), INTENT(IN   ) :: var_dsd
   INTEGER(kind_int),  INTENT(IN   ) :: flg
   REAL(kind_real),     INTENT(IN   ) :: rho
 
-  REAL(kind_real) :: qr,qs,qh,qg,ntr,nts,nth,ntg 
+  REAL(kind_real) :: qr,qs,qh,qg,ntr,nts,nth,ntg
   REAL(kind_real) :: vg,vh
   REAL(kind_real) :: rainIceRefl_hh,rainIceRefl_vv,rainIceRefl_hv,zdr
   REAL(kind_real) :: fracqrs,fracqrh,fracqrg
@@ -513,8 +513,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 
   REAL(kind_real) :: tair_C
   REAL(kind_real) :: ntms, ntmh, ntmg
-  logical :: firstcall = .true.
-  SAVE firstcall
+  logical, save :: firstcall = .true.
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !
@@ -534,7 +533,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
         CALL init_fox()
     END SELECT
 
-    firstcall = .false. 
+    firstcall = .false.
   END IF
 
   qrf = 0._kind_real; qsf = 0._kind_real; qhf = 0._kind_real; qgf = 0._kind_real
@@ -569,7 +568,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 
   temH = 0._kind_real
   temV = 0._kind_real
-  temHV = 0._kind_real 
+  temHV = 0._kind_real
 
   rainIceRefl_hh = 0._kind_real
   rainIceRefl_vv = 0._kind_real
@@ -591,7 +590,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   ntg = var_dsd%T_Ntg
   vg = var_dsd%T_vg
   vh = var_dsd%T_vh
-  
+
   if(qr < 0.0_kind_real) qr =0.0_kind_real
   if(qs < 0.0_kind_real) qs =0.0_kind_real
   if(qh < 0.0_kind_real) qh =0.0_kind_real
@@ -626,10 +625,12 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   IF (MFflg == 0) THEN
 
     CALL fractionWater(qr,qs,fos,rhos,fracqrs,fracqs,fms,fws,rhoms)
-    IF(hail_ON == 1)  &
+    IF(hail_ON == 1) then
       CALL fractionWater(qr,qh,foh,rhoh,fracqrh,fracqh,fmh,fwh,rhomh)
-    IF(graupel_ON == 1) &
+    end if
+    IF(graupel_ON == 1) then
       CALL fractionWater(qr,qg,fog,rhog,fracqrg,fracqg,fmg,fwg,rhomg)
+    end if
 
     qrf = qr - fracqrs - fracqrh - fracqrg
     if(qrf < 0.0_kind_real) qrf = 0.0_kind_real
@@ -647,9 +648,11 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   ELSE IF (MFflg == 2) THEN
 
     qrf = qr
-    qsf = qs; fms = 0.0_kind_real;
-    IF(hail_ON == 1)   qhf = qh; fmh = 0.0_kind_real;
-    IF(graupel_ON == 1) qgf = qg; fmg = 0.0_kind_real;
+    qsf = qs; fms = 0.0_kind_real
+    IF(hail_ON == 1)   qhf = qh
+    fmh = 0.0_kind_real
+    IF(graupel_ON == 1) qgf = qg
+    fmg = 0.0_kind_real
 
     ntms = nts
     ntmh = nth
@@ -660,10 +663,12 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
     tair_C = ta - degKtoC
 
     CALL fractionWater_temperature_snow(qs,rhos,fms,fws,rhoms,tair_C)
-    IF(hail_ON == 1)  &
-    CALL fractionWater_temperature_hail(qh,rhoh,fmh,fwh,rhomh,tair_C)
-    IF(graupel_ON == 1)  &
-    CALL fractionWater_temperature_hail(qg,rhog,fmg,fwg,rhomg,tair_C)
+    IF(hail_ON == 1) then
+      CALL fractionWater_temperature_hail(qh,rhoh,fmh,fwh,rhomh,tair_C)
+    end if
+    IF(graupel_ON == 1) then
+      CALL fractionWater_temperature_hail(qg,rhog,fmg,fwg,rhomg,tair_C)
+    end if
 
     qrf = qr
     qsf = qs-fms
@@ -677,11 +682,13 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   ! may need MFflg4 - !fractionWater with median diameter preservation
   ELSE IF (MFflg == 4) THEN    ! Temperature-based melting.
     CALL fractionWater(qr,qs,fos,rhos,fracqrs,fracqs,fms,fws,rhoms)
-    IF(hail_ON == 1)  &
+    IF(hail_ON == 1) then
       CALL fractionWater_md(qr,qh,foh,rhoh,fracqrh,fracqh,fmh,fwh,rhomh,rho,nth,ntmh)
+    end if
 !    according to the FV3 code, hail is not considered for wet fraction.
-    IF(graupel_ON == 1) &
+    IF(graupel_ON == 1) then
       CALL fractionWater_md(qr,qg,fog,rhog,fracqrg,fracqg,fmg,fwg,rhomg,rho,ntg,ntmg)
+    end if
 
      qrf = qr - fracqrs - fracqrh - fracqrg
      if(qrf < 0.0_kind_real) qrf = 0.0_kind_real
@@ -718,17 +725,17 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
   IF(fms > 0._kind_real) THEN
     alphaa_ws = snow_alpha_a(fws)
     alphab_ws = snow_alpha_b(fws)
-  ENDIF
+  END IF
 
   IF(hail_ON == 1 .and. fmh > 0._kind_real) THEN
     alphaa_wh = hail_alpha_a(fwh)
     alphab_wh = hail_alpha_b(fwh)
-  ENDIF
+  END IF
 
   IF(graupel_ON == 1 .and. fmg > 0._kind_real) THEN
     alphaa_wg = grpl_alpha_a(fwg)
     alphab_wg = grpl_alpha_b(fwg)
-  ENDIF
+  END IF
 
 !-----------------------------------------------------------------------
 ! Calculate rho_0rs, rho_0rh, and rho_0rg
@@ -739,8 +746,8 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
       rho_0rs = rho_0rsi
     else if (1.e-2_kind_real > temp .and. temp <= 1._kind_real) then
       rho_0rs = rho_0rsi - .5_kind_real*log10(temp)*(rho_0rsf-rho_0rsi)
-    endif
-  ENDIF
+    end if
+  END IF
 
   IF(hail_ON == 1 .and. flg > 2 .and. fmh > 0._kind_real) THEN
     temp=rho*fmh*1.e3_kind_real
@@ -748,8 +755,8 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
       rho_0rh = rho_0rhi
     else if (1.e-2_kind_real > temp .and. temp <= 1._kind_real) then
       rho_0rh = rho_0rhi - .5_kind_real*log10(temp)*(rho_0rhf-rho_0rhi)
-    endif
-  ENDIF
+    end if
+  END IF
 
   IF(graupel_ON == 1 .and. flg > 2 .and. fmg > 0._kind_real) THEN
     temp=rho*fmg*1.e3_kind_real
@@ -757,8 +764,8 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
       rho_0rg = rho_0rgi
     else if (1.e-2_kind_real > temp .and. temp <= 1._kind_real) then
       rho_0rg = rho_0rgi - .5_kind_real*log10(temp)*(rho_0rgf-rho_0rgi)
-    endif
-  ENDIF
+    end if
+  END IF
 
 !-----------------------------------------------------------------------
 ! Calculate reflectivity (Zhh and Zvv (and Zhv, if necessary))
@@ -773,14 +780,14 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
     CASE(1:12,14,106,109:110,116)
       IF(lamdas > 0._kind_real .and. N0s > 0._kind_real) THEN
         CALL partialRefIce(N0s,dble(alphas),As,Bs,Cs,alphaa_ds,       &
-                           alphab_ds,beta_sa, beta_sb,dble(lamdas),   & 
+                           alphab_ds,beta_sa, beta_sb,dble(lamdas),   &
                            ZdrysnowH,ZdrysnowV,dble(T_mus))
         IF(flg > 2) THEN
           CALL partialRhoIce(N0s,dble(alphas),Cs,Ds,alphaa_ds,        &
                            alphab_ds,beta_sa,beta_sb,rho_0s,    &
                            dble(lamdas),ZdrysnowHV,dble(T_mus))
-        ENDIF
-      ENDIF
+        END IF
+      END IF
       IF(lamdams > 0._kind_real .and. N0ms > 0._kind_real) THEN
         CALL partialRefIce(N0ms,dble(alphas),As,Bs,Cs,alphaa_ws,       &
                            alphab_ws,beta_sa,beta_sb,dble(lamdams),    &
@@ -789,8 +796,8 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
           CALL partialRhoIce(N0ms,dble(alphas),Cs,Ds,alphaa_ws,        &
                            alphab_ws,beta_sa,beta_sb,rho_0rs,    &
                            dble(lamdams),ZwetsnowHV,dble(T_mus))
-        ENDIF
-      ENDIF
+        END IF
+      END IF
     CASE(108)
       IF(lamdas > 0._kind_real .and. N0s > 0._kind_real .and. qsf > 0._kind_real) THEN
         CALL partialRefIce(N0s,dble(alphas),As,Bs,Cs,alphaa_tom_ds,     &
@@ -799,7 +806,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 
         CALL partialRefIce(N0s2,dble(alphas2),As,Bs,Cs,alphaa_tom_ds,     &
                           alphab_tom_ds,beta_tom_dsa,beta_tom_dsb,  &
-                          dble(lamdas2),temH,temV,dble(T_mus)) 
+                          dble(lamdas2),temH,temV,dble(T_mus))
 
         ZdrysnowH = ZdrysnowH + temH
         ZdrysnowV = ZdrysnowV + temV
@@ -813,19 +820,19 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
                           rho_0s,dble(lamdas2),temHV,dble(T_mus))
 
           ZdrysnowHV = ZdrysnowHV + temHV
-        ENDIF
-      END IF 
+        END IF
+      END IF
       IF(lamdams > 0._kind_real .and. N0ms > 0._kind_real .and. fms > 0._kind_real) THEN
          CALL partialRefIce(N0ms,dble(alphas),As,Bs,Cs,alphaa_ws,      &
                            alphab_ws,beta_sa,beta_sb,dble(lamdams),    &
-                           ZwetsnowH,ZwetsnowV,dble(T_mus)) 
+                           ZwetsnowH,ZwetsnowV,dble(T_mus))
          IF(flg > 2) THEN
          CALL partialRhoIce(N0ms,dble(alphas),Cs,Ds,alphaa_ws,           &
                            alphab_ws,beta_sa,beta_sb,rho_0rs,      &
                            dble(lamdams),ZwetsnowHV,dble(T_mus))
          END IF
-      ENDIF 
-  END SELECT 
+      END IF
+  END SELECT
 
 
   IF(hail_ON == 1) THEN
@@ -837,8 +844,8 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
         CALL partialRhoIce(N0h,dble(alphah),Chd,Dhd,alphaa_dh,      &
                          alphab_dh,beta_ha,beta_hb,rho_0h,    &
                          dble(lamdah),ZdryhailHV,dble(T_muh))
-      ENDIF
-    ENDIF
+      END IF
+    END IF
     IF(lamdamh > 0._kind_real .and. N0mh > 0._kind_real .and. fmh > 0._kind_real) THEN
       CALL partialRefIce(N0mh,dble(alphah),Ah,Bh,Ch,alphaa_wh,       &
                          alphab_wh,beta_ha,beta_hb,dble(lamdamh),    &
@@ -847,9 +854,9 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
         CALL partialRhoIce(N0mh,dble(alphah),Ch,Dh,alphaa_wh,        &
                          alphab_wh,beta_ha,beta_hb,rho_0rh,    &
                          dble(lamdamh),ZwethailHV,dble(T_muh))
-      ENDIF
-    ENDIF
-  ENDIF 
+      END IF
+    END IF
+  END IF
 
   IF(graupel_ON == 1) THEN
     IF(lamdag > 0._kind_real .and. N0g > 0._kind_real .and.  qgf > 0._kind_real)THEN
@@ -860,9 +867,9 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
         CALL partialRhoIce(N0g,dble(alphag),Cgd,Dgd,alphaa_dg,      &
                          alphab_dg,beta_ga,beta_gb,rho_0g,    &
                          dble(lamdag),ZdrygrplHV,dble(T_mug))
-      ENDIF
-    ENDIF
-     IF(lamdamg > 0._kind_real .and. N0mg > 0._kind_real .and. fmg > 0._kind_real) THEN 
+      END IF
+    END IF
+     IF(lamdamg > 0._kind_real .and. N0mg > 0._kind_real .and. fmg > 0._kind_real) THEN
       CALL partialRefIce(N0mg,dble(alphag),Ag,Bg,Cg,alphaa_wg,       &
                          alphab_wg,beta_ga,beta_gb,dble(lamdamg),    &
                          ZwetgrplH,ZwetgrplV,dble(T_mug))
@@ -870,9 +877,9 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
         CALL partialRhoIce(N0mg,dble(alphag),Cg,Dg,alphaa_wg,        &
                          alphab_wg,beta_ga,beta_gb,rho_0rg,    &
                          dble(lamdamg),ZwetgrplHV,dble(T_mug))
-      ENDIF
-    ENDIF
-  ENDIF
+      END IF
+    END IF
+  END IF
 
   IF(lamdar > 0._kind_real .and. N0r > 0._kind_real) THEN
     CALL partialRefRain(N0r,dble(alphar),alphaa,alphab,beta_ra,beta_rb,  &
@@ -882,8 +889,8 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 
     CALL partialRhoRain(N0r,dble(alphar),alphaa,alphab,beta_ra,beta_rb,  &
                         dble(lamdar),rainReflHV,dble(T_mur))
-    ENDIF
-  ENDIF
+    END IF
+  END IF
 
   rainIceRefl_hh=rainReflH+ZdrysnowH+ZwetsnowH+ZdryhailH+ZwethailH &
                  +ZdrygrplH+ZwetgrplH
@@ -902,7 +909,7 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 
     if(rainIceRefl_vv > 0._kind_real) then
       zdr = 10._kind_real*LOG10(MAX(1.0_kind_real,rainIceRefl_hh/rainIceRefl_vv))
-    endif
+    end if
 
     rainIceRefl = assign_Refl(rainIceRefl_hh,rainIceRefl_vv,zdr,log_ref)
 
@@ -914,14 +921,15 @@ TYPE(T_obs_dual) FUNCTION rainIceRefl(var_dsd,rho,flg)
 !-----------------------------------------------------------------------
 ! Safety block to ensure r_hv <= 1.
 !-----------------------------------------------------------------------
-      IF(rainIceRefl_hv > SQRT(rainIceRefl_hh*rainIceRefl_vv)) &
-         rainIceRefl_hv = SQRT(rainIceRefl_hh*rainIceRefl_vv)
+      IF(rainIceRefl_hv > SQRT(rainIceRefl_hh*rainIceRefl_vv)) then
+        rainIceRefl_hv = SQRT(rainIceRefl_hh*rainIceRefl_vv)
+      end if
 !-----------------------------------------------------------------------
 
       rainIceRefl%T_sum_ref_hv = rainIceRefl_hv
 
-    ENDIF
-  ENDIF
+    END IF
+  END IF
 
 END FUNCTION rainIceRefl
 
@@ -976,7 +984,7 @@ END FUNCTION rainIceRefl
 !-----------------------------------------------------------------------
 ! Check for bad air density value.
 !-----------------------------------------------------------------------
- 
+
   qr = var_dsd%T_qr
   qs = var_dsd%T_qs
   qh = var_dsd%T_qh
@@ -984,7 +992,7 @@ END FUNCTION rainIceRefl
 
 
   IF (rho > 0.0_kind_real .and. &
-      (qr > 0._kind_real .or. qs > 0._kind_real .or. qh > 0._kind_real .or. qg > 0._kind_real)) THEN 
+      (qr > 0._kind_real .or. qs > 0._kind_real .or. qh > 0._kind_real .or. qg > 0._kind_real)) THEN
      calculate_obs = rainIceRefl(var_dsd,rho,flg)
   END IF
 
@@ -1520,7 +1528,7 @@ SUBROUTINE fractionWater(qr,qi,fo,density_ice,fracqr,fracqi,fm,fw,rhom)
 !-----------------------------------------------------------------------
   IF (qr > 0._kind_real .AND. qi > 0._kind_real) THEN
     fr = fo*(MIN(qi/qr,qr/qi))**.3_kind_real
-  ENDIF
+  END IF
 
 !-----------------------------------------------------------------------
 ! Calculate the faction of water and ice.
@@ -1538,7 +1546,7 @@ SUBROUTINE fractionWater(qr,qi,fo,density_ice,fracqr,fracqi,fm,fw,rhom)
     fw = 1._kind_real
   ELSE IF (fm > 0._kind_real) THEN
     fw = fracqr/fm
-  ENDIF
+  END IF
 
   rhom = 1000._kind_real*fw**2._kind_real + (1._kind_real-fw**2._kind_real)*density_ice
 
@@ -1600,26 +1608,26 @@ SUBROUTINE fractionWater_temperature_snow (qi,density_ice,fm,fw,rhom,tair_C)
   else
     fm = 0._kind_real
     fw = 0._kind_real
-  endif
+  end if
 
   rhom = 1000._kind_real*fw**2._kind_real + (1._kind_real-fw**2._kind_real)*density_ice
 
 END SUBROUTINE fractionWater_temperature_snow
 
 SUBROUTINE fractionWater_temperature_hail(qi,density_ice,fm,fw,rhom,tair_C)
-  
+
 !-----------------------------------------------------------------------
-! 
+!
 ! PURPOSE:
 !
 ! This subroutine calculates the fractions of water, dry ice (snow or
 ! hail), the mixture based on the air temperature.
 ! It also calculate the density of mixture.
-! 
+!
 !-----------------------------------------------------------------------
 !
 ! AUTHOR:  Youngsun Jung, 7/25/2014
-! 
+!
 !-----------------------------------------------------------------------
 ! Force explicit declarations.
 !-----------------------------------------------------------------------
@@ -1664,7 +1672,7 @@ SUBROUTINE fractionWater_temperature_hail(qi,density_ice,fm,fw,rhom,tair_C)
   else
     fm = 0._kind_real
     fw = 0._kind_real
-  endif
+  end if
 
   rhom = 1000._kind_real*fw**2._kind_real + (1._kind_real-fw**2._kind_real)*density_ice
 
@@ -1678,8 +1686,8 @@ SUBROUTINE fractionWater_md(qr,qi,fo,density_ice,fracqr,fracqi,fm,fw,rhom, &
 ! PURPOSE:
 !
 ! This subroutine calculates the fractions of water, dry ice (snow or
-! hail), in the mixture following fractionWater but accounts for preserving 
-! median diamater by altering number concentration. 
+! hail), in the mixture following fractionWater but accounts for preserving
+! median diamater by altering number concentration.
 !
 !-----------------------------------------------------------------------
 !
@@ -1720,7 +1728,7 @@ SUBROUTINE fractionWater_md(qr,qi,fo,density_ice,fracqr,fracqi,fm,fw,rhom, &
 !-----------------------------------------------------------------------
   IF (qr > 0._kind_real .AND. qi > 0._kind_real) THEN
     fr = fo*(MIN(qi/qr,qr/qi))**.3_kind_real
-  ENDIF
+  END IF
 
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
@@ -1735,11 +1743,11 @@ SUBROUTINE fractionWater_md(qr,qi,fo,density_ice,fracqr,fracqi,fm,fw,rhom, &
   fracqi = fr * qi
   fm = fracqr + fracqi
 
-  IF (fm .EQ. 0._kind_real .AND. qr > 0._kind_real) THEN
+  IF (fm == 0._kind_real .AND. qr > 0._kind_real) THEN
     fw = 1._kind_real
   ELSE IF (fm > 0._kind_real) THEN
     fw = fracqr/fm
-  ENDIF
+  END IF
 
   rhom = 1000._kind_real*fw**2._kind_real + (1._kind_real-fw**2._kind_real)*density_ice
 
@@ -1750,7 +1758,7 @@ SUBROUTINE fractionWater_md(qr,qi,fo,density_ice,fracqr,fracqi,fm,fw,rhom, &
   ELSE
     ntm = 0._kind_real
     fm = 0._kind_real
-  ENDIF
+  END IF
 END SUBROUTINE fractionWater_md
 
 SUBROUTINE power_mom(power,cx,t,rhoa,q,moment)
@@ -1783,7 +1791,7 @@ SUBROUTINE power_mom(power,cx,t,rhoa,q,moment)
 !-----------------------------------------------------------------------
 
   REAL(kind_real) :: a,b
-  REAL(kind_real) :: rpower  
+  REAL(kind_real) :: rpower
   REAL(kind_real) :: log_a
   REAL(kind_real) :: second_moment
   REAL(kind_real) :: T_c
@@ -1805,7 +1813,7 @@ SUBROUTINE power_mom(power,cx,t,rhoa,q,moment)
       IF(power == 2) THEN
         moment = second_moment
       ELSE
- 
+
         rpower = REAL(power)
 
         log_a = dble(5.065339_kind_real-.062659_kind_real*T_c                    &
@@ -1832,7 +1840,7 @@ SUBROUTINE power_mom(power,cx,t,rhoa,q,moment)
 
   END SELECT
 
-END SUBROUTINE
+END SUBROUTINE power_mom
 
 SUBROUTINE calc_N0x_mp(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh,ntg, &
                        ntmg,qrf,qsf,fms,qhf,fmh,qgf,fmg)
@@ -1854,17 +1862,17 @@ SUBROUTINE calc_N0x_mp(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh,ntg, &
 ! Declare arguments.
 !-----------------------------------------------------------------------
 
-  REAL(kind_real) :: rhoa,rhoms,rhomh,rhomg
-  REAL(kind_real) :: ntr,nts,nth,ntg
-  REAL(kind_real) :: qrf,qsf,qhf,qgf
-  REAL(kind_real) :: fms,fmh,fmg
-  REAL(kind_real) :: ntms,ntmg,ntmh  ! JDL ADD
+  REAL(kind_real), INTENT(IN   ) :: rhoa,rhoms,rhomh,rhomg
+  REAL(kind_real), INTENT(INOUT) :: ntr,nts,nth,ntg
+  REAL(kind_real), INTENT(INOUT) :: qrf,qsf,qhf,qgf
+  REAL(kind_real), INTENT(INOUT) :: fms,fmh,fmg
+  REAL(kind_real), INTENT(INOUT) :: ntms,ntmg,ntmh  ! JDL ADD
 
 !-----------------------------------------------------------------------
 ! Declare local variables.
 !-----------------------------------------------------------------------
   REAL(kind_real) :: moma,momb
-  REAL(kind_real) :: no_value = missing
+  REAL(kind_real) :: no_value
 
   REAL(kind_real), PARAMETER :: D0r = 50.e-5_kind_real
   REAL(kind_real), PARAMETER :: R1 = 1.e-12_kind_real
@@ -1905,6 +1913,7 @@ SUBROUTINE calc_N0x_mp(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh,ntg, &
 !     CALL calc_N0x_melt(rhoa,no_value,no_value,no_value,ntr,no_value, &
 !                        no_value,no_value,qrf,no_value,no_value,      &
 !                        no_value,no_value,no_value,no_value)    ! 18 arugment
+      no_value = missing
       CALL calc_N0x_melt(rhoa,no_value,no_value,no_value,ntr,no_value, &
                          no_value,no_value,no_value,no_value,no_value, qrf, &
                          no_value,no_value,no_value,no_value,no_value,no_value)
@@ -2040,10 +2049,10 @@ SUBROUTINE calc_N0x_melt(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh, &
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  db_alfr = dble(alphar); db_alfs = dble(alphas); db_alfh = dble(alphah);
+  db_alfr = dble(alphar); db_alfs = dble(alphas); db_alfh = dble(alphah)
   db_alfg = dble(alphag)
 
-  db_mur = dble(T_mur); db_mus = dble(T_mus); db_muh = dble(T_muh);
+  db_mur = dble(T_mur); db_mus = dble(T_mus); db_muh = dble(T_muh)
   db_mug = dble(T_mug)
 
   IF(qrf >= epsQ .AND. ntr >= epsN) THEN
@@ -2051,49 +2060,49 @@ SUBROUTINE calc_N0x_melt(rhoa,rhoms,rhomh,rhomg,ntr,nts,ntms,nth,ntmh, &
      N0r = MIN(maxN0,sngl(N0r))
   ELSE
      qrf = 0.0_kind_real; ntr=0.0_kind_real
-  ENDIF
+  END IF
 
   IF(qsf >= epsQ .AND. nts >= epsN) THEN
      CALL cal_N0(rhoa,qsf,nts,rhos,db_alfs,N0s,db_mus)
      N0s = MIN(maxN0,sngl(N0s))
   ELSE
      qsf = 0.0_kind_real; nts=0.0_kind_real
-  ENDIF
+  END IF
 
   IF(fms >= epsQ .AND. ntms >= epsN) THEN
      CALL cal_N0(rhoa,fms,ntms,rhoms,db_alfs,N0ms,db_mus)
      N0ms = MIN(maxN0,sngl(N0ms))
   ELSE
      fms = 0.0_kind_real; ntms = 0.0_kind_real
-  ENDIF
+  END IF
 
   IF(qhf >= epsQ .AND. nth >= epsN) THEN
      CALL cal_N0(rhoa,qhf,nth,rhoh,db_alfh,N0h,db_muh)
      N0h = MIN(maxN0,sngl(N0h))
   ELSE
      qhf = 0.0_kind_real; nth = 0.0_kind_real
-  ENDIF
+  END IF
 
   IF(fmh >= epsQ .AND. ntmh >= epsN) THEN
      CALL cal_N0(rhoa,fmh,ntmh,rhomh,db_alfh,N0mh,db_muh)
      N0mh = MIN(maxN0,sngl(N0mh))
   ELSE
      fmh = 0.0_kind_real; ntmh = 0.0_kind_real
-  ENDIF
+  END IF
 
   IF(qgf >= epsQ .AND. ntg >= epsN) THEN
      CALL cal_N0(rhoa,qgf,ntg,rhog,db_alfg,N0g,db_mug)
      N0g = MIN(maxN0,sngl(N0g))
   ELSE
      qgf = 0.0_kind_real; ntg = 0.0_kind_real
-  ENDIF
+  END IF
 
   IF(fmg >= epsQ .AND. ntmg >= epsN) THEN
      CALL cal_N0(rhoa,fmg,ntmg,rhomg,db_alfg,N0mg,db_mug)
      N0mg = MIN(maxN0,sngl(N0mg))
   ELSE
      fmg = 0.0_kind_real; ntmg = 0.0_kind_real
-  ENDIF
+  END IF
 
 END SUBROUTINE calc_N0x_melt
 
@@ -2395,7 +2404,7 @@ SUBROUTINE cal_Nt(rhoa,q,N0,cx,alpha,Ntx,mu_x)
                    ((gamma1/gamma4)*dble(rhoa)* &
                    dble(q)/dble(cx))**((1.0_kind_real+alpha)/(4.0_kind_real+alpha)))
 
-END SUBROUTINE 
+END SUBROUTINE cal_Nt
 
 SUBROUTINE cal_lamda(rhoa,q,Ntx,rhox,alpha,lamda,mu_x)
 !
@@ -2528,7 +2537,7 @@ SUBROUTINE set_dsd_para()
 
   IF (N0s <= 0.0) THEN
     N0s = 3.0E+06_kind_real
-  ENDIF
+  END IF
 
   SELECT CASE (mp_option)
   CASE(1:14,106,109:110,116)
@@ -2647,7 +2656,7 @@ SUBROUTINE rdr_obs (rho,qscalar,obs_dual,var_dsd,    &
   TYPE(T_para_dsd), INTENT(INOUT) :: var_dsd
 
  !local variables
-  REAL(kind_real) :: no_value = missing
+  REAL(kind_real), parameter :: no_value = missing
 
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 !
@@ -2656,7 +2665,7 @@ SUBROUTINE rdr_obs (rho,qscalar,obs_dual,var_dsd,    &
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
   SELECT CASE (mp_option)
-  CASE(2:8,106)  ! single moment schemes 
+  CASE(2:8,106)  ! single moment schemes
     SELECT CASE (qgh_opt)
       CASE (1)                       ! graupel off, hail off
         var_dsd = assign_para_dsd_TM(qscalar(P_qr),qscalar(P_qs),no_value, &

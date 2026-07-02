@@ -10,7 +10,7 @@ module ufo_crtm_active_mod
  use crtm_module
 
  use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
  use missing_values_mod
 
@@ -60,14 +60,14 @@ hofx = missing
 ! Get the level number for reflectivity profiles
 call obsspace_get_db(obss, "MetaData", "modelLayer", modelLayer)
 modelLayer = modelLayer + 1 ! convert from 0 index to 1
-   
+
 do m = 1, n_Profiles
    if (.not.Options(m)%Skip_Profile) then
       jlayer = modelLayer(m)
-      do l = 1, n_Channels 
+      do l = 1, n_Channels
         if (abs(rts(l,m)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
            hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(jlayer)
-        endif
+        end if
       end do
    end if
 end do
@@ -127,7 +127,10 @@ modelLayer = modelLayer + 1 ! convert from 0 index to 1
 
 ! Put simulated diagnostics into hofxdiags
 ! We need to call the routines for passive instrument as well when dealing with active obs
-call ufo_crtm_passive_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, hofxdiags, err_stat)
+call ufo_crtm_passive_diag( &
+    rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, &
+    obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, &
+    hofxdiags, err_stat)
 
 ! ----------------------------------------------
 do jvar = 1, hofxdiags%nvar
@@ -135,9 +138,9 @@ do jvar = 1, hofxdiags%nvar
 
    if (ch_diags(jvar) > 0) then
       if (size(pack(channels,channels==ch_diags(jvar))) /= 1) then
-         write(err_msg,*) 'ufo_crtm_active_diags: mismatch between// &
-                           & h(x) channels(', channels,') and// &
-                           & ch_diags(jvar) = ', ch_diags(jvar)
+         write(err_msg,*) "ufo_crtm_active_diags: mismatch between// &
+                           & h(x) channels(", channels,") and// &
+                           & ch_diags(jvar) = ", ch_diags(jvar)
          call abor1_ftn(err_msg)
       end if
    end if
@@ -150,8 +153,9 @@ do jvar = 1, hofxdiags%nvar
       end if
    end do
 
-   if (allocated(hofxdiags%geovals(jvar)%vals)) &
-      deallocate(hofxdiags%geovals(jvar)%vals)
+   if (allocated(hofxdiags%geovals(jvar)%vals)) then
+     deallocate(hofxdiags%geovals(jvar)%vals)
+   end if
 
    hofxdiags%geovals(jvar)%nval = n_Layers
 
@@ -171,10 +175,10 @@ do jvar = 1, hofxdiags%nvar
                if (.not.Options(jprofile)%Skip_Profile) then
                   jlayer = modelLayer(jprofile)
                   do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     if (abs(rts(jchannel,jprofile)%Reflectivity(jlayer)) < threshold_reflectivity) then 
+                     if (abs(rts(jchannel,jprofile)%Reflectivity(jlayer)) < threshold_reflectivity) then
                           hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                               rts(jchannel,jprofile) % Reflectivity(jlayer)
-                     endif
+                     end if
                   end do
                end if
             end do
@@ -192,7 +196,7 @@ do jvar = 1, hofxdiags%nvar
                      if (abs(rts(jchannel,jprofile)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
                          hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                              rts(jchannel,jprofile) % Reflectivity_Attenuated(jlayer)
-                     endif
+                     end if
                   end do
                end if
             end do
@@ -232,7 +236,7 @@ do jvar = 1, hofxdiags%nvar
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers 
+                  do jlevel = 1, n_Layers
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -246,7 +250,7 @@ do jvar = 1, hofxdiags%nvar
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers 
+                  do jlevel = 1, n_Layers
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -260,7 +264,7 @@ do jvar = 1, hofxdiags%nvar
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers 
+                  do jlevel = 1, n_Layers
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -274,7 +278,7 @@ do jvar = 1, hofxdiags%nvar
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers 
+                  do jlevel = 1, n_Layers
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -288,7 +292,7 @@ do jvar = 1, hofxdiags%nvar
 
             do jprofile = 1, n_Profiles
                if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers 
+                  do jlevel = 1, n_Layers
                      hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
                         atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
                   end do
@@ -296,16 +300,16 @@ do jvar = 1, hofxdiags%nvar
             end do
 
          case default
-            write(err_msg,*) 'ufo_crtm_active_diags: //&
-                              & ObsDiagnostic is unsupported, ', &
+            write(err_msg,*) "ufo_crtm_active_diags: //&
+                              & ObsDiagnostic is unsupported, ", &
                               & hofxdiags%variables(jvar)
             call fckit_log%info(err_msg)
             !call abor1_ftn(err_msg)
             err_stat = 1
       end select
    else
-      write(err_msg,*) 'ufo_crtm_active_diags: //&
-                        & ObsDiagnostic is unsupported, ', &
+      write(err_msg,*) "ufo_crtm_active_diags: //&
+                        & ObsDiagnostic is unsupported, ", &
                         & hofxdiags%variables(jvar)
       call fckit_log%info(err_msg)
       !call abor1_ftn(err_msg)

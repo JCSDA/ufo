@@ -9,7 +9,7 @@
 module ufo_rttovonedvarcheck_setup_mod
 
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_rttovonedvarcheck_constants_mod
 
@@ -88,7 +88,7 @@ end type ufo_rttovonedvarcheck
 contains
 
 !------------------------------------------------------------------------------
-!> Setup the defaults for the main rttovonedvarcheck object and read in the 
+!> Setup the defaults for the main rttovonedvarcheck object and read in the
 !! contents of the yaml file.
 !!
 !! \author Met Office
@@ -321,7 +321,7 @@ end if
 ! used with type = principalComponentEmiss
 call surface_emissivity_conf % get_or_die("EmisEigVecPath",str)
 self % EmisEigVecPath = str
-self % pcemiss = .false. 
+self % pcemiss = .false.
 if (len(trim(self % EmisEigVecPath)) > 0) then
   self % pcemiss = .true.
 end if
@@ -407,7 +407,7 @@ if (self % mwEmissRetrieval) then
   write(*,*) "NumEmissElements = ",self % NumEmissElements
   write(*,*) "EmissToChannelMap = ",self % EmissToChannelMap
   write(*,*) "ChannelToEmissMap = ",self % ChannelToEmissMap
-endif
+end if
 write(*,*) "Use PC for Emissivity = ", self % pcemiss
 write(*,*) "EmisEigVecPath = ",self % EmisEigVecPath
 write(*,*) "EmisAtlas = ",self % EmisAtlas

@@ -1,9 +1,9 @@
 ! (C) Copyright 2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module for thermodynamic computations and conversions for use in UFO 
+!> Fortran module for thermodynamic computations and conversions for use in UFO
 
 module thermo_utils_mod
 

@@ -5,13 +5,17 @@
 
 module ufo_vertinterp_tlad_mod
 
-  use oops_variables_mod
-  use obs_variables_mod
+  use, intrinsic :: iso_c_binding, only: c_char, c_double, c_ptr
+  use kinds, only: kind_real
+  use oops_variables_mod, only: oops_variables
+  use obs_variables_mod, only: obs_variables
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_mod
-  use missing_values_mod
+  use missing_values_mod, only: missing_value
   use ufo_interp_param_mod
+  implicit none
+  private
 
 ! ------------------------------------------------------------------------------
 
@@ -86,7 +90,7 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
   else
     call grid_conf%get_or_die("vertical coordinate",coord_name)
     self%v_coord = coord_name
-  endif
+  end if
 
   call grid_conf%get_or_die("interpolation method",interp_method)
   self%interp_method = interp_method
@@ -103,16 +107,16 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     !> the method is automatic
     if (trim(self%interp_method) == "automatic") then
        !> Log-linear interpolation is used when v_coord is pressure
-       if ((trim(self%v_coord) .eq. var_prs) .or. &
-           (trim(self%v_coord) .eq. var_prsi) .or. &
-           (trim(self%v_coord) .eq. var_prsimo)) then
+       if ((trim(self%v_coord) == var_prs) .or. &
+           (trim(self%v_coord) == var_prsi) .or. &
+           (trim(self%v_coord) == var_prsimo)) then
          self%selected_interp = LOG_LINEAR_INTERP
        !> Nearest-Neighbor is used when const vertical coordinate used.
        else if (self%use_constant_vcoord) then
          self%selected_interp = NEAREST_NEIGHBOR_INTERP
-       endif
-    endif
-  endif
+       end if
+    end if
+  end if
 
   !> Determine observation vertical coordinate.
   !  Use the model vertical coordinate unless the option
@@ -122,7 +126,7 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
      self%o_v_coord = coord_name
   else
      self%o_v_coord = self%v_coord
-  endif
+  end if
 
   !> Scale hofx by an incoming field. Can come from GeoVaLs or ObsSpace
   self%hofx_scaling = .false.
@@ -136,12 +140,12 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     if ( grid_conf%has("hofx scaling field group") ) then
       call grid_conf%get_or_die("hofx scaling field group", hofx_scaling_field_group)
       self%hofx_scaling_field_group = hofx_scaling_field_group
-    endif
+    end if
     ! If the group is GeoVaLs then push back the variable name
     if (trim(self%hofx_scaling_field_group) == "GeoVaLs") then
       call self%geovars%push_back(trim(self%hofx_scaling_field))
-    endif
-  endif
+    end if
+  end if
 
   !> Determine observation vertical coordinate group.
   !  Use MetaData unless the option
@@ -151,7 +155,7 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     self%o_v_group = coord_group
   else
     self%o_v_group = "MetaData"
-  endif
+  end if
 
   !> Look to see if the user wants to use a backup coordinate for the interpolation
   self%use_backup_coordinate = .false.
@@ -161,9 +165,10 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     self%use_backup_coordinate = .true.
 
     !> Use of a backup coordinate is not tested with also using self%use_constant_vcoord
-    if (self%use_constant_vcoord) &
-      call abor1_ftn('Requesting a backup coordinate in the vertical interpolation, but ' // &
-                     'also using a constant vertical coordinate is not supported.')
+    if (self%use_constant_vcoord) then
+      call abor1_ftn("Requesting a backup coordinate in the vertical interpolation, but " // &
+                     "also using a constant vertical coordinate is not supported.")
+    end if
 
     !> Get the name of the backup coordinate
     call grid_conf%get_or_die("observation vertical coordinate backup", coord_name)
@@ -178,13 +183,13 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
     if ( grid_conf%has("observation vertical coordinate group backup") ) then
       call grid_conf%get_or_die("observation vertical coordinate group backup", coord_group)
       self%o_v_group_backup = coord_group
-    endif
+    end if
 
     !> Get model backgup coodinate
     if ( grid_conf%has("vertical coordinate backup") ) then
       call grid_conf%get_or_die("vertical coordinate backup", coord_name)
       self%v_coord_backup = coord_name
-    endif
+    end if
 
     !> Get interpolation method backup
     call grid_conf%get_or_die("interpolation method backup", interp_method)
@@ -202,24 +207,25 @@ subroutine vertinterp_tlad_setup_(self, grid_conf)
       !> the method is automatic
       if (trim(interp_method_backup) == "automatic") then
          !> Log-linear interpolation is used when v_coord is pressure
-         if ((trim(self%v_coord_backup) .eq. var_prs) .or. &
-             (trim(self%v_coord_backup) .eq. var_prsi) .or. &
-             (trim(self%v_coord_backup) .eq. var_prsimo)) then
+         if ((trim(self%v_coord_backup) == var_prs) .or. &
+             (trim(self%v_coord_backup) == var_prsi) .or. &
+             (trim(self%v_coord_backup) == var_prsimo)) then
            self%selected_interp_backup = LOG_LINEAR_INTERP
-         endif
-      endif
-    endif
+         end if
+      end if
+    end if
 
     !> Assert that if nearest neighbor is chosen for the regular interpolation, then it is also
     !  chosen for the backup interpolation
     if ((self%selected_interp == NEAREST_NEIGHBOR_INTERP .and. &
-         self%selected_interp_backup .ne. NEAREST_NEIGHBOR_INTERP) .or. &
-        (self%selected_interp .ne. NEAREST_NEIGHBOR_INTERP .and. &
-         self%selected_interp_backup == NEAREST_NEIGHBOR_INTERP)) &
-      call abor1_ftn('If the regular interpolation method is nearest neighbor, then the ' // &
-                     'backup interpolation method must also be nearest neighbor (and vice versa).')
+         self%selected_interp_backup /= NEAREST_NEIGHBOR_INTERP) .or. &
+        (self%selected_interp /= NEAREST_NEIGHBOR_INTERP .and. &
+         self%selected_interp_backup == NEAREST_NEIGHBOR_INTERP)) then
+      call abor1_ftn("If the regular interpolation method is nearest neighbor, then the " // &
+                     "backup interpolation method must also be nearest neighbor (and vice versa).")
+    end if
 
-  endif
+  end if
 
 end subroutine vertinterp_tlad_setup_
 
@@ -274,12 +280,12 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     if (self%selected_interp == LOG_LINEAR_INTERP) then
       do ilev = 1, nlevs
         tmp(ilev) = log(tmp(ilev))
-      enddo
-    endif
+      end do
+    end if
   else
     nlevs = vcoordprofile%nval
     allocate(tmp(vcoordprofile%nval))
-  endif
+  end if
 
   ! Turn selected interpolation into an array
   allocate(selected_interp(self%nlocs))
@@ -306,9 +312,9 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
 
         ! Use backup coordinate profile for this observation
         vcoordprofile%vals(:, iobs) = vcoordprofile_backup%vals(:, iobs)
-      endif
-    enddo
-  endif
+      end if
+    end do
+  end if
 
   do iobs = 1, self%nlocs
     if (.not. self%use_constant_vcoord) then
@@ -324,8 +330,8 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
         end do
       else
         tmp = vcoordprofile%vals(:,iobs)
-      endif
-    endif
+      end if
+    end if
 
     if (selected_interp(iobs) == LOG_LINEAR_INTERP) then
       if (obsvcoord(iobs) /= missing) then
@@ -343,7 +349,7 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
       call vert_interp_weights(nlevs, tmp2, tmp, self%wi(iobs), self%wf(iobs))
     end if
 
-  enddo
+  end do
 
   ! Scaling to hofx
   if (self%hofx_scaling) then
@@ -356,8 +362,8 @@ subroutine vertinterp_tlad_settraj_(self, geovals, obss)
     else
       call obsspace_get_db(obss, self%hofx_scaling_field_group, self%hofx_scaling_field, &
                            self%scaling_field)
-    endif
-  endif
+    end if
+  end if
 
   ! Cleanup memory
   deallocate(obsvcoord)
@@ -400,14 +406,14 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
           call nearestneighbor_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
                                              & hofx(ivar,iobs), self%wi(iobs))
         end if
-      enddo
+      end do
     else
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
           call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
                                   & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
         end if
-      enddo
+      end do
     end if
 
     ! Scaling to hofx
@@ -415,11 +421,11 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
           hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
-        endif
-      enddo
-    endif
+        end if
+      end do
+    end if
 
-  enddo
+  end do
 
 end subroutine vertinterp_simobs_tl_
 
@@ -460,9 +466,9 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
           hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
-        endif
-      enddo
-    endif
+        end if
+      end do
+    end if
 
     ! Adjoint of interpolatation
     if (self%selected_interp == NEAREST_NEIGHBOR_INTERP) then
@@ -470,18 +476,18 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
         if (hofx(ivar,iobs) /= missing) then
           call nearestneighbor_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
                                              & hofx(ivar,iobs), self%wi(iobs))
-        endif
-      enddo
+        end if
+      end do
     else
       do iobs = 1, nlocs
         if (hofx(ivar,iobs) /= missing) then
           call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
                                   & hofx(ivar,iobs), self%wi(iobs), self%wf(iobs))
-        endif
-      enddo
+        end if
+      end do
     end if
 
-  enddo
+  end do
 
 end subroutine vertinterp_simobs_ad_
 

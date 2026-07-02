@@ -1,13 +1,13 @@
 !-------------------------------------------------------------------------------
 ! (C) Crown Copyright 2021 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !-------------------------------------------------------------------------------
 
 module ufo_cloudcostfunction_mod_c
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_utils_mod, only: Ops_SatRad_Qsplit, Ops_QsatWat, Ops_Qsat
 
@@ -23,7 +23,7 @@ contains
 ! output_type != 1: Compute derivatives dq/dqtotal, dql/dqtotal, dqi/dqtotal
 subroutine ufo_ops_satrad_qsplit_c(output_type, nvals, p_in, t_in, qtotal_in, &
                                    q_out, ql_out, qi_out, use_qt_split_rain) &
-                                   bind(C, name='ufo_ops_satrad_qsplit_f90')
+                                   bind(C, name="ufo_ops_satrad_qsplit_f90")
 
 implicit none
 integer(c_int), intent(in) :: output_type
@@ -56,7 +56,7 @@ end subroutine ufo_ops_satrad_qsplit_c
 ! using saturation vapour pressure calculated using Goff-Gratch formulae.
 ! Values in the lookup table are over water above and below 0 degrees C.
 subroutine ufo_ops_satrad_qsatwat(qs_out, t_in, p_in, nvals) &
-                                  bind(C, name='ufo_ops_satrad_qsatwat_f90')
+                                  bind(C, name="ufo_ops_satrad_qsatwat_f90")
 
 implicit none
 integer(c_int), intent(in) :: nvals
@@ -79,7 +79,7 @@ end subroutine ufo_ops_satrad_qsatwat
 ! Values in the lookup table are over water above 0 degrees C and over
 ! ice below this temperature.
 subroutine ufo_ops_qsat(qs_out, t_in, p_in, nvals) &
-     bind(C, name='ufo_ops_qsat_f90')
+     bind(C, name="ufo_ops_qsat_f90")
 
 implicit none
 integer(c_int), intent(in) :: nvals

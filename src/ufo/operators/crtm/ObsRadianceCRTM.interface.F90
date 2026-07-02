@@ -9,7 +9,7 @@ module ufo_radiancecrtm_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
   use fckit_mpi_module,   only: fckit_mpi_comm
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_radiancecrtm_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -37,7 +37,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radiancecrtm_setup_c(c_key_self, c_conf, c_nchan, c_channels, midPointJulday, c_varlist, c_comm) &
-                                    bind(c,name='ufo_radiancecrtm_setup_f90')
+                                    bind(c,name="ufo_radiancecrtm_setup_f90")
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
@@ -70,7 +70,7 @@ end subroutine ufo_radiancecrtm_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancecrtm_delete_c(c_key_self) bind(c,name='ufo_radiancecrtm_delete_f90')
+subroutine ufo_radiancecrtm_delete_c(c_key_self) bind(c,name="ufo_radiancecrtm_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -86,7 +86,7 @@ end subroutine ufo_radiancecrtm_delete_c
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_radiancecrtm_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-           c_hofx, c_key_hofxdiags, c_qc_flags) bind(c,name='ufo_radiancecrtm_simobs_f90')
+           c_hofx, c_key_hofxdiags, c_qc_flags) bind(c,name="ufo_radiancecrtm_simobs_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -98,7 +98,7 @@ type(c_ptr),value, intent(in) :: c_qc_flags
 type(ufo_radiancecrtm), pointer :: self
 type(ufo_geovals),  pointer :: geovals
 type(ufo_geovals),  pointer :: hofxdiags
-character(len=*), parameter :: myname_='ufo_radiancecrtm_simobs_c'
+character(len=*), parameter :: myname_="ufo_radiancecrtm_simobs_c"
 
 call ufo_radiancecrtm_registry%get(c_key_self, self)
 

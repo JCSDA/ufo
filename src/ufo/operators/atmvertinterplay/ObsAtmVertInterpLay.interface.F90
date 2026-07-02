@@ -8,7 +8,7 @@
 
 module ufo_atmvertinterplay_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
 
   use fckit_configuration_module, only: fckit_configuration
   use ufo_atmvertinterplay_mod
@@ -36,7 +36,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmvertinterplay_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_atmvertinterplay_setup_f90')
+subroutine ufo_atmvertinterplay_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name="ufo_atmvertinterplay_setup_f90")
 use oops_variables_mod
 use obs_variables_mod
 implicit none
@@ -63,7 +63,7 @@ end subroutine ufo_atmvertinterplay_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_atmvertinterplay_delete_c(c_key_self) bind(c,name='ufo_atmvertinterplay_delete_f90')
+subroutine ufo_atmvertinterplay_delete_c(c_key_self) bind(c,name="ufo_atmvertinterplay_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -78,7 +78,7 @@ end subroutine ufo_atmvertinterplay_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_atmvertinterplay_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-                                c_hofx) bind(c,name='ufo_atmvertinterplay_simobs_f90')
+                                c_hofx) bind(c,name="ufo_atmvertinterplay_simobs_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

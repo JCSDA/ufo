@@ -38,7 +38,7 @@ type :: singlerefob_type
   type (element_type), allocatable :: refractivity(:)
   type (element_type), allocatable :: z(:)
   integer, allocatable             :: qc_flags(:)
-end type
+end type singlerefob_type
 
 ! Structure for the background (model) information
 type :: singlerefbg_type
@@ -46,7 +46,7 @@ type :: singlerefbg_type
   real(kind_real), allocatable :: zb(:)
   real(kind_real), allocatable :: p(:)
   real(kind_real), allocatable :: q(:)
-end type
+end type singlerefbg_type
 
 contains
 

@@ -5,9 +5,12 @@
 
 module ufo_backgrounderroridentity_mod
 
-use iso_c_binding,      only: c_ptr
+use, intrinsic :: iso_c_binding,      only: c_ptr
 use oops_variables_mod, only: oops_variables
 use ufo_geovals_mod,    only: ufo_geovals
+implicit none
+private
+public :: ufo_backgrounderroridentity_fillobsdiags
 
 contains
 
@@ -33,7 +36,7 @@ subroutine ufo_backgrounderroridentity_fillobsdiags(geovals, nlocs, obsvars, obs
   character(len=*), parameter      :: suffix = "_background_error"
 
   do ivar = 1, obsdiags%nvar
-    varstr = obsdiags%variables(ivar)    
+    varstr = obsdiags%variables(ivar)
     lenvarstr = len_trim(varstr)
 
     ! We need to fill this diagnostic if:
@@ -56,7 +59,7 @@ subroutine ufo_backgrounderroridentity_fillobsdiags(geovals, nlocs, obsvars, obs
 
     ! Copy the geoval to the diagnostic.
     obsdiags%geovals(ivar)%vals(1, 1:nlocs) = background_error%vals(1, 1:nlocs)
-  enddo
+  end do
 end subroutine ufo_backgrounderroridentity_fillobsdiags
 
 end module ufo_backgrounderroridentity_mod

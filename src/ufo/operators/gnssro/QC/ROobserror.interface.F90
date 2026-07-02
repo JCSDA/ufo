@@ -1,13 +1,13 @@
 !
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !
 module ufo_roobserror_mod_c
 
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use ufo_roobserror_mod
 use kinds
 
@@ -31,7 +31,7 @@ contains
 #include "oops/util/linkedList_c.f"
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_create_c(c_self, c_obspace, c_conf, c_filtervar) bind(c,name='ufo_roobserror_create_f90')
+subroutine ufo_roobserror_create_c(c_self, c_obspace, c_conf, c_filtervar) bind(c,name="ufo_roobserror_create_f90")
 use obs_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_self
@@ -55,7 +55,7 @@ end subroutine ufo_roobserror_create_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_delete_c(c_self) bind(c,name='ufo_roobserror_delete_f90')
+subroutine ufo_roobserror_delete_c(c_self) bind(c,name="ufo_roobserror_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_self
 
@@ -69,7 +69,7 @@ end subroutine ufo_roobserror_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_roobserror_prior_c(c_self) bind(c,name='ufo_roobserror_prior_f90')
+subroutine ufo_roobserror_prior_c(c_self) bind(c,name="ufo_roobserror_prior_f90")
 
 implicit none
 

@@ -8,7 +8,7 @@
 module ufo_reconradop_mod
 
   use fckit_log_module, only : fckit_log
-  use iso_c_binding, only: c_int, c_double
+  use, intrinsic :: iso_c_binding, only: c_int, c_double
   use kinds, only : kind_real ! from oops
   use rttov_types
   use ufo_radiancerttov_utils_mod
@@ -62,22 +62,28 @@ contains
     open(unit = fileunit, file = trim(filepath))
 
     read(fileunit, *, iostat = readstatus) nchans
+    if (readstatus /= 0) then
+      write(message,*) RoutineName, " Problem reading nchans "
+      call abor1_ftn(message)
+    end if
 
     allocate(self % Cmatrix_bias(nchans))
     allocate(self % Cmatrix(nchans,nchans))
 
     read (fileunit, *, iostat = readstatus) self % Cmatrix_bias(:)
-    do ich = 1, nchans
-      read (fileunit, *, iostat = readstatus) self % Cmatrix(:,ich)
-    end do
-
     if (readstatus /= 0) then
-      write(message,*) RoutineName,  &
-      ' Problem reading C matrix elements '
+      write(message,*) RoutineName, " Problem reading C matrix bias "
       call abor1_ftn(message)
     end if
+    do ich = 1, nchans
+      read (fileunit, *, iostat = readstatus) self % Cmatrix(:,ich)
+      if (readstatus /= 0) then
+        write(message,*) RoutineName, " Problem reading C matrix elements "
+        call abor1_ftn(message)
+      end if
+    end do
 
-    write(*, '(A,I0,A)') 'Finished reading the C matrix and bias vector for ', nchans, ' reconstructed radiances.'
+    write(*, "(A,I0,A)") "Finished reading the C matrix and bias vector for ", nchans, " reconstructed radiances."
 
     close(unit = fileunit)
 
@@ -105,11 +111,11 @@ contains
     end if
     if (conf % RTTOV_switchrad) then
       ! the C matrix needs to be applied to jacobians in radiance units
-      write(*,*) 'RTTOV jacobians now set to be given in radiance units'
+      write(*,*) "RTTOV jacobians now set to be given in radiance units"
       conf % rttov_opts % config % adk_bt = .false.
     end if
 
-    message = 'Finished reading C matrix and bias in ufo_reconradop_setup'
+    message = "Finished reading C matrix and bias in ufo_reconradop_setup"
     call fckit_log%info(message)
 
   end subroutine ufo_reconradop_setup
@@ -121,7 +127,7 @@ contains
     class(ufo_reconradop), intent(inout) :: self
     type(ufo_rttov_io),    intent(inout) :: rtprof
 
-    integer                              :: nlevels      !Number of levels in the profile 
+    integer                              :: nlevels      !Number of levels in the profile
 
     nlevels = size(rtprof % profiles(1) % p)
     allocate(self % cwn(rtprof % nchan_inst))
@@ -144,8 +150,8 @@ contains
     integer,                 intent(in)    :: prof_start
     logical,                 intent(in)    :: jacobian_needed
     real(c_double),optional, intent(inout) :: hofx(:,:)
-    type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info 
-    
+    type(ufo_rttovonedvarcheck_ob), optional, intent(inout) :: ob_info
+
     character(len=max_string)                   :: message
 
     integer                              :: ichan, nchan_sim, iprof, localchan, nlevels
@@ -153,14 +159,15 @@ contains
     nlevels = size(rtprof % profiles(1) % p)
     nchan_sim = size(chanprof)
     do ichan = 1, nchan_sim, rtprof % nchan_inst
-      iprof = prof_start + chanprof(ichan) % prof - 1          
+      iprof = prof_start + chanprof(ichan) % prof - 1
       self % cwn = rtprof % radiance % total(ichan:ichan+rtprof % nchan_inst-1) ! temporary array, in mW/cm-1/sr/m2
       ! Cmat_bias is in W/m-1/sr/m2
-      self % rad(1:rtprof % nchan_inst) = matmul(self % Cmatrix, 1e-5*self % cwn) + self % Cmatrix_bias(1:rtprof % nchan_inst) ! simulated reconstructed radiance from mW/cm-1/sr/m2 to W/m-1/sr/m2
+      ! simulated reconstructed radiance from mW/cm-1/sr/m2 to W/m-1/sr/m2
+      self % rad(1:rtprof % nchan_inst) = matmul(self % Cmatrix, 1e-5*self % cwn) + self % Cmatrix_bias(1:rtprof % nchan_inst)
       ! make sure radiance is not negative
       if (any(self % rad(1:rtprof % nchan_inst) <= 0.0)) then
-        write(*,*) 'Warning: radiance <= 0:', pack(self % rad(1:rtprof % nchan_inst), self % rad(1:rtprof % nchan_inst) <= 0.0), &
-          ' chan:', pack(chanprof(ichan:ichan+rtprof % nchan_inst-1) % chan, self % rad(1:rtprof % nchan_inst) <= 0.0), ' iprof:', iprof
+        write(*,*) "Warning: radiance <= 0:", pack(self % rad(1:rtprof % nchan_inst), self % rad(1:rtprof % nchan_inst) <= 0.0), &
+          " chan:", pack(chanprof(ichan:ichan+rtprof % nchan_inst-1) % chan, self % rad(1:rtprof % nchan_inst) <= 0.0), " iprof:", iprof
         where (self % rad(1:rtprof % nchan_inst) <= 0.0)
           ! set negative simulated reconstructed radiances equal to simulated radiances
           self % rad(1:rtprof % nchan_inst) = 1e-5*self % cwn(1:rtprof % nchan_inst) ! radiance from mW/cm-1/sr/m2 to W/m-1/sr/m2
@@ -168,8 +175,8 @@ contains
         ! convert wavenumber from cm-1 to m-1
         ! note we are assuming we are not using cut-down coefficients so that chanprof(ichan)%chan is the actual channel number
         self % cwn = conf % rttov_coef_array(1) % coef % ff_cwn(chanprof(ichan:ichan+rtprof % nchan_inst-1) % chan) * 1e2
-        ! convert radiance to brightness temperature 
-        call rtprof % rad_to_bt(self % cwn(1:rtprof % nchan_inst), self % rad(1:rtprof % nchan_inst), self % bt_arr(1:rtprof % nchan_inst))              
+        ! convert radiance to brightness temperature
+        call rtprof % rad_to_bt(self % cwn(1:rtprof % nchan_inst), self % rad(1:rtprof % nchan_inst), self % bt_arr(1:rtprof % nchan_inst))
         if (present(hofx)) then
           hofx(1:rtprof % nchan_inst,iprof) = self % bt_arr(1:rtprof % nchan_inst)
           ! this is optional, to use BT directly from RTTOV when rad is not positive
@@ -183,24 +190,25 @@ contains
         ! convert wavenumber from cm-1 to m-1
         ! note we are assuming we are not using cut-down coefficients so that chanprof(ichan)%chan is the actual channel number
         self % cwn = conf % rttov_coef_array(1) % coef % ff_cwn(chanprof(ichan:ichan+rtprof % nchan_inst-1) % chan) * 1e2
-        ! convert radiance to brightness temperature 
-        call rtprof % rad_to_bt(self % cwn(1:rtprof % nchan_inst), self % rad(1:rtprof % nchan_inst), self % bt_arr(1:rtprof % nchan_inst))              
-        if (present(hofx)) &
-          hofx(1:rtprof % nchan_inst,iprof) = self % bt_arr(1:rtprof % nchan_inst)  
-      end if              
+        ! convert radiance to brightness temperature
+        call rtprof % rad_to_bt(self % cwn(1:rtprof % nchan_inst), self % rad(1:rtprof % nchan_inst), self % bt_arr(1:rtprof % nchan_inst))
+        if (present(hofx)) then
+          hofx(1:rtprof % nchan_inst,iprof) = self % bt_arr(1:rtprof % nchan_inst)
+        end if
+      end if
       ! now redefines the RTprof quantities that are going to end up in hofxdiags
       ! check ufo_rttov_populate_hofxdiags to make sure everything is covered
       if (present(hofx)) then
         rtprof % radiance % bt(ichan:ichan+rtprof % nchan_inst-1) = hofx(1:rtprof % nchan_inst,iprof)
       else
         ! redefine the BT when radiance is positive
-        ! and use BT unchanged from RTTOV when rad is not positive 
+        ! and use BT unchanged from RTTOV when rad is not positive
         ! (perhaps more precise when the conversion depends of the channel SRF?)
         where (self % rad(1:rtprof % nchan_inst) > 0.0)
           rtprof % radiance % bt(ichan:ichan+rtprof % nchan_inst-1) = self % bt_arr(1:rtprof % nchan_inst)
         end where
       end if
-    
+
       !store transmittance if ob_info present in call and transmittance part of structure
       if (present(ob_info)) then
         if (allocated(ob_info % transmittance)) then
@@ -241,12 +249,12 @@ contains
         self % profile_k_rr_surf(:,1:9) = matmul(self % Cmatrix,self % profile_k_rr_surf(:,1:9))
         ! Calculate the Jacobian of BT (K) with respect to radiance (W/m-1/sr/m2)
         call rtprof % dBT_dRad(self % cwn, self % rad, self % dBT_dRad_arr)
-        ! Convert the jacobians back to BT over field variable units 
+        ! Convert the jacobians back to BT over field variable units
         do localchan = 1, rtprof % nchan_inst
           ! var_ts
           rtprof % profiles_k(ichan + localchan - 1) % t(:) = &
             self % dBT_dRad_arr(localchan)*1e-5*self % profile_k_rr(localchan,:,1)
-          ! var_q      
+          ! var_q
           rtprof % profiles_k(ichan + localchan - 1) % q(:) = &
             self % dBT_dRad_arr(localchan)*1e-5*self % profile_k_rr(localchan,:,2)
           ! var_sfc_t2m
@@ -277,12 +285,12 @@ contains
           rtprof % profiles_k(ichan + localchan - 1) % cfraction = &
             self % dBT_dRad_arr(localchan)*1e-5*self % profile_k_rr_surf(localchan,9)
         end do
-      end if 
-    enddo
+      end if
+    end do
 
   end subroutine ufo_reconradop_hofx_jac_calc
   ! ------------------------------------------------------------------------------
-  
+
   subroutine ufo_reconradop_delete(self)
 
     implicit none

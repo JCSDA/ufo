@@ -7,7 +7,7 @@
 
 module ufo_oceanconversions_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use kinds
 
   implicit none
@@ -30,7 +30,7 @@ contains
 !!
 
 real(c_float) function gsw_rho_t_exact_c(c_sal, c_temp, c_pressure) &
-                                 bind(c, name='gsw_rho_t_exact_f90')
+                                 bind(c, name="gsw_rho_t_exact_f90")
   use gsw_mod_toolbox, only: gsw_rho_t_exact
   implicit none
   real(c_float),  intent(in   ) :: c_sal, c_temp, c_pressure
@@ -61,7 +61,7 @@ end function gsw_rho_t_exact_c
 !!
 
 real(c_float) function gsw_p_from_z_c(c_depth, c_lat) &
-                                 bind(c, name='gsw_p_from_z_f90')
+                                 bind(c, name="gsw_p_from_z_f90")
   use gsw_mod_toolbox, only: gsw_p_from_z
   implicit none
   real(c_float),  intent(in   ) :: c_depth, c_lat
@@ -94,7 +94,7 @@ end function gsw_p_from_z_c
 !!
 
 real(c_float) function gsw_pt_from_t_c(c_sal, c_temp, c_pressure) &
-                                 bind(c, name='gsw_pt_from_t_f90')
+                                 bind(c, name="gsw_pt_from_t_f90")
   use gsw_mod_toolbox, only: gsw_pt_from_t
   implicit none
   real(c_float),  intent(in   ) :: c_sal, c_temp, c_pressure
@@ -126,7 +126,7 @@ end function gsw_pt_from_t_c
 !!
 
 real(c_float) function gsw_ct_from_t_c(c_sal, c_temp, c_pressure) &
-                                 bind(c, name='gsw_ct_from_t_f90')
+                                 bind(c, name="gsw_ct_from_t_f90")
   use gsw_mod_toolbox, only: gsw_CT_from_t
   implicit none
   real(c_float),  intent(in   ) :: c_sal, c_temp, c_pressure
@@ -158,7 +158,7 @@ end function gsw_ct_from_t_c
 !!
 
 real(c_float) function gsw_sa_from_sp_c(c_sal, c_pressure, c_longitude, c_latitude) &
-                                 bind(c, name='gsw_sa_from_sp_f90')
+                                 bind(c, name="gsw_sa_from_sp_f90")
   use gsw_mod_toolbox, only: gsw_SA_from_SP
   implicit none
   real(c_float),  intent(in   ) :: c_sal, c_pressure, c_longitude, c_latitude

@@ -1,14 +1,14 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !>Stubbed Fortran module for ground based gnss ropp1d forward operator
 !> following the ROPP (2018 Aug) implementation
 
 module ufo_gnssgb_refropp1d_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -16,7 +16,7 @@ use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_basis_mod,     only: ufo_basis
 use vert_interp_mod
 use lag_interp_mod,    only: lag_interp_const, lag_interp_smthWeights
-use obsspace_mod   
+use obsspace_mod
 use missing_values_mod
 use logger_mod, only: oops_log
 
@@ -56,9 +56,9 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-      write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+      write(err_msg,*) myname_, " error: nlocs inconsistent!"
       call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t)         ! temperature
@@ -79,10 +79,10 @@ subroutine ufo_gnssgb_refropp1d_simobs(self, geovals, hofx, obss)
   allocate(obsLon(nobs))
   allocate(obsLat(nobs))
 
-  call obsspace_get_db(obss, "MetaData", "longitude",        obsLon) 
-  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat) 
+  call obsspace_get_db(obss, "MetaData", "longitude",        obsLon)
+  call obsspace_get_db(obss, "MetaData", "latitude",         obsLat)
 
-  deallocate(obsLat) 
+  deallocate(obsLat)
   deallocate(obsLon)
 
   write(err_msg,*) "ufo_gnssgb_refropp1d_simobs_stub: completed"

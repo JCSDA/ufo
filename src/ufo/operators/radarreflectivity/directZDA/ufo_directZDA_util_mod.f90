@@ -10,7 +10,7 @@ module ufo_directZDA_util_mod
 use kinds
 
  implicit none
- private 
+ private
 
  public :: coef4dbzfwrd
  public :: calc_coeffs_dry_snow_tm
@@ -49,7 +49,8 @@ subroutine coef4dbzfwrd(mphyopt,iret)
 
       implicit none
 
-      integer :: mphyopt, iret
+      integer, intent(in) :: mphyopt
+      integer, intent(out) :: iret
 !-----------------------------------------------------------------------
 ! Declare local parameters.
 !-----------------------------------------------------------------------
@@ -157,7 +158,7 @@ subroutine coef4dbzfwrd(mphyopt,iret)
 
       select case (mphyopt)
       case (2,3,4)
-          ! hail 
+          ! hail
           ! changed the density of hail to graupel to make it consistent with WRF Lin scheme
            Zehnegf = ((m3todBZ * Zefact) * Ki2  /  &
                ((pi ** pipowf) * Kw2 * (4.0E+06_kind_real ** N0xpowf) *  &
@@ -176,7 +177,7 @@ subroutine coef4dbzfwrd(mphyopt,iret)
               (rhog ** rhoxpowf))) ** approxpow)
           iret = 0
       case default
-          write(6,*) ' subroutine COEF4DBZFWRD: warning --> invalid mphyopt for single moment scheme'
+          write(6,*) " subroutine COEF4DBZFWRD: warning --> invalid mphyopt for single moment scheme"
           iret = -1
       end select
 
@@ -210,7 +211,7 @@ subroutine coef4dbzfwrd(mphyopt,iret)
 !$$$  subprogram documentation block
 !                .      .    .                                       .
 ! subprogram:    calc_coeffs_dry_snow_tm - calculate coefficients for dry snow
-!                                          dependent on temperature 
+!                                          dependent on temperature
 ! program history log:
 !   2021-08-30  CAPS (J. Park) - Initial code; based on WRF v4.0
 !                              - (from module_mp_thompson.F)
@@ -230,15 +231,15 @@ subroutine coef4dbzfwrd(mphyopt,iret)
     ! LOCAL
     real(kind_real) :: a_, b_, loga_, tc0
     real(kind_real), dimension(10), parameter:: &
-    sa = (/ 5.065339_kind_real, -0.062659_kind_real, -3.032362_kind_real, &
+    sa = [ 5.065339_kind_real, -0.062659_kind_real, -3.032362_kind_real, &
             0.029469_kind_real, -0.000285_kind_real, &
             0.31255_kind_real,   0.000204_kind_real,  0.003199_kind_real, &
-            0.0_kind_real,      -0.015952_kind_real/)
+            0.0_kind_real,      -0.015952_kind_real]
     real(kind_real), dimension(10), parameter:: &
-    sb = (/ 0.476221_kind_real, -0.015896_kind_real,  0.165977_kind_real, &
+    sb = [ 0.476221_kind_real, -0.015896_kind_real,  0.165977_kind_real, &
             0.007468_kind_real, -0.000141_kind_real, &
             0.060366_kind_real,  0.000079_kind_real,  0.000594_kind_real, &
-            0.0_kind_real,      -0.003577_kind_real/)
+            0.0_kind_real,      -0.003577_kind_real]
     real(kind_real), parameter:: mu_s = 0.6357_kind_real
     real(kind_real), parameter:: bm_s = 2.0_kind_real
     real(kind_real), parameter:: bv_s = 0.55_kind_real

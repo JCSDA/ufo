@@ -8,7 +8,7 @@
 
 module vert_interp_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use vert_interp_mod
   implicit none
   private
@@ -18,7 +18,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine vert_interp_weights_c(c_nlev, c_obl, c_vec, c_wi, c_wf) &
-  bind(c,name='vert_interp_weights_f90')
+  bind(c,name="vert_interp_weights_f90")
 
 implicit none
 integer(c_int), intent(in ) :: c_nlev         !Number of model levels
@@ -34,7 +34,7 @@ end subroutine vert_interp_weights_c
 ! ------------------------------------------------------------------------------
 
 subroutine vert_interp_apply_c(c_nlev, c_fvec, c_f, c_wi, c_wf) &
-  bind(c,name='vert_interp_apply_f90')
+  bind(c,name="vert_interp_apply_f90")
 
 implicit none
 integer(c_int), intent(in ) :: c_nlev          !Number of model levels
@@ -50,7 +50,7 @@ end subroutine vert_interp_apply_c
 ! ------------------------------------------------------------------------------
 
 subroutine nearestneighbor_interp_index_c(c_nlev, c_obl, c_vec, c_idx) &
-  bind(c,name='nearestneighbor_interp_index_f90')
+  bind(c,name="nearestneighbor_interp_index_f90")
 
 implicit none
 integer(c_int), intent(in ) :: c_nlev         !Number of model levels
@@ -65,7 +65,7 @@ end subroutine nearestneighbor_interp_index_c
 ! ------------------------------------------------------------------------------
 
 subroutine nearestneighbor_interp_apply_c(c_nlev, c_fvec, c_f, c_idx) &
-  bind(c,name='nearestneighbor_interp_apply_f90')
+  bind(c,name="nearestneighbor_interp_apply_f90")
 
 implicit none
 integer(c_int), intent(in ) :: c_nlev          !Number of model levels

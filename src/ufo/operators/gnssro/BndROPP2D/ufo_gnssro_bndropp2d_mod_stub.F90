@@ -1,14 +1,14 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Stubbed Fortran module for gnssro bending angle ropp2d forward operator
 !> following the ROPP (2018 Aug) implementation
 
 module ufo_gnssro_bndropp2d_mod
 
-use fckit_configuration_module, only: fckit_configuration 
+use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -83,9 +83,9 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 ! check if the number of geoval profiles is correct
   if (t%nprofiles /= size(hofx)*n_horiz .or. q%nprofiles /= size(hofx)*n_horiz .or. &
       prs%nprofiles /= size(hofx)*n_horiz .or. gph%nprofiles /= size(hofx)*n_horiz) then
-     write(err_msg,*) myname_, ' error: npaths inconsistent!'
+     write(err_msg,*) myname_, " error: npaths inconsistent!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
   missing = missing_value(missing)
 
@@ -117,7 +117,7 @@ subroutine ufo_gnssro_bndropp2d_simobs(self, geovals, hofx, obss)
 
   write(err_msg,*) "ufo_gnssro_bndropp2d_simobs: complete"
   call oops_log%trace(err_msg)
-     
+
 end subroutine ufo_gnssro_bndropp2d_simobs
 ! ------------------------------------------------------------------------------
 

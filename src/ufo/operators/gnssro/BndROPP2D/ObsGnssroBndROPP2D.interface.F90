@@ -1,37 +1,37 @@
 ! (C) Copyright 2017 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle gnssro observations-bending angle ROPP 1d operator
 
 module ufo_gnssro_bndropp2d_mod_c
-  
-  use fckit_configuration_module, only: fckit_configuration 
-  use iso_c_binding, only: c_ptr, c_int, c_double, c_float
+
+  use fckit_configuration_module, only: fckit_configuration
+  use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_double, c_float
   use ufo_gnssro_bndropp2d_mod
   use ufo_gnssro_2d_locs_mod
 
   implicit none
   private
-  
+
 #define LISTED_TYPE ufo_gnssro_BndROPP2D
-  
+
   !> Linked list interface - defines registry_t type
 #include "oops/util/linkedList_i.f"
-  
+
   !> Global registry
   type(registry_t) :: ufo_gnssro_BndROPP2D_registry
-  
+
   ! ------------------------------------------------------------------------------
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
 #include "oops/util/linkedList_c.f"
-  
+
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_gnssro_bndropp2d_setup_c(c_key_self, c_conf,c_size) bind(c,name='ufo_gnssro_bndropp2d_setup_f90')
+
+subroutine ufo_gnssro_bndropp2d_setup_c(c_key_self, c_conf,c_size) bind(c,name="ufo_gnssro_bndropp2d_setup_f90")
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
@@ -46,23 +46,23 @@ f_conf = fckit_configuration(c_conf)
 call self%setup(f_conf, c_size)
 
 call f_conf%final()
-   
+
 end subroutine ufo_gnssro_BndROPP2D_setup_c
-  
+
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_gnssro_bndropp2d_delete_c(c_key_self) bind(c,name='ufo_gnssro_bndropp2d_delete_f90')
+
+subroutine ufo_gnssro_bndropp2d_delete_c(c_key_self) bind(c,name="ufo_gnssro_bndropp2d_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
 call ufo_gnssro_BndROPP2D_registry%remove(c_key_self)
 
 end subroutine ufo_gnssro_bndropp2d_delete_c
-  
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_gnssro_bndropp2d_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
-    bind(c,name='ufo_gnssro_bndropp2d_simobs_f90')
+    bind(c,name="ufo_gnssro_bndropp2d_simobs_f90")
 
 implicit none
 integer(c_int),     intent(in)    :: c_key_self
@@ -81,7 +81,7 @@ end subroutine ufo_gnssro_bndropp2d_simobs_c
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_2d_locs_init_c(c_key_self, c_obsspace, c_nlocs, c_lons, c_lats) &
-    bind(c,name='ufo_gnssro_2d_locs_init_f90')
+    bind(c,name="ufo_gnssro_2d_locs_init_f90")
 implicit none
 integer(c_int),     intent(in)     :: c_key_self
 type(c_ptr), value, intent(in)     :: c_obsspace

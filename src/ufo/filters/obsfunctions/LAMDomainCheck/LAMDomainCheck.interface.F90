@@ -7,7 +7,7 @@
 
 module ufo_lamdomaincheck_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use kinds
   use ufo_constants_mod, only: deg2rad, two, half, mean_earth_rad_m
 
@@ -42,7 +42,7 @@ contains
 
 subroutine lam_domaincheck_esg_c(c_a, c_k, c_plat, c_plon, c_pazi, c_npx, c_npy,&
                                  c_dx, c_dy, c_nbdy, c_lat, c_lon, c_mask) &
-                                 bind(c, name='lam_domaincheck_esg_f90')
+                                 bind(c, name="lam_domaincheck_esg_f90")
   use esg_grid_mod, only: gtoxm_ak_rr
   implicit none
   real(c_float),  intent(in   ) :: c_a, c_k, c_plat, c_plon, c_pazi, c_dx, c_dy
@@ -105,7 +105,7 @@ end subroutine lam_domaincheck_esg_c
 
 subroutine lam_domaincheck_circle_c(c_cenlat, c_cenlon, c_radius, &
                                     c_lat, c_lon, c_mask) &
-                                 bind(c, name='lam_domaincheck_circle_f90')
+                                 bind(c, name="lam_domaincheck_circle_f90")
   implicit none
   real(c_float),  intent(in   ) :: c_cenlat, c_cenlon, c_radius
   real(c_float),  intent(in   ) :: c_lat, c_lon

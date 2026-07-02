@@ -5,9 +5,12 @@
 
 module ufo_backgrounderrorvertinterp_mod
 
-use iso_c_binding,      only: c_ptr
+use, intrinsic :: iso_c_binding,      only: c_ptr
 use oops_variables_mod, only: oops_variables
 use ufo_geovals_mod,    only: ufo_geovals
+implicit none
+private
+public :: ufo_backgrounderrorvertinterp_fillobsdiags
 
 contains
 
@@ -63,7 +66,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
   end if
 
   ! Use logarithmic interpolation if the vertical coordinate is background_error_air_pressure
-  use_ln = (vcoord_name .eq. "background_error_" // var_prs)
+  use_ln = (vcoord_name == "background_error_" // var_prs)
 
   ! Calculate the interpolation weights
   allocate(interp_nodes(vcoord_profile%nval))
@@ -81,10 +84,10 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
     end if
     call vert_interp_weights(vcoord_profile%nval, interp_point, interp_nodes, &
                              wi(iobs), wf(iobs))
-  enddo
+  end do
 
   do ivar = 1, obsdiags%nvar
-    varstr = obsdiags%variables(ivar)    
+    varstr = obsdiags%variables(ivar)
     lenvarstr = len_trim(varstr)
 
     ! We need to fill this diagnostic if:
@@ -111,8 +114,8 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
                              background_error_profile%vals(:,iobs), &
                              obsdiags%geovals(ivar)%vals(1,iobs), &
                              wi(iobs), wf(iobs))
-    enddo
-  enddo
+    end do
+  end do
 
   ! Free memory
   deallocate(interp_nodes)

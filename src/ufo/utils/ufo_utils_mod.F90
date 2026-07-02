@@ -489,10 +489,10 @@ subroutine Ops_QsatWat (QS, &
 implicit none
 
 ! subroutine arguments:
-integer                     :: npnts     ! Points (=horizontal dimensions) being processed by qSAT scheme.
-real(kind=kind_real)        :: T(npnts)  ! Temperature (K).
-real(kind=kind_real)        :: P(npnts)  ! Pressure (Pa).
-real(kind=kind_real)        :: QS(npnts) ! Saturation mixing ratio at temperature T and pressure P (KG/KG)
+integer, intent(in)               :: npnts     ! Points (=horizontal dimensions) being processed by qSAT scheme.
+real(kind=kind_real), intent(in)  :: T(npnts)  ! Temperature (K).
+real(kind=kind_real), intent(in)  :: P(npnts)  ! Pressure (Pa).
+real(kind=kind_real), intent(out) :: QS(npnts) ! Saturation mixing ratio at temperature T and pressure P (KG/KG)
 
 ! Local declarations:
 real(kind=kind_real), parameter :: one_minus_epsilon = one - rd_over_rv
@@ -1139,7 +1139,7 @@ do j = 1, n
   end if
   if (X(j) <= Tolerance) then
     ErrorCode = 1
-    Errormessage = RoutineName//': U matrix is not positive definite'
+    Errormessage = RoutineName//": U matrix is not positive definite"
     call fckit_log % warning(Errormessage)
     goto 9999
   end if
@@ -1271,7 +1271,7 @@ do j = 1, n
     end do
   end if
   if (x(j) <= tolerance) then
-    errormessage = routinename//': Matrix is not positive definite'
+    errormessage = routinename//": Matrix is not positive definite"
     call fckit_log % warning(errormessage)
     status = 1
     goto 9999
@@ -1289,9 +1289,9 @@ if (present (matrix)) then
 else
   ! make sure that the dimensions of tmp were correctly specified
   if (m /= n) then
-    errormessage = routinename//': 2nd and 3rd arguments of routine must be'
+    errormessage = routinename//": 2nd and 3rd arguments of routine must be"
     call fckit_log % warning(errormessage)
-    errormessage = routinename//': identical if the matrix option is not present'
+    errormessage = routinename//": identical if the matrix option is not present"
     call fckit_log % warning(errormessage)
     status = 2
     goto 9999
@@ -1506,8 +1506,8 @@ end subroutine sort_and_unique
 
     INTEGER :: ic, i
 
-    CHARACTER(26), PARAMETER :: upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    CHARACTER(26), PARAMETER :: lower = 'abcdefghijklmnopqrstuvwxyz'
+    CHARACTER(26), PARAMETER :: upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    CHARACTER(26), PARAMETER :: lower = "abcdefghijklmnopqrstuvwxyz"
 
 !   lowcase each letter if it is lowecase
     string = str
@@ -1522,14 +1522,14 @@ end subroutine sort_and_unique
     IMPLICIT NONE
     CHARACTER(len=*),INTENT(in) :: names(:)
     CHARACTER(len=*),INTENT(in) :: usrname
-    INTEGER i
+    INTEGER :: i
     getindex=-1
     DO i=1,SIZE(names)
       IF(TRIM(usrname)==TRIM(names(i))) THEN
         getindex=i
         EXIT
-      ENDIF
-    ENDDO
+      END IF
+    END DO
   END FUNCTION getindex
 
 end module ufo_utils_mod

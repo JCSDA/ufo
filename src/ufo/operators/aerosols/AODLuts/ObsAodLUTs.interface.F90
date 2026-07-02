@@ -8,7 +8,7 @@
 module ufo_aodluts_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_aodluts_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -35,8 +35,8 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodluts_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) & 
-                               bind(c,name='ufo_aodluts_setup_f90')
+subroutine ufo_aodluts_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) &
+                               bind(c,name="ufo_aodluts_setup_f90")
 use oops_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
@@ -64,7 +64,7 @@ end subroutine ufo_aodluts_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodluts_delete_c(c_key_self) bind(c,name='ufo_aodluts_delete_f90')
+subroutine ufo_aodluts_delete_c(c_key_self) bind(c,name="ufo_aodluts_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -81,7 +81,7 @@ end subroutine ufo_aodluts_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_aodluts_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, &
-                                c_nlocs, c_hofx) bind(c,name='ufo_aodluts_simobs_f90')
+                                c_nlocs, c_hofx) bind(c,name="ufo_aodluts_simobs_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

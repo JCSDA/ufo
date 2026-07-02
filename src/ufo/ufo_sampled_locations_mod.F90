@@ -8,7 +8,7 @@
 
 module ufo_sampled_locations_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 implicit none
 
 public :: ufo_sampled_locations
@@ -21,7 +21,7 @@ contains
   procedure, public :: get_lons
   procedure, public :: get_lats
   procedure, public :: get_timemask
-end type
+end type ufo_sampled_locations
 
 interface ufo_sampled_locations
   module procedure ctor_from_ptr

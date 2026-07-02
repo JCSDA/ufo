@@ -9,7 +9,7 @@
 module ufo_radianceoasim_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_oasim_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -36,7 +36,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radianceoasim_setup_c(c_key_self, c_conf, c_nchan, c_channels) bind(c,name='ufo_radianceoasim_setup_f90')
+subroutine ufo_radianceoasim_setup_c(c_key_self, c_conf, c_nchan, c_channels) bind(c,name="ufo_radianceoasim_setup_f90")
 
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
@@ -57,7 +57,7 @@ end subroutine ufo_radianceoasim_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radianceoasim_delete_c(c_key_self) bind(c,name='ufo_radianceoasim_delete_f90')
+subroutine ufo_radianceoasim_delete_c(c_key_self) bind(c,name="ufo_radianceoasim_delete_f90")
 integer(c_int), intent(inout) :: c_key_self
 
 type(ufo_oasim), pointer :: self
@@ -71,7 +71,7 @@ end subroutine ufo_radianceoasim_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_radianceoasim_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-  bind(c,name='ufo_radianceoasim_simobs_f90')
+  bind(c,name="ufo_radianceoasim_simobs_f90")
 
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals

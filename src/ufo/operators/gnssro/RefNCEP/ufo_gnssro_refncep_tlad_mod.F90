@@ -1,14 +1,15 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module for gnssro refractivity tangent linear and adjoint
 !> following NCEP's method
 
 module ufo_gnssro_refncep_tlad_mod
-  use fckit_configuration_module, only: fckit_configuration 
-  use kinds
+  use, intrinsic :: iso_c_binding, only: c_double, c_ptr
+  use fckit_configuration_module, only: fckit_configuration
+  use kinds, only: kind_real
   use ufo_vars_mod
   use ufo_geovals_mod
   use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -17,12 +18,13 @@ module ufo_gnssro_refncep_tlad_mod
   use obsspace_mod
   use gnssro_mod_constants
   use gnssro_mod_conf
-  use missing_values_mod
+  use missing_values_mod, only: missing_value
   use ufo_constants_mod
-  use iso_c_binding
+  implicit none
+  private
 
   !> Fortran derived type for gnssro trajectory
-  type, extends(ufo_basis_tlad) :: ufo_gnssro_RefNCEP_tlad
+  type, extends(ufo_basis_tlad), public :: ufo_gnssro_RefNCEP_tlad
    private
      type(gnssro_conf)             :: roconf
      integer                       :: nval, nlocs
@@ -52,14 +54,14 @@ end subroutine ufo_gnssro_refncep_tlad_setup
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_refncep_tlad_settraj(self, geovals, obss)
   use gnssro_mod_transform, only: geometric2geop
-      
+
   implicit none
   class(ufo_gnssro_RefNCEP_tlad),intent(inout) :: self
   type(ufo_geovals),             intent(in)    :: geovals
   type(c_ptr), value,            intent(in)    :: obss
-      
+
   character(len=*), parameter :: myname_="ufo_gnssro_refncep_tlad_settraj"
-      
+
   type(ufo_geoval),    pointer :: t,q,prs,gph
   real(kind_real), allocatable :: obsZ(:), obsLat(:)  ! observation vector
   real(kind_real)  :: obsH,gesT,gesQ,gesP
@@ -78,7 +80,7 @@ subroutine ufo_gnssro_refncep_tlad_settraj(self, geovals, obss)
 ! Keep copy of dimensions
   self%nval  = prs%nval
   self%nlocs = obsspace_get_nlocs(obss)
- 
+
   allocate(self%wi(self%nlocs))
   allocate(self%wf(self%nlocs))
   allocate(self%jac_t(self%nlocs))
@@ -120,60 +122,60 @@ subroutine ufo_gnssro_refncep_tlad_settraj(self, geovals, obss)
                          + n_b*gesQ/ ( ((1-(rd_over_rv))*gesQ+(rd_over_rv))*gesT**2 )   &
                          + n_c*gesQ/ ( ((1-(rd_over_rv))*gesQ+(rd_over_rv))*gesT )
 
-  enddo
+  end do
 
-  
+
   self%ltraj = .true.
 ! cleanup
   deallocate(obsZ)
   deallocate(obsLat)
 
 end subroutine ufo_gnssro_refncep_tlad_settraj
-    
+
 ! ------------------------------------------------------------------------------
-    
+
 subroutine ufo_gnssro_refncep_simobs_tl(self, geovals, hofx, obss)
   implicit none
   class(ufo_gnssro_RefNCEP_tlad), intent(in)     :: self
   type(ufo_geovals),              intent(in)     :: geovals
   real(kind_real),                intent(inout)  :: hofx(:)
   type(c_ptr), value,             intent(in)     :: obss
-     
+
   character(len=*), parameter :: myname="ufo_gnssro_refncep_tlad_tl"
   character(max_string)       :: err_msg
-      
+
   type(ufo_geoval), pointer :: t_tl, q_tl, prs_tl
   real(kind_real)           :: gesT_tl, gesQ_tl, gesP_tl
   integer                   :: iobs
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-      write(err_msg,*) myname, ' trajectory wasnt set!'
+      write(err_msg,*) myname, " trajectory wasnt set!"
       call abor1_ftn(err_msg)
-  endif
-      
+  end if
+
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-    write(err_msg,*) myname, ' error: nlocs inconsistent!'
+    write(err_msg,*) myname, " error: nlocs inconsistent!"
     call abor1_ftn(err_msg)
-  endif
-     
+  end if
+
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,t_tl)
   call ufo_geovals_get_var(geovals, var_q, q_tl)
   call ufo_geovals_get_var(geovals, var_prs, prs_tl)
- 
+
 ! tangent linear obs operator (linear)
   do iobs = 1, geovals%nlocs
      call vert_interp_apply_tl(  t_tl%nval,  t_tl%vals(:,iobs), gesT_tl, self%wi(iobs),self%wf(iobs))
      call vert_interp_apply_tl(  q_tl%nval,  q_tl%vals(:,iobs), gesQ_tl, self%wi(iobs),self%wf(iobs))
      call vert_interp_apply_tl(prs_tl%nval,prs_tl%vals(:,iobs), gesP_tl, self%wi(iobs),self%wf(iobs))
      hofx(iobs)  =  self%jac_t(iobs)*gesT_tl  + self%jac_q(iobs)*gesQ_tl + self%jac_prs(iobs)*gesP_tl
-  enddo
-    
+  end do
+
 end subroutine ufo_gnssro_refncep_simobs_tl
 ! ------------------------------------------------------------------------------
-    
+
 subroutine ufo_gnssro_refncep_simobs_ad(self, geovals, hofx, obss)
   implicit none
   class(ufo_gnssro_RefNCEP_tlad), intent(in)    :: self
@@ -190,16 +192,16 @@ subroutine ufo_gnssro_refncep_simobs_ad(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname, ' trajectory wasnt set!'
+     write(err_msg,*) myname, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
-      
+  end if
+
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
-      
+  end if
+
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_prs, prs_d)
   call ufo_geovals_get_var(geovals, var_ts,t_d)
@@ -208,8 +210,8 @@ subroutine ufo_gnssro_refncep_simobs_ad(self, geovals, hofx, obss)
   missing = missing_value(missing)
 
   do iobs = 1, geovals%nlocs
-    
-    if (hofx(iobs) .ne. missing) then
+
+    if (hofx(iobs) /= missing) then
       gesT_d = 0.0_kind_real
       gesQ_d = 0.0_kind_real
       gesP_d = 0.0_kind_real
@@ -219,9 +221,9 @@ subroutine ufo_gnssro_refncep_simobs_ad(self, geovals, hofx, obss)
       call vert_interp_apply_ad(  t_d%nval,  t_d%vals(:,iobs), gesT_d, self%wi(iobs), self%wf(iobs))
       call vert_interp_apply_ad(  q_d%nval,  q_d%vals(:,iobs), gesQ_d, self%wi(iobs), self%wf(iobs))
       call vert_interp_apply_ad(prs_d%nval,prs_d%vals(:,iobs), gesP_d, self%wi(iobs), self%wf(iobs))
-    endif
+    end if
 
-  enddo
+  end do
 
 end subroutine ufo_gnssro_refncep_simobs_ad
 ! ------------------------------------------------------------------------------
@@ -230,7 +232,7 @@ subroutine ufo_gnssro_refncep_tlad_delete(self)
   implicit none
   class(ufo_gnssro_RefNCEP_tlad), intent(inout) :: self
   character(len=*), parameter :: myname_="ufo_gnssro_refncep_tlad_delete"
-      
+
   self%nval = 0
   if (allocated(self%wi))    deallocate(self%wi)
   if (allocated(self%wf))    deallocate(self%wf)
@@ -239,7 +241,7 @@ subroutine ufo_gnssro_refncep_tlad_delete(self)
   if (allocated(self%jac_prs)) deallocate(self%jac_prs)
   self%ltraj = .false.
 end subroutine ufo_gnssro_refncep_tlad_delete
-    
+
 ! ------------------------------------------------------------------------------
 
 end module ufo_gnssro_refncep_tlad_mod

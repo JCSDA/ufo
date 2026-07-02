@@ -1,8 +1,8 @@
 !-------------------------------------------------------------------------------
 ! (C) British Crown Copyright 2020 Met Office
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 !-------------------------------------------------------------------------------
 
 !> Fortran module to handle scatwind observations - Met Office neutral operator
@@ -10,30 +10,30 @@
 module ufo_scatwind_neutralmetoffice_mod_c
 
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_scatwind_neutralmetoffice_mod
   use ufo_geovals_mod,    only: ufo_geovals
   use ufo_geovals_mod_c,  only: ufo_geovals_registry
 
   implicit none
   private
-  
+
 #define LISTED_TYPE ufo_scatwind_neutralmetoffice
-  
+
   !> Linked list interface - defines registry_t type
 #include "oops/util/linkedList_i.f"
-  
+
   !> Global registry
   type(registry_t) :: ufo_scatwind_neutralmetoffice_registry
-  
+
   ! ------------------------------------------------------------------------------
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
 #include "oops/util/linkedList_c.f"
-  
+
 ! ------------------------------------------------------------------------------
-  
+
 subroutine ufo_scatwind_neutralmetoffice_setup_c(c_key_self,         &
                                                  surface_type_check, &
                                                  surface_type_sea,   &
@@ -41,7 +41,7 @@ subroutine ufo_scatwind_neutralmetoffice_setup_c(c_key_self,         &
                                                  c_geovars,          &
                                                  c_nchan,            &
                                                  c_channels,         &
-                                                 c_conf) bind(c,name='ufo_scatwind_neutralmetoffice_setup_f90')
+                                                 c_conf) bind(c,name="ufo_scatwind_neutralmetoffice_setup_f90")
 use oops_variables_mod
 use obs_variables_mod
 implicit none
@@ -69,10 +69,10 @@ call self%setup(c_channels, surface_type_check, surface_type_sea)
 call f_conf%final()
 
 end subroutine ufo_scatwind_neutralmetoffice_setup_c
-  
+
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_scatwind_neutralmetoffice_delete_c(c_key_self) bind(c,name='ufo_scatwind_neutralmetoffice_delete_f90')
+
+subroutine ufo_scatwind_neutralmetoffice_delete_c(c_key_self) bind(c,name="ufo_scatwind_neutralmetoffice_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -83,12 +83,12 @@ call self%delete
 call ufo_scatwind_NeutralMetOffice_registry%remove(c_key_self)
 
 end subroutine ufo_scatwind_neutralmetoffice_delete_c
-  
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_scatwind_neutralmetoffice_simobs_c(c_key_self, c_key_geovals, &
                                                   c_obsspace, c_nvars, c_nlocs, &
-                                                  c_hofx) bind(c,name='ufo_scatwind_neutralmetoffice_simobs_f90')
+                                                  c_hofx) bind(c,name="ufo_scatwind_neutralmetoffice_simobs_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

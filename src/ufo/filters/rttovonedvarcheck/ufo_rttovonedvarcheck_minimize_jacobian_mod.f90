@@ -7,7 +7,7 @@
 
 module ufo_rttovonedvarcheck_minimize_jacobian_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_constants_mod, only: zero
 use ufo_geovals_mod
@@ -105,7 +105,7 @@ end select
 end  subroutine ufo_rttovonedvarcheck_get_bts
 
 !------------------------------------------------------------------------------
-!> Get the jacobian from rttov and if neccessary convert 
+!> Get the jacobian from rttov and if neccessary convert
 !! to variables used in the 1D-Var.
 !!
 !! \details Heritage: Ops_SatRad_GetHmatrix_RTTOV12.f90
@@ -534,105 +534,105 @@ character(len=3) :: txt_nchans
 character(len=*), parameter :: RoutineName = "ufo_rttovonedvarcheck_PrintHmatrix"
 !-------------------------------------------------------------------------------
 
-write( unit=txt_nchans,fmt='(i3)' )  nchans
-write( unit=int_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'I30)'
-write( unit=real_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'E30.15)'
+write( unit=txt_nchans,fmt="(i3)" )  nchans
+write( unit=int_fmt,fmt="(a)" ) "(" // trim(txt_nchans) // "I30)"
+write( unit=real_fmt,fmt="(a)" ) "(" // trim(txt_nchans) // "E30.15)"
 
 write(*,*)
 
 write(*, int_fmt) channels(:)
 
   if ( profindex % t(1) > 0 ) THEN
-    write(*, '(a)') 'Temperature Profile'
+    write(*, "(a)") "Temperature Profile"
     do i = profindex%t(1),profindex%t(2)
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % q(1) > 0 ) THEN
-    write(*, '(a)') 'q Profile'
+    write(*, "(a)") "q Profile"
     do i = profindex%q(1),profindex%q(2)
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % qt(1) > 0 ) THEN
-    write(*, '(a)') 'qt Profile /1000'
+    write(*, "(a)") "qt Profile /1000"
     do i = profindex%qt(1),profindex%qt(2)
       write(*, real_fmt)  H_matrix(:,i)/1000
     end do
   end if
 
   if ( profindex % o3profile(1) > 0 ) THEN
-    write(*, '(a)') 'Ozone Profile'
+    write(*, "(a)") "Ozone Profile"
     do i = profindex%o3profile(1),profindex%o3profile(2)
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % o3total > 0 ) THEN
-    write(*, '(a)') 'Total Column Ozone'
+    write(*, "(a)") "Total Column Ozone"
     write(*, real_fmt)  H_matrix(:,profindex%o3total)
   end if
 
 
   if ( profindex % lwp > 0 ) THEN
-    write(*, '(a)') 'LWP'
+    write(*, "(a)") "LWP"
     write(*, real_fmt)  H_matrix(i,profindex % lwp)
   end if
 
   if ( profindex % t2 > 0 ) THEN
-    write(*, '(a)') '2m T'
+    write(*, "(a)") "2m T"
     write(*, real_fmt)  H_matrix(:,profindex % t2)
   end if
 
   if ( profindex % q2 > 0 ) THEN
-    write(*, '(a)') '2m q'
+    write(*, "(a)") "2m q"
     write(*, real_fmt)  H_matrix(:,profindex % q2)
   end if
 
   if ( profindex % pstar > 0 ) THEN
-    write(*, '(a)') 'P Star'
+    write(*, "(a)") "P Star"
     write(*, real_fmt)  H_matrix(:,profindex % pstar)
   end if
 
   if ( profindex % windspeed > 0 ) THEN
-    write(*, '(a)') 'Windspeed'
+    write(*, "(a)") "Windspeed"
     write(*, real_fmt)  H_matrix(:,profindex % windspeed)
   end if
 
   if ( profindex % tstar > 0 ) THEN
-    write(*, '(a)') 'Skin Temperature'
+    write(*, "(a)") "Skin Temperature"
     write(*, real_fmt)  H_matrix(:,profindex % tstar)
   end if
 
   if ( profindex % mwemiss(1) > 0) THEN
-    write(*, '(a)') 'Microwave emissivity retrieval'
+    write(*, "(a)") "Microwave emissivity retrieval"
     do i = profindex%mwemiss(1),profindex%mwemiss(2)
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % emisspc(1) > 0) THEN
-    write(*, '(a)') 'PC emissivity retrieval'
+    write(*, "(a)") "PC emissivity retrieval"
     do i = profindex%emisspc(1),profindex%emisspc(2)
       write(*, real_fmt)  H_matrix(:,i)
     end do
   end if
 
   if ( profindex % cloudtopp > 0 ) THEN
-    write(*, '(a)') 'Cloud top pressure'
+    write(*, "(a)") "Cloud top pressure"
     write(*, real_fmt)  H_matrix(:,profindex % cloudtopp)
   end if
 
   if ( profindex % cloudfrac > 0 ) THEN
-    write(*, '(a)') 'Cloud fraction'
+    write(*, "(a)") "Cloud fraction"
     write(*, real_fmt)  H_matrix(:,profindex % cloudfrac)
   end if
 
 write(*,*)
-write(*, '(a)') 'End H-Matrix'
-write(*, '(a)') '------------------------'
+write(*, "(a)") "End H-Matrix"
+write(*, "(a)") "------------------------"
 
 end  subroutine ufo_rttovonedvarcheck_PrintHmatrix
 

@@ -6,7 +6,7 @@ MODULE gsw_pot_to_insitu
 !
 ! PURPOSE:
 !  This module provides additional subroutines needed to compute the in situ
-!  temperature from a numerical model's potential temperature (ºC) and practical 
+!  temperature from a numerical model's potential temperature (ºC) and practical
 !  salinity (psu). It utilizes the TEOS GSW Fortran package, version 3.03,
 !  available at http://www.teos-10.org
 !
@@ -18,7 +18,7 @@ MODULE gsw_pot_to_insitu
 !===============================================================================
 
 use kinds
-  
+
 IMPLICIT NONE
 
 PUBLIC :: t_from_pt, p_from_z    ! Computing in situ from potential temperature
@@ -35,7 +35,7 @@ FUNCTION t_from_pt(pt_in,sp_in,p_in,lon_in,lat_in)
 !===============================================================================
   !USE common, ONLY: r_size
 
-  use gsw_mod_toolbox, only : gsw_ct_from_pt  
+  use gsw_mod_toolbox, only : gsw_ct_from_pt
   use gsw_mod_toolbox, only : gsw_sa_from_sp
   use gsw_mod_toolbox, only : gsw_t_from_ct
   use gsw_mod_kinds
@@ -49,7 +49,7 @@ FUNCTION t_from_pt(pt_in,sp_in,p_in,lon_in,lat_in)
   real(kind_real), INTENT(IN) :: pt_in, sp_in, p_in, lon_in, lat_in
   real(kind_real) :: pt, sp, p, lon, lat
   real(kind_real) :: sa, ct, T
- 
+
   pt = pt_in
   sp = sp_in
   p  = p_in
@@ -112,7 +112,7 @@ FUNCTION sa_from_sp(sp,p,long,lat)
 !
 ! sp     : Practical Salinity                              [unitless]
 ! p      : sea pressure                                    [dbar]
-! long   : longitude                                       [DEG E]     
+! long   : longitude                                       [DEG E]
 ! lat    : latitude                                        [DEG N]
 !
 ! gsw_sa_from_sp   : Absolute Salinity                     [g/kg]
@@ -130,7 +130,7 @@ END FUNCTION sa_from_sp
 FUNCTION pt_from_t(sa,t,p,p_ref)
 !===============================================================================
 
-! Calculates potential temperature of seawater from in-situ temperature 
+! Calculates potential temperature of seawater from in-situ temperature
 !
 ! sa     : Absolute Salinity                               [g/kg]
 ! t      : in-situ temperature                             [deg C]

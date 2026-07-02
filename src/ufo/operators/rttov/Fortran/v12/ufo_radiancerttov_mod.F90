@@ -8,7 +8,7 @@
 module ufo_radiancerttov_mod
 
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use kinds
   use logger_mod, only : oops_log
   use missing_values_mod
@@ -114,7 +114,7 @@ contains
     end do coefloop
 
     if ( any(self % coefindex == 0) ) then
-      message = 'ufo_radiancerttov_setup error: input channels not in the coefficient file'
+      message = "ufo_radiancerttov_setup error: input channels not in the coefficient file"
       call abor1_ftn(message)
     end if
 
@@ -125,20 +125,21 @@ contains
           self%varin(ind) = varin_scatt(j)
           ind = ind + 1
         end if
-      enddo
+      end do
     end if
 
     if (self % conf % debug) then
       do j=1,size(self%varin)
-        write(message,'(I4,1x,A)') j, trim(self%varin(j))
+        write(message,"(I4,1x,A)") j, trim(self%varin(j))
         call oops_log%trace(message)
-      enddo
+      end do
     end if
 
-    if (self % conf % read_Cmatrix) &
+    if (self % conf % read_Cmatrix) then
       call self % reconradop % setup(self % RTprof, self % conf)
+    end if
 
-    message = 'Finished setting up rttov'
+    message = "Finished setting up rttov"
     call oops_log%info(message)
     call f_confOpts%final()
 
@@ -163,7 +164,7 @@ contains
                                       hofx, hofxdiags, qcf_p, ob_info)
     use fckit_mpi_module,   only: fckit_mpi_comm
     use obsdatavector_mod,  only: obsdatavector_int
-    use iso_fortran_env,    only: int64
+    use, intrinsic :: iso_fortran_env,    only: int64
     use ufo_rttovonedvarcheck_ob_mod
 
     implicit none
@@ -182,7 +183,7 @@ contains
     type(fckit_mpi_comm)                    :: f_comm
 
     ! Local Variables
-    character(*), parameter                 :: routine_name = 'ufo_radiancerttov_simobs'
+    character(*), parameter                 :: routine_name = "ufo_radiancerttov_simobs"
     character(len=800)                      :: message
     type(rttov_chanprof), allocatable       :: chanprof(:)
     type(ufo_geoval), pointer               :: geoval_temp
@@ -210,7 +211,7 @@ contains
     include 'rttov_k.interface'
     include 'rttov_scatt_ad.interface'
 
-    message = trim(routine_name) // ': Simulating observations'
+    message = trim(routine_name) // ": Simulating observations"
     call oops_log%trace(message)
 
     !Initialisations
@@ -242,14 +243,14 @@ contains
     if (nprofiles == 0) return
 
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
-    write(message,'(2A, I0, A, I0, A)') &
-      trim(routine_name), ': Allocating ', nprofiles, ' profiles with ', nlevels, ' levels'
+    write(message,"(2A, I0, A, I0, A)") &
+      trim(routine_name), ": Allocating ", nprofiles, " profiles with ", nlevels, " levels"
     call oops_log%trace(message)
 
     call self % RTprof % alloc_profiles(errorstatus, self % conf, nprofiles, nlevels, init=.true., asw=1)
 
     ! Assign the atmospheric and surface data from the GeoVaLs
-    message = trim(routine_name) // ': Creating RTTOV profiles from geovals'
+    message = trim(routine_name) // ": Creating RTTOV profiles from geovals"
     call oops_log%trace(message)
     if(present(ob_info)) then
       call self % RTprof % setup_rtprof(geovals,obss,self % conf,ob_info=ob_info)
@@ -259,8 +260,9 @@ contains
     do_profile_diagnostics = .false.
     if (any(self % RTProf % print_profile(:))) do_profile_diagnostics = .true.
 
-    if (self % conf % read_Cmatrix) &
+    if (self % conf % read_Cmatrix) then
       call self % reconradop % allocate(self % RTProf)
+    end if
 
     ! Read emissivity from obs space if its requested
     if (self % conf % surface_emissivity_group /= "") then
@@ -281,14 +283,14 @@ contains
     nchan_sim = nprof_sim * size(self%channels)
 
     ! Allocate structures for RTTOV direct code (and, if needed, K code and any structures for RTTOV-SCATT)
-    write(message,'(2A,I0,A,I0,A)')                                                   &
-      trim(routine_name), ': Allocating resources for RTTOV direct code: ', nprof_sim, ' and ', nchan_sim, ' channels'
+    write(message,"(2A,I0,A,I0,A)")                                                   &
+      trim(routine_name), ": Allocating resources for RTTOV direct code: ", nprof_sim, " and ", nchan_sim, " channels"
     call oops_log%trace(message)
     call self % RTprof % alloc_direct(errorstatus, self % conf, nprof_sim, nchan_sim, nlevels, init=.true., asw=1)
 
     if (jacobian_needed) then
-      write(message,'(2A,I0,A,I0,A)')                                                 &
-        trim(routine_name), ': Allocating resources for RTTOV K code: ', nprof_sim, ' and ', nchan_sim, ' channels'
+      write(message,"(2A,I0,A,I0,A)")                                                 &
+        trim(routine_name), ": Allocating resources for RTTOV K code: ", nprof_sim, " and ", nchan_sim, " channels"
       call oops_log%trace(message)
 
       call self % RTprof % alloc_profiles_k(errorstatus, self % conf, nchan_sim, nlevels, init=.true., asw=1)
@@ -324,7 +326,7 @@ contains
             ! increment profile and channel counters and skip this one
             nchan_total = nchan_total + nchan_sim
             prof_start = prof_start + nprof_sim
-            cycle
+            cycle RTTOV_loop
           end if
         end if
       end if
@@ -465,8 +467,8 @@ contains
               self % conf % mw_scatt % coef,                                             &! in    scatt coefficients structure
               self % RTProf % calcemis(1:nchan_sim),                                     &! in    flag for internal emissivity calcs
               self % RTProf % emissivity(1:nchan_sim),                                   &! inout input/output emissivities per channel
-              self % RTProf % profiles_k(1:nchan_sim),                                   &! inout 
-              self % RTProf % mw_scatt % profiles_k(1:nchan_sim),                        &! inout 
+              self % RTProf % profiles_k(1:nchan_sim),                                   &! inout
+              self % RTProf % mw_scatt % profiles_k(1:nchan_sim),                        &! inout
               self % RTProf % emissivity_k(1:nchan_sim),                                 &! inout input/output emissivity jacs per channel
               self % RTProf % radiance,                                                  &! inout computed radiances
               self % RTProf % radiance_k)                                                 ! inout computed radiance jacobians
@@ -486,10 +488,10 @@ contains
               emissivity  = self % RTProf % emissivity(1:nchan_sim),          &! inout input/output emissivities per channel
               emissivity_k = self % RTProf % emissivity_k(1:nchan_sim))        ! inout input/output emissivities per channel
           end if
-          
+
           if ( errorstatus /= errorstatus_success ) then
-            write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_k: error ', errorstatus, &
-              ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
+            write(message,"(2A, I6, A, I6, A, I6)") trim(routine_name), "after rttov_k: error ", errorstatus, &
+              " skipping profiles ", prof_start, " -- ", prof_start + nprof_sim - 1
             call oops_log%trace(message)
           end if
         else ! direct
@@ -507,8 +509,8 @@ contains
               self % RTProf % calcemis(1:nchan_sim),                                     &! in    flag for internal emissivity calcs
               self % RTProf % emissivity(1:nchan_sim),                                   &! inout input/output emissivities per channel
               self % RTProf % radiance,                                                  &! inout computed radiances
-              emis_retrieval_terms = self % RTprof % mw_scatt % emis_retrieval)           !             
-          else        
+              emis_retrieval_terms = self % RTprof % mw_scatt % emis_retrieval)           !
+          else
             call rttov_direct(                                                &
               errorstatus,                                                    &! out   error flag
               chanprof(1:nchan_sim),                                          &! in    channel and profile index structure
@@ -518,12 +520,12 @@ contains
               self % RTProf % transmission,                                   &! inout computed transmittances
               self % RTProf % radiance,                                       &! inout computed radiances
               calcemis    = self % RTProf % calcemis(1:nchan_sim),            &! in    flag for internal emissivity calcs
-              emissivity  = self % RTProf % emissivity(1:nchan_sim))!,        &! inout input/output emissivities per channel          
+              emissivity  = self % RTProf % emissivity(1:nchan_sim))!,        &! inout input/output emissivities per channel
           end if
-          
+
           if ( errorstatus /= errorstatus_success ) then
-            write(message,'(2A, I6, A, I6, A, I6)') trim(routine_name), 'after rttov_direct: error ', errorstatus, &
-                                         ' skipping profiles ', prof_start, ' -- ', prof_start + nprof_sim - 1
+            write(message,"(2A, I6, A, I6, A, I6)") trim(routine_name), "after rttov_direct: error ", errorstatus, &
+                                         " skipping profiles ", prof_start, " -- ", prof_start + nprof_sim - 1
             call oops_log%trace(message)
             if (present(ob_info)) ob_info % rterror = .true.
           end if
@@ -550,7 +552,7 @@ contains
                   end if
                 end if
               end if
-            enddo
+            end do
           end if
 
           ! Write out emissivity out and hofx
@@ -561,7 +563,7 @@ contains
                 write(*,*) "profile ", iprof
                 write(*,*) "emissivity out = ",self % RTprof % emissivity(ichan:ichan+self%RTprof%nchan_inst-1) % emis_out
                 write(*,*) "hofx out = ",hofx(1:size(self%channels),iprof)
-                
+
                 if (self % conf % do_mw_scatt) then
                   write(*,*) "emis_retrieval cfrac = ",self % RTprof % mw_scatt % emis_retrieval % cfrac(ichan:ichan+self%RTprof%nchan_inst-1)
                   write(*,*) "emis_retrieval tau_clr = ",self % RTprof % mw_scatt % emis_retrieval % tau_clr(ichan:ichan+self%RTprof%nchan_inst-1)
@@ -574,8 +576,9 @@ contains
           end if
 
           ! Put simulated diagnostics into hofxdiags
-          if(hofxdiags % nvar > 0) &
+          if(hofxdiags % nvar > 0) then
             call hofxdiags_methods % populate(self % RTProf, chanprof, self % conf, prof_start, hofxdiags)
+          end if
         end if
       end if ! nchan_sim > 0
 
@@ -586,10 +589,10 @@ contains
       ! deallocate local chanprof so it can be re-allocated with a different number of channels if reqd.
       deallocate(chanprof)
       if (jacobian_needed) call self % RTprof % zero_k(self % conf, reset_profiles_k=.true.)
-      
+
     end do RTTOV_loop
 
-    message = 'Deallocating resource for RTTOV...'
+    message = "Deallocating resource for RTTOV..."
     call oops_log%trace(message)
 
     if (allocated(sfc_emiss)) deallocate(sfc_emiss)
@@ -600,22 +603,22 @@ contains
     if(jacobian_needed) then
       call self % RTprof % alloc_k(errorstatus, self % conf, -1, -1, -1, asw=0)
       call self % RTprof % alloc_profiles_k(errorstatus, self % conf, size(self % RTprof % profiles_k), -1, asw=0)
-      ! deallocation of profiles_k isn't done by default in alloc_profs_k because it can contain the trajectory 
+      ! deallocation of profiles_k isn't done by default in alloc_profs_k because it can contain the trajectory
       ! which is currently used for the TL/AD but the 1dvar doesn't use it so it can be safely done here
       deallocate (self % RTprof % profiles_k)
       if (self % conf % do_mw_scatt) deallocate(self % RTProf % mw_scatt % profiles_k)
-    endif
+    end if
     call self % RTprof % alloc_direct(errorstatus, self % conf, -1, -1, -1, asw=0)
     call self % RTprof % alloc_profiles(errorstatus, self % conf, size(self % RTprof % profiles), -1, asw=0)
 
     deallocate(self % RTprof % chanprof)
     deallocate(self % RTprof % sensor_index_array)
-    
+
     if (errorstatus /= errorstatus_success) then
-      message = 'after rttov_alloc_direct (deallocation)'
+      message = "after rttov_alloc_direct (deallocation)"
       call abor1_ftn(message)
     else
-      message = 'Done. Returning'
+      message = "Done. Returning"
       call oops_log%trace(message)
     end if
     call f_comm%final()

@@ -9,7 +9,7 @@
 
 module ufo_gnssro_bendmetoffice_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -73,24 +73,24 @@ self % noSuperCheck = noSuperCheck
 self % dryRefractivityConstant = dryRefractivityConstant
 self % wetRefractivityConstant = wetRefractivityConstant
 
-write(message, *) myname_, ' Setting up Met Office GNSS-RO forward operator with'
+write(message, *) myname_, " Setting up Met Office GNSS-RO forward operator with"
 call oops_log%info(message)
-write(message, *) 'vert_interp_ops =', self % vert_interp_ops
+write(message, *) "vert_interp_ops =", self % vert_interp_ops
 call oops_log%info(message)
-write(message, *) 'pseudo_ops =', self % pseudo_ops
+write(message, *) "pseudo_ops =", self % pseudo_ops
 call oops_log%info(message)
-write(message, *) 'min_temp_grad =', self % min_temp_grad
+write(message, *) "min_temp_grad =", self % min_temp_grad
 call oops_log%info(message)
-write(message, *) 'no super check =', self % noSuperCheck
+write(message, *) "no super check =", self % noSuperCheck
 call oops_log%info(message)
-write(message, *) 'dryRefractivityConstant =', self % dryRefractivityConstant
+write(message, *) "dryRefractivityConstant =", self % dryRefractivityConstant
 call oops_log%info(message)
-write(message, *) 'wetRefractivityConstant =', self % wetRefractivityConstant
+write(message, *) "wetRefractivityConstant =", self % wetRefractivityConstant
 call oops_log%info(message)
-write(message, '(A)') 'chanList = '
+write(message, "(A)") "chanList = "
 call oops_log % debug(message)
 do i = 1, SIZE(chanList), 100
-  write(message, '(100I5)') chanList(i:min(i+99, size(chanList)))
+  write(message, "(100I5)") chanList(i:min(i+99, size(chanList)))
   call oops_log % debug(message)
 end do
 
@@ -157,9 +157,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
 
 ! check if nlocs is consistent in geovals and what was passed in
   if (geovals%nlocs /= nlocs) then
-      write(err_msg,*) myname_, ' error: nlocs inconsistent between geovals and what was passed in!'
+      write(err_msg,*) myname_, " error: nlocs inconsistent between geovals and what was passed in!"
       call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
@@ -167,9 +167,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
 
-  write(message, '(A,10I6)') 'Q: ', q%nval, q%nprofiles, shape(q%vals)
+  write(message, "(A,10I6)") "Q: ", q%nval, q%nprofiles, shape(q%vals)
   call oops_log%info(message)
-  write(message, '(A,10I6)') 'Pressure: ', prs%nval, prs%nprofiles, shape(prs%vals)
+  write(message, "(A,10I6)") "Pressure: ", prs%nval, prs%nprofiles, shape(prs%vals)
   call oops_log%info(message)
 
   nlocs_check = obsspace_get_nlocs(obss)
@@ -180,12 +180,12 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
   ! default to zero, rather than one.  So reset this:
   if (nlevels_check == 0) nlevels_check = 1
   if (nlocs /= nlocs_check .OR. nlevels_check /= nlevels) then
-    write(err_msg,'(2A,4I8)') myname_, ' error: nlocs or nlevels doesnt match', nlocs, nlocs_check, nlevels, nlevels_check
+    write(err_msg,"(2A,4I8)") myname_, " error: nlocs or nlevels doesnt match", nlocs, nlocs_check, nlevels, nlevels_check
     call fckit_exception%throw(err_msg)
   end if
 
   if (nlevels > 1 .AND. nlevels /= size(self % chanList)) then
-    write(err_msg,'(2A,4I8)') myname_, ' error: channel list must match nlevels', nlevels, size(self%chanList)
+    write(err_msg,"(2A,4I8)") myname_, " error: channel list must match nlevels", nlevels, size(self%chanList)
     call fckit_exception%throw(err_msg)
   end if
 
@@ -347,27 +347,27 @@ LOGICAL, INTENT(IN)            :: noSuperCheck            ! Do we skip a super-r
 REAL(kind_real), INTENT(OUT)   :: tobs(1:nobs)            ! Virtual temperature on model levels
 !
 ! Things that may need to be output, as they are used by the TL/AD calculation
-! 
+!
 INTEGER                      :: nRefLevels          ! Number of levels in refractivity calculation
 REAL(kind_real), ALLOCATABLE :: nr(:)               ! Model calculation of impact parameters
 REAL(kind_real), ALLOCATABLE :: temperature(:)      ! Calculated virtual temperature on pseudo levels
-! 
+!
 ! Local parameters
-! 
+!
 integer, parameter           :: max_string = 800  ! Length of strings
 character(len=*), parameter  :: myname_ = "Ops_GPSRO_ForwardModel"
 !
 ! Local variables
-! 
+!
 character(max_string)        :: err_msg           ! Error message to be output
 integer                      :: ilevel            ! Loop variable, model level number
 integer                      :: iobs              ! Loop variable, observation number
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
-    write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
+    write(err_msg,*) myname_ // ":" // " Data must be on a staggered grid nlevp, nlevq = ", nlevp, nlevq
     call oops_log % warning(err_msg)
-    write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
+    write(err_msg,*) myname_ // ":" // " error: number of levels inconsistent!"
     call abor1_ftn(err_msg)
 END IF
 

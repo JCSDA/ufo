@@ -22,7 +22,7 @@ contains
 ! All these subroutines are expected to cause aborts.
 
 subroutine test_ufo_geovals_setup_with_mismatched_nvars_c() &
-  bind(c,name='test_ufo_geovals_setup_with_mismatched_nvars_f90')
+  bind(c,name="test_ufo_geovals_setup_with_mismatched_nvars_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -58,7 +58,7 @@ end subroutine test_ufo_geovals_setup_with_mismatched_nvars_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_with_mismatched_nreduced_vars_c() &
-  bind(c,name='test_ufo_geovals_setup_with_mismatched_nreduced_vars_f90')
+  bind(c,name="test_ufo_geovals_setup_with_mismatched_nreduced_vars_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -97,7 +97,7 @@ end subroutine test_ufo_geovals_setup_with_mismatched_nreduced_vars_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_with_sampling_method_set_to_0_c() &
-  bind(c,name='test_ufo_geovals_setup_with_sampling_method_set_to_0_f90')
+  bind(c,name="test_ufo_geovals_setup_with_sampling_method_set_to_0_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -135,7 +135,7 @@ end subroutine test_ufo_geovals_setup_with_sampling_method_set_to_0_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_with_sampling_method_set_to_3_c() &
-  bind(c,name='test_ufo_geovals_setup_with_sampling_method_set_to_3_f90')
+  bind(c,name="test_ufo_geovals_setup_with_sampling_method_set_to_3_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -173,7 +173,7 @@ end subroutine test_ufo_geovals_setup_with_sampling_method_set_to_3_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_with_method_mislabelled_as_trivial_c() &
-  bind(c,name='test_ufo_geovals_setup_with_method_mislabelled_as_trivial_f90')
+  bind(c,name="test_ufo_geovals_setup_with_method_mislabelled_as_trivial_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -212,7 +212,7 @@ end subroutine test_ufo_geovals_setup_with_method_mislabelled_as_trivial_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_partial_setup_with_mismatched_nvars_c() &
-  bind(c,name='test_ufo_geovals_partial_setup_with_mismatched_nvars_f90')
+  bind(c,name="test_ufo_geovals_partial_setup_with_mismatched_nvars_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -241,7 +241,7 @@ end subroutine test_ufo_geovals_partial_setup_with_mismatched_nvars_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_partial_setup_with_sampling_method_set_to_0_c() &
-  bind(c,name='test_ufo_geovals_partial_setup_with_sampling_method_set_to_0_f90')
+  bind(c,name="test_ufo_geovals_partial_setup_with_sampling_method_set_to_0_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -273,7 +273,7 @@ end subroutine test_ufo_geovals_partial_setup_with_sampling_method_set_to_0_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_partial_setup_with_sampling_method_set_to_3_c() &
-  bind(c,name='test_ufo_geovals_partial_setup_with_sampling_method_set_to_3_f90')
+  bind(c,name="test_ufo_geovals_partial_setup_with_sampling_method_set_to_3_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -305,7 +305,7 @@ end subroutine test_ufo_geovals_partial_setup_with_sampling_method_set_to_3_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_sampling_method_0_c() &
-  bind(c,name='test_ufo_geovals_setup_sampling_method_0_f90')
+  bind(c,name="test_ufo_geovals_setup_sampling_method_0_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -339,7 +339,7 @@ call ufo_geovals_partial_setup(geovals, nlocs, vars, nvars, &
 do i = 1, nlocs
   paths_by_loc(i)%begin = i
   paths_by_loc(i)%end = i + 1
-enddo
+end do
 call ufo_geovals_setup_sampling_method(geovals, sampling_method, npaths, nlocs, paths_by_loc)
 
 end subroutine test_ufo_geovals_setup_sampling_method_0_c
@@ -347,7 +347,7 @@ end subroutine test_ufo_geovals_setup_sampling_method_0_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_sampling_method_3_c() &
-  bind(c,name='test_ufo_geovals_setup_sampling_method_3_f90')
+  bind(c,name="test_ufo_geovals_setup_sampling_method_3_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -381,7 +381,7 @@ call ufo_geovals_partial_setup(geovals, nlocs, vars, nvars, &
 do i = 1, nlocs
   paths_by_loc(i)%begin = i
   paths_by_loc(i)%end = i + 1
-enddo
+end do
 call ufo_geovals_setup_sampling_method(geovals, sampling_method, npaths, nlocs, paths_by_loc)
 
 end subroutine test_ufo_geovals_setup_sampling_method_3_c
@@ -389,7 +389,7 @@ end subroutine test_ufo_geovals_setup_sampling_method_3_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_c() &
-  bind(c,name='test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_f90')
+  bind(c,name="test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -425,7 +425,7 @@ call ufo_geovals_partial_setup(geovals, nlocs, vars, nvars, &
 do i = 1, nlocs
   paths_by_loc(i)%begin = nlocs - (i - 1)
   paths_by_loc(i)%end = nlocs + (i - 1) + 1
-enddo
+end do
 call ufo_geovals_setup_sampling_method(geovals, sampling_method, npaths, nlocs, paths_by_loc)
 
 end subroutine test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_c
@@ -433,7 +433,7 @@ end subroutine test_ufo_geovals_setup_sampling_method_mislabelled_as_trivial_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs_c() &
-  bind(c,name='test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs_f90')
+  bind(c,name="test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -468,7 +468,7 @@ call ufo_geovals_partial_setup(geovals, nlocs, vars, nvars, &
 do i = 1, nlocs
   paths_by_loc(i)%begin = i
   paths_by_loc(i)%end = i + 1
-enddo
+end do
 call ufo_geovals_setup_sampling_method(geovals, sampling_method, npaths, &
                                        mismatched_nlocs, paths_by_loc)
 
@@ -477,7 +477,7 @@ end subroutine test_ufo_geovals_setup_sampling_method_with_mismatched_nlocs_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_trivial_sampling_method_0_c() &
-  bind(c,name='test_ufo_geovals_setup_trivial_sampling_method_0_f90')
+  bind(c,name="test_ufo_geovals_setup_trivial_sampling_method_0_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -512,7 +512,7 @@ end subroutine test_ufo_geovals_setup_trivial_sampling_method_0_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_setup_trivial_sampling_method_3_c() &
-  bind(c,name='test_ufo_geovals_setup_trivial_sampling_method_3_f90')
+  bind(c,name="test_ufo_geovals_setup_trivial_sampling_method_3_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -547,7 +547,7 @@ end subroutine test_ufo_geovals_setup_trivial_sampling_method_3_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_set_invalid_default_format_c() &
-  bind(c,name='test_ufo_geovals_set_invalid_default_format_f90')
+  bind(c,name="test_ufo_geovals_set_invalid_default_format_f90")
 implicit none
 
 type(ufo_geovals) :: geovals
@@ -560,7 +560,7 @@ end subroutine test_ufo_geovals_set_invalid_default_format_c
 !-------------------------------------------------------------------------------
 
 subroutine test_ufo_geovals_get_nonexistent_var_c() &
-  bind(c,name='test_ufo_geovals_get_nonexistent_var_f90')
+  bind(c,name="test_ufo_geovals_get_nonexistent_var_f90")
 implicit none
 
 type(ufo_geovals) :: geovals

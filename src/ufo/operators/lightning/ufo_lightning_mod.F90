@@ -7,10 +7,10 @@
 
 module ufo_lightning_mod
 
- use kinds
- use ufo_vars_mod
- use obs_variables_mod
- use oops_variables_mod
+ use kinds, only: kind_real
+ use ufo_vars_mod, only: var_delp, var_qg
+ use obs_variables_mod, only: obs_variables
+ use oops_variables_mod, only: oops_variables
  use ufo_constants_mod, only: one, zero, half, grav     ! Gravitational field strength
  use ufo_basis_mod,     only: ufo_basis
  implicit none
@@ -21,7 +21,6 @@ module ufo_lightning_mod
    private
    type(obs_variables), public  :: obsvars
    type(oops_variables), public :: geovars
-   !logical, public     ::  l_fed_nonlinear
    integer, public     ::  n_horiz
    !real(kind_real),allocatable,public  :: obsLon2d(:), obsLat2d(:)
 
@@ -36,8 +35,8 @@ contains
 
 subroutine ufo_lightning_simobs(self, geovals, obss, nvars, nlocs, hofx)
 use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
-use iso_c_binding
-use obsspace_mod
+use, intrinsic :: iso_c_binding, only: c_double, c_ptr
+use obsspace_mod, only: obsspace_get_db
 
 implicit none
 class(ufo_lightning), intent(in)    :: self
@@ -62,15 +61,14 @@ type(c_ptr), value, intent(in)    :: obss
   character(max_string) :: err_msg         ! Error message for output
   character(max_string) :: message         ! General message for output
   character(len=*), parameter :: myname_ = "ufo_lightning_simobs"
-  !logical  ::  l_fed_nonlinear 
-  integer  ::   n_horiz 
+  integer  ::   n_horiz
 
   ! check if nlocs is consistent in geovals & hofx
   if (geovals%geovals(1)%nprofiles /= size(hofx,2)*self%n_horiz) then
-      write(err_msg,*) myname_, ' error: nlocs ',geovals%geovals(1)%nprofiles, &
-              ' inconsistent with HofX size * n_horiz',size(hofx,2)*self%n_horiz
+      write(err_msg,*) myname_, " error: nlocs ",geovals%geovals(1)%nprofiles, &
+              " inconsistent with HofX size * n_horiz",size(hofx,2)*self%n_horiz
       call abor1_ftn(err_msg)
-  endif
+  end if
 
   ! check if some variable is in geovals and get it (var_tv is defined in ufo_vars_mod)
   call ufo_geovals_get_var(geovals, var_delp, delp)
@@ -81,7 +79,6 @@ type(c_ptr), value, intent(in)    :: obss
 !allocate(obss_metadata(nlocs))
 !call obsspace_get_db(obss, "MetaData", "some_metadata", obss_metadata)
 
-  !l_fed_nonlinear = self%l_fed_nonlinear
   n_horiz = self%n_horiz
 
 !
@@ -103,7 +100,7 @@ type(c_ptr), value, intent(in)    :: obss
     inc = -1
     ibot = qg%nval
     isfc = qg%nval
-  endif
+  end if
 
   !
   var_loop: do ivar = 1, nvars
@@ -121,7 +118,6 @@ type(c_ptr), value, intent(in)    :: obss
                               qg %vals(:,(iobs-1)*n_horiz+1:iobs*n_horiz),     &  ! Mean layer graupel mass  (kg/kg)
                               hofx(ivar,iobs),                                 &  ! Simulated FED(flash min^-1 pixel^-1)
                               n_horiz)!
-                              !l_fed_nonlinear,n_horiz)!
   end do obs_loop
   end do var_loop
   !write(err_msg,*) "TRACE: ufo_lightning_simobs: completed"
@@ -140,7 +136,6 @@ SUBROUTINE Lightning_ForwardModel(nlevdP, &
                                 delp,     &
                                 qg,       &
                                 Model_Lightning, &
-                                !l_fed_nonlinear, &
                                 n_horiz )
 !-------------------------------------------------------------------------------
 !> Compute Total column graupel mass amount from geovals graupel mixing ratio
@@ -168,7 +163,6 @@ REAL(kind_real), parameter     :: glmcoeff = 2.088e-8
 !REAL(kind_real)                :: ag
 DOUBLE PRECISION               :: ag, answer
 REAL(kind_real)                :: coeff3rdorder(4)
-!LOGICAL, INTENT(IN)            :: l_fed_nonlinear
 !
 ! Local parameters
 !
@@ -182,9 +176,9 @@ character(max_string) :: message           ! General message for output
 REAL(kind_real)       :: PDiff             ! Pressure diff across layer
 REAL(kind_real)       :: GK                ! 1/gravity
 INTEGER               :: ilev              ! level counter
-INTEGER               :: i_horiz             
+INTEGER               :: i_horiz
 
-gridarea = 15000*15000/n_horiz  !the representaive area for each partner point 
+gridarea = 15000*15000/n_horiz  !the representaive area for each partner point
 !-------------------------------------------------------------------------------
 ! The operator is calibrated using GSL's RFFS 1-3 hour forecasts, provided hourly from 00 to 23 Z,
 ! specifically for the period June 11 to June 15, 2023.
@@ -204,7 +198,7 @@ Model_Lightning = zero
 ag = zero
 !
 ! If there is no graupel in any column, just return rapidly.
-if (all(qg .eq. zero)) return
+if (all(qg == zero)) return
 !-------------------------------------------------------------------------------
 ! Calculate model equivalent of total column graupel mass.
 !-------------------------------------------------------------------------------
@@ -218,9 +212,9 @@ DO ilev = ilev1, ilev2, inc
    !Horizontal integration of the graupel mass profile over a 15x15 km² area,
    !effectively reducing the extended geovals back to the observation space (i.e, from n_horiz*nlocs to nlocs).
    DO i_horiz = 1, n_horiz !Horizontal integration over n_horiz grids
-     PDiff = -1.0* delp(ilev,i_horiz) 
+     PDiff = -1.0* delp(ilev,i_horiz)
      ag = ag - GK * qg(ilev,i_horiz) * PDiff * gridarea ! Accumulate layer graupel mass
-   ENDDO
+   END DO
 END DO
 ag = ag * 1.0E-9  !The coefficients are fitted based on the relscaled data to avoid excessively small values
 answer = coeff3rdorder(1)*ag**3  + coeff3rdorder(2)*ag**2+ &

@@ -1,7 +1,7 @@
 ! (C) Copyright 2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to perform linear interpolation
 
@@ -16,7 +16,7 @@ public
 
 contains
 
-subroutine get_integral_limits(airpressure, botpressure, toppressure, modelpressure, nlevs, nlocs, nsig) 
+subroutine get_integral_limits(airpressure, botpressure, toppressure, modelpressure, nlevs, nlocs, nsig)
 implicit none
 integer,intent(in)  :: nlevs, nlocs, nsig
 real(kind_real) , dimension(nlocs),intent(in) ::  airpressure
@@ -28,7 +28,7 @@ if (nlevs == 1) then ! total column ozone
   do iobs = 1, nlocs
     toppressure(iobs) = modelpressure(nsig+1,iobs)
     botpressure(iobs) = modelpressure(1,iobs)
-  enddo
+  end do
 else
   !Obs pressures read in as Pa
   nprofs = nlocs/nlevs
@@ -41,23 +41,23 @@ else
       if (kk == nlevs) then
         k1 = nlevs - 1
         k2 = 1
-      endif
+      end if
       iobs = iobs+1
       toppressure(iobs) = airpressure(k2)
       botpressure(iobs) = airpressure(k1)
       if( kk == 1 ) then
-        toppressure(iobs) = modelpressure(nsig+1, iobs) 
+        toppressure(iobs) = modelpressure(nsig+1, iobs)
         botpressure(iobs) = airpressure(k1)
-        if(botpressure(iobs) < modelpressure(nsig+1, iobs)) then 
+        if(botpressure(iobs) < modelpressure(nsig+1, iobs)) then
           botpressure(iobs) = modelpressure(nsig+1, iobs)
-        endif
+        end if
       else if( kk == nlevs) then
-        toppressure(iobs) = modelpressure(nsig+1, iobs)  
-        botpressure(iobs) = modelpressure(1, iobs) 
-      endif
-    enddo
-  enddo
-endif
+        toppressure(iobs) = modelpressure(nsig+1, iobs)
+        botpressure(iobs) = modelpressure(1, iobs)
+      end if
+    end do
+  end do
+end if
 
 end subroutine get_integral_limits
 
@@ -68,16 +68,18 @@ real function pindex(nx, press, obspressure)
 
 implicit none
 
-integer :: ix, k, nx
-real(kind_real) :: ozp, obspressure, psi
-real(kind_real), dimension(nx) :: press
+integer, intent(in) :: nx
+real(kind_real), intent(in) :: press(nx)
+real(kind_real), intent(in) :: obspressure
+integer :: ix, k
+real(kind_real) :: ozp, psi
 
 psi = 1.0_kind_real/press(1)
 if(obspressure*psi < 1.) then
   ozp = obspressure
 else
   ozp = press(1)
-endif
+end if
 if( ozp >= press(1)) then
   ix = 1
 else
@@ -86,11 +88,11 @@ else
     if(ozp >= press(k)) then
       ix = k
       exit
-    endif
-  enddo
+    end if
+  end do
   if(ix == 0) ix = nx
   if(ix > 1)ix = ix -1
-endif
+end if
 ozp = float(ix) + &
     (ozp-press(ix))/(press(ix+1)-press(ix))
 pindex = ozp
@@ -122,7 +124,7 @@ do kk=iz1,iz2,-1
   if (kk == iz2) delz = delz - pob + iz2
   delp4 = modelpressure(kk)-modelpressure(kk+1)  ! [Pa]
   layer_oz = layer_oz + modelozone(kk)*coefficient*(delz*delp4)
-enddo
+end do
 
 end subroutine apply_layer_integral
 
@@ -152,7 +154,7 @@ do kk=iz1,iz2,-1
   if (kk == iz2) delz = delz - pob + iz2
   delp4 = modelpressure(kk)-modelpressure(kk+1)  ! [Pa]
   modelozone(kk) = modelozone(kk) + layer_oz*coefficient*(delz*delp4)
-enddo
+end do
 
 end subroutine undo_layer_integral
 
@@ -161,17 +163,17 @@ subroutine vert_interp_lay_apply_tl(modelozoned, layer_ozd, coefficient,  modelp
 real(kind_real), intent(in)  ::modelozoned(:)
 real(kind_real),intent(in):: botpressure, toppressure
 integer,intent(in) :: nsig
-real(kind_real), intent(in), dimension(nsig+1) :: modelpressure 
+real(kind_real), intent(in), dimension(nsig+1) :: modelpressure
 real(kind_real), intent(out) :: layer_ozd
 real,intent(in) :: coefficient
 call apply_layer_integral(coefficient, modelozoned, modelpressure, botpressure, toppressure, nsig, layer_ozd)
-end subroutine vert_interp_lay_apply_tl 
+end subroutine vert_interp_lay_apply_tl
 
 subroutine vert_interp_lay_apply_ad(modelozoneb, layer_ozb, coefficient,  modelpressure, botpressure, toppressure, nsig)
 real(kind_real), intent(out)  ::modelozoneb(:)
 real(kind_real),intent(in):: botpressure, toppressure
 integer,intent(in) :: nsig
-real(kind_real), intent(in), dimension(nsig+1) :: modelpressure 
+real(kind_real), intent(in), dimension(nsig+1) :: modelpressure
 real(kind_real), intent(in) :: layer_ozb
 real,intent(in) :: coefficient
 call undo_layer_integral(coefficient, modelozoneb, modelpressure, botpressure, toppressure, nsig, layer_ozb)

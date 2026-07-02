@@ -39,7 +39,7 @@ type :: singleob_type
   type (element_type)              :: ro_rad_curv
   type (element_type)              :: ro_geoid_und
   integer, allocatable             :: qc_flags(:)
-end type
+end type singleob_type
 
 ! Structure for the background (model) information
 type :: singlebg_type
@@ -47,7 +47,7 @@ type :: singlebg_type
   real(kind_real), allocatable :: zb(:)
   real(kind_real), allocatable :: p(:)
   real(kind_real), allocatable :: q(:)
-end type
+end type singlebg_type
 
 contains
 

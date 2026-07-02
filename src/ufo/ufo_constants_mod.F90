@@ -2,9 +2,11 @@
 module ufo_constants_mod
 !==========================================================================
 
-use kinds
+use kinds, only: kind_real
 
 implicit none
+private
+
 real(kind_real), parameter, public :: grav    = 9.80665e+0_kind_real  ! Gravity (m/s^2)
 real(kind_real), parameter, public :: t0c     = 2.7315e+2_kind_real  ! temperature at zero celsius     (K)
 real(kind_real), parameter, public :: rd     = 2.8705e2_kind_real  ! specific gas constant for dry air (J K^-1 kg^-1)
@@ -62,11 +64,11 @@ real(kind_real), parameter, public :: grav_polar = 9.8321849378_kind_real     ! 
 real(kind_real), parameter, public :: grav_equator = 9.7803253359_kind_real   ! [m/s2] equatorial gravity
 real(kind_real), parameter, public :: earth_omega = 7.292115e-5_kind_real     ! [rad/s]
 real(kind_real), parameter, public :: grav_constant = 3.986004418e14_kind_real  ! [m3/s2]
-real(kind_real), parameter ::  flattening  = (semi_major_axis-semi_minor_axis)/semi_major_axis
-real(kind_real), parameter ::  somigliana  = (semi_minor_axis/semi_major_axis) * (grav_polar/grav_equator) - one
-real(kind_real), parameter ::  grav_ratio  = (earth_omega*earth_omega * &
+real(kind_real), parameter, public ::  flattening  = (semi_major_axis-semi_minor_axis)/semi_major_axis
+real(kind_real), parameter, public ::  somigliana  = (semi_minor_axis/semi_major_axis) * (grav_polar/grav_equator) - one
+real(kind_real), parameter, public ::  grav_ratio  = (earth_omega*earth_omega * &
                                               semi_major_axis*semi_major_axis * semi_minor_axis) / grav_constant
-real(kind_real), parameter ::  eccentricity = sqrt(semi_major_axis**2 - semi_minor_axis**2)/semi_major_axis
+real(kind_real), parameter, public ::  eccentricity = sqrt(semi_major_axis**2 - semi_minor_axis**2)/semi_major_axis
 
 real(kind_real), parameter, public :: flatt = 0.003352811_kind_real       ! flattening of oblate ellipsoid
 real(kind_real), parameter, public :: m_ratio= 0.003449787_kind_real      ! gravity ratio
@@ -85,7 +87,7 @@ real(kind_real), parameter, public :: Pa_to_hPa = 0.01_kind_real
 real(kind_real), parameter, public :: min_q = 3.0e-6_kind_real
 real(kind_real), parameter, public :: min_clw = zero
 real(kind_real), parameter, public :: min_ciw = zero
-real(kind_real), parameter, public :: RTTOV_ToA = 0.0001_kind_real ! hPa 
+real(kind_real), parameter, public :: RTTOV_ToA = 0.0001_kind_real ! hPa
 
 ! constants used in Ops_QSat and Ops_QSatWat
 real(kind_real), parameter, public :: ZeroDegC = 273.15_kind_real

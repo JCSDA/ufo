@@ -7,9 +7,9 @@
 !> Fortran module for ground based GNSS Met Office's tangent linear and adjoint
 
 module ufo_groundgnss_metoffice_tlad_mod
-use iso_c_binding
 
-use kinds
+use, intrinsic :: iso_c_binding, only: c_bool, c_double, c_float, c_ptr
+use kinds, only: kind_real
 use ufo_vars_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -23,11 +23,13 @@ use ufo_constants_mod, only: &
     rd,                      &    ! Gas constant for dry air
     grav                          ! Gravitational field strength
 
+implicit none
+private
 
 integer, parameter             :: max_string=800
 
 !> Fortran derived type for groundgnss trajectory
-type, extends(ufo_basis_tlad)  ::  ufo_groundgnss_metoffice_tlad
+type, extends(ufo_basis_tlad), public ::  ufo_groundgnss_metoffice_tlad
   private
 
   integer                      :: nlevp, nlevq, nlocs, iflip
@@ -162,7 +164,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
                                            self % K(:, 1:nstate))            ! K-matrix (Jacobian of the observation with respect to the inputs
 
     end do obs_loop
-  endif
+  end if
 ! Note that this routine has been run.
   self%ltraj = .true.
 
@@ -201,13 +203,13 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     call abor1_ftn(trim(myname_) // ' trajectory wasnt set!')
-  endif
+     call abor1_ftn(trim(myname_) // " trajectory wasnt set!")
+  end if
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     call abor1_ftn(trim(myname_) // ' error: nlocs inconsistent!')
-  endif
+     call abor1_ftn(trim(myname_) // " error: nlocs inconsistent!")
+  end if
 
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
@@ -222,7 +224,7 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
 
 ! Loop through the obs, calculating the increment to the observation
   if (nlocs > 0) then
-  
+
     obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
       pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
@@ -233,7 +235,7 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
       hofx(iobs) = SUM(self % K(iobs,:) * x_d)
 
     end do obs_loop
-  endif
+  end if
   deallocate(x_d)
   deallocate(pressure_d)
   deallocate(humidity_d)
@@ -276,13 +278,13 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     call abor1_ftn(trim(myname_) // ' trajectory wasnt set!')
-  endif
+     call abor1_ftn(trim(myname_) // " trajectory wasnt set!")
+  end if
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     call abor1_ftn(trim(myname_) // ' error: nlocs inconsistent!')
-  endif
+     call abor1_ftn(trim(myname_) // " error: nlocs inconsistent!")
+  end if
 
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity

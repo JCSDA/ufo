@@ -8,13 +8,16 @@
 
 module ufo_lightning_tlad_mod
 
-use obs_variables_mod
-use oops_variables_mod
+use, intrinsic :: iso_c_binding, only: c_double, c_ptr
+use obs_variables_mod, only: obs_variables
+use oops_variables_mod, only: oops_variables
 use ufo_vars_mod
 use ufo_geovals_mod
-use kinds
-use missing_values_mod
+use kinds, only: kind_real
+use missing_values_mod, only: missing_value
 use ufo_constants_mod, only: one, zero, half, grav ! Gravitational field strength
+implicit none
+private
 
  !> Fortran derived type for the tl/ad observation operator
  type, public :: ufo_lightning_tlad
@@ -42,7 +45,6 @@ contains
 ! ------------------------------------------------------------------------------
 ! This code is for the TL/AD lightning operator.
 subroutine ufo_lightning_tlad_settraj_(self, geovals, obss)
-use iso_c_binding
 use obsspace_mod
 implicit none
 class(ufo_lightning_tlad), intent(inout) :: self
@@ -85,9 +87,9 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
 !
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
   IF (delp % nval /= qg % nval ) THEN
-    write(err_msg,*) myname_ // ':' // &
-    ' Data must be on a staggered grid nlevp, nlevq = ',delp%nval,qg%nval
-    write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
+    write(err_msg,*) myname_ // ":" // &
+    " Data must be on a staggered grid nlevp, nlevq = ",delp%nval,qg%nval
+    write(err_msg,*) myname_ // ":" // " error: number of levels inconsistent!"
     call abor1_ftn(err_msg)
   END IF
 !
@@ -110,7 +112,7 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
     inc = -1
     ibot = qg%nval
     isfc = qg%nval
-  endif
+  end if
 !
   ALLOCATE(self % K(1:self%nlocs*self%n_horiz, 1:self%nlevq))
   ALLOCATE(dfed_dqg(1:self%nlevq,1:self%n_horiz))
@@ -133,7 +135,7 @@ character(len=*), parameter :: myname_="ufo_lightning_tlad_settraj"
     ! Build K-matrix (Jacobian of FED with respect to layer qg)
      do ilev=1,self%nlevq
        self%K((iobs-1)*n_horiz+1 : iobs*n_horiz, ilev) = dfed_dqg(ilev,1:n_horiz)
-     enddo
+     end do
   end do obs_loop
   deallocate(dfed_dqg)
 
@@ -144,7 +146,6 @@ end subroutine ufo_lightning_tlad_settraj_
 ! Note: this can use information saved from trajectory in your ufo_lightning_tlad type
 ! Input geovals parameter represents dx for tangent linear model
 subroutine ufo_lightning_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
-use iso_c_binding
 implicit none
 class(ufo_lightning_tlad), intent(in)  :: self
 type(ufo_geovals),       intent(in)    :: geovals
@@ -191,7 +192,6 @@ end subroutine ufo_lightning_simobs_tl_
 ! TODO: replace below function with your ad observation operator.
 ! Note: this can use information saved from trajectory in your ufo_lightning_tlad type
 subroutine ufo_lightning_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
-use iso_c_binding
 implicit none
 class(ufo_lightning_tlad), intent(in)    :: self
 type(ufo_geovals),         intent(inout) :: geovals
@@ -226,14 +226,14 @@ type(c_ptr), value,        intent(in)    :: obss
       qg_d % nval = self % nlevq
       allocate(qg_d % vals(qg_d % nval, nlocs*n_horiz))
       qg_d % vals = zero
-  endif
+  end if
 
   if (.not. allocated(delp_d%vals)) then
       !delp_d % nlocs = self % nlocs
       delp_d % nval = self % nlevdP
       allocate(delp_d % vals(delp_d % nval, nlocs*n_horiz))
       delp_d % vals = zero
-  endif
+  end if
 
   missing = missing_value(missing)
 ! Allocate state vector x_d
@@ -354,8 +354,8 @@ DO ilev = ilev1, ilev2, inc  !Used for vertical integration
    DO i_horiz = 1, n_horiz   !Used for horizontal integration
      PDiff = -1.0 * delp(ilev,i_horiz)     ! prs is pressure on level i
      if(PDiff>0)then
-       write(0,*) 'PDiff is larger than zero, STOP HERE2'
-     endif
+       write(0,*) "PDiff is larger than zero, STOP HERE2"
+     end if
      ag = ag - GK * qg(ilev,i_horiz) * PDiff * gridarea ! Accumulate layer graupel mass
    END DO
 END DO

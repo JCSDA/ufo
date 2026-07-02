@@ -43,7 +43,7 @@ contains
 !! \details Heritage: Ops_SatRad_SetUpRTprofBg_RTTOV12.f90
 !!
 !! Check the geovals profile is ready for the first iteration.  The
-!! only check included at the moment if the first calculation for 
+!! only check included at the moment if the first calculation for
 !! q total.
 !!
 !! \author Met Office
@@ -112,7 +112,7 @@ if (profindex % q(1) > 0 .or. profindex % qt(1) > 0) then
     call Ops_Qsat (qsaturated(:),   & ! out
                    temperature(:),  & ! in
                    pressure(:),     & ! in
-                   nlevels)           ! in  
+                   nlevels)           ! in
   end if
 
   ! Limit q
@@ -300,9 +300,9 @@ if(surface_type /= RTsea .and. self % UseColdSurfaceCheck) then
      end do
      geovals%geovals(gv_index) % vals(1,1) = skin_t
 
-   endif
+   end if
 
-endif
+end if
 
 ! Tidy up
 if (allocated(temperature))    deallocate(temperature)
@@ -577,7 +577,7 @@ real(kind_real)                      :: Normalisation
 
 nchans_1dvar = size(ob % channels_used)
 allocate(ChannelWeights(nchans_1dvar))
-Identity = reshape ((/ one, zero, zero, one /), shape (Identity))
+Identity = reshape ([ one, zero, zero, one ], shape (Identity))
 
 ! Channel weights based upon observational errors
 ChannelWeights = one / r_matrix % diagonal(:)
@@ -603,7 +603,7 @@ Eigenvectors(:,:) = Hessian(:,:) - (Identity(:,:) * Eigenvalue(1))
 
 ! Pick the longest of the two
 
-if (Eigenvectors(2,1) ** two + Eigenvectors(2,2) ** two < & 
+if (Eigenvectors(2,1) ** two + Eigenvectors(2,2) ** two < &
   Eigenvectors(1,1) ** two + Eigenvectors(1,2) ** two) then
   FirstEigenvector(:) = Eigenvectors(1,:)
 else

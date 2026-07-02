@@ -11,6 +11,7 @@ module ufo_gnssroonedvarcheck_pen_mod
 
 use kinds, only: kind_real
 use missing_values_mod, only: missing_value
+implicit none
 
 private
 public :: Ops_GPSRO_pen

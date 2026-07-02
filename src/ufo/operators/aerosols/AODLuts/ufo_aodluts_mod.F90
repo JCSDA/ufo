@@ -39,7 +39,7 @@ MODULE ufo_aodluts_mod
      PROCEDURE :: simobs => ufo_aodluts_simobs
   END TYPE ufo_aodluts
   CHARACTER(len=maxvarlen), DIMENSION(4), PARAMETER :: varin_default = &
-       (/var_ts, var_q, var_prs, var_prsi/)
+       [var_ts, var_q, var_prs, var_prsi]
 
   CHARACTER(maxvarlen), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
@@ -109,7 +109,7 @@ CONTAINS
     TYPE(c_ptr), VALUE,       INTENT(in) :: obss
 
 ! local variables
-    CHARACTER(*), PARAMETER :: program_name = 'ufo_aodluts_mod.f90'
+    CHARACTER(*), PARAMETER :: program_name = "ufo_aodluts_mod.f90"
     CHARACTER(255) :: message, version
     INTEGER        :: err_stat, alloc_stat
     INTEGER        :: l, m, n, i
@@ -126,7 +126,7 @@ CONTAINS
 
     REAL(kind_real), ALLOCATABLE :: wavelengths_all(:)
     REAL(kind_real), ALLOCATABLE :: aero_layers(:,:,:),rh(:,:)
-    
+
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
 
     INTEGER :: rc
@@ -142,36 +142,36 @@ CONTAINS
 
     ALLOCATE(aero_layers(n_aerosols,n_layers,n_profiles),&
          &rh(n_layers,n_profiles))
-    
+
     IF (self%conf%use_crtm) THEN
        err_stat = crtm_init( self%conf%sensor_id, &
             chinfo, &
             file_path=TRIM(self%conf%coefficient_path), &
             quiet=.TRUE.)
-       
+
        IF ( err_stat /= success ) THEN
-          message = 'error initializing crtm'
+          message = "error initializing crtm"
           CALL display_message( program_name, message, failure )
           STOP
        END IF
-    ENDIF
+    END IF
 
     sensor_loop:DO n = 1, self%conf%n_sensors
 
        IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
-       
+
        IF (self%conf%use_crtm) THEN
 
           n_channels = crtm_channelinfo_n_channels(chinfo(n))
-         
+
           ALLOCATE(wavelengths_all(n_channels), stat = alloc_stat)
-          
+
           IF ( alloc_stat /= 0 ) THEN
-             message = 'error allocating wavelengths_all'
+             message = "error allocating wavelengths_all"
              CALL display_message( program_name, message, failure )
              STOP
           END IF
-          
+
           wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
 
        ELSE
@@ -179,26 +179,26 @@ CONTAINS
           CALL get_rc_wavelengths(self%conf%rcfile,wavelengths_all,rc)
 
           IF ( rc /= 0 ) THEN
-             message = 'error getting wavelengths from rcfile'
+             message = "error getting wavelengths from rcfile"
              CALL display_message( program_name, message, failure )
              STOP
           END IF
-          
-       ENDIF
+
+       END IF
 
        self%conf%wavelengths=wavelengths_all(self%channels)
 
        CALL calculate_aero_layers(self%conf,&
             &n_aerosols, n_profiles, n_layers,&
             &geovals, aero_layers=aero_layers, rh=rh)
- 
-!note the difference in the "if" construct:
-!a) aaod_tot denotes Absorption AOD 
-!b) aod_tot denotes AOD
-!that are alternatively output from 
-!subroutine get_cf_aod in geos-aero/src/CF_MieObs.F90 
 
-!aaod_tot option is chosen with the following configuration   
+!note the difference in the "if" construct:
+!a) aaod_tot denotes Absorption AOD
+!b) aod_tot denotes AOD
+!that are alternatively output from
+!subroutine get_cf_aod in geos-aero/src/CF_MieObs.F90
+
+!aaod_tot option is chosen with the following configuration
 
 !- obs space:
 !    name: Aod
@@ -213,7 +213,7 @@ CONTAINS
 !      AbsorptionAod: true
 
 !It can only exist for AERONET observations
-!see 
+!see
 !https://amt.copernicus.org/articles/13/3375/2020/#section4
 !for details (note that only available for "channels": 3,5,6,7)
 !i.e. 440,675,870,1020nm
@@ -224,32 +224,32 @@ CONTAINS
           CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
                &self%conf%rcfile,  &
                &self%conf%wavelengths, var_aerosols, aero_layers, rh,&
-               &aaod_tot = hofx, rc = rc)  
+               &aaod_tot = hofx, rc = rc)
        ELSE
           CALL get_cf_aod(n_layers, n_profiles, nvars, n_aerosols, &
                &self%conf%rcfile,  &
                &self%conf%wavelengths, var_aerosols, aero_layers, rh,&
-               &aod_tot = hofx, rc = rc)  
-       ENDIF
+               &aod_tot = hofx, rc = rc)
+       END IF
 
        DEALLOCATE(aero_layers,rh,wavelengths_all)
 
        IF (rc /= 0) THEN
-          message = 'error on exit from get_cf_aod'
+          message = "error on exit from get_cf_aod"
           CALL display_message( program_name, message, failure )
           STOP
        END IF
-          
+
     END DO sensor_loop
-    
+
     IF (self%conf%use_crtm) THEN
        err_stat = crtm_destroy( chinfo )
        IF ( err_stat /= success ) THEN
-          message = 'error destroying crtm (settraj)'
+          message = "error destroying crtm (settraj)"
           CALL display_message( program_name, message, failure )
           STOP
        END IF
-    ENDIF
+    END IF
 
   END SUBROUTINE ufo_aodluts_simobs
 

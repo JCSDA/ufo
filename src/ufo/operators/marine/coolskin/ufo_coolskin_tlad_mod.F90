@@ -7,10 +7,10 @@
 
 module ufo_coolskin_tlad_mod
 
- use fckit_configuration_module, only: fckit_configuration 
- use iso_c_binding
+ use fckit_configuration_module, only: fckit_configuration
+ use, intrinsic :: iso_c_binding
  use kinds
- 
+
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
  use ufo_basis_tlad_mod, only: ufo_basis_tlad
  use ufo_vars_mod
@@ -26,7 +26,7 @@ module ufo_coolskin_tlad_mod
  type, extends(ufo_basis_tlad), public :: ufo_coolskin_tlad
  private
   integer          :: nlocs           !< Local number of obs
-  real(c_double)   :: r_miss_val      !< Missing value flag  
+  real(c_double)   :: r_miss_val      !< Missing value flag
   real (kind=kind_real), allocatable :: jac(:,:)   !< Jacobian     [6*nobs]
  contains
   procedure :: setup  => ufo_coolskin_tlad_setup
@@ -100,7 +100,7 @@ do iobs = 1, self%nlocs
                          R_nl%vals(1,iobs),&
                          Td%vals(1,iobs),&
                          u%vals(1,iobs))
-enddo
+end do
 
 end subroutine ufo_coolskin_tlad_settraj
 
@@ -129,17 +129,17 @@ call ufo_geovals_get_var(geovals, var_sea_fric_vel , u )
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
-  write(err_msg,*) myname_, ' trajectory wasnt set!'
+  write(err_msg,*) myname_, " trajectory wasnt set!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! check if nobs is consistent in geovals & hofx
 nobs = self%nlocs
 
 if (geovals%nlocs /= nobs) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  write(err_msg,*) myname_, " error: nobs inconsistent!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 
 ! Perturbation coolskin obs operator
@@ -159,7 +159,7 @@ do iobs = 1, self%nlocs
                 self%jac(4,iobs)*R_nl%vals(1,iobs) + &
                 self%jac(5,iobs)*Td%vals(1,iobs) + &
                 self%jac(6,iobs)*u%vals(1,iobs)
-enddo
+end do
 
 end subroutine ufo_coolskin_simobs_tl
 
@@ -182,16 +182,16 @@ type(ufo_geoval), pointer :: S_ns, H_I, H_s, R_nl, Td, u
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
-  write(err_msg,*) myname_, ' trajectory wasnt set!'
+  write(err_msg,*) myname_, " trajectory wasnt set!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! check if nobs is consistent in geovals & hofx
 nobs = self%nlocs
 if (geovals%nlocs /= nobs) then
-  write(err_msg,*) myname_, ' error: nobs inconsistent!'
+  write(err_msg,*) myname_, " error: nobs inconsistent!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 if (.not. geovals%linit ) geovals%linit=.true.
 
@@ -213,7 +213,7 @@ do iobs = 1, nobs
       Td%vals(1,iobs)   = Td%vals(1,iobs)    + self%jac(5,iobs)*hofx(iobs)
       u%vals(1,iobs)    = u%vals(1,iobs)     + self%jac(6,iobs)*hofx(iobs)
    end if
-enddo
+end do
 
 end subroutine ufo_coolskin_simobs_ad
 

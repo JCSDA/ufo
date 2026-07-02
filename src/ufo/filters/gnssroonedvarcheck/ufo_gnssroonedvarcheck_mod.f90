@@ -1,5 +1,5 @@
 ! (C) Copyright 2017-2020 Met Office
-! 
+!
 ! this software is licensed under the terms of the apache licence version 2.0
 ! which can be obtained at http://www.apache.org/licenses/license-2.0.
 
@@ -11,7 +11,7 @@ use, intrinsic :: iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only : fckit_log
 use fckit_exception_module, only: fckit_exception
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use missing_values_mod
 use obsspace_mod
@@ -116,41 +116,41 @@ subroutine ufo_gnssroonedvarcheck_create(self, obsspace, bmatrix_filename, &
   self % dryRefractivityConstant = dryRefractivityConstant
   self % wetRefractivityConstant = wetRefractivityConstant
 
-  write(message, '(A)') 'GNSS-RO 1D-Var check: input parameters are:'
+  write(message, "(A)") "GNSS-RO 1D-Var check: input parameters are:"
   call fckit_log % debug(message)
-  write(message, '(2A)') 'bmatrix_filename = ', bmatrix_filename
+  write(message, "(2A)") "bmatrix_filename = ", bmatrix_filename
   call fckit_log % debug(message)
-  write(message, '(A,L1)') 'capsupersat = ', capsupersat
+  write(message, "(A,L1)") "capsupersat = ", capsupersat
   call fckit_log % debug(message)
-  write(message, '(A,F16.8)') 'cost_funct_test = ', cost_funct_test
+  write(message, "(A,F16.8)") "cost_funct_test = ", cost_funct_test
   call fckit_log % debug(message)
-  write(message, '(A,F16.8)') 'Delta_ct2 = ', Delta_ct2
+  write(message, "(A,F16.8)") "Delta_ct2 = ", Delta_ct2
   call fckit_log % debug(message)
-  write(message, '(A,F16.8)') 'Delta_factor = ', Delta_factor
+  write(message, "(A,F16.8)") "Delta_factor = ", Delta_factor
   call fckit_log % debug(message)
-  write(message, '(A,F16.8)') 'min_temp_grad = ', min_temp_grad
+  write(message, "(A,F16.8)") "min_temp_grad = ", min_temp_grad
   call fckit_log % debug(message)
-  write(message, '(A,I7)') 'n_iteration_test = ', n_iteration_test
+  write(message, "(A,I7)") "n_iteration_test = ", n_iteration_test
   call fckit_log % debug(message)
-  write(message, '(A,F16.8)') 'OB_test = ', OB_test
+  write(message, "(A,F16.8)") "OB_test = ", OB_test
   call fckit_log % debug(message)
-  write(message, '(A,L1)') 'pseudo_ops = ', pseudo_ops
+  write(message, "(A,L1)") "pseudo_ops = ", pseudo_ops
   call fckit_log % debug(message)
-  write(message, '(A,L1)') 'vert_interp_ops = ', vert_interp_ops
+  write(message, "(A,L1)") "vert_interp_ops = ", vert_interp_ops
   call fckit_log % debug(message)
-  write(message, '(A,F16.8)') 'y_test = ', y_test
+  write(message, "(A,F16.8)") "y_test = ", y_test
   call fckit_log % debug(message)
-  write(message, '(A)') 'chanList = '
+  write(message, "(A)") "chanList = "
   call fckit_log % debug(message)
   do i = 1, SIZE(chanList), 100
-    write(message, '(100I5)') chanList(i:min(i+99, size(chanList)))
+    write(message, "(100I5)") chanList(i:min(i+99, size(chanList)))
     call fckit_log % debug(message)
   end do
-  write(message, '(A,L1)') 'no super check = ', noSuperCheck
+  write(message, "(A,L1)") "no super check = ", noSuperCheck
   call fckit_log % debug(message)
-  write(message, '(A,F16.6)') 'Dry refractivity constant = ', dryRefractivityConstant
+  write(message, "(A,F16.6)") "Dry refractivity constant = ", dryRefractivityConstant
   call fckit_log % debug(message)
-  write(message, '(A,F16.6)') 'Wet refractivity constant = ', wetRefractivityConstant
+  write(message, "(A,F16.6)") "Wet refractivity constant = ", wetRefractivityConstant
   call fckit_log % debug(message)
 
 end subroutine ufo_gnssroonedvarcheck_create
@@ -174,9 +174,9 @@ end subroutine ufo_gnssroonedvarcheck_delete
 ! ------------------------------------------------------------------------------
 !> The main routine that applys the GNSS-RO onedvar filter
 !!
-!! \details Heritage : 
+!! \details Heritage :
 !!
-!! This routine is called from the c++ apply method.  The filter performs 
+!! This routine is called from the c++ apply method.  The filter performs
 !! a 1D-Var minimization
 !!
 !! \author Met Office
@@ -249,7 +249,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   nlevels = max(1, obsspace_get_nchans(self % obsdb))
 
   if (nlevels > 1 .AND. nlevels /= SIZE(self % chanList)) then
-    write(Message,'(a,2I5)') 'nChans should equal length of channel list', nlevels, SIZE(self % chanList)
+    write(Message,"(a,2I5)") "nChans should equal length of channel list", nlevels, SIZE(self % chanList)
     call fckit_exception%throw(Message)
   end if
 
@@ -325,15 +325,15 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   do iprofile = 1, size(unique)
     start_point = current_point
     iobs = 1 + ((index_vals(start_point) - 1) / nlevels)
-    WRITE (Message, '(A,I0)') 'ObNumber ', iprofile
+    WRITE (Message, "(A,I0)") "ObNumber ", iprofile
     call fckit_log % info(Message)
-    WRITE (Message, '(A,F12.2)') 'Latitude ', obsLat(iobs)
+    WRITE (Message, "(A,F12.2)") "Latitude ", obsLat(iobs)
     call fckit_log % info(Message)
-    WRITE (Message, '(A,F12.2)') 'Longitude ', obsLon(iobs)
+    WRITE (Message, "(A,F12.2)") "Longitude ", obsLon(iobs)
     call fckit_log % info(Message)
-    WRITE (Message, '(A,I0)') 'Processing centre ', obsOrigC(iobs)
+    WRITE (Message, "(A,I0)") "Processing centre ", obsOrigC(iobs)
     call fckit_log % info(Message)
-    WRITE (Message, '(A,I0)') 'Sat ID ', obsSatid(iobs)
+    WRITE (Message, "(A,I0)") "Sat ID ", obsSatid(iobs)
     call fckit_log % info(Message)
 
     ! Work out which observations belong to the current profile
@@ -414,12 +414,12 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
     if (verboseOutput) then
       do ipoint = 0, nobs_profile-1, 20
-          write(Message,'(20I5)') qc_flags(index_vals(start_point+ipoint: &
+          write(Message,"(20I5)") qc_flags(index_vals(start_point+ipoint: &
                                                       min(start_point+ipoint+19, current_point-1)))
           call fckit_log % debug(Message)
       end do
       do ipoint = 0, nobs_profile-1, 10
-          write(Message,'(10E16.5)') obs_bending_angle(index_vals(start_point+ipoint: &
+          write(Message,"(10E16.5)") obs_bending_angle(index_vals(start_point+ipoint: &
                                                                min(start_point+ipoint+9, current_point-1)))
           call fckit_log % debug(Message)
       end do

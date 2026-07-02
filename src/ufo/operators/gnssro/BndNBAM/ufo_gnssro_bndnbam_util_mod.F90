@@ -1,6 +1,6 @@
-!  
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module of Gnssro NBAM (NCEP's Bending Angle Method) operator
 
@@ -30,7 +30,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   character(len=*), parameter    :: myname  = "ufo_gnssro_bndnbam_simobs_single"
 
   real(kind_real), intent(out)   :: bendingAngle
- 
+
   integer, intent(in)            :: nlev
   integer, intent(in)            :: nlevExt
   integer, intent(in)            :: nlevAdd
@@ -40,7 +40,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   logical, intent(in)            :: super_ref_GEOS
   real(kind_real), intent(in)    :: obsLat, obsGeoid, obsLocR, obsImpP ! obsspace
   real(kind_real), intent(in)    :: grids(ngrd)
- 
+
   real(kind_real), intent(in)    :: radius(nlev)
   real(kind_real), intent(in)    :: refIndex(nlev)
   real(kind_real), intent(inout) :: ref(nlevExt)
@@ -68,9 +68,9 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
   refXrad(nlevExt+1)=refXrad(nlevExt-2)
   do k = 1,nlevExt
      call lag_interp_const(lagConst(:,k),refXrad(k-1:k+1),3)
-  enddo
+  end do
 
-! integrate on a new set of equally-spaced vertical grid 
+! integrate on a new set of equally-spaced vertical grid
   derivRef_s = zero
   grids_loop: do igrd =1,ngrd
     refXrad_s(igrd)=sqrt(grids(igrd)**2 + obsImpP**2) !x_s^2=s^2+a^2
@@ -79,7 +79,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
        call get_coordinate_value(refXrad_s(igrd), sIndx,refXrad((top_layer_SR+1):nlevExt),&
             nlevExt-top_layer_SR-1,"increasing")
        sIndx = sIndx+top_layer_SR
-    endif
+    end if
     rnlevExt = float(nlevExt)
 
     if (sIndx > zero .and. sIndx < rnlevExt) then  !obs inside the new grid
@@ -92,18 +92,18 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
           w4(4)=w4(4)+w4(1); w4(1:3)=w4(2:4);w4(4)=zero
           dw4(4)=dw4(4)+dw4(1);dw4(1:3)=dw4(2:4);dw4(4)=zero
           indx=indx+1
-       endif
+       end if
        if (indx==nlevExt-1) then
           w4(1)=w4(1)+w4(4); w4(2:4)=w4(1:3);w4(1)=zero
           dw4(1)=dw4(1)+dw4(4); dw4(2:4)=dw4(1:3);dw4(1)=zero
           indx=indx-1
-       endif
+       end if
 
        derivRef_s(igrd)=dot_product(dw4,ref(indx-1:indx+2)) !derivative dN/dx_s
        if (super_ref_GEOS) then
           derivRef_s(igrd)=max(zero,abs(derivRef_s(igrd)))
        else
-          if (derivRef_s(igrd).gt.zero) then
+          if (derivRef_s(igrd)>zero) then
              super_refraction_flag = 3
              return
           end if
@@ -111,7 +111,7 @@ subroutine ufo_gnssro_bndnbam_simobs_single( &
 
     else
       return
-    endif !obs in new grid
+    end if !obs in new grid
   end do grids_loop
 
 ! bending angle (radians)

@@ -8,9 +8,9 @@
 module ufo_reconradop_crtm_mod
 
  use crtm_module
- use CRTM_Planck_Functions 
+ use CRTM_Planck_Functions
  use fckit_log_module, only : fckit_log
- use iso_c_binding, only: c_int, c_double
+ use, intrinsic :: iso_c_binding, only: c_int, c_double
  use kinds, only : kind_real ! from oops
  use ufo_crtm_utils_mod
  use ufo_utils_mod, only : ufo_utils_iogetfreeunit
@@ -18,7 +18,7 @@ module ufo_reconradop_crtm_mod
  implicit none
  private
 
- !> Fortran derived type for cmatrix 
+ !> Fortran derived type for cmatrix
  type, public :: ufo_reconradop_crtm
  contains
    procedure :: GetCmatrix => ufo_reconradop_crtm_GetCmatrix
@@ -54,22 +54,30 @@ character(len=4) :: char_chan
  open(unit = fileunit, file = trim(filepath))
 
  read(fileunit, *, iostat = readstatus) nchans
+ if (readstatus /= 0) then
+   message = RoutineName//" Problem reading nchans."
+   call abor1_ftn(message)
+ end if
 
  allocate( Cmatrix_bias(nchans))
  allocate( Cmatrix(nchans,nchans))
 
  read (fileunit, *, iostat = readstatus)  Cmatrix_bias(:)
- do ich = 1, nchans
-   read (fileunit, *, iostat = readstatus)  Cmatrix(:,ich)
- end do
  if (readstatus /= 0) then
-   message = RoutineName//' Problem reading C matrix elements.'
+   message = RoutineName//" Problem reading C matrix bias."
    call abor1_ftn(message)
  end if
+ do ich = 1, nchans
+   read (fileunit, *, iostat = readstatus)  Cmatrix(:,ich)
+   if (readstatus /= 0) then
+     message = RoutineName//" Problem reading C matrix elements."
+     call abor1_ftn(message)
+   end if
+ end do
  close(unit = fileunit)
 
- write(char_chan,'(I4)') nchans
- message = 'Finished reading the C matrix and bias vector for '//trim(char_chan)//' reconstructed radiances.'
+ write(char_chan,"(I4)") nchans
+ message = "Finished reading the C matrix and bias vector for "//trim(char_chan)//" reconstructed radiances."
  call fckit_log%info(message)
 
 end subroutine ufo_reconradop_crtm_GetCmatrix
@@ -99,25 +107,25 @@ character(len=4) :: size_char, size_char2
 
    message =  "C matrix or bias vector size does not match expected size"
    call fckit_log%info(message)
-   
-   write(size_char,'(I4)') size(Cmatrix_bias)
-   message = 'C matrix bias size: '//trim(size_char)//"."
+
+   write(size_char,"(I4)") size(Cmatrix_bias)
+   message = "C matrix bias size: "//trim(size_char)//"."
    call fckit_log%info(message)
 
-   write(size_char,'(I4)') size(Cmatrix,1)
-   write(size_char2,'(I4)') size(Cmatrix,2)
-   message = 'C matrix size: '//trim(size_char)//'x'//trim(size_char2)//"."
+   write(size_char,"(I4)") size(Cmatrix,1)
+   write(size_char2,"(I4)") size(Cmatrix,2)
+   message = "C matrix size: "//trim(size_char)//"x"//trim(size_char2)//"."
    call fckit_log%info(message)
 
-   write(size_char,'(I4)') nchan
-   message = 'Channels size: '//trim(size_char)
+   write(size_char,"(I4)") nchan
+   message = "Channels size: "//trim(size_char)
    call fckit_log%info(message)
 
-   message = "C matrix size does not match channel size" 
+   message = "C matrix size does not match channel size"
    call abor1_ftn(message)
  end if
 
- message = 'Finished reading C matrix and bias in ufo_reconradop_crtm_setup'
+ message = "Finished reading C matrix and bias in ufo_reconradop_crtm_setup"
  call fckit_log%info(message)
 
 end subroutine ufo_reconradop_crtm_setup
@@ -131,6 +139,7 @@ class(ufo_reconradop_crtm),   intent(in) :: self
 character(len=*), intent(in)                     :: filepath
 type(CRTM_RTSolution_type), intent(inout) :: rts(:,:)
 integer, intent(in) :: n_Sensor, n_Profiles, n_Channels, n_Absorbers
+integer, intent(in) :: n_Levels
 integer, intent(in) :: channels(:)
 type(CRTM_RTSolution_type), optional, intent(inout):: rts_K(:,:)
 type(CRTM_Atmosphere_type), optional,intent(inout) :: atm_K(:,:)
@@ -143,18 +152,18 @@ real(c_double),allocatable :: jac_a_tmp(:, :, :)
 real(c_double),allocatable :: jac_s_tmp(:,:)
 real(kind_real), allocatable     :: Cmatrix_bias(:)         ! C matrix bias vector used to simulate reconstructed radiances.
 real(kind_real), allocatable     :: Cmatrix(:,:)            ! C matrix used to simulate reconstructed radiances.
-integer :: m,l, n_Levels, jlevel, jabs
+integer :: m, l, jabs
 
- message = 'Applying reconstructed radiance operator'
+ message = "Applying reconstructed radiance operator"
  call fckit_log%info(message)
  call  self%setup(filepath, channels, Cmatrix_bias, CMatrix)
- message = 'jacobian_needed='//merge("T","F",jacobian_needed)
+ message = "jacobian_needed="//merge("T","F",jacobian_needed)
  call fckit_log%info(message)
-  
+
  if(jacobian_needed) then
    allocate(jac_t_tmp(n_Channels,n_Levels),&
             jac_a_tmp(n_Channels, n_Levels, n_Absorbers ),&
-            jac_s_tmp(n_Channels,8) )  
+            jac_s_tmp(n_Channels,8) )
  end if
 
  profile_loop: do m = 1, n_Profiles
@@ -163,12 +172,12 @@ integer :: m,l, n_Levels, jlevel, jabs
    ! need factor of 1e5 for bias MTG-IRS/IASI products (W/m-1/sr/m2) to CRTM/Planck Functions (mW/cm-1/sr/m2)
    ! Apply reconstructed radiance operator matrix and add bias term
    rad_tmp = matmul(cmatrix, rad_tmp) + 1e5*cmatrix_bias
- 
+
    if(jacobian_needed) then
 
     ! fill temporary jacobian arrays for profile
     call  ufo_reconradop_crtm_rr_jacobian_tmp_populate(m, n_Channels, n_Levels, n_Absorbers, sfc_K, rts_K, atm_K, jac_s_tmp, jac_t_tmp, jac_a_tmp)
-      
+
      ! apply matrix to temperature profile Jacobian
      jac_t_tmp = matmul(cmatrix, jac_t_tmp)
      ! apply matrix to surface Jacobians
@@ -185,16 +194,16 @@ integer :: m,l, n_Levels, jlevel, jabs
      if(rad_tmp(l) > 0) then
 
        ! replace Tb with reconstructed radiance Tb (as long as there's a valid result for RR operator)
-       ! Note there isn't another Planck temperature call for when rad_tmp<0, 
-       ! because rts(l,m)%Brightness_Temperature will already have CRTM Tb 
+       ! Note there isn't another Planck temperature call for when rad_tmp<0,
+       ! because rts(l,m)%Brightness_Temperature will already have CRTM Tb
 
        call CRTM_Planck_Temperature(n_Sensor, channels(l), rad_tmp(l), rts(l,m)%Brightness_Temperature  )
        if(jacobian_needed) then
          call ufo_reconradop_crtm_rr_jacobian_convert(l, m, n_Sensor,n_Levels, n_Absorbers, channels, rad_tmp(l), jac_s_tmp, jac_t_tmp, jac_a_tmp, sfc_K, rts_K, atm_K)
-       end if 
+       end if
        ! if we have a negative radiance, convert the jacobians that are set to be dR/dx to dTb/dx
      else if (jacobian_needed) then
-       ! fill in original CRTM Tb Jacobian 
+       ! fill in original CRTM Tb Jacobian
        call ufo_reconradop_crtm_normal_jacobian_convert(l, m, n_Sensor, n_Levels, n_Absorbers, channels, rts(l,m)%Radiance, sfc_K, rts_K, atm_K)
      end if
 
@@ -209,10 +218,10 @@ integer :: m,l, n_Levels, jlevel, jabs
  call self%delete(Cmatrix_bias, Cmatrix)
 
 end subroutine ufo_reconradop_crtm_apply
-  
+
 ! ------------------------------------------------------------------------------
 subroutine ufo_reconradop_crtm_rr_jacobian_tmp_populate(m, n_Channels, n_Levels, n_Absorbers, sfc_K, rts_K, atm_K, jac_s_tmp, jac_t_tmp, jac_a_tmp)
-implicit none 
+implicit none
 integer, intent(in) :: m, n_Channels, n_Levels, n_Absorbers
 type(CRTM_RTSolution_type), intent(in):: rts_K(:,:)
 type(CRTM_Atmosphere_type), intent(in) :: atm_K(:,:)
@@ -220,7 +229,7 @@ type(CRTM_Surface_type),  intent(in) :: sfc_K(:,:)
 real(c_double),intent(inout) :: jac_t_tmp(:,:)
 real(c_double),intent(inout) :: jac_a_tmp(:, :, :)
 real(c_double),intent(inout) :: jac_s_tmp(:,:)
-integer l, jlevel, jabs
+integer :: l, jlevel, jabs
 
  jac_s_tmp(:,1) = sfc_K(:,m) % Water_Temperature
  jac_s_tmp(:,2) = sfc_K(:,m) % Land_Temperature
@@ -237,20 +246,20 @@ integer l, jlevel, jabs
        jac_a_tmp(l,jlevel,jabs) = atm_K(l,m)%Absorber(jlevel,jabs)
      end do
    end do
- end do 
+ end do
 
-end subroutine ufo_reconradop_crtm_rr_jacobian_tmp_populate 
+end subroutine ufo_reconradop_crtm_rr_jacobian_tmp_populate
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_reconradop_crtm_normal_jacobian_convert(l, m, n_Sensor, n_Levels, n_Absorbers, channels, rad, sfc_K, rts_K, atm_K)
-implicit none        
+implicit none
 integer, intent(in) :: l ,m, n_Sensor, channels(:), n_Absorbers, n_levels
 real(c_double),intent(in) :: rad
 type(CRTM_RTSolution_type), intent(inout):: rts_K(:,:)
 type(CRTM_Atmosphere_type), intent(inout) :: atm_K(:,:)
 type(CRTM_Surface_type),  intent(inout) :: sfc_K(:,:)
 integer:: jlevel, jabs
- ! fill in RR operator Tb surface Jacobians 
+ ! fill in RR operator Tb surface Jacobians
 
  call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, sfc_K(l,m) % Water_Temperature, sfc_K(l,m) % Water_Temperature)
  call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, sfc_K(l,m) % Land_Temperature, sfc_K(l,m) % Land_Temperature)
@@ -262,10 +271,10 @@ integer:: jlevel, jabs
  call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, sfc_K(l,m) % Salinity, sfc_K(l,m) % Salinity)
 
  do jlevel = 1,n_Levels
-   ! fill RR operator for Tb air temperature Jacobians 
+   ! fill RR operator for Tb air temperature Jacobians
    call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, atm_K(l,m) % Temperature(jlevel) , atm_K(l,m) % Temperature(jlevel))
    ! fill RR operator for Tb constituent profile Jacobians
-   do jabs = 1,n_Absorbers             
+   do jabs = 1,n_Absorbers
      call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, atm_K(l,m) % Absorber(jlevel,jabs), atm_K(l,m) % Absorber(jlevel,jabs))
    end do
  end do
@@ -274,14 +283,14 @@ end subroutine ufo_reconradop_crtm_normal_jacobian_convert
 
 ! ------------------------------------------------------------------------------
 subroutine ufo_reconradop_crtm_rr_jacobian_convert(l, m, n_Sensor, n_Levels, n_Absorbers,  channels, rad, jac_s_tmp, jac_t_tmp, jac_a_tmp, sfc_K, rts_K, atm_K)
-implicit none        
+implicit none
 integer, intent(in) :: l ,m, n_Sensor, channels(:), n_Levels, n_Absorbers
 real(c_double),intent(in) :: rad, jac_s_tmp(:,:), jac_t_tmp(:,:), jac_a_tmp(:,:,:)
 type(CRTM_RTSolution_type), intent(inout):: rts_K(:,:)
 type(CRTM_Atmosphere_type), intent(inout) :: atm_K(:,:)
 type(CRTM_Surface_type),  intent(inout) :: sfc_K(:,:)
 integer:: jlevel, jabs
- ! fill in RR operator Tb surface Jacobians 
+ ! fill in RR operator Tb surface Jacobians
 
  call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, jac_s_tmp(l,1), sfc_K(l,m) % Water_Temperature)
  call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, jac_s_tmp(l,2), sfc_K(l,m) % Land_Temperature)
@@ -293,10 +302,10 @@ integer:: jlevel, jabs
  call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, jac_s_tmp(l,8), sfc_K(l,m) % Salinity)
 
  do jlevel = 1,n_Levels
-   ! fill RR operator for Tb air temperature Jacobians 
+   ! fill RR operator for Tb air temperature Jacobians
    call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, jac_t_tmp(l,jlevel) , atm_K(l,m) % Temperature(jlevel))
    ! fill RR operator for Tb constituent profile Jacobians
-   do jabs = 1,n_Absorbers             
+   do jabs = 1,n_Absorbers
      call CRTM_Planck_Temperature_TL(n_Sensor, channels(l), rad, jac_a_tmp(l,jlevel,jabs), atm_K(l,m) % Absorber(jlevel,jabs))
    end do
  end do

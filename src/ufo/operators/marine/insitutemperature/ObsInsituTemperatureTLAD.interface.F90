@@ -8,7 +8,7 @@
 
 module ufo_insitutemperature_tlad_mod_c
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use oops_variables_mod
 use obs_variables_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -35,7 +35,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_insitutemperature_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_obsvarindices, &
-    c_nobsvars, c_geovars) bind(c,name='ufo_insitutemperature_tlad_setup_f90')
+    c_nobsvars, c_geovars) bind(c,name="ufo_insitutemperature_tlad_setup_f90")
   integer(c_int),        intent(inout) :: c_key_self
   type(c_ptr),    value, intent(in)    :: c_conf
   type(c_ptr),    value, intent(in)    :: c_obsvars ! variables to be simulated...
@@ -59,7 +59,7 @@ end subroutine ufo_insitutemperature_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitutemperature_tlad_delete_c(c_key_self) bind(c,name='ufo_insitutemperature_tlad_delete_f90')
+subroutine ufo_insitutemperature_tlad_delete_c(c_key_self) bind(c,name="ufo_insitutemperature_tlad_delete_f90")
   integer(c_int), intent(inout) :: c_key_self
 
   type(ufo_insitutemperature_tlad), pointer :: self
@@ -73,7 +73,7 @@ end subroutine ufo_insitutemperature_tlad_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_insitutemperature_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) &
-    bind(c,name='ufo_insitutemperature_tlad_settraj_f90')
+    bind(c,name="ufo_insitutemperature_tlad_settraj_f90")
   integer(c_int),     intent(in) :: c_key_self
   integer(c_int),     intent(in) :: c_key_geovals
   type(c_ptr), value, intent(in) :: c_obsspace
@@ -91,7 +91,7 @@ end subroutine ufo_insitutemperature_tlad_settraj_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_insitutemperature_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-    bind(c,name='ufo_insitutemperature_simobs_tl_f90')
+    bind(c,name="ufo_insitutemperature_simobs_tl_f90")
   integer(c_int), intent(in) :: c_key_self
   integer(c_int), intent(in) :: c_key_geovals
   type(c_ptr), value, intent(in) :: c_obsspace
@@ -111,7 +111,7 @@ end subroutine ufo_insitutemperature_simobs_tl_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_insitutemperature_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-    bind(c,name='ufo_insitutemperature_simobs_ad_f90')
+    bind(c,name="ufo_insitutemperature_simobs_ad_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

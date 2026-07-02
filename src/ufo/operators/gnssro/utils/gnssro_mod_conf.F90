@@ -2,7 +2,7 @@
 module gnssro_mod_conf
 !==========================================================================
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use obsspace_mod
 use ufo_constants_mod, only: mean_earth_rad_m
@@ -63,7 +63,7 @@ roconf%ro_type = ro_type
 if (f_conf%has("ro_type"))  then
   call f_conf%get_or_die("ro_type",str)
   roconf%ro_type=trim(str)
-endif
+end if
 !if (f_conf%has("ro_type")) call f_conf%get_or_die("ro_type",roconf%ro_type)
 roconf%dtheta        = roconf%res/(mean_earth_rad_m/1000.0) ! m to km
 roconf%vertlayer = "full"
@@ -75,24 +75,24 @@ roconf%super_ref_qc = "NBAM"
 if (f_conf%has("super_ref_qc"))  then
   call f_conf%get_or_die("super_ref_qc",str)
   roconf%super_ref_qc=trim(str)
-endif
+end if
 roconf%sr_steps = 2
 if (f_conf%has("sr_steps")) call f_conf%get_or_die("sr_steps",roconf%sr_steps)
 roconf%output_diags="false"
 if (f_conf%has("output_diags"))  then
   call f_conf%get_or_die("output_diags",str)
   roconf%output_diags=trim(str)
-endif
+end if
 roconf%GSI_version="EMC"
 if (f_conf%has("GSI_version"))  then
   call f_conf%get_or_die("GSI_version",str)
   roconf%GSI_version=trim(str)
-endif
+end if
 roconf%modeltopconfig="false"
 if (f_conf%has("modeltop")) then  !an integer specifying roughly the model top in km
   call f_conf%get_or_die("modeltop", roconf%modeltop)
-  if (roconf%modeltop .gt. 0)   roconf%modeltopconfig="true"
-endif
+  if (roconf%modeltop > 0)   roconf%modeltopconfig="true"
+end if
 if (f_conf%has("nlevadd")) call f_conf%get_or_die("nlevadd", roconf%nlevadd)
 if (f_conf%has("ngrd")) call f_conf%get_or_die("ngrd", roconf%ngrd)
 end subroutine gnssro_conf_setup

@@ -1,8 +1,9 @@
 module ufo_gnssro_2d_locs_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use fckit_log_module, only : fckit_log
 use kinds,            only : kind_real
+implicit none
 
 private
 public:: ufo_gnssro_2d_locs_init
@@ -31,7 +32,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, nlocs_ext, lons, lats)
   integer :: i, j, nlocs
   real(kind_real), dimension(:), allocatable :: lon, lat
 
-! gnss ro data 2d location  
+! gnss ro data 2d location
   real(kind_real), dimension(:), allocatable      :: obsAzim
   real(kind_real), dimension(self%roconf%n_horiz) :: plat_2d, plon_2d
   integer         :: kerror, n_horiz
@@ -48,7 +49,7 @@ subroutine ufo_gnssro_2d_locs_init(self, obss, nlocs_ext, lons, lats)
   allocate(obsAzim(nlocs))
   call obsspace_get_db(obss, "MetaData", "sensorAzimuthAngle", obsAzim)
 
-  !Setup ufo 2d locations 
+  !Setup ufo 2d locations
   do i = 1, nlocs
     lons( (i-1)*n_horiz+1 : i*n_horiz) =  lon(i)
     lats( (i-1)*n_horiz+1 : i*n_horiz) =  lat(i)

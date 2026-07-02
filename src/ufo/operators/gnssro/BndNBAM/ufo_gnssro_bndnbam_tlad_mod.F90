@@ -7,27 +7,28 @@
 
 module ufo_gnssro_bndnbam_tlad_mod
 use fckit_configuration_module, only: fckit_configuration
-use kinds
+use kinds, only: kind_real
 use ufo_vars_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use obsspace_mod
-use missing_values_mod
+use missing_values_mod, only: missing_value
 use lag_interp_mod
 use ufo_basis_tlad_mod,only: ufo_basis_tlad
 use gnssro_mod_conf
 use gnssro_mod_constants
 use gnssro_mod_transform, only: geop2geometric
 use fckit_log_module,  only : fckit_log
-use iso_c_binding, only: c_ptr, c_double
+use, intrinsic :: iso_c_binding, only: c_ptr, c_double
 use ufo_constants_mod, only: zero, half, one, two, three, rd_over_g, rd_over_rv, rv_over_rd
 
-
 implicit none
+private
+
 real(c_double)                             :: missing
 
 !>  Fortran derived type for gnssro trajectory
-type, extends(ufo_basis_tlad) :: ufo_gnssro_BndNBAM_tlad
+type, extends(ufo_basis_tlad), public :: ufo_gnssro_BndNBAM_tlad
   private
   integer                       :: nlev, nlev1, nlocs, iflip, nrecs
   real(kind_real), allocatable  :: jac_t(:,:), jac_prs(:,:), jac_q(:,:)
@@ -104,7 +105,7 @@ subroutine ufo_gnssro_bndnbam_tlad_settraj(self, geovals, obss)
   missing = missing_value(missing)
   nlocs   = obsspace_get_nlocs(obss) ! number of observations
   nrecs   = obsspace_get_nrecs(obss)
-  write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', nlocs, nrecs
+  write(err_msg,*) myname, ": nlocs from gelvals and hofx, nrecs", nlocs, nrecs
   call fckit_log%debug(err_msg)
 
 if (nlocs > 0 ) then
@@ -113,7 +114,7 @@ if (nlocs > 0 ) then
   call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_sfc_geomz, zs)  ! surface geopotential height/surface altitude
 
-  if (self%roconf%vertlayer .eq. "mass") then
+  if (self%roconf%vertlayer == "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
   else
@@ -139,30 +140,30 @@ if (nlocs > 0 ) then
 
 ! copy geovals to local background arrays
   self%iflip = 0
-  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
+  if (prs%vals(1,1) < prs%vals(prs%nval,1) ) then
      self%iflip = 1
-     write(err_msg,'(a)')'  ufo_gnssro_bndnbam_tlad_settraj:'//new_line('a')//                         &
-                         '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  but NBAM requires it to be ascending order, need flip'
+     write(err_msg,"(a)")"  ufo_gnssro_bndnbam_tlad_settraj:"//new_line("a")//                         &
+                         "  Model vertical height profile is in descending order,"//new_line("a")// &
+                         "  but NBAM requires it to be ascending order, need flip"
     call fckit_log%debug(err_msg)
     do k = 1, nlev
        gesT(k,:) = t%vals(nlev-k+1,:)
        gesQ(k,:) = q%vals(nlev-k+1,:)
-    enddo
+    end do
     do k = 1, nlev1
        gesP(k,:) = prs%vals(nlev1-k+1,:)
        gesH(k,:) = gph%vals(nlev1-k+1,:)
-    enddo
+    end do
   else  ! not flipping
 
     do k = 1, nlev
        gesT(k,:) = t%vals(k,:)
        gesQ(k,:) = q%vals(k,:)
-    enddo
+    end do
     do k = 1, nlev1
        gesP(k,:) = prs%vals(k,:)
        gesH(k,:) = gph%vals(k,:)
-    enddo
+    end do
   end if
 
 ! if all fields t and q are on mass layers,
@@ -171,7 +172,7 @@ if (nlocs > 0 ) then
      do k = nlev, 2, -1
         gesT(k,:) = half* (gesT(k,:) + gesT(k-1,:))
         gesQ(k,:) = half* (gesQ(k,:) + gesQ(k-1,:))
-     enddo
+     end do
   end if
         gesZs(:) = zs%vals(1,:)
 
@@ -221,14 +222,14 @@ if (nlocs > 0 ) then
   else
      ngrd = min(80,self%roconf%ngrd) ! do not provide ngrd if EMC; default is 80km
      ModelsigLevelcheck = three
-  endif
+  end if
 
-  if (trim(self%roconf%modeltopconfig) .eq. "true") then
+  if (trim(self%roconf%modeltopconfig) == "true") then
     ! maximum = 80km for low top models refactor needed otherwise
     if ( self%roconf%modeltop > 80 ) then
        ! FAIL should either use a GSI config (NOAA or NASA)
-       write(err_msg,*) myname, ' modeltopconfig not applicable for model tops over 80 km'// &
-           '    ... try using default GSI GFS 16.3 setup for NOAA or NASA'
+       write(err_msg,*) myname, " modeltopconfig not applicable for model tops over 80 km"// &
+           "    ... try using default GSI GFS 16.3 setup for NOAA or NASA"
        call abor1_ftn(err_msg)
     end if
     ngrd = min(60, self%roconf%ngrd) ! maximum = 60 for low top models
@@ -390,12 +391,12 @@ if (nlocs > 0 ) then
                dw4(4)=dw4(4)+dw4(1);dw4(1:3)=dw4(2:4);dw4(4)=zero
                dw4_tl(4)=dw4_tl(4)+dw4_tl(1);dw4_tl(1:3)=dw4_tl(2:4);dw4_tl(4)=zero
                indx=indx+1
-             endif
+             end if
              if(indx==nlevExt-1) then
                dw4(1)=dw4(1)+dw4(4); dw4(2:4)=dw4(1:3);dw4(1)=zero
                dw4_tl(1)=dw4_tl(1)+dw4_tl(4); dw4_tl(2:4)=dw4_tl(1:3);dw4_tl(1)=zero
                indx=indx-1
-             endif
+             end if
 
              dbetaxi=(r1em6/refXrad_s(j))*dot_product(dw4_tl,ref(indx-1:indx+2))
              dbetan =(r1em6/refXrad_s(j))*dot_product(dw4,ref_tl(indx-1:indx+2))
@@ -489,9 +490,9 @@ subroutine ufo_gnssro_bndnbam_simobs_tl(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-      write(err_msg,*) myname, ' trajectory was not set!'
+      write(err_msg,*) myname, " trajectory was not set!"
       call abor1_ftn(err_msg)
-  endif
+  end if
 
 
 if (geovals%nlocs > 0 ) then
@@ -499,13 +500,13 @@ if (geovals%nlocs > 0 ) then
 
 ! check if nlocs is consistent in geovals & hofx
   if (self%nlocs /= size(hofx)) then
-      write(err_msg,*) myname, ' error: nlocs inconsistent!'
+      write(err_msg,*) myname, " error: nlocs inconsistent!"
       call abor1_ftn(err_msg)
-  endif
+  end if
 
   call ufo_geovals_get_var(geovals, var_ts,  t_tl)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q_tl)         ! specific humidity
-  if (self%roconf%vertlayer .eq. "mass") then
+  if (self%roconf%vertlayer == "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs_tl)       ! pressure
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs_tl)       ! pressure
@@ -522,18 +523,18 @@ if (geovals%nlocs > 0 ) then
     do k = 1, nlev
        gesT_tl(k,:) = t_tl%vals(nlev-k+1,:)
        gesQ_tl(k,:) = q_tl%vals(nlev-k+1,:)
-    enddo
+    end do
     do k = 1, nlev1
        gesP_tl(k,:) = prs_tl%vals(nlev1-k+1,:)
-    enddo
+    end do
   else  ! not flipping
     do k =1, nlev
        gesT_tl(k,:) = t_tl%vals(k,:)
        gesQ_tl(k,:) = q_tl%vals(k,:)
-    enddo
+    end do
     do k =1, nlev1
        gesP_tl(k,:) = prs_tl%vals(k,:)
-    enddo
+    end do
   end if
 
 ! if all fields t and q are on mass layers,
@@ -542,7 +543,7 @@ if (geovals%nlocs > 0 ) then
      do k = nlev, 2, -1
         gesT_tl(k,:) = half* (gesT_tl(k,:) + gesT_tl(k-1,:))
         gesQ_tl(k,:) = half* (gesQ_tl(k,:) + gesQ_tl(k-1,:))
-     enddo
+     end do
   end if
 
   iobs = 0
@@ -585,22 +586,22 @@ subroutine ufo_gnssro_bndnbam_simobs_ad(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname, ' trajectory wasnt set!'
+     write(err_msg,*) myname, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 if (self%nlocs > 0 ) then
 
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-      write(err_msg,*) myname, ' error: nlocs inconsistent!'
+      write(err_msg,*) myname, " error: nlocs inconsistent!"
       call abor1_ftn(err_msg)
-  endif
+  end if
 
   call ufo_geovals_get_var(geovals, var_ts,  t_ad)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q_ad)         ! specific humidity
 
-  if (self%roconf%vertlayer .eq. "mass") then
+  if (self%roconf%vertlayer == "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs_ad)       ! pressure
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs_ad)       ! pressure
@@ -639,7 +640,7 @@ if (self%nlocs > 0 ) then
                gesT_ad(k,iobs)   = half*gesT_ad(k,iobs)
                gesQ_ad(k-1,iobs) = half*gesQ_ad(k,iobs) +  gesQ_ad(k-1,iobs)
                gesQ_ad(k,iobs)   = half*gesQ_ad(k,iobs)
-            enddo
+            end do
           end if
 
       end if
@@ -650,18 +651,18 @@ if (self%nlocs > 0 ) then
     do k = 1, nlev
        t_ad%vals(nlev-k+1,:) = gesT_ad(k,:)
        q_ad%vals(nlev-k+1,:) = gesQ_ad(k,:)
-    enddo
+    end do
     do k = 1, nlev1
        prs_ad%vals(nlev1-k+1,:) = gesP_ad(k,:)
-    enddo
+    end do
   else  ! not flipping
     do k =1, nlev
        t_ad%vals(k,:) = gesT_ad(k,:)
        q_ad%vals(k,:) = gesQ_ad(k,:)
-    enddo
+    end do
     do k =1, nlev1
        prs_ad%vals(k,:) = gesP_ad(k,:)
-    enddo
+    end do
   end if
 
   deallocate(gesT_ad)

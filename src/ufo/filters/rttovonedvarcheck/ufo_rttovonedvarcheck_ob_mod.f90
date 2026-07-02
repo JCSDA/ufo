@@ -43,7 +43,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   real(kind_real)      :: final_cost !< final cost at solution
   real(kind_real)      :: LWP !< retrieved liquid water path. This is output for future filters
   real(kind_real)      :: IWP !< retrieved ice water path. This is output for future filters
-  real(kind_real), allocatable :: clw(:) !< cloud liquid water profile. Currently used in Var 
+  real(kind_real), allocatable :: clw(:) !< cloud liquid water profile. Currently used in Var
   real(kind_real), allocatable :: yobs(:) !< satellite BTs
   real(kind_real), allocatable :: final_bt_diff(:) !< final bt difference if converged
   real(kind_real), allocatable :: emiss(:) !< surface emissivity
@@ -61,7 +61,7 @@ type, public :: ufo_rttovonedvarcheck_ob
   logical              :: QC_SlowConvChans !< qc flag for slow converging channels
   logical              :: rterror !< error when running rttov => exit and reject profile
   logical, allocatable :: calc_emiss(:) !< flag to decide if RTTOV calculates emissivity
-  type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object !< pointer to the IR pc emissivity object
+  type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object => null() !< pointer to the IR pc emissivity object
 
 contains
   procedure :: setup  => ufo_rttovonedvarcheck_InitOb
@@ -94,7 +94,7 @@ class(ufo_rttovonedvarcheck_ob), intent(out) :: self !< observation metadata typ
 integer, intent(in) :: nchans !< number of channels used for this particular observation
 integer, intent(in) :: nlevels !< number of levels in the profile
 integer, intent(in) :: nprofelements !< number of profile elements used
-integer :: nchans_all !< Size of all channels in ObsSpace
+integer, intent(in) :: nchans_all !< Size of all channels in ObsSpace
 logical, intent(in) :: storeclw
 logical, intent(in) :: storetransmittance
 real(kind_real) :: missing_real
@@ -120,11 +120,11 @@ allocate(self % calc_emiss(nchans_all))
 if (storeclw) then
   allocate(self % clw(nlevels))
   self % clw(:) = missing_real
-endif
+end if
 if (storetransmittance) then
   allocate(self % transmittance(nchans_all))
   self % transmittance(:) = missing_real
-endif
+end if
 self % yobs(:) = missing_real
 self % final_bt_diff(:) = missing_real
 self % emiss(:) = missing_real
@@ -246,9 +246,9 @@ write(*,"(10F8.2)") self % emiss(:)
 if (allocated(self % pcemiss)) then
   write(*,"(A)") "Emissivity PC: "
   write(*,"(10F18.8)") self % pcemiss(:)
-endif
+end if
 
-end subroutine
+end subroutine ufo_rttovonedvarcheck_PrintOb
 
 !-------------------------------------------------------------------------------
 

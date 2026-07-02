@@ -1,12 +1,12 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle gnssro refractivity observations
 
 module ufo_gnssro_refncep_mod
-  use fckit_configuration_module, only: fckit_configuration 
+  use fckit_configuration_module, only: fckit_configuration
   use kinds
   use ufo_vars_mod
   use ufo_geovals_mod
@@ -48,11 +48,11 @@ contains
       type(ufo_geovals),         intent(in)     :: geovals
       real(kind_real),           intent(inout)  :: hofx(:)
       type(c_ptr), value,        intent(in)     :: obss
-      
+
       character(len=*), parameter :: myname_="ufo_gnssro_refncep_simobs"
       character(max_string) :: err_msg
       integer           :: iobs,nlocs
-      real(kind_real)   :: wf 
+      real(kind_real)   :: wf
       integer           :: wi
       type(ufo_geoval), pointer    :: t,q,prs,gph
       real(kind_real)              :: refr1, refr2,refr3
@@ -61,9 +61,9 @@ contains
 
       ! check if nlocs is consistent in geovals & hofx
       if (geovals%nlocs /= size(hofx)) then
-        write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+        write(err_msg,*) myname_, " error: nlocs inconsistent!"
         call abor1_ftn(err_msg)
-      endif
+      end if
       ! get variables from geovals
       call ufo_geovals_get_var(geovals, var_prs, prs)
       call ufo_geovals_get_var(geovals, var_ts,t)
@@ -84,13 +84,13 @@ contains
       ! obs operator
       do iobs = 1, geovals%nlocs
 
-      !  Convert geometric height at observation to geopotential height 
+      !  Convert geometric height at observation to geopotential height
            call geometric2geop(obsLat(iobs), obsZ(iobs), obsH)
-           call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights 
+           call vert_interp_weights(gph%nval,obsH, gph%vals(:,iobs),wi,wf)  ! calculate weights
            call vert_interp_apply(t%nval,   t%vals(:,iobs), gesT, wi, wf)
            call vert_interp_apply(q%nval,   q%vals(:,iobs), gesQ, wi, wf)
 
-      !    use  hypsometric equation to calculate pressure 
+      !    use  hypsometric equation to calculate pressure
            gesTv  = 0.0
            gesTv0 = 0.0
            gesTv  = gesT*(one + (rv_over_rd-one)* (gesQ/(1-gesQ) ) )
@@ -100,9 +100,9 @@ contains
            refr2  = n_b*gesP*gesQ/ ( gesT**2 * ((rd_over_rv)+(1-(rd_over_rv))*gesQ) )
            refr3  = n_c*gesP*gesQ/ ( gesT    * ((rd_over_rv)+(1-(rd_over_rv))*gesQ) )
            hofx(iobs)  = refr1 + refr2 + refr3
-      enddo
+      end do
 
-      ! cleanup 
+      ! cleanup
       deallocate(obsZ)
       deallocate(obsLat)
     end subroutine ufo_gnssro_refncep_simobs

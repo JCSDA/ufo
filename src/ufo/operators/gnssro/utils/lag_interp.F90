@@ -1,6 +1,6 @@
 !> Fortran module to prepare for Lagrange polynomial interpolation.
 !> based on GSI: lagmod.f90
- 
+
 module lag_interp_mod
 
 use kinds, only: kind_real
@@ -21,7 +21,7 @@ public :: lag_interp_smthweights_TL
 contains
 
 subroutine lag_interp_const(q,x,n)
-! Precompute the N constant denominator factors of the N-point 
+! Precompute the N constant denominator factors of the N-point
 ! Lagrange polynomial interpolation formula.
 !
 ! input argument list:
@@ -42,8 +42,8 @@ DO i=1,n
    q(i)=one
    DO j=1,n
       IF(j /= i)q(i)=q(i)/(x(i)-x(j))
-   ENDDO
-ENDDO
+   END DO
+END DO
 end subroutine lag_interp_const
 
 
@@ -67,15 +67,15 @@ DO i=1,n
          rat=one/(x(i)-x(j))
          q_TL(i)=(q_TL(i)-q(i)*(x_TL(i)-x_TL(j))*rat)*rat
          q(i)=q(i)*rat
-      ENDIF
-   ENDDO
-ENDDO
+      END IF
+   END DO
+END DO
 end subroutine lag_interp_const_TL
 
 !============================================================================
 subroutine lag_interp_weights(x,xt,q,w,dw,n)
-! Construct the Lagrange weights and their derivatives when 
-! target abscissa is known and denominators Q have already 
+! Construct the Lagrange weights and their derivatives when
+! target abscissa is known and denominators Q have already
 ! been precomputed
 !
 ! input argument list:
@@ -104,7 +104,7 @@ do j=1,n-1
    d(j)=xt-x(j)
    pa (j+1)=pa (j)*d(j)
    dpa(j+1)=dpa(j)*d(j)+pa(j)
-enddo
+end do
 d(n)=xt-x(n)
 
 pb(n)=one
@@ -112,11 +112,11 @@ dpb(n)=zero
 do j=n,2,-1
    pb (j-1)=pb (j)*d(j)
    dpb(j-1)=dpb(j)*d(j)+pb(j)
-enddo
+end do
 do j=1,n
    w (j)= pa(j)*pb (j)*q(j)
    dw(j)=(pa(j)*dpb(j)+dpa(j)*pb(j))*q(j)
-enddo
+end do
 end subroutine lag_interp_weights
 
 
@@ -146,7 +146,7 @@ do j=1,n-1
    pa_TL (j+1)=pa_TL (j)*d(j)+pa(j)*d_TL(j)
    dpa   (j+1)=dpa   (j)*d(j)+pa(j)
    dpa_TL(j+1)=dpa_TL(j)*d(j)+dpa(j)*d_TL(j)+pa_TL(j)
-enddo
+end do
 d(n)=xt-x(n)
 d_TL(n)=-x_TL(n)
 
@@ -159,27 +159,27 @@ do j=n,2,-1
    pb_TL (j-1)=pb_TL (j)*d(j)+pb (j)*d_TL(j)
    dpb   (j-1)=dpb   (j)*d(j)+pb (j)
    dpb_TL(j-1)=dpb_TL(j)*d(j)+dpb(j)*d_TL(j)+pb_TL(j)
-enddo
+end do
 do j=1,n
    w    (j)= pa   (j)*pb (j)*q(j)
    dw   (j)=(pa   (j)*dpb(j)+dpa(j)*pb    (j))*q(j)
    w_TL (j)=(pa_TL(j)*pb (j)+pa (j)*pb_TL (j))*q(j)+pa(j)*pb(j)*q_TL(j)
    dw_TL(j)=(pa_TL(j)*dpb(j)+pa (j)*dpb_TL(j)+dpa_TL(j)*pb(j)+dpa(j)*pb_TL(j))*q(j)+ &
             (pa   (j)*dpb(j)+dpa(j)*pb    (j))*q_TL(j)
-enddo
+end do
 end subroutine lag_interp_weights_TL
 
 !============================================================================
 subroutine lag_interp_smthWeights(x,xt,aq,bq,w,dw,n)
-! Construct weights and their derivatives for interpolation 
-! to a given target based on a linearly weighted mixture of 
-! the pair of Lagrange interpolators which omit the respective 
-! end points of the source nodes provided. The number of source 
-! points provided must be even and the nominal target interval 
-! is the unique central one. The linear weighting pair is 
-! determined by the relative location of the target within 
-! this central interval, or else the extreme values, 0 and 1, 
-! when target lies outside this interval.  The objective is to 
+! Construct weights and their derivatives for interpolation
+! to a given target based on a linearly weighted mixture of
+! the pair of Lagrange interpolators which omit the respective
+! end points of the source nodes provided. The number of source
+! points provided must be even and the nominal target interval
+! is the unique central one. The linear weighting pair is
+! determined by the relative location of the target within
+! this central interval, or else the extreme values, 0 and 1,
+! when target lies outside this interval.  The objective is to
 ! provide an interpolator whose derivative is continuous.
 !============================================================================
 IMPLICIT NONE
@@ -201,7 +201,7 @@ daw(n)=zero
 bw(1)=zero
 dbw(1)=zero
 na=n/2
-IF(na*2 /= n)STOP 'In lag_interp_smthWeights; n must be even'
+IF(na*2 /= n)STOP "In lag_interp_smthWeights; n must be even"
 xa =x(na     )
 xb =x(na+1)
 dwb=one/(xb-xa)
@@ -209,10 +209,10 @@ wb =(xt-xa)*dwb
 IF(wb>one )THEN
    wb =one
    dwb=zero
-ELSEIF(wb<zero)THEN
+ELSE IF(wb<zero)THEN
    wb =zero
    dwb=zero
-ENDIF
+END IF
 
 bw =bw -aw
 dbw=dbw-daw
@@ -252,7 +252,7 @@ daw_TL(n)=zero
 bw_TL(1) =zero
 dbw_TL(1)=zero
 na=n/2
-IF(na*2 /= n)STOP 'In lag_interp_smthWeights; n must be even'
+IF(na*2 /= n)STOP "In lag_interp_smthWeights; n must be even"
 xa   =x   (na)
 xa_TL=x_TL(na)
 xb   =x   (na+1)
@@ -266,12 +266,12 @@ IF(wb > one)THEN
    dwb   =zero
    wb_TL =zero
    dwb_TL=zero
-ELSEIF(wb < zero)THEN
+ELSE IF(wb < zero)THEN
    wb    =zero
    dwb   =zero
    wb_TL =zero
    dwb_TL=zero
-ENDIF
+END IF
 
 bw    =bw    -aw
 bw_TL =bw_TL -aw_TL

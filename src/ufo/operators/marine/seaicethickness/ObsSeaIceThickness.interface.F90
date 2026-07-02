@@ -8,9 +8,9 @@
 
 module ufo_seaicethickness_mod_c
 
-  use fckit_configuration_module, only: fckit_configuration 
-  use iso_c_binding
-  use ufo_seaicethickness_mod 
+  use fckit_configuration_module, only: fckit_configuration
+  use, intrinsic :: iso_c_binding
+  use ufo_seaicethickness_mod
   implicit none
   private
 
@@ -33,12 +33,12 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seaicethickness_setup_c(c_key_self, c_conf, c_obsvars) bind(c,name='ufo_seaicethickness_setup_f90')
+subroutine ufo_seaicethickness_setup_c(c_key_self, c_conf, c_obsvars) bind(c,name="ufo_seaicethickness_setup_f90")
 use obs_variables_mod
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
-type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated                                                        
+type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
 
 type(ufo_seaicethickness), pointer :: self
 type(fckit_configuration) :: f_conf
@@ -56,10 +56,10 @@ end subroutine ufo_seaicethickness_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_seaicethickness_delete_c(c_key_self) bind(c,name='ufo_seaicethickness_delete_f90')
+subroutine ufo_seaicethickness_delete_c(c_key_self) bind(c,name="ufo_seaicethickness_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_seaicethickness), pointer :: self
 
 call ufo_seaicethickness_registry%get(c_key_self, self)
@@ -73,7 +73,7 @@ end subroutine ufo_seaicethickness_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_seaicethickness_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
-    bind(c,name='ufo_seaicethickness_simobs_f90')
+    bind(c,name="ufo_seaicethickness_simobs_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

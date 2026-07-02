@@ -8,9 +8,9 @@
 
 module ufo_CoolSkin_mod_c
 
-  use fckit_configuration_module, only: fckit_configuration 
-  use iso_c_binding
-  use ufo_CoolSkin_mod 
+  use fckit_configuration_module, only: fckit_configuration
+  use, intrinsic :: iso_c_binding
+  use ufo_CoolSkin_mod
   implicit none
   private
 
@@ -33,7 +33,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_CoolSkin_setup_c(c_key_self, c_conf) bind(c,name='ufo_CoolSkin_setup_f90')
+subroutine ufo_CoolSkin_setup_c(c_key_self, c_conf) bind(c,name="ufo_CoolSkin_setup_f90")
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in) :: c_conf
@@ -52,10 +52,10 @@ end subroutine ufo_CoolSkin_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_CoolSkin_delete_c(c_key_self) bind(c,name='ufo_CoolSkin_delete_f90')
+subroutine ufo_CoolSkin_delete_c(c_key_self) bind(c,name="ufo_CoolSkin_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
-    
+
 type(ufo_CoolSkin), pointer :: self
 
 call ufo_CoolSkin_registry%get(c_key_self, self)
@@ -68,7 +68,7 @@ end subroutine ufo_CoolSkin_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_CoolSkin_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name='ufo_CoolSkin_simobs_f90')
+subroutine ufo_CoolSkin_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) bind(c,name="ufo_CoolSkin_simobs_f90")
 
 implicit none
 integer(c_int), intent(in) :: c_key_self

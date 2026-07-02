@@ -12,7 +12,7 @@ module ufo_columnretrieval_tlad_mod
   use ufo_geovals_mod
   use missing_values_mod
   use kinds
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
 
   implicit none
   private
@@ -88,7 +88,7 @@ end subroutine destructor
 
 ! ------------------------------------------------------------------------------
 subroutine columnretrieval_tlad_settraj_(self, geovals_in, obss)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use ufo_constants_mod, only: one
   use obsspace_mod
@@ -149,7 +149,7 @@ end subroutine columnretrieval_tlad_settraj_
 
 ! ------------------------------------------------------------------------------
 subroutine columnretrieval_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hofx)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use obsspace_mod
   use satcolumn_mod, only: simulate_column_ob_tl
@@ -189,7 +189,7 @@ end subroutine columnretrieval_simobs_tl_
 
 ! ------------------------------------------------------------------------------
 subroutine columnretrieval_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx)
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   use satcolumn_mod, only: simulate_column_ob_ad
   use obsspace_mod
@@ -217,7 +217,7 @@ subroutine columnretrieval_simobs_ad_(self, geovals_in, obss, nvars, nlocs, hofx
       call simulate_column_ob_ad(self%nlayers_retrieval, tracer%nval, &
                                  self%avgkernel_obs(:,iobs), &
                                  self%prsi_obs(:,iobs), self%prsi(:,iobs),&
-                                 tracer%vals(:,iobs), hofx_tmp, self%stretch, & 
+                                 tracer%vals(:,iobs), hofx_tmp, self%stretch, &
                                  self%tropopause)
       tracer%vals(:,iobs) = tracer%vals(:,iobs) * self%convert_factor_model
     end if

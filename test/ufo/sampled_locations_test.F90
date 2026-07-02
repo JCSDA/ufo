@@ -6,7 +6,7 @@
 !
 module test_sampled_locations
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 
 implicit none
 private
@@ -17,7 +17,7 @@ contains
 !> Tests whether latitudes and longitudes from ufo::SampledLocations object
 !! are matching references in yaml file
 integer function test_sampled_locations_lonslats_c(c_locs, c_conf) &
-  bind(c,name='test_sampled_locations_lonslats_f90')
+  bind(c,name="test_sampled_locations_lonslats_f90")
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only: fckit_log
 use ufo_sampled_locations_mod
@@ -29,7 +29,7 @@ type(c_ptr), value, intent(in) :: c_conf  !< test configuration (described in Sa
 type(ufo_sampled_locations) :: locs
 type(fckit_configuration) :: f_conf
 integer :: npaths, ipath
-real    :: tolerance = 1.e-8
+real, parameter :: tolerance = 1.e-8
 real(c_double), dimension(:), allocatable :: lons_ref, lats_ref, lons, lats
 character(len=200) :: logmessage
 
@@ -53,7 +53,7 @@ do ipath = 1, npaths
   call fckit_log%debug(logmessage)
   write(logmessage, *) "lats: path and ref: ", lats(ipath), ", ", lats_ref(ipath)
   call fckit_log%debug(logmessage)
-enddo
+end do
 
 !> compare to reference
 if(any(abs(lons-lons_ref) > tolerance)) test_sampled_locations_lonslats_c = 0
@@ -69,7 +69,7 @@ end function test_sampled_locations_lonslats_c
 !> Tests whether ufo::SampledLocations time mask method results
 !! are matching references in yaml file
 integer function test_sampled_locations_timemask_c(c_locs, c_conf) &
-  bind(c,name='test_sampled_locations_timemask_f90')
+  bind(c,name="test_sampled_locations_timemask_f90")
 use fckit_configuration_module, only: fckit_configuration
 use fckit_log_module, only: fckit_log
 use datetime_mod
@@ -113,14 +113,14 @@ do itest = 1, size(testconfigs)
   do ipath = 1, npaths
     write(logmessage, *) "mask: path and ref: ", mask(ipath), ", ", mask_ref(ipath)
     call fckit_log%debug(logmessage)
-  enddo
+  end do
 
   !> compare to reference
   if(any(mask .neqv. mask_ref)) test_sampled_locations_timemask_c = 0
 
   deallocate(mask)
 
-enddo
+end do
 
 end function test_sampled_locations_timemask_c
 

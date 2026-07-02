@@ -1,40 +1,40 @@
 ! (C) Copyright 2017 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to handle ground-based gnss observations ROPP operator
 
 module ufo_groundgnss_ropp_mod_c
-  
-  use fckit_configuration_module, only: fckit_configuration 
-  use iso_c_binding
+
+  use fckit_configuration_module, only: fckit_configuration
+  use, intrinsic :: iso_c_binding
   use ufo_groundgnss_ropp_mod
 
   implicit none
   private
-  
+
 #define LISTED_TYPE ufo_groundgnss_ROPP
-  
+
   !> Linked list interface - defines registry_t type
 #include "oops/util/linkedList_i.f"
-  
+
   !> Global registry
   type(registry_t) :: ufo_groundgnss_ROPP_registry
-  
+
   ! ------------------------------------------------------------------------------
 contains
   ! ------------------------------------------------------------------------------
   !> Linked list implementation
 #include "oops/util/linkedList_c.f"
-  
+
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_groundgnss_ropp_setup_c(c_key_self, c_conf) bind(c,name='ufo_groundgnss_ropp_setup_f90')
+
+subroutine ufo_groundgnss_ropp_setup_c(c_key_self, c_conf) bind(c,name="ufo_groundgnss_ropp_setup_f90")
 implicit none
 integer(c_int),     intent(inout)  :: c_key_self
 type(c_ptr), value, intent(in)     :: c_conf
-    
+
 type(ufo_groundgnss_ROPP), pointer :: self
 type(fckit_configuration)          :: f_conf
 
@@ -44,21 +44,21 @@ f_conf = fckit_configuration(c_conf)
 call f_conf%final()
 
 end subroutine ufo_groundgnss_ROPP_setup_c
-  
+
 ! ------------------------------------------------------------------------------
-  
-subroutine ufo_groundgnss_ropp_delete_c(c_key_self) bind(c,name='ufo_groundgnss_ropp_delete_f90')
+
+subroutine ufo_groundgnss_ropp_delete_c(c_key_self) bind(c,name="ufo_groundgnss_ropp_delete_f90")
 implicit none
 integer(c_int), intent(inout)      :: c_key_self
 
 call ufo_groundgnss_ROPP_registry%remove(c_key_self)
 
 end subroutine ufo_groundgnss_ropp_delete_c
-  
+
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_groundgnss_ropp_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nobs, c_hofx) &
-    bind(c,name='ufo_groundgnss_ropp_simobs_f90')
+    bind(c,name="ufo_groundgnss_ropp_simobs_f90")
 
 implicit none
 integer(c_int),     intent(in)     :: c_key_self

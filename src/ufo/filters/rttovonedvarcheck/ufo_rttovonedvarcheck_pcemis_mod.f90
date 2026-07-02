@@ -6,7 +6,7 @@
 !> Fortran module which contains the methods for Infrared
 !> Principal Component Emissivity
 !> The science can be found at:
-!> Pavelin, E., Candy, B., 2014. Assimilation of surface-sensitive infrared radiances over land: 
+!> Pavelin, E., Candy, B., 2014. Assimilation of surface-sensitive infrared radiances over land:
 !> Estimation of land surface temperature and emissivity. Q. J. R. Metorol. Soc., 140, 1198-1208.
 
 module ufo_rttovonedvarcheck_pcemis_mod
@@ -93,7 +93,7 @@ end if
 
 self % initialised = .true.
 
-! Read in emissivity atlas if file path present - 
+! Read in emissivity atlas if file path present -
 ! if not a first guess will be used from eigenvector file
 if (present(atlaspath)) then
   inquire(file=trim(atlaspath), exist=file_exists)
@@ -143,6 +143,12 @@ open(unit = fileunit, file = trim(filepath))
 
 read(fileunit, *, iostat = readstatus) eigversion, self % emis_eigen % Nchans, &
                                        self % emis_eigen % NumEV
+! Has there been an error in the read?
+if (readstatus /= 0) then
+  write(message,*) RoutineName,  &
+       "Problem reading in emis eigenvectors - please check the file "
+  call abor1_ftn(message)
+end if
 
 allocate (self % emis_eigen % Channels( self % emis_eigen % Nchans))
 allocate (self % emis_eigen % Mean( self % emis_eigen % Nchans))
@@ -158,21 +164,27 @@ end if
 ! 2. Read the channels, mean emissivities and eigenvectors
 !--------------------------------------------------------
 
-read (fileunit, *, iostat = readstatus) self % emis_eigen % Channels(:)
-read (fileunit, *, iostat = readstatus) self % emis_eigen % Mean(:)
-read (fileunit, *, iostat = readstatus) self % emis_eigen % PCmin(:)
-read (fileunit, *, iostat = readstatus) self % emis_eigen % PCmax(:)
-read (fileunit, *, iostat = readstatus) self % emis_eigen % PCguess(:)
-do i = 1, self % emis_eigen % NumEV
-  read (fileunit, *, iostat = readstatus) self % emis_eigen % EV(i,:)
-end do
-
+read (fileunit, *, iostat = readstatus) &
+  self % emis_eigen % Channels(:), &
+  self % emis_eigen % Mean(:), &
+  self % emis_eigen % PCmin(:), &
+  self % emis_eigen % PCmax(:), &
+  self % emis_eigen % PCguess(:)
 ! Has there been an error in the read?
 if (readstatus /= 0) then
   write(message,*) RoutineName,  &
-       'Problem reading in emis eigenvectors - please check the file '
+       "Problem reading in emis eigenvectors - please check the file "
   call abor1_ftn(message)
 end if
+do i = 1, self % emis_eigen % NumEV
+  read (fileunit, *, iostat = readstatus) self % emis_eigen % EV(i,:)
+  ! Has there been an error in the read?
+  if (readstatus /= 0) then
+    write(message,*) RoutineName,  &
+         "Problem reading in emis eigenvectors - please check the file "
+    call abor1_ftn(message)
+  end if
+end do
 
 if (eigversion >= 2) then
   do i = 1, self % emis_eigen % Nchans
@@ -181,14 +193,14 @@ if (eigversion >= 2) then
   ! Has there been an error in the read?
   if (readstatus /= 0) then
     write(message,*) RoutineName,  &
-         'Problem reading in inverse emis eigenvectors - please check the file '
+         "Problem reading in inverse emis eigenvectors - please check the file "
     call abor1_ftn(message)
   end if
 end if
 
-write(*, '(A,I0,A,I0,A)') 'Finished reading ',self % emis_eigen % NumEV, &
-                          ' emissivity eigenvectors on ', &
-                           self % emis_eigen % Nchans,' channels.'
+write(*, "(A,I0,A,I0,A)") "Finished reading ",self % emis_eigen % NumEV, &
+                          " emissivity eigenvectors on ", &
+                           self % emis_eigen % Nchans," channels."
 
 close(unit = fileunit)
 
@@ -230,6 +242,12 @@ read (fileunit, *, iostat = readstatus) self % emis_atlas % Nlat, &
                                         self % emis_atlas % Nlon, &
                                         self % emis_atlas % Npc, &
                                         self % emis_atlas % gridstep
+! Has there been an error in the read?
+if (readstatus /= 0) then
+  write(message,*) RoutineName,  &
+       "Problem reading in EmisAtlas - please check the file"
+  call abor1_ftn(message)
+end if
 
 allocate (self % emis_atlas % EmisPC(self % emis_atlas % Nlon, &
                                      self % emis_atlas % Nlat, &
@@ -241,19 +259,18 @@ allocate (self % emis_atlas % EmisPC(self % emis_atlas % Nlon, &
 
 do i = 1, self % emis_atlas % nlon
   do j = 1, self % emis_atlas % nlat
-    read (fileunit, '(12F10.6)', iostat = readstatus) self % emis_atlas % EmisPC(i,j,:)
+    read (fileunit, "(12F10.6)", iostat = readstatus) self % emis_atlas % EmisPC(i,j,:)
+    ! Has there been an error in the read?
+    if (readstatus /= 0) then
+      write(message,*) RoutineName,  &
+           "Problem reading in EmisAtlas - please check the file"
+      call abor1_ftn(message)
+    end if
   end do
 end do
 
-! Has there been an error in the read?
-if (readstatus /= 0) then
-  write(message,*) RoutineName,  &
-       'Problem reading in EmisAtlas - please check the file'
-  call abor1_ftn(message)
-else
-  write (*, '(A,I0,A)') 'Finished reading IR emissivity atlas with ', &
-                         self % emis_atlas % Npc, ' principal components.'
-end if
+write (*, "(A,I0,A)") "Finished reading IR emissivity atlas with ", &
+                       self % emis_atlas % Npc, " principal components."
 
 close(unit = fileunit)
 
@@ -339,8 +356,9 @@ character(len=max_string)   :: message
 integer, allocatable        :: ChannelIndex(:)
 
 ! Check the input
-if (size(Channels) /= size(Emissivity) ) &
+if (size(Channels) /= size(Emissivity) ) then
   call abor1_ftn("ufo_rttovonedvarcheck_EmisToPC: channels and emissivity not the same size: aborting")
+end if
 
 ! Create the input channel to pc emissivity index mapping
 allocate(ChannelIndex(size(Channels)))
@@ -362,7 +380,7 @@ if (allocated(self % emis_eigen % EV_Inverse)) then
 else
 
   write(message, *) RoutineName,                             &
-                 ' Missing inverse eigenvector matrix - cannot convert emissivities to PCs'
+                 " Missing inverse eigenvector matrix - cannot convert emissivities to PCs"
   call abor1_ftn(message)
 
 end if
@@ -401,14 +419,17 @@ real(kind_real)             :: BigPC(NumChans)
 integer                     :: ChannelIndex(NumChans)
 
 ! Check the input
-if (size(Channels) /= NumChans ) &
+if (size(Channels) /= NumChans ) then
   call abor1_ftn("rttovonedvarcheck PCToEmis: channels not of size NumChans: aborting")
+end if
 
-if (size(PC) /= NumPC) &
+if (size(PC) /= NumPC) then
   call abor1_ftn("rttovonedvarcheck PCToEmis: PC not of size NumPC: aborting")
+end if
 
-if (size(Emissivity) /= NumChans) &
+if (size(Emissivity) /= NumChans) then
   call abor1_ftn("rttovonedvarcheck PCToEmis: emissivity not of size NumChans: aborting")
+end if
 
 ! Create the input channel to pc emissivity index mapping
 call self % mapchannels(Channels, ChannelIndex)
@@ -466,17 +487,21 @@ integer                     :: ichan
 integer                     :: ChannelIndex(NumChans)
 
 ! Check the input
-if (size(Channels) /= NumChans ) &
+if (size(Channels) /= NumChans ) then
   call abor1_ftn("rttovonedvarcheck EmisKToPC: channels not of size NumChans: aborting")
+end if
 
-if (size(Emissivity) /= NumChans) &
+if (size(Emissivity) /= NumChans) then
   call abor1_ftn("rttovonedvarcheck EmisKToPC: emissivity not of size NumChans: aborting")
+end if
 
-if (size(Emissivity_K) /= NumChans) &
+if (size(Emissivity_K) /= NumChans) then
   call abor1_ftn("rttovonedvarcheck EmisKToPC: emissivity_k not of size NumChans: aborting")
+end if
 
-if (size(PC_K,1) /= NumChans .or. size(PC_K,2) /= NumPC) &
+if (size(PC_K,1) /= NumChans .or. size(PC_K,2) /= NumPC) then
   call abor1_ftn("rttovonedvarcheck EmisKToPC: PC_K not of size NumChans x NumPC: aborting")
+end if
 
 ! Create the input channel to pc emissivity index mapping
 call self % mapchannels(Channels, ChannelIndex)

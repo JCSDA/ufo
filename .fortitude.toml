@@ -1,0 +1,28 @@
+[check]
+ignore=[
+    "C121", # use-all
+]
+line-length=190
+target-std="f2008"
+
+[check.per-file-ignores]
+"src/ufo/operators/crtm/ufo_aodcrtm_*mod.F90" = [
+    "C182", # multiple-allocations-with-stat
+]
+"src/ufo/operators/crtm/ufo_crtm_passive_mod.F90" = [
+    "E001", # syntax-error
+]
+"src/ufo/operators/crtm/ufo_crtm_utils_mod.F90" = [
+    "C011", # missing-default-case
+    "C072", # assumed-size-character-intent
+]
+"src/ufo/operators/crtm/ufo_radiancecrtm_*mod.F90" = [
+    "C011", # missing-default-case
+    "C182", # multiple-allocations-with-stat
+]
+"src/ufo/operators/radarreflectivity/directZDA/radarZ_module.f90" = [
+    "C011", # missing-default-case
+]
+"src/ufo/operators/rttov/Fortran/*/ufo_radiancerttov_tlad_mod.F90" = [
+    "C011", # missing-default-case
+]

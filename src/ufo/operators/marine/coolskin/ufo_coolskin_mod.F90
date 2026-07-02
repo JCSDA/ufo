@@ -7,8 +7,8 @@
 
 module ufo_coolskin_mod
 
- use fckit_configuration_module, only: fckit_configuration 
- use iso_c_binding
+ use fckit_configuration_module, only: fckit_configuration
+ use, intrinsic :: iso_c_binding
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -69,26 +69,26 @@ implicit none
 
     ! Set missing flag
     missing = missing_value(missing)
-    
+
     ! check if nobs is consistent in geovals & hofx
     obss_nlocs = obsspace_get_nlocs(obss)
 
     !nlocs = size(hofx,1)
     if (geovals%nlocs /= size(hofx,1)) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+       write(err_msg,*) myname_, " error: nobs inconsistent!"
        call abor1_ftn(err_msg)
-    endif
+    end if
 
     ! check if coolskin input variables are in geovals and get them
 
     call ufo_geovals_get_var(geovals, var_ocn_sst, Td)
-    call ufo_geovals_get_var(geovals, var_sw_rad , R_nl )	
+    call ufo_geovals_get_var(geovals, var_sw_rad , R_nl )
     call ufo_geovals_get_var(geovals, var_latent_heat , H_I )
-    call ufo_geovals_get_var(geovals, var_sens_heat , H_s )	
+    call ufo_geovals_get_var(geovals, var_sens_heat , H_s )
     call ufo_geovals_get_var(geovals, var_lw_rad , S_ns )
     call ufo_geovals_get_var(geovals, var_sea_fric_vel , u )
-    
-    ! simulated obs, hofx(iobs)=Ts 
+
+    ! simulated obs, hofx(iobs)=Ts
     do iobs = 1, obss_nlocs
       ! check for missing values
       ! (the atmospheric fields *shouldn't* be masked, so dont
@@ -107,9 +107,9 @@ implicit none
                              R_nl%vals(1,iobs),&
                              Td%vals(1,iobs),&
                              u%vals(1,iobs))
-    enddo
+    end do
 
-    
+
   end subroutine ufo_coolskin_simobs
 
 

@@ -8,7 +8,7 @@
 module ufo_insitutemperature_mod
 
 use gsw_pot_to_insitu
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use obsspace_mod
 use oops_variables_mod
@@ -89,7 +89,7 @@ subroutine ufo_insitutemperature_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
    outer: do iobs = 1, nlocs
       ! if any values in the the geovals profile are missing, skip
-      ! TODO: be less restrictive if there is the possibility of partially 
+      ! TODO: be less restrictive if there is the possibility of partially
       !  missing geoval profiles? (probably would never happen)
       do ilev = 1, temp%nval
          if (temp%vals(ilev,iobs) == missing .or. &

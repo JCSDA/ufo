@@ -7,7 +7,7 @@
 
 module ufo_insitutemperature_tlad_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use missing_values_mod
 use obsspace_mod
@@ -111,7 +111,7 @@ subroutine ufo_insitutemperature_tlad_settraj(self, geovals, obss)
    allocate(self%salto(self%nlocs))
    outer: do iobs = 1, self%nlocs
       ! if any values in the the geovals profile are missing, skip
-      ! TODO: be less restrictive if there is the possibility of partially 
+      ! TODO: be less restrictive if there is the possibility of partially
       !  missing geoval profiles? (probably would never happen)
       do ilev = 1, temp%nval
          if (temp%vals(ilev,iobs) == missing .or. &

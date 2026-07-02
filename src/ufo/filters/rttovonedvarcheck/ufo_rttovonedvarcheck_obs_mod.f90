@@ -10,7 +10,7 @@ module ufo_rttovonedvarcheck_obs_mod
 use datetime_mod, only: datetime
 use fckit_exception_module, only: fckit_exception
 use kinds
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use missing_values_mod
 use obsspace_mod
 use oops_variables_mod
@@ -64,7 +64,7 @@ logical                      :: Store1DVarTransmittance !  flag to output the su
 real(kind_real), allocatable :: emiss(:,:)      ! initial surface emissivity
 logical, allocatable         :: calc_emiss(:)   ! flag to request RTTOV calculate first guess emissivity
 real(kind_real), allocatable :: mwemisserr(:,:) ! surface emissivity error from atlas
-type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object ! Infrared principal components object
+type(ufo_rttovonedvarcheck_pcemis), pointer :: pcemiss_object => null() ! Infrared principal components object
 real(kind_real), allocatable :: pcemiss(:,:)    ! principal component emissivity array
 logical, allocatable         :: output_to_db(:)   ! flag to output data for this profile
 
@@ -73,7 +73,7 @@ contains
   procedure :: delete => ufo_rttovonedvarcheck_obs_delete
   procedure :: output => ufo_rttovonedvarcheck_obs_output
 
-end type
+end type ufo_rttovonedvarcheck_obs
 
 interface put_1d_indb
   module procedure put_1dint_indb
@@ -110,7 +110,7 @@ integer                     :: missing_int
 integer                     :: jvar, iloc , jobs   !< counters
 character(len=max_string)   :: var
 character(len=200)          :: message
-logical                     :: variable_present = .false.
+logical                     :: variable_present
 type(ufo_geoval), pointer   :: geoval
 integer                     :: numpc
 
@@ -201,9 +201,9 @@ do jobs = 1, self % iloc
   do jvar = 1, config % nchans
     if (self % ybias(jvar, jobs) == missing_real) then
       self % ybias(jvar, jobs) = zero
-    endif
-  enddo
-enddo
+    end if
+  end do
+end do
 
 ! Subtract bias from the observations (apply bias correction)
 self % yobs = self % yobs - self % ybias
@@ -262,12 +262,12 @@ end if
 ! Read in elevation for all obs
 if (obsspace_has(config % obsdb, "MetaData", "heightOfSurface")) then
   call obsspace_get_db(config % obsdb, "MetaData", "heightOfSurface", self % elevation(:))
-else if (ufo_vars_getindex(geovals % variables, 'height_above_mean_sea_level_at_surface') > 0) then
-  call ufo_geovals_get_var(geovals, 'height_above_mean_sea_level_at_surface', geoval)
+else if (ufo_vars_getindex(geovals % variables, "height_above_mean_sea_level_at_surface") > 0) then
+  call ufo_geovals_get_var(geovals, "height_above_mean_sea_level_at_surface", geoval)
   self % elevation(:) = geoval%vals(1, :)
 else
   self % elevation(:) = zero
-endif
+end if
 
 ! Copy channels from config
 self % channels(:) = config % channels(:)
@@ -278,12 +278,12 @@ if (obsspace_has(config % obsdb, "MetaData", "surfaceQualifier")) then
 else
   call ufo_geovals_get_var(geovals, "surface_type", geoval)
   self % surface_type(:) = geoval%vals(1, :)
-endif
+end if
 
 ! Read in satellite identifier
 if (obsspace_has(config % obsdb, "MetaData", "satelliteIdentifier")) then
   call obsspace_get_db(config % obsdb, "MetaData", "satelliteIdentifier", self % satellite_identifier(:))
-endif
+end if
 
 ! Read in skin temperature from the obs space
 if (config % skinTemperatureFromObsSpace) then
@@ -294,7 +294,7 @@ if (config % skinTemperatureFromObsSpace) then
                       "but the array MetaData/skinTemperature is not present ", &
                       "=> aborting."
     call fckit_exception % throw(message)
-  endif
+  end if
 end if
 
 ! Setup surface emissivity
@@ -449,7 +449,7 @@ implicit none
 
 ! subroutine arguments:
 class(ufo_rttovonedvarcheck_obs), intent(inout) :: self !< observation metadata type
-type(ufo_rttovonedvarcheck) :: config  !< main object containing configuration
+type(ufo_rttovonedvarcheck), intent(in) :: config  !< main object containing configuration
 integer, intent(in) :: nemisspc
 type(oops_variables), intent(in) :: vars
 
@@ -513,14 +513,14 @@ if (self % pcemiss_object % initialised) then
           !END IF
         end if
 
-      else ! If no atlas present, use PCGuess.        
+      else ! If no atlas present, use PCGuess.
         if (len(trim(config % EmissGroupInObsSpace)) > 0) then
           call ufo_rttovonedvarcheck_obs_ReadFromDB(self, config, vars, .false.)
           call self % pcemiss_object % emistopc(self % channels, &
                                          self % emiss(:, i), self % pcemiss(:, i))
         else
           self % pcemiss(:,i) = self % pcemiss_object % emis_eigen % PCGuess(1:nemisspc)
-        endif
+        end if
       end if
 
       ! If over sea make sure that emissivity is done by rttov
@@ -587,7 +587,7 @@ do jvar = 1, nchans
   if (self % Store1DVarTransmittance) then
     write(var,"(A14,I0)") "transmittance_",self % channels(jvar)
     call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % transmittance(jvar,:))
-  endif
+  end if
 end do
 
 ! Output Diagnostics

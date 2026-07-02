@@ -93,20 +93,20 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
   nlocs   = obsspace_get_nlocs(obss) ! number of observations
   nrecs   = obsspace_get_nrecs(obss) ! number of records/profiles
-  write(err_msg,*) myname, ': nlocs from gelvals and hofx, nrecs', geovals%nlocs, nlocs, nrecs
+  write(err_msg,*) myname, ": nlocs from gelvals and hofx, nrecs", geovals%nlocs, nlocs, nrecs
   call fckit_log%debug(err_msg)
   missing = missing_value(missing)
 
   allocate(temperature(nlocs))
   temperature = missing
-  if (trim(self%roconf%output_diags) .eq. "true") then
+  if (trim(self%roconf%output_diags) == "true") then
      allocate(humidity(nlocs))      ! at obs location
      allocate(pressure(nlocs))      ! at obs location
      allocate(refractivity(nlocs))  ! at obs location
      humidity = missing
      pressure = missing
      refractivity = missing
-  endif
+  end if
   allocate(super_refraction_flag(nlocs))
   super_refraction_flag = 0
   allocate(LayerIdx(nlocs))
@@ -117,26 +117,26 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 
 ! check if nobs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-    write(err_msg,*) myname, ': nlocs inconsistent!', geovals%nlocs, size(hofx)
+    write(err_msg,*) myname, ": nlocs inconsistent!", geovals%nlocs, size(hofx)
     call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,  t)         ! air temperature
   call ufo_geovals_get_var(geovals, var_q,   q)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_sfc_geomz, zs)  ! surface geopotential height/surface altitude
 
-  if (self%roconf%vertlayer .eq. "mass") then
+  if (self%roconf%vertlayer == "mass") then
     call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
-  else if (self%roconf%vertlayer .eq. "full") then
+  else if (self%roconf%vertlayer == "full") then
     call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_zi,    gph)       ! geopotential height
   else
     call ufo_geovals_get_var(geovals, var_prsi,  prs)       ! pressure
     call ufo_geovals_get_var(geovals, var_zi,    gph)
-    write(err_msg,*) myname,': vertlayer has to be mass of full, '//new_line('a')// &
-                            '  will use full layer anyway'
+    write(err_msg,*) myname,": vertlayer has to be mass of full, "//new_line("a")// &
+                            "  will use full layer anyway"
     call fckit_log%info(err_msg)
   end if
 
@@ -151,31 +151,31 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   allocate(gesZs(nlocs))
 
 ! copy geovals to local background arrays
-  if (prs%vals(1,1) .lt. prs%vals(prs%nval,1) ) then
-    write(err_msg,'(a)')'  ufo_gnssro_bndnbam_simobs:'//new_line('a')//                         &
-                         '  Model vertical height profile is in descending order,'//new_line('a')// &
-                         '  but bndNBAM requires it to be ascending order, need flip'
+  if (prs%vals(1,1) < prs%vals(prs%nval,1) ) then
+    write(err_msg,"(a)")"  ufo_gnssro_bndnbam_simobs:"//new_line("a")//                         &
+                         "  Model vertical height profile is in descending order,"//new_line("a")// &
+                         "  but bndNBAM requires it to be ascending order, need flip"
     call fckit_log%debug(err_msg)
     do k=1, nlev
        gesT(k,:) = t%vals(nlev-k+1,:)
        gesQ(k,:) = q%vals(nlev-k+1,:)
        gesTv(k,:)= gesT(k,:)*(1+gesQ(k,:)*(rv_over_rd-1))
-    enddo
+    end do
     do k=1, nlev1
        gesP(k,:) = prs%vals(nlev1-k+1,:)
        gesZ(k,:) = gph%vals(nlev1-k+1,:)
-    enddo
+    end do
   else  ! not flipping
     do k=1, nlev
        gesT(k,:)  = t%vals(k,:)
        gesQ(k,:)  = q%vals(k,:)
        gesTv(k,:) = gesT(k,:)*(1+gesQ(k,:)*(rv_over_rd-1))
-    enddo
+    end do
 
     do k=1, nlev1
        gesP(k,:) = prs%vals(k,:)
        gesZ(k,:) = gph%vals(k,:)
-    enddo
+    end do
   end if
        gesZs(:) = zs%vals(1,:)
 
@@ -190,7 +190,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 !       to exactly reproduce nbam, t is converted to tv, tv mean is calcualted,
 !       then tv mean is converted to t mean
         gesT(k,:) = gesTv(k,:)/(1+ gesQ(k,:)*(rv_over_rd-1))
-     enddo
+     end do
   end if
 
 ! set obs space struture
@@ -222,7 +222,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
   end do
   nlocs_end(nrecs)= nlocs
   if (icount /= nrecs) then
-    write(err_msg,*) myname, ': record number is not consistent :', icount, nrecs
+    write(err_msg,*) myname, ": record number is not consistent :", icount, nrecs
     call abor1_ftn(err_msg)
   end if
 
@@ -242,14 +242,14 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
      ModelsigLevelcheck = three
      SRcloseLayers = 5
      super_ref_GEOS = .false.
-  endif
+  end if
 
-  if (trim(self%roconf%modeltopconfig) .eq. "true") then
+  if (trim(self%roconf%modeltopconfig) == "true") then
      ! maximum = 80km for low top models refactor needed otherwise
      if ( self%roconf%modeltop > 80 ) then
         ! FAIL should either use a GSI config (NOAA or NASA)
-        write(err_msg,*) myname, ' modeltopconfig not applicable for model tops over 80 km'// &
-            '    ... try using default GSI GFS 16.3 setup for NOAA or NASA'
+        write(err_msg,*) myname, " modeltopconfig not applicable for model tops over 80 km"// &
+            "    ... try using default GSI GFS 16.3 setup for NOAA or NASA"
         call abor1_ftn(err_msg)
      end if
      ngrd = min(60, self%roconf%ngrd) ! maximum = 60 for low top models this is not a height in km
@@ -327,7 +327,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
       wf=sIndx-float(wi)
       wf=max(zero,min(wf,one))
       temperature(iobs)=gesTv(wi,iobs)*(one-wf)+gesTv(wi2,iobs)*wf
-      if (trim(self%roconf%output_diags) .eq. "true") then
+      if (trim(self%roconf%output_diags) == "true") then
          humidity(iobs)= gesQ(wi,iobs)*(one-wf)+gesQ(wi2,iobs)*wf
          temp          = gesT(wi,iobs)*(one-wf)+gesT(wi2,iobs)*wf
          geop          = gesZ(wi,iobs)*(one-wf)+gesZ(wi2,iobs)*wf
@@ -362,13 +362,13 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                     if (count_SR > 1 ) then
                     else
                        top_layer_SR=k
-                    endif
+                    end if
                     if (obsImpP(iobs) <= refXrad(top_layer_SR+2)) then
                        super_refraction_flag(iobs) = 1
                        qcfail = .true.
-                    endif
-                 endif
-              endif
+                    end if
+                 end if
+              end if
 
            end do kloop
 
@@ -406,12 +406,12 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
                     call get_coordinate_value(obsImpP(iobs),sIndx,refXrad((top_layer_SR+1):nlev),&
                                               nlev-top_layer_SR-1,"increasing")
                     sIndx = sIndx+top_layer_SR
-                 endif
+                 end if
               else
                  qcfail = .true.
                  super_refraction_flag(iobs) = 1
-              endif
-           endif !top_layer_SR  >= 1
+              end if
+           end if !top_layer_SR  >= 1
         end if ! obsHgt <= SRcheckHeight
 
 !    ROPP style super refraction check
@@ -431,11 +431,11 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
        end if
 
      else
-       write(err_msg,*) myname, ': super refraction method has to be NBAM or ECMWF!'
+       write(err_msg,*) myname, ": super refraction method has to be NBAM or ECMWF!"
        call abor1_ftn(err_msg)
      end if
 
-     if (super_refraction_flag(iobs) .eq. 0) then
+     if (super_refraction_flag(iobs) == 0) then
      call ufo_gnssro_bndnbam_simobs_single(   &
                obsLat(iobs), obsGeoid(iobs), obsLocR(iobs), obsImpP(iobs), &
                grids, ngrd, &
@@ -549,7 +549,7 @@ subroutine ufo_gnssro_bndnbam_simobs(self, geovals, hofx, obss)
 ! saving obs vertical model layer postion for later
   call obsspace_put_db(obss, "ObsDiag",   "modelLayerIndex", LayerIdx)
   call obsspace_put_db(obss, "ObsDiag",   "RecordNumberIndex", RecordIdx)
-  if (trim(self%roconf%output_diags) .eq. "true") then
+  if (trim(self%roconf%output_diags) == "true") then
       call obsspace_put_db(obss, "ObsDiag", "water_vapor_mixing_ratio_wrt_moist_air", humidity)
       call obsspace_put_db(obss, "ObsDiag", "refractivity", refractivity)
       call obsspace_put_db(obss, "ObsDiag", "pressure", pressure)

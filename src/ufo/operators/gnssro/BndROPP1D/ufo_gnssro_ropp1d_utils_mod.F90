@@ -1,9 +1,9 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle gnssro bending angle observations following 
+!> Fortran module to handle gnssro bending angle observations following
 !> the ROPP (2018 Aug) implementation
 
 module ufo_gnssro_ropp1d_utils_mod
@@ -59,19 +59,20 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
   real(kind=kind_real),                intent(in)  :: phi_sfc
   integer,                             intent(in)  :: lm
   real(kind=kind_real), dimension(lm), intent(in)  :: temp,shum,pres,phi
+  integer, optional,                   intent(in)  :: iflip
+  integer,                             intent(in)  :: non_ideal
 
 ! Local variables
   character(len=250)                 :: record
   real(kind=kind_real)               :: rlon_local
-  integer ::  n,i,j,k
-  integer, optional, intent(in)  :: iflip
-  integer, intent(in)                :: non_ideal
+  integer :: n,i,j,k
+  logical :: flip_mode
 
-  if (non_ideal .eq. 1) then
+  if (non_ideal == 1) then
     x%non_ideal     = .TRUE.
   else
     x%non_ideal     = .FALSE.
-  endif
+  end if
   x%direct_ion    = .FALSE.
   x%state_ok      = .TRUE.
   x%new_bangle_op = .TRUE.     ! activate ROPP v8 new interpolation scheme
@@ -79,7 +80,7 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
 ! ROPP Longitude value is -180.0 to 180.0
   x%lat      = real(rlat,kind=wp)
   rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
+  if (rlon_local > 180) rlon_local = rlon_local - 360.
   x%lon  = real(rlon_local,kind=wp)
   x%time = real(step_time, kind=wp)
 
@@ -91,7 +92,7 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
 ! allocate arrays for temperature, specific humidity, pressure
 ! and geopotential height data
 !--------------------------------------------------------------
-  if (associated(x%temp)) deallocate(x%temp) 
+  if (associated(x%temp)) deallocate(x%temp)
   if (associated(x%shum)) deallocate(x%shum)
   if (associated(x%pres)) deallocate(x%pres)
   if (associated(x%geop)) deallocate(x%geop)
@@ -105,10 +106,11 @@ subroutine init_ropp_1d_statevec(step_time,rlon,rlat, temp,shum,pres,phi,lm,phi_
 ! ROPP FM requires vertical height profile to be of the ascending order.
 ! (see ropp_io_ascend ( ROdata )). So we need to flip the data.
 !----------------------------------------------------
-  write(record,'(4a9,a11)') 'lvl','temp','shum','pres','geop'
+  write(record,"(4a9,a11)") "lvl","temp","shum","pres","geop"
 
  n = lm
- if ( present(iflip) .and. iflip .eq. 1) then
+ flip_mode = present(iflip) .and. iflip == 1
+ if (flip_mode) then
    do k = 1, lm
       x%temp(n) = real(temp(k),kind=wp)
       x%shum(n) = real(shum(k),kind=wp)
@@ -162,15 +164,17 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
   type(State1dFM),     intent(inout) :: x_ad
   integer,             intent(in)    :: lm
   real(kind=kind_real), dimension(lm), intent(inout)    :: temp_d,shum_d,pres_d,phi_d
+  integer, optional, intent(in) :: iflip
 
 ! Local variables
-  integer   ::   n,k
-  integer, optional, intent(in) :: iflip
+  integer :: n, k
+  logical :: flip_mode
 !-------------------------------------------------------------------------
 
   n = lm
 
-  if ( present(iflip) .and. iflip .eq. 1) then
+  flip_mode = present(iflip) .and. iflip == 1
+  if (flip_mode) then
     do k = 1, lm
 
 !!     x_tl%temp(n,:) = real(temp_d(k),kind=wp)
@@ -183,7 +187,7 @@ subroutine init_ropp_1d_statevec_ad(temp_d,shum_d,pres_d,phi_d,lm,x_ad, iflip)
 
 !!     x_tl%pres(n,:) = real(pres_d(k),kind=wp)
        pres_d(k) = pres_d(k) + real(x_ad%pres(n),kind=kind_real)
-       x_ad%pres(n) = 0.0_wp 
+       x_ad%pres(n) = 0.0_wp
 
 !!     x_tl%geop(n,:) = real(phi_d(k),kind=wp)
        phi_d(k) = phi_d(k) + real(x_ad%geop(n),kind=kind_real)
@@ -211,12 +215,12 @@ end subroutine init_ropp_1d_statevec_ad
 !------------------------------------------------------------------------------------
 
 subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undulat,y)
-      
+
 !  Description:
 !     subroutine to fill a ROPP observation vector structure
 !     observation provides the inputs of:
 !     impact parameter, lat, lon, time, radius of curvature
-!     
+!
 !     forward model will provide the simulation of bending angle
 !
 !  Inputs:
@@ -226,7 +230,7 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
 !     rlon          longitude
 !     roc           radius of curvature
 !     undulat       undulation correction for radius of curvature
-!     
+!
 !  Outputs:
 !     y:     Partially filled Forward model observation vector
 !-----------------------------------------------------------------------------------
@@ -250,7 +254,7 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
   r8lat      = real(rlat,kind=wp)
   y%lat      = r8lat
   rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
+  if (rlon_local > 180) rlon_local = rlon_local - 360.
   y%lon        = real(rlon_local,kind=wp)
   y%nobs       = nvprof
   y%g_sfc      = gravity(r8lat, 0.0_wp)          ! 2nd argument is height(m) above the sfc
@@ -276,7 +280,7 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
 
   do i=1,nvprof
      y%impact(i) = real(obs_impact(i),kind=wp)  ! ROPP expects impact parameter in meters
-     if (ichk(i) .le. 0) then
+     if (ichk(i) <= 0) then
         y%weights(i) = 1.0_wp                    ! following t_fascod example
      else
         y%weights(i) = 0.0_wp
@@ -285,12 +289,12 @@ subroutine init_ropp_1d_obvec(nvprof,obs_impact,ichk,ob_time,rlat,rlon,roc,undul
 
   y%bangle(:)  = 0.0_wp                    ! following t_fascod example
 
-  write(record,'(a9,2a11,3a15)') 'ROPPyvec:','lat', 'lon', 'g_sfc', 'roc', 'r_earth_eff'
-  write(record,'(9x,2f11.2,f15.6,2f15.2)')   y%lat, y%lon, y%g_sfc, y%r_curve, y%r_earth
+  write(record,"(a9,2a11,3a15)") "ROPPyvec:","lat", "lon", "g_sfc", "roc", "r_earth_eff"
+  write(record,"(9x,2f11.2,f15.6,2f15.2)")   y%lat, y%lon, y%g_sfc, y%r_curve, y%r_earth
 
   y%obs_ok = .TRUE.
 
-end subroutine init_ropp_1d_obvec                                                    
+end subroutine init_ropp_1d_obvec
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -314,7 +318,7 @@ subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
   r8lat      = real(rlat,kind=wp)
   y%lat      = real(rlat,kind=wp)
   rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
+  if (rlon_local > 180) rlon_local = rlon_local - 360.
   y%lon        = real(rlon_local,kind=wp)
   y%nobs       = nvprof
   y%g_sfc      = gravity(r8lat, 0.0_wp)          ! 2nd argument is height(m) above the sfc
@@ -334,7 +338,7 @@ subroutine init_ropp_1d_obvec_tlad(iloop,nvprof,obs_impact,  &
 ! number of points in profile
   y%nobs    = nvprof
   y_p%nobs  = nvprof
- 
+
   do i=1,nvprof
      y_p%impact(i)  = real(obs_impact(i),kind=wp)
      y%impact(i)    = real(obs_impact(i),kind=wp)
@@ -396,5 +400,5 @@ subroutine ropp_tidy_up_tlad_1d(x,x_p,y,y_p)
 end subroutine ropp_tidy_up_tlad_1d
 
 !-------------------------------------------------------------------------
-     
+
 end module ufo_gnssro_ropp1d_utils_mod

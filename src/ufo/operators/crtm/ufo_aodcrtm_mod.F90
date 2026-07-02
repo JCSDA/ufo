@@ -8,7 +8,7 @@
 module ufo_aodcrtm_mod
 
  use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
  use missing_values_mod
 
@@ -32,7 +32,7 @@ module ufo_aodcrtm_mod
    procedure :: delete => ufo_aodcrtm_delete
    procedure :: simobs => ufo_aodcrtm_simobs
  end type ufo_aodcrtm
- CHARACTER(len=maxvarlen), DIMENSION(5), PARAMETER :: varin_default = (/var_ts, var_mixr, var_rh, var_prs, var_prsi/) 
+ CHARACTER(len=maxvarlen), DIMENSION(5), PARAMETER :: varin_default = [var_ts, var_mixr, var_rh, var_prs, var_prsi]
 
  CHARACTER(MAXVARLEN), PARAMETER :: varname_tmplate="aerosol_optical_depth"
 
@@ -58,11 +58,11 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
 
  call crtm_conf_setup(self%conf, f_confOpts, f_confOper, midPointJulday)
  if ( ufo_vars_getindex(self%conf%Absorbers, var_mixr) /= 1 ) then
-   write(err_msg,*) 'ufo_aodcrtm_setup error: H2O must be first in CRTM Absorbers for AOD'
+   write(err_msg,*) "ufo_aodcrtm_setup error: H2O must be first in CRTM Absorbers for AOD"
    call abor1_ftn(err_msg)
  end if
  if ( ufo_vars_getindex(self%conf%Absorbers, var_oz) < 2 ) then
-   write(err_msg,*) 'ufo_aodcrtm_setup error: O3 must be included in CRTM Absorbers'
+   write(err_msg,*) "ufo_aodcrtm_setup error: O3 must be included in CRTM Absorbers"
    call abor1_ftn(err_msg)
  end if
 
@@ -73,7 +73,7 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  self%varin(1:size(varin_default)) = varin_default
  self%varin(SIZE(varin_default)+1:) = var_aerosols
 
- 
+
  allocate(self%varin_aero(SIZE(var_aerosols)))
  self%varin_aero(:) = var_aerosols(:)
 
@@ -108,7 +108,7 @@ real(c_double),           intent(inout) :: hofx(nvars, nlocs)
 type(c_ptr), value,       intent(in)    :: obss
 
 ! Local Variables
-character(*), parameter :: PROGRAM_NAME = 'ufo_aodcrtm_mod.F90'
+character(*), parameter :: PROGRAM_NAME = "ufo_aodcrtm_mod.F90"
 character(len=MAXVARLEN) :: def_aero_mod
 character(255) :: message, version
 integer        :: err_stat, alloc_stat
@@ -168,7 +168,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
             AerosolCoeff_File   = trim(self%conf%AerosolCoeff_File), &
             Quiet=.TRUE.)
  if ( err_stat /= SUCCESS ) THEN
-   message = 'Error initializing CRTM'
+   message = "Error initializing CRTM"
    call Display_Message( PROGRAM_NAME, message, FAILURE )
    stop
  end if
@@ -192,7 +192,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
              rts( N_Channels, n_Profiles ),   &
              STAT = alloc_stat )
    if ( alloc_stat /= 0 ) THEN
-      message = 'Error allocating structure arrays'
+      message = "Error allocating structure arrays"
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
@@ -202,7 +202,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! ----------------------------------------
    call CRTM_Atmosphere_Create( atm, n_Layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols )
    if ( any(.not. CRTM_Atmosphere_Associated(atm)) ) then
-      message = 'Error allocating CRTM Forward Atmosphere structure'
+      message = "Error allocating CRTM Forward Atmosphere structure"
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
@@ -214,9 +214,10 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
 
-   if (trim(self%conf%aerosol_option) /= "") &
-       & call load_aerosol_data(n_profiles, n_layers, geovals, &
+   if (trim(self%conf%aerosol_option) /= "") then
+     call load_aerosol_data(n_profiles, n_layers, geovals, &
        & self%conf, self%varin_aero, trim(def_aero_mod), atm)
+   end if
 
    ! Call THE CRTM inspection
    ! ------------------------
@@ -225,17 +226,17 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
      call CRTM_ChannelInfo_Inspect(chinfo(n))
    end if
 
-   ! Start processing the CRTM AOD 
+   ! Start processing the CRTM AOD
    ! |-> Jacobian K-Matrix .OR.
    ! |-> Forward Operator
    ! ------------------------------------------------
    jacobian_needed = .false.
    kmatrix : select case ( jacobian_needed )
-     
+
      case(.true.)
        !
        ! Description:
-       ! ===========       
+       ! ===========
        ! For the time being this branch is NEVER executed because
        ! jacobian_needed = .false. . The Jacobian may be needed in the future
        ! for QC and bias correction but running the Forward operator alone for
@@ -244,13 +245,13 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
        !
 
        ! The output K-MATRIX structure:
- 
-       ! Allocate the k-matrix arrays     
+
+       ! Allocate the k-matrix arrays
        allocate( atm_K( n_channels, N_PROFILES ), &
                  rts_K( n_channels, N_PROFILES ), &
                  STAT = alloc_stat )
        if ( alloc_stat /= 0 ) then
-         message = 'Error allocating structure arrays'
+         message = "Error allocating structure arrays"
          call Display_Message( PROGRAM_NAME, message, FAILURE )
          stop
        end if
@@ -258,11 +259,11 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
        ! Call the constructor for the k-matrix output structure
        call CRTM_Atmosphere_Create( atm_K, n_layers, self%conf%n_Absorbers, self%conf%n_Clouds, self%conf%n_Aerosols)
        if ( any(.not. CRTM_Atmosphere_Associated(atm_K)) ) then
-         message = 'Error allocating CRTM K-matrix Atmosphere structure'
+         message = "Error allocating CRTM K-matrix Atmosphere structure"
          call Display_Message( PROGRAM_NAME, message, FAILURE )
          stop
        end if
-   
+
        ! Call the constructor for the k-matrix input structure
        call CRTM_RTSolution_Create(rts_k, n_Layers )
 
@@ -283,7 +284,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
        ! ============================================================================
 
 
-       !     The K-matrix model y = K.x for AOD 
+       !     The K-matrix model y = K.x for AOD
        ! -----------------------------------------
        err_stat = CRTM_AOD_K( atm,    &  ! FORWARD  Input
             rts_K                   , &  ! K-MATRIX Input
@@ -292,25 +293,25 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
             atm_k        )               ! K-MATRIX Output
 
        if ( err_stat /= SUCCESS ) then
-         message = 'Error calling CRTM K-Matrix Model for '//TRIM(self%conf%SENSOR_ID(n))
+         message = "Error calling CRTM K-Matrix Model for "//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
          stop
        end if
 
-        
+
        call CRTM_Atmosphere_Destroy(atm_k)
        call CRTM_RTSolution_Destroy(rts_k)
-        
+
        deallocate( atm_K, rts_K )
-              
+
        if ( alloc_stat /= 0 ) THEN
-         message = 'Error deallocating Jacobian structure arrays'
+         message = "Error deallocating Jacobian structure arrays"
          call Display_Message( PROGRAM_NAME, message, FAILURE )
          stop
        end if
 
      case default
- 
+
        !     The Forward Operator y = H(x) for AOD
        ! ------------------------------------------
        err_stat = CRTM_AOD( atm          , &  ! FORWARD  Input
@@ -318,7 +319,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
                             rts          )    ! FORWARD  Output
 
        if ( err_stat /= SUCCESS ) then
-         message = 'Error calling CRTM Forward Model for '//TRIM(self%conf%SENSOR_ID(n))
+         message = "Error calling CRTM Forward Model for "//TRIM(self%conf%SENSOR_ID(n))
          call Display_Message( PROGRAM_NAME, message, FAILURE )
          stop
        end if
@@ -348,7 +349,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    ! ---------------------
    deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
    if ( alloc_stat /= 0 ) THEN
-      message = 'Error deallocating structure arrays'
+      message = "Error deallocating structure arrays"
       call Display_Message( PROGRAM_NAME, message, FAILURE )
       stop
    end if
@@ -360,7 +361,7 @@ end do Sensor_Loop
  ! write( *, '( /5x, "Destroying the CRTM..." )' )
  err_stat = CRTM_Destroy( chinfo )
  if ( err_stat /= SUCCESS ) then
-    message = 'Error destroying CRTM'
+    message = "Error destroying CRTM"
     call Display_Message( PROGRAM_NAME, message, FAILURE )
     stop
  end if

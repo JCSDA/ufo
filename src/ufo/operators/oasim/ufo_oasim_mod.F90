@@ -11,7 +11,7 @@ module ufo_oasim_mod
  use oasim_constants_mod, only: nlt
 
  use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -46,13 +46,13 @@ contains
 subroutine ufo_oasim_setup(self, f_conf, channels)
 class(ufo_oasim),          intent(inout)  :: self
 type(fckit_configuration), intent(in)     :: f_conf
-integer(c_int),            intent(in)     :: channels(:)  !List of channels to use 
+integer(c_int),            intent(in)     :: channels(:)  !List of channels to use
 
 character(len=*), parameter :: myname_="ufo_oasim_simobs"
 character(max_string) :: err_msg
 character(len=:), allocatable :: str
 
-!Path to coefficient files                                                                                                       
+!Path to coefficient files
 call f_conf%get_or_die("CoefficientPath",str)
 call self%oasim_%create(str)
 
@@ -85,7 +85,7 @@ implicit none
     character(len=*), parameter :: myname_="ufo_oasim_simobs"
     character(max_string) :: err_msg
 
-    logical :: is_midnight 
+    logical :: is_midnight
     integer :: km, day_of_year
     real(kind_real) :: dt
     type(ufo_geoval), pointer :: ps,  wspd, ozone, wvapor, rh, cov, clwp
@@ -100,16 +100,16 @@ implicit none
 
     ! Set missing flag
     missing = missing_value(missing)
-    
+
     ! check if nobs is consistent in geovals & hofx
     obss_nlocs = obsspace_get_nlocs(obss)
     obss_nchans= obsspace_get_nchans(obss)
 
     !nlocs = size(hofx,1)
     if (geovals%nlocs /= nlocs) then
-       write(err_msg,*) myname_, ' error: nobs inconsistent!'
+       write(err_msg,*) myname_, " error: nobs inconsistent!"
        call abor1_ftn(err_msg)
-    endif
+    end if
 
     allocate(Wave_Ch(obss_nchans))
     allocate(Solar_Z(obss_nlocs))
@@ -122,7 +122,7 @@ implicit none
     ! check if oasim input variables are in geovals and get them
 
     call ufo_geovals_get_var(geovals, var_ps , ps )
-    call ufo_geovals_get_var(geovals, var_sfc_wspeed , wspd ) 
+    call ufo_geovals_get_var(geovals, var_sfc_wspeed , wspd )
     call ufo_geovals_get_var(geovals, var_oz_thick , ozone )
     call ufo_geovals_get_var(geovals, var_water_vapor , wvapor )
     call ufo_geovals_get_var(geovals, var_rh , rh )
@@ -144,20 +144,20 @@ implicit none
 
     ! To Do change this part later to read form obs file
     is_midnight = .FALSE.
-    km = 1  
+    km = 1
     day_of_year = 90
     cosz = cos(Solar_Z * pi/180)
     dt = 86400/2.0
     allocate(tirrq(obss_nlocs,km))
     allocate(cdomabsq(obss_nlocs,km))
     allocate(avgq(obss_nlocs,km))
-    
+
     ! check if the aerosol variables are not 2D turn them to 2D, (nlt=33 bands (number of bands in oasim), nobs)
     if (size(asym%vals,dim=1) == 1) then
        asym%vals= reshape(spread(asym%vals,2,nlt),[nlt,obss_nlocs])
        wa_in%vals=reshape(spread(wa_in%vals,2,nlt),[nlt,obss_nlocs])
        ta_in%vals=reshape(spread(ta_in%vals,2,nlt),[nlt,obss_nlocs])
-    endif
+    end if
 
     do iobs = 1, obss_nlocs
        ! check if the ocean thickness is positive (valid)
@@ -170,8 +170,8 @@ implicit none
                cyano%vals(:,iobs), cocco%vals(:,iobs), dino%vals(:,iobs), phaeo%vals(:,iobs), &
                tirrq(iobs,:), cdomabsq(iobs,:), avgq(iobs,:), hofx(:,iobs))
 
-       endif
-    enddo
+       end if
+    end do
 
 end subroutine ufo_oasim_simobs
 

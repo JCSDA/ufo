@@ -9,7 +9,7 @@
 
 module ufo_groundgnss_metoffice_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -96,7 +96,7 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   type(ufo_geoval), pointer          :: rho_heights     ! Model heights of levels containing air pressure
 
   real(kind_real), allocatable       :: zStation(:)
-  
+
   ! Local variables
   INTEGER :: ilev, nlevp, nlevq, iflip
   REAL(kind_real), allocatable :: pressure(:)   ! Model background values of air pressure (monotonic order)
@@ -106,7 +106,7 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
 
 ! check if nlocs is consistent in geovals & hofx
   IF (geovals%nlocs /= size(hofx)) THEN
-    write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+    write(err_msg,*) myname_, " error: nlocs inconsistent!"
     call abor1_ftn(err_msg)
   END IF
 
@@ -126,11 +126,11 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
 
   hofx(:) = 0
 
-  allocate(pressure(1:nlevp)) 
+  allocate(pressure(1:nlevp))
   allocate(humidity(1:nlevq))
   allocate(za(1:nlevp))
   allocate(zb(1:nlevq))
-  
+
   if (nobs > 0) then
     obs_loop: do iobs = 1, nobs
 
@@ -154,14 +154,14 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
                                        zStation(iobs),         &
                                        hofx(iobs))
 
-      write(message,'(A,10I6)') "Size of hofx = ", shape(hofx)
+      write(message,"(A,10I6)") "Size of hofx = ", shape(hofx)
       call fckit_log%debug(message)
-      write(message,'(A,F12.4)') "hofx(iobs) = ", hofx(iobs)
+      write(message,"(A,F12.4)") "hofx(iobs) = ", hofx(iobs)
       call fckit_log%debug(message)
 
     end do obs_loop
-  endif
-  
+  end if
+
   deallocate(pressure)
   deallocate(humidity)
   deallocate(za)
@@ -171,7 +171,7 @@ end subroutine ufo_groundgnss_metoffice_simobs
 ! ------------------------------------------------------------------------------
 
 
-SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,                & 
+SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,                &
                                        nlevq,                &
                                        za,                   &
                                        zb,                   &
@@ -202,25 +202,25 @@ INTEGER, INTENT(IN)            :: nobs                     ! Number of observati
 REAL(kind_real), INTENT(IN)    :: zStation               ! Station heights
 REAL(kind_real), INTENT(INOUT) :: Model_ZTD              ! Model forecast of the observations
 
-! 
+!
 ! Things that may need to be output, as they are used by the TL/AD calculation
-! 
+!
 
 REAL(kind_real)                  :: pN(nlevq)            ! Presure on theta levels
 REAL(kind_real), ALLOCATABLE     :: refrac(:)            ! Model refractivity
 LOGICAL                          :: refracerr            ! Refraction error
 INTEGER                          :: nRefLevels           ! Number of levels in refractivity calculation
 REAL(kind_real)                  :: TopCorrection        ! Zenith Total Delay Top of atmos correction
-! 
+!
 ! Local parameters
-! 
+!
 integer, parameter           :: max_string = 800  ! Length of strings
 character(len=*), parameter  :: myname_ = "Ops_Groundgnss_ForwardModel"
 !
 ! Local variables
-! 
+!
 INTEGER                      :: nstate            ! no. of levels in state vec.
-REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector 
+REAL(kind_real)              :: x(1:nlevp+nlevq)  ! state vector
 character(max_string)        :: err_msg           ! Error message to be output
 character(max_string)        :: message           ! General message for output
 
@@ -228,9 +228,9 @@ REAL(kind_real), ALLOCATABLE :: model_heights(:)  ! Geopotential heights of the 
 
 ! The model data must be on a staggered grid, with nlevp = nlevq+1
 IF (nlevp /= nlevq + 1) THEN
-    write(err_msg,*) myname_ // ':' // ' Data must be on a staggered grid nlevp, nlevq = ', nlevp, nlevq
+    write(err_msg,*) myname_ // ":" // " Data must be on a staggered grid nlevp, nlevq = ", nlevp, nlevq
     call fckit_log % warning(err_msg)
-    write(err_msg,*) myname_ // ':' // ' error: number of levels inconsistent!'
+    write(err_msg,*) myname_ // ":" // " error: number of levels inconsistent!"
     call abor1_ftn(err_msg)
 END IF
 
@@ -272,7 +272,7 @@ CALL Ops_Groundgnss_ZTD  (nlevq,     &
 
 Model_ZTD = Model_ZTD + TopCorrection
 
-write(message,'(A,F16.14)') "Model_ZTD = ", Model_ZTD
+write(message,"(A,F16.14)") "Model_ZTD = ", Model_ZTD
 call fckit_log%debug(message)
 
 

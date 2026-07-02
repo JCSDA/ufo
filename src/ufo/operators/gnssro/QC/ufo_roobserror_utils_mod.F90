@@ -34,7 +34,7 @@ type Rmatrix_type
   REAL          :: min_error             ! Minimum value of the observation error (in radians)
   REAL, POINTER :: height(:)             ! The height for each specified observation error
   REAL, POINTER :: frac_err(:)           ! The fractional error at this height (obs error / background measurement)
-end type
+end type Rmatrix_type
 
 contains
 
@@ -69,9 +69,9 @@ INTEGER                                       :: return_code           ! Return 
 R_num_mats = 0
 
 fileunit = ufo_utils_iogetfreeunit()
-OPEN(UNIT=fileunit, FILE=filename, ACTION='READ', STATUS='OLD', IOSTAT=return_code)
+OPEN(UNIT=fileunit, FILE=filename, ACTION="READ", STATUS="OLD", IOSTAT=return_code)
 if (return_code /= 0) then
-  WRITE(ErrorMessage, '(3A,I0)') "Error opening ", TRIM(filename), &
+  WRITE(ErrorMessage, "(3A,I0)") "Error opening ", TRIM(filename), &
     ", return code = ", return_code
   call abor1_ftn(ErrorMessage)
 end if
@@ -83,7 +83,7 @@ end if
 
 DO
   IF (R_num_mats >= max_mats) THEN
-    WRITE (ErrorMessage, '(A,I0,A,I0)') &
+    WRITE (ErrorMessage, "(A,I0,A,I0)") &
       "Trying to read too many R-matrices ", &
       R_num_mats, " out of ", max_mats
     CALL abor1_ftn(ErrorMessage)
@@ -96,7 +96,7 @@ DO
     ! End of file reached
     EXIT
   ELSE IF (return_code > 0) THEN
-    WRITE(ErrorMessage, '(A,I0)') &
+    WRITE(ErrorMessage, "(A,I0)") &
       "Trouble reading R-matrix namelist, error number ", &
       return_code
     CALL abor1_ftn(ErrorMessage)
@@ -123,7 +123,7 @@ CLOSE(fileunit)
 
 DO i = 2, R_num_mats
   IF (RMatrix(i) % max_height /= RMatrix(1) % max_height) THEN
-    WRITE (ErrorMessage, '(A,I0,A,I0,A,I0)') &
+    WRITE (ErrorMessage, "(A,I0,A,I0,A,I0)") &
       "All the R-matrices should have the same value for max_height Rmatrix(", &
       i, ") % max_height = ", RMatrix(i) % max_height, &
       ", RMatrix(1) % max_height = ", RMatrix(1) % max_height
@@ -194,7 +194,7 @@ IF (return_code == 0) THEN
 
   RMatrix % num_heights = COUNT (heights /= missing_value(heights(1)))
   IF (COUNT(obs_errors /= missing_value(obs_errors(1))) /= RMatrix % num_heights) THEN
-    WRITE (ErrorMessage, '(A,I0,1X,I0)') "Counts do not match ", &
+    WRITE (ErrorMessage, "(A,I0,1X,I0)") "Counts do not match ", &
                                          COUNT(obs_errors /= missing_value(obs_errors(1))), RMatrix % num_heights
     CALL abor1_ftn(ErrorMessage)
   ELSE
@@ -282,7 +282,7 @@ END DO
 IF (upper_match > 0) THEN
   IF (lower_match > 0) THEN
     if (verboseOutput) then
-      WRITE (ErrorMessage, '(A,3F10.2)') "Interpolating between locations.. ", &
+      WRITE (ErrorMessage, "(A,3F10.2)") "Interpolating between locations.. ", &
                                          RMatrix_list(lower_match) % av_temp, &
                                          av_temp, RMatrix_list(upper_match) % av_temp
     end if
@@ -323,7 +323,7 @@ ELSE
     CALL ufo_roobserror_copy_rmatrix(RMatrix_list(lower_match), &
                                      out_matrix)
   ELSE
-    WRITE (ErrorMessage, '(A,I0,1X,I0,1X)') "Did not match any matrices ", satid, origc
+    WRITE (ErrorMessage, "(A,I0,1X,I0,1X)") "Did not match any matrices ", satid, origc
     CALL fckit_log % warning(ErrorMessage)
     CALL ufo_roobserror_copy_rmatrix(RMatrix_list(1), &
                                      out_matrix)
@@ -477,7 +477,7 @@ IF (closest_match > 0) THEN
   CALL ufo_roobserror_copy_rmatrix(RMatrix_list(closest_match), &
                                    out_matrix)
 ELSE
-  WRITE (ErrorMessage, '(A,I0,1X,I0)') "Did not match any matrices ", satid, origc
+  WRITE (ErrorMessage, "(A,I0,1X,I0)") "Did not match any matrices ", satid, origc
   CALL fckit_log % warning(ErrorMessage)
   CALL ufo_roobserror_copy_rmatrix(RMatrix_list(1), &
                                    out_matrix)

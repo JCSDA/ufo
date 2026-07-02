@@ -6,7 +6,7 @@
 !
 module ufo_geovals_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use ufo_vars_mod
 use kinds
 use obsspace_mod
@@ -146,11 +146,11 @@ integer :: i
 linit = .true.
 do i = 1, self%nvar
   if (.not. allocated(self%geovals(i)%vals)) linit = .false.
-enddo
+end do
 
 do i = 1, self%nsampling_methods
   if (.not. allocated(self%sampling_methods(i)%paths_by_loc)) linit = .false.
-enddo
+end do
 
 self%linit = linit
 
@@ -215,28 +215,28 @@ if (nvars /= vars%nvars()) then
   write(err_msg,*) "ufo_geovals_setup: mismatch in the number of variables (nvars = ", &
     nvars, ", vars%nvars() = ", vars%nvars(), ")"
   call abor1_ftn(err_msg)
-endif
+end if
 if (nreduced_vars /= reduced_vars%nvars()) then
   write(err_msg,*) "ufo_geovals_setup: mismatch in the number of reduced variables ", &
     "(nreduced_vars = ", nreduced_vars, ", reduced_vars%nvars() = ", reduced_vars%nvars(), ")"
   call abor1_ftn(err_msg)
-endif
+end if
 if (any(sampling_method_by_var < 1)) then
   write(err_msg,*) "ufo_geovals_setup: sampling method ", &
     minval(sampling_method_by_var), " does not exist"
   call abor1_ftn(err_msg)
-endif
+end if
 if (any(sampling_method_by_var > nsampling_methods)) then
   write(err_msg,*) "ufo_geovals_setup: sampling method ", &
     maxval(sampling_method_by_var), " does not exist"
   call abor1_ftn(err_msg)
-endif
+end if
 do imethod = 1, nsampling_methods
   if (is_sampling_method_trivial(imethod) .and. npaths_by_method(imethod) /= nlocs) then
     write(err_msg,*) "ufo_geovals_setup: trivial sampling methods must sample each location exactly once"
     call abor1_ftn(err_msg)
-  endif
-enddo
+  end if
+end do
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
@@ -256,13 +256,13 @@ do ireduced_var = 1, reduced_vars%nvars()
     else
       ! The reduced and sampled versions of this variable are identical
       reduced_geovals(ireduced_var) = ivar
-    endif
+    end if
   else
     ! Only the reduced version of this variable will be stored; the sampled version won't
     self%nvar = self%nvar + 1
     reduced_geovals(ireduced_var) = self%nvar
-  endif
-enddo
+  end if
+end do
 
 reduced_vars_sampling_method = 0
 if (reduced_vars%nvars() > 0) then
@@ -270,14 +270,14 @@ if (reduced_vars%nvars() > 0) then
     if (is_sampling_method_trivial(imethod)) then
       reduced_vars_sampling_method = imethod
       exit
-    endif
-  enddo
+    end if
+  end do
   if (reduced_vars_sampling_method == 0) then
     ! Reduced variables need to be mapped to a trivial sampling method, but none has been provided.
     ! We need to create one on our own.
     reduced_vars_sampling_method = nsampling_methods + 1
-  endif
-endif
+  end if
+end if
 
 allocate(self%geovals(self%nvar))
 allocate(self%variables(self%nvar))
@@ -293,7 +293,7 @@ do ivar = 1, vars%nvars()
   self%variables(igeoval) = vars%variable(ivar)
   call ufo_geovals_setup_geoval(self, igeoval, sampling_method_by_var(ivar), &
                                 nvals(ivar), npaths_by_method(sampling_method_by_var(ivar)))
-enddo
+end do
 ! Handle the reduced versions of variables non-aliased with the sampled versions
 do ireduced_var = 1, reduced_vars%nvars()
   igeoval = reduced_geovals(ireduced_var)
@@ -301,24 +301,24 @@ do ireduced_var = 1, reduced_vars%nvars()
   if (igeoval > vars%nvars()) then
     call ufo_geovals_setup_geoval(self, igeoval, reduced_vars_sampling_method, &
                                   nreduced_vals(ireduced_var), int(nlocs, kind=c_size_t))
-  endif
-enddo
+  end if
+end do
 
 if (reduced_vars_sampling_method == nsampling_methods + 1) then
   self%nsampling_methods = nsampling_methods + 1
 else
   self%nsampling_methods = nsampling_methods
-endif
+end if
 allocate(self%sampling_methods(self%nsampling_methods))
 do imethod = 1, nsampling_methods
   self%sampling_methods(imethod)%trivial = is_sampling_method_trivial(imethod)
   self%sampling_methods(imethod)%npaths = npaths_by_method(imethod)
-enddo
+end do
 if (reduced_vars_sampling_method == nsampling_methods + 1) then
   self%sampling_methods(nsampling_methods + 1)%trivial = .true.
   self%sampling_methods(nsampling_methods + 1)%npaths = nlocs
   call ufo_geovals_setup_trivial_sampling_method(self, nsampling_methods + 1)
-endif
+end if
 
 end subroutine ufo_geovals_setup
 
@@ -371,17 +371,17 @@ if (nvars /= vars%nvars()) then
   write(err_msg,*) "ufo_geovals_partial_setup: mismatch in the number of variables (nvars = ", &
     nvars, ", vars%nvars() = ", vars%nvars(), ")"
   call abor1_ftn(err_msg)
-endif
+end if
 if (any(sampling_method_by_var < 1)) then
   write(err_msg,*) "ufo_geovals_partial_setup: sampling method ", &
     minval(sampling_method_by_var), " does not exist"
   call abor1_ftn(err_msg)
-endif
+end if
 if (any(sampling_method_by_var > nsampling_methods)) then
   write(err_msg,*) "ufo_geovals_partial_setup: sampling method ", &
     maxval(sampling_method_by_var), " does not exist"
   call abor1_ftn(err_msg)
-endif
+end if
 
 call ufo_geovals_delete(self)
 self%nlocs = nlocs
@@ -400,13 +400,13 @@ do ireduced_var = 1, reduced_vars%nvars()
     else
       ! The reduced and sampled versions of this variable are identical
       reduced_geovals(ireduced_var) = ivar
-    endif
+    end if
   else
     ! Only the reduced version of this variable will be stored; the sampled version won't
     self%nvar = self%nvar + 1
     reduced_geovals(ireduced_var) = self%nvar
-  endif
-enddo
+  end if
+end do
 
 reduced_vars_sampling_method = 0
 if (reduced_vars%nvars() > 0) then
@@ -414,14 +414,14 @@ if (reduced_vars%nvars() > 0) then
     if (is_sampling_method_trivial(imethod)) then
       reduced_vars_sampling_method = imethod
       exit
-    endif
-  enddo
+    end if
+  end do
   if (reduced_vars_sampling_method == 0) then
     ! Reduced variables need to be mapped to a trivial sampling method, but none has been provided.
     ! We need to create one on our own.
     reduced_vars_sampling_method = nsampling_methods + 1
-  endif
-endif
+  end if
+end if
 
 allocate(self%geovals(self%nvar))
 allocate(self%variables(self%nvar))
@@ -436,30 +436,30 @@ do ivar = 1, vars%nvars()
   igeoval = ivar
   self%variables(igeoval) = vars%variable(ivar)
   call ufo_geovals_partial_setup_geoval(self, igeoval, sampling_method_by_var(ivar))
-enddo
+end do
 ! Handle the reduced versions of variables non-aliased with the sampled versions
 do ireduced_var = 1, reduced_vars%nvars()
   igeoval = reduced_geovals(ireduced_var)
   self%reduced_variables(igeoval) = reduced_vars%variable(ireduced_var)
   if (igeoval > vars%nvars()) then
     call ufo_geovals_partial_setup_geoval(self, igeoval, reduced_vars_sampling_method)
-  endif
-enddo
+  end if
+end do
 
 if (reduced_vars_sampling_method == nsampling_methods + 1) then
   self%nsampling_methods = nsampling_methods + 1
 else
   self%nsampling_methods = nsampling_methods
-endif
+end if
 allocate(self%sampling_methods(self%nsampling_methods))
 do imethod = 1, nsampling_methods
   self%sampling_methods(imethod)%trivial = is_sampling_method_trivial(imethod)
-enddo
+end do
 if (reduced_vars_sampling_method == nsampling_methods + 1) then
   self%sampling_methods(nsampling_methods + 1)%trivial = .true.
   self%sampling_methods(nsampling_methods + 1)%npaths = nlocs
   call ufo_geovals_setup_trivial_sampling_method(self, nsampling_methods + 1)
-endif
+end if
 
 end subroutine ufo_geovals_partial_setup
 
@@ -489,8 +489,8 @@ do ivar = 1, vars%nvars()
   if (ivar_gvals <= 0 .and. ireducedvar_gvals <= 0) then
     write(err_msg,*) "ufo_geovals_allocate: ", trim(vars%variable(ivar)), " doesn't exist in geovals"
     call abor1_ftn(err_msg)
-  endif
-enddo
+  end if
+end do
 
 ! check if all variables are now allocated and all sampling methods set up, and set self%linit
 ! accordingly
@@ -508,11 +508,11 @@ contains
                        " levels; now trying to allocate as ", nlevels, " levels."
       call abor1_ftn(err_msg)
     ! only allocate if not already allocated
-    elseif (.not. allocated(self%geovals(igeoval)%vals)) then
+    else if (.not. allocated(self%geovals(igeoval)%vals)) then
       self%geovals(igeoval)%nval  = nlevels
       allocate(self%geovals(igeoval)%vals(nlevels, self%geovals(igeoval)%nprofiles))
-    endif
-  end subroutine
+    end if
+  end subroutine allocate_geoval
 
 end subroutine ufo_geovals_allocate
 
@@ -547,26 +547,26 @@ if (sampling_method < 1 .or. sampling_method > self%nsampling_methods) then
   write(err_msg,*) "ufo_geovals_setup_sampling_method: sampling method ", sampling_method, &
     " does not exist"
   call abor1_ftn(err_msg)
-endif
+end if
 if (nlocs /= self%nlocs) then
   write(err_msg,*) "ufo_geovals_setup_sampling_method: mismatch in nlocs"
   call abor1_ftn(err_msg)
-endif
+end if
 if (self%sampling_methods(sampling_method)%trivial) then
   do iloc = 1, nlocs
     if (paths_by_loc(iloc)%begin /= iloc .or. paths_by_loc(iloc)%end /= iloc + 1) then
       write(err_msg,*) "ufo_geovals_setup_sampling_method: the method should be trivial but is not"
       call abor1_ftn(err_msg)
-    endif
-  enddo
-endif
+    end if
+  end do
+end if
 
 self%sampling_methods(sampling_method)%npaths = npaths
 do ivar = 1, self%nvar
   if (self%sampling_method_by_var(ivar) == sampling_method) then
     self%geovals(ivar)%nprofiles = npaths
-  endif
-enddo
+  end if
+end do
 
 allocate(self%sampling_methods(sampling_method)%paths_by_loc(self%nlocs))
 self%sampling_methods(sampling_method)%paths_by_loc(:) = paths_by_loc(:)
@@ -596,20 +596,20 @@ if (sampling_method < 1 .or. sampling_method > self%nsampling_methods) then
   write(err_msg,*) "ufo_geovals_setup_trivial_sampling_method: sampling method ", sampling_method, &
     " does not exist"
   call abor1_ftn(err_msg)
-endif
+end if
 
 self%sampling_methods(sampling_method)%npaths = self%nlocs
 do ivar = 1, self%nvar
   if (self%sampling_method_by_var(ivar) == sampling_method) then
     self%geovals(ivar)%nprofiles = self%nlocs
-  endif
-enddo
+  end if
+end do
 
 allocate(self%sampling_methods(sampling_method)%paths_by_loc(self%nlocs))
 do iloc = 1, self%nlocs
   self%sampling_methods(sampling_method)%paths_by_loc(iloc)%begin = iloc
   self%sampling_methods(sampling_method)%paths_by_loc(iloc)%end = iloc + 1
-enddo
+end do
 
 call ufo_geovals_update_linit(self)
 
@@ -626,9 +626,9 @@ integer :: ivar
 if (allocated(self%geovals)) then
   do ivar = 1, self%nvar
     if (allocated(self%geovals(ivar)%vals)) deallocate(self%geovals(ivar)%vals)
-  enddo
+  end do
   deallocate(self%geovals)
-endif
+end if
 if (allocated(self%variables)) deallocate(self%variables)
 if (allocated(self%reduced_variables)) deallocate(self%reduced_variables)
 if (allocated(self%sampling_methods)) deallocate(self%sampling_methods)
@@ -659,7 +659,7 @@ if (nvars /= vars%nvars()) then
   write(err_msg,*) "ufo_geovals_add_reduced_vars: mismatch in the number of variables ", &
     "(nvars = ", nvars, ", vars%nvars() = ", vars%nvars(), ")"
   call abor1_ftn(err_msg)
-endif
+end if
 
 if (nvars == 0) return  ! Nothing to do
 
@@ -671,7 +671,7 @@ do inew_var = 1, vars%nvars()
     write(err_msg,*) "ufo_geovals_add_reduced_vars: variable ", vars%variable(inew_var), &
       " already exists in reduced format"
     call abor1_ftn(err_msg)
-  endif
+  end if
   ivar = ufo_vars_getindex(self%variables, vars%variable(inew_var))
   if (ivar >= 1) then
     if (.not. self%sampling_methods(self%sampling_method_by_var(ivar))%trivial .or. &
@@ -683,21 +683,21 @@ do inew_var = 1, vars%nvars()
     else
       ! The reduced and sampled versions of this variable are identical
       geoval_indices(inew_var) = ivar
-    endif
+    end if
   else
     ! Only the reduced version of this variable will be stored; the sampled version won't
     new_nvars = new_nvars + 1
     geoval_indices(inew_var) = new_nvars
-  endif
-enddo
+  end if
+end do
 
 sampling_method = 0
 do imethod = 1, self%nsampling_methods
   if (self%sampling_methods(imethod)%trivial) then
     sampling_method = imethod
     exit
-  endif
-enddo
+  end if
+end do
 if (sampling_method == 0) then
   ! Reduced variables need to be mapped to a trivial sampling method, but none exists.
   ! We need to create one on our own.
@@ -707,7 +707,7 @@ if (sampling_method == 0) then
   self%sampling_methods(sampling_method)%trivial = .true.
   self%sampling_methods(sampling_method)%npaths = self%nlocs
   call ufo_geovals_setup_trivial_sampling_method(self, sampling_method)
-endif
+end if
 
 call resize(self%geovals, new_nvars)
 call resize(self%variables, new_nvars)
@@ -722,8 +722,8 @@ do inew_var = 1, vars%nvars()
   if (igeoval > self%nvar) then
     call ufo_geovals_setup_geoval(self, igeoval, int(sampling_method, kind=c_size_t), &
                                   nvals(inew_var), int(self%nlocs, kind=c_size_t))
-  endif
-enddo
+  end if
+end do
 
 self%nvar = new_nvars
 
@@ -747,20 +747,20 @@ if (present(format)) then
   actual_format = format
 else
   actual_format = self%default_format
-endif
+end if
 
 if (actual_format == ufo_geoval_sampled) then
   variables => self%variables
 else if (actual_format == ufo_geoval_reduced) then
   variables => self%reduced_variables
 else
-  call abor1_ftn('ufo_geovals_get_vars: format must be either ufo_geoval_sampled or ufo_geoval_reduced')
-endif
+  call abor1_ftn("ufo_geovals_get_vars: format must be either ufo_geoval_sampled or ufo_geoval_reduced")
+end if
 
 call vars%clear()
 do i = 1, size(variables)
   if (variables(i) /= "") call vars%push_back(variables(i))
-enddo
+end do
 
 end subroutine ufo_geovals_get_vars
 
@@ -782,8 +782,8 @@ type(ufo_geovals), intent(inout) :: self
 integer(c_int), intent(in) :: format
 
 if (format /= ufo_geoval_sampled .and. format /= ufo_geoval_reduced) then
-  call abor1_ftn('ufo_geovals_set_default_format: format must be either ufo_geoval_sampled or ufo_geoval_reduced')
-endif
+  call abor1_ftn("ufo_geovals_set_default_format: format must be either ufo_geoval_sampled or ufo_geoval_reduced")
+end if
 
 self%default_format = format
 
@@ -831,43 +831,43 @@ if (present(format)) then
   actual_format = format
 else
   actual_format = self%default_format
-endif
+end if
 
 if (present(must_be_found)) then
   actual_must_be_found = must_be_found
 else
   actual_must_be_found = .true.
-endif
+end if
 
 if (actual_format == ufo_geoval_sampled) then
   variables => self%variables
 else if (actual_format == ufo_geoval_reduced) then
   variables => self%reduced_variables
 else
-  write(err_msg,*) myname_, ' format must be either ufo_geoval_sampled or ufo_geoval_reduced'
+  write(err_msg,*) myname_, " format must be either ufo_geoval_sampled or ufo_geoval_reduced"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ivar = ufo_vars_getindex(variables, varname)
 
 if (ivar < 0) then
   if (actual_must_be_found) then
-    write(0,*)'ufo_geovals_get_var looking for '
+    write(0,*)"ufo_geovals_get_var looking for "
     if (actual_format == ufo_geoval_sampled) then
-      write(0,*)'sampled '
+      write(0,*)"sampled "
     else
-      write(0,*)'reduced '
-    endif
-    write(0,*)'variable ',trim(varname),' in:'
+      write(0,*)"reduced "
+    end if
+    write(0,*)"variable ",trim(varname)," in:"
     do jv=1,self%nvar
-      write(0,*)'ufo_geovals_get_var ',jv,trim(variables(jv))
-    enddo
-    write(err_msg,*) myname_, " ", trim(varname), ' doesnt exist'
+      write(0,*)"ufo_geovals_get_var ",jv,trim(variables(jv))
+    end do
+    write(err_msg,*) myname_, " ", trim(varname), " doesnt exist"
     call abor1_ftn(err_msg)
-  endif  ! if actual_must_be_found is .false., we leave geoval as a null pointer
+  end if  ! if actual_must_be_found is .false., we leave geoval as a null pointer
 else
   geoval => self%geovals(ivar)
-endif
+end if
 
 end subroutine ufo_geovals_get_var
 
@@ -886,11 +886,11 @@ character(max_string) :: err_msg
 geoval => NULL()
 
 if (ivar <= 0 .or. ivar > self % nvar) then
-  write(err_msg,*) myname_, " index ", ivar, ' doesnt exist'
+  write(err_msg,*) myname_, " index ", ivar, " doesnt exist"
   call abor1_ftn(err_msg)
 else
   geoval => self%geovals(ivar)
-endif
+end if
 
 end subroutine ufo_geovals_get_var_by_index
 
@@ -903,10 +903,10 @@ integer :: ivar
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_zero: geovals not initialized")
-endif
+end if
 do ivar = 1, self%nvar
   self%geovals(ivar)%vals(:,:) = 0.0
-enddo
+end do
 
 end subroutine ufo_geovals_zero
 
@@ -919,10 +919,10 @@ integer :: ivar
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_abs: geovals not initialized")
-endif
+end if
 do ivar = 1, self%nvar
   self%geovals(ivar)%vals = abs(self%geovals(ivar)%vals)
-enddo
+end do
 
 end subroutine ufo_geovals_abs
 
@@ -937,15 +937,15 @@ real(kind_real) :: N
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_rms: geovals not initialized")
-endif
+end if
 vrms=0.0_kind_real
 N=0.0_kind_real
 do jv = 1, self%nvar
    do jo = 1, self%geovals(jv)%nprofiles
       vrms = vrms + Sum(self%geovals(jv)%vals(:,jo)**2)
       N=N+self%geovals(jv)%nval
-   enddo
-enddo
+   end do
+end do
 
 if ( N > 0) vrms = sqrt(vrms/N)
 
@@ -958,14 +958,14 @@ use random_mod
 implicit none
 type(ufo_geovals), intent(inout) :: self
 integer :: ivar
-integer :: rseed = 7
+integer, parameter :: rseed = 7
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_random: geovals not initialized")
-endif
+end if
 do ivar = 1, self%nvar
   call normal_distribution(self%geovals(ivar)%vals, 0.0_kind_real, 1.0_kind_real, rseed)
-enddo
+end do
 
 end subroutine ufo_geovals_random
 
@@ -979,15 +979,15 @@ integer :: jv, jo, jz
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_scalmult: geovals not allocated")
-endif
+end if
 
 do jv=1,self%nvar
   do jo=1,self%geovals(jv)%nprofiles
     do jz = 1, self%geovals(jv)%nval
       self%geovals(jv)%vals(jz,jo) = zz * self%geovals(jv)%vals(jz,jo)
-    enddo
-  enddo
-enddo
+    end do
+  end do
+end do
 
 end subroutine ufo_geovals_scalmult
 
@@ -1002,11 +1002,11 @@ integer :: jv, jp, jl, jm
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_profmult: geovals not allocated")
-endif
+end if
 
 if (nlocs /= self%nlocs) then
   call abor1_ftn("ufo_geovals_profmult: nlocs mismatch")
-endif
+end if
 
 do jv = 1, self%nvar
   jm = self%sampling_method_by_var(jv)
@@ -1014,9 +1014,9 @@ do jv = 1, self%nvar
     do jp = self%sampling_methods(jm)%paths_by_loc(jl)%begin, &
             self%sampling_methods(jm)%paths_by_loc(jl)%end - 1
       self%geovals(jv)%vals(:,jp) = values(jl) * self%geovals(jv)%vals(:,jp)
-    enddo
-  enddo
-enddo
+    end do
+  end do
+end do
 
 end subroutine ufo_geovals_profmult
 
@@ -1034,14 +1034,14 @@ character(len=MAXVARLEN), pointer :: self_variables(:), rhs_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_assign: geovals not allocated")
-endif
+end if
 if (.not. rhs%linit) then
   call abor1_ftn("ufo_geovals_assign: geovals not allocated")
-endif
+end if
 
 if (self%nlocs /= rhs%nlocs) then
   call abor1_ftn("ufo_geovals_assign: nlocs different between lhs and rhs")
-endif
+end if
 
 do jv=1,self%nvar
   ! Determine if this is an sampled or reduced variable
@@ -1053,27 +1053,27 @@ do jv=1,self%nvar
     rhs_variables => rhs%reduced_variables
   else
     continue
-  endif
+  end if
 
   iv = ufo_vars_getindex(rhs_variables, self_variables(jv))
   if (iv < 0) then
-    write(err_msg,*) 'ufo_geovals_assign: var ', trim(self_variables(jv)), ' doesnt exist in rhs'
+    write(err_msg,*) "ufo_geovals_assign: var ", trim(self_variables(jv)), " doesnt exist in rhs"
     call abor1_ftn(trim(err_msg))
-  endif
+  end if
   if (self%geovals(jv)%nval /= rhs%geovals(iv)%nval) then
-    write(err_msg,*) 'ufo_geovals_assign: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+    write(err_msg,*) "ufo_geovals_assign: nvals for var ", trim(self_variables(jv)), " are different in lhs and rhs"
     call abor1_ftn(trim(err_msg))
-  endif
+  end if
   if (self%geovals(jv)%nprofiles /= rhs%geovals(iv)%nprofiles) then
-    write(err_msg,*) 'ufo_geovals_assign: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+    write(err_msg,*) "ufo_geovals_assign: nprofiles for var ", trim(self_variables(jv)), " are different in lhs and rhs"
     call abor1_ftn(trim(err_msg))
-  endif
+  end if
   do jo=1,self%geovals(jv)%nprofiles
     do jz = 1, self%geovals(jv)%nval
       self%geovals(jv)%vals(jz,jo) = rhs%geovals(iv)%vals(jz,jo)
-    enddo
-  enddo
-enddo
+    end do
+  end do
+end do
 
 end subroutine ufo_geovals_assign
 
@@ -1094,20 +1094,20 @@ do_flip = .false.
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_reorderzdir: geovals not allocated")
-endif
+end if
 
 if (trim(zdir) /= "bottom2top" .and. trim(zdir) /= "top2bottom") then
-  write(err_msg, *) 'ufo_geovals_reorderzdir: z-coordinate direction ', trim(zdir), ' not defined. ', &
-                    'use either bottom2top or top2bottom'
+  write(err_msg, *) "ufo_geovals_reorderzdir: z-coordinate direction ", trim(zdir), " not defined. ", &
+                    "use either bottom2top or top2bottom"
   call abor1_ftn(err_msg)
 end if
 
 ! Get vertical coordinate variable
 call ufo_geovals_get_var(self, varname, geoval)
 if (.not. associated(geoval)) then
-  write(err_msg, *) 'ufo_geovals_reorderzdir: geoval vertical coordinate variable ', trim(varname), ' doesnt exist'
+  write(err_msg, *) "ufo_geovals_reorderzdir: geoval vertical coordinate variable ", trim(varname), " doesnt exist"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! Check if reorder variables is necessary based on the direction defined by zdir
 if ((trim(zdir) == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval,1)) .or. &
@@ -1115,7 +1115,7 @@ if ((trim(zdir) == "bottom2top" .and. geoval%vals(1,1) < geoval%vals(geoval%nval
    do_flip = .true.
 else
    return
-endif
+end if
 
 call ufo_geovals_copy(self, selfclone)
 
@@ -1124,9 +1124,9 @@ if (do_flip) then
     do ival = 1, self%geovals(ivar)%nval
       kval = self%geovals(ivar)%nval - ival + 1
       self%geovals(ivar)%vals(ival,:) = selfclone%geovals(ivar)%vals(kval,:)
-    enddo
-  enddo
-endif
+    end do
+  end do
+end if
 
 call ufo_geovals_delete(selfclone)
 
@@ -1146,10 +1146,10 @@ character(len=MAXVARLEN), pointer :: self_variables(:), other_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
-endif
+end if
 if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_add: geovals not allocated")
-endif
+end if
 
 do jv=1,self%nvar
   ! Determine if this is an sampled or reduced variable
@@ -1161,25 +1161,25 @@ do jv=1,self%nvar
     other_variables => other%reduced_variables
   else
     continue
-  endif
+  end if
 
   iv = ufo_vars_getindex(other_variables, self_variables(jv))
-  if (iv .ne. -1) then !Only add if exists in RHS
+  if (iv /= -1) then !Only add if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_add: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) "ufo_geovals_add: nvals for var ", trim(self_variables(jv)), " are different in lhs and rhs"
       call abor1_ftn(trim(err_msg))
-    endif
+    end if
     if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
-      write(err_msg,*) 'ufo_geovals_add: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) "ufo_geovals_add: nprofiles for var ", trim(self_variables(jv)), " are different in lhs and rhs"
       call abor1_ftn(trim(err_msg))
-    endif
+    end if
     do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) + other%geovals(iv)%vals(jz,jo)
-      enddo
-    enddo
-  endif
-enddo
+      end do
+    end do
+  end if
+end do
 
 end subroutine ufo_geovals_add
 
@@ -1197,10 +1197,10 @@ character(len=MAXVARLEN), pointer :: self_variables(:), other_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
-endif
+end if
 if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_diff: geovals not allocated")
-endif
+end if
 
 do jv=1,self%nvar
   ! Determine if this is an sampled or reduced variable
@@ -1212,25 +1212,25 @@ do jv=1,self%nvar
     other_variables => other%reduced_variables
   else
     continue
-  endif
+  end if
 
   iv = ufo_vars_getindex(other_variables, self_variables(jv))
-  if (iv .ne. -1) then !Only subtract if exists in RHS
+  if (iv /= -1) then !Only subtract if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_diff: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) "ufo_geovals_diff: nvals for var ", trim(self_variables(jv)), " are different in lhs and rhs"
       call abor1_ftn(trim(err_msg))
-    endif
+    end if
     if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
-      write(err_msg,*) 'ufo_geovals_diff: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) "ufo_geovals_diff: nprofiles for var ", trim(self_variables(jv)), " are different in lhs and rhs"
       call abor1_ftn(trim(err_msg))
-    endif
+    end if
     do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) - other%geovals(iv)%vals(jz,jo)
-      enddo
-    enddo
-  endif
-enddo
+      end do
+    end do
+  end if
+end do
 
 end subroutine ufo_geovals_diff
 
@@ -1248,10 +1248,10 @@ character(len=MAXVARLEN), pointer :: self_variables(:), other_variables(:)
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_schurmult: geovals not allocated")
-endif
+end if
 if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_schurmult: geovals not allocated")
-endif
+end if
 
 do jv=1,self%nvar
   ! Determine if this is an sampled or reduced variable
@@ -1263,25 +1263,25 @@ do jv=1,self%nvar
     other_variables => other%reduced_variables
   else
     continue
-  endif
+  end if
 
   iv = ufo_vars_getindex(other_variables, self_variables(jv))
-  if (iv .ne. -1) then !Only mult if exists in RHS
+  if (iv /= -1) then !Only mult if exists in RHS
     if (self%geovals(jv)%nval /= other%geovals(iv)%nval) then
-      write(err_msg,*) 'ufo_geovals_schurmult: nvals for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) "ufo_geovals_schurmult: nvals for var ", trim(self_variables(jv)), " are different in lhs and rhs"
       call abor1_ftn(trim(err_msg))
-    endif
+    end if
     if (self%geovals(jv)%nprofiles /= other%geovals(iv)%nprofiles) then
-      write(err_msg,*) 'ufo_geovals_schurmult: nprofiles for var ', trim(self_variables(jv)), ' are different in lhs and rhs'
+      write(err_msg,*) "ufo_geovals_schurmult: nprofiles for var ", trim(self_variables(jv)), " are different in lhs and rhs"
       call abor1_ftn(trim(err_msg))
-    endif
+    end if
     do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
         self%geovals(jv)%vals(jz,jo) = self%geovals(jv)%vals(jz,jo) * other%geovals(iv)%vals(jz,jo)
-      enddo
-    enddo
-  endif
-enddo
+      end do
+    end do
+  end if
+end do
 
 end subroutine ufo_geovals_schurmult
 
@@ -1297,7 +1297,7 @@ integer :: jv, jc
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_copy: geovals not defined")
-endif
+end if
 
 call ufo_geovals_delete(other)
 
@@ -1315,7 +1315,7 @@ do jc = 1, size(other%sampling_methods)
   other%sampling_methods(jc)%npaths = self%sampling_methods(jc)%npaths
   allocate(other%sampling_methods(jc)%paths_by_loc(size(self%sampling_methods(jc)%paths_by_loc)))
   other%sampling_methods(jc)%paths_by_loc(:) = self%sampling_methods(jc)%paths_by_loc(:)
-enddo
+end do
 allocate(other%sampling_method_by_var(size(self%sampling_method_by_var)))
 other%sampling_method_by_var(:) = self%sampling_method_by_var(:)
 
@@ -1325,7 +1325,7 @@ do jv = 1, other%nvar
   other%geovals(jv)%nprofiles = self%geovals(jv)%nprofiles
   allocate(other%geovals(jv)%vals(other%geovals(jv)%nval, other%geovals(jv)%nprofiles))
   other%geovals(jv)%vals(:,:) = self%geovals(jv)%vals(:,:)
-enddo
+end do
 
 other%missing_value = self%missing_value
 other%linit = .true.
@@ -1347,7 +1347,7 @@ type(ufo_index_range) :: path_index_range
 
 if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_copy_one: geovals not defined")
-endif
+end if
 
 call ufo_geovals_delete(self)
 
@@ -1367,7 +1367,7 @@ do jc = 1, size(self%sampling_methods)
   allocate(self%sampling_methods(jc)%paths_by_loc(1))
   self%sampling_methods(jc)%paths_by_loc(1)%begin = 1
   self%sampling_methods(jc)%paths_by_loc(1)%end = 1 + self%sampling_methods(jc)%npaths
-enddo
+end do
 allocate(self%sampling_method_by_var(size(other%sampling_method_by_var)))
 self%sampling_method_by_var(:) = other%sampling_method_by_var(:)
 
@@ -1380,7 +1380,7 @@ do jv = 1, self%nvar
   path_index_range = other%sampling_methods(jc)%paths_by_loc(loc_index)
   self%geovals(jv)%vals(:,:) = &
     other%geovals(jv)%vals(:, path_index_range%begin : path_index_range%end-1)
-enddo
+end do
 
 self%missing_value = other%missing_value
 self%linit = .true.
@@ -1435,14 +1435,14 @@ integer :: npaths, ivar, iprofile, ival
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_analytic_init: geovals not defined")
-endif
+end if
 
 ! The last variable should be the pressure coordinate.  That's
 ! where we get the height information for the analytic init
 if (self%variables(self%nvar) /= var_prs .and. &
     self%variables(self%nvar) /= var_prsi) then
   call abor1_ftn("ufo_geovals_analytic_init: pressure coordinate not defined")
-endif
+end if
 
 ! Today, code exists only to populate these geovals variables:
 ! - air_temperature
@@ -1456,8 +1456,8 @@ do ivar = 1, self%nvar
               .or. self%variables(ivar) == var_q &
               .or. self%variables(ivar) == var_prs)) then
       call abor1_ftn("ufo_geovals_analytic_init: unable to fill variable " // trim(self%variables(ivar)))
-   endif
-enddo
+   end if
+end do
 
 npaths = sampled_locations%npaths()
 allocate(lons(npaths), lats(npaths))
@@ -1521,11 +1521,11 @@ do ivar = 1, self%nvar-1
          else if (self%variables(ivar) == var_q) then
             ! specific humidity / water_vapor_mixing_ratio_wrt_moist_air
             self%geovals(ivar)%vals(ival,iprofile) = hum0
-         endif
+         end if
 
-      enddo
-   enddo
-enddo
+      end do
+   end do
+end do
 
 deallocate(lons, lats)
 
@@ -1556,13 +1556,13 @@ real(kind_real) :: over_nloc, vrms, norm
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
-endif
+end if
 if (.not. other%linit) then
   call abor1_ftn("ufo_geovals_normalize: geovals not allocated")
-endif
+end if
 if (self%nvar /= other%nvar) then
   call abor1_ftn("ufo_geovals_normalize: reference geovals object must have the same variables as the sampled")
-endif
+end if
 
 
 do jv=1,self%nvar
@@ -1578,22 +1578,22 @@ do jv=1,self%nvar
    do jo = 1, other%geovals(jv)%nprofiles
       do jz = 1, other%geovals(jv)%nval
          vrms = vrms + other%geovals(jv)%vals(jz,jo)**2
-      enddo
-   enddo
+      end do
+   end do
 
    if (vrms > 0.0_kind_real) then
       norm = 1.0_kind_real / sqrt(vrms*over_nloc)
    else
       norm = 0.0_kind_real
-   endif
+   end if
 
    ! Now loop through the LHS locations to compute the normalized value
    do jo=1,self%geovals(jv)%nprofiles
       do jz = 1, self%geovals(jv)%nval
          self%geovals(jv)%vals(jz,jo) = norm*self%geovals(jv)%vals(jz,jo)
-      enddo
-   enddo
-enddo
+      end do
+   end do
+end do
 
 end subroutine ufo_geovals_normalize
 
@@ -1609,7 +1609,7 @@ integer :: jo, jz, jv
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_minmaxavg: geovals not initialized")
-endif
+end if
 
 jv = kvar+1
 kobs = 0
@@ -1618,14 +1618,14 @@ pmax = -huge(pmax)
 prms = 0.0_kind_real
 do jo = 1, self%geovals(jv)%nprofiles
   do jz = 1, self%geovals(jv)%nval
-    if (self%geovals(jv)%vals(jz,jo) .ne. self%missing_value) then
+    if (self%geovals(jv)%vals(jz,jo) /= self%missing_value) then
       kobs = kobs + 1
       if (self%geovals(jv)%vals(jz,jo) < pmin) pmin = self%geovals(jv)%vals(jz,jo)
       if (self%geovals(jv)%vals(jz,jo) > pmax) pmax = self%geovals(jv)%vals(jz,jo)
       prms = prms + self%geovals(jv)%vals(jz,jo) * self%geovals(jv)%vals(jz,jo)
-    endif
-  enddo
-enddo
+    end if
+  end do
+end do
 if (kobs > 0) prms = sqrt(prms/real(kobs,kind_real))
 
 end subroutine ufo_geovals_minmaxavg
@@ -1650,7 +1650,7 @@ integer :: jv, jo, jz
 
 if (.not. self%linit) then
   call abor1_ftn("ufo_geovals_maxloc: geovals not allocated")
-endif
+end if
 
 mxval = 0.0_kind_real
 iobs = 1
@@ -1662,7 +1662,7 @@ do jv = 1,self%nvar
       vrms = 0.0_kind_real
       do jz = 1, self%geovals(jv)%nval
          vrms = vrms + self%geovals(jv)%vals(jz,jo)**2
-      enddo
+      end do
 
       if ( self%geovals(jv)%nval > 0 ) then
         vrms = sqrt(vrms/real(self%geovals(jv)%nval,kind_real))
@@ -1672,10 +1672,10 @@ do jv = 1,self%nvar
          mxval = vrms
          iobs = jo
          ivar = jv
-      endif
+      end if
 
-   enddo
-enddo
+   end do
+end do
 
 end subroutine ufo_geovals_maxloc
 
@@ -1722,17 +1722,17 @@ integer(c_size_t), allocatable :: sampling_method_by_var(:)
 logical(c_bool) :: is_sampling_method_trivial(1)
 
 ! open netcdf file
-call check('nf90_open', nf90_open(trim(filename),nf90_nowrite,ncid))
+call check("nf90_open", nf90_open(trim(filename),nf90_nowrite,ncid))
 
 ! find how many locs are in the file
 ierr = nf90_inq_dimid(ncid, "nlocs", dimid)
 if(ierr /= nf90_noerr) then
   write(err_msg,*) "Error: Dimension nlocs not found in ", trim(filename)
   call abor1_ftn(err_msg)
-endif
+end if
 
-call check('nf90_inq_dimid', nf90_inq_dimid(ncid, "nlocs", dimid))
-call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimid, len = global_npaths))
+call check("nf90_inq_dimid", nf90_inq_dimid(ncid, "nlocs", dimid))
+call check("nf90_inquire_dimension", nf90_inquire_dimension(ncid, dimid, len = global_npaths))
 
 !> round-robin distribute the observations to PEs
 !> Calculate how many obs. on each PE
@@ -1745,16 +1745,16 @@ call obsspace_get_index(c_obspace, global_loc_by_my_loc)
 ! single location in the obs file. There needs to be at least
 ! loc_multiplier * obs_all_nlocs locations in the geovals file.
 
-if (global_npaths .lt. (loc_multiplier * obs_all_nlocs)) then
+if (global_npaths < (loc_multiplier * obs_all_nlocs)) then
   write(obs_nlocs_str, *) loc_multiplier * obs_all_nlocs
   write(geo_nlocs_str, *) global_npaths
-  write(err_msg,'(7a)') &
+  write(err_msg,"(7a)") &
      "Error: Number of locations in the geovals file (", &
      trim(adjustl(geo_nlocs_str)), ") must be greater than or equal to ", &
      "the product of loc_multiplier and number of locations in the ", &
      "obs file (", trim(adjustl(obs_nlocs_str)), ")"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! We have enough locations in the geovals file to cover the span of the
 ! number of locations in the obs file. Generate the global_path_by_my_path map according
@@ -1771,9 +1771,9 @@ if (loc_multiplier > 0) then
     do global_path = global_path_start, global_path_end
       global_path_by_my_path(my_path) = global_path
       my_path = my_path + 1
-    enddo
+    end do
     path_ranges_by_loc(my_loc)%end = my_path
-  enddo
+  end do
 else
 
   ! Negative loc_multipliers are no longer supported. They used to map each location to a set
@@ -1798,7 +1798,7 @@ if (loc_multiplier == 1) then
   reduced_vars = oops_variables(vars)
 else
   reduced_vars = oops_variables()
-endif
+end if
 
 ! allocate geovals structure
 call ufo_geovals_partial_setup(self, obs_nlocs, vars, vars%nvars(), &
@@ -1819,23 +1819,23 @@ do ivar = 1, self%nvar
     varname => self%variables(ivar)
   else
     varname => self%reduced_variables(ivar)
-  endif
+  end if
 
   ierr = nf90_inq_varid(ncid, varname, varid)
   if(ierr /= nf90_noerr) then
     write(err_msg,*) "Error: Variable ", trim(varname), " not found in ", trim(filename)
     call abor1_ftn(err_msg)
-  endif
+  end if
 
-  call check('nf90_inquire_variable', nf90_inquire_variable(ncid, varid, xtype = vartype, &
+  call check("nf90_inquire_variable", nf90_inquire_variable(ncid, varid, xtype = vartype, &
                                          ndims = ndims, dimids = dimids))
   !> read 1d variable
 
   if (ndims == 1) then
-    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = var_global_npaths))
+    call check("nf90_inquire_dimension", nf90_inquire_dimension(ncid, dimids(1), len = var_global_npaths))
     if (var_global_npaths /= global_npaths) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= global_npaths')
-    endif
+      call abor1_ftn("ufo_geovals_read_netcdf: var dim /= global_npaths")
+    end if
 
     nval = 1
 
@@ -1846,57 +1846,57 @@ do ivar = 1, self%nvar
     !> fill the geoval
     allocate(field1d(var_global_npaths))
 
-    call check('nf90_get_var', nf90_get_var(ncid, varid, field1d))
+    call check("nf90_get_var", nf90_get_var(ncid, varid, field1d))
 
     self%geovals(ivar)%vals(1,:) = field1d(global_path_by_my_path)
 
     deallocate(field1d)
 
   !> read 2d variable
-  elseif (ndims == 2) then
-    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(1), len = nval))
-    call check('nf90_inquire_dimension', nf90_inquire_dimension(ncid, dimids(2), len = var_global_npaths))
+  else if (ndims == 2) then
+    call check("nf90_inquire_dimension", nf90_inquire_dimension(ncid, dimids(1), len = nval))
+    call check("nf90_inquire_dimension", nf90_inquire_dimension(ncid, dimids(2), len = var_global_npaths))
     if (var_global_npaths /= global_npaths) then
-      call abor1_ftn('ufo_geovals_read_netcdf: var dim /= global_npaths')
-    endif
+      call abor1_ftn("ufo_geovals_read_netcdf: var dim /= global_npaths")
+    end if
 
     !> allocate geoval for this variable
     self%geovals(ivar)%nval = nval
     allocate(self%geovals(ivar)%vals(nval,my_npaths))
     allocate(field2d(nval, var_global_npaths))
 
-    call check('nf90_get_var', nf90_get_var(ncid, varid, field2d))
+    call check("nf90_get_var", nf90_get_var(ncid, varid, field2d))
     if (.not. levels_are_top_down) then
       self%geovals(ivar)%vals(:,:) = field2d(nval:1:-1,global_path_by_my_path)
     else
       self%geovals(ivar)%vals(:,:) = field2d(:,global_path_by_my_path)
-    endif
+    end if
     deallocate(field2d)
   !> only 1d & 2d vars
   else
 
-    call abor1_ftn('ufo_geovals_read_netcdf: can only read 1d and 2d fields')
-  endif
+    call abor1_ftn("ufo_geovals_read_netcdf: can only read 1d and 2d fields")
+  end if
 
   ! set the missing value equal to IODA missing_value
   do my_loc = 1, obs_nlocs
     do ival = 1, nval
       if(self%geovals(ivar)%vals(ival, my_loc) > 1.0e08) then
         self%geovals(ivar)%vals(ival, my_loc) = self%missing_value
-      endif
-    enddo
-  enddo
+      end if
+    end do
+  end do
 
-enddo
+end do
 
-call check('nf90_close', nf90_close(ncid))
+call check("nf90_close", nf90_close(ncid))
 
 call ufo_geovals_update_linit(self)
 
 if (.not. self%linit) then
   write(err_msg,*) "ufo_geovals_read_netcdf: internal error: not all data structures have been properly initialized"
   call abor1_ftn(err_msg)
-endif
+end if
 
 end subroutine ufo_geovals_read_netcdf
 
@@ -1913,7 +1913,7 @@ integer, allocatable :: ncid_var(:)
 
 allocate(ncid_var(self%nvar))
 
-call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
+call check("nf90_create", nf90_create(trim(filename),nf90_hdf5,ncid))
 ! TODO(wsmigaj): define a new format with nlocs replaced by nprofiles and stored
 ! separately for each variable
 !------------------------------------------------------------------------------
@@ -1923,25 +1923,25 @@ call check('nf90_create', nf90_create(trim(filename),nf90_hdf5,ncid))
 ! is equal to nlocs, thus not affecting previous cases; and the number of extended geovals required for non-trivial cases.
 ! Further refinement is needed for storing each variable separately.
 !------------------------------------------------------------------------------
-call check('nf90_def_dim', nf90_def_dim(ncid,'nlocs',self%geovals(1)%nprofiles, dimid_nlocs))
+call check("nf90_def_dim", nf90_def_dim(ncid,"nlocs",self%geovals(1)%nprofiles, dimid_nlocs))
 
 dims(2) = dimid_nlocs
 
 do i = 1, self%nvar
-  call check('nf90_def_dim', &
+  call check("nf90_def_dim", &
        nf90_def_dim(ncid,trim(self%variables(i))//"_nval",self%geovals(i)%nval, dimid_nval))
   dims(1) = dimid_nval
-  call check('nf90_def_var',  &
+  call check("nf90_def_var",  &
        nf90_def_var(ncid,trim(self%variables(i)),nf90_float,dims,ncid_var(i)))
-enddo
+end do
 
-call check('nf90_enddef', nf90_enddef(ncid))
+call check("nf90_enddef", nf90_enddef(ncid))
 
 do i = 1, self%nvar
-  call check('nf90_put_var', nf90_put_var(ncid,ncid_var(i),self%geovals(i)%vals(:,:)))
-enddo
+  call check("nf90_put_var", nf90_put_var(ncid,ncid_var(i),self%geovals(i)%vals(:,:)))
+end do
 
-call check('nf90_close', nf90_close(ncid))
+call check("nf90_close", nf90_close(ncid))
 deallocate(ncid_var)
 
 end subroutine ufo_geovals_write_netcdf
@@ -1975,7 +1975,7 @@ if (levels_top_down) then
 else
   lbgn=c_nlev
   linc=-1
-endif
+end if
 
 do jprofile=1, c_nprofiles
   iprofile = c_indx(jprofile) + 1
@@ -1985,8 +1985,8 @@ do jprofile=1, c_nprofiles
   do jlev=1, c_nlev
     geoval%vals(ilev,iprofile) = c_vals(jlev,jprofile)
     ilev = ilev + linc
-  enddo
-enddo
+  end do
+end do
 
 end subroutine ufo_geovals_fill
 
@@ -2019,7 +2019,7 @@ if (levels_top_down) then
 else
   lbgn=c_nlev
   linc=-1
-endif
+end if
 
 do jprofile=1, c_nprofiles
   iprofile = c_indx(jprofile) + 1
@@ -2029,8 +2029,8 @@ do jprofile=1, c_nprofiles
   do jlev=1, c_nlev
     c_vals(jlev,jprofile) = geoval%vals(ilev,iprofile)
     ilev = ilev + linc
-  enddo
-enddo
+  end do
+end do
 
 end subroutine ufo_geovals_fillad
 
@@ -2071,7 +2071,7 @@ if (present(format)) then
   actual_format = format
 else
   actual_format = self%default_format
-endif
+end if
 
 if (actual_format == ufo_geoval_sampled) then
   variables => self%variables
@@ -2079,17 +2079,17 @@ else if (actual_format == ufo_geoval_reduced) then
   variables => self%reduced_variables
 else
   call abor1_ftn("ufo_geovals_print: format must be either ufo_geoval_sampled or ufo_geoval_reduced")
-endif
+end if
 
 do ivar = 1, self%nvar
   varname = variables(ivar)
   call ufo_geovals_get_var(self, varname, geoval, actual_format)
   if (associated(geoval)) then
-    print *, 'geoval test: ', trim(varname), geoval%nval, geoval%vals(:,iobs)
+    print *, "geoval test: ", trim(varname), geoval%nval, geoval%vals(:,iobs)
   else
-    print *, 'geoval test: ', trim(varname), ' doesnt exist'
-  endif
-enddo
+    print *, "geoval test: ", trim(varname), " doesnt exist"
+  end if
+end do
 
 end subroutine ufo_geovals_print
 

@@ -1,16 +1,16 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Stubbed Fortran module for gnssro bending angle ropp1d tangent linear and adjoint
 !> following the ROPP (2018 Aug) implementation
 
 module ufo_gnssro_bndropp1d_tlad_mod
 
+use, intrinsic :: iso_c_binding, only: c_double, c_ptr
 use fckit_configuration_module, only: fckit_configuration
-!use iso_c_binding
-use kinds
+use kinds, only: kind_real
 use ufo_vars_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -18,13 +18,15 @@ use vert_interp_mod
 use ufo_basis_tlad_mod,  only: ufo_basis_tlad
 use obsspace_mod
 use gnssro_mod_conf
-use missing_values_mod
+use missing_values_mod, only: missing_value
 use logger_mod, only: oops_log
+implicit none
+private
 
 integer, parameter         :: max_string=800
 
 !> Fortran derived type for gnssro trajectory
-type, extends(ufo_basis_tlad)   ::  ufo_gnssro_BndROPP1D_tlad
+type, extends(ufo_basis_tlad), public ::  ufo_gnssro_BndROPP1D_tlad
   private
   integer                       :: nval, nlocs
   type(gnssro_conf)             :: roconf       ! ro configuration
@@ -48,9 +50,9 @@ subroutine ufo_gnssro_bndropp1d_tlad_setup(self, f_conf)
   call gnssro_conf_setup(self%roconf,f_conf)
 
 end subroutine ufo_gnssro_bndropp1d_tlad_setup
-! ------------------------------------------------------------------------------    
+! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
-       
+
   implicit none
   class(ufo_gnssro_BndROPP1D_tlad), intent(inout) :: self
   type(ufo_geovals),                intent(in)    :: geovals
@@ -69,8 +71,8 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   call ufo_geovals_get_var(geovals, var_prs,   prs)       ! pressure
   call ufo_geovals_get_var(geovals, var_z,     gph)       ! geopotential height
   call ufo_geovals_get_var(geovals, var_sfc_geomz, gph_sfc)   ! surface geopotential height
-      
-  call self%delete()   
+
+  call self%delete()
 
 ! Keep copy of dimensions
   self%nval = prs%nval
@@ -82,7 +84,7 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   allocate(self%gph(self%nval,self%nlocs))
   allocate(self%gph_sfc(1,self%nlocs))
 
-! allocate  
+! allocate
   self%gph     = gph%vals
   self%t       = t%vals
   self%q       = q%vals
@@ -90,28 +92,28 @@ subroutine ufo_gnssro_bndropp1d_tlad_settraj(self, geovals, obss)
   self%gph_sfc = gph_sfc%vals
 
   self%ltraj   = .true.
-       
+
 end subroutine ufo_gnssro_bndropp1d_tlad_settraj
-    
+
 ! ------------------------------------------------------------------------------
-! ------------------------------------------------------------------------------    
+! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   implicit none
   class(ufo_gnssro_BndROPP1D_tlad), intent(in)    :: self
   type(ufo_geovals),                intent(in)    :: geovals   ! perturbed quantities
   real(kind_real),                  intent(inout) :: hofx(:)
   type(c_ptr),   value,             intent(in)    :: obss
- 
+
   integer                         :: iobs,nlev, nlocs
-    
+
   character(len=*), parameter  :: myname_="ufo_gnssro_bndropp1d_simobs_tl"
   character(max_string)        :: err_msg
-  type(ufo_geoval), pointer    :: t_d, q_d, prs_d 
+  type(ufo_geoval), pointer    :: t_d, q_d, prs_d
   integer                       :: use_compress
 
 ! hack - set local geopotential height to zero for ropp routines
   real(kind_real), allocatable :: gph_d_zero(:)
-  real(kind_real)              :: gph_sfc_d_zero 
+  real(kind_real)              :: gph_sfc_d_zero
   real(kind_real), allocatable :: obsLat(:), obsLon(:), obsImpP(:), obsLocR(:), obsGeoid(:)
 ! hack - set local geopotential height to zero for ropp routines
 
@@ -121,22 +123,22 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
-      
+  end if
+
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname_, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
-  nlev  = self%nval 
+  nlev  = self%nval
   nlocs  = self%nlocs ! number of observations
 
   allocate(gph_d_zero(nlev))
@@ -153,10 +155,10 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   call obsspace_get_db(obss, "MetaData", "latitude",             obsLat)
   call obsspace_get_db(obss, "MetaData", "impactParameterRO",    obsImpP)
   call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
-  call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid) 
+  call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid)
 
 ! tidy up - deallocate obsspace structures
-  deallocate(obsLat) 
+  deallocate(obsLat)
   deallocate(obsLon)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -166,7 +168,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_tl(self, geovals, hofx, obss)
   call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs_tl
- 
+
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
@@ -177,7 +179,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   type(c_ptr),  value,              intent(in)    :: obss
   real(c_double)              :: missing
 
-  type(ufo_geoval),     pointer   :: t_d, q_d, prs_d 
+  type(ufo_geoval),     pointer   :: t_d, q_d, prs_d
 ! set local geopotential height to zero for ropp routines
   real(kind_real),      parameter :: gph_sfc_d_zero = 0.0
   real(kind_real),    allocatable :: gph_d_zero(:)
@@ -192,21 +194,21 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
 
 ! check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 ! check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname_, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
-     
+  end if
+
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_ts,    t_d)         ! temperature
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prs,   prs_d)       ! pressure
 
-  nlev  = self%nval 
+  nlev  = self%nval
   nlocs  = self%nlocs
 
   allocate(gph_d_zero(nlev))
@@ -220,15 +222,15 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   allocate(obsGeoid(nlocs))
 
   call obsspace_get_db(obss, "MetaData", "longitude",            obsLon)
-  call obsspace_get_db(obss, "MetaData", "latitude",             obsLat) 
+  call obsspace_get_db(obss, "MetaData", "latitude",             obsLat)
   call obsspace_get_db(obss, "MetaData", "impactParameterRO",    obsImpP)
   call obsspace_get_db(obss, "MetaData", "earthRadiusCurvature", obsLocR)
   call obsspace_get_db(obss, "MetaData", "geoidUndulation",      obsGeoid)
-  
+
   missing = missing_value(missing)
 
 ! tidy up - deallocate obsspace structures
-  deallocate(obsLat) 
+  deallocate(obsLat)
   deallocate(obsLon)
   deallocate(obsImpP)
   deallocate(obsLocR)
@@ -239,7 +241,7 @@ subroutine ufo_gnssro_bndropp1d_simobs_ad(self, geovals, hofx, obss)
   call oops_log%trace(err_msg)
 
 end subroutine ufo_gnssro_bndropp1d_simobs_ad
-    
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 subroutine ufo_gnssro_bndropp1d_tlad_delete(self)
@@ -247,17 +249,17 @@ subroutine ufo_gnssro_bndropp1d_tlad_delete(self)
   implicit none
   class(ufo_gnssro_BndROPP1D_tlad), intent(inout) :: self
   character(len=*), parameter :: myname_="ufo_gnssro_bndropp_tlad_delete"
-      
+
   self%nval = 0
   if (allocated(self%prs)) deallocate(self%prs)
   if (allocated(self%t))   deallocate(self%t)
   if (allocated(self%q))   deallocate(self%q)
   if (allocated(self%gph)) deallocate(self%gph)
   if (allocated(self%gph_sfc)) deallocate(self%gph_sfc)
-  self%ltraj = .false. 
+  self%ltraj = .false.
 
 end subroutine ufo_gnssro_bndropp1d_tlad_delete
 
 !-------------------------------------------------------------------------
-       
+
 end module ufo_gnssro_bndropp1d_tlad_mod

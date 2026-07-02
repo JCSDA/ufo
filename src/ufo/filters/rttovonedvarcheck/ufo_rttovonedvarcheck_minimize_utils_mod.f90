@@ -8,7 +8,7 @@
 module ufo_rttovonedvarcheck_minimize_utils_mod
 
 use fckit_log_module, only : fckit_log
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use oops_variables_mod
 use ufo_constants_mod, only: grav, zero, half, one, two, Pa_to_hPa
@@ -111,7 +111,7 @@ end if
 if (profindex % qt(1) > 0) then
   allocate(humidity_total(nlevels))
   humidity_total(:) = zero
-  
+
   ! Get humidity data from geovals
   call ufo_geovals_get_var(geovals, var_q, geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
@@ -119,7 +119,7 @@ if (profindex % qt(1) > 0) then
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
   call ufo_geovals_get_var(geovals, var_cli, geoval)
   humidity_total(:) = humidity_total(:) + geoval%vals(:, 1)
-  
+
   ! Convert from kg/kg to ln(g/kg)
   prof_x(profindex % qt(1):profindex % qt(2)) = log (humidity_total * 1000.0_kind_real) ! ln(g/kg)
 
@@ -211,7 +211,7 @@ end subroutine ufo_rttovonedvarcheck_GeoVaLs2ProfVec
 !!
 !! \details Heritage: Ops_SatRad_Vec2RTprof_RTTOV12.f90
 !!
-!! Convert profile data to the GeoVaLs (and ob) format.  We only copy fields 
+!! Convert profile data to the GeoVaLs (and ob) format.  We only copy fields
 !! that are being retrieved, as indicated by the profindex structure.
 !!
 !! \author Met Office
@@ -291,7 +291,7 @@ if (profindex % qt(1) > 0) then
   allocate(q(nlevels))
   allocate(ql(nlevels))
   allocate(qi(nlevels))
-  
+
   ! Convert from ln(g/kg) to kg/kg
   humidity_total(:) = EXP (prof_x(profindex % qt(1):profindex % qt(2))) / &
                            1000.0_kind_real ! ln(g/kg) => kg/kg
@@ -935,13 +935,13 @@ character(len=3) :: txt_nchans, txt_nprof
 character(len=10) :: int_fmt
 
 obs_size = size(yob)
-write( unit=txt_nchans,fmt='(i3)' ) obs_size
-write( unit=chans_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'E30.16)'
-write( unit=int_fmt,fmt='(a)' ) '(' // trim(txt_nchans) // 'I30)'
+write( unit=txt_nchans,fmt="(i3)" ) obs_size
+write( unit=chans_fmt,fmt="(a)" ) "(" // trim(txt_nchans) // "E30.16)"
+write( unit=int_fmt,fmt="(a)" ) "(" // trim(txt_nchans) // "I30)"
 
 profile_size = size(guessprofile)
-write( unit=txt_nprof,fmt='(i3)' ) profile_size
-write( unit=prof_fmt,fmt='(a)' ) '(' // trim(txt_nprof) // 'E30.16)'
+write( unit=txt_nprof,fmt="(i3)" ) profile_size
+write( unit=prof_fmt,fmt="(a)" ) "(" // trim(txt_nprof) // "E30.16)"
 
 write(*,*) "Start print iter info"
 

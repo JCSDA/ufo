@@ -1,9 +1,9 @@
 ! (C) Copyright 2017-2018 UCAR
-! 
+!
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-!> Fortran module to handle ground-based gnss  observations following 
+!> Fortran module to handle ground-based gnss  observations following
 !> the ROPP (2018 Aug) implementation
 
 module ufo_groundgnss_ropp_utils_mod
@@ -77,7 +77,7 @@ subroutine init_ropp_1d_statevec(step_time, rlon, rlat, temp, shum,   &
 ! ROPP Longitude value is -180.0 to 180.0
   x%lat      = real(rlat,kind=wp)
   rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
+  if (rlon_local > 180) rlon_local = rlon_local - 360.
   x%lon  = real(rlon_local,kind=wp)
   x%time = real(step_time, kind=wp)
 
@@ -88,7 +88,7 @@ subroutine init_ropp_1d_statevec(step_time, rlon, rlat, temp, shum,   &
 ! allocate arrays for temperature, specific humidity, pressure
 ! and geopotential height data
 !--------------------------------------------------------------
-  if (associated(x%temp)) deallocate(x%temp) 
+  if (associated(x%temp)) deallocate(x%temp)
   if (associated(x%shum)) deallocate(x%shum)
   if (associated(x%pres)) deallocate(x%pres)
   if (associated(x%geop)) deallocate(x%geop)
@@ -106,7 +106,7 @@ subroutine init_ropp_1d_statevec(step_time, rlon, rlat, temp, shum,   &
   if ( present(iflip) ) then
     local_flip = iflip
   end if
-  if ( local_flip .eq. 1) then
+  if ( local_flip == 1) then
     do k = 1, lm
       x%temp(lm+1-k) = real(temp(k),kind=wp)
       x%shum(lm+1-k) = real(shum(k),kind=wp)
@@ -144,7 +144,7 @@ subroutine init_ropp_1d_statevec(step_time, rlon, rlat, temp, shum,   &
   do i = 1, x%n_lev
      j = x%n_lev + i
      x%cov%d(j + j*(j-1)/2) = 1.0_wp
-  enddo
+  end do
 
   x%cov%d(n + n*(n-1)/2) = 1.0_wp
 
@@ -156,7 +156,7 @@ subroutine init_ropp_1d_statevec(step_time, rlon, rlat, temp, shum,   &
   if (associated(x%cov%s)) deallocate(x%cov%s)
 
   x%cov%fact_chol = .FALSE.
-  x%cov%equi_chol = 'N'
+  x%cov%equi_chol = "N"
 
 end subroutine init_ropp_1d_statevec
 
@@ -223,7 +223,7 @@ end subroutine init_ropp_1d_statevec_ad
 !------------------------------------------------------------------------------------
 
 subroutine calc_station_phi(rlat, station_height, station_phi)
-      
+
 !  Description:
 !     convert station geometric height to geopotential height
 !     provide inputs of:
@@ -232,7 +232,7 @@ subroutine calc_station_phi(rlat, station_height, station_phi)
 !  Inputs:
 !     rlat             latitude
 !     station_height   station geometric height
-!     
+!
 !  Outputs:
 !     station_phi:     station geopotential height
 !-----------------------------------------------------------------------------------
@@ -250,7 +250,7 @@ end subroutine calc_station_phi
 !------------------------------------------------------------------------------------
 
 subroutine calc_model_z(nlev, rlat, model_phi, model_z)
-      
+
 !  Description:
 !     convert model geopotential height to geometric height
 !     provide inputs of:
@@ -260,7 +260,7 @@ subroutine calc_model_z(nlev, rlat, model_phi, model_z)
 !     nlev             number of model levels
 !     rlat             latitude
 !     model_phi        model geopotential height
-!     
+!
 !  Outputs:
 !     model_z:         model geometric height
 !-----------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ subroutine calc_model_z(nlev, rlat, model_phi, model_z)
   real(kind=kind_real), dimension(nlev),  intent(in)   :: model_phi
   real(kind=kind_real), dimension(nlev),  intent(out)  :: model_z
 
-  integer ilev
+  integer :: ilev
 
   ! not used in forward operator at this time -- simulate at model levels only
   do ilev = 1, nlev
@@ -284,19 +284,19 @@ end subroutine calc_model_z
 !------------------------------------------------------------------------------------
 
 subroutine init_ropp_1d_obvec(nlev, ichk, ob_time, rlat, rlon, station_phi, x, y)
-      
+
 !  Description:
 !     subroutine to fill a ROPP observation vector structure
 !     observation provides the inputs of:
 !     lat, lon, time
-!     
+!
 !     forward model will provide the simulation of refractivity
 !
 !  Inputs:
 !     ob_time       time of the observation
 !     rlat          latitude
 !     rlon          longitude
-!     
+!
 !  Outputs:
 !     y:     Partially filled Forward model observation vector
 !-----------------------------------------------------------------------------------
@@ -316,9 +316,9 @@ subroutine init_ropp_1d_obvec(nlev, ichk, ob_time, rlat, rlon, station_phi, x, y
   integer                                   :: i
 
   y%time     = real(ob_time,kind=wp)
-  y%lat      = real(rlat,kind=wp) 
+  y%lat      = real(rlat,kind=wp)
   rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
+  if (rlon_local > 180) rlon_local = rlon_local - 360.
   y%lon        = real(rlon_local,kind=wp)
 
 !----------------------------------------------------
@@ -338,7 +338,7 @@ subroutine init_ropp_1d_obvec(nlev, ichk, ob_time, rlat, rlon, station_phi, x, y
   allocate(y%geop(1:nlev))               ! value set in fwd model
 
   do i=1,nlev
-     if (ichk(i) .le. 0) then
+     if (ichk(i) <= 0) then
         y%weights(i) = 1.0_wp              ! following t_fascod example
      else
         y%weights(i) = 0.0_wp
@@ -353,7 +353,7 @@ subroutine init_ropp_1d_obvec(nlev, ichk, ob_time, rlat, rlon, station_phi, x, y
 !--------------------------------------------
   y%obs_ok = .TRUE.
 
-end subroutine init_ropp_1d_obvec                                                    
+end subroutine init_ropp_1d_obvec
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -373,7 +373,7 @@ subroutine init_ropp_1d_obvec_tlad(nlev,  &
   y%time     = real(0.0, kind=wp)!)real(ob_time,kind=wp)
   y%lat      = real(rlat,kind=wp)
   rlon_local = rlon
-  if (rlon_local .gt. 180) rlon_local = rlon_local - 360.
+  if (rlon_local > 180) rlon_local = rlon_local - 360.
   y%lon        = real(rlon_local,kind=wp)
 
 ! allocate refractivity
@@ -404,7 +404,7 @@ end subroutine init_ropp_1d_obvec_tlad
 !
 !  Inputs:
 !     lm            number of model levels
-!     model_refrac  refractivities to integrate 
+!     model_refrac  refractivities to integrate
 !     model_z       model geometric heights
 !     ob_terr       observation station height
 !
@@ -438,7 +438,7 @@ subroutine gnss_ztd_integral(lm, model_refrac, model_z, ob_terr, model_ztd, l_li
   do k = 1, lm
     if (k==1) then
       if ( model_refrac(k) <= 0 .or. model_refrac(k+1) <= 0 ) then
-        write(err_msg,'(a,2es13.3)') ' unphysical refractivity ', &
+        write(err_msg,"(a,2es13.3)") " unphysical refractivity ", &
             model_refrac(k), model_refrac(k+1)
         call fckit_log%info(err_msg)
         cycle
@@ -448,7 +448,7 @@ subroutine gnss_ztd_integral(lm, model_refrac, model_z, ob_terr, model_ztd, l_li
         c_i = ( log(model_refrac(k+1)) - log(model_refrac(k)) )      / &
                ( model_z(k) - model_z(k+1) )
         if ( c_i == 0 ) then
-          write(err_msg,'(a,2es13.3)') ' model refractivity repeating1 ', &
+          write(err_msg,"(a,2es13.3)") " model refractivity repeating1 ", &
               model_refrac(k), model_refrac(k+1)
           call fckit_log%info(err_msg)
           l_linear = .true.
@@ -462,7 +462,7 @@ subroutine gnss_ztd_integral(lm, model_refrac, model_z, ob_terr, model_ztd, l_li
       cycle
     else
       if ( model_refrac(k) <= 0 .or. model_refrac(k-1) <= 0 ) then
-        write(err_msg,'(a,2es13.3)') ' unphysical refractivity ', &
+        write(err_msg,"(a,2es13.3)") " unphysical refractivity ", &
             model_refrac(k), model_refrac(k-1)
         call fckit_log%info(err_msg)
         cycle
@@ -472,7 +472,7 @@ subroutine gnss_ztd_integral(lm, model_refrac, model_z, ob_terr, model_ztd, l_li
         c_i = ( log(model_refrac(k)) - log(model_refrac(k-1)) )  / &
                ( model_z(k-1) - model_z(k) )
         if ( c_i == 0 ) then
-          write(err_msg,'(a,2es13.3)') ' model refractivity repeating2 ', &
+          write(err_msg,"(a,2es13.3)") " model refractivity repeating2 ", &
               model_refrac(k), model_refrac(k-1)
           call fckit_log%info(err_msg)
           l_linear = .true.
@@ -489,7 +489,7 @@ subroutine gnss_ztd_integral(lm, model_refrac, model_z, ob_terr, model_ztd, l_li
       end if
     end if
     model_ztd = model_ztd + ddzd
-  enddo
+  end do
 
   ! a very bad place to put this suggestions?
   model_ztd = model_ztd * 1.e-6
@@ -543,5 +543,5 @@ subroutine ropp_tidy_up_tlad_1d(x,x_p,y,y_p)
 end subroutine ropp_tidy_up_tlad_1d
 
 !-------------------------------------------------------------------------
-     
+
 end module ufo_groundgnss_ropp_utils_mod

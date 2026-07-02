@@ -12,6 +12,7 @@ module ufo_gnssroonedvarcheck_do1dvar_mod
 use kinds, only: kind_real
 use missing_values_mod, only: missing_value
 use fckit_log_module, only: fckit_log
+implicit none
 
 private
 public :: Ops_GPSRO_Do1DVar_BA
@@ -157,9 +158,9 @@ nobs = COUNT (Ob % BendingAngle(:) % value /= missing_value(Ob % BendingAngle(1)
               Ob % ImpactParam(:) % value /= missing_value(Ob % ImpactParam(1) % value)   .AND. & ! not missing impact parameter
               Ob % qc_flags(:) == 0)
 
-WRITE (message, '(A,I0)') 'size of input obs vector ', SIZE (Ob % BendingAngle(:) % value)
+WRITE (message, "(A,I0)") "size of input obs vector ", SIZE (Ob % BendingAngle(:) % value)
 CALL fckit_log % info(message)
-WRITE (message, '(A,I0)') 'size of packed obs vector ', nobs
+WRITE (message, "(A,I0)") "size of packed obs vector ", nobs
 CALL fckit_log % info(message)
 
 ! Only continue if we have some observations to process
@@ -354,13 +355,13 @@ IF (nobs > 0) THEN
 
 ELSE
   IF (nobs <= 10) THEN
-    WRITE (message, '(A)') 'nobs is less than 10: exit Ops_GPSRO_Do1DVar_BA'
+    WRITE (message, "(A)") "nobs is less than 10: exit Ops_GPSRO_Do1DVar_BA"
     CALL fckit_log % info(message)
     Ob % BendingAngle(:) % PGEFinal = 0.55     ! flag lack of observation data
   END IF
 
   IF (BAerr) THEN
-    WRITE (message, '(A)') 'Error in Ops_Refractivity: exit Ops_GPSRO_Do1DVar_BA'
+    WRITE (message, "(A)") "Error in Ops_Refractivity: exit Ops_GPSRO_Do1DVar_BA"
     CALL fckit_log % info(message)
     Ob % BendingAngle(:) % PGEFinal = 0.58     ! flag BAerr
   END IF

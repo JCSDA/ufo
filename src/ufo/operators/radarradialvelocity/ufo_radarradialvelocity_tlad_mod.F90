@@ -5,12 +5,16 @@
 
 module ufo_radarradialvelocity_tlad_mod
 
-  use oops_variables_mod
-  use obs_variables_mod
+  use, intrinsic :: iso_c_binding, only: c_char, c_double, c_ptr
+  use kinds, only: kind_real
+  use oops_variables_mod, only: oops_variables
+  use obs_variables_mod, only: obs_variables
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_mod
-  use missing_values_mod
+  use missing_values_mod, only: missing_value
+  implicit none
+  private
 
 
 ! ------------------------------------------------------------------------------
@@ -33,9 +37,9 @@ module ufo_radarradialvelocity_tlad_mod
     final :: destructor
   end type ufo_radarradialvelocity_tlad
 
-  character(len=maxvarlen), dimension(3), parameter :: geovars_default = (/var_u, &
+  character(len=maxvarlen), dimension(3), parameter :: geovars_default = [var_u, &
                                                                         var_v, &
-                                                                        var_w /)
+                                                                        var_w ]
 
 ! ------------------------------------------------------------------------------
 contains
@@ -54,13 +58,13 @@ subroutine radarradialvelocity_tlad_setup_(self, yaml_conf)
   if( yaml_conf%has("VertCoord") ) then
       call yaml_conf%get_or_die("VertCoord",coord_name)
       self%v_coord = coord_name
-      if( trim(self%v_coord) .ne. var_z .and. trim(self%v_coord) .ne. var_geomz ) then
+      if( trim(self%v_coord) /= var_z .and. trim(self%v_coord) /= var_geomz ) then
         call abor1_ftn("ufo_radarradialvelocity: incorrect vertical coordinate specified")
-      endif
+      end if
   else  ! default
       !self%v_coord = var_z
       self%v_coord = var_geomz
-  endif
+  end if
 
 
 end subroutine radarradialvelocity_tlad_setup_
@@ -78,7 +82,7 @@ subroutine radarradialvelocity_tlad_settraj_(self, geovals, obss)
   integer :: iobs
   real(kind_real),  dimension(:), allocatable :: obsvcoord
   !real(kind_real),  dimension(:), allocatable :: cosazm_costilt, sinazm_costilt, sintilt, vterminal
-  type(ufo_geoval), pointer :: vcoordprofile 
+  type(ufo_geoval), pointer :: vcoordprofile
 
   real(kind_real), allocatable :: tmp(:)
   real(kind_real) :: tmp2
@@ -117,7 +121,7 @@ subroutine radarradialvelocity_tlad_settraj_(self, geovals, obss)
     tmp = vcoordprofile%vals(:,iobs)
     tmp2 = obsvcoord(iobs)
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, self%wi(iobs), self%wf(iobs))
-  enddo
+  end do
 
 ! Cleanup memory
   deallocate(obsvcoord)
@@ -157,15 +161,15 @@ subroutine radarradialvelocity_simobs_tl_(self, geovals, obss, nvars, nlocs, hof
     do iobs = 1, nlocs
       call vert_interp_apply_tl(profile%nval, profile%vals(:,iobs), &
                              & vfields(ivar,iobs), self%wi(iobs), self%wf(iobs))
-    enddo
-  enddo
+    end do
+  end do
 
   do ivar = 1, nvars
     do iobs=1,nlocs
       hofx(ivar,iobs) = vfields(1,iobs)*self%sinazm_costilt(iobs) &
                       + vfields(2,iobs)*self%cosazm_costilt(iobs) &
                       + vfields(3,iobs)*self%sintilt(iobs)
-    enddo
+    end do
   end do
 
   deallocate(vfields)
@@ -199,12 +203,12 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
     do iobs=1,nlocs
      ! no vertical velocity and terminal velocity in GSI rw observer, it can add
      ! in future after acceptance test
-     if (hofx(ivar,iobs) .ne. missing) then
+     if (hofx(ivar,iobs) /= missing) then
       vfields(1,iobs) = vfields(1,iobs) + hofx(ivar,iobs)*self%sinazm_costilt(iobs)
       vfields(2,iobs) = vfields(2,iobs) + hofx(ivar,iobs)*self%cosazm_costilt(iobs)
       vfields(3,iobs) = vfields(3,iobs) + hofx(ivar,iobs)*self%sintilt(iobs)
      end if
-    enddo
+    end do
   end do
 
   do ivar = 1, nvars_geovars
@@ -218,8 +222,8 @@ subroutine radarradialvelocity_simobs_ad_(self, geovals, obss, nvars, nlocs, hof
     do iobs = 1, nlocs
       call vert_interp_apply_ad(profile%nval, profile%vals(:,iobs), &
                              & vfields(ivar,iobs), self%wi(iobs), self%wf(iobs))
-    enddo
-  enddo
+    end do
+  end do
 
 
   deallocate(vfields)

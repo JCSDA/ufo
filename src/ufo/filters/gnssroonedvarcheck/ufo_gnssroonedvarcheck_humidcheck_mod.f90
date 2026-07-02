@@ -8,6 +8,7 @@
 module ufo_gnssroonedvarcheck_humidcheck_mod
 
 use kinds
+implicit none
 
 private
 public :: Ops_GPSRO_humidcheck

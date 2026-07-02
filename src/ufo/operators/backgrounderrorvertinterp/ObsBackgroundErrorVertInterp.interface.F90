@@ -5,9 +5,11 @@
 
 module ufo_backgrounderrorvertinterp_mod_c
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr
 use ufo_backgrounderrorvertinterp_mod, only: ufo_backgrounderrorvertinterp_fillobsdiags
 implicit none
+private
+public :: ufo_backgrounderrorvertinterp_fillobsdiags_c
 
 contains
 
@@ -18,7 +20,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags_c(len_obs_vcoord, c_obs_vc
                                                         len_vcoord, c_vcoord, &
                                                         c_key_geovals, c_obsspace, c_nlocs, &
                                                         c_obsvars, c_key_obsdiags) &
-  bind(c, name='ufo_backgrounderrorvertinterp_fillobsdiags_f90')
+  bind(c, name="ufo_backgrounderrorvertinterp_fillobsdiags_f90")
 
   use string_f_c_mod,     only: c_f_string
   use oops_variables_mod, only: oops_variables

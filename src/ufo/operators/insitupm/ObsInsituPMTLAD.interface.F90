@@ -8,7 +8,7 @@
 
 module ufo_insitupm_tlad_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_insitupm_tlad_mod
   implicit none
   private
@@ -29,7 +29,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitupm_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name='ufo_insitupm_tlad_setup_f90')
+subroutine ufo_insitupm_tlad_setup_c(c_key_self, c_conf, c_obsvars, c_geovars) bind(c,name="ufo_insitupm_tlad_setup_f90")
 use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 use obs_variables_mod
@@ -55,7 +55,7 @@ end subroutine ufo_insitupm_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitupm_tlad_delete_c(c_key_self) bind(c,name='ufo_insitupm_tlad_delete_f90')
+subroutine ufo_insitupm_tlad_delete_c(c_key_self) bind(c,name="ufo_insitupm_tlad_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -67,7 +67,7 @@ end subroutine ufo_insitupm_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitupm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_insitupm_tlad_settraj_f90')
+subroutine ufo_insitupm_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name="ufo_insitupm_tlad_settraj_f90")
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_geovals_mod,   only: ufo_geovals
 implicit none
@@ -88,7 +88,7 @@ end subroutine ufo_insitupm_tlad_settraj_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitupm_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_insitupm_simobs_tl_f90')
+subroutine ufo_insitupm_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name="ufo_insitupm_simobs_tl_f90")
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_geovals_mod,   only: ufo_geovals
 implicit none
@@ -109,7 +109,7 @@ end subroutine ufo_insitupm_simobs_tl_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_insitupm_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name='ufo_insitupm_simobs_ad_f90')
+subroutine ufo_insitupm_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) bind(c,name="ufo_insitupm_simobs_ad_f90")
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_geovals_mod,   only: ufo_geovals
 implicit none

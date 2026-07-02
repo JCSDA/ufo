@@ -8,8 +8,8 @@
 
 module ufo_aodext_mod_c
 
-  use iso_c_binding
-  use ufo_aodext_mod 
+  use, intrinsic :: iso_c_binding
+  use ufo_aodext_mod
   implicit none
   private
 
@@ -32,7 +32,7 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodext_setup_c(c_key_self, c_conf, c_obsvars, c_geovars, c_nchan, c_channels) bind(c,name='ufo_aodext_setup_f90')
+subroutine ufo_aodext_setup_c(c_key_self, c_conf, c_obsvars, c_geovars, c_nchan, c_channels) bind(c,name="ufo_aodext_setup_f90")
 use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 use obs_variables_mod
@@ -61,7 +61,7 @@ end subroutine ufo_aodext_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_aodext_delete_c(c_key_self) bind(c,name='ufo_aodext_delete_f90')
+subroutine ufo_aodext_delete_c(c_key_self) bind(c,name="ufo_aodext_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -74,7 +74,7 @@ end subroutine ufo_aodext_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_aodext_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-                                c_hofx) bind(c,name='ufo_aodext_simobs_f90')
+                                c_hofx) bind(c,name="ufo_aodext_simobs_f90")
 use ufo_geovals_mod,   only: ufo_geovals
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 implicit none

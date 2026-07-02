@@ -8,7 +8,7 @@
 module ufo_seaicethickness_tlad_mod
 
  use fckit_configuration_module, only: fckit_configuration
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use kinds
 
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var
@@ -30,7 +30,7 @@ module ufo_seaicethickness_tlad_mod
   character(max_string) :: thickness_sim_option
   type(ufo_geoval) :: icethick !< ice thickness (traj)
   type(ufo_geoval) :: icefrac  !< ice fraction  (traj)
-  type(ufo_geoval) :: snowthick!< snow thickness(traj) 
+  type(ufo_geoval) :: snowthick!< snow thickness(traj)
   real(kind=kind_real) :: rho_ice  = 905.0 !< [kg/m3]
   real(kind=kind_real) :: rho_snow = 330.0 !< [kg/m3]
   real(kind=kind_real) :: rho_water= 1000.0!< [kg/m3]
@@ -56,9 +56,9 @@ character(max_string)  :: err_msg
 
 nvars = self%obsvars%nvars()
 if (nvars /= 1) then
-  write(err_msg,*) 'ufo_seaicethickness_tlad_setup error: only variables size 1 supported!'
+  write(err_msg,*) "ufo_seaicethickness_tlad_setup error: only variables size 1 supported!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! Set thickness-simulate option from ymal file
 !self%thickness_sim_option = self%obsvars%variable(1)
@@ -94,7 +94,7 @@ call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac)
 if (self%obsvars%variable(1) == "seaIceFreeboard") then
    call ufo_geovals_get_var(geovals, var_seaicesnowthick, snowthick)
    self%snowthick= snowthick
-endif
+end if
 
 self%icethick = icethick
 self%icefrac  = icefrac
@@ -123,15 +123,15 @@ missing = missing_value(missing)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
-  write(err_msg,*) myname_, ' trajectory wasnt set!'
+  write(err_msg,*) myname_, " trajectory wasnt set!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! check if nlocs is consistent in geovals & hofx
 if (geovals%nlocs /= size(hofx,1)) then
-  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+  write(err_msg,*) myname_, " error: nlocs inconsistent!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! check if sea ice fraction variable is in geovals and get it
 call ufo_geovals_get_var(geovals, var_seaicefrac, icefrac_d)
@@ -141,8 +141,8 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 if (self%obsvars%variable(1) == "seaIceFreeboard") then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-   rho_wsw = (-self%rho_snow)/self%rho_water  
-endif
+   rho_wsw = (-self%rho_snow)/self%rho_water
+end if
 
 ! sea ice thickness obs operator
 ncat = icefrac_d%nval
@@ -164,8 +164,8 @@ case ("seaIceFreeboard")
                       rho_wiw * self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) + &
                       rho_wiw * icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs) + &
                       rho_wsw * icefrac_d%vals(icat,iobs) * self%snowthick%vals(icat,iobs)
-      enddo
-   enddo
+      end do
+   end do
 case ("iceThickness")
    do iobs = 1, size(hofx,1)
       do icat = 1, ncat
@@ -179,10 +179,10 @@ case ("iceThickness")
          hofx(iobs) = hofx(iobs) +                                         &
                       self%icefrac%vals(icat,iobs) * icethick_d%vals(icat,iobs) + &
                       icefrac_d%vals(icat,iobs) * self%icethick%vals(icat,iobs)
-      enddo
-   enddo
+      end do
+   end do
 case default
-  write(err_msg,*) myname_, ' error: no match seaice thickness_option!'
+  write(err_msg,*) myname_, " error: no match seaice thickness_option!"
   call abor1_ftn(err_msg)
 end select
 
@@ -209,20 +209,20 @@ missing = missing_value(missing)
 
 ! check if trajectory was set
 if (.not. self%ltraj) then
-  write(err_msg,*) myname_, ' trajectory wasnt set!'
+  write(err_msg,*) myname_, " trajectory wasnt set!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! check if nlocs is consistent in geovals & hofx
 if (geovals%nlocs /= size(hofx,1)) then
-  write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+  write(err_msg,*) myname_, " error: nlocs inconsistent!"
   call abor1_ftn(err_msg)
-endif
+end if
 
 if (self%obsvars%variable(1) == "seaIceFreeboard") then
    rho_wiw = (self%rho_water-self%rho_ice)/self%rho_water
-   rho_wsw = (-self%rho_snow)/self%rho_water   
-endif
+   rho_wsw = (-self%rho_snow)/self%rho_water
+end if
 
 if (.not. geovals%linit ) geovals%linit=.true.
 
@@ -232,16 +232,16 @@ call ufo_geovals_get_var(geovals, var_seaicethick, icethick_d)
 
 ncat = self%icethick%nval
 if (ncat < 1) then
-  write(err_msg,*) myname_, ' unknown number of categories'
+  write(err_msg,*) myname_, " unknown number of categories"
   call abor1_ftn(err_msg)
-endif
+end if
 
 ! backward sea ice thickness obs operator
 
 select case (trim(self%obsvars%variable(1)))
 case ("seaIceFreeboard")
    do iobs = 1, size(hofx,1)
-      if (hofx(iobs) /= missing) then   
+      if (hofx(iobs) /= missing) then
          do icat = 1, ncat
             icefrac_d%vals(icat,iobs)  = icefrac_d%vals(icat,iobs)&
                                          + rho_wiw*self%icethick%vals(icat,iobs) * hofx(iobs)&
@@ -250,7 +250,7 @@ case ("seaIceFreeboard")
                                          + rho_wiw*self%icefrac%vals(icat,iobs) * hofx(iobs)
          end do
       end if
-   enddo
+   end do
 case ("iceThickness")
    do iobs = 1, size(hofx,1)
       if (hofx(iobs) /= missing) then
@@ -259,9 +259,9 @@ case ("iceThickness")
             icethick_d%vals(icat,iobs) = icethick_d%vals(icat,iobs) + self%icefrac%vals(icat,iobs) * hofx(iobs)
          end do
       end if
-   enddo
+   end do
 case default
-  write(err_msg,*) myname_, ' error: no match seaice thickness_option!'
+  write(err_msg,*) myname_, " error: no match seaice thickness_option!"
   call abor1_ftn(err_msg)
 end select
 

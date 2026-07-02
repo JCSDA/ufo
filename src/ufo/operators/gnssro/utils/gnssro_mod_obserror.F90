@@ -2,11 +2,12 @@
 module gnssro_mod_obserror
 !==========================================================================
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use gnssro_mod_constants
 use ufo_roobserror_utils_mod
 use fckit_log_module, only: fckit_log
+implicit none
 
 private
 public :: bending_angle_obserr_ECMWF, bending_angle_obserr_NRL
@@ -20,14 +21,16 @@ integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue
 integer(c_int),                  intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
-real(kind_real)                  :: H_km, missing
+real(kind_real),                 intent(in)  :: missing
+
+real(kind_real) :: H_km
 integer :: i
 
 obsErr = missing
 
 do i = 1, nobs
-   
-if (QCflags(i) .eq. 0) then
+
+if (QCflags(i) == 0) then
 
     H_km  = obsImpH(i)/1000.0_kind_real
 
@@ -35,7 +38,7 @@ if (QCflags(i) .eq. 0) then
        obsErr(i) = (H_km*1.25 + (10-H_km)*20)/10.0
        obsErr(i) = obsErr(i)/100.0*obsValue(i)
     else if ( H_km > 10.0 .and. H_km <= 32.0 ) then
-      obsErr(i) = 1.25/100.0*obsValue(i) 
+      obsErr(i) = 1.25/100.0*obsValue(i)
     else
       obsErr(i) = 3.0*1e-6
     end if
@@ -53,20 +56,21 @@ integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsValue, obsLat
 integer(c_int),                  intent(in)  :: QCflags(:)
 real(kind_real), dimension(nobs),intent(out) :: obsErr
-real(kind_real):: H_m, missing
+real(kind_real),                 intent(in)  :: missing
+real(kind_real):: H_m
 real(kind_real):: lat_in_rad,trop_proxy,damping_factor,errfac
 real(kind_real):: max_sfc_error, min_ba_error
 
 integer :: i
 
-obsErr = missing 
+obsErr = missing
 max_sfc_error = 20.0   ! %
 min_ba_error  = 1.25   ! %
 
 do i = 1, nobs
 
-if (QCflags(i) .eq. 0) then
-   
+if (QCflags(i) == 0) then
+
    H_m  = obsImpH(i)
    lat_in_rad = deg2rad * obsLat(i)
    trop_proxy = 8666.66 + 3333.33*cos(2.0*lat_in_rad)
@@ -86,17 +90,19 @@ subroutine  bending_angle_obserr_NBAM(obsLat, obsImpH, obsSaid, nobs, obsErr, QC
 implicit none
 integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsImpH, obsLat
-integer(c_int),  dimension(nobs),intent(in)  :: obsSaid, QCflags(:)
-real(kind_real), dimension(nobs),intent(out) ::  obsErr
-real(kind_real)                 :: H_km, missing
+integer(c_int),  dimension(nobs),intent(in)  :: obsSaid
+integer(c_int),                  intent(in)  :: QCflags(:)
+real(kind_real), dimension(nobs),intent(out) :: obsErr
+real(kind_real),                 intent(in)  :: missing
 
+real(kind_real) :: H_km
 integer :: i
 
 obsErr = missing
 
 do i = 1, nobs
 
-if (QCflags(i) .eq. 0) then
+if (QCflags(i) == 0) then
 
    H_km  = obsImpH(i)/1000.0_kind_real
 !  processed at EUMETSAT
@@ -109,14 +115,14 @@ if (QCflags(i) .eq. 0) then
            obsErr(i)=0.19032 +0.287535 *H_km-0.00260813*H_km**2
          else
            obsErr(i)=-3.20978 +1.26964 *H_km-0.0622538 *H_km**2
-         endif
+         end if
        else
          if(H_km > 18.0) then
            obsErr(i)=-1.87788 +0.354718 *H_km-0.00313189 *H_km**2
          else
            obsErr(i)=-2.41024 +0.806594 *H_km-0.027257 *H_km**2
-         endif
-       endif
+         end if
+       end if
 !  COSMIC-2 (750-755) and Commercial (265-269)
    else if ( (ObsSaid(i) >= 750 .and. ObsSaid(i) <= 755) .or. (ObsSaid(i) >= 265 .and. ObsSaid(i) <= 269) ) then
        if ( abs(obsLat(i)) > 40.0 ) then
@@ -126,31 +132,31 @@ if (QCflags(i) .eq. 0) then
             obsErr(i) = 2.1750271+0.0431177*H_km-0.0008567*H_km**2
          else
             obsErr(i) = -0.3447429+0.2829981*H_km-0.0028545*H_km**2
-         endif
+         end if
        else
          if (H_km <= 4.0) then
             obsErr(i) = 0.7285212-1.1138755*H_km+0.2311123*H_km**2
-         elseif (H_km <= 18.0 .and. H_km > 4.0) then
+         else if (H_km <= 18.0 .and. H_km > 4.0) then
             obsErr(i) = -3.3878629+0.8691249*H_km-0.0297196*H_km**2
          else
             obsErr(i) = -2.3875749+0.3667211*H_km-0.0037542*H_km**2
-         endif
-       endif
+         end if
+       end if
    else ! Other
        if( abs(obsLat(i)) > 40.0 ) then
          if ( H_km > 12.00 ) then
             obsErr(i)=-0.685627 +0.377174 *H_km-0.00421934 *H_km**2
          else
             obsErr(i)=-3.27737 +1.20003 *H_km-0.0558024 *H_km**2
-         endif
+         end if
        else
          if( H_km > 18.0 ) then
             obsErr(i)=-2.73867 +0.447663 *H_km-0.00475603 *H_km**2
          else
             obsErr(i)=-3.45303 +0.908216 *H_km-0.0293331 *H_km**2
-         endif
-       endif
-   endif
+         end if
+       end if
+   end if
    obsErr(i) = 0.001 /abs(exp(obsErr(i)))
 
 end if
@@ -166,15 +172,16 @@ integer,                         intent(in)  :: nobs
 real(kind_real), dimension(nobs),intent(in)  :: obsLat, obsZ
 real(kind_real), dimension(nobs),intent(out) :: obsErr
 integer(c_int),                  intent(in)  :: QCflags(:)
-real(kind_real)                   :: H_km, missing
+real(kind_real),                 intent(in)  :: missing
 
+real(kind_real) :: H_km
 integer :: i
 
 obsErr = missing
 
 do i = 1, nobs
 
-  if (QCflags(i) .eq. 0) then
+  if (QCflags(i) == 0) then
      H_km  = obsZ(i)/1000.0_kind_real
      if( abs(obsLat(i))>= 20.0 ) then
          obsErr(i)=-1.321+0.341*H_km-0.005*H_km**2
@@ -183,8 +190,8 @@ do i = 1, nobs
           obsErr(i)=2.013-0.060*H_km+0.0045*H_km**2
        else
           obsErr(i)=-1.18+0.058*H_km+0.025*H_km**2
-       endif
-     endif
+       end if
+     end if
      obsErr(i) = 1.0_kind_real/abs(exp(obsErr(i)))
   end if
 end do
@@ -253,7 +260,7 @@ do iprofile = 1, size(unique)
 
   do iPoint = start_point, current_point-1
     iob = sort_order(iPoint)
-    if (QCflags(iob) .eq. 0) then
+    if (QCflags(iob) == 0) then
       if (RMatrix_list(1) % av_temp > 0) then
         !--------------------------------------------------------
         ! Choose R matrix depending on satid, origctr and the average
@@ -268,7 +275,7 @@ do iprofile = 1, size(unique)
                                                 RMatrix)
 
       ELSE
-        WRITE (Message, '(2A)') "RMatrices must have positive average ", &
+        WRITE (Message, "(2A)") "RMatrices must have positive average ", &
                                      "temperature"
         CALL abor1_ftn(Message)
       END IF
@@ -302,7 +309,7 @@ do iprofile = 1, size(unique)
       end if
 
       if (verboseOutput) then
-        WRITE(Message,'(A,I8,2F16.4,3E26.8)') 'Result', iob, obsZ(iob), frac_err, &
+        WRITE(Message,"(A,I8,2F16.4,3E26.8)") "Result", iob, obsZ(iob), frac_err, &
             ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), averageTemp(iob)
         CALL fckit_log % info(Message)
       end if
@@ -381,7 +388,7 @@ do iprofile = 1, size(unique)
 
   do iPoint = start_point, current_point-1
     iOb = sort_order(iPoint)
-    if (QCflags(iob) .eq. 0) then
+    if (QCflags(iob) == 0) then
       IF (RMatrix_list(1) % latitude /= &
           missing_value(RMatrix_list(1) % latitude)) THEN
         ! Use the R-matrix from the first observation in the profile
@@ -392,7 +399,7 @@ do iprofile = 1, size(unique)
                                                 RMatrix_list,        &
                                                 RMatrix)
       ELSE
-        WRITE (Message, '(2A)') "RMatrices must have a valid latitude set"
+        WRITE (Message, "(2A)") "RMatrices must have a valid latitude set"
         CALL abor1_ftn(Message)
       END IF
 
@@ -425,7 +432,7 @@ do iprofile = 1, size(unique)
       end if
 
       if (verboseOutput) then
-        WRITE(Message,'(A,I8,2F16.4,2E21.8,F12.4)') 'Result', iob, obsZ(iob), &
+        WRITE(Message,"(A,I8,2F16.4,2E21.8,F12.4)") "Result", iob, obsZ(iob), &
             frac_err, ObsErr(iob), MAX(frac_err * obsValue(iob), Rmatrix % min_error), &
             obsLat(iob)
         CALL fckit_log % info(Message)
@@ -435,7 +442,7 @@ do iprofile = 1, size(unique)
       ObsErr(iob) = MAX (frac_err * obsValue(iob), Rmatrix % min_error)
 
     else
-      WRITE(Message,'(A,I8,2E16.8)') 'Missing', iob, obsZ(iob), obsLat(iob)
+      WRITE(Message,"(A,I8,2E16.8)") "Missing", iob, obsZ(iob), obsLat(iob)
       obsErr(iob) = missing
     end if
   end do

@@ -1,11 +1,12 @@
 !==========================================================================
-module gnssro_mod_transform 
+module gnssro_mod_transform
 !==========================================================================
 
 use kinds
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use gnssro_mod_constants
 use ufo_constants_mod
+implicit none
 
 private
 public :: geometric2geop, geop2geometric, compute_refractivity
@@ -17,7 +18,7 @@ contains
 ! variable converting between geopotential and geometric heights using  MJ Mahoney's (2001)
 ! Parameters from WGS-84 model software inside GPS receivers.
 ! copy from GSI
-subroutine  geometric2geop(Latitude,geometricZ, geopotentialH ) 
+subroutine  geometric2geop(Latitude,geometricZ, geopotentialH )
 implicit none
 real(kind_real), intent(in)  :: Latitude,   geometricZ
 real(kind_real), intent(out) :: geopotentialH

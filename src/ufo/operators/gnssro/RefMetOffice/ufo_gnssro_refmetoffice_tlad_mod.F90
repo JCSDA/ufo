@@ -8,7 +8,7 @@
 
 module ufo_gnssro_refmetoffice_tlad_mod
 
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use kinds
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -25,6 +25,7 @@ use ufo_constants_mod, only: &
     grav,                    &    ! Gravitational field strength
     rd_over_rv                    ! Ratio of molecular weights of water and dry air
 use gnssro_mod_transform, only: geometric2geop
+implicit none
 
 private
 public :: ufo_gnssro_refmetoffice_tlad
@@ -108,7 +109,7 @@ end subroutine ufo_gnssro_refmetoffice_tlad_setup
 !!
 !-------------------------------------------------------------------------------
 subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
-       
+
   implicit none
 ! Subroutine arguments
   class(ufo_gnssro_refmetoffice_tlad), intent(inout) :: self     !< The object that we use to save data in
@@ -145,7 +146,7 @@ subroutine ufo_gnssro_refmetoffice_tlad_settraj(self, geovals, obss)
   self % nlevp = prs % nval
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
-  
+
 ! Get the meta-data from the observations
   allocate(obs_height(self%nlocs))
   allocate(obsLat(self%nlocs))
@@ -232,15 +233,15 @@ subroutine ufo_gnssro_refmetoffice_simobs_tl(self, geovals, hofx, obss)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname_, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
@@ -264,7 +265,7 @@ subroutine ufo_gnssro_refmetoffice_simobs_tl(self, geovals, hofx, obss)
   call oops_log%trace(err_msg)
 
   return
-    
+
 end subroutine ufo_gnssro_refmetoffice_simobs_tl
 
 !-------------------------------------------------------------------------------
@@ -309,16 +310,16 @@ subroutine ufo_gnssro_refmetoffice_simobs_ad(self, geovals, hofx, obss)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname_, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
-     
+  end if
+
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi,  prs_d)       ! pressure
@@ -363,12 +364,12 @@ subroutine ufo_gnssro_refmetoffice_tlad_delete(self)
   implicit none
   class(ufo_gnssro_refmetoffice_tlad), intent(inout) :: self
   character(len=*), parameter :: myname_="ufo_gnssro_refmetoffice_tlad_delete"
-      
+
   self%nlocs = 0
   self%nlevp = 0
   self%nlevq = 0
   if (allocated(self%K)) deallocate(self%K)
-  self%ltraj = .false. 
+  self%ltraj = .false.
 
 end subroutine ufo_gnssro_refmetoffice_tlad_delete
 
@@ -569,7 +570,7 @@ DO n = 1, nobs
     model_height_diff = zb(i + 1) - zb(i)
     obs_height_diff = zobs(n) - zb(i)
     height_diff_ratio = obs_height_diff / model_height_diff
-  
+
     ! Interpolate P,T,q separately
     IF (MIN (q(i), q(i + 1)) > 0.0) THEN
       ! q varies exponentially with height

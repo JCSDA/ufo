@@ -8,8 +8,8 @@
 
 module ufo_gnssro_bendmetoffice_tlad_mod
 
-use iso_c_binding
-use kinds
+use, intrinsic :: iso_c_binding, only: c_bool, c_double, c_float, c_int, c_ptr
+use kinds, only: kind_real
 use ufo_vars_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,   only: ufo_geovals_registry
@@ -25,6 +25,7 @@ use ufo_gnssro_ukmo1d_utils_mod, only: Ops_GPSROcalc_nr
 use ufo_utils_refractivity_calculator, only: &
     ufo_calculate_refractivity, ufo_refractivity_kmat
 
+implicit none
 private
 public :: ufo_gnssro_bendmetoffice_tlad
 public :: ufo_gnssro_bendmetoffice_setup
@@ -111,7 +112,7 @@ end subroutine ufo_gnssro_bendmetoffice_setup
 !!
 !-------------------------------------------------------------------------------
 subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
-       
+
   use fckit_exception_module, only: fckit_exception
 
   implicit none
@@ -157,12 +158,12 @@ subroutine ufo_gnssro_bendmetoffice_tlad_settraj(self, geovals, obss)
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
   self % nlevels = max(1, obsspace_get_nchans(obss))
-  
+
 ! Check that the number of vertical levels in the observations is consistent
 ! with what we were given in setup
   if (self % nlevels > 1) then
     if (self % nlevels /= size(self % chanList)) then
-      write(err_msg,'(2A,4I8)') myname_, ' error: channel list must match nlevels', self % nlevels, size(self%chanList)
+      write(err_msg,"(2A,4I8)") myname_, " error: channel list must match nlevels", self % nlevels, size(self%chanList)
       call fckit_exception%throw(err_msg)
     end if
   end if
@@ -265,15 +266,15 @@ subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
-      
+  end if
+
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname_, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
@@ -297,9 +298,9 @@ subroutine ufo_gnssro_bendmetoffice_simobs_tl(self, geovals, hofx, obss)
   call oops_log%trace(err_msg)
 
   return
-    
+
 end subroutine ufo_gnssro_bendmetoffice_simobs_tl
- 
+
 
 !-------------------------------------------------------------------------------
 !> \brief Given an increment to the observation, find the equivalent increment
@@ -342,16 +343,16 @@ subroutine ufo_gnssro_bendmetoffice_simobs_ad(self, geovals, hofx, obss)
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
-     write(err_msg,*) myname_, ' trajectory wasnt set!'
+     write(err_msg,*) myname_, " trajectory wasnt set!"
      call abor1_ftn(err_msg)
-  endif
+  end if
 
 ! Check if nlocs is consistent in geovals & hofx
   if (geovals%nlocs /= size(hofx)) then
-     write(err_msg,*) myname_, ' error: nlocs inconsistent!'
+     write(err_msg,*) myname_, " error: nlocs inconsistent!"
      call abor1_ftn(err_msg)
-  endif
-     
+  end if
+
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi,  prs_d)       ! pressure
@@ -393,13 +394,13 @@ subroutine ufo_gnssro_bendmetoffice_tlad_delete(self)
   implicit none
   class(ufo_gnssro_bendmetoffice_tlad), intent(inout) :: self  !< The object being tidied up
   character(len=*), parameter :: myname_="ufo_gnssro_bendmetoffice_tlad_delete"
-      
+
   self%nlocs = 0
   self%nlevp = 0
   self%nlevq = 0
   if (allocated(self%K)) deallocate(self%K)
   if (allocated(self%chanlist)) deallocate(self%chanlist)
-  self%ltraj = .false. 
+  self%ltraj = .false.
 
 end subroutine ufo_gnssro_bendmetoffice_tlad_delete
 

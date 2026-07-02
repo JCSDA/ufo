@@ -212,7 +212,21 @@ if( BUILD_TESTING )
                     COMMAND ${CMAKE_BINARY_DIR}/bin/ufo_cpplint.py
                     ARGS --quiet --recursive ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/test
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-                    LABELS tier2 )
+                    LABELS lint tier2 )
+  find_program(
+    FORTITUDE_EXECUTABLE
+    NAMES fortitude
+    DOC "Path to the Fortitude linter executable"
+  )
+  if( FORTITUDE_EXECUTABLE )
+    ecbuild_add_test(
+      TARGET "${PROJECT_NAME}_fortitude_check"
+      LABELS lint tier2
+      TYPE SCRIPT
+      COMMAND "${FORTITUDE_EXECUTABLE}"
+      ARGS check "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+  endif()
 endif()
 
 ## Export package

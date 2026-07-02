@@ -1,12 +1,12 @@
 ! (C) Copyright 2017-2018 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
-! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.  
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fortran module to implement RO observational error
 
 module ufo_roobserror_mod
-use fckit_configuration_module, only: fckit_configuration 
+use fckit_configuration_module, only: fckit_configuration
 use kinds
 use ufo_geovals_mod
 use obsspace_mod
@@ -16,7 +16,7 @@ use gnssro_mod_obserror
 use fckit_log_module, only : fckit_log
 use fckit_exception_module, only: fckit_exception
 use gnssro_mod_constants, only: max_string
-use iso_c_binding, only: c_ptr, c_int, c_size_t
+use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_size_t
 
 implicit none
 public :: ufo_roobserror, ufo_roobserror_create, ufo_roobserror_delete
@@ -44,7 +44,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_roobserror_create(self, obspace, f_conf)
-use iso_c_binding
+use, intrinsic :: iso_c_binding
 use obs_variables_mod
 implicit none
 type(ufo_roobserror), intent(inout)   :: self
@@ -58,7 +58,7 @@ if (f_conf%has("errmodel")) then
    call f_conf%get_or_die("errmodel",str)
    self%errmodel = str
 end if
-write(message,*) 'errmodel = ', trim(self % errmodel)
+write(message,*) "errmodel = ", trim(self % errmodel)
 call fckit_log%debug(message)
 
 self % rmatrix_filename = ""
@@ -66,7 +66,7 @@ if (f_conf % has("rmatrix_filename")) then
    call f_conf % get_or_die("rmatrix_filename", str)
    self % rmatrix_filename = str
 end if
-write(message,*) 'rmatrix_filename = ', trim(self % rmatrix_filename)
+write(message,*) "rmatrix_filename = ", trim(self % rmatrix_filename)
 call fckit_log%debug(message)
 
 self % err_variable = ""
@@ -74,7 +74,7 @@ if (f_conf % has("err_variable")) then
    call f_conf % get_or_die("err_variable", str)
    self % err_variable = str
 end if
-write(message,*) 'err_variable = ', trim(self % err_variable)
+write(message,*) "err_variable = ", trim(self % err_variable)
 call fckit_log%debug(message)
 
 ! Get the number of extra geovals as a multiplier, default to 1
@@ -82,28 +82,28 @@ self % n_horiz = 1
 if (f_conf % has("n_horiz")) then
    call f_conf % get_or_die("n_horiz", self % n_horiz)
 end if
-write(message,*) 'n_horiz = ', self % n_horiz
+write(message,*) "n_horiz = ", self % n_horiz
 call fckit_log%debug(message)
 
 self % allow_extrapolation = .false.
 if (f_conf % has("allow extrapolation")) then
    call f_conf % get_or_die("allow extrapolation", self % allow_extrapolation)
 end if
-write(message,*) 'allow_extrapolation = ', self % allow_extrapolation
+write(message,*) "allow_extrapolation = ", self % allow_extrapolation
 call fckit_log%debug(message)
 
 self % use_profile = .false.
 if (f_conf % has("use profile")) then
    call f_conf % get_or_die("use profile", self % use_profile)
 end if
-write(message,*) 'use_profile = ', self % use_profile
+write(message,*) "use_profile = ", self % use_profile
 call fckit_log%debug(message)
 
 self % verbose_output = .false.
 if (f_conf % has("verbose output")) then
    call f_conf % get_or_die("verbose output", self % verbose_output)
 end if
-write(message,*) 'verbose_output = ', self % verbose_output
+write(message,*) "verbose_output = ", self % verbose_output
 call fckit_log%debug(message)
 
 self % average_temperature_name = ""
@@ -111,7 +111,7 @@ if (f_conf % has("average temperature name")) then
    call f_conf % get_or_die("average temperature name", str)
    self % average_temperature_name = str
 end if
-write(message,*) 'average_temperature_name = ', trim(self % average_temperature_name)
+write(message,*) "average_temperature_name = ", trim(self % average_temperature_name)
 call fckit_log%debug(message)
 
 self%obsdb      = obspace
@@ -296,13 +296,13 @@ case ("atmosphericRefractivity")
 
     allocate(obsZ(nobs))
     allocate(obsLat(nobs))
-    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ) 
+    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ)
     call obsspace_get_db(self%obsdb, "MetaData", "latitude", obsLat)
     call refractivity_obserr_NCEP(obsLat, obsZ, nobs, obsErr, QCflags, missing)
-    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NCEP method" 
+    write(err_msg,*) "ufo_roobserror_mod: setting up refractivity obs error with NCEP method"
     call fckit_log%debug(err_msg)
     deallocate(obsZ)
-    deallocate(obsLat)  
+    deallocate(obsLat)
     ! up date obs error
     call obsspace_put_db(self%obsdb, "FortranERR", trim(self%variable), obsErr)
 
@@ -332,7 +332,7 @@ case ("atmosphericRefractivity")
     allocate(obsOrigC(nobs))
     allocate(obsValue(nobs))
     allocate(obsZ(nobs))
-    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ) 
+    call obsspace_get_db(self%obsdb, "MetaData", "height",  obsZ)
     call obsspace_get_db(self%obsdb, "MetaData", "satelliteIdentifier", obsSatid)
     call obsspace_get_db(self%obsdb, "MetaData", "dataProviderOrigin", obsOrigC)
     call obsspace_get_db(self%obsdb, "ObsValue", trim(self%variable), obsValue)

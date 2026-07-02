@@ -8,7 +8,7 @@
 
 module ufo_lightning_tlad_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use ufo_lightning_tlad_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
   use ufo_geovals_mod,   only: ufo_geovals
@@ -32,7 +32,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_lightning_tlad_setup_c(c_key_self, nhoriz_, c_obsvars, c_geovars) &
-                                      bind(c,name='ufo_lightning_tlad_setup_f90')
+                                      bind(c,name="ufo_lightning_tlad_setup_f90")
 use oops_variables_mod
 use obs_variables_mod
 use ufo_vars_mod, only: MAXVARLEN, var_qg, var_delp
@@ -42,7 +42,7 @@ integer(c_int), intent(in)     :: nhoriz_
 !logical(c_bool), intent(in)    :: l_fed_nonlinear_
 type(c_ptr), value, intent(in) :: c_obsvars ! variables to be simulated
 type(c_ptr), value, intent(in) :: c_geovars ! variables requested from the model
-character(len=maxvarlen), dimension(2), parameter :: geovars_default = (/var_qg, var_delp/)
+character(len=maxvarlen), dimension(2), parameter :: geovars_default = [var_qg, var_delp]
 
 type(ufo_lightning_tlad), pointer :: self
 call ufo_lightning_tlad_registry%setup(c_key_self, self)
@@ -58,7 +58,7 @@ end subroutine ufo_lightning_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_lightning_tlad_delete_c(c_key_self) bind(c,name='ufo_lightning_tlad_delete_f90')
+subroutine ufo_lightning_tlad_delete_c(c_key_self) bind(c,name="ufo_lightning_tlad_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -69,7 +69,7 @@ end subroutine ufo_lightning_tlad_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_lightning_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) &
-                                        bind(c,name='ufo_lightning_tlad_settraj_f90')
+                                        bind(c,name="ufo_lightning_tlad_settraj_f90")
 
 implicit none
 integer(c_int),     intent(in) :: c_key_self
@@ -89,7 +89,7 @@ end subroutine ufo_lightning_tlad_settraj_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_lightning_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-                                     bind(c,name='ufo_lightning_simobs_tl_f90')
+                                     bind(c,name="ufo_lightning_simobs_tl_f90")
 
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_geovals_mod,   only: ufo_geovals
@@ -113,7 +113,7 @@ end subroutine ufo_lightning_simobs_tl_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_lightning_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-                                     bind(c,name='ufo_lightning_simobs_ad_f90')
+                                     bind(c,name="ufo_lightning_simobs_ad_f90")
 
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 use ufo_geovals_mod,   only: ufo_geovals

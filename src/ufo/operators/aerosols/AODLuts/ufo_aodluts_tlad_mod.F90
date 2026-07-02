@@ -37,7 +37,7 @@ MODULE ufo_aodluts_tlad_mod
      INTEGER :: n_layers
      INTEGER :: n_channels
      INTEGER :: n_aerosols
-     REAL(kind_real), ALLOCATABLE  :: bext(:,:,:,:)  
+     REAL(kind_real), ALLOCATABLE  :: bext(:,:,:,:)
      REAL(kind_real), ALLOCATABLE  :: layer_factors(:,:)
      LOGICAL :: ltraj
    CONTAINS
@@ -114,9 +114,9 @@ CONTAINS
     TYPE(c_ptr), VALUE,       INTENT(in)    :: obss
 
 ! local variables
-    CHARACTER(*), PARAMETER :: program_name = 'ufo_aodluts_tlad_mod.f90'
+    CHARACTER(*), PARAMETER :: program_name = "ufo_aodluts_tlad_mod.f90"
     CHARACTER(255) :: message, version
-    INTEGER        :: err_stat, alloc_stat
+    INTEGER        :: err_stat
     INTEGER        :: n,l,m
     TYPE(ufo_geoval), POINTER :: temp
 
@@ -130,8 +130,8 @@ CONTAINS
     INTEGER :: rc,nvars
 
     IF (.NOT. self%conf%use_crtm) THEN
-       message = 'CRTM must be used in this routine - TLAD for '&
-            &//TRIM(self%conf%sensor_id(1))//' not available'
+       message = "CRTM must be used in this routine - TLAD for "&
+            &//TRIM(self%conf%sensor_id(1))//" not available"
        CALL display_message( program_name, message, failure )
        STOP
     END IF
@@ -141,7 +141,7 @@ CONTAINS
 !their value is for evaluation of represenation of aerosols in the model
 !over extended periods
     IF (self%conf%aaod) THEN
-       message = 'TLAD not available for Absorption AOD'
+       message = "TLAD not available for Absorption AOD"
        CALL display_message( program_name, message, failure )
        STOP
     END IF
@@ -161,7 +161,7 @@ CONTAINS
          file_path=TRIM(self%conf%coefficient_path), &
          quiet=.TRUE.)
     IF ( err_stat /= success ) THEN
-       message = 'error initializing crtm (settraj)'
+       message = "error initializing crtm (settraj)"
        CALL display_message( program_name, message, failure )
        STOP
     END IF
@@ -179,7 +179,7 @@ CONTAINS
 
        IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
 
-       ALLOCATE(wavelengths_all(self%n_channels), stat = alloc_stat)
+       ALLOCATE(wavelengths_all(self%n_channels))
 
        wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
 
@@ -198,7 +198,7 @@ CONTAINS
             &ext=self%bext, rc = rc)
 
        IF (rc /= 0) THEN
-          message = 'error on exit from get_cf_aod'
+          message = "error on exit from get_cf_aod"
           CALL display_message( program_name, message, failure )
           STOP
        END IF
@@ -211,7 +211,7 @@ CONTAINS
 
     err_stat = crtm_destroy( chinfo )
     IF ( err_stat /= success ) THEN
-       message = 'error destroying crtm (settraj)'
+       message = "error destroying crtm (settraj)"
        CALL display_message( program_name, message, failure )
        STOP
     END IF
@@ -247,15 +247,15 @@ CONTAINS
 
 ! check if trajectory was set
     IF (.NOT. self%ltraj) THEN
-       WRITE(err_msg,*) myname_, ' trajectory wasnt set!'
+       WRITE(err_msg,*) myname_, " trajectory wasnt set!"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
 
 ! check if nlocs is consistent in geovals & hofx
     IF (geovals%nlocs /= self%n_profiles) THEN
-       WRITE(err_msg,*) myname_, ' error: nlocs inconsistent!'
+       WRITE(err_msg,*) myname_, " error: nlocs inconsistent!"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
 
     CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
 
@@ -263,17 +263,17 @@ CONTAINS
 
 ! check model levels is consistent in geovals & crtm
     IF (var_p%nval /= self%n_layers) THEN
-       WRITE(err_msg,*) myname_, ' error: layers inconsistent!'
+       WRITE(err_msg,*) myname_, " error: layers inconsistent!"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
 
     ALLOCATE(aero_layers(self%n_aerosols,self%n_layers,self%n_profiles))
 
     DO jaero=1,self%n_aerosols
        CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
        aero_layers(jaero,:,:)=var_p%vals*self%layer_factors
-    ENDDO
-    
+    END DO
+
     CALL get_geos_aod_tl(self%n_layers,self%n_profiles, nvars,&
          &self%n_aerosols, self%bext, aero_layers, aod_tot_tl=hofx)
 
@@ -309,15 +309,15 @@ CONTAINS
 
 ! check if trajectory was set
     IF (.NOT. self%ltraj) THEN
-       WRITE(err_msg,*) myname_, ' trajectory wasnt set!'
+       WRITE(err_msg,*) myname_, " trajectory wasnt set!"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
 
 ! check if nlocs is consistent in geovals & hofx
     IF (geovals%nlocs /= self%n_profiles) THEN
-       WRITE(err_msg,*) myname_, ' error: nlocs inconsistent!'
+       WRITE(err_msg,*) myname_, " error: nlocs inconsistent!"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
 
     CALL assign_aerosol_names(self%conf%aerosol_option,var_aerosols)
 
@@ -333,7 +333,7 @@ CONTAINS
        qm_ad(jaero,:,:) = qm_ad(jaero,:,:) * self%layer_factors
        var_p%vals=qm_ad(jaero,:,:)
 
-    ENDDO
+    END DO
 
     NULLIFY(var_p)
 

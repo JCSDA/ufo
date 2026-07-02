@@ -7,6 +7,7 @@
 
 module ufo_vertinterp_tlad_mod_c
 
+  use, intrinsic :: iso_c_binding, only: c_double, c_int, c_ptr
   use fckit_configuration_module, only: fckit_configuration
   use ufo_vertinterp_tlad_mod
   use ufo_geovals_mod_c, only: ufo_geovals_registry
@@ -32,9 +33,9 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vertinterp_tlad_setup_c(c_key_self, c_conf, c_obsvars, &
-                                          c_obsvarindices, c_nobsvars, c_geovars) bind(c,name='ufo_vertinterp_tlad_setup_f90')
-use oops_variables_mod
-use obs_variables_mod
+                                          c_obsvarindices, c_nobsvars, c_geovars) bind(c,name="ufo_vertinterp_tlad_setup_f90")
+use oops_variables_mod, only: oops_variables
+use obs_variables_mod, only: obs_variables
 implicit none
 integer(c_int), intent(inout)     :: c_key_self
 type(c_ptr), value, intent(in)    :: c_conf
@@ -61,7 +62,7 @@ end subroutine ufo_vertinterp_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_vertinterp_tlad_delete_c(c_key_self) bind(c,name='ufo_vertinterp_tlad_delete_f90')
+subroutine ufo_vertinterp_tlad_delete_c(c_key_self) bind(c,name="ufo_vertinterp_tlad_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -80,7 +81,7 @@ end subroutine ufo_vertinterp_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_vertinterp_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name='ufo_vertinterp_tlad_settraj_f90')
+subroutine ufo_vertinterp_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace) bind(c,name="ufo_vertinterp_tlad_settraj_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -101,7 +102,7 @@ end subroutine ufo_vertinterp_tlad_settraj_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vertinterp_simobs_tl_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-           bind(c,name='ufo_vertinterp_simobs_tl_f90')
+           bind(c,name="ufo_vertinterp_simobs_tl_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals
@@ -124,7 +125,7 @@ end subroutine ufo_vertinterp_simobs_tl_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vertinterp_simobs_ad_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, c_hofx) &
-           bind(c,name='ufo_vertinterp_simobs_ad_f90')
+           bind(c,name="ufo_vertinterp_simobs_ad_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals

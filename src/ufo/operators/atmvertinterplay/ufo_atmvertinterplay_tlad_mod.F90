@@ -5,14 +5,16 @@
 
 module ufo_atmvertinterplay_tlad_mod
 
-  use oops_variables_mod
-  use obs_variables_mod
+  use, intrinsic :: iso_c_binding, only: c_char, c_double, c_int, c_ptr
+  use oops_variables_mod, only: oops_variables
+  use obs_variables_mod, only: obs_variables
   use ufo_vars_mod
   use ufo_geovals_mod
   use vert_interp_lay_mod
   use missing_values_mod, only: missing_value
-  use, intrinsic :: iso_c_binding
   use kinds, only: kind_real
+  implicit none
+  private
 
 ! ------------------------------------------------------------------------------
 
@@ -48,14 +50,14 @@ subroutine atmvertinterplay_tlad_setup_(self, grid_conf)
   real(kind=c_double), allocatable :: coefficients(:)
   integer(kind=c_int), allocatable :: nlevels(:)
   !Local Variables
-  integer :: ivar, nlevs=0, ngvars=0, ncoefs=0
+  integer :: ivar, nlevs, ngvars, ncoefs
   ! Check configurations
   ngvars = grid_conf%get_size("geovals")
   call grid_conf%get_or_die("geovals", gvars)
   ! add to geovars list
   do ivar = 1, ngvars
     call self%geovars%push_back(gvars(ivar))
-  enddo
+  end do
   ncoefs = grid_conf%get_size("coefficients")
   call grid_conf%get_or_die("coefficients", coefficients)
   allocate(self%coefficients(ncoefs))
@@ -102,7 +104,7 @@ subroutine atmvertinterplay_tlad_settraj_(self, geovals_in, obss)
     self%flip_it = .true.
   else
     self%flip_it = .false.
-  endif
+  end if
 
   ! Get pressure profiles from geovals [Pa]
   call ufo_geovals_get_var(geovals, var_prsi, modelpres)
@@ -148,9 +150,9 @@ subroutine atmvertinterplay_simobs_tl_(self, geovals_in, obss, nvars, nlocs, hof
       if(hofx(ivar,iobs) /= missing) then
         if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
         call vert_interp_lay_apply_tl(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
-      endif
-    enddo
-  enddo
+      end if
+    end do
+  end do
   call ufo_geovals_delete(geovals)
 end subroutine atmvertinterplay_simobs_tl_
 
@@ -181,9 +183,9 @@ subroutine atmvertinterplay_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx)
         call vert_interp_lay_apply_ad(profile%vals(:,iobs), hofx(ivar,iobs), self%coefficients(ivar),  self%modelpressures(:,iobs), self%botpressure(iobs), self%toppressure(iobs), nsig)
         ! if the geovals come in as top2bottom (logic in traj part of code), make sure to output the adj in the same direction!
         if(self%flip_it) profile%vals(1:profile%nval,iobs) = profile%vals(profile%nval:1:-1,iobs)
-      endif
-    enddo
-  enddo
+      end if
+    end do
+  end do
 
 
 end subroutine atmvertinterplay_simobs_ad_

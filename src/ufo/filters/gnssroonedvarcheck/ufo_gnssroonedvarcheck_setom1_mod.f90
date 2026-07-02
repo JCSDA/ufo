@@ -11,6 +11,7 @@ use kinds
 use logger_mod, only: oops_log
 use missing_values_mod
 use ufo_roobserror_utils_mod, only: Rmatrix_type
+implicit none
 
 private
 public :: Ops_GPSRO_setOM1
@@ -120,7 +121,7 @@ ELSE
   OM1(:,:) = omat(:,:)
 
   IF (ReturnCode /= 0) THEN
-    write(message, '(A,I8)') 'Error in inversion, return code ', ReturnCode
+    write(message, "(A,I8)") "Error in inversion, return code ", ReturnCode
     call oops_log % warning(message)
     OM1_error = .TRUE.
   END IF

@@ -59,7 +59,7 @@ CONTAINS
     TYPE(fckit_configuration),  INTENT(in)    :: f_confopts
     TYPE(fckit_configuration),  INTENT(in)    :: f_confoper
 
-    CHARACTER(*), PARAMETER :: routine_name = 'luts_conf_setup'
+    CHARACTER(*), PARAMETER :: routine_name = "luts_conf_setup"
     CHARACTER(len=:), ALLOCATABLE :: str
 
     CALL f_confopts%get_or_die("AerosolOption",str)
@@ -79,19 +79,19 @@ CONTAINS
        conf%use_crtm=.TRUE.
     ELSE
        conf%use_crtm=.FALSE.
-    ENDIF
+    END IF
 
     IF (f_confOpts%has("model units coeff")) THEN
        CALL f_confopts%get_or_die("model units coeff",conf%convert_factor_model)
-    ENDIF
+    END IF
 
     IF (f_confOpts%has("dry mix ratio")) THEN
        CALL f_confopts%get_or_die("dry mix ratio",conf%dry_mixr_model)
-    ENDIF
+    END IF
 
     IF (f_confOpts%has("AbsorptionAod")) THEN
        CALL f_confopts%get_or_die("AbsorptionAod", conf%aaod)
-    ENDIF
+    END IF
 
     DEALLOCATE(str)
 
@@ -136,9 +136,9 @@ CONTAINS
 
     CALL ufo_geovals_get_var(geovals, var_ts, geoval)
     IF (geoval%nval /= n_layers) THEN
-       WRITE(err_msg,*) 'get_atm_aero_data error: layers inconsistent!'
+       WRITE(err_msg,*) "get_atm_aero_data error: layers inconsistent!"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
     t=geoval%vals
 
     CALL ufo_geovals_get_var(geovals, var_prs, geoval)
@@ -165,9 +165,9 @@ CONTAINS
 
     IF (TRIM(conf%aerosol_option) /= "aerosols_gocart_gefs" .AND. &
          &TRIM(conf%aerosol_option) /= "aerosols_gocart_ufs") THEN
-       WRITE(err_msg,*) 'this aerosol not implemented - check later'
+       WRITE(err_msg,*) "this aerosol not implemented - check later"
        CALL abor1_ftn(err_msg)
-    ENDIF
+    END IF
 
     CALL assign_aerosol_names(conf%aerosol_option,var_aerosols)
 
@@ -175,35 +175,35 @@ CONTAINS
 
        DO k=1,n_layers
           DO m = 1, n_profiles
-!correct for mixing ratio factor 
+!correct for mixing ratio factor
 !being calculated from dry pressure, cotton eq. (2.4)
 !p_dry=p_total/(1+r_v/r_d*mixing_ratio)
              factors(k,m)=(pint(k+1,m)-pint(k,m))/grav/&
                   &(1.0_kind_real+rv_rd*sphum(k,m)/(1.0_kind_real-sphum(k,m)))
-          ENDDO
-       ENDDO
+          END DO
+       END DO
 
     ELSE
-   
+
        DO k=1,n_layers
           DO m = 1, n_profiles
              factors(k,m)=(pint(k+1,m)-pint(k,m))/grav
-          ENDDO
-       ENDDO
+          END DO
+       END DO
 
-    ENDIF
+    END IF
 
     IF ( PRESENT(aero_layers) ) THEN
        DO ivar=1,n_aerosols
           CALL ufo_geovals_get_var(geovals, var_aerosols(ivar), geoval)
           aero_layers(ivar,:,:)=conf%convert_factor_model*geoval%vals*factors
-       ENDDO
-    ENDIF
+       END DO
+    END IF
 
     IF ( PRESENT(rh) ) THEN
        CALL qsmith(t,sphum,pmid,rh)
        WHERE (rh > 1.0_kind_real) rh=1.0_kind_real
-    ENDIF
+    END IF
 
     IF ( PRESENT(layer_factors) ) layer_factors=conf%convert_factor_model*factors
 

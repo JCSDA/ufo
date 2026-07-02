@@ -7,7 +7,7 @@
 
 module ufo_vertinterp_mod_c
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use fckit_configuration_module, only: fckit_configuration
   use ufo_vertinterp_mod
   use ufo_geovals_mod,    only: ufo_geovals
@@ -35,7 +35,7 @@ contains
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vertinterp_setup_c(c_key_self, c_conf, c_obsvars, c_obsvarindices, c_nobsvars, &
-                                     c_geovars) bind(c,name='ufo_vertinterp_setup_f90')
+                                     c_geovars) bind(c,name="ufo_vertinterp_setup_f90")
 use oops_variables_mod
 use obs_variables_mod
 implicit none
@@ -65,7 +65,7 @@ end subroutine ufo_vertinterp_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_vertinterp_delete_c(c_key_self) bind(c,name='ufo_vertinterp_delete_f90')
+subroutine ufo_vertinterp_delete_c(c_key_self) bind(c,name="ufo_vertinterp_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -83,7 +83,7 @@ end subroutine ufo_vertinterp_delete_c
 ! ------------------------------------------------------------------------------
 
 subroutine ufo_vertinterp_simobs_c(c_key_self, c_key_geovals, c_obsspace, c_nvars, c_nlocs, &
-                                      c_hofx) bind(c,name='ufo_vertinterp_simobs_f90')
+                                      c_hofx) bind(c,name="ufo_vertinterp_simobs_f90")
 implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geovals

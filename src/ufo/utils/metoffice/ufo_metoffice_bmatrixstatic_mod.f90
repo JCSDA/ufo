@@ -78,18 +78,18 @@ character(len=*), parameter, public :: ufo_metoffice_fieldtype_text(nfieldtypes_
      var_sfc_q2m,            &
      var_sfc_tskin,          &
      var_ps,                 &
-     'ozone (total column)', &
-     '[unused field type] ', &
+     "ozone (total column)", &
+     "[unused field type] ", &
      var_clw,                &
-     'q total             ', &
+     "q total             ", &
      var_sfc_wspeed,         &
-     'ozone (profile)     ', &
-     'liquid water path   ', &
+     "ozone (profile)     ", &
+     "liquid water path   ", &
      var_sfc_emiss,          &
      var_cli,                &
-     'cloud top pressure  ', &
-     'cloud fraction      ', &
-     'emissivity pcs      ', &
+     "cloud top pressure  ", &
+     "cloud fraction      ", &
+     "emissivity pcs      ", &
      var_cldfrac_vol ]
 
 contains
@@ -115,7 +115,7 @@ integer, allocatable          :: fields_in(:) ! Fields_in used to subset b-matri
 integer, allocatable          :: nonzero_fields(:) ! fields_in with nonzero entries removed
 integer, allocatable          :: nonzero_fields_in(:) ! fields_in with nonzero entries removed
 real(kind=kind_real)          :: t1,t2        ! Time values for logging
-logical                       :: testing = .false.
+logical, parameter            :: testing = .false.
 integer                       :: ii, jj
 logical                       :: match
 
@@ -169,7 +169,7 @@ if (.not. all(nonzero_fields(1:min(size(nonzero_fields_in),size(nonzero_fields))
                ufo_metoffice_fieldtype_text(self % fields(ii,1))
   end do
   call abor1_ftn("Supplied field list is expected in the B-matrix order")
-endif
+end if
 
 write(message,*) "ufo_metoffice_bmatrixstatic_setup cpu time = ",(t2-t1)
 call fckit_log % info(message)
@@ -298,9 +298,9 @@ integer, allocatable               :: elementsused(:)
 ! is not # or !
 
 do
-  read (fileunit, '(a)') line
+  read (fileunit, "(a)") line
   line = adjustl (line)
-  if (verify (line, '#!') == 1) then
+  if (verify (line, "#!") == 1) then
     backspace (fileunit)
     exit
   end if
@@ -324,15 +324,15 @@ end if
 ! 1.3) output initial messages
 !----
 
-call fckit_log % debug('reading b matrix file:')
-write (message, '(a,i0)') 'number of latitude bands = ', nbands
+call fckit_log % debug("reading b matrix file:")
+write (message, "(a,i0)") "number of latitude bands = ", nbands
 call fckit_log % debug(message)
-write (message, '(a,i0)') 'matrix size = ', matrixsize
+write (message, "(a,i0)") "matrix size = ", matrixsize
 call fckit_log % debug(message)
 if (nbfields > 0) then
-  call fckit_log % debug('order of fields and number of elements in each:')
+  call fckit_log % debug("order of fields and number of elements in each:")
   do i = 1, nbfields
-    write (message, '(i0,a)') bfields(i,2), ' x ' // ufo_metoffice_fieldtype_text(bfields(i,1))
+    write (message, "(i0,a)") bfields(i,2), " x " // ufo_metoffice_fieldtype_text(bfields(i,1))
     call fckit_log % debug(message)
   end do
 end if
@@ -390,26 +390,26 @@ if (present (fieldlist)) then
   ! 2.1.1) write messages
 
   if (any (fieldlist /= 0)) then
-    call fckit_log % debug('the following requested retrieval fields are not in the b matrix:')
+    call fckit_log % debug("the following requested retrieval fields are not in the b matrix:")
     do i = 1, size (fieldlist)
       if (fieldlist(i) /= 0) then
-        write (fieldtype, '(i0)') fieldlist(i)
+        write (fieldtype, "(i0)") fieldlist(i)
         if (fieldlist(i) > 0 .and. fieldlist(i) <= nfieldtypes_ukmo) then
-          write (message, '(a)') trim (ufo_metoffice_fieldtype_text(fieldlist(i))) // &
-            ' (fieldtype ' // trim (adjustl (fieldtype)) // ')'
+          write (message, "(a)") trim (ufo_metoffice_fieldtype_text(fieldlist(i))) // &
+            " (fieldtype " // trim (adjustl (fieldtype)) // ")"
           call fckit_log % debug(message)
         else
-          write (message, '(a)') 'fieldtype ' // trim (adjustl (fieldtype)) // &
-            ' which is invalid'
+          write (message, "(a)") "fieldtype " // trim (adjustl (fieldtype)) // &
+            " which is invalid"
           call fckit_log % debug(message)
         end if
       end if
     end do
   end if
 
-  call fckit_log % debug('b matrix fields used to define the retrieval profile vector:')
+  call fckit_log % debug("b matrix fields used to define the retrieval profile vector:")
   do i = 1, nbfields
-    write (message, '(a)') ufo_metoffice_fieldtype_text(bfields(i,1))
+    write (message, "(a)") ufo_metoffice_fieldtype_text(bfields(i,1))
     call fckit_log % debug(message)
   end do
 
@@ -426,7 +426,7 @@ else if (present (b_elementsused)) then
 
   allocate (elementsused(size (b_elementsused)))
   if (any (b_elementsused < 0 .and. b_elementsused > matrixsize)) then
-    write(*,*) routinename // ' : invalid b matrix elements present in input list'
+    write(*,*) routinename // " : invalid b matrix elements present in input list"
   end if
   nelements = count (b_elementsused > 0 .and. b_elementsused <= matrixsize)
   elementsused(1:nelements) = pack (b_elementsused, b_elementsused > 0 .and. b_elementsused <= matrixsize)
@@ -472,17 +472,17 @@ readallb : do
 
   ! latitude band information
 
-  read (fileunit, '(i3,2f8.2)', iostat = readstatus) band, southlimit, northlimit
-  if (readstatus < 0) exit
+  read (fileunit, "(i3,2f8.2)", iostat = readstatus) band, southlimit, northlimit
+  if (readstatus < 0) exit readallb
 
   ! matrix data
 
   do j = 1, matrixsize
-    read (fileunit, '(5e16.8)' ) (bfromfile(i,j), i = 1, matrixsize)
+    read (fileunit, "(5e16.8)" ) (bfromfile(i,j), i = 1, matrixsize)
   end do
 
-  write (message, '(a,i0,a,2f8.2)') &
-    'band no.', band, ' has southern and northern latitude limits of', &
+  write (message, "(a,i0,a,2f8.2)") &
+    "band no.", band, " has southern and northern latitude limits of", &
     southlimit, northlimit
   call fckit_log % debug(message)
 
@@ -502,7 +502,7 @@ readallb : do
     self % south(band) = southlimit
     self % north(band) = northlimit
   else
-    write (message, '(a,i0)') 'skipped matrix with band number ', band
+    write (message, "(a,i0)") "skipped matrix with band number ", band
     call fckit_log % debug(message)
   end if
 
@@ -600,8 +600,8 @@ character(len=MAXVARLEN)  :: varname
 integer                   :: jvar
 integer                   :: nmvars, counter
 character(len=200)        :: message
-logical                   :: clw_present = .false.
-logical                   :: ciw_present = .false.
+logical, save             :: clw_present = .false.
+logical, save             :: ciw_present = .false.
 
 call fckit_log % info("rttovonedvarcheck_create_fields_in: starting")
 

@@ -11,7 +11,7 @@ module ufo_directZDA_mod
  use ufo_vars_mod
  use oops_variables_mod
  use obs_variables_mod
- 
+
  implicit none
  private
 
@@ -20,18 +20,18 @@ module ufo_directZDA_mod
  type, public :: ufo_directZDA
  private
    type(obs_variables), public :: obsvars
-   type(oops_variables), public :: geovars 
+   type(oops_variables), public :: geovars
 
-   character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical 
+   character(len=MAXVARLEN), public :: v_coord ! GeoVaL to use to interpolate in vertical
    character(len=MAXVARLEN), public :: micro_option    ! Choice (enum) of microphysics option
    integer, public :: mphyopt                  ! Integer value for microphysics option
    logical, public :: use_variational = .false.
 
- contains 
+ contains
    procedure :: setup  => ufo_directZDA_setup
    procedure :: simobs => ufo_directZDA_simobs
  end type ufo_directZDA
- 
+
  integer :: n_geovars
  character(len=maxvarlen), dimension(:), allocatable :: geovars_list
 
@@ -40,7 +40,7 @@ contains
 ! ------------------------------------------------------------------------------
 subroutine ufo_directZDA_setup(self, yaml_conf)
   use fckit_configuration_module, only: fckit_configuration
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use radarz_iface
 
   implicit none
@@ -51,154 +51,154 @@ subroutine ufo_directZDA_setup(self, yaml_conf)
   character(kind=c_char,len=:), allocatable :: micro_option
   character(kind=c_char,len=:), allocatable :: this_varname
   character(len=maxvarlen) :: var_string
-  integer :: iret_init_mphyopt = -1
+  integer :: iret_init_mphyopt
 
   ! YAML option for microphysics scheme
   call yaml_conf%get_or_die("microphysics option", micro_option)
-  if(trim(micro_option) .eq. "Thompson") then
+  if(trim(micro_option) == "Thompson") then
     !self%micro_option = THOMPSON
     self%mphyopt = 108
     mp_option = 108
-  else if(trim(micro_option) .eq. "NSSL") then
+  else if(trim(micro_option) == "NSSL") then
     !self%micro_option = NSSL
     self%mphyopt = 14
     mp_option = 14
-  else if(trim(micro_option) .eq. "Lin") then
+  else if(trim(micro_option) == "Lin") then
     !self%micro_option = LIN
     self%mphyopt = 2
     mp_option = 2
-  else if(trim(micro_option) .eq. "GFDL") then
+  else if(trim(micro_option) == "GFDL") then
     !self%micro_option = GFDL
     self%mphyopt = 5
     mp_option = 5
   else
-    print*, ' microphysics picked is: ', trim(micro_option)
+    print*, " microphysics picked is: ", trim(micro_option)
     call abor1_ftn("microphysics option not set or unsupported, aborting")
-  endif
+  end if
 
   ! If YAML option indicates use of variational method then update mp_option
   self%use_variational=.false.
   call yaml_conf%get_or_die("use variational method", self%use_variational)
 
   if (self%use_variational) then
-    if (trim(micro_option) .ne. "Thompson" .and. trim(micro_option) .ne. "Lin" ) then ! Jun: Or we can use if ( NSSL) 
+    if (trim(micro_option) /= "Thompson" .and. trim(micro_option) /= "Lin" ) then ! Jun: Or we can use if ( NSSL)
       call abor1_ftn("variational method not available for requested microphysics option")
-    endif
-  endif
+    end if
+  end if
 
   ! YAML option for vertical coordinate name
   self%v_coord = var_z
   if( yaml_conf%has("vertical coordinate") ) then
       call yaml_conf%get_or_die("vertical coordinate",coord_name)
       self%v_coord = coord_name
-      if( trim(self%v_coord) .ne. var_z ) then
+      if( trim(self%v_coord) /= var_z ) then
         call abor1_ftn("ufo_directZDA: incorrect vertical coordinate specified")
-      endif
-  endif
+      end if
+  end if
 
   ! Set up the atmospheric state variables and microphysics species (into geovars_list).
 
-  if ( self%mphyopt .eq. 14 ) then         !  NSSL EnKF OP: 14
-    n_geovars=13 
+  if ( self%mphyopt == 14 ) then         !  NSSL EnKF OP: 14
+    n_geovars=13
     if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
     var_string="var_rain_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        !call yaml_conf%get_or_die(trim(var_string), geovars_list(1))
        call yaml_conf%get_or_die("var_rain_mixing_ratio", this_varname)
        geovars_list(1) = this_varname
-    endif
+    end if
     var_string="var_snow_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(2) = this_varname
-    endif
+    end if
     var_string="var_graupel_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(3) = this_varname
-    endif
+    end if
     var_string="var_hail_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(4) = this_varname
-    endif
+    end if
     var_string="var_rain_number_concentration"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(5) = this_varname
-    endif
+    end if
     var_string="var_snow_number_concentration"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(6) = this_varname
-    endif
+    end if
     var_string="var_graupel_number_concentration"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(7) = this_varname
-    endif
+    end if
     var_string="var_hail_number_concentration"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(8) = this_varname
-    endif
+    end if
     var_string="var_graupel_vol_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(9) = this_varname
-    endif
+    end if
     var_string="var_hail_vol_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(10) = this_varname
-    endif
+    end if
     geovars_list(11) = var_prs
     geovars_list(12) = var_ts
     geovars_list(13) = var_q
-  else if ( self%mphyopt .eq. 108 ) then   ! TM OP : 108
+  else if ( self%mphyopt == 108 ) then   ! TM OP : 108
     n_geovars=7
     if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
     var_string="var_rain_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(1) = this_varname
-    endif
+    end if
     var_string="var_snow_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(2) = this_varname
-    endif
+    end if
     var_string="var_graupel_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(3) = this_varname
-    endif
+    end if
     var_string="var_rain_number_concentration"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(4) = this_varname
-    endif
+    end if
     geovars_list(5) = var_prs
     geovars_list(6) = var_ts
     geovars_list(7) = var_q
-  else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then   ! LIN=2, GFDL=5
+  else if ( self%mphyopt == 2 .or. self%mphyopt == 5 ) then   ! LIN=2, GFDL=5
     n_geovars=6
     if (.not.allocated(geovars_list) ) allocate(geovars_list(n_geovars))
     var_string="var_rain_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(1) = this_varname
-    endif
+    end if
     var_string="var_snow_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(2) = this_varname
-    endif
+    end if
     var_string="var_graupel_mixing_ratio"
     if( yaml_conf%has(trim(var_string)) ) then
        call yaml_conf%get_or_die(trim(var_string), this_varname)
        geovars_list(3) = this_varname
-    endif
+    end if
     geovars_list(4) = var_prs
     geovars_list(5) = var_ts
     geovars_list(6) = var_q
@@ -208,7 +208,7 @@ subroutine ufo_directZDA_setup(self, yaml_conf)
   call self%geovars%push_back(self%v_coord)
 
   iret_init_mphyopt = init_mphyopt(self%mphyopt)
-  if ( iret_init_mphyopt .ne. 0 ) then
+  if ( iret_init_mphyopt /= 0 ) then
      call abor1_ftn("microphysics option not set properly, aborting")
   end if
 
@@ -223,7 +223,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   use obsspace_mod
 
   use radarz_iface, only: P_qr, P_qs, P_qg, P_qh,   &
-                          P_nr, P_ns, P_ng, P_nh,   & 
+                          P_nr, P_ns, P_ng, P_nh,   &
                           P_vg, P_vh, ta,  &
                           t_obs_dual, t_para_dsd, nscalar
   use radarz_module, only: init_refl, init_para_dsd, calcMDR, calcMu, &
@@ -252,8 +252,8 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
   character(len=MAXVARLEN) :: geovar
 
-  real(kind_real), allocatable :: tmp(:) 
-  real(kind_real) :: tmp2 
+  real(kind_real), allocatable :: tmp(:)
+  real(kind_real) :: tmp2
   real(kind_real), allocatable :: vfields(:,:)  ! background fields interplated vertically to the observation height
 
   integer :: i_melt_snow, i_melt_graupel
@@ -282,7 +282,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   type(t_obs_dual) :: obs_dual
   type(t_para_dsd) :: var_dsd
 
-!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     !Variational DA needs a larger tolerance of qx and nx for Lin and Thompson
   if ( self%use_variational ) then
           qx_min = 1.0E-6_kind_real
@@ -292,7 +292,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
           qx_min = 1.0E-8_kind_real
           qn_min = 1.0_kind_real
           qb_min = 1.0E-8_kind_real
-  endif
+  end if
 
   ! Get height profiles from geovals
   call ufo_geovals_get_var(geovals, self%v_coord, vcoordprofile)
@@ -312,7 +312,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
     tmp = vcoordprofile%vals(:,iobs)
     tmp2 = obsvcoord(iobs)
     call vert_interp_weights(vcoordprofile%nval, tmp2, tmp, wi(iobs), wf(iobs))
-  enddo
+  end do
 
 ! Number of variables in geovars (without the vertical coordinate)
   nvars_geovars = self%geovars%nvars() - 1
@@ -329,19 +329,19 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
     do iobs = 1, nlocs
       call vert_interp_apply(profile%nval, profile%vals(:,iobs), &
                              & vfields(ivar,iobs), wi(iobs), wf(iobs))
-    enddo
-  enddo
+    end do
+  end do
 
-  if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then
+  if ( self%mphyopt == 2 .or. self%mphyopt == 5 ) then
 ! Initialize coefficients and power index numers used in the dbz obs operator
 ! for single moment scheme (LIN)
     i_melt_snow=-1
     i_melt_graupel=100
     call coef4dbzfwrd(self%mphyopt,iret_coef4dbzfwrd)
-     if ( iret_coef4dbzfwrd .ne. 0 ) then
+     if ( iret_coef4dbzfwrd /= 0 ) then
         call abor1_ftn("iret_coef4dbzfwrd is not 0, stop")
      end if
-  else if ( self%mphyopt .eq. 108 ) then
+  else if ( self%mphyopt == 108 ) then
   ! Define Variables for dry Zs in TM
      oams = one/am_s
      alpha_const_tm_dry_snow =  (0.176_kind_real/0.93_kind_real) * (6.0_kind_real/pi)*(6.0_kind_real/pi)     &
@@ -349,18 +349,18 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   end if
 
   do ivar = 1,1
-    do iobs=1,nlocs 
+    do iobs=1,nlocs
 
       ! calculate RHO first
-      if ( self%mphyopt .eq. 14 ) then
+      if ( self%mphyopt == 14 ) then
          idx_p = 11
          idx_t = 12
          idx_q = 13
-      else if ( self%mphyopt .eq. 108 ) then
+      else if ( self%mphyopt == 108 ) then
          idx_p = 5
          idx_t = 6
          idx_q = 7
-      else if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then
+      else if ( self%mphyopt == 2 .or. self%mphyopt == 5 ) then
          idx_p = 4
          idx_t = 5
          idx_q = 6
@@ -376,9 +376,9 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
       qgges = max(vfields(3,iobs), qx_min)  ! qg
 
       ! Some microphysics options have more species and double-moment.
-      if ( self%mphyopt .eq. 108 ) then
+      if ( self%mphyopt == 108 ) then
          qnrges = max(vfields(4,iobs)*RHO, qn_min)  ! qnr
-      elseif ( self%mphyopt .eq. 14 ) then
+      else if ( self%mphyopt == 14 ) then
          qhges = max(vfields(4,iobs), qx_min)   ! qh
          qnrges = max(vfields(5,iobs)*RHO, qn_min)  ! qnr
          qnsges = max(vfields(6,iobs)*RHO, qn_min)  ! qns
@@ -396,12 +396,12 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
       rdBZr = zero
       rdBZs = zero
       wgt_dry = zero
-      wgt_wet = zero ;
+      wgt_wet = zero
       Zeg_dry = zero
-      Zeg_wet = zero ;
+      Zeg_wet = zero
 
 ! --------------- LIN operator code from GSI 'setupdbz.f90' --------------
-      if ( self%mphyopt .eq. 2 .or. self%mphyopt .eq. 5 ) then ! LIN operator
+      if ( self%mphyopt == 2 .or. self%mphyopt == 5 ) then ! LIN operator
          ! rain
          if (qrges > qx_min) then
             Zer = Cr * (qrges*RHO)**Pr
@@ -412,7 +412,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
             if ( i_melt_snow < 0 ) then
                ! no melting: dry snow at any temperature
                Zes = Cs_dry * (qsges*RHO)**Ps_dry
-            else if ( i_melt_snow  .eq. 100 ) then
+            else if ( i_melt_snow  == 100 ) then
                ! melting: wet snow at any temperature
                Zes = Cs_wet * (qsges*RHO)**Ps_wet
             else
@@ -430,7 +430,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
             if ( i_melt_graupel < 0 ) then
                ! no melting: dry grauple/hail at any temperature
                Zeg = Cg_dry * (qgges*RHO)**Pg_dry
-            else if ( i_melt_graupel  .eq. 100 ) then
+            else if ( i_melt_graupel  == 100 ) then
                ! melting: wet graupel at any temperature
                Zeg = Cg_wet * (qgges*RHO)**Pg_wet
             else
@@ -464,28 +464,28 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
       end if
 
 ! --------------- TM operator code from GSI 'setupdbz.f90' --------------
-      if ( self%mphyopt .eq. 108 .and. self%use_variational ) then ! TM operator
+      if ( self%mphyopt == 108 .and. self%use_variational ) then ! TM operator
 !----TM-------------
          Cg_wet= 5.54914E+12_kind_real
          Cg_dry= 1.90409E+12_kind_real
          Pg_wet= 2.5_kind_real
 
        ! rain
-         if (qrges .gt. qx_min .and. qnrges .ge. qn_min) then
+         if (qrges > qx_min .and. qnrges >= qn_min) then
             Zer = 720._kind_real * (qrges*RHO)**2 / (pi**2*rhor**2*(qnrges*RHO)) * 1.E18
-         endif
+         end if
 
        ! snow
          if (qsges > qx_min) then
              if ( T1D > T_melt ) then
                 Zes = (1.47E+05_kind_real)*(qsges*1000._kind_real)**2.67_kind_real
              else
-             ! calc coeffs for dry snow based on TM MP code 
+             ! calc coeffs for dry snow based on TM MP code
                 call calc_coeffs_dry_snow_tm(T1D,a_dry_snow_tm,b_dry_snow_tm)
                 smoz = a_dry_snow_tm * (qsges*oams)**b_dry_snow_tm
                 Zes  = alpha_const_tm_dry_snow*smoz
              end if
-         endif
+         end if
 
        ! graupel/hail
          if (qgges > qx_min) then
@@ -494,7 +494,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
              else
                 Zeg = Cg_dry*RHO**1.75_kind_real * qgges**Pg_wet
              end if
-         endif
+         end if
 
          Ze=Zer+Zes+Zeg
 
@@ -505,22 +505,22 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
 
 !      Convert to simulated radar reflectivity in units of dBZ
          rdBZ = ten * log10(Ze)
-         if (Zer .gt. zero) rdBZr = ten * log10(Zer)
-         if (Zes .gt. zero) rdBZs = ten * log10(Zes)
+         if (Zer > zero) rdBZr = ten * log10(Zer)
+         if (Zes > zero) rdBZs = ten * log10(Zes)
 
       end if
 
-      if ( (self%mphyopt .eq. 108 .or. self%mphyopt .eq. 14 ) .and. &
+      if ( (self%mphyopt == 108 .or. self%mphyopt == 14 ) .and. &
            (.not.(self%use_variational)) ) then
 
 ! NSSL operator for EnKF / use radarZ
-          if ( self%mphyopt .eq. 108 ) then
+          if ( self%mphyopt == 108 ) then
              if ( P_qr > 0 ) qscalar(P_qr) = qrges
              if ( P_qs > 0 ) qscalar(P_qs) = qsges
              if ( P_qg > 0 ) qscalar(P_qg) = qgges
              if ( P_nr > 0 ) qscalar(P_nr) = qnrges
 
-          else if ( self%mphyopt .eq. 14 ) then
+          else if ( self%mphyopt == 14 ) then
 ! NSSL operator for EnKF / use radarZ
              if ( P_qr > 0 ) qscalar(P_qr) = qrges
              if ( P_qs > 0 ) qscalar(P_qs) = qsges
@@ -556,7 +556,7 @@ subroutine ufo_directZDA_simobs(self, geovals, obss, nvars, nlocs, hofx)
   deallocate(obsvcoord)
   deallocate(wi)
   deallocate(wf)
-  
+
   deallocate(vfields)
 
 end subroutine ufo_directZDA_simobs

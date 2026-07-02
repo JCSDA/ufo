@@ -10,6 +10,16 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/develop' }}
 
 jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install linter
+        run: |
+          python3 -m pip install fortitude-lint
+      - name: Run fortitude check
+        run: |
+          fortitude check
   build:
     if: |
       ( github.repository_owner == 'JCSDA-internal' && github.event.pull_request.draft == false )
