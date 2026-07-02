@@ -40,3 +40,13 @@ observations:
   passedBenchmark: 3179
   benchmarkFlag: 24
   flaggedBenchmark: 35
+  diagnosticFlagBenchmark:
+    PermanentStationRejection/relativeHumidity: 115
+    InterpolationCheckRejection/relativeHumidity: 33
+    FinalQCRejection/relativeHumidity: 264
+    SignificantWindLevelInAscent/relativeHumidity: 0
+    TropopauseLevelInAscent/relativeHumidity: 2
+    PartialLayerUsedInAveraging/airTemperature: 2
+    MaximumWindLevelInAscent/airTemperature: 0
+    SignificantWindLevelInAscent/airTemperature: 0
+    StandardLevelInAscent/airTemperature: 29

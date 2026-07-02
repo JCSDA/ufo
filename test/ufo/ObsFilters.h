@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -142,6 +143,12 @@ class ObsTypeParameters : public oops::Parameters {
 
   /// An integer corresponding to one of the constants in the QCflags namespace.
   oops::OptionalParameter<int> benchmarkFlag{"benchmarkFlag", this};
+
+
+  /// A map corresponding with keys listing diagnostic flag and values are the
+  /// number of observations expected to pass quality control.
+  oops::OptionalParameter<std::map<std::string, int>>
+  diagnosticFlagBenchmark{"diagnosticFlagBenchmark", this};
 
   /// Indices of observations expected to receive the `benchmarkFlag` flag.
   ///
@@ -528,6 +535,43 @@ void testFilters(size_t obsSpaceIndex, ioda::ObsSpace &obspace,
       const size_t flaggedBenchmark = *params.flaggedBenchmark.value();
       size_t flagged = numEqualTo(qcflags, flag, *obspace.distribution());
       EXPECT_EQUAL(flagged, flaggedBenchmark);
+    }
+  }
+
+
+  if (params.diagnosticFlagBenchmark.value() != boost::none) {
+    atLeastOneBenchmarkFound = true;
+
+    const std::map<std::string, int> &diagnosticFlagBenchmark =
+      *params.diagnosticFlagBenchmark.value();
+    for (const auto &flagAndCount : diagnosticFlagBenchmark) {
+      const std::string & groupAndName = flagAndCount.first;
+      const int expectedCount = flagAndCount.second;
+
+      const std::size_t slashLast = groupAndName.find_last_of("/");
+      if (slashLast == std::string::npos) {
+        throw eckit::UserError("Diagnostic flag name '" + groupAndName +
+                     "' does not contain a slash separating the group and variable names",
+                     Here());
+      }
+      const std::string diagFlagName = groupAndName.substr(0, slashLast);
+      const std::string varName = groupAndName.substr(slashLast+1);
+
+
+      std::vector<bool> diagFlagBool(obspace.nlocs());
+      obspace.get_db("DiagnosticFlags/" + diagFlagName, varName, diagFlagBool);
+
+      std::unique_ptr<ioda::Accumulator<int>> accumulatorDiag =
+        obspace.distribution()->createAccumulator<int>();
+      for (size_t jobs = 0; jobs < obspace.nlocs(); jobs++) {
+        if (diagFlagBool[jobs]) {
+          accumulatorDiag->addTerm(jobs, 1);
+        }
+      }
+
+      const int countDiag = accumulatorDiag->computeResult();
+
+      EXPECT_EQUAL(countDiag, expectedCount);
     }
   }
 
