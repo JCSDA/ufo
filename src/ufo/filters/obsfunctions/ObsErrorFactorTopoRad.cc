@@ -48,7 +48,7 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   splitInstSat(sensor, inst, sat);
   ASSERT(inst == "amsua" || inst == "atms"    || inst == "mhs" ||
          inst == "iasi" || inst == "cris-fsr" || inst == "airs" ||
-         inst == "avhrr3" || inst == "seviri");
+         inst == "avhrr3" || inst == "seviri" || inst == "abi");
 
   if (inst == "amsua" || inst == "atms") {
     // Get test groups from options
@@ -96,7 +96,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
 
   // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
   if (inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3" ||
-      inst == "seviri") {
+      inst == "seviri" || inst == "abi") {
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
       in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich],
@@ -161,7 +161,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
   } else {
     oops::Log::error() << "ObsErrorFactorTopoRad: Invalid instrument (sensor) specified: " << inst
                        << "  The valid instruments are: iasi, cris-fsr, airs, avhrr3, seviri, "
-                       << "  amsua, atms, and mhs."
+                       << "  amsua, atms, abi, and mhs."
                        << std::endl;
   }
   oops::Log::trace() << "ObsErrorFactorTopoRad compute complete" << std::endl;
