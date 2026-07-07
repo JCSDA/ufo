@@ -216,6 +216,7 @@ character(10), parameter :: jacobianstr = "_jacobian_"
 integer(c_size_t) :: nvars, nlocs
 integer :: n_skipped, n_good
 integer :: qc_ff
+integer :: ispec
 logical:: skip_prof
 
 ! set a local boolean variable for whether we are in vis or ultraviolet channels
@@ -617,6 +618,26 @@ integer, allocatable :: zeroCloudInCRTM0(:)
        write(err_msg,*) "ufo_radiancecrtm_tlad_settraj error: failed to put simulated diagnostics into hofxdiags"
        call abor1_ftn(err_msg)
     end if
+
+   ! If desired, zero out Jacobian following a user-defined range setting
+   ! --------------------------------------------------------------------
+   if (self%conf%zeroO3JacRange(1)>0.0 .and. self%conf%zeroO3JacRange(2)<1.0e9) then
+     do jspec = 1, self%conf%n_Absorbers
+       ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
+       if (self%conf%Absorbers(ispec) == var_oz) then
+          do jprofile = 1, self%n_Profiles
+            if (.not.self%Options(jprofile)%Skip_Profile) then
+               do lch = 1, size(self%channels)
+                  if (sc(n)%wavenumber(lch) < self%conf%zeroO3JacRange(1) .or. &
+                      sc(n)%wavenumber(lch) > self%conf%zeroO3JacRange(2)) then
+                     self%atm_K(lch,jprofile)%Absorber(:,ispec) = ZERO
+                  end if
+               end do
+            end if
+          end do
+       end if
+     end do
+   end if
 
    ! Deallocate the structures
    ! -------------------------

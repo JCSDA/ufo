@@ -92,6 +92,8 @@ namespace ufo
     //// use qc flags
     oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
        "do not calculate hofx for values not passing qc (true or false)", false, this};
+    //// range of wavelengths (m^-1) to zero-out jacobian of ozone
+    oops::OptionalParameter<std::vector<float>> zeroO3JacRange{"zeroO3JacRange", this};
   };  // end class CRTMLinearObsOperatorParameters
 
 

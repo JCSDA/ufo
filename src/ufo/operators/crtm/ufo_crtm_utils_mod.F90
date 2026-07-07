@@ -69,6 +69,7 @@ type crtm_conf
  integer :: n_Clouds
  integer :: n_Aerosols
  integer :: n_Surfaces
+ integer :: n_zeroO3JacRange
  character(len=MAXVARLEN), allocatable :: Absorbers(:)
  integer, allocatable :: Absorber_Id(:)
  integer, allocatable :: Absorber_Units(:)
@@ -96,6 +97,7 @@ type crtm_conf
  real(kind_real) :: co2_rescale_to_ppmv = co2_rescale_to_ppmv
  real(kind_real) :: co2_ppmv_value = co2_ppmv_value
  real(kind_real) :: midpoint_julday = midpoint_julday
+ real(kind_real) :: zeroO3JacRange(2)
  logical :: Cloud_Seeding = .false.
  logical :: cal_cloud_frac_in_fov = .false.
  logical :: cal_cloud_reff_in_fov  = .false.
@@ -265,6 +267,7 @@ integer :: jspec, ivar
 character(len=max_string) :: message
 character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
+real(kind_real), allocatable :: flt_array(:)
 
 character(len=maxvarlen), allocatable :: var_aerosols(:)
 logical, save :: message_flag = .true.
@@ -511,6 +514,26 @@ character(max_string) :: cloud_reff_method
  if (ufo_vars_getindex(ValidCO2AbsorberMethod, conf%co2_method_geovars) < 1) then
    write(message,*) "crtm_conf_setup error: invalid CO2 method ",trim(conf%co2_method_geovars)
    call fckit_exception % throw(message)
+ end if
+
+ ! Range of wavelength to zero out O3 Jacobians
+ ! ---------------------------------------------
+ conf%n_zeroO3JacRange = 0
+ conf%zeroO3JacRange(1) = 0.0
+ conf%zeroO3JacRange(2) = 1.0e9
+ if (f_confOper%has("zeroO3JacRange")) then
+   conf%n_zeroO3JacRange = conf%n_zeroO3JacRange + f_confOper%get_size("zeroO3JacRange")
+
+   if (conf%n_zeroO3JacRange /= size(conf%zeroO3JacRange) ) then
+     write(message,*) "crtm_conf_setup error: invalid O3 Jac range "
+     call fckit_exception % throw(message)
+   end if
+
+   call f_confOper%get_or_die("zeroO3JacRange",flt_array)
+   conf%zeroO3JacRange(1:conf%n_zeroO3JacRange) = flt_array
+   write(message,*) trim(ROUTINE_NAME),&
+        " Zeroing-out Jacobian wrt ozone for wavelength < ", conf%zeroO3JacRange(1),&
+        " and > ", conf%zeroO3JacRange(2)
  end if
 
  ! observation midpoint Julian day in proleptic Julian calendar (from 01Jan 4713BC)
@@ -1625,7 +1648,6 @@ end function uv_to_wdir
     ! CRTM, NAAPS, GOCART-GEOS5, CMAQ
     CHARACTER(*), INTENT(in) :: aerosol_coef_file
     CHARACTER(*), INTENT(out) :: aerosol_model
-    integer :: checkstring
 
     if (aerosol_coef_file == "AerosolCoeff.nc4" .or. &
         aerosol_coef_file == "AerosolCoeff.bin") then
@@ -1681,7 +1703,7 @@ end function uv_to_wdir
     TYPE(ufo_geoval), POINTER :: geoval
 
     INTEGER, INTENT(in) :: n_profiles, n_layers
-    INTEGER :: ivar, n_aerosols, i, k, m
+    INTEGER :: n_aerosols, i, k, m
 
     REAL(kind_real), DIMENSION(5), PARAMETER  :: dust_radii=[&
          &0.55_kind_real,1.4_kind_real,2.4_kind_real,4.5_kind_real,8.0_kind_real]
