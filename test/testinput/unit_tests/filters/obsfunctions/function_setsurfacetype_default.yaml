@@ -3,6 +3,7 @@ _: &rttov_surftype_land 42
 time window:
   begin: 2019-12-29T21:00:00Z
   end: 2019-12-30T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 ### Test user-specified default surface type ###

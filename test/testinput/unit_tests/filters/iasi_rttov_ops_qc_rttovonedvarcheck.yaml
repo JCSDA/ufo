@@ -53,6 +53,7 @@ _: &land_not_used 265, 280, 327, 345, 347, 350, 356, 371, 373, 375, 377, 379, 38
 time window:
   begin: 2021-01-14T21:00:00Z
   end: 2021-01-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs operator: &ObsOperator

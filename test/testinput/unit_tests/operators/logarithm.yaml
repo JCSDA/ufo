@@ -1,6 +1,7 @@
 time window:
   begin: 2000-10-12T23:30:00Z
   end: 2030-10-13T00:30:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 

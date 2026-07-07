@@ -1,6 +1,7 @@
 time window:
   begin: 2000-01-01T00:00:00Z
   end: 2030-12-31T23:59:59Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs space: # Comparison against Met Office OPS system (multi-level)

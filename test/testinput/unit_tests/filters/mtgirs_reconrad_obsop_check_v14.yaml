@@ -46,6 +46,7 @@ _: &1dvar_not_used 531, 533, 536, 538, 540, 542, 543, 544, 548, 549, 550, 556, 5
 time window:
   begin: 2021-06-24T09:00:00Z
   end: 2021-06-24T15:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs operator: &ObsOperator

@@ -1,6 +1,7 @@
 time window:
   begin: 2018-04-14T21:00:00Z
   end: 2018-04-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs space:
@@ -18,7 +19,7 @@ observations:
     filename: Data/ufo/testinput_tier_1/satwind_geoval_2018041500_m.nc4
   geovals test:
     state variables: [eastward_wind, northward_wind, air_pressure]
-    norm: 4307792.01444180
+    norm: 4329648.55399846564978361
 - obs space:
     name: amsua_n19
     obsdatain:

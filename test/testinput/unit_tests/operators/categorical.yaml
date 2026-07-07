@@ -1,6 +1,7 @@
 time window:
   begin: 2018-04-14T21:00:00Z
   end: 2018-04-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 # The value of `rms ref` is calculated for most of the cases below by determining the
 # rms values for each variable and operator separately and combining them as follows:

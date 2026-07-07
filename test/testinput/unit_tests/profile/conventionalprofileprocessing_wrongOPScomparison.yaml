@@ -12,6 +12,7 @@ Incorrect and missing values, RH:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -35,6 +36,7 @@ Incorrect and missing values:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -58,6 +60,7 @@ Incorrect and missing values, averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -82,6 +85,7 @@ Incorrect and missing values, Basic:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -104,6 +108,7 @@ Wrong number of entries per profile:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -130,6 +135,7 @@ Wrong number of entries per profile, UInterp:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -154,6 +160,7 @@ Wrong number of entries per profile, UInterpAlternative:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -176,6 +183,7 @@ Wrong number of entries per profile, RH:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -200,6 +208,7 @@ Wrong number of entries per profile, background:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -224,6 +233,7 @@ Wrong number of entries per profile, pressure transformation:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -253,6 +263,7 @@ Wrong number of entries per profile, temperature averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -281,6 +292,7 @@ Wrong number of entries per profile, wind speed averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -309,6 +321,7 @@ Wrong number of entries per profile, relative humidity averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -336,6 +349,7 @@ No group variable chosen:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -357,6 +371,7 @@ Ascending sort order:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -382,6 +397,7 @@ Invalid check requested:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -405,6 +421,7 @@ Duplicate check requested:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -430,6 +447,7 @@ Incorrect type in get:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -455,6 +473,7 @@ Standard levels out of order:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -481,6 +500,7 @@ Background SondeLaunchWindRej:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -504,6 +524,7 @@ Background manual QC flags:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -529,6 +550,7 @@ Profile pressure not run before temperature averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -554,6 +576,7 @@ Missing GeoVaLs for pressure calculation:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -578,6 +601,7 @@ Missing GeoVaLs for temperature averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -606,6 +630,7 @@ Profile pressure not run before wind speed averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -631,6 +656,7 @@ Missing GeoVaLs for wind speed averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -659,6 +685,7 @@ Profile pressure not run before relative humidity averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -685,6 +712,7 @@ Exception in ProfileDataHandler due to reorderzdir:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -710,6 +738,7 @@ Missing GeoVaLs for relative humidity averaging:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:
@@ -736,6 +765,7 @@ Missing GeoVaLs for sign check:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:

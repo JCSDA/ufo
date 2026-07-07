@@ -1,6 +1,7 @@
 time window:
   begin: 2020-12-30T03:00:00Z
   end: 2020-12-30T09:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations: 
 # 1. check operator works with correct geoval order

@@ -7,6 +7,7 @@
 time window:
   begin: 2019-06-14T20:30:00Z
   end: 2019-06-15T03:30:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 # Temperature

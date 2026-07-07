@@ -1,6 +1,7 @@
 time window:
   begin: 2023-03-31T17:00:00Z
   end: 2023-03-31T23:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 # Test Thompson microphysics reflectivity operator with variational method (option 108)
 observations:

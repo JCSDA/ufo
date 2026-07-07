@@ -1,6 +1,7 @@
 time window:
   begin: '2020-09-03T15:00:00Z'
   end: '2020-09-03T21:00:00Z'
+  bound to include: begin  # consistency with test data from "ncdiag"
 observations:
 - obs space:
     name: NO2
@@ -28,7 +29,7 @@ observations:
     tolerance AD: 1.0e-13
   geovals:
     filename: Data/ufo/testinput_tier_1/tempo_no2_geovals.nc4
-  rms ref: 8.8868698941106699e-12
+  rms ref: 8.6457886037154183e-12
   tolerance: 1.0e-7
 - obs space:
     name: NO2
@@ -82,5 +83,5 @@ observations:
     tolerance AD: 1.0e-13
   geovals:
     filename: Data/ufo/testinput_tier_1/tempo_no2_geovals.nc4
-  rms ref: 8.4734255336663887e-11
+  rms ref: 8.5379181068436509e-11
   tolerance: 1.0e-7

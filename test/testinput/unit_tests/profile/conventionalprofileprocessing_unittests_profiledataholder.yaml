@@ -6,6 +6,7 @@ ProfileDataHolder:
   time window:
     begin: 2000-01-01T00:00:00Z
     end: 2030-01-01T00:00:00Z
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:
     name: Radiosonde
     obsdatain:

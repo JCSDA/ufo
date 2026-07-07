@@ -1,6 +1,7 @@
 time window:
   begin: 2019-03-21T00:00:00Z
   end: 2019-03-21T18:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs operator:
@@ -20,6 +21,6 @@ observations:
         obsfile: Data/ufo/pace_radiance_2019032112_out.nc
   geovals:
     filename: Data/ufo/testinput_tier_1/pace_radiance_geovals_2019032112.nc
-  rms ref: 0.270960411
+  rms ref: 0.24241504528169303
   tolerance: 1.e-6
 

@@ -1,6 +1,7 @@
 time window:
   begin: 2019-10-16T20:30:00Z
   end: 2019-10-17T03:30:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs operator:

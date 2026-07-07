@@ -1,6 +1,7 @@
 time window:
   begin: 2018-04-14T21:00:00Z
   end: 2018-04-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 geovals test:
 - obs space:
@@ -80,6 +81,7 @@ geovals get test:
   time window:
     begin: 2018-04-14T21:00:00Z  # required for initializing SampledLocations from the obs space below
     end: 2018-04-15T03:00:00Z    # required for initializing SampledLocations from the obs space below
+    bound to include: begin  # consistency with test data from "ncdiag"
   obs space:                          # required for initializing SampledLocations to locations from this file
     name: amsua_n19
     obsdatain:

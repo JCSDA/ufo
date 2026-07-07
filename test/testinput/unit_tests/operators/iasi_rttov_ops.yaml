@@ -23,6 +23,7 @@ _: &all_channels 16, 38, 49, 51, 55, 57, 59, 61, 63, 66, 70, 72, 74, 79, 81,
 time window:
   begin: 2021-01-14T21:00:00Z
   end: 2021-01-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs operator:

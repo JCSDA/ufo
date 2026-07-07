@@ -1,6 +1,7 @@
 time window:
   begin: 2019-01-01T00:00:00Z
   end: 2022-01-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs space:

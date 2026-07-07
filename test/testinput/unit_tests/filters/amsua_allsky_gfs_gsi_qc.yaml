@@ -1,7 +1,7 @@
 time window:
   begin: '2024-02-18T21:00:00Z'
   length: PT6H
-  bound to include: begin
+  bound to include: begin  # consistency with test data from "ncdiag"
 observations:
 - obs space:
     name: AMSUA N19

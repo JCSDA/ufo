@@ -1,6 +1,7 @@
 time window:
   begin: 2020-11-14T21:00:00Z
   end: 2020-11-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
 - obs operator:
@@ -32,7 +33,7 @@ observations:
 # One scan angle
 # rms ref: 218.10222468021257
 # Two scan angles (ch 1-9 & 10-13)
-  rms ref: 218.19693688899761
+  rms ref: 218.18594709373238
   tolerance: 1.e-6
   linear obs operator test:
     coef TL: 1.e-3
