@@ -973,6 +973,15 @@ ufo_add_test( NAME    function_tropopause_height
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    function_SymmCldImpact
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_SymmCldImpact.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_velocity_channels
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x

@@ -339,8 +339,8 @@ set ( filters_files
       obsfunctions/ScatWindsAmbiguityCheck.h
       obsfunctions/SCATRetMW.cc
       obsfunctions/SCATRetMW.h
-      obsfunctions/SymmCldImpactIR.cc
-      obsfunctions/SymmCldImpactIR.h
+      obsfunctions/SymmCldImpact.cc
+      obsfunctions/SymmCldImpact.h
       obsfunctions/SolarZenith.cc
       obsfunctions/SolarZenith.h
       obsfunctions/StableLayersCloudTopPressure.cc

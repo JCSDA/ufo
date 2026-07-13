@@ -63,6 +63,8 @@ set ( utils_files
       SpatialBinSelector.cc
       StringUtils.cc
       StringUtils.h
+      SymmCldImpactUtils.h
+      SymmCldImpactUtils.cc
       SurfaceReportConstants.h
       TruncatingEquispacedBinSelector.h
       ufo_utils_mod.F90

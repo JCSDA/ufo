@@ -30,6 +30,8 @@ set ( predictor_files
   ScanAngle.cc
   SineOfLatitude.h
   SineOfLatitude.cc
+  SymmCldImpactPred.h
+  SymmCldImpactPred.cc
   Thickness.h
   Thickness.cc
   ObsMetaDataPredictor.h

@@ -27,7 +27,7 @@ observations:
     options:
       channels: *all_channels 
       xvar:
-        name: ObsFunction/SymmCldImpactIR
+        name: ObsFunction/SymmCldImpact
         channels: *all_channels
         options:
           channels: *all_channels

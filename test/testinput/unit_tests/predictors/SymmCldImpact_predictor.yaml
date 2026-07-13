@@ -1,0 +1,28 @@
+time window:
+  begin: 2018-04-14T20:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: abi_g16
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/abi_g16_obs_2018041500_symobserr.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &all_channels 8-10,13
+  #obsdataout:
+  #    engine:
+  #      type: H5File
+  #      obsfile: Data/abi_g16_obs_2018041500_m_pred_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/abi_g16_geoval_2018041500_m_qc.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/satbias_abi_g16_SymmCldImpact.nc4
+    variational bc:
+      predictors:
+      - name: SymmCldImpact
+        channels: *all_channels
+        btlim: [234.27, 244.75, 255.98, 292.99]
+        use_hofx: true
+  tolerance: 1.0e-6
