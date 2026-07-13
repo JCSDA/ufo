@@ -83,7 +83,6 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
                                     std::vector<std::vector<bool>> & flagged) const {
   oops::Log::trace() << "DuplicateThinning applyFilter start" << std::endl;
 
-  const util::DateTime missingDateTime = util::missingValue<util::DateTime>();
   const float missingFloat = util::missingValue<float>();
   const int missingInt = util::missingValue<int>();
 
@@ -157,7 +156,7 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
     for (size_t pos : categoryGroup) {
       const size_t obsId = validObsIds[pos];
       // Obs with missing dateTime is not thinned.
-      if (timeToleranceSec_ > 0 && dateTime[obsId] != missingDateTime) {
+      if (timeToleranceSec_ > 0) {
         const int64_t distFromSeed =
             std::abs((dateTime[obsId] - analysisTime).toSeconds());
         if (distFromSeed > timeToleranceSec_) {
@@ -177,13 +176,9 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
     const bool preferAfter = preferAfter_;
     if (groupObsIds.size() > 1) {
       std::stable_sort(groupObsIds.begin(), groupObsIds.end(),
-          [&dateTime, &analysisTime, &missingDateTime, preferAfter](size_t a, size_t b) {
-            const int64_t da = (dateTime[a] == missingDateTime)
-                ? std::numeric_limits<int64_t>::max()
-                : std::abs((dateTime[a] - analysisTime).toSeconds());
-            const int64_t db = (dateTime[b] == missingDateTime)
-                ? std::numeric_limits<int64_t>::max()
-                : std::abs((dateTime[b] - analysisTime).toSeconds());
+          [&dateTime, &analysisTime, preferAfter](size_t a, size_t b) {
+            const int64_t da = std::abs((dateTime[a] - analysisTime).toSeconds());
+            const int64_t db = std::abs((dateTime[b] - analysisTime).toSeconds());
             if (da != db) return da < db;  // choose closer value
             return preferAfter ? (dateTime[a] > dateTime[b])  // choose later value
                                : (dateTime[a] < dateTime[b]);  // choose earlier value
@@ -192,10 +187,6 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
       std::vector<util::DateTime> keptTime;
       keptTime.reserve(groupObsIds.size());
       for (size_t obsId : groupObsIds) {
-        if (dateTime[obsId] == missingDateTime) {
-          // Missing time — keep.
-          continue;
-        }
         bool tooClose = false;
         for (const util::DateTime & t : keptTime) {
           if (std::abs((dateTime[obsId] - t).toSeconds()) < minSpacingSec_) {
@@ -209,6 +200,18 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
         } else {
           keptTime.push_back(dateTime[obsId]);
         }
+      }
+    }
+  }
+
+  // Apply analysis-time tolerance to observations not in multi-element groups.
+  for (size_t obsId : validObsIds) {
+    if (isThinned[obsId]) continue;  // already handled above
+    if (timeToleranceSec_ > 0) {
+      const int64_t distFromSeed =
+          std::abs((dateTime[obsId] - analysisTime).toSeconds());
+      if (distFromSeed > timeToleranceSec_) {
+        isThinned[obsId] = true;
       }
     }
   }

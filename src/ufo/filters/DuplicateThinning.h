@@ -54,9 +54,9 @@ class DuplicateThinningParameters : public FilterParametersBase {
   /// Minimum time gap required between two observations retained in the same
   /// group. Observation is thinned if its dateTime is within
   /// `min_spacing` of any already-retained observation in the same group.
-  /// e.g. PT15M for 15 minutes. Default value is set to PT1H.
+  /// e.g. PT15M for 15 minutes. Default value is set to PT6H.
   oops::Parameter<util::Duration> minSpacing{
-      "min_spacing", util::Duration("PT1H"), this};
+      "min_spacing", util::Duration("PT6H"), this};
 
   /// Tie-breaker for the min-spacing pass: when two observations are
   /// equidistant from `analysis_time`, choose the one whose dateTime is

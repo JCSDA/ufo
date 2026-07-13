@@ -26,7 +26,7 @@ observations:
     tolerance: [0.5, 0.5, 0.5]
     # action:
     #   name: reduce obs space
-  passedBenchmark: 745  # 1000 total obs, 255 thinned
+  passedBenchmark: 132  # 1000 total obs, 868 thinned
 
 
 - obs space:
@@ -48,36 +48,25 @@ observations:
     variable names: [MetaData/stationIdentification] # default tolerance
   passedBenchmark: 240   # 1000 total obs, 760 thinned due to duplication
 
+- obs space:
+    name: duplicate thinning with default values
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_duplicate_check.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/qc_duplicate_thinning_default_out.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: DuplicateThinning
+    analysis_time: 2019-01-01T00:00:00Z
+    action:
+      name: reduce obs space
+  passedBenchmark: 9   # 1000 total obs, kept 238, 358, 440, 460, 952, 199, 269, 797, 983
 
-# time window:
-#   begin: 2024-05-05T00:00:00Z
-#   end: 2034-06-07T23:59:59Z
-
-# observations:
-# - obs space:
-#     name: Aircraft
-#     obsdatain:
-#       engine:
-#         type: H5File
-#         obsfile: Data/ufo/testinput_tier_1/ioda_adpsfc_2m.nc
-#     obsdataout:
-#       engine:
-#         type: H5File
-#         obsfile: Data/qc_duplicate_thinning_adpsfc_out.nc4
-#     simulated variables: [airTemperatureAt2M] #, cloudAmount, cloudCoverTotal, depthBelowSeaSurface, dewpointTemperature,
-#      heightAboveSurfaceOfBaseOfLowestCloud, heightOfBaseOfCloud, heightOfWaves, maximumWindGustSpeed]
-#   obs filters:
-#   - filter: DuplicateThinning
-#     analysis_time: 2024-05-06T00:00:00Z
-#     analysis_time_tolerance: PT1M # analysis time window tolerance
-#     min_spacing: PT10M
-#     variable name: [MetaData/latitude,
-#                     MetaData/longitude]
-#     tolerance: [0.5, 0.5] #, 250.0]
-#   passedBenchmark: 0 # 16220 total obs, 8204 missing, 8016 removed by thinning.
-
-
-# Min spacing above observation tolerance:
+# # Min spacing above observation tolerance:
 # time window:
 #   begin: 2000-01-01T00:00:00Z
 #   end: 2030-01-01T00:00:00Z
