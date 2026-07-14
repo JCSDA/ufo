@@ -7,13 +7,12 @@
 
 #include "ufo/filters/StuckCheck.h"
 
-#include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <boost/none.hpp>
+#include <boost/optional.hpp>
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
@@ -35,25 +34,39 @@ StuckCheck::StuckCheck(ioda::ObsSpace &obsdb, const Parameters_ &parameters,
   oops::Log::trace() << "StuckCheck constructor" << std::endl;
   if (options_.core.percentageStuckTolerance.value()) {
     if ((options_.core.numberStuckTolerance.value()) ||
-           (options_.core.timeStuckTolerance.value())) {  // must NOT be set if percentage set
+           (options_.core.timeStuckTolerance.value()) ||
+           (options_.core.numberStuckToleranceVariable.value())) {
       throw eckit::UserError(R"(If percentage stuck tolerance is set,
-            neither number stuck tolerance nor time stuck tolerance should be set.)", Here());
+        neither number stuck tolerance, number stuck tolerance variable,
+        nor time stuck tolerance should be set.)", Here());
     }
     if ((options_.core.percentageStuckTolerance.value().value() < 0) ||
-        (options_.core.percentageStuckTolerance.value().value() > 100)) {  // must be 0-100
+        (options_.core.percentageStuckTolerance.value().value() > 100)) {
       throw eckit::UserError(R"(Percentage stuck tolerance must be between 0 and 100.)", Here());
     }
-  } else {  // no percentage stuck tolerance, so others MUST be set
-    if (!options_.core.numberStuckTolerance.value() || !options_.core.timeStuckTolerance.value()) {
+    if (options_.core.minimumAllowedStuck.value() < 1) {
+      throw eckit::UserError(R"(Minimum allowed stuck must be at least 1.)",
+                             Here());
+    }
+  } else {  // no percentage stuck tolerance
+    if (options_.core.numberStuckTolerance.value() &&
+        options_.core.numberStuckToleranceVariable.value()) {
+      throw eckit::UserError(R"(If number stuck tolerance variable is set,
+            number stuck tolerance must not also be set.)",
+                             Here());
+    }
+    if (!(options_.core.numberStuckTolerance.value() ||
+          options_.core.numberStuckToleranceVariable.value()) ||
+        !options_.core.timeStuckTolerance.value()) {
       throw eckit::UserError(R"(If percentage stuck tolerance is not set,
-            then both number stuck tolerance and time stuck tolerance must be set.)", Here());
+            then number stuck tolerance or number stuck tolerance variable,
+            and time stuck tolerance must be set.)",
+                             Here());
     }
   }
-  obsGroupDateTimes_.reset(new std::vector<util::DateTime>);
   oops::Log::debug() << "StuckCheck: config = " << options_ << '\n';
 }
 
-// Required for the correct destruction of ObsGroupDateTimes_.
 StuckCheck::~StuckCheck() {
   oops::Log::trace() << "StuckCheck destructor" << std::endl;
 }
@@ -72,8 +85,20 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
                                                                obsdb_,
                                                                false);
   const std::vector<size_t> validObsIds = obsAccessor.getValidObservationIds(apply);
-  *obsGroupDateTimes_ = obsAccessor.getDateTimeVariableFromObsSpace(
+  obsGroupDateTimes_ = obsAccessor.getDateTimeVariableFromObsSpace(
         "MetaData", "dateTime");
+  if (options_.core.numberStuckToleranceVariable.value()) {
+    const Variable &numStuckVar =
+        *options_.core.numberStuckToleranceVariable.value();
+    if (obsdb_.dtype(numStuckVar.group(), numStuckVar.variable()) !=
+        ioda::ObsDtype::Integer) {
+      throw eckit::UserError(
+          "The number stuck tolerance variable must have integer type.",
+          Here());
+    }
+    numberStuckToleranceVarValues_ = obsAccessor.getIntVariableFromObsSpace(
+        numStuckVar.group(), numStuckVar.variable());
+  }
   // Create groups based on record number (assumed station ID) or category variable
   // (stationIdVariable) or otherwise assume observations all taken by the same station (1 group)
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
@@ -95,6 +120,12 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
       std::string stationId = std::to_string(stationNumber);
       std::vector<float> variableDataStation = collectStationVariableData(
             station.begin(), station.end(), validObsIds, variableValues);
+      const boost::optional<size_t> stuckTolerance = getStuckToleranceForRecord(
+          validObsIds, station.begin(), station.end());
+      if (!stuckTolerance) {
+        stationNumber++;
+        continue;
+      }
       // the working variable's value associated with the prior observation
       float previousObservationValue;
       float currentObservationValue;
@@ -118,7 +149,8 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
                                                   firstSameValueIndex,
                                                   observationIndex,
                                                   isRejected,
-                                                  stationId);
+                                                  stationId,
+                                                  *stuckTolerance);
             }
           } else {  // streak ended in the previous observation
             StuckCheck::potentiallyRejectStreak(station.begin(),
@@ -127,7 +159,8 @@ void StuckCheck::applyFilter(const std::vector<bool> & apply,
                                                 firstSameValueIndex,
                                                 observationIndex - 1,
                                                 isRejected,
-                                                stationId);
+                                                stationId,
+                                                *stuckTolerance);
             // start the streak with the current observation and reset the count to 1
             firstSameValueIndex = observationIndex;
             previousObservationValue = currentObservationValue;
@@ -164,6 +197,62 @@ std::vector<float> StuckCheck::collectStationVariableData(
   return stationData;
 }
 
+/// Determines the number stuck tolerance to use for the given record,
+/// considering all three tolerance modes (percentage, per-observation variable,
+/// fixed). Returns boost::none if no rejection should be attempted for this
+/// record (computed percentage tolerance is below minimumAllowedStuck, or all
+/// tolerance variable values are missing).
+boost::optional<size_t> StuckCheck::getStuckToleranceForRecord(
+    const std::vector<size_t> &validObsIds,
+    std::vector<size_t>::const_iterator stationObsIndicesBegin,
+    std::vector<size_t>::const_iterator stationObsIndicesEnd) const {
+  const size_t stationLength = stationObsIndicesEnd - stationObsIndicesBegin;
+  const size_t startObsIndex = validObsIds.at(*stationObsIndicesBegin);
+  if (options_.core.percentageStuckTolerance.value()) {
+    const size_t percentageBaseCount =
+        options_.core.percentageStuckToleranceBasedOnIntervals.value()
+            ? stationLength - 1
+            : stationLength;
+    const size_t computed =
+        std::round(options_.core.percentageStuckTolerance.value().value() *
+                   percentageBaseCount / 100.0);
+    if (computed <
+        static_cast<size_t>(options_.core.minimumAllowedStuck.value()))
+      return boost::none;
+    return computed;
+  }
+  if (options_.core.numberStuckToleranceVariable.value()) {
+    const int missingInt = util::missingValue<int>();
+    boost::optional<int> foundTolerance;
+    for (auto it = stationObsIndicesBegin; it != stationObsIndicesEnd; ++it) {
+      const size_t obsIndex = validObsIds.at(*it);
+      const int currentObsTolerance =
+          numberStuckToleranceVarValues_.at(obsIndex);
+      if (currentObsTolerance == missingInt) continue;
+      if (!foundTolerance) {
+        foundTolerance = currentObsTolerance;
+      } else if (currentObsTolerance != *foundTolerance) {
+        throw eckit::BadValue(
+            "StuckCheck Error: Not all number stuck tolerance values are equal "
+            "for record starting at index " +
+                std::to_string(startObsIndex) + ".",
+            Here());
+      }
+    }
+    if (!foundTolerance) return boost::none;
+    if (*foundTolerance < 0) {
+      throw eckit::BadValue(
+          "The number stuck tolerance variable must be non-negative. "
+          "Invalid value found for record starting at index " +
+              std::to_string(startObsIndex) + ".",
+          Here());
+    }
+    return static_cast<size_t>(*foundTolerance);
+  }
+  return static_cast<size_t>(
+      options_.core.numberStuckTolerance.value().value());
+}
+
 void StuckCheck::potentiallyRejectStreak(
     std::vector<size_t>::const_iterator stationIndicesBegin,
     std::vector<size_t>::const_iterator stationIndicesEnd,
@@ -171,12 +260,13 @@ void StuckCheck::potentiallyRejectStreak(
     size_t startOfStreakIndex,
     size_t endOfStreakIndex,
     std::vector<bool> &isRejected,
-    std::string stationId = "") const {
+    std::string stationId,
+    size_t stuckTolerance) const {
 
   auto getObservationTime = [this, &stationIndicesBegin, &validObsIds] (
       size_t offsetFromBeginning)->util::DateTime{
     const size_t obsIndex = validObsIds.at(*(stationIndicesBegin + offsetFromBeginning));
-    return obsGroupDateTimes_->at(obsIndex);
+    return obsGroupDateTimes_.at(obsIndex);
   };
 
   auto rejectObservation = [&validObsIds, &isRejected, &stationIndicesBegin, &stationId](
@@ -185,24 +275,14 @@ void StuckCheck::potentiallyRejectStreak(
     isRejected[obsIndex] = true;
   };
 
-  const size_t streakLength = endOfStreakIndex - startOfStreakIndex + 1;
-  const size_t stationLength = stationIndicesEnd - stationIndicesBegin;
-  size_t numberStuckTolerance;
-  if (options_.core.percentageStuckTolerance.value()) {
-    numberStuckTolerance =
-        std::round(options_.core.percentageStuckTolerance.value().value()*stationLength/100.0);
-    if (numberStuckTolerance < 2) {
-      return;
-    }
-  } else {
-    numberStuckTolerance = options_.core.numberStuckTolerance.value().value();
-  }
-  if (streakLength <= numberStuckTolerance) {
-      return;
+  const size_t streakLength = endOfStreakIndex - startOfStreakIndex;
+  if (streakLength < stuckTolerance) {
+    return;
   }
 
-  if (!(options_.core.percentageStuckTolerance.value())) {
-    if (streakLength < stationLength) {
+  if (options_.core.timeStuckTolerance.value()) {
+    const size_t stationLength = stationIndicesEnd - stationIndicesBegin;
+    if (streakLength < stationLength - 1) {
       const util::DateTime firstStreakObservationTime = getObservationTime(startOfStreakIndex);
       const util::DateTime lastStreakObservationTime = getObservationTime(endOfStreakIndex);
       const util::Duration streakDuration = lastStreakObservationTime - firstStreakObservationTime;

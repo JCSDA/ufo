@@ -159,6 +159,109 @@ observations:
     percentage stuck tolerance: 70
   expectExceptionWithMessage: "If percentage stuck tolerance is set"
 - obs space:
+    name: Ship (number stuck tolerance variable supplied)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: MetaData/numberStuckToleranceVariable
+        type: int
+        value: 7
+  - filter: Stuck Check
+    filter variables: [windNorthward]
+    number stuck tolerance variable: MetaData/numberStuckToleranceVariable
+    time stuck tolerance: PT2M
+  flaggedObservationsBenchmark: *referenceFlaggedObsIds
+  flaggedBenchmark: 8
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship percentage stuck check (both number stuck tolerance options given)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: MetaData/numberStuckToleranceVariable
+        type: int
+        value: 7
+  - filter: Stuck Check
+    filter variables: [windNorthward]
+    number stuck tolerance: 7
+    number stuck tolerance variable: MetaData/numberStuckToleranceVariable
+    time stuck tolerance: PT2M
+  expectExceptionWithMessage: "If number stuck tolerance variable is set"
+- obs space:
+    name: Ship (float number stuck tolerance variable supplied)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: MetaData/numberStuckToleranceVariable
+        type: float
+        value: 7
+  - filter: Stuck Check
+    filter variables: [windNorthward]
+    number stuck tolerance variable: MetaData/numberStuckToleranceVariable
+    time stuck tolerance: PT2M
+  expectExceptionWithMessage: "The number stuck tolerance variable must have integer type"
+- obs space:
+    name: Ship (negative number stuck tolerance variable supplied)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out1.nc4
+    simulated variables: [windNorthward]
+    observed variables: [windNorthward]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+      - name: MetaData/numberStuckToleranceVariable
+        type: int
+        value: -1
+  - filter: Stuck Check
+    filter variables: [windNorthward]
+    number stuck tolerance variable: MetaData/numberStuckToleranceVariable
+    time stuck tolerance: PT2M
+  expectExceptionWithMessage: "must be non-negative. Invalid value found for record starting at index"
+- obs space:
     name: Ship percentage stuck check (2 vars)
     obsdatain:
       engine:
@@ -184,8 +287,84 @@ observations:
       - 20
       - 21
       - 22
+      - 133
+      - 134
+      - 458
+      - 459
+      - 460
+      - 508
+      - 509
+  flaggedBenchmark: 15  #
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship percentage stuck check (2 vars, 3 required for a streak)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sfcship_obs_2018041500_m_stuckcheck_out8.nc4
+    simulated variables: [airTemperature, windNorthward]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [airTemperature, windNorthward]
+    percentage stuck tolerance: 15  # 15%, i.e. number stuck tolerance: 2, for record length 12
+    minimum allowed stuck: 2  # i.e. number stuck tolerance derived from percentage must be at least 3 to form a streak
+  flaggedObservationsBenchmark:
+      - 15
+      - 16
+      - 17
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
       - 458
       - 459
       - 460
   flaggedBenchmark: 11  #
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship percentage stuck check (NOT based on intervals)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature, windNorthward]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [airTemperature, windNorthward]
+    percentage stuck tolerance: 25
+    percentage stuck tolerance based on intervals: false # default
+  flaggedObservationsBenchmark:
+      - 110
+      - 111
+  flaggedBenchmark: 2
+  benchmarkFlag: 21 # track
+- obs space:
+    name: Ship percentage stuck check (based on intervals)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcship_obs_2018041500_m.nc4
+      obsgrouping:
+        group variables: [ "stationIdentification" ]
+    simulated variables: [airTemperature, windNorthward]
+  obs filters:
+  - filter: Stuck Check
+    filter variables: [airTemperature, windNorthward]
+    percentage stuck tolerance: 25
+    percentage stuck tolerance based on intervals: true # number stuck tolerance will round to different numbers based on whether this is true or false
+  flaggedObservationsBenchmark:
+      - 133
+      - 134
+      - 508
+      - 509
+  flaggedBenchmark: 4
   benchmarkFlag: 21 # track
