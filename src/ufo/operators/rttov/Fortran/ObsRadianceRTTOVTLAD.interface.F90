@@ -32,7 +32,8 @@ contains
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist) &
+subroutine ufo_radiancerttov_tlad_setup_c(c_key_self, c_conf, c_nchan, c_channels, c_varlist, &
+                                          c_qc_size, c_qc_passed) &
                                     bind(c,name="ufo_radiancerttov_tlad_setup_f90")
 use oops_variables_mod
 implicit none
@@ -41,6 +42,8 @@ type(c_ptr), value, intent(in) :: c_conf
 integer(c_int), intent(in) :: c_nchan
 integer(c_int), intent(in) :: c_channels(c_nchan)
 type(c_ptr), intent(in), value :: c_varlist
+integer(c_int), intent(in) :: c_qc_size              !< number of flags classified as passed - in
+integer(c_int), intent(in) :: c_qc_passed(c_qc_size) !< flags for passivated obs. - in
 
 type(oops_variables) :: oops_vars
 type(ufo_radiancerttov_tlad), pointer :: self
@@ -49,7 +52,7 @@ type(fckit_configuration) :: f_conf
 call ufo_radiancerttov_tlad_registry%setup(c_key_self, self)
 f_conf = fckit_configuration(c_conf)
 
-call self%setup(f_conf, c_channels)
+call self%setup(f_conf, c_channels, c_qc_passed)
 
 !> Update C++ ObsOperator with input variable list
 oops_vars = oops_variables(c_varlist)
@@ -61,7 +64,8 @@ end subroutine ufo_radiancerttov_tlad_setup_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_tlad_delete_c(c_key_self) bind(c,name="ufo_radiancerttov_tlad_delete_f90")
+subroutine ufo_radiancerttov_tlad_delete_c(c_key_self) &
+           bind(c,name="ufo_radiancerttov_tlad_delete_f90")
 implicit none
 integer(c_int), intent(inout) :: c_key_self
 
@@ -75,7 +79,8 @@ end subroutine ufo_radiancerttov_tlad_delete_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine ufo_radiancerttov_tlad_settraj_c(c_key_self, c_key_geovals, c_obsspace, c_key_hofxdiags) &
+subroutine ufo_radiancerttov_tlad_settraj_c(c_key_self, c_key_geovals, &
+                                            c_obsspace, c_key_hofxdiags, c_qc_flags) &
                                        bind(c,name="ufo_radiancerttov_tlad_settraj_f90")
 
 implicit none
@@ -83,6 +88,7 @@ integer(c_int),     intent(in) :: c_key_self
 integer(c_int),     intent(in) :: c_key_geovals
 type(c_ptr), value, intent(in) :: c_obsspace
 integer(c_int),     intent(in) :: c_key_hofxdiags
+type(c_ptr),value,  intent(in) :: c_qc_flags
 
 type(ufo_radiancerttov_tlad), pointer :: self
 type(ufo_geovals),       pointer :: geovals
@@ -94,7 +100,7 @@ call ufo_radiancerttov_tlad_registry%get(c_key_self, self)
 call ufo_geovals_registry%get(c_key_geovals,geovals)
 call ufo_geovals_registry%get(c_key_hofxdiags,hofxdiags)
 
-call self%settraj(geovals, c_obsspace, hofxdiags)
+call self%settraj(geovals, c_obsspace, hofxdiags, qcf_p=c_qc_flags)
 
 end subroutine ufo_radiancerttov_tlad_settraj_c
 

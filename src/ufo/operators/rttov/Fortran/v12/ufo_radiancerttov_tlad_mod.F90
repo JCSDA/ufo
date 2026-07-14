@@ -56,12 +56,13 @@ module ufo_radiancerttov_tlad_mod
 contains
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_tlad_setup(self, f_confOper, channels)
+  subroutine ufo_radiancerttov_tlad_setup(self, f_confOper, channels, qc_passed)
     implicit none
 
     class(ufo_radiancerttov_tlad), intent(inout) :: self
     type(fckit_configuration), intent(in)        :: f_confOper
     integer(c_int),            intent(in)        :: channels(:)  !List of channels to use
+    integer(c_int), optional,  intent(in)        :: qc_passed(:) !List of qcflags_passed values, not used
 
     type(fckit_configuration)                    :: f_confOpts ! RTcontrol
     type(fckit_configuration)                    :: f_confLinOper
@@ -142,7 +143,7 @@ contains
   end subroutine ufo_radiancerttov_tlad_delete
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, hofxdiags)
+  subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, hofxdiags, qcf_p)
 
     use fckit_mpi_module,   only: fckit_mpi_comm
 
@@ -152,6 +153,7 @@ contains
     type(ufo_geovals),             intent(in)    :: geovals
     type(c_ptr), value,            intent(in)    :: obss
     type(ufo_geovals),             intent(inout) :: hofxdiags    !non-h(x) diagnostics
+    type(c_ptr), value, optional,  intent(in)    :: qcf_p !not used
 
     real(c_double)                               :: missing
     type(fckit_mpi_comm)                         :: f_comm

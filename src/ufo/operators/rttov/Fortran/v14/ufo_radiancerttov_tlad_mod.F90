@@ -33,6 +33,7 @@ module ufo_radiancerttov_tlad_mod
     private
     character(len=MAXVARLEN), public, allocatable :: varin(:)      ! variables which will be part of the analysis.
     integer, allocatable                          :: channels(:)
+    integer, allocatable                          :: qc_passed(:)  ! list of values indicating passed qc
     integer, allocatable                          :: coefindex(:)  ! list of the coefindex for the channels to simulate.
     type(rttov_conf)                              :: conf
     type(rttov_conf)                              :: conf_traj
@@ -44,6 +45,7 @@ module ufo_radiancerttov_tlad_mod
     integer                                       :: nlevels
 
     logical                                       :: ltraj
+    logical, allocatable                          :: skipping_profile(:) ! list of profile to be skipped for channels.
 
   contains
     procedure :: setup  => ufo_radiancerttov_tlad_setup
@@ -56,12 +58,13 @@ module ufo_radiancerttov_tlad_mod
 contains
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_tlad_setup(self, f_confOper, channels)
+  subroutine ufo_radiancerttov_tlad_setup(self, f_confOper, channels, qc_passed)
     implicit none
 
     class(ufo_radiancerttov_tlad), intent(inout) :: self
     type(fckit_configuration), intent(in)        :: f_confOper
     integer(c_int),            intent(in)        :: channels(:)  !List of channels to use
+    integer(c_int), optional,  intent(in)        :: qc_passed(:) !List of values indicating passed qc
 
     type(fckit_configuration)                    :: f_confOpts ! RTcontrol
     type(fckit_configuration)                    :: f_confLinOper
@@ -100,6 +103,12 @@ contains
     allocate(self % coefindex(self % RTprof_k % nchan_inst))
     self % coefindex(:) = 0
     self % channels(:) = channels
+
+    ! Copy flags to fortran object
+    if (present(qc_passed)) then
+      allocate(self % qc_passed(size(qc_passed)))
+      self % qc_passed(:) = qc_passed(:)
+    end if
 
     jnew = 1
     coefloop: do ii = 1, self % RTprof_k % nchan_inst
@@ -142,9 +151,11 @@ contains
   end subroutine ufo_radiancerttov_tlad_delete
 
   ! ------------------------------------------------------------------------------
-  subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, hofxdiags)
+  subroutine ufo_radiancerttov_tlad_settraj(self, geovals, obss, hofxdiags, qcf_p)
 
     use fckit_mpi_module,   only: fckit_mpi_comm
+    use obsdatavector_mod,  only: obsdatavector_int
+    use, intrinsic :: iso_fortran_env,    only: int64
 
     implicit none
 
@@ -152,6 +163,7 @@ contains
     type(ufo_geovals),             intent(in)    :: geovals
     type(c_ptr), value,            intent(in)    :: obss
     type(ufo_geovals),             intent(inout) :: hofxdiags    !non-h(x) diagnostics
+    type(c_ptr), value, optional,  intent(in)    :: qcf_p
 
     real(c_double)                               :: missing
     type(fckit_mpi_comm)                         :: f_comm
@@ -167,13 +179,16 @@ contains
 
     integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan, ilev, localchan
     integer                                      :: nprof_sim, nprof_max_sim, nchan_total
-    integer                                      :: nchan_sim, ivar
+    integer                                      :: nchan_sim, ivar, qc_flag
+    integer(int64)                               :: ii, pp
     integer                                      :: prof_start, prof_end
     integer                                      :: sensor_index
     integer, allocatable                         :: prof_list(:,:)  ! store list of 'good' profiles
 
-    logical                                      :: jacobian_needed, jacobian_needed_rr, do_profile_diagnostics
+    logical                                      :: jacobian_needed, jacobian_needed_rr
+    logical                                      :: do_profile_diagnostics, skip_profile
     real(kind_real), allocatable                 :: sfc_emiss(:,:)
+    type(obsdatavector_int)                      :: qc_flags
     real(kind_real), allocatable                 :: RTTOV_Atlas_Emissivity(:)
     character(len = MAXVARLEN)                   :: varname
 
@@ -196,6 +211,11 @@ contains
     call ufo_geovals_get_var(geovals, var_ts, geoval_temp)
     self % nlevels = geoval_temp % nval
     nullify(geoval_temp)
+
+    ! Setup qc flags will run profile by profile
+    if (present(qcf_p)) then
+      if (self % conf % UseQCFlagsToSkipHofX) qc_flags % data_ptr = qcf_p
+    end if
 
     ! Sanity checks
     if (self % nprofiles == 0) return
@@ -265,8 +285,35 @@ contains
     prof_start = 1
     prof_end = self % nprofiles
     nchan_total = 0
+    allocate(self % skipping_profile(self % nprofiles * self % RTprof_k % nchan_inst))
+    self % skipping_profile = .false.
 
     RTTOV_loop : do while (prof_start <= prof_end)
+      ! Check qc flags if requested and skip if no active channels
+      ! note prof_by_prof is set to true if UseQCFlagsToSkipHofX is true
+      if (present(qcf_p) .and. allocated(self % qc_passed)) then
+        if (self % conf % UseQCFlagsToSkipHofX) then
+          skip_profile = .true.
+          do ichan = 1, self % RTprof_k % nchan_inst
+            ii = ichan ! conversion to int64
+            pp = prof_start ! conversion to int64
+            qc_flag = qc_flags % get(ii, pp)
+
+            if (any(self % qc_passed == qc_flag)) then
+              skip_profile = .false.
+              exit
+            end if
+          end do
+          if (skip_profile) then
+            ! increment profile and channel counters and skip this one
+            self % skipping_profile(nchan_total + 1) = .true. ! nchan_total starts at zero, which is invalid index, so +1
+            nchan_total = nchan_total + nchan_sim
+            prof_start = prof_start + nprof_sim
+            self % nchan_total = nchan_total
+            cycle RTTOV_loop
+          end if
+        end if
+      end if
 
       ! Zero all k code variables.  These arrays are of size prof_end-prof_start
       call self % RTprof_K % zero_k(self % conf, reset_profiles_k=.false.)
@@ -382,7 +429,7 @@ contains
                     self % conf % rttov_coef_array(sensor_index),                     &
                     chanprof(1:nchan_sim),                                            &
                     self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1), &
-                    self % RTProf_K % profiles_k(1:nchan_sim),                        &
+                    self % RTProf_K % profiles_k(nchan_total+1:nchan_total+nchan_sim),&
                     self % RTProf_K % emissivity,                                     &
                     self % RTProf_K % emissivity_k,                                   &
                     self % RTProf_K % transmission,                                   &
@@ -568,8 +615,13 @@ contains
           end if
 
           do ichan = 1, self % nchan_total, size(self % channels)
-            prof = self % RTprof_K % chanprof(ichan) % prof
             do jchan = 1, size(self % channels)
+              if (self % skipping_profile(ichan)) then ! when profile is skipped exit now for this channel chunk
+                write(message, *) myname_, ": skipping profile for ichan: ", ichan
+                call oops_log%info(message)
+                exit
+              end if
+              prof = self % RTprof_K % chanprof(ichan) % prof
               if (trim(varname) == var_ts) then
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   sum(self % RTprof_K % profiles_k(ichan+jchan-1) % t(:) * &
@@ -609,8 +661,13 @@ contains
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           do ichan = 1, self % nchan_total, size(self % channels)
-            prof = self % RTprof_K % chanprof(ichan) % prof
             do jchan = 1, size(self%channels)
+              if (self % skipping_profile(ichan)) then ! when profile is skipped exit now for this channel chunk
+                write(message, *) myname_, ": skipping profile for ichan: ", ichan
+                call oops_log%info(message)
+                exit
+              end if
+              prof = self % RTprof_K % chanprof(ichan) % prof
               if (trim(varname) == var_sfc_t2m) then
                 hofx(jchan, prof) = hofx(jchan, prof) + &
                   self % RTprof_K % profiles_k(ichan+jchan-1) % near_surface(1) % t2m * geoval_d % vals(1, prof)
@@ -695,8 +752,13 @@ contains
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           do ichan = 1, self % nchan_total, size(self % channels)
-            prof = self % RTprof_K % chanprof(ichan) % prof
             do jchan = 1, size(self % channels)
+              if (self % skipping_profile(ichan)) then ! when profile is skipped exit now for this channel chunk
+                write(message, *) myname_, ": skipping profile for ichan: ", ichan
+                call oops_log%info(message)
+                exit
+              end if
+              prof = self % RTprof_K % chanprof(ichan) % prof
               if (hofx(jchan, prof) /= missing) then
                 if (trim(varname) == var_ts) then
                   geoval_d % vals(:, prof) = geoval_d % vals(:, prof) + &
@@ -735,8 +797,13 @@ contains
           call ufo_geovals_get_var(geovals, trim(varname), geoval_d)
 
           do ichan = 1, self % nchan_total, size(self % channels)
-            prof = self % RTprof_K % chanprof(ichan) % prof
             do jchan = 1, size(self%channels)
+              if (self % skipping_profile(ichan)) then ! when profile is skipped exit now for this channel chunk
+                write(message, *) myname_, ": skipping profile for ichan: ", ichan
+                call oops_log%info(message)
+                exit
+              end if
+              prof = self % RTprof_K % chanprof(ichan) % prof
               if (hofx(jchan, prof) /= missing) then
                 if (trim(varname) == var_sfc_t2m) then
                   geoval_d % vals(1, prof) = geoval_d % vals(1, prof) + &

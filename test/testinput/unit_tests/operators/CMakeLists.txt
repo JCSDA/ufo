@@ -1833,6 +1833,15 @@ if(ENABLE_RTTOVCPP_TESTS)
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif(ENABLE_RTTOVCPP_TESTS)
 #
+    ufo_add_test( NAME    linopr_atms_rttov_tlad_qc
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_tlad_qc${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL}operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
     ufo_add_test( NAME    opr_atms_rttov_allsurfacetypes
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
