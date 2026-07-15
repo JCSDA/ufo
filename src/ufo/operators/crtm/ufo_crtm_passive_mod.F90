@@ -183,7 +183,7 @@ do jvar = 1, hofxdiags%nvar
    if (xstr_diags(jvar) == "") then
       ! forward h(x) diags
       select case(ystr_diags(jvar))
-         ! variable: optical_thickness_of_atmosphere_layer_CH
+         ! variable: optical_thickness_of_atmosphere_layer by channel and location
          case (var_opt_depth)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -197,7 +197,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: toa_outgoing_radiance_per_unit_wavenumber_CH [mW / (m^2 sr cm^-1)] (nval=1)
+         ! variable: toa_outgoing_radiance_per_unit_wavenumber by channel and location [mW / (m^2 sr cm^-1)]
          case (var_radiance)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -209,7 +209,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_assuming_clear_sky_CH
+         ! variable: brightness_temperature_assuming_clear_sky by channel and location
          case (var_tb_clr)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -224,7 +224,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_CH
+         ! variable: brightness_temperature by channel and location
          case (var_tb)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -237,7 +237,7 @@ do jvar = 1, hofxdiags%nvar
             end do
 
 #if defined(CRTM_VERSION) && (CRTM_VERSION >= 3)
-         ! variable: albedo_CH
+         ! variable: albedo by channel and location
          case (var_albedo)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -249,7 +249,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_assuming_clear_sky_CH
+         ! variable: albedo_assuming_clear_sky by channel and location
          case (var_albedo_clr)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -262,7 +262,7 @@ do jvar = 1, hofxdiags%nvar
             end do
 #endif
 
-         ! variable: transmittances_of_atmosphere_layer_CH
+         ! variable: transmittances_of_atmosphere_layer by channel and location
          case (var_lvl_transmit)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -283,7 +283,7 @@ do jvar = 1, hofxdiags%nvar
             end do
             deallocate(TmpVar)
 
-         ! variable: weightingfunction_of_atmosphere_layer_CH
+         ! variable: weightingfunction_of_atmosphere_layer by channel and location
          case (var_lvl_weightfunc)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -314,7 +314,7 @@ do jvar = 1, hofxdiags%nvar
             deallocate(TmpVar)
             deallocate(Tao)
 
-         ! variable: pressure_level_at_peak_of_weightingfunction_CH
+         ! variable: pressure_level_at_peak_of_weightingfunction by channel and location
          case (var_pmaxlev_weightfunc)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -354,6 +354,17 @@ do jvar = 1, hofxdiags%nvar
             deallocate(Tao)
             deallocate(Wfunc)
 
+         ! variable: surface_emissivity by channel and location
+         case (var_sfc_emiss)
+            hofxdiags%geovals(jvar)%nval = 1
+            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
+            hofxdiags%geovals(jvar)%vals = missing
+            do jprofile = 1, n_Profiles
+               if (.not. Options(jprofile)%Skip_Profile) then
+                  hofxdiags%geovals(jvar)%vals(1, jprofile) = &
+                     rts(jchannel, jprofile) % surface_emissivity
+               end if
+            end do
          case default
 !           write(err_msg,*) 'ufo_radiancecrtm_simobs: //&
 !                             & ObsDiagnostic is unsupported, ', &
@@ -367,7 +378,7 @@ do jvar = 1, hofxdiags%nvar
    else if (ystr_diags(jvar) == var_tb) then
       ! var_tb jacobians
       select case (xstr_diags(jvar))
-         ! variable: brightness_temperature_jacobian_air_temperature_CH
+         ! variable: brightness_temperature_jacobian_air_temperature by channel and location
          case (var_ts)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -380,7 +391,7 @@ do jvar = 1, hofxdiags%nvar
                   end do
                end if
             end do
-         ! variable: brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air_CH
+         ! variable: brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air by channel and location
          ! (nval==n_Layers) --> requires MAXVARLEN=71
          case (var_mixr)
             hofxdiags%geovals(jvar)%nval = n_Layers
@@ -396,7 +407,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_mole_fraction_of_carbon_dioxide_in_air_CH
+         ! variable: brightness_temperature_mole_fraction_of_carbon_dioxide_in_air by channel and location
          case (var_co2)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -411,7 +422,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_mole_fraction_of_ozone_in_air_CH
+         ! variable: brightness_temperature_mole_fraction_of_ozone_in_air by channel and location
          case (var_oz)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -426,7 +437,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
+         ! variable: brightness_temperature_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer by channel and location
          case (var_clw_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -441,7 +452,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
+         ! variable: brightness_temperature_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer by channel and location
          case (var_cli_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -456,7 +467,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
+         ! variable: brightness_temperature_jacobian_mass_content_of_snow_in_atmosphere_layer by channel and location
          case (var_cls_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -471,7 +482,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
+         ! variable: brightness_temperature_jacobian_mass_content_of_rain_in_atmosphere_layer by channel and location
          case (var_clr_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -486,7 +497,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
+         ! variable: brightness_temperature_jacobian_mass_content_of_graupel_in_atmosphere_layer by channel and location
          case (var_clg_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -501,7 +512,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
+         ! variable: brightness_temperature_jacobian_mass_content_of_hail_in_atmosphere_layer by channel and location
          case (var_clh_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -516,7 +527,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_skin_temperature_at_surface_CH (nval=1)
+         ! variable: brightness_temperature_jacobian_skin_temperature_at_surface by channel and location
          case (var_sfc_tskin)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -531,7 +542,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: brightness_temperature_jacobian_surface_emissivity_CH (nval=1)
+         ! variable: brightness_temperature_jacobian_surface_emissivity by channel and location (nval=1)
          case (var_sfc_emiss)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -555,7 +566,7 @@ do jvar = 1, hofxdiags%nvar
    else if (ystr_diags(jvar) == var_albedo) then
       ! var_albedo jacobians
       select case (xstr_diags(jvar))
-         ! variable: albedo_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
+         ! variable: albedo_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer by channel and location
          case (var_clw_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -571,7 +582,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
+         ! variable: albedo_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer by channel and location
          case (var_cli_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -587,7 +598,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
+         ! variable: albedo_jacobian_mass_content_of_snow_in_atmosphere_layer by channel and location
          case (var_cls_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -603,7 +614,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
+         ! variable: albedo_jacobian_mass_content_of_rain_in_atmosphere_layer by channel and location
          case (var_clr_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -619,7 +630,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
+         ! variable: albedo_jacobian_mass_content_of_graupel_in_atmosphere_layer by channel and location
          case (var_clg_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -635,7 +646,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
+         ! variable: albedo_jacobian_mass_content_of_hail_in_atmosphere_layer by channel and location
          case (var_clh_wp)
             hofxdiags%geovals(jvar)%nval = n_Layers
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
@@ -651,7 +662,7 @@ do jvar = 1, hofxdiags%nvar
                end if
             end do
 
-         ! variable: albedo_jacobian_surface_emissivity_CH (nval=1)
+         ! variable: albedo_jacobian_surface_emissivity by channel and location
          case (var_sfc_emiss)
             hofxdiags%geovals(jvar)%nval = 1
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,n_Profiles))
