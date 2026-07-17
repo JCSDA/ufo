@@ -1186,10 +1186,12 @@ contains
           do iprof = 1, nProfiles
             profiles(iprof) % hydro(conf % rttov_hydro_index_clw, top_level:bottom_level:stride) = geoval%vals(:, iprof)
           end do
-        else
-          do iprof = 1, nProfiles
-            profiles(iprof) % clw(top_level:bottom_level:stride) = geoval%vals(:, iprof)
-          end do
+        else if (conf % rttov_opts % clw_absorption % clw_data) then
+          if (associated(profiles(1)%clw)) then
+            do iprof = 1, nProfiles
+              profiles(iprof) % clw(top_level:bottom_level:stride) = geoval%vals(:, iprof)
+            end do
+          end if
         end if
       case (var_cli)
         call ufo_geovals_get_var(geovals, conf%Absorbers(jspec), geoval)
@@ -1438,12 +1440,14 @@ contains
             end do
           else if (conf % rttov_opts % clw_absorption % clw_data) then
             ! Constrain small values to min_clw for clw profile
-            do ilev = 1, nlevels
-              if (profiles(iprof) % clw(ilev) < min_clw) then
-                profiles(iprof) % clw(ilev) = min_clw
-                self % clw_profile_reset(iprof, ilev) = .true.
-              end if
-            end do
+            if (associated(profiles(1)%clw)) then
+              do ilev = 1, nlevels
+                if (profiles(iprof) % clw(ilev) < min_clw) then
+                  profiles(iprof) % clw(ilev) = min_clw
+                  self % clw_profile_reset(iprof, ilev) = .true.
+                end if
+              end do
+            end if
           end if
         end if
 
@@ -1485,8 +1489,10 @@ contains
                         profiles(iprof) % hydro(conf % rttov_hydro_index_clw, :) + &
                         profiles(iprof) % hydro(conf % rttov_hydro_index_ciw, :)
 
-        else
-          Qtotal(:) = Qtotal(:) + profiles(iprof) % clw(:)
+        else if (conf % rttov_opts % clw_absorption % clw_data) then
+          if (associated(profiles(iprof) % clw)) then
+            Qtotal(:) = Qtotal(:) + profiles(iprof) % clw(:)
+          end if
         end if
 
         ! generate first guess cloud and q based on the qtotal physics
@@ -1506,7 +1512,9 @@ contains
           profiles(iprof) % hydro(conf % rttov_hydro_index_clw, :) = clw_temp(:)
           profiles(iprof) % hydro(conf % rttov_hydro_index_ciw, :) = ciw_temp(:)
         else if (conf % rttov_opts % clw_absorption % clw_data) then
-          profiles(iprof) % clw(:) = clw_temp(:)
+          if (associated(profiles(iprof) % clw)) then
+            profiles(iprof) % clw(:) = clw_temp(:)
+          end if
         end if
 
         self % ciw(:,iprof) = ciw_temp(:)
@@ -2421,9 +2429,11 @@ contains
                 if (conf % do_mw_scatt) then
                   hofxdiags%geovals(jvar)%vals(:,prof) = &
                     RTProf % profiles_k(ichan) % hydro(conf % rttov_hydro_index_clw, :)
-                else
-                  hofxdiags%geovals(jvar)%vals(:,prof) = &
-                    RTProf % profiles_k(ichan) % clw(:)
+                else if (conf % rttov_opts % clw_absorption % clw_data) then
+                  if (associated(RTProf % profiles_k(ichan) % clw)) then
+                    hofxdiags%geovals(jvar)%vals(:,prof) = &
+                      RTProf % profiles_k(ichan) % clw(:)
+                  end if
                 end if
               else if(self % xstr_diags(jvar) == var_cli) then
                 if (conf % do_mw_scatt) then
