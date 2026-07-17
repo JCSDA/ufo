@@ -114,6 +114,9 @@ set ( filters_files
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h
+      Percentile.cc
+      Percentile.h
+      PercentileParameters.h
       SuperOb.h
       SuperOb.cc
       SuperRefractionCheckImpactParameter.h

@@ -182,7 +182,8 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::history,       "removed by history check"},
     {QCflags::processed,     "rejected as processed but not assimilated"},
     {QCflags::superrefraction, "rejected by GNSSRO super refraction QC"},
-    {QCflags::superob,       "rejected by superobbing"}
+    {QCflags::superob,       "rejected by superobbing"},
+    {QCflags::percentile,    "rejected by percentile filter"}
   };
   const size_t numSpecialCases = 3;
 

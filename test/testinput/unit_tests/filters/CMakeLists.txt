@@ -570,6 +570,23 @@ if( ${gsw_FOUND} )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( ${gsw_FOUND} )
 #
+ufo_add_test( NAME    qc_percentile
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_percentile.yaml"
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    qc_percentile_mpi
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_percentile.yaml"
+              MPI     4
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    qc_poisson_disk_thinning
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

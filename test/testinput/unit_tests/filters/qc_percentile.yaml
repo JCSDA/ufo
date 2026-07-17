@@ -1,0 +1,357 @@
+# This tests that the Percentile filter works as expected.
+
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2029-12-12T23:59:59Z
+
+observations:
+
+  - obs space:
+      name: Percentile - Central 90%, Inclusive, grouped
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/percentile_obs_out.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+    flaggedObservationsBenchmark:
+      [  0,   1,   2,   3,   4,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 298,
+       299, 300, 301, 302]
+    flaggedBenchmark: 30
+    benchmarkFlag: 33 # percentile
+    compareVariables:
+      - reference:
+          name: TestReference/airTemperatureCentral90Inclusive
+        test:
+          name: DerivedObsValue/airTemperature
+        absTol: 1e-5
+
+  - obs space:
+      name: Percentile - Central 90%, Exclusive, grouped
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/percentile_obs_out.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ false ]
+    flaggedObservationsBenchmark: # note the extra flags compared to inclusive
+      [  0,   1,   2,   3,   4,   5,  95,  96,  97,  98,  99, 100, 101,
+       102, 103, 104, 105, 106, 196, 197, 198, 199, 200, 201, 202, 203,
+       204, 205, 206, 207, 297, 298, 299, 300, 301, 302]
+    flaggedBenchmark: 36
+    benchmarkFlag: 33 # percentile
+    compareVariables:
+      - reference:
+          name: TestReference/airTemperatureCentral90Exclusive
+        test:
+          name: DerivedObsValue/airTemperature
+        absTol: 1e-5
+
+  - obs space:
+      name: Percentile - Central 90%, inclusive, not-grouped (station_id_variable used)
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/percentile_obs_out.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+        station_id_variable: MetaData/stationIdentification
+    flaggedObservationsBenchmark:
+      [  0,   1,   2,   3,   4,  96,  97,  98,  99, 100, 101, 102, 103,
+       104, 105, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 298,
+       299, 300, 301, 302]
+    flaggedBenchmark: 30
+    benchmarkFlag: 33 # percentile
+    compareVariables:
+      - reference:
+          name: TestReference/airTemperatureCentral90Inclusive
+        test:
+          name: DerivedObsValue/airTemperature
+        absTol: 1e-5
+
+  - obs space:
+      name: Percentile - Lower 70% only, inclusive, grouped
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/percentile_obs_out.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        upper percentiles: [ 70.0 ]
+        inclusive central range: [ true ]
+    flaggedObservationsBenchmark:
+      [ 71,  72,  73,  74,  75,  76,  77,  78,  79,  80,  81,  82,  83,
+        84,  85,  86,  87,  88,  89,  90,  91,  92,  93,  94,  95,  96,
+        97,  98,  99, 100, 172, 173, 174, 175, 176, 177, 178, 179, 180,
+       181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193,
+       194, 195, 196, 197, 198, 199, 200, 201, 273, 274, 275, 276, 277,
+       278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290,
+       291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302]
+    flaggedBenchmark: 90
+    benchmarkFlag: 33 # percentile
+    compareVariables:
+      - reference:
+          name: TestReference/airTemperatureLower70Inclusive
+        test:
+          name: DerivedObsValue/airTemperature
+        absTol: 1e-5
+
+
+  - obs space:
+      name: Percentile - Central 90%, Inclusive, grouped, fewer obs
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs_97.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/percentile_obs_out_97.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+    flaggedObservationsBenchmark:
+      [  0,   1,   2,   3,   4,  92,  93,  94,  95,  96,  97,  98,  99,
+       100, 190, 191, 192, 193, 194, 195, 196, 197, 198, 286, 287, 288,
+       289, 290]
+    flaggedBenchmark: 28
+    benchmarkFlag: 33 # percentile
+    compareVariables:
+      - reference:
+          name: TestReference/airTemperatureCentral90Inclusive
+        test:
+          name: DerivedObsValue/airTemperature
+        absTol: 1e-5
+
+  - obs space:
+      name: Percentile - Central 90%, Exclusive, grouped, fewer obs
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs_97.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/percentile_obs_97_out.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ false ]
+    flaggedObservationsBenchmark: # note the extra flags compared to inclusive
+      [  0,   1,   2,   3,   4,  92,  93,  94,  95,  96,  97,  98,  99,
+       100, 101, 102, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197,
+       198, 286, 287, 288, 289, 290]
+    flaggedBenchmark: 32
+    benchmarkFlag: 33 # percentile
+    compareVariables:
+      - reference:
+          name: TestReference/airTemperatureCentral90Exclusive
+        test:
+          name: DerivedObsValue/airTemperature
+        absTol: 1e-5
+
+  - obs space:
+      name: Percentile - exception - missing lower and upper percentiles
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        inclusive central range: [ true ]
+    expectExceptionWithMessage:
+      "At least one of 'lower percentiles' or 'upper percentiles' must be specified"
+
+  - obs space:
+      name: Percentile - exception - lower percentiles count mismatch
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0, 10.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+    expectExceptionWithMessage:
+      "Number of lower percentiles must match number of filter variables"
+
+  - obs space:
+      name: Percentile - exception - upper percentiles count mismatch
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 90.0, 95.0 ]
+        inclusive central range: [ true ]
+    expectExceptionWithMessage:
+      "Number of upper percentiles must match number of filter variables"
+
+  - obs space:
+      name: Percentile - exception - inclusive central range count mismatch
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature, relativeHumidity ]
+        lower percentiles: [ 5.0, 5.0 ]
+        upper percentiles: [ 95.0, 95.0 ]
+        inclusive central range: [ true, false, true ]
+    expectExceptionWithMessage:
+      "Number of inclusive central range values must match number of filter variables"
+
+  - obs space:
+      name: Percentile - exception - percentile out of range
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ -1.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+    expectExceptionWithMessage:
+      "Percentile values must be in range [0, 100]"
+
+  - obs space:
+      name: Percentile - exception - lower percentile greater than upper
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 96.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+    expectExceptionWithMessage:
+      "Lower percentile must be <= upper percentiles"
+
+  - obs space:
+      name: Percentile - exception - station_id_variable with record grouping
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+        station_id_variable: MetaData/stationIdentification
+    expectExceptionWithMessage:
+      "Using station_id_variable with record grouping is not supported for Percentile filter"
+
+  - obs space:
+      name: Percentile - exception - missing grouping and station_id_variable
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/percentile_obs.nc4
+      simulated variables: [ airTemperature ]
+      observed variables: [ airTemperature ]
+    obs filters:
+      - filter: Percentile
+        filter variables: [ airTemperature ]
+        lower percentiles: [ 5.0 ]
+        upper percentiles: [ 95.0 ]
+        inclusive central range: [ true ]
+    expectExceptionWithMessage:
+      "station_id_variable must be used when record grouping is not set for Percentile filter"

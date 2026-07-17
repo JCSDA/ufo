@@ -39,6 +39,7 @@
 #include "ufo/filters/ObsPolygonCheck.h"
 #include "ufo/filters/ObsRefractivityGradientCheck.h"
 #include "ufo/filters/ParameterSubstitution.h"
+#include "ufo/filters/Percentile.h"
 #include "ufo/filters/PerformAction.h"
 #include "ufo/filters/PoissonDiskThinning.h"
 #include "ufo/filters/PreQC.h"
@@ -138,6 +139,8 @@ void instantiateObsFilterFactory() {
            ObsRefractivityGradientCheckMaker("Obs Refractivity Gradient Check");
   static FilterMaker<ParameterSubstitution>
            parameterSubstitutionMaker("Parameter Substitution");
+  static FilterMaker<Percentile>
+           percentileMaker("Percentile");
   static FilterMaker<PerformAction>
            performActionMaker("Perform Action");
   static FilterMaker<PoissonDiskThinning>
