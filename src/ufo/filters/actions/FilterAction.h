@@ -13,13 +13,13 @@
 
 #include <boost/noncopyable.hpp>
 
+#include "ufo/filters/actions/FilterActionBase.h"
+
 namespace ioda {
   template<typename DATATYPE> class ObsDataVector;
 }
 
 namespace ufo {
-  class FilterActionBase;
-  class FilterActionParametersBase;
   class ObsFilterData;
   class Variables;
 
@@ -47,6 +47,7 @@ class FilterAction : private boost::noncopyable {
   void apply(const ufo::Variables &vars, const std::vector<std::vector<bool>> &flagged,
              ObsFilterData &data, int filterQCflag,
              ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr) const;
+
   const ufo::Variables & requiredVariables() const;
 
   /// \brief Return true if this action modifies QC flags.
@@ -55,6 +56,7 @@ class FilterAction : private boost::noncopyable {
   bool modifiesQCFlags() const;
 
  private:
+  const FilterActionParametersBase &parameters_;
   std::unique_ptr<FilterActionBase> action_;
 };
 

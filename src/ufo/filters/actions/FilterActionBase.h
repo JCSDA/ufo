@@ -17,6 +17,7 @@
 
 #include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
 namespace ioda {
@@ -42,6 +43,9 @@ class FilterActionParametersBase : public oops::Parameters {
   /// via the FilterActionFactory). FilterActionFactory will throw an exception if this parameter is
   /// not provided.
   oops::OptionalParameter<std::string> name{"name", this};
+
+  /// \brief Apply action to the whole record.
+  oops::Parameter<bool> applyToRecord{"apply to whole record", false, this};
 };
 
 // -----------------------------------------------------------------------------
@@ -76,6 +80,16 @@ class FilterActionBase : private boost::noncopyable {
   virtual void apply(const ufo::Variables &vars, const std::vector<std::vector<bool>> &flagged,
                      ObsFilterData &data, int filterQCflag,
                      ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr) const = 0;
+
+  virtual void apply_to_record(const Variables &vars,
+                               const std::vector<std::vector<bool>> &flagged,
+                               ObsFilterData &data, int filterQCflag,
+                               ioda::ObsDataVector<int> &flags,
+                               ioda::ObsDataVector<float> &obserr) const {
+    throw eckit::NotImplemented(
+        "\"apply to whole record\" not implemented for this filter action",
+        Here());
+  }
 
   /// \brief Return the list of variables required by the action.
   ///

@@ -37,12 +37,20 @@ class AcceptObs : public FilterActionBase {
   void apply(const Variables &, const std::vector<std::vector<bool>> &,
              ObsFilterData &, int,
              ioda::ObsDataVector<int> &, ioda::ObsDataVector<float> &) const override;
+  void apply_to_record(const Variables &vars,
+                       const std::vector<std::vector<bool>> &flagged,
+                       ObsFilterData &data, int filterQCflag,
+                       ioda::ObsDataVector<int> &flags,
+                       ioda::ObsDataVector<float> &obserr) const override;
 
   const ufo::Variables & requiredVariables() const override {return allvars_;}
 
   bool modifiesQCFlags() const override { return true; }
 
  private:
+    /// \brief Return true if the observation's current QC flag can be reset to pass.
+    static bool canAcceptAtLocation(int currentFlag);
+
   Variables allvars_;
 };
 

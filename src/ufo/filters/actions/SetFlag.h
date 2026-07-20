@@ -115,10 +115,19 @@ class SetFlag : public FilterActionBase {
              int /*filterQCflag*/,
              ioda::ObsDataVector<int> & flags,
              ioda::ObsDataVector<float> & obserr) const override;
+  void apply_to_record(const Variables &vars,
+                       const std::vector<std::vector<bool>> &flagged,
+                       ObsFilterData &data, int /*filterQCflag*/,
+                       ioda::ObsDataVector<int> &qcFlags,
+                       ioda::ObsDataVector<float> &) const override;
   const ufo::Variables & requiredVariables() const override {return allvars_;}
   bool modifiesQCFlags() const override { return false; }
 
  private:
+  /// \brief Return true if the action is allowed to update the diagnostic flag
+  /// given the observation's current QC flag and the action's "ignore" option.
+  bool canSetOrUnsetAtLocation(int qcFlag) const;
+
   Variables allvars_;
   Parameters_ parameters_;
 };

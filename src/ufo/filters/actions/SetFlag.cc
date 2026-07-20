@@ -8,18 +8,25 @@
 #include "ufo/filters/actions/SetFlag.h"
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/actions/RecordActionUtils.h"
 #include "ufo/filters/DiagnosticFlag.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
 
 namespace ufo {
 
-// -----------------------------------------------------------------------------
-
 namespace {
 
-bool returnFalse(int /*qcflag*/) {
-  return false;
+bool isIgnored(IgnoredObservations ignoredObservations, int qcFlag) {
+  switch (ignoredObservations) {
+    case IgnoredObservations::NONE:
+      return false;
+    case IgnoredObservations::REJECTED:
+      return QCflags::isRejected(qcFlag);
+    case IgnoredObservations::DEFECTIVE:
+      return QCflags::isDefective(qcFlag);
+  }
+  throw std::logic_error("Unhandled IgnoredObservations value");
 }
 
 }  // namespace
@@ -46,6 +53,13 @@ SetFlag<value>::SetFlag(const SetFlagParameters &parameters)
 // -----------------------------------------------------------------------------
 
 template <bool value>
+bool SetFlag<value>::canSetOrUnsetAtLocation(int qcFlag) const {
+  return !isIgnored(parameters_.ignore.value(), qcFlag);
+}
+
+// -----------------------------------------------------------------------------
+
+template <bool value>
 void SetFlag<value>::apply(const Variables &vars,
                            const std::vector<std::vector<bool>> &flagged,
                            ObsFilterData &data,
@@ -59,24 +73,6 @@ void SetFlag<value>::apply(const Variables &vars,
   }
   oops::Log::trace() << "SetFlag apply start" << std::endl;
   const std::string group = "DiagnosticFlags/" + parameters_.flag.value();
-
-  typedef bool (*Predicate)(int);
-  // Pointer to a function taking a QC flag and returning true if observations with this QC flag
-  // should be ignored and false otherwise
-  Predicate isIgnored = nullptr;
-  switch (parameters_.ignore.value()) {
-  case IgnoredObservations::NONE:
-    isIgnored = &returnFalse;
-    break;
-
-  case IgnoredObservations::REJECTED:
-    isIgnored = &QCflags::isRejected;
-    break;
-
-  case IgnoredObservations::DEFECTIVE:
-    isIgnored = &QCflags::isDefective;
-    break;
-  }
 
   const size_t nlocs = data.nlocs();
   std::vector<DiagnosticFlag> diagnosticFlags(nlocs);
@@ -106,7 +102,7 @@ void SetFlag<value>::apply(const Variables &vars,
     for (size_t iobs = 0; iobs < nlocs; ++iobs) {
       // Set/unset the diagnostic flag if the filter has flagged this observation and
       // the action hasn't been told to skip it
-      if (flagged[ifiltervar][iobs] && !isIgnored(filterVarQcFlags[iobs])) {
+      if (flagged[ifiltervar][iobs] && canSetOrUnsetAtLocation(filterVarQcFlags[iobs])) {
         diagnosticFlags[iobs] = value;
         if (parameters_.setObservationReportFlags && diagnosticFlagsObsRep[iobs] != value)
           diagnosticFlagsObsRep[iobs] = value;
@@ -131,6 +127,45 @@ void SetFlag<value>::apply(const Variables &vars,
     }
   }
   oops::Log::trace() << "SetFlag apply complete" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+template <bool value>
+void SetFlag<value>::apply_to_record(
+    const Variables &vars, const std::vector<std::vector<bool>> &flagged,
+    ObsFilterData &data, int /*filterQCflag*/,
+    ioda::ObsDataVector<int> &qcFlags,
+    ioda::ObsDataVector<float> &obserr) const {
+  oops::Log::trace() << "SetFlag apply_to_record start" << std::endl;
+
+  // Get record information: a vector for each record containing its observation
+  // indices.
+  const std::vector<std::vector<std::size_t>> recordLocs =
+      actions::recordLocationsOrThrow(data, value ? "set" : "unset");
+
+  // Pre-compute the index of each filter variable in the full QC flags array.
+  std::vector<std::size_t> allVarIndexes;
+  allVarIndexes.reserve(vars.nvars());
+  for (size_t ifiltervar = 0; ifiltervar < vars.nvars(); ++ifiltervar) {
+    allVarIndexes.push_back(
+        qcFlags.varnames().find(vars.variable(ifiltervar).variable()));
+  }
+
+  // Expand the per-location flagged mask to a whole-record mask.
+  // Record expansion can only be triggered by locations that apply() would
+  // actually update.
+  const auto isEligibleForRecordExpansion = [&](std::size_t ifiltervar, std::size_t jloc) {
+    return canSetOrUnsetAtLocation(qcFlags[allVarIndexes[ifiltervar]][jloc]);
+  };
+  const std::vector<std::vector<bool>> expandedFlagged =
+      actions::expandFlaggedToWholeRecord(flagged, recordLocs, isEligibleForRecordExpansion);
+
+  // Reuse per-observation logic in apply() once the record mask has been
+  // expanded.
+  apply(vars, expandedFlagged, data, 0, qcFlags, obserr);
+
+  oops::Log::trace() << "SetFlag apply_to_record complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

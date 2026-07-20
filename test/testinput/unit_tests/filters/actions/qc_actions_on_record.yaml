@@ -1,0 +1,218 @@
+time window:
+  begin: 2018-01-01T00:00:00Z
+  end: 2019-01-01T00:00:00Z
+
+observations:
+# Test not-implemented error is thrown when "apply to whole record" is used
+# on an action that doesn't support it
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [stationIdentification]
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: variable1
+    action:
+      name: inflate error
+      inflation factor: 2.0
+      apply to whole record: true
+  expectExceptionWithMessage: not implemented for this filter action
+
+# Test error is thrown when "apply to whole record" is used without grouping
+# into records
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  - filter: BlackList
+    filter variables:
+    - name: variable1
+    action:
+      name: reject
+      apply to whole record: true
+  expectExceptionWithMessage: The ObsSpace must have been divided into records
+
+# Test "reject", without "apply to whole record", on grouped observations
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [boolvar1] # = 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 (2 groups)
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  # Reject observations with MetaData/var1 >= 3
+  - filter: BlackList
+    action:
+      name: reject
+    where:
+      - variable:
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        maxvalue: 3
+  passedBenchmark: 7 # 10 original obs - 3 rejected obs.
+
+# As above, but using "apply to whole record"
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [boolvar1] # = 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 (2 groups)
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  # Reject observations with with MetaData/var1 >= 3, but apply rejection to every ob in the record
+  - filter: BlackList
+    action:
+      name: reject
+      apply to whole record: true
+    where:
+      - variable:
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        maxvalue: 3
+  passedBenchmark: 4 # all obs in 1st group (6) are rejected; 2nd group (4) are kept.
+
+# As above, but test "set" with "apply to whole record" yields a flag matching
+# boolvar1
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [boolvar1] # = 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 (2 groups)
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  # Ensure the diagnostic flag exists and is initially false everywhere
+  - filter: Create Diagnostic Flags
+    flags:
+    - name: FlagA
+      initial value: false
+  # Set FlagA when any obs in a record matches the where-clause, applying to the whole record
+  - filter: Perform Action
+    action:
+      name: set
+      flag: FlagA
+      apply to whole record: true
+    where:
+      - variable:
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        maxvalue: 3
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: MetaData/boolvar1
+
+# As above, but test "unset" with "apply to whole record" and "set observation
+# report flags"
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [boolvar1] # = 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 (2 groups)
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  # Ensure the diagnostic flag exists and is initially true everywhere so it can
+  # be unset to match boolvar1
+  - filter: Create Diagnostic Flags
+    create observation report flags: true
+    flags:
+    - name: FlagA
+      initial value: true
+  # Unset FlagA when any obs in a record matches the where-clause, applying to the whole record
+  - filter: Perform Action
+    action:
+      name: unset
+      flag: FlagA
+      apply to whole record: true
+      set observation report flags: true
+    where:
+      - variable:
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        minvalue: 9
+  compareVariables:
+  - test:
+      name: DiagnosticFlags/FlagA/variable1
+    reference:
+      name: MetaData/boolvar1
+  - test:
+      name: DiagnosticFlags/FlagA/observationReport
+    reference:
+      name: MetaData/boolvar1
+
+# Test "accept", without "apply to whole record", on grouped observations
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [boolvar1] # = 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 (2 groups)
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  # Reject all observations
+  - filter: RejectList
+    action:
+      name: reject
+  # Accept observations with MetaData/var1 <= 3
+  - filter: AcceptList
+    action:
+      name: accept
+    where:
+      - variable:
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        maxvalue: 3
+  passedBenchmark: 3 # Only 3 obs (indices 0, 1, 2) are accepted.
+
+# As above, but using "apply to whole record"
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/filters_testdata.nc4
+      obsgrouping:
+          group variables: [boolvar1] # = 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 (2 groups)
+    simulated variables: [variable1]
+  HofX: HofX
+  obs filters:
+  # Reject all observations
+  - filter: RejectList
+    action:
+      name: reject
+  # Accept observations with MetaData/var1 <= 3, but apply acceptance to every ob in the record
+  - filter: AcceptList
+    action:
+      name: accept
+      apply to whole record: true
+    where:
+      - variable:
+          name:  MetaData/var1  # = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        maxvalue: 3
+  passedBenchmark: 6 # Indices 0,1,2 are in group 1 (6 obs); all of group 1 are accepted.

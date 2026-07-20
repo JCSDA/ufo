@@ -8,6 +8,7 @@
 #include "ufo/filters/actions/AcceptObs.h"
 
 #include "ioda/ObsDataVector.h"
+#include "ufo/filters/actions/RecordActionUtils.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
 
@@ -26,6 +27,14 @@ AcceptObs::AcceptObs(const Parameters_ &)
 
 // -----------------------------------------------------------------------------
 
+bool AcceptObs::canAcceptAtLocation(int currentFlag) {
+  return currentFlag != QCflags::missing &&
+         currentFlag != QCflags::preQC &&
+         currentFlag != QCflags::Hfailed;
+}
+
+// -----------------------------------------------------------------------------
+
 void AcceptObs::apply(const Variables & vars,
                       const std::vector<std::vector<bool>> & flagged,
                       ObsFilterData &,
@@ -38,14 +47,51 @@ void AcceptObs::apply(const Variables & vars,
     for (size_t jobs = 0; jobs < flags.nlocs(); ++jobs) {
       if (flagged[ifiltervar][jobs]) {
         int &currentFlag = flags[iallvar][jobs];
-        if (currentFlag != QCflags::missing &&
-            currentFlag != QCflags::preQC &&
-            currentFlag != QCflags::Hfailed)
+        if (canAcceptAtLocation(currentFlag))
           currentFlag = QCflags::pass;
       }
     }
   }
   oops::Log::trace() << "AcceptObs apply complete" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+void AcceptObs::apply_to_record(const Variables &vars,
+                                const std::vector<std::vector<bool>> &flagged,
+                                ObsFilterData &data, int /*filterQCflag*/,
+                                ioda::ObsDataVector<int> &flags,
+                                ioda::ObsDataVector<float> &obserr) const {
+  oops::Log::trace() << "AcceptObs apply_to_record start" << std::endl;
+
+  // Get record information: a vector for each record containing its observation
+  // indices.
+  const std::vector<std::vector<std::size_t>> recordLocs =
+      actions::recordLocationsOrThrow(data, "accept");
+
+  // Pre-compute the index of each filter variable in the full QC flags array.
+  std::vector<std::size_t> allVarIndexes;
+  allVarIndexes.reserve(vars.nvars());
+  for (size_t ifiltervar = 0; ifiltervar < vars.nvars(); ++ifiltervar) {
+    allVarIndexes.push_back(
+        flags.varnames().find(vars.variable(ifiltervar).variable()));
+  }
+
+  // Expand the per-location flagged mask to a whole-record mask.
+  // Record expansion can only be triggered by locations that apply() would
+  // actually accept.
+  const auto isEligibleForRecordExpansion = [&](std::size_t ifiltervar, std::size_t jloc) {
+    return canAcceptAtLocation(flags[allVarIndexes[ifiltervar]][jloc]);
+  };
+  const std::vector<std::vector<bool>> expandedFlagged =
+      actions::expandFlaggedToWholeRecord(flagged, recordLocs, isEligibleForRecordExpansion);
+
+  // Reuse per-observation logic in apply() once the record mask has been
+  // expanded. apply() handles the actual QC flag updates, so we avoid
+  // duplicating that logic here.
+  apply(vars, expandedFlagged, data, 0, flags, obserr);
+
+  oops::Log::trace() << "AcceptObs apply_to_record complete" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

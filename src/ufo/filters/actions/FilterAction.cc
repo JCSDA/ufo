@@ -14,7 +14,7 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 FilterAction::FilterAction(const FilterActionParametersBase & parameters)
-  : action_(FilterActionFactory::create(parameters)) {
+  : parameters_(parameters), action_(FilterActionFactory::create(parameters)) {
   oops::Log::trace() << "FilterAction constructor" << std::endl;
 }
 
@@ -27,7 +27,11 @@ FilterAction::~FilterAction() {}
 void FilterAction::apply(const Variables & vars, const std::vector<std::vector<bool>> & mask,
                          ObsFilterData & data, int filterQCflag,
                          ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & err) const {
-  action_->apply(vars, mask, data, filterQCflag, flags, err);
+  if (parameters_.applyToRecord) {
+    action_->apply_to_record(vars, mask, data, filterQCflag, flags, err);
+  } else {
+    action_->apply(vars, mask, data, filterQCflag, flags, err);
+  }
 }
 
 // -----------------------------------------------------------------------------
