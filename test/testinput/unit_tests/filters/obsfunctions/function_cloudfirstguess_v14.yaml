@@ -9,7 +9,6 @@ observations:
 - obs operator: &ObsOperator
     name: RTTOV
     Absorbers: [Ozone]
-    debug: true
     obs options:
       RTTOV_default_opts: UKMO_PS45
       SatRad_compatibility: true
