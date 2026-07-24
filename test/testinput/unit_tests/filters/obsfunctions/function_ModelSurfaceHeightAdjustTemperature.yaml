@@ -4,8 +4,9 @@ time window:
   bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
+# Test 1: Default behaviour (terrain height, standard lapse rate)
 - obs space:
-    name: Surface
+    name: Surface_default
     obsdatain:
       engine:
         type: H5File
@@ -20,5 +21,98 @@ observations:
       elevation:
         name: MetaData/stationElevation
     variables: [airTemperatureAt2M]
+    tolerance: 1.0e-6
+
+# Test 2: Configurable constant lapse rate
+- obs space:
+    name: Surface_constant_lapse_rate
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
+
+  obs function:
+    name: ObsFunction/ModelHeightAdjustedAirTemperature
+    options:
+      elevation:
+        name: MetaData/stationElevation
+      temperature lapse rate in K/km:
+        scheme: constant
+        value: 5.0
+    variables: [airTemperatureAt2M_constLR5]
+    tolerance: 1.0e-6
+
+# Test 3: Model height using terrain with offset
+- obs space:
+    name: Surface_terrain_with_offset
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
+
+  obs function:
+    name: ObsFunction/ModelHeightAdjustedAirTemperature
+    options:
+      elevation:
+        name: MetaData/stationElevation
+      model height:
+        from: terrain
+        offset in meters: 2.0
+    variables: [airTemperatureAt2M_terrainOffset2m]
+    tolerance: 1.0e-6
+
+# Test 4: Model height using lowest model level
+- obs space:
+    name: Surface_lowest_model_level
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
+
+  obs function:
+    name: ObsFunction/ModelHeightAdjustedAirTemperature
+    options:
+      elevation:
+        name: MetaData/stationElevation
+      model height:
+        from: lowestModelLevel
+    variables: [airTemperatureAt2M_lowestLevel]
+    tolerance: 1.0e-6
+
+# Test 5: Local lapse rate with bounds clamping
+- obs space:
+    name: Surface_local_lapse_rate
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_20210521T1200Z.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_geovals_20210521T1200Z.nc4
+
+  obs function:
+    name: ObsFunction/ModelHeightAdjustedAirTemperature
+    options:
+      elevation:
+        name: MetaData/stationElevation
+      observed variable:
+        name: ObsValue/airTemperatureAt2M
+      temperature lapse rate in K/km:
+        scheme: local
+        level1: 1
+        level2: 5
+        bounds:
+          minvalue: 0.5
+          maxvalue: 10.0
+    variables: [airTemperatureAt2M_localLR]
     tolerance: 1.0e-6
 
