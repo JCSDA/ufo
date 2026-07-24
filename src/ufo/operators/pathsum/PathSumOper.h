@@ -36,48 +36,35 @@ class PathSumOperParameters : public ObsOperatorParametersBase {
 /*!
  * \brief Observation operator for path-integrated GeoVaLs
  *
- * The PathSum operator computes the integral (sum) of a GeoVaL variable along a
- * specified path. Two modes are supported:
+ * The pathsum operator computes a weighted summation of a GeoVaLs variable
+ * along a vertical or slant path. When the weights correspond to path lengths,
+ * the summation provides a numerical approximation to the path integral.
+
+ * Integration weights may be:
+ *   - read from GeoVaLs
+ *   - specified directly in YAML
+ *   - computed internally using trapezoidal integration
  *
- *  - **Vertical integration** (`path type: vertical`, default):
- *    For each observation location (latitude, longitude), integrate the chosen
- *    GeoVaL variable vertically with respect to `height_wrt_surface`.
- *    Integration weights can be provided in one of three ways:
- *      - from a GeoVaL variable (`weight variable`),
- *      - from a YAML vector (`weights`),
- *      - computed as vertical distances between adjacent levels (default).
- *    Optionally, integration can be restricted to a user-defined height range
- *    (`height range: [zmin, zmax]`).
- *
- *  - **Slant integration** (`path type: slant`):
- *    Groups observation points by `sequenceNumber` from MetaData. Each group
- *    defines a slant path through 3D space. Integration is performed along each
- *    path, either using GeoVaL-provided weights or by computing segment lengths
- *    from latitude, longitude, and height coordinates.
- *
- * The final integrated value can be scaled by an optional `scaling factor`
- * (default = 1.0), useful for unit conversion (e.g., converting electron density
- * to Total Electron Content).
+ * The operator also supports:
+ *   - optional height-range restriction
+ *   - optional interpolation to exact height boundaries at two the end points of
+ *     the path, implemented only for vertical paths
  *
  * ### YAML example
  *
  * \code{.yaml}
  * obs operator:
  *   name: PathSum
- *   path type: vertical                  # "slant" option is TO BE IMPLEMENTED
- *   geoval variable: electron_density    # required GeoVaL to integrate
- *   weight variable: weightVarName       # optional, from GeoVaLs
- *   weights: [100, 200, 150]             # optional, from YAML vector, only available for vertical
- *                                        # integration for now
- *   height range: [0, 500000]            # optional, height range above surface (unit is determined
- *                                        # by GeoVals)
- *   scaling factor: 1.0e-07              # optional, default = 1.0 
+ *   path type: vertical                  
+ *   geoval variable: electron_density    # GeoVaLs variable to integrate
+ *   weights: [100, 200, 150]             # optional, weights from YAML
+ *   height range: [0, 500000]            # optional, height range 
+ *                                        # (height unit is determined by GeoVaLs)
+ *   scaling factor: 1.0e-07              # optional, default = 1.0
  * \endcode
  *
  * Output:
- *  - The operator writes integrated values into hofx.
- *  - For slant paths, all points sharing the same `sequenceNumber` receive
- *    the same integrated value.
+ *  - The operator writes integrated values into HofX.
  */
 
  public:
@@ -106,6 +93,15 @@ class PathSumOperParameters : public ObsOperatorParametersBase {
 
   // Optional scaling factor for unit conversion or other purposes
   oops::Parameter<float> scalingFactor{"scaling factor", 1.0, this};
+
+  // Optional GeoVaL variables for slant path coordinates
+  oops::Parameter<std::string> pathPointLatVar{"path point latitude variable",
+                                               "pathPointLatitude", this};
+  oops::Parameter<std::string> pathPointLonVar{"path point longitude variable",
+                                               "pathPointLongitude", this};
+  // Optional GeoVaL variables for vertical or slant path coordinates
+  oops::Parameter<std::string> pathPointHeightVar{"path point height variable",
+                                                  "pathPointHeight", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -135,20 +131,46 @@ class PathSumOper : public ObsOperatorBase {
  private:
   void print(std::ostream &) const override;
 
+  // Geometry container for a path
+  struct PathGeometry {
+    std::vector<float> lat;
+    std::vector<float> lon;
+    std::vector<double> height;
+  };
+
   // Compute 3D segment length
   double computeSegmentLength(const std::array<double, 3> &p1,
                               const std::array<double, 3> &p2) const;
 
-  // Compute trapezoidal weight for a given level based on segment lengths
-  double computeTrapezoidalWeight(std::size_t lev,
-                                  const std::vector<double> &heights,
-                                  float lat, float lon,
-                                  std::size_t nlevs) const;
+  // Compute trapezoidal weight for a given ipoint based on segment lengths
+  double computeTrapezoidalWeight(std::size_t ipoint,
+                                  const PathGeometry &geom) const;
 
   // Interpolate upper/lower boundary if needed
   void interpolateBoundaries(std::vector<double> &heights,
                              std::vector<double> &vals,
                              double hmin, double hmax) const;
+
+    // Build geometry for vertical or slant paths
+  PathGeometry buildGeometry(std::size_t loc,
+                             const GeoVaLs &geovals,
+                             const std::vector<float> &lats,
+                             const std::vector<float> &lons,
+                             bool needHeights,
+                             bool needPathLatLon) const;
+
+  // Build weights
+  void buildWeights(std::vector<double> &wts,
+                    const PathGeometry &geom,
+                    std::size_t loc,
+                    const GeoVaLs &geovals,
+                    bool useHeightRange,
+                    const double hmin, const double hmax,
+                    const std::size_t npoint) const;
+
+  // Generic integration
+  double integrate(const std::vector<double> &vals,
+                   const std::vector<double> &wts) const;
 
   /// Parameters stored
   const ioda::ObsSpace & odb_;
@@ -160,6 +182,9 @@ class PathSumOper : public ObsOperatorBase {
   bool interpolateBoundaries_;
   bool useKmForHeight_;
   float scalingFactor_;
+  boost::optional<oops::Variable> pathPointLatVar_;
+  boost::optional<oops::Variable> pathPointLonVar_;
+  boost::optional<oops::Variable> pathPointHeightVar_;
 
   oops::Variables requiredVars_;
 };

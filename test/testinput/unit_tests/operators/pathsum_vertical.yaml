@@ -9,8 +9,9 @@ observations:
     path type: vertical
     geoval variable: electron_density
     weight variable: pathsum_weights    # weight from geoval
+    path point height variable: height_wrt_surface # geodetic height along the path
     height range: [0, 2000]
-    use km for height: true        # only applicable if using sementLength computation inside code
+    use km for height: true       
     scaling factor: 1.0e-07        # used to unit conversion
   obs space:
     name: GNSSVTEC_readweight
@@ -31,11 +32,12 @@ observations:
   tolerance: 1.0e-04
 - obs operator:
     name: PathSum
-    path type: vertical            # use "slant" for slant path
+    path type: vertical           
     geoval variable: electron_density
     height range: [0, 2000]
-    use km for height: true        # only applicable if using sementLength computation inside code
-    scaling factor: 1.0e-07        # used to unit conversion
+    path point height variable: height_wrt_surface  
+    use km for height: true
+    scaling factor: 1.0e-07      
   obs space:
     name: GNSSVTEC_computeweight
     obsdatain:
@@ -57,7 +59,8 @@ observations:
     name: PathSum
     path type: vertical            
     geoval variable: electron_density
-    weights: [1.0, 2.0, 3.0]         # optional for vertical integration
+    weights: [1.0, 2.0, 3.0]    
+    path point height variable: height_wrt_surface
     height range: [0, 105]      # height range for vertical integration
     scaling factor: 1.0e-04
   obs space:
@@ -81,8 +84,9 @@ observations:
     name: PathSum
     path type: vertical
     geoval variable: electron_density
-    weight variable: weights    # weight from geoval
-    height range: [0, 105]      # height range for vertical integration
+    weight variable: weights  
+    path point height variable: height_wrt_surface
+    height range: [0, 105]   
     scaling factor: 1.0e-04
   obs space:
     name: PathSum_readweight
@@ -105,8 +109,9 @@ observations:
     name: PathSum
     path type: vertical
     geoval variable: electron_density
-    weight variable: weights    # weight from geoval
-    height range: [0, 105]      # height range for vertical integration
+    weight variable: weights 
+    path point height variable: height_wrt_surface
+    height range: [0, 105]   
     interpolate boundaries: true
     scaling factor: 1.0e-04
   obs space:

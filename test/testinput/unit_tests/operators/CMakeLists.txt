@@ -1263,10 +1263,19 @@ ufo_add_test( NAME    opr_ionosonde
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    opr_pathsum
+ufo_add_test( NAME    opr_pathsum_vertical
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pathsum.yaml"
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pathsum_vertical.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    opr_pathsum_slant
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/pathsum_slant.yaml"
               MPI     1
               LIBS    ufo
               LABELS  operators

@@ -45,7 +45,10 @@ PathSumOper::PathSumOper(const ioda::ObsSpace & odb,
                  *params.heightRange.value() : std::vector<double>()),
     interpolateBoundaries_(params.interpolateBoundaries),
     useKmForHeight_(params.useKmForHeight.value()),
-    scalingFactor_(params.scalingFactor)
+    scalingFactor_(params.scalingFactor),
+    pathPointLatVar_(oops::Variable(params.pathPointLatVar.value())),
+    pathPointLonVar_(oops::Variable(params.pathPointLonVar.value())),
+    pathPointHeightVar_(oops::Variable(params.pathPointHeightVar.value()))
   {
     std::string ptype = params.pathType.value();
     std::transform(ptype.begin(), ptype.end(), ptype.begin(), ::tolower);
@@ -57,10 +60,16 @@ PathSumOper::PathSumOper(const ioda::ObsSpace & odb,
       throw eckit::BadParameter(
         "Unknown path type: " + ptype, Here());
     }
+
     requiredVars_ += oops::Variables(std::vector<oops::Variable>{geovalVar_});
-    if (!weightsVar_ || !heightRange_.empty()) {
-      requiredVars_ += oops::Variables(std::vector<oops::Variable>{
-                       oops::Variable("height_wrt_surface")});
+
+    if (pathType_ == PathType::SLANT && !weightsVar_ && weights_.empty()) {
+      requiredVars_ += oops::Variables(std::vector<oops::Variable>{*pathPointLatVar_});
+      requiredVars_ += oops::Variables(std::vector<oops::Variable>{*pathPointLonVar_});
+    }
+    if ((!weightsVar_ && weights_.empty()) || !heightRange_.empty() ||
+         interpolateBoundaries_) {
+      requiredVars_ += oops::Variables(std::vector<oops::Variable>{*pathPointHeightVar_});
     }
 
     // If weights come from GeoVaLs, require them
@@ -79,10 +88,11 @@ PathSumOper::~PathSumOper() {
 // -----------------------------------------------------------------------------
 /// Segement length between two points is returned in [m] by default
 /// or [km] if useKmForHeight is true
+/// NOTE: Assume the latitudes from geovals are geodetic latitudes
 double PathSumOper::computeSegmentLength(const std::array<double, 3> &p1,
                                          const std::array<double, 3> &p2) const {
   // Apply scaling factor if input heights are in km
-  double scale = useKmForHeight_ ? 0.001 : 1.0;                // convert m->km if needed
+  double scale = useKmForHeight_ ? 0.001 : 1.0;
 
   // WGS-84 ellipsoid parameters
   const double a_scaled = Constants::semi_major_axis * scale;   // semi-major axis of Earth
@@ -92,11 +102,10 @@ double PathSumOper::computeSegmentLength(const std::array<double, 3> &p1,
   auto geodeticToECEF = [&](const std::array<double, 3>& p) -> std::array<double, 3> {
     double lat = p[0] * M_PI / 180.0;  // geodetic latitude
     double lon = p[1] * M_PI / 180.0;  // geodetic longitude
-    double height   = p[2];            // height wrt Earth surface
+    double height   = p[2];            // geodetic height
 
     double radius = a_scaled / std::sqrt(1.0 - ecc2 * std::sin(lat)
                                                * std::sin(lat));  // radius of curvature
-
     double x = (radius + height) * std::cos(lat) * std::cos(lon);
     double y = (radius + height) * std::cos(lat) * std::sin(lon);
     double z = (radius * (1.0 - ecc2) + height) * std::sin(lat);
@@ -135,31 +144,29 @@ inline bool isValidValue(double v) {
 
 //------------------------------------------------------------------------------
 /// TrapezoidalWeight = 0.5 * (segment ending at lev) + 0.5 * (segment starting at lev)
-/// Assumes heights are ordered monotonicly, either increasing or decreasing
-double PathSumOper::computeTrapezoidalWeight(std::size_t lev,
-                                             const std::vector<double> &heights,
-                                             float lat, float lon,
-                                             std::size_t nlevs) const {
+double PathSumOper::computeTrapezoidalWeight(std::size_t ipoint,
+                                             const PathGeometry &geom) const {
   const double missing = util::missingValue<double>();
+  const std::size_t npoint = geom.height.size();
 
-  if (heights.empty() || lev >= nlevs) {
-    return missing;
-  }
+  if (npoint == 0 || ipoint >= npoint) return missing;
 
   double prevSegmentLength = missing;
   double nextSegmentLength = missing;
 
-  // Segment ending at lev (from lev-1 to lev)
-  if (lev > 0 && isValidValue(heights[lev-1]) && isValidValue(heights[lev])) {
-    std::array<double, 3> p0 = {lat, lon, heights[lev-1]};
-    std::array<double, 3> p1 = {lat, lon, heights[lev]};
+  // Segment ending at ipoint (from ipoint-1 to ipoint)
+  if (ipoint > 0 && isValidValue(geom.height[ipoint-1]) &&
+                    isValidValue(geom.height[ipoint])) {
+    std::array<double, 3> p0 = {geom.lat[ipoint-1], geom.lon[ipoint-1], geom.height[ipoint-1]};
+    std::array<double, 3> p1 = {geom.lat[ipoint], geom.lon[ipoint], geom.height[ipoint]};
     prevSegmentLength = computeSegmentLength(p0, p1);
   }
 
-  // Segment starting at lev (from lev to lev+1)
-  if (lev < nlevs - 1 && isValidValue(heights[lev]) && isValidValue(heights[lev+1])) {
-    std::array<double, 3> p0 = {lat, lon, heights[lev]};
-    std::array<double, 3> p1 = {lat, lon, heights[lev+1]};
+  // Segment starting at ipoint (from ipoint to ipoint+1)
+  if (ipoint < npoint - 1 && isValidValue(geom.height[ipoint]) &&
+                              isValidValue(geom.height[ipoint+1])) {
+    std::array<double, 3> p0 = {geom.lat[ipoint], geom.lon[ipoint], geom.height[ipoint]};
+    std::array<double, 3> p1 = {geom.lat[ipoint+1], geom.lon[ipoint+1], geom.height[ipoint+1]};
     nextSegmentLength = computeSegmentLength(p0, p1);
   }
 
@@ -167,9 +174,9 @@ double PathSumOper::computeTrapezoidalWeight(std::size_t lev,
   if (isValidValue(prevSegmentLength) && isValidValue(nextSegmentLength)) {
     return 0.5 * prevSegmentLength + 0.5 * nextSegmentLength;
   } else if (isValidValue(nextSegmentLength)) {
-    return 0.5 * nextSegmentLength;  // First level: only next segment
+    return 0.5 * nextSegmentLength;  // First ipoint: only next segment
   } else if (isValidValue(prevSegmentLength)) {
-    return 0.5 * prevSegmentLength;  // Last level: only prev segment
+    return 0.5 * prevSegmentLength;  // Last ipoint: only prev segment
   }
 
   return missing;
@@ -210,7 +217,7 @@ void PathSumOper::interpolateBoundaries(std::vector<double> &heights,
                                         double hmin, double hmax) const
 {
   if (heights.size() < 2) {
-    oops::Log::warning() << "pathSumOper::interpolateBoundaries: " <<
+    oops::Log::warning() << "Warning:pathSumOper::interpolateBoundaries: " <<
           "interpolateBoundaries called with less than 2 heights" << std::endl;
     return;
   }
@@ -219,7 +226,7 @@ void PathSumOper::interpolateBoundaries(std::vector<double> &heights,
   HeightOrder order = detectHeightOrder(heights);
   if (order == HeightOrder::UNKNOWN) {
     oops::Log::warning()
-          << "pathSumOper::interpolateBoundaries: "
+          << "Warning:pathSumOper::interpolateBoundaries: "
           << "Height order could not be determined (missing or non-monotonic heights). "
           << "Boundary interpolation will be skipped for such profiles. "
           << std::endl;
@@ -280,135 +287,176 @@ void PathSumOper::interpolateBoundaries(std::vector<double> &heights,
   }
 
   if (lowerNeeded && !lowerInterpolated)
-    oops::Log::debug() << "pathSumOper::interpolateBoundaries: "
+    oops::Log::warning() << "pathSumOper::interpolateBoundaries: "
                        << "Could not interpolate lower boundary at hmin=" << hmin << std::endl;
   if (upperNeeded && !upperInterpolated)
-    oops::Log::debug() << "pathSumOper::interpolateBoundaries: "
+    oops::Log::warning() << "pathSumOper::interpolateBoundaries: "
                        << "Could not interpolate upper boundary at hmax=" << hmax << std::endl;
+
+  // ---- mask values outside height range ----
+  const double missing = util::missingValue<double>();
+
+  for (std::size_t lev = 0; lev < heights.size(); ++lev) {
+    if (!isValidValue(heights[lev]) ||
+        heights[lev] < hmin ||
+        heights[lev] > hmax) {
+      vals[lev] = missing;
+    }
+  }
 }
 
+// -----------------------------------------------------------------------------
+PathSumOper::PathGeometry
+PathSumOper::buildGeometry(std::size_t loc,
+                           const GeoVaLs & geovals,
+                           const std::vector<float> &lats,
+                           const std::vector<float> &lons,
+                           bool needHeights,
+                           bool needPathLatLon) const {
+  PathGeometry geom;
+
+  const std::size_t npoints = geovals.nlevs(geovalVar_);
+  const float missingValueFloat = util::missingValue<float>();
+  const double missingValueDouble = util::missingValue<double>();
+
+  geom.lat.assign(npoints, missingValueFloat);
+  geom.lon.assign(npoints, missingValueFloat);
+  geom.height.assign(npoints, missingValueDouble);
+
+  if (needHeights) {
+    try {
+      geovals.getAtLocation(geom.height, oops::Variable{*pathPointHeightVar_}, loc);
+    } catch (const std::exception &error) {
+      oops::Log::warning()
+        << "Warning:PathSumOper: failed to read " << *pathPointHeightVar_
+        << " at loc=" << loc << " : " << error.what() << std::endl;
+      throw;
+    }
+  }
+
+  if (pathType_ == PathType::VERTICAL) {
+    geom.lat.assign(npoints, lats[loc]);
+    geom.lon.assign(npoints, lons[loc]);
+  } else {
+    if (needPathLatLon) {
+      geovals.getAtLocation(geom.lat, oops::Variable{*pathPointLatVar_}, loc);
+      geovals.getAtLocation(geom.lon, oops::Variable{*pathPointLonVar_}, loc);
+    }
+  }
+
+  return geom;
+}
+
+// -----------------------------------------------------------------------------
+void PathSumOper::buildWeights(std::vector<double> &wts,
+                               const PathGeometry &geom,
+                               std::size_t loc,
+                               const GeoVaLs &geovals,
+                               bool useHeightRange,
+                               const double hmin, const double hmax,
+                               const std::size_t npoint) const {
+  const double missing = util::missingValue<double>();
+  std::vector<double> wtsValue(npoint, missing);
+
+  if (weightsVar_) {
+    geovals.getAtLocation(wtsValue, *weightsVar_, loc);
+    oops::Log::trace() << "PathSumOper: using weights from GeoVaLs" << std::endl;
+  } else if (!weights_.empty()) {
+    std::size_t ncopy = std::min(weights_.size(), npoint);
+    std::copy(weights_.begin(), weights_.begin()+ncopy, wtsValue.begin());
+    oops::Log::trace() << "PathSumOper: using weights from YAML" << std::endl;
+  } else {
+    oops::Log::trace() << "PathSumOper: using operator-computed weights" << std::endl;
+  }
+
+  for (std::size_t ipoint = 0; ipoint < npoint; ++ipoint) {
+    bool withinHeightRange = !useHeightRange ||
+                             (!geom.height.empty() && isValidValue(geom.height[ipoint]) &&
+                             geom.height[ipoint] >= hmin && geom.height[ipoint] <= hmax);
+
+    if (!withinHeightRange) continue;
+
+    if (weightsVar_ || !weights_.empty()) {
+      wts[ipoint]= wtsValue[ipoint];
+    } else {
+      wts[ipoint] = computeTrapezoidalWeight(ipoint, geom);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+double PathSumOper::integrate(const std::vector<double> &vals,
+                              const std::vector<double> &wts) const {
+  const double missing = util::missingValue<double>();
+
+  double sum = 0.0;
+  bool anyValid = false;
+
+  for (std::size_t ipoint = 0; ipoint < vals.size(); ++ipoint) {
+    if (!isValidValue(vals[ipoint]) || !isValidValue(wts[ipoint])) continue;
+    sum += vals[ipoint] * wts[ipoint];
+    anyValid = true;
+  }
+
+  return anyValid ? sum : missing;
+}
 // -----------------------------------------------------------------------------
 void PathSumOper::simulateObs(const GeoVaLs & geovals,
                               ioda::ObsVector & hofx,
                               ObsDiagnostics &, const QCFlags_t &) const {
-// PathSum: Integration of a geoval variable along a vertical or any slant path
-// defined by latitude, longitude and height
-
-  oops::Log::trace() << "PathSumOper::simulateObs start" << std::endl;
-
-  const std::size_t nlocs = geovals.nlocs();
-  const std::size_t nlevs = geovals.nlevs(geovalVar_);
-  ASSERT(nlocs == hofx.nlocs());
-  ASSERT(nlocs == odb_.nlocs());
-
+  const std::size_t nlocs = geovals.nlocs();  // corresponds to observation locations
+  const std::size_t npoints = geovals.nlevs(geovalVar_);   // vertical levels or slant path points
   const double missing = util::missingValue<double>();
-
-  // Lat/lon from ODB only needed if computing weights(wts)
-  std::vector<float> lats, lons;
-  if (!weightsVar_) {
-    odb_.get_db("MetaData", "latitude", lats);
-    odb_.get_db("MetaData", "longitude", lons);
-    ASSERT(lats.size() == nlocs && lons.size() == nlocs);
-  }
-
-  if (weightsVar_) {
-    oops::Log::debug() << "PathSumOper: using weights from GeoVaLs" << std::endl;
-  } else if (!weights_.empty()) {
-    oops::Log::debug() << "PathSumOper: using weights from YAML" << std::endl;
-  } else {
-    oops::Log::debug() << "PathSumOper: using operator-computed weights" << std::endl;
-  }
-
-  // Apply height range restriction and interpolate boundaries if needed
   const bool useHeightRange = !heightRange_.empty();
+
+  std::vector<float> lats, lons;
+  odb_.get_db("MetaData", "latitude", lats);
+  odb_.get_db("MetaData", "longitude", lons);
+
+  ASSERT(lats.size() == nlocs);
+  ASSERT(lons.size() == nlocs);
+
+  // Decide if heights are required
+  const bool needHeights = (!weightsVar_ && weights_.empty()) ||
+                           useHeightRange || interpolateBoundaries_;
+
+  // Decide if path point Lat/Lon are required
+  const bool needPathLatLon = (pathType_ == PathType::SLANT && !weightsVar_ && weights_.empty());
+
+  // Height range is defined via YAML or infinite
   const double hmin = useHeightRange ? heightRange_[0] : std::numeric_limits<double>::lowest();
   const double hmax = useHeightRange ? heightRange_[1] : std::numeric_limits<double>::max();
 
-  // Vertical integration
-  if (pathType_ == PathType::VERTICAL) {
-    // Loop over locations
-    for (std::size_t loc = 0; loc < nlocs; ++loc) {
-      hofx[loc] = missing;
+  for (std::size_t loc = 0; loc < nlocs; ++loc) {
+    hofx[loc] = missing;
 
-      // Extract profile for main variable
-      std::vector<double> vals(nlevs);
-      geovals.getAtLocation(vals, geovalVar_, loc);
+    // Build unified geometry for both vertical and slant paths
+    PathGeometry geom = buildGeometry(loc, geovals, lats, lons, needHeights, needPathLatLon);
 
-      // Extract weights for integration computation if WeightsVar is defined in yaml
-      std::vector<double> wts(nlevs, missing);  // default = missing, dimension nlevs
-      // weights from geovals
-      if (weightsVar_) {
-        geovals.getAtLocation(wts, *weightsVar_, loc);
-      // weights from yaml
-      } else if (!weights_.empty()) {
-        const std::size_t ncopy_size = std::min(weights_.size(), nlevs);
-        std::copy(weights_.begin(), weights_.begin() + ncopy_size, wts.begin());
+    // Get geoval values
+    std::vector<double> vals(npoints);
+    geovals.getAtLocation(vals, geovalVar_, loc);
+
+    if (useHeightRange && interpolateBoundaries_) {
+      if (pathType_ == PathType::VERTICAL) {
+        interpolateBoundaries(geom.height, vals, hmin, hmax);
+      } else {
+        oops::Log::warning() << "Warning:PathSumOper:: interpolateBoundaries only implemented "
+                           << "for path type: vertical. Ignored the yaml option." << std::endl;
       }
-
-      // Get vertical coordinate if no weights are defined or height range is defined in yaml
-      // or interpolateBoundaries is true
-      const bool needHeights = useHeightRange || interpolateBoundaries_ ||
-                               (!weightsVar_ && weights_.empty());
-      std::vector<double> heights(nlevs);
-      if (needHeights) {
-        geovals.getAtLocation(heights, oops::Variable{"height_wrt_surface"}, loc);
-
-        if (heights.empty()) {
-          oops::Log::debug() << "pathSumOper: height_wrt_surface is empty, PathSum skipped at loc"
-                            << loc << std::endl;
-            continue;  // safety check
-        }
-      }
-
-      // Interpolate boundaries
-      if (useHeightRange && interpolateBoundaries_ && heights.size() > 1) {
-          interpolateBoundaries(heights, vals, hmin, hmax);
-      }
-
-      // Prepare for vertical path integration
-      // Loop over levels (nlevs dimension, same as vals)
-      double sum = 0.0;
-      bool anyValid = false;
-
-      for (std::size_t lev = 0; lev < nlevs; ++lev) {
-        // Check if this level is within height range (if defined)
-        bool withinHeightRange = !useHeightRange ||
-                                (!heights.empty() && isValidValue(heights[lev]) &&
-                                 heights[lev] >= hmin && heights[lev] <= hmax);
-
-        if (!withinHeightRange || !isValidValue(vals[lev])) continue;
-
-        // ---- Determine weight (wt) depending on configuration ----
-        double wt = missing;
-        if (lev < wts.size() && isValidValue(wts[lev])) {
-          wt = wts[lev];
-        } else {
-          wt = computeTrapezoidalWeight(lev, heights, lats[loc], lons[loc], nlevs);
-        }
-
-        // Compute sum using weight * value
-        if (!isValidValue(wt)) continue;
-
-        sum += wt * vals[lev];
-        anyValid = true;
-      }
-
-      // Store result in hofx and convert to certain unit if needed. scalingFactor default is 1.0
-      if (anyValid) hofx[loc] = sum * scalingFactor_;
     }
+
+    // Build weights
+    std::vector<double> wts(npoints, missing);
+    buildWeights(wts, geom, loc, geovals, useHeightRange, hmin, hmax, npoints);
+
+    // Integrate
+    double integral = integrate(vals, wts);
+
+    hofx[loc] = isValidValue(integral)
+                ? integral * scalingFactor_
+                : missing;
   }
-
-  // Slant path integration
-  if (pathType_ == PathType::SLANT) {
-      oops::Log::warning() << "PathSumOper: "
-                           << "Slant path computation is currently a placeholder "
-                           << "and will be implemented in a future update. "
-                           << "Exiting now to prevent use of incomplete results." << std::endl;
-
-      throw eckit::NotImplemented
-                ("Slant path computation not yet implemented in PathSumOper.", Here());
-  }  // End of vertical or slant path
-
   oops::Log::trace() << "PathSumOper::simulateObs done" << std::endl;
 }
 
