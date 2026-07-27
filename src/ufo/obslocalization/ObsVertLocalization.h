@@ -22,6 +22,8 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
+#include "oops/generic/gc99.h"
+#include "oops/generic/soar.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/obslocalization/ObsLocalizationBase.h"
@@ -40,6 +42,11 @@ class ObsVertLocalization: public ObsLocalizationBase<ITERATOR> {
   /// The lengthscale from ObsVertLocParameters is used.
   void computeLocalization(const ITERATOR &,
                            ioda::ObsVector & locvector) const override;
+
+  /// Compute localization between two points using the z-coordinate as the
+  /// vertical coordinate. Returns a value between 0.0 and 1.0.
+  double computeLocalization(const eckit::geometry::Point3 & p1,
+                             const eckit::geometry::Point3 & p2) const override;
 
  protected:
   struct LocalObs {
@@ -86,6 +93,17 @@ ObsVertLocalization<ITERATOR>::ObsVertLocalization(const eckit::Configuration & 
   : options_()
 {
   options_.validateAndDeserialize(config);
+
+  // Reject invalid parameters up front so both compute paths
+  // (Point3/Point3 and iterator-based) can rely on valid values.
+  if (options_.lengthscale <= 0.0) {
+    throw eckit::BadParameter("vertical lengthscale parameter should be > 0.0");
+  }
+  if (options_.localizationFunction.value().compare("SOAR") == 0 &&
+      options_.SOARexpDecayH == util::missingValue<double>()) {
+    throw eckit::BadParameter("soar decay parameter is not specified");
+  }
+
   // check that this distribution supports local obs space
   // TODO(travis) this has been moved to computeLocalization as a quick fix for a bug.
   distName_ = obsspace.distribution()->name();
@@ -123,10 +141,49 @@ void ObsVertLocalization<ITERATOR>::computeLocalization(const ITERATOR & i,
 // -----------------------------------------------------------------------------
 
 template<typename ITERATOR>
+double ObsVertLocalization<ITERATOR>::computeLocalization(
+      const eckit::geometry::Point3 & p1,
+      const eckit::geometry::Point3 & p2) const {
+  oops::Log::trace() << "ObsVertLocalization::computeLocalization(Point3)" << std::endl;
+
+  // Extract vertical coordinates from Point3 z-component
+  double vCoord1 = p1[2];
+  double vCoord2 = p2[2];
+
+  // Apply log transform if configured
+  if (options_.logTransform.value()) {
+    if (vCoord1 == 0) { vCoord1 = FLT_EPSILON; }
+    if (vCoord2 == 0) { vCoord2 = FLT_EPSILON; }
+    vCoord1 = log(vCoord1);
+    vCoord2 = log(vCoord2);
+  }
+
+  double distance = options_.distance(vCoord1, vCoord2);
+  double ls = options_.lengthscale;
+
+  if (distance >= ls) {
+    return 0.0;
+  }
+
+  if (options_.localizationFunction.value().compare("Box Car") == 0) {
+    return 1.0;
+  } else if (options_.localizationFunction.value().compare("Gaspari Cohn") == 0) {
+    return oops::gc99(distance / ls);
+  } else if (options_.localizationFunction.value().compare("SOAR") == 0) {
+    return oops::soar(distance * options_.SOARexpDecayH);
+  } else {
+    throw eckit::BadParameter("Vertical correlation function not recognized "
+                              + options_.localizationFunction.value());
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+template<typename ITERATOR>
 void ObsVertLocalization<ITERATOR>::localizeLocalObs(const ITERATOR & i,
                                               ioda::ObsVector & locvector,
                                               const LocalObs & localobs) const {
-  oops::Log::trace() << "ObsVertLocalization::computeLocalization(lengthscale)" << std::endl;
+  oops::Log::trace() << "ObsVertLocalization::localizeLocalObs" << std::endl;
 
   const double missing = util::missingValue<double>();
   const size_t nvars = locvector.nvars();
@@ -154,10 +211,6 @@ void ObsVertLocalization<ITERATOR>::localizeLocalObs(const ITERATOR & i,
       }
   } else if (options_.localizationFunction.value().compare("SOAR") == 0) {
       const double SOARexpDecayH = options_.SOARexpDecayH;
-      if (SOARexpDecayH == util::missingValue<double>()) {
-        std::string message = "soar horizontal decay parameter is not specified";
-        throw eckit::BadParameter(message);
-      }
       for (size_t jlocal = 0; jlocal < nlocal; ++jlocal) {
         double locFactor = oops::soar(localobs.distance[jlocal]*SOARexpDecayH);
         for (size_t jvar = 0; jvar < nvars; ++jvar) {
@@ -182,10 +235,6 @@ const typename ObsVertLocalization<ITERATOR>::LocalObs
 ObsVertLocalization<ITERATOR>::getLocalObs(const ITERATOR & i,
                                     double lengthscale) const {
   oops::Log::trace() << "ObsVertLocalization::getLocalObs" << std::endl;
-
-  if ( lengthscale <= 0.0 ) {
-    throw eckit::BadParameter("lengthscale parameter should be >= 0.0");
-  }
 
   // check that this distribution supports local obs space
   // TODO(travis) this should be in the constructor, but currently

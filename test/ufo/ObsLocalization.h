@@ -86,6 +86,67 @@ void testObsLocalizationPoint3() {
 
 // -----------------------------------------------------------------------------
 
+/// \brief Tests computeLocalization(p1, p2) using Point3 values produced by
+/// ObsIterator (rather than hand-built). Verifies the integration of
+/// ioda's `iterator vertical coordinate` -> Point3.z -> ObsVertLocalization.
+void testObsLocalizationPoint3FromIterator() {
+  typedef ioda::ObsIterator Iterator_;
+
+  instantiateObsLocFactory<Iterator_>();
+
+  const eckit::Configuration & conf = ::test::TestEnvironment::config();
+
+  // The "iterator obs localizations" section is optional so this test header
+  // can be reused by YAML drivers that only exercise the Point3/Point3 path.
+  if (!conf.has("iterator obs localizations")) {
+    oops::Log::info() << "Skipping iterator-based obs localization tests "
+                         "(no 'iterator obs localizations' section)" << std::endl;
+    return;
+  }
+
+  const util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
+  const eckit::LocalConfiguration obsconf(conf, "obs space");
+  ioda::ObsSpace obsspace(obsconf, oops::mpi::world(), timeWindow, oops::mpi::myself());
+
+  // Collect Point3 values from ObsIterator into an indexable vector.
+  std::vector<eckit::geometry::Point3> points;
+  for (Iterator_ it = obsspace.begin(); it != obsspace.end(); ++it) {
+    points.push_back(*it);
+  }
+
+  const std::vector<eckit::LocalConfiguration> locConfs =
+      conf.getSubConfigurations("iterator obs localizations");
+
+  for (const auto & locConf : locConfs) {
+    const eckit::LocalConfiguration locSubConf(locConf, "localization");
+    const std::string name = locSubConf.getString("localization method");
+    oops::Log::info() << "Testing iterator-based obs localization: " << name << std::endl;
+
+    ObsLocalization<Iterator_> obsloc(locSubConf, obsspace);
+
+    const std::vector<eckit::LocalConfiguration> pairConfs =
+        locConf.getSubConfigurations("iterator pair tests");
+
+    for (const auto & pairConf : pairConfs) {
+      const size_t i1 = pairConf.getInt("i1");
+      const size_t i2 = pairConf.getInt("i2");
+      ASSERT(i1 < points.size());
+      ASSERT(i2 < points.size());
+
+      const double tol = pairConf.getDouble("tolerance");
+      const double ref = pairConf.getDouble("reference value");
+      const double result = obsloc.computeLocalization(points[i1], points[i2]);
+
+      oops::Log::info() << "  iter[" << i1 << "]=" << points[i1]
+                        << " iter[" << i2 << "]=" << points[i2]
+                        << " result=" << result << " ref=" << ref << std::endl;
+      EXPECT(std::abs(result - ref) <= tol);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+
 class ObsLocalization : public oops::Test {
  public:
   using oops::Test::Test;
@@ -99,6 +160,9 @@ class ObsLocalization : public oops::Test {
 
     ts.emplace_back(CASE("ufo/ObsLocalization/testObsLocalizationPoint3")
       { testObsLocalizationPoint3(); });
+
+    ts.emplace_back(CASE("ufo/ObsLocalization/testObsLocalizationPoint3FromIterator")
+      { testObsLocalizationPoint3FromIterator(); });
   }
 
   void clear() const override {}

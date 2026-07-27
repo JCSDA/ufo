@@ -5,6 +5,7 @@ time window:
 obs space:
   name: simple obs
   simulated variables: [windEastward]
+  iterator vertical coordinate: height
   obsdatain:
     engine:
       type: GenList
@@ -13,9 +14,11 @@ obs space:
       dateTimes: [3600, 3600, 3600]
       epoch: "seconds since 2000-01-01T00:00:00Z"
       obs errors: [1.0]
+      vert coord type: height
+      vert coords: [100.0, 200.0, 300.0]
 
 obs localizations:
-  # Box car: returns 1.0 if distance <= lengthscale, 0.0 otherwise
+  # Box car: returns 1.0 if distance < lengthscale, 0.0 otherwise
 - localization:
     localization method: Horizontal Box car
     lengthscale: 1000000.0   # 1000 km
@@ -75,4 +78,134 @@ obs localizations:
   - p1: [0.0, 0.0, 0.0]
     p2: [5.0, 0.0, 0.0]
     reference value: 0.89237
+    tolerance: 1.0e-3
+
+  # Vertical Box Car: returns 1.0 if |z1-z2| < lengthscale, 0.0 otherwise
+- localization:
+    localization method: Vertical localization
+    vertical lengthscale: 1000.0
+    localization function: Box Car
+    assign constant vertical coordinate to obs: true
+    constant vertical coordinate value: 0.0
+  point pair tests:
+    # Same height -> 0 distance -> 1.0
+  - p1: [0.0, 0.0, 500.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # 500m apart, inside 1000m -> 1.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # 1500m apart, outside 1000m -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 1500.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+  # Vertical Gaspari-Cohn: gc99 taper with vertical distance
+- localization:
+    localization method: Vertical localization
+    vertical lengthscale: 1000.0
+    localization function: Gaspari Cohn
+    assign constant vertical coordinate to obs: true
+    constant vertical coordinate value: 0.0
+  point pair tests:
+    # Same height -> gc99(0) = 1.0
+  - p1: [0.0, 0.0, 500.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # 500m / 1000m = 0.5 -> gc99(0.5) = 0.2083333
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 0.2083333
+    tolerance: 1.0e-6
+    # 1500m -> outside -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 1500.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+  # Vertical SOAR: (1+x)*exp(-x) taper with vertical distance
+- localization:
+    localization method: Vertical localization
+    vertical lengthscale: 1000.0
+    localization function: SOAR
+    soar decay: 0.002
+    assign constant vertical coordinate to obs: true
+    constant vertical coordinate value: 0.0
+  point pair tests:
+    # Same height -> soar(0) = 1.0
+  - p1: [0.0, 0.0, 500.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # 500m * 0.002 = 1.0 -> soar(1.0) = 2*exp(-1) ~= 0.73576
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 0.73576
+    tolerance: 1.0e-3
+    # 1500m -> outside -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 1500.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+  # Vertical GC99 with log transform (pressure coordinates)
+- localization:
+    localization method: Vertical localization
+    vertical lengthscale: 2.0
+    localization function: Gaspari Cohn
+    apply log transformation: true
+    assign constant vertical coordinate to obs: true
+    constant vertical coordinate value: 0.0
+  point pair tests:
+    # p1=1000 hPa, p2=500 hPa: |log(1000)-log(500)| = log(2) ~= 0.693
+    # gc99(0.693/2.0) = gc99(0.3466) ~= 0.48280
+  - p1: [0.0, 0.0, 1000.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 0.48280
+    tolerance: 1.0e-3
+    # p1=1000, p2=10: |log(1000)-log(10)| = log(100) ~= 4.605 > 2.0 -> 0.0
+  - p1: [0.0, 0.0, 1000.0]
+    p2: [0.0, 0.0, 10.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+# Tests that drive computeLocalization(p1, p2) with Point3 values produced
+# by ObsIterator (rather than hand-built). Verifies the integration of
+# ioda's `iterator vertical coordinate` -> Point3.z -> ObsVertLocalization.
+# Obs locations are at z=[100,200,300] (see obs space MetaData/height above).
+iterator obs localizations:
+- localization:
+    localization method: Vertical localization
+    vertical lengthscale: 150.0
+    localization function: Box Car
+    assign constant vertical coordinate to obs: true
+    constant vertical coordinate value: 0.0
+  iterator pair tests:
+    # i=0 (z=100), i=1 (z=200): |dz|=100 < 150 -> 1.0
+  - i1: 0
+    i2: 1
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # i=0 (z=100), i=2 (z=300): |dz|=200 > 150 -> 0.0
+  - i1: 0
+    i2: 2
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+- localization:
+    localization method: Vertical localization
+    vertical lengthscale: 1000.0
+    localization function: Gaspari Cohn
+    assign constant vertical coordinate to obs: true
+    constant vertical coordinate value: 0.0
+  iterator pair tests:
+    # i=0 (z=100), i=1 (z=200): gc99(100/1000) = gc99(0.1) ~= 0.93905
+  - i1: 0
+    i2: 1
+    reference value: 0.93905
     tolerance: 1.0e-3
