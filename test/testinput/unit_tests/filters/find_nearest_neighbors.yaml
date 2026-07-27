@@ -1,0 +1,323 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+  - obs space:
+      name: Test Find Nearest Neighbors
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables: # need as many as nearest neighbors output variable and number to find
+          - name: DerivedMetaData/firstNearestSynopTempDistance
+          - name: DerivedMetaData/secondNearestSynopTempDistance
+          - name: DerivedMetaData/thirdNearestSynopTempDistance
+        output assignment: MetaData/stationIdentification
+        output variables: # need as many as distance output variables and number to find
+          - name: DerivedMetaData/firstNearestSynopTempStatid
+          - name: DerivedMetaData/secondNearestSynopTempStatid
+          - name: DerivedMetaData/thirdNearestSynopTempStatid
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    compareVariables:
+      - test:
+          name: DerivedMetaData/firstNearestSynopTempStatid
+        reference:
+          name: TestReference/firstNearestStationID
+      - test:
+          name: DerivedMetaData/secondNearestSynopTempStatid
+        reference:
+          name: TestReference/secondNearestStationID
+      - test:
+          name: DerivedMetaData/thirdNearestSynopTempStatid
+        reference:
+          name: TestReference/thirdNearestStationID
+      # NOTE: Lat/lon conversion to float can introduce relative errors of ~5e-8 which
+      # are amplified by the haversine calculation to relative distance errors of ~1e-5
+      - test:
+          name: DerivedMetaData/firstNearestSynopTempDistance
+        reference:
+          name: TestReference/firstNearestDistance
+        relTol: 1.0e-5
+      - test:
+          name: DerivedMetaData/secondNearestSynopTempDistance
+        reference:
+          name: TestReference/secondNearestDistance
+        relTol: 1.0e-5
+      - test:
+          name: DerivedMetaData/thirdNearestSynopTempDistance
+        reference:
+          name: TestReference/thirdNearestDistance
+        relTol: 1.0e-5
+
+  - obs space:
+      name: Test Find Nearest Neighbors Inefficient Distribution
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+      distribution:
+        name: InefficientDistribution
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables: # need as many as nearest neighbors output variable and number to find
+          - name: DerivedMetaData/firstNearestSynopTempDistance
+          - name: DerivedMetaData/secondNearestSynopTempDistance
+          - name: DerivedMetaData/thirdNearestSynopTempDistance
+        output assignment: MetaData/stationIdentification
+        output variables: # need as many as distance output variables and number to find
+          - name: DerivedMetaData/firstNearestSynopTempStatid
+          - name: DerivedMetaData/secondNearestSynopTempStatid
+          - name: DerivedMetaData/thirdNearestSynopTempStatid
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    compareVariables:
+      - test:
+          name: DerivedMetaData/firstNearestSynopTempStatid
+        reference:
+          name: TestReference/firstNearestStationID
+      - test:
+          name: DerivedMetaData/secondNearestSynopTempStatid
+        reference:
+          name: TestReference/secondNearestStationID
+      - test:
+          name: DerivedMetaData/thirdNearestSynopTempStatid
+        reference:
+          name: TestReference/thirdNearestStationID
+      # NOTE: Lat/lon conversion to float can introduce relative errors of ~5e-8 which
+      # are amplified by the haversine calculation to relative distance errors of ~1e-5
+      - test:
+          name: DerivedMetaData/firstNearestSynopTempDistance
+        reference:
+          name: TestReference/firstNearestDistance
+        relTol: 1.0e-5
+      - test:
+          name: DerivedMetaData/secondNearestSynopTempDistance
+        reference:
+          name: TestReference/secondNearestDistance
+        relTol: 1.0e-5
+      - test:
+          name: DerivedMetaData/thirdNearestSynopTempDistance
+        reference:
+          name: TestReference/thirdNearestDistance
+        relTol: 1.0e-5
+
+  - obs space:
+      name: Test Find Nearest Neighbors Invalid Algorithm
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedMetaData/algorithmDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/algorithmStationId
+        algorithm: kd-tree
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Only brute force algorithm is implemented
+
+  - obs space:
+      name: Test Find Nearest Neighbors Missing Query Variable
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/nonExistentQueryVariable
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedMetaData/missingQueryDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/missingQueryStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Query point variable ObsValue/nonExistentQueryVariable not found in ObsSpace
+
+  - obs space:
+      name: Test Find Nearest Neighbors Missing Reference Variable
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/nonExistentReferenceVariable
+        distance output variables:
+          - name: DerivedMetaData/missingReferenceDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/missingReferenceStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Reference point variable ObsValue/nonExistentReferenceVariable not found in ObsSpace
+
+  - obs space:
+      name: Test Find Nearest Neighbors No Output Variables
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables: []
+        output assignment: MetaData/stationIdentification
+        output variables: []
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: No output variables specified
+
+  - obs space:
+      name: Test Find Nearest Neighbors Output Count Mismatch
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedMetaData/mismatchFirstDistance
+          - name: DerivedMetaData/mismatchSecondDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/mismatchFirstStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Number of distance output variables must match number of output variables
+
+  - obs space:
+      name: Test Find Nearest Neighbors Unsupported Distance Units
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedMetaData/unsupportedUnitsDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/unsupportedUnitsStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: parsecs
+    expectExceptionWithMessage: "Unsupported distance units: parsecs"
+
+  - obs space:
+      name: Test Find Nearest Neighbors Output Group ObsValue
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedMetaData/outputGroupObsValueDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: ObsValue/outputGroupObsValueStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Output variables cannot be in group ObsValue or DerivedObsValue
+
+  - obs space:
+      name: Test Find Nearest Neighbors Output Group DerivedObsValue
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedMetaData/outputGroupDerivedObsValueDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedObsValue/outputGroupDerivedObsValueStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Output variables cannot be in group ObsValue or DerivedObsValue
+
+  - obs space:
+      name: Test Find Nearest Neighbors Distance Output Group ObsValue
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: ObsValue/distanceOutputGroupObsValueDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/distanceOutputGroupObsValueStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Distance output variables cannot be in group ObsValue or DerivedObsValue
+
+  - obs space:
+      name: Test Find Nearest Neighbors Distance Output Group DerivedObsValue
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/find_nearest_neighbors_obs.nc4
+      simulated variables: [airTemperature]
+    obs filters:
+      - filter: Find Nearest Neighbors
+        query point variable: ObsValue/airTemperatureQuery
+        reference point variable: ObsValue/airTemperatureReference
+        distance output variables:
+          - name: DerivedObsValue/distanceOutputGroupDerivedObsValueDistance
+        output assignment: MetaData/stationIdentification
+        output variables:
+          - name: DerivedMetaData/distanceOutputGroupDerivedObsValueStationId
+        algorithm: brute force
+        distance method: haversine
+        distance units: km
+    expectExceptionWithMessage: Distance output variables cannot be in group ObsValue or DerivedObsValue

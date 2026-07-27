@@ -76,6 +76,8 @@ struct Constants {
   static constexpr double euzc_1         = -0.39;        // constant for estimating euphotic layer
   static constexpr double trop_lapse_rate   = 0.002;     // Lapse rate of tropopause (K/m)
                                                          // according to WMO definition
+  static constexpr double m_per_mile = 1609.344;         // metres in a mile (m / mile)
+  static constexpr double m_per_nautical_mile = 1852.0;  // metres in a nautical mile (m / nmi)
 
   // International Civil Aviation Organization (ICAO) atmosphere.
   // https://en.wikipedia.org/wiki/International_Standard_Atmosphere#ICAO_Standard_Atmosphere

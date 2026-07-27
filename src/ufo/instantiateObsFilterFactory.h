@@ -20,6 +20,7 @@
 #include "ufo/filters/DifferenceCheck.h"
 #include "ufo/filters/DuplicateThinning.h"
 #include "ufo/filters/EnsembleStatistics.h"
+#include "ufo/filters/FindNearestNeighbors.h"
 #include "ufo/filters/Gaussian_Thinning.h"
 #include "ufo/filters/GeoVaLsWriter.h"
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
@@ -115,6 +116,8 @@ void instantiateObsFilterFactory() {
            duplicateThinningMaker("DuplicateThinning");
   static FilterMaker<ObsPolygonCheck>
            polygonCheckMaker("Polygon Check");
+  static FilterMaker<FindNearestNeighbors>
+           findNearestNeighborsMaker("Find Nearest Neighbors");
   static FilterMaker<Gaussian_Thinning>
            gaussianThinningMaker("Gaussian Thinning");
   static FilterMaker<GNSSROOneDVarCheck>

@@ -32,6 +32,8 @@ set ( filters_files
       FilterParametersBase.h
       FilterUtils.cc
       FilterUtils.h
+      FindNearestNeighbors.cc
+      FindNearestNeighbors.h
       GenericFilterParameters.h
       GeoVaLsWriter.cc
       GeoVaLsWriter.h

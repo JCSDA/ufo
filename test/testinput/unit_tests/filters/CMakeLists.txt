@@ -72,6 +72,23 @@ ufo_add_test( NAME    filter_stage_mpi
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    find_nearest_neighbors
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/find_nearest_neighbors.yaml"
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    find_nearest_neighbors_mpi
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/find_nearest_neighbors.yaml"
+              MPI     3
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    gnssrobendmetoffice_qc
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1040,7 +1057,7 @@ if( crtm_FOUND )
                   LIBS    ufo
                   LABELS  crtm filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../
-                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data ) 
+                  TEST_DEPENDS ufo_get_ufo_test_data ufo_get_crtm_test_data )
 #
     ufo_add_test( NAME    tropics_qc_filters
                   ECBUILD
