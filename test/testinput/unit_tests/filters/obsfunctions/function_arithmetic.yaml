@@ -15,6 +15,11 @@ observations:
   # Variables to perform arithmetic on
   - filter: Variable Assignment
     assignments:
+    - name: MetaData/variable_0
+      type: float
+      value: 0
+  - filter: Variable Assignment
+    assignments:
     - name: MetaData/variable_1
       type: float
       value: 1
@@ -38,6 +43,11 @@ observations:
     - name: MetaData/variable_minus_1
       type: float
       value: -1
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_2
+      type: float
+      value: -2
   - filter: Variable Assignment
     assignments:
     - name: MetaData/variable_minus_11
@@ -331,6 +341,19 @@ observations:
 
   - filter: Variable Assignment
     assignments:
+    - name: MetaData/divide_by_0
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_1
+          - name: MetaData/variable_2
+          - name: MetaData/variable_0
+          exponents: [2.,3.,-1.]
+
+  - filter: Variable Assignment
+    assignments:
     - name: MetaData/absolutevalue_false
       type: float
       function:
@@ -482,6 +505,11 @@ observations:
       name: MetaData/non_int_total_exponent
     reference:
       name: TestReference/missing
+  
+  - test:
+      name: MetaData/divide_by_0
+    reference:
+      name: TestReference/missing
 
   - test:
       name: MetaData/absolutevalue_false
@@ -626,3 +654,103 @@ observations:
           log bases: [3]
           total log base: 2
   expectExceptionWithMessage: Invalid log value '0' for log base '2'.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try producing complex number.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_2
+      type: float
+      value: -2
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_minus_2
+          exponents: [1.5]
+          abort if invalid operation: True
+  expectExceptionWithMessage: Coefficient exponent error. Trying to raise a negative number to a non-integer exponent. Complex numbers are not currently supported. Variable is MetaData/variable_minus_2 at location 0.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try producing complex number with total exponent.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_1
+      type: float
+      value: -1
+    - name: MetaData/variable_minus_2
+      type: float
+      value: -2
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_minus_1
+          - name: MetaData/variable_minus_2
+          total exponent: 1.5
+          abort if invalid operation: True
+  expectExceptionWithMessage: Total coefficient exponent error. Trying to raise a negative number to a non-integer exponent. Complex numbers are not currently supported. Variable is MetaData/variable_minus_2 at location 0.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try dividing by 0.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_2
+      type: float
+      value: 2
+    - name: MetaData/variable_0
+      type: float
+      value: 0
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_2
+          - name: MetaData/variable_0
+          exponents: [3, -1]
+          abort if invalid operation: True
+  expectExceptionWithMessage: Div/0 error! Variable is MetaData/variable_0 at location 0.
+
+- obs space:
+    <<: *ObsSpace
+    name: Try dividing by 0 with total exponent.
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/variable_minus_1
+      type: float
+      value: -1
+    - name: MetaData/variable_1
+      type: float
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/dummy
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_minus_1
+          - name: MetaData/variable_1
+          total exponent: -1
+          abort if invalid operation: True
+  expectExceptionWithMessage: Div/0 error! Variable is MetaData/variable_1 at location 0.

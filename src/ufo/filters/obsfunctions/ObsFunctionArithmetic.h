@@ -36,7 +36,8 @@ class ArithmeticParameters : public oops::Parameters {
   /// coefficient associated with the above variables
   oops::OptionalParameter<std::vector<FunctionValue>> coefs{"coefs", this};
   /// exponent associated with the above variables
-  oops::OptionalParameter<std::vector<FunctionValue>> exponents{"exponents", this};
+  oops::OptionalParameter<std::vector<FunctionValue>> exponents{"exponents",
+                                                                this};
   /// total exponent
   oops::OptionalParameter<FunctionValue> total_exponent{"total exponent", this};
   /// total multiplicative coefficient
@@ -48,16 +49,24 @@ class ArithmeticParameters : public oops::Parameters {
   oops::OptionalParameter<std::string> total_log_base{"total log base", this};
   /// log bases associated with the above variables (can empty string for
   /// no logarithm, or e for natural logarithm)
-  oops::OptionalParameter<std::vector<std::string>> log_bases{"log bases", this};
+  oops::OptionalParameter<std::vector<std::string>> log_bases{"log bases",
+                                                              this};
   /// Take absolute value of each variable (true/false).
-  /// If true, the absolute value is taken before any other operation is performed.
-  oops::OptionalParameter<std::vector<bool>> absolute_value{"absolute value", this};
-  /// Truncate (round towards zero) each variable to the nearest integer multiple of
-  /// the corresponding entry in this vector.
-  /// If the value is zero or negative, no truncation is performed.
-  /// If the value is positive, truncation is performed before any other operation apart from
-  /// taking the absolute value.
+  /// If true, the absolute value is taken before any other operation is
+  /// performed.
+  oops::OptionalParameter<std::vector<bool>> absolute_value{"absolute value",
+                                                            this};
+  /// Truncate (round towards zero) each variable to the nearest integer
+  /// multiple of the corresponding entry in this vector. If the value is zero
+  /// or negative, no truncation is performed. If the value is positive,
+  /// truncation is performed before any other operation apart from taking the
+  /// absolute value.
   oops::OptionalParameter<std::vector<int>> truncate{"truncate", this};
+  /// If \c true (the default), will raise exceptions when trying to perform
+  /// invalid or unsupported operations. Otherwise will set output values as
+  /// missing.
+  oops::Parameter<bool> abortIfInvalid{"abort if invalid operation", false,
+                                       this};
   /// Use channel number in the calculation not the value from the variable
   oops::Parameter<bool> useChannelNumber{"use channel numbers", false, this};
 };
@@ -107,8 +116,8 @@ class ArithmeticParameters : public oops::Parameters {
 ///
 ///  obs function:
 ///    name: ObsFunction/LinearCombination
-///    channels: &select_chans 6-15, 18-22 # this line may be needed depending on the filter used
-///    options:
+///    channels: &select_chans 6-15, 18-22 # this line may be needed depending
+///    on the filter used options:
 ///      variables:
 ///      - name: ObsValue/brightnessTemperature
 ///        channels: *select_chans
@@ -123,8 +132,8 @@ class ArithmeticParameters : public oops::Parameters {
 ///
 ///  obs function:
 ///    name: ObsFunction/LinearCombination
-///    channels: &select_chans 6-15, 18-22 # this line may be needed depending on the filter used
-///    options:
+///    channels: &select_chans 6-15, 18-22 # this line may be needed depending
+///    on the filter used options:
 ///      variables:
 ///      - name: ObsValue/brightnessTemperature
 ///        channels: *select_chans
@@ -147,7 +156,8 @@ class ArithmeticParameters : public oops::Parameters {
 ///
 /// will return |ObsValue/variable1| + trunc(ObsValue/variable2, 3)
 /// where trunc(x, y) returns x truncated to the nearest integer multiple of y.
-/// Truncation is always performed towards zero, e.g. trunc(17, 3) = 15, trunc(-13, 3) = -12.
+/// Truncation is always performed towards zero, e.g. trunc(17, 3) = 15,
+/// trunc(-13, 3) = -12.
 ///
 template <typename FunctionValue>
 class Arithmetic : public ObsFunctionBase<FunctionValue> {
@@ -157,10 +167,14 @@ class Arithmetic : public ObsFunctionBase<FunctionValue> {
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<FunctionValue> &) const;
   FunctionValue power(FunctionValue, FunctionValue) const;
-  const ufo::Variables & requiredVariables() const;
+  const ufo::Variables &requiredVariables() const;
+
  private:
-  FunctionValue logpower(FunctionValue, FunctionValue, std::string) const;
-  FunctionValue logbasen(FunctionValue, std::string) const;
+  FunctionValue logpower(FunctionValue, FunctionValue,
+                         const std::string &) const;
+  FunctionValue logbasen(FunctionValue, const std::string &) const;
+  template <class ExceptionType>
+  void warnOrThrow(const std::string &) const;
   ArithmeticParameters<FunctionValue> options_;
   ufo::Variables invars_;
 };

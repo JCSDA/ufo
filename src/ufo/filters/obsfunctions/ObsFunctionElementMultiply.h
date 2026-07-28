@@ -8,6 +8,7 @@
 #ifndef UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONELEMENTMULTIPLY_H_
 #define UFO_FILTERS_OBSFUNCTIONS_OBSFUNCTIONELEMENTMULTIPLY_H_
 
+#include <string>
 #include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
@@ -32,18 +33,21 @@ class ElementMultiplyParameters : public oops::Parameters {
  public:
   /// Input variables of the linear combination
   oops::RequiredParameter<std::vector<Variable>> variables{"variables", this};
-  /// exponent associated with the above variables. Defaults to 1 if no value is entered.
-  oops::OptionalParameter<std::vector<FunctionValue>> exponents{"exponents", this};
   /// If \c true (the default), will raise exceptions when trying to perform
   /// invalid or unsupported operations. Otherwise will set output values as
   /// missing.
-  oops::OptionalParameter<bool> abortIfInvalid{"abort if invalid operation",
-                                               this};
+  oops::Parameter<bool> abortIfInvalid{"abort if invalid operation", true,
+                                       this};
+  /// exponent associated with the above variables. Defaults to 1 if no value is
+  /// entered.
+  oops::OptionalParameter<std::vector<FunctionValue>> exponents{"exponents",
+                                                                this};
 };
 
 // -----------------------------------------------------------------------------
 
-/// \brief Outputs an elementwise multiplication of variables which can be raised
+/// \brief Outputs an elementwise multiplication of variables which can be
+/// raised
 ///  to powers allowing implementation of division.
 ///
 /// Example
@@ -70,8 +74,11 @@ class ElementMultiply : public ObsFunctionBase<FunctionValue> {
   void compute(const ObsFilterData &,
                ioda::ObsDataVector<FunctionValue> &) const;
   FunctionValue power(FunctionValue, FunctionValue) const;
-  const ufo::Variables & requiredVariables() const;
+  const ufo::Variables &requiredVariables() const;
+
  private:
+  template <class ExceptionType>
+  void warnOrThrow(const std::string &) const;
   ElementMultiplyParameters<FunctionValue> options_;
   ufo::Variables invars_;
 };
