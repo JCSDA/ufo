@@ -15,7 +15,7 @@ observations:
     simulated variables: [windEastward, windNorthward]
   obs operator:
     name: Product
-    geovals to scale hofx by: wind_reduction_factor_at_10m
+    geovals to scale hofx by: ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m
     observation alias file: ../resources/namemap/test_name_map.yaml
   geovals:
     filename: Data/ufo/testinput_tier_1/sondes_geoval_2018041500_s.nc4
