@@ -100,7 +100,8 @@ ObjectJsonSchema ParameterTraits<ufo::Variable>::jsonSchema(const std::string &n
       ObjectJsonSchema simpleSchema = ParameterTraits<std::string>::jsonSchema("");
       ObjectJsonSchema completeSchema({{"name", {{"type", "\"string\""}}},
                                        {"options", {{"type", "\"object\""}}},
-                                       {"channels", {{"type", "[\"string\", \"integer\"]"}}}});
+                                       {"channels", {{"type", "[\"string\", \"integer\"]"}}},
+                                       {"layers", {{"type", "[\"string\", \"integer\"]"}}}});
       ch << toString(simpleSchema.properties().at("")) << ",\n";
       ch << completeSchema.toString() << '\n';
     }

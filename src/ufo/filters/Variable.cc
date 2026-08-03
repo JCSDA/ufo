@@ -41,6 +41,10 @@ Variable::Variable(const eckit::Configuration & conf)
     std::string chlist = conf.getString("channels");
     std::set<int> channelset = oops::parseIntSet(chlist);
     std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
+  } else if (conf.has("layers")) {
+    std::string layerlist = conf.getString("layers");
+    std::set<int> layerset = oops::parseIntSet(layerlist);
+    std::copy(layerset.begin(), layerset.end(), std::back_inserter(channels_));
   }
   oops::Log::trace() << "ufo::Variable(config) constructor complete" << std::endl;
 }

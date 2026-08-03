@@ -333,6 +333,15 @@ ufo_add_test( NAME    qc_boundscheck
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    qc_boundscheck_layers
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_boundscheck_layers.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    qc_creatediagnosticflags
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

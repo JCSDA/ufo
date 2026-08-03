@@ -1,0 +1,57 @@
+time window:
+  begin: '2020-09-03T15:00:00Z'
+  end: '2020-09-03T21:00:00Z'
+
+observations:
+- obs space:
+    name: Test layers BoundsCheck - all 34 layers flag_all
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_total_2020090318_m.nc4
+    simulated variables: [nitrogendioxideTotal]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: ObsValue/nitrogendioxideTotal
+    test variables:
+    - name: RetrievalAncillaryData/averagingKernel
+      layers: 1-34
+    maxvalue: 1.5
+    flag all filter variables if any test variable is out of bounds: true
+  passedBenchmark: 93
+
+- obs space:
+    name: Test layers BoundsCheck - single layer
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_total_2020090318_m.nc4
+    simulated variables: [nitrogendioxideTotal]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: ObsValue/nitrogendioxideTotal
+    test variables:
+    - name: RetrievalAncillaryData/averagingKernel
+      layers: 1
+    maxvalue: 1.5
+  passedBenchmark: 96
+
+- obs space:
+    name: Test layers BoundsCheck - subset of near-surface layers
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/tropomi_no2_total_2020090318_m.nc4
+    simulated variables: [nitrogendioxideTotal]
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: ObsValue/nitrogendioxideTotal
+    test variables:
+    - name: RetrievalAncillaryData/averagingKernel
+      layers: 32-34
+    maxvalue: 0.5
+    flag all filter variables if any test variable is out of bounds: true
+  passedBenchmark: 87
