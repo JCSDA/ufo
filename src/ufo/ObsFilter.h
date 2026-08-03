@@ -48,6 +48,9 @@ class ObsFilter : public util::Printable,
             ioda::ObsDataVector<int> & flags, ioda::ObsDataVector<float> & obserr);
   ObsFilter(const ObsFilter &) = delete;
   ObsFilter(ObsFilter &&) = default;
+
+  /// \brief Set the outer loop iteration index on the underlying filter.
+  void setIteration(int iteration) { ofilt_->setIteration(iteration); }
   ObsFilter& operator=(const ObsFilter &) = delete;
   ObsFilter& operator=(ObsFilter &&) = default;
   ~ObsFilter();

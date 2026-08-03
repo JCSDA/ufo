@@ -89,6 +89,7 @@ void ObsFilters::appendToFiltersList(const FilterParams_& filtersParams,
     if (apply) {
       filters.emplace_back(obsspace_, filterParams.filterParameters,
                            qcflags_, obserr_);
+      filters.back().setIteration(iteration_);
       geovars_ += filters.back().requiredVars();
       diagvars_ += filters.back().requiredHdiagnostics();
     }

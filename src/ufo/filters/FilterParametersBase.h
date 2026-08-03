@@ -23,6 +23,32 @@
 
 namespace ufo {
 
+/// \brief Parameters for the identifier block
+class IdentifierParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(IdentifierParameters, Parameters)
+
+ public:
+  oops::RequiredParameter<std::string> name{"name",
+         "Unique identifier name for this filter instance in an observation space.", this};
+
+  /// Whether to log the flagged observation count using the unique identifier. Default: false.
+  oops::Parameter<bool> logging{"logging",
+         "Whether to log the flagged obs count using the unique identifier.", false, this};
+
+  /// Whether to write per-observation flagged results to DiagnosticFlags/<filterId>/<varname>
+  /// in the output ioda file. Default: false.
+  oops::Parameter<bool> diagnosticFlag{"diagnostic flag",
+         "Whether to write per-observation filter results as DiagnosticFlags into the ioda file",
+         false, this};
+
+  /// Whether to write per-observation flags for ONLY newly flagged observations (those
+  /// that currently have pass status) to DiagnosticFlags/<filterId>_new/<varname>.
+  /// Default: false.
+  oops::Parameter<bool> diagnosticFlagNew{"diagnostic flag new",
+         "Whether to write diagnostic flags for only newly flagged observations",
+         false, this};
+};
+
 /// \brief Parameters controlling the action performed on observations flagged by a filter.
 class FilterActionParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(FilterActionParameters, Parameters)
@@ -65,6 +91,9 @@ class FilterParametersBaseWithAbstractActions : public ObsFilterParametersBase {
   /// If set to true, the filter will be executed only after the obs operator (even if it
   /// doesn't require any variables from the GeoVaLs or HofX groups).
   oops::Parameter<bool> deferToPost{"defer to post", false, this};
+
+  /// Optional identifier block for filter identification and logging.
+  oops::OptionalParameter<IdentifierParameters> identifier{"identifier", this};
 
   /// Return parameters specifying the actions to be performed on observations flagged by the
   /// filter.

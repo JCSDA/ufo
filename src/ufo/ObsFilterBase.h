@@ -73,8 +73,14 @@ enum class FilterStage {AUTO,
 class ObsFilterBase : public util::Printable,
                       private boost::noncopyable {
  public:
-  ObsFilterBase() {}
+  ObsFilterBase() : iteration_(0) {}
   virtual ~ObsFilterBase() {}
+
+  /// \brief Set the outer loop iteration index for this filter.
+  void setIteration(int iteration) { iteration_ = iteration; }
+
+  /// \brief Get the outer loop iteration index.
+  int getIteration() const { return iteration_; }
 
   /// \brief Perform any observation processing steps that do not require access to GeoVaLs or
   /// outputs produced by the observation operator.
@@ -108,6 +114,9 @@ class ObsFilterBase : public util::Printable,
 
   /// \brief Return the list of observation diagnostics required by this filter.
   virtual oops::ObsVariables requiredHdiagnostics() const = 0;
+
+ private:
+  int iteration_;
 };
 
 // =============================================================================
