@@ -1,0 +1,7 @@
+# Test use list: only these stations should be used
+airTemperature:
+  - "AAA001"
+  - "BBB002"
+  - "CCC003"
+  - "DDD004"
+  - "EEE005"

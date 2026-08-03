@@ -111,6 +111,10 @@ set ( filters_files
       SatName.cc
       SatwindInversionCorrection.cc
       SatwindInversionCorrection.h
+      SharedListCheck.cc
+      SharedListCheck.h
+      SharedListStore.cc
+      SharedListStore.h
       SpikeAndStepCheck.cc
       SpikeAndStepCheck.h
       StuckCheck.cc

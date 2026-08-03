@@ -1,0 +1,155 @@
+time window:
+  begin: 2024-05-06T22:00:00Z
+  end: 2024-05-07T00:00:00Z
+  bound to include: begin
+
+observations:
+# ====================================================
+# Test 1: Reject matched (simple reject list)
+# Stations AAA001, BBB002, CCC003 should be rejected for airTemperature
+# Expected: 7 pass (10 - 3 rejected)
+# ====================================================
+- obs space:
+    name: SharedListCheck_reject_matched
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_SharedListCheck_testdata.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: SharedListCheck
+    shared list file: ../resources/sharedListCheck/test_aircraft_rejectlist.yaml
+    list to use: airTemperature
+    variable to check: MetaData/stationIdentification
+    flag mode: flag matched
+    action:
+      name: reject
+    filter variables:
+    - name: airTemperature
+  passedBenchmark: 7
+
+# ====================================================
+# Test 2: Reject unmatched (use list)
+# Only AAA001-EEE005 are in the use list for airTemperature
+# FFF006-JJJ010 should be rejected
+# Expected: 5 pass
+# ====================================================
+- obs space:
+    name: SharedListCheck_reject_unmatched
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_SharedListCheck_testdata.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: SharedListCheck
+    shared list file: ../resources/sharedListCheck/test_mesonet_uselist.yaml
+    list to use: airTemperature
+    variable to check: MetaData/stationIdentification
+    flag mode: flag unmatched
+    action:
+      name: reject
+    filter variables:
+    - name: airTemperature
+  passedBenchmark: 5
+
+# ====================================================
+# Test 3: Same list applied to multiple variables
+# list to use: airTemperature → [AAA001, BBB002, CCC003]
+# Both airTemperature and windEastward reject the same 3 stations
+# passedBenchmark = (10-3) + (10-3) = 14
+# ====================================================
+- obs space:
+    name: SharedListCheck_per_variable
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_SharedListCheck_testdata.nc4
+    simulated variables: [airTemperature, windEastward]
+  obs filters:
+  - filter: SharedListCheck
+    shared list file: ../resources/sharedListCheck/test_aircraft_rejectlist.yaml
+    list to use: airTemperature
+    variable to check: MetaData/stationIdentification
+    flag mode: flag matched
+    action:
+      name: reject
+    filter variables:
+    - name: airTemperature
+    - name: windEastward
+  passedBenchmark: 14
+
+# ====================================================
+# Test 4: Compound matching (provider + subprovider)
+# Trusted: ProvA/all, ProvB/Sub1, ProvC/Sub2
+# Obs providers/subs:
+#   0: ProvA/Sub1 → matched (ProvA/all)
+#   1: ProvA/Sub2 → matched (ProvA/all)
+#   2: ProvB/Sub1 → matched (ProvB/Sub1)
+#   3: ProvB/Sub2 → NOT matched (ProvB but Sub2 != Sub1)
+#   4: ProvC/Sub1 → NOT matched (ProvC but Sub1 != Sub2)
+#   5: ProvC/Sub2 → matched (ProvC/Sub2)
+#   6: ProvD/Sub1 → NOT matched
+#   7: ProvD/Sub2 → NOT matched
+#   8: ProvE/Sub1 → NOT matched
+#   9: ProvE/Sub2 → NOT matched
+# flag matched → 4 flagged (indices 0,1,2,5)
+# With action: reject → 6 pass
+# ====================================================
+- obs space:
+    name: SharedListCheck_compound
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_SharedListCheck_testdata.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  - filter: SharedListCheck
+    shared list file: ../resources/sharedListCheck/test_mesonet_providers.yaml
+    list to use: trusted
+    compound check:
+    - obs variable: MetaData/dataProvider
+      sublist to use: provider
+    - obs variable: MetaData/dataSubprovider
+      sublist to use: subprovider
+    flag mode: flag matched
+    action:
+      name: reject
+    filter variables:
+    - name: airTemperature
+  passedBenchmark: 6
+
+# ====================================================
+# Test 5: Accept matched (trusted providers accept back)
+# First reject all, then accept back trusted providers
+# Step 1: reject all 10 obs
+# Step 2: accept back matched (ProvA/all, ProvB/Sub1, ProvC/Sub2) → 4 accepted
+# Expected: 4 pass
+# ====================================================
+- obs space:
+    name: SharedListCheck_accept_matched
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/function_SharedListCheck_testdata.nc4
+    simulated variables: [airTemperature]
+  obs filters:
+  # Step 1: Reject all observations
+  - filter: RejectList
+    filter variables:
+    - name: airTemperature
+  # Step 2: Accept back trusted providers
+  - filter: SharedListCheck
+    shared list file: ../resources/sharedListCheck/test_mesonet_providers.yaml
+    list to use: trusted
+    compound check:
+    - obs variable: MetaData/dataProvider
+      sublist to use: provider
+    - obs variable: MetaData/dataSubprovider
+      sublist to use: subprovider
+    flag mode: flag matched
+    action:
+      name: accept
+    filter variables:
+    - name: airTemperature
+  passedBenchmark: 4

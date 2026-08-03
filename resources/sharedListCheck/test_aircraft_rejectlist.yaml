@@ -1,0 +1,8 @@
+# Test reject list: reject specific stations per variable
+airTemperature:
+  - "AAA001"
+  - "BBB002"
+  - "CCC003"
+windEastward:
+  - "DDD004"
+  - "EEE005"

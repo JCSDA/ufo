@@ -55,6 +55,7 @@
 #include "ufo/filters/refractivityonedvarcheck/RefractivityOneDVarCheck.h"
 #include "ufo/filters/SatName.h"
 #include "ufo/filters/SatwindInversionCorrection.h"
+#include "ufo/filters/SharedListCheck.h"
 #include "ufo/filters/SpikeAndStepCheck.h"
 #include "ufo/filters/StuckCheck.h"
 #include "ufo/filters/SuperOb.h"
@@ -176,6 +177,8 @@ void instantiateObsFilterFactory() {
            satnameCheckMaker("satname");
   static FilterMaker<SatwindInversionCorrection>
              SatwindInversionCorrectionMaker("Satwind Inversion Correction");
+  static FilterMaker<SharedListCheck>
+             SharedListCheckMaker("SharedListCheck");
   static FilterMaker<TrackCheckShip>
            ShipTrackCheckMaker("Ship Track Check");
   static FilterMaker<SpikeAndStepCheck>

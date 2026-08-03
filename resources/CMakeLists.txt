@@ -3,7 +3,7 @@
 # This software is licensed under the terms of the Apache Licence Version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
-set(resource_list namemap)
+set(resource_list namemap sharedListCheck)
 
 file(INSTALL ${resource_list} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
