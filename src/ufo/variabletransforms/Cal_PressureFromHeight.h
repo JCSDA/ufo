@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "ufo/variabletransforms/Cal_Humidity.h"
 #include "ufo/variabletransforms/TransformBase.h"
 
 namespace ufo {
@@ -30,6 +31,10 @@ class Cal_PressureFromHeightParameters: public VariableTransformParametersBase {
 
   /// Pressure group name.
   oops::Parameter<std::string> PressureGroup{"pressure group", "ObsValue", this};
+
+  /// Relative humidity units
+  oops::OptionalParameter<ufo::RelativeHumidityUnits> RelativeHumidityUnits{
+      "observation relative humidity units", this};
 };
 
 
@@ -65,6 +70,15 @@ class Cal_PressureFromHeightForProfile : public TransformBase {
 
   /// Pressure group name.
   std::string pressureGroup_;
+
+  /// Relative humidity units
+  boost::optional<ufo::RelativeHumidityUnits> relativeHumidityUnits_;
+
+  float relativeHumidityAsPercentage(float rh) const {
+    return (*relativeHumidityUnits_ == RelativeHumidityUnits::FRACTION)
+               ? 100.0f * rh
+               : rh;
+  }
 };
 
 /*!

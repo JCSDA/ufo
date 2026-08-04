@@ -36,3 +36,4 @@ Sondes:
     PrintStationID: true
     BChecks_Skip: true
     Comparison_Tol: 0.001
+    observation relative humidity units: percentage

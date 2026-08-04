@@ -33,6 +33,7 @@ observations:
     - name: airTemperature
     - name: relativeHumidity
     Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    observation relative humidity units: percentage
     compareWithOPS: false
     flagBasicChecksFail: true
     PrintStationID: true

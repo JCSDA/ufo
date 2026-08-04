@@ -28,13 +28,13 @@ observations:
   - filter: Satwind Inversion Correction
     observation pressure:
       name: MetaData/pressure
-    RH threshold: 54
-  compareVariables:                       # test output matches precalculated values
+    model RH threshold: 0.54          # fractional RH
+  compareVariables:                   # test output matches precalculated values
     - reference:
         name: TestReference/pressure  # corrected pressures from OPS
       test:
         name: MetaData/pressure       # corrected pressures in ufo
-      absTol: 1.0e-5                      # tolerance in Pa
+      absTol: 1.0e-5                  # tolerance in Pa
 #---------------------------------------------------
 - obs space:
     name: Diagnostic flags not initialised
@@ -53,7 +53,7 @@ observations:
   - filter: Satwind Inversion Correction
     observation pressure:
       name: MetaData/pressure
-    RH threshold: 54
+    model RH threshold: 0.54          # fractional RH
   expectExceptionWithMessage: DiagnosticFlags/InversionCorrectionPerformed/windEastward or DiagnosticFlags/InversionCorrectionPerformed/windNorthward not initialised
 
 

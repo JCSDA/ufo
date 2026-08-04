@@ -16,6 +16,7 @@
 #include "ufo/filters/Variable.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
+#include "ufo/variabletransforms/Cal_Humidity.h"
 
 namespace ufo {
 
@@ -26,9 +27,14 @@ class VisibilityDiagnosticParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(VisibilityDiagnosticParameters, Parameters)
 
  public:
+  /// Relative humidity units for the input relative humidity variable and other
+  /// relative humidity parameters, either percentage or fraction.
+  oops::RequiredParameter<RelativeHumidityUnits> rhUnits{
+      "observation relative humidity units", this};
+
   /// The below parameters are required observed or derived variables
 
-  /// Relative humidity (unitless) - defined as the ratio of the specific
+  /// Relative humidity (% or fraction) - defined as the ratio of the specific
   /// humidity to the saturation specific humidity
   oops::RequiredParameter<Variable> rh{"relative humidity variable", this};
   /// Pressure (Pa)
@@ -155,18 +161,20 @@ class VisibilityDiagnosticParameters : public oops::Parameters {
                                    0.001f,
                                    this,
                                    {oops::exclusiveMinConstraint<float>(0.0f)}};
-  /// Minimum allowed total water relative humidity (unitless) for calculating
-  /// the first guess of the particle radius `r` (fraction, not percentage)
-  oops::Parameter<float> rh_tot_min{
+  /// Minimum allowed total water relative humidity for calculating
+  /// the first guess of the particle radius `r` (fraction or percentage).
+  /// Default is 0.01 if `observation relative humidity units` is fraction or
+  /// 1.0 % if `observation relative humidity units` is percentage.
+  oops::OptionalParameter<float> rh_tot_min{
       "minimum relative humidity for first guess",
-      0.01f,
       this,
       {oops::exclusiveMinConstraint<float>(0.0f)}};
-  /// Maximum allowed relative humidity (unitless) for calculating the first
-  /// guess of the particle radius `r` (fraction, not percentage)
-  oops::Parameter<float> rh_tot_max{
+  /// Maximum allowed relative humidity for calculating the first
+  /// guess of the particle radius `r` (fraction or percentage). Default is
+  /// 0.999 if `observation relative humidity units` is fraction or 99.9 % if
+  /// `observation relative humidity units` is percentage.
+  oops::OptionalParameter<float> rh_tot_max{
       "maximum relative humidity for first guess",
-      0.999f,
       this,
       {oops::exclusiveMinConstraint<float>(0.0f)}};
   /// Minimum allowed wet particle (droplet) radius, normalized by the mean dry
@@ -256,6 +264,10 @@ class VisibilityDiagnostic : public ObsFunctionBase<float> {
  private:
   VisibilityDiagnosticParameters options_;
   ufo::Variables invars_;
+
+  /// @brief The relative humidity at saturation, which is either 100.0f for
+  /// percentage or 1.0f for fraction, depending on the configuration.
+  const float relativeHumidityAtSaturation_;
 
   /// @brief Calculates the saturation specific humidity (kg kg^-1) as a
   /// function of the temperature and pressure.

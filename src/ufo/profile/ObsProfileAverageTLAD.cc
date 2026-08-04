@@ -61,6 +61,9 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
   // Number of profiles in the original ObsSpace.
   const std::size_t nprofs = recnums.size() / 2;
 
+  // Scaling factor to apply to input simulated variable GeoVaLs.
+  const float scalingFactor = data_.getScalingFactor();
+
   // Loop over profiles.
   for (std::size_t jprof = 0; jprof < nprofs; ++jprof) {
     const std::vector<std::size_t> &locsOriginal = odb_.recidx_vector(recnums[jprof]);
@@ -78,10 +81,10 @@ void ObsProfileAverageTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector & 
         const std::size_t jloc = slant_path_location[mlev];
         dx.getAtLocation(var_gv, variable, jloc);
         if (data_.geovalsObsSameDir()) {  // geovals and observations are the same way round:
-          dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[mlev];
+          dy[locsExtended[mlev] * dy.nvars() + jvar] = scalingFactor * var_gv[mlev];
         } else {  // reverse geovals so they're the same way round in extended space as
           // observations / H(x) in original space:
-          dy[locsExtended[mlev] * dy.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+          dy[locsExtended[mlev] * dy.nvars() + jvar] = scalingFactor * var_gv[nlevs_var - 1 - mlev];
         }
       }
     }
@@ -102,6 +105,9 @@ void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & 
 
   // Number of profiles in the original ObsSpace.
   const std::size_t nprofs = recnums.size() / 2;
+
+  // Scaling factor to apply to input simulated variable GeoVaLs.
+  const float scalingFactor = data_.getScalingFactor();
 
   // Loop over profiles.
   for (std::size_t jprof = 0; jprof < nprofs; ++jprof) {
@@ -124,11 +130,11 @@ void ObsProfileAverageTLAD::simulateObsAD(GeoVaLs & dx, const ioda::ObsVector & 
         if (dy[idx] != missing) {
           if (data_.geovalsObsSameDir()) {
             // geovals and observations are the same way round:
-            var_gv[mlev] += dy[idx];
+            var_gv[mlev] += scalingFactor * dy[idx];
           } else {
             // geovals reversed relative to obs
             // write dy into correct index of geoval
-            var_gv[nlevs_var - 1 - mlev] += dy[idx];
+            var_gv[nlevs_var - 1 - mlev] += scalingFactor * dy[idx];
           }
         }
         // Store the new value of dx.

@@ -17,7 +17,8 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
-    Method: UKMO 
+    Method: UKMO
+    observation relative humidity units: percentage
     AllowSuperSaturation: true
     pressure at 2m variable: "surfacePressure"
     temperature at 2m variable: "airTemperatureAt2M"
@@ -44,6 +45,7 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMO
+    observation relative humidity units: percentage
     AllowSuperSaturation: true
     pressure group variable: "MetaData"
     pressure variable: "pressure"
@@ -71,6 +73,7 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMO
+    observation relative humidity units: percentage
     AllowSuperSaturation: true
     pressure group variable: "MetaData"
     pressure variable: "pressure"
@@ -97,7 +100,8 @@ observations:
   obs filters:
   - filter: Variable Transforms
     Transform: RelativeHumidity
-    Method: UKMO 
+    Method: UKMO
+    observation relative humidity units: percentage
     AllowSuperSaturation: true
     pressure at 2m variable: "surfacePressure"
     temperature at 2m variable: "airTemperatureAt2M"

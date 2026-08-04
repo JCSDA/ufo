@@ -1,8 +1,8 @@
 /*
  * (C) Crown copyright 2020, Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_PROFILE_PROFILECHECKBASE_H_
@@ -103,6 +103,20 @@ namespace ufo {
     /// Add an "OPS_" prefix to the names of variables that are used in the comparison
     /// with results from the Met Office OPS system.
     std::string addOPSPrefix(const std::string & fullname);
+
+    // Relative humidity at saturation (100 for percentage or 1.0 for fraction)
+    float relativeHumidityAtSaturation() const {
+      if (!options_.relativeHumidityUnits.value()) {
+        throw eckit::BadParameter(
+            "Missing required parameter 'observation relative humidity units' "
+            "when relative humidity is used",
+            Here());
+      }
+      return (*options_.relativeHumidityUnits.value() ==
+              RelativeHumidityUnits::PERCENTAGE)
+                 ? 100.0f
+                 : 1.0f;
+    }
 
    protected:  // variables
     /// Configurable parameters

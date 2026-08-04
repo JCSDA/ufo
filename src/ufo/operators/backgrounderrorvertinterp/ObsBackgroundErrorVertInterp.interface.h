@@ -10,6 +10,10 @@
 
 #include "ufo/Fortran.h"
 
+namespace eckit {
+  class Configuration;
+}  // namespace eckit
+
 namespace oops {
 class Variables;
 }  // namespace oops
@@ -32,6 +36,7 @@ extern "C" {
                                                       const ioda::ObsSpace &obsspace,
                                                       const int &nlocs,
                                                       const oops::Variables &obsvars,
+                                                      const eckit::Configuration &conf,
                                                       const F90goms &obsdiags);
 
 }  // extern C

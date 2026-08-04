@@ -635,6 +635,33 @@ ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_air_pressure
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_air_pressure_obsspace_scaling
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_vert_interp_air_pressure_obsspace_scaling.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_air_pressure_obsspace_missing_scaling
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_vert_interp_air_pressure_obsspace_missing_scaling.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_air_pressure_geovals_scaling
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obsdiag_background_error_vert_interp_air_pressure_geovals_scaling.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    opr_obsdiag_background_error_vert_interp_height
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsDiagnostics.x
@@ -1222,6 +1249,24 @@ ufo_add_test( NAME    linopr_vert_interp_pmissing
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vert_interp_pmissing.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    opr_vert_interp_pmissing_scaled
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vert_interp_pmissing_scaled.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    linopr_vert_interp_pmissing_scaled
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/vert_interp_pmissing_scaled.yaml"
               MPI     1
               LIBS    ufo
               LABELS  operators

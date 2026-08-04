@@ -18,13 +18,18 @@ static TransformMaker<Cal_PressureFromHeightForProfile>
 
 Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
     const Parameters_ &options, const ObsFilterData &data,
-    ioda::ObsDataVector<int> &flags,
-    ioda::ObsDataVector<float> &obserr)
+    ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr),
+      relativeHumidityUnits_(
+          options.RelativeHumidityUnits.value() != boost::none
+              ? options.RelativeHumidityUnits.value()
+              : throw eckit::BadParameter(
+                    "PressureFromHeightForProfile: missing required "
+                    "parameter 'observation relative humidity units'",
+                    Here())),
       heightCoord_(options.HeightCoord),
       pressureCoord_(options.PressureCoord),
-      pressureGroup_(options.PressureGroup)
-{}
+      pressureGroup_(options.PressureGroup) {}
 
 /************************************************************************************/
 
@@ -153,9 +158,10 @@ void Cal_PressureFromHeightForProfile::methodDEFAULT(
             formulas::SatVaporPres_fromTemp(Tprev, formulas::Formulation::Sonntag);
         Pvap = formulas::SatVaporPres_correction(Pvap, Tprev, -1.0,
                                                  formulas::Formulation::Gill);
+        const float rh_percent =
+            relativeHumidityAsPercentage(relativeHumiditySurface[rSort[ilocs]]);
         Tprev = formulas::VirtualTemp_From_Rh_Psat_P_T(
-            relativeHumiditySurface[rSort[ilocs]], Pvap, Pprev, Tprev,
-            formulas::Formulation::DEFAULT);
+            rh_percent, Pvap, Pprev, Tprev, formulas::Formulation::DEFAULT);
       }
 
     } else {
@@ -196,8 +202,10 @@ void Cal_PressureFromHeightForProfile::methodDEFAULT(
                                                  formulas::Formulation::Sonntag);
           Pvap = formulas::SatVaporPres_correction(
               Pvap, Tprev, -1.0, formulas::Formulation::Gill);
+          const float rh_percent =
+              relativeHumidityAsPercentage(relativeHumidity[rSort[ilocs]]);
           Tcurrent = formulas::VirtualTemp_From_Rh_Psat_P_T(
-              relativeHumidity[rSort[ilocs]], Pvap, Pprev, Tcurrent,
+              rh_percent, Pvap, Pprev, Tcurrent,
               formulas::Formulation::DEFAULT);
         }
       } else {
@@ -313,4 +321,3 @@ void Cal_PressureFromHeightForICAO::methodDEFAULT(const std::vector<bool> &apply
                  getDerivedGroup(pressureGroup_));
 }
 }  // namespace ufo
-

@@ -1,0 +1,40 @@
+# Verifies that the BackgroundErrorVertInterp obs operator produces correct obs diagnostics
+# when using a "logarithmic" vertical coordinate (air pressure) and scaling the output.
+# The scaling field chosen is ObsError/airTemperature. This ensures that all combinations of
+# (missing/non-missing) values for both air pressure and the scaling field are covered.
+
+time window:
+  begin: 2018-04-14T20:00:00Z
+  end: 2018-04-15T03:00:00Z
+obs space:
+  name: Sondes
+  obsdatain:
+    engine:
+      type: H5File
+      obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_missingp.nc4
+# obsdataout:
+#   engine:
+#     type: H5File
+#     obsfile: Data/sondes_obs_2018041500_s_vertinterp_pressure_out.nc4
+  simulated variables: [airTemperature, specificHumidity, windNorthward, windEastward]
+obs operator:
+  name: Composite
+  components:
+  # operator used to evaluate H(x)
+  - name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
+  # operator used to evaluate background errors
+  - name: BackgroundErrorVertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
+    observation vertical coordinate group: MetaData
+    vertical coordinate: background_error_air_pressure
+    error scaling field: airTemperature
+    error scaling field group: ObsError
+geovals:
+  filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
+obs diagnostics:
+  variables: [northward_wind_background_error, water_vapor_mixing_ratio_wrt_moist_air_background_error]
+reference obs diagnostics:
+  filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_obsdiag_scaled_obsspace_missing_2018041500_s.nc4
+tolerance: 1.e-4

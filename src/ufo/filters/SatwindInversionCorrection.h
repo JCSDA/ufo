@@ -46,8 +46,9 @@ class SatwindInversionCorrectionParameters : public FilterParametersBase {
  public:
   /// Name of the observation pressure variable to correct
   oops::RequiredParameter<Variable> obs_pressure{"observation pressure", this};
-  /// Relative humidity (%) threshold value
-  oops::RequiredParameter<float> rh_threshold{"RH threshold", this};
+  /// Relative humidity threshold value relating to a GeoVaLs
+  /// therefore in fractional units (0.0 - 1.0)
+  oops::RequiredParameter<float> model_rh_threshold{"model RH threshold", this};
   /// Minimum AMV pressure (Pa) to consider for correction - set default
   oops::Parameter<float> min_pressure{"minimum pressure", 70000.0, this};
   /// Maximum model pressure (Pa) to consider - set default

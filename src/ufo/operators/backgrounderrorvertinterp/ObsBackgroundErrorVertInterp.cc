@@ -79,6 +79,7 @@ void ObsBackgroundErrorVertInterp::simulateObs(const GeoVaLs & geovals, ioda::Ob
                                                  verticalCoordinate.c_str(),
                                                  geovals.toFortran(), odb_, hofx.nlocs(),
                                                  variables,
+                                                 parameters_.toConfiguration(),
                                                  ydiags.toFortran());
 
   oops::Log::trace() << "ObsBackgroundErrorVertInterp::simulateObs done" <<  std::endl;

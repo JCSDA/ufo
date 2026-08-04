@@ -22,6 +22,7 @@ Cal_RelativeHumidity::Cal_RelativeHumidity(
     ioda::ObsDataVector<int> &flags,
     ioda::ObsDataVector<float> &obserr)
   : TransformBase(options, data, flags, obserr),
+      relativeHumidityUnits_(options.RelativeHumidityUnits),
       allowSuperSaturation_(options.AllowSuperSaturation),
       specifichumidityvariable_(options.SpecificHumidityVariable),
       pressurevariable_(options.PressureVariable),
@@ -94,7 +95,7 @@ Method: -
   specific humidity (over ice below 0C) at the air temperature are calculated.
   Relative humidity is then calculated using :
 
-         RH = (QSAT(DEW POINT)/QSAT(DRY BULB))*100
+         RH = (QSAT(DEW POINT)/QSAT(DRY BULB))*relativeHumidityAtSaturation()
 
    For some temperatures (e.g. when dew point = temperature), supersaturation
    w.r.t ice may occur.
@@ -225,9 +226,11 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
         // if saturated specific humidities are positive calculate relative
         // humidity
         if (Q_sub_s_w > 0 && Q_sub_s_w_ice > 0) {
-          relativeHumidity[iloc] = (Q_sub_s_w / Q_sub_s_w_ice) * 100.0;
+          relativeHumidity[iloc] =
+              (Q_sub_s_w / Q_sub_s_w_ice) * relativeHumidityAtSaturation();
           if (!allowSuperSaturation_)
-            relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
+            relativeHumidity[iloc] = std::min(relativeHumidityAtSaturation(),
+                                              relativeHumidity[iloc]);
         }
       // if relative humidity (Rh) is reported (small minority of stations)
       // update from Rh over water (reported) to Rh over ice if necessary
@@ -240,7 +243,8 @@ void Cal_RelativeHumidity::methodUKMO(const std::vector<bool> &apply) {
           evaluateSatSpecHumidity(temperature, temperature);
           relativeHumidity[iloc] *= (Q_sub_s_w / Q_sub_s_w_ice);
           if (!allowSuperSaturation_)
-            relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
+            relativeHumidity[iloc] = std::min(relativeHumidityAtSaturation(),
+                                              relativeHumidity[iloc]);
         }
       }
     }
@@ -263,16 +267,17 @@ Method: -
   above water for temperatures greater than 0 and above ice below zero.
   Relative humidity is then calculated using :
 
-    RH = (Mixing_Ratio/QSAT(DRY BULB))*100
+    RH = (Mixing_Ratio/QSAT(DRY BULB))*relativeHumidityAtSaturation()
 
   The option AllowSuperSaturation (false by default) controls whether upper air relative humidity
-  is capped at 100%.
+  is capped at relativeHumidityAtSaturation() (1 or 100 depending on chosen units).
 
   Example:
   \code{.unparsed}
   obs filter:
   - filter: Variable Transforms
     Transform: RelativeHumidity
+    observation relative humidity units: percentage
     Method: UKMOmixingratio
     AllowSuperSaturation: false
   \endcode
@@ -340,13 +345,15 @@ void Cal_RelativeHumidity::methodUKMOmixingratio(const std::vector<bool> &apply)
 
         // Calculate RH
         if (mixRatio >= 0 && Q_sub_s > 0) {
-          relativeHumidity[iloc] = (mixRatio / Q_sub_s) * 100.0f;
+          relativeHumidity[iloc] =
+              (mixRatio / Q_sub_s) * relativeHumidityAtSaturation();
         } else {
           relativeHumidity[iloc] = missingValueFloat;
         }
         if (relativeHumidity[iloc] != missingValueFloat &&
             !allowSuperSaturation_) {
-          relativeHumidity[iloc] = std::min(100.0f, relativeHumidity[iloc]);
+          relativeHumidity[iloc] =
+              std::min(relativeHumidityAtSaturation(), relativeHumidity[iloc]);
         }
       }
     }
@@ -411,8 +418,9 @@ void Cal_RelativeHumidity::methodDEFAULT(
       // Convert specific humidity to water vapor mixing ratio
       qv = std::max(1.0e-12f, specificHumidity[jobs]/(1.0f-specificHumidity[jobs]));
 
-      // Final RH (which can be greater than 100%) is q/qsat, but set sensible lowest limit
-      relativeHumidity[jobs] = std::max(1.0e-6f, qv/qvs);
+      // Final RH (which can be greater than fully saturated) is q/qsat, but set
+      // sensible lowest limit
+      relativeHumidity[jobs] = std::max(1.0e-6f, qv/qvs) * relativeHumidityAtSaturation();
     }
   }
   putObservation(relativehumidityvariable_, relativeHumidity);
@@ -430,6 +438,7 @@ Cal_SpecificHumidity::Cal_SpecificHumidity(
     ioda::ObsDataVector<int> &flags,
     ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr),
+      relativeHumidityUnits_(options.RelativeHumidityUnits),
       specifichumidityvariable_(options.SpecificHumidityVariable),
       pressurevariable_(options.PressureVariable),
       pressureat2mvariable_(options.PressureAt2MVariable),
@@ -538,7 +547,7 @@ void Cal_SpecificHumidity::methodQSat(
           formulas::Formulation::Gill);
       float qsat = formulas::Qsat_From_Psat(esat_air, pressure[jobs],
                                             formulas::Formulation::GillUKMO);
-      specificHumidity[jobs] = qsat * relativeHumidity[jobs];
+      specificHumidity[jobs] = qsat * relativeHumidity[jobs] / relativeHumidityAtSaturation();
     }
   }
   putObservation(specifichumidityvariable_, specificHumidity);
@@ -633,7 +642,8 @@ void Cal_SpecificHumidity::methodDEFAULT(
             airTemperature[jobs], SatVaporPres_fromTemp_form);
         esat = std::min(pressure[jobs]*0.15f, satVaporPres);
         qvs = Constants::rd_over_rv * esat/(pressure[jobs]-esat);
-        qv = std::max(1.0e-12f, relativeHumidity[jobs]*qvs);
+        qv = std::max(1.0e-12f, relativeHumidity[jobs] * qvs /
+                                    relativeHumidityAtSaturation());
         specificHumidity[jobs] = std::max(1.0e-12f, qv/(1.0f+qv));
       }
     }

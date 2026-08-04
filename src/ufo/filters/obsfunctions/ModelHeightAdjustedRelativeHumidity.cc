@@ -33,6 +33,9 @@ ModelHeightAdjustedRelativeHumidity::ModelHeightAdjustedRelativeHumidity(
 
   // Required observation station height and temperature
   parameters_.validateAndDeserialize(conf);
+  observationRelativeHumidityAtSaturation_ = (
+    parameters_.observation_relative_humidity_units.value() ==
+    RelativeHumidityUnits::PERCENTAGE) ? 100.0f : 1.0f;
   const Variable elevation = parameters_.elevation.value();
   const Variable temperature = parameters_.temperature.value();
   invars_ += elevation;
@@ -57,23 +60,29 @@ void ModelHeightAdjustedRelativeHumidity::compute(const ObsFilterData & in,
 
   const float missing = util::missingValue<float>();
 
-  // Maximum values of RH_ice for temperatures 0 to -40 deg C
-  const std::vector<float>  rhmax{100.00, 100.98, 101.97, 102.96, 103.97, 104.99,
-                                  106.01, 107.05, 108.10, 109.16, 110.23, 111.31,
-                                  112.40, 113.51, 114.62, 115.75, 116.88, 118.03,
-                                  119.19, 120.36, 121.54, 122.74, 123.94, 125.15,
-                                  126.38, 127.62, 128.87, 130.12, 131.39, 132.67,
-                                  133.96, 135.26, 136.58, 137.90, 139.23, 140.57,
-                                  141.92, 143.27, 144.64, 146.02, 147.40};
+  // Maximum values of RH_ice as a fraction for temperatures 0 to -40 deg C
+  std::vector<float> rhmax{1.0000, 1.0098, 1.0197, 1.0296, 1.0397, 1.0499,
+                           1.0601, 1.0705, 1.0810, 1.0916, 1.1023, 1.1131,
+                           1.1240, 1.1351, 1.1462, 1.1575, 1.1688, 1.1803,
+                           1.1919, 1.2036, 1.2154, 1.2274, 1.2394, 1.2515,
+                           1.2638, 1.2762, 1.2887, 1.3012, 1.3139, 1.3267,
+                           1.3396, 1.3526, 1.3658, 1.3790, 1.3923, 1.4057,
+                           1.4192, 1.4327, 1.4464, 1.4602, 1.4740};
+
+  // Convert rhmax to percentage if observation variable is a percentage.
+  std::transform(rhmax.begin(), rhmax.end(), rhmax.begin(),
+            [this](double rh) -> double {return rh * observationRelativeHumidityAtSaturation_;});
 
   // compute relative humidity correction and adjusted relative humidity.
+  const float rhCorrectionPerMeter = 0.0001f * observationRelativeHumidityAtSaturation_;
   for (size_t jj = 0; jj < nlocs; ++jj) {
     if (StationHeight[jj] == missing || ModelHeight[jj] == missing || rh[jj] == missing) {
       out[0][jj] = missing;
     } else {
       int Tbin = std::ceil(Constants::t0c - T[jj]);
       Tbin = std::max(0, std::min(40, Tbin));
-      float CorrectedRH = std::max(rh[jj] - 0.01*(StationHeight[jj] - ModelHeight[jj]), 0.0);
+      float CorrectedRH = std::max(
+        rh[jj] - rhCorrectionPerMeter*(StationHeight[jj] - ModelHeight[jj]), 0.0f);
       CorrectedRH = std::min(CorrectedRH, rhmax[Tbin]);
       out[0][jj] = CorrectedRH;
     }

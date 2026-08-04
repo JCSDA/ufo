@@ -32,6 +32,7 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
+    observation relative humidity units: percentage
   HofX: HofX
   passedBenchmark: 9654
   benchmarkFlag: 24

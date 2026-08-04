@@ -35,6 +35,7 @@ observations:
     flagBasicChecksFail: true
     PrintStationID: true
     BChecks_Skip: true
+    observation relative humidity units: percentage
   HofX: HofX
   obs diagnostics:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_bkgqc_obsdiagnostics_repobs.nc4

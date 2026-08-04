@@ -19,12 +19,39 @@
 
 namespace ufo {
 
+enum class RelativeHumidityUnits { PERCENTAGE, FRACTION };
+
+struct RelativeHumidityUnitsParameterTraitsHelper {
+  typedef RelativeHumidityUnits EnumType;
+  static constexpr char enumTypeName[] = "RelativeHumidityUnits";
+  static constexpr util::NamedEnumerator<RelativeHumidityUnits> namedValues[] =
+      {{RelativeHumidityUnits::PERCENTAGE, "percentage"},
+       {RelativeHumidityUnits::FRACTION, "fraction"}};
+};
+
+}  // namespace ufo
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::RelativeHumidityUnits> :
+    public EnumParameterTraits<ufo::RelativeHumidityUnitsParameterTraitsHelper>
+{};
+
+}  // namespace oops
+
+namespace ufo {
+
 /// Configuration parameters for the variable transformation of specific humidity to
 /// relative humidity
 class Cal_HumidityParameters: public VariableTransformParametersBase {
   OOPS_CONCRETE_PARAMETERS(Cal_HumidityParameters, VariableTransformParametersBase);
 
  public:
+  /// Units of relative humidity to read in or write out - either percentage or
+  /// fraction
+  oops::OptionalParameter<ufo::RelativeHumidityUnits> RelativeHumidityUnits{
+      "observation relative humidity units", this};
   /// Should we allow super-saturated relative humidity? [Optional]:
   /// By default \e AllowSuperSaturation is set to \e false.
   /// See ReadTheDoc for more details
@@ -69,6 +96,7 @@ class Cal_HumidityParameters: public VariableTransformParametersBase {
 * - filter: Variables Transform
 *   Transform: ["RelativeHumidity"]
 *   Method: UKMO    # Using UKMO method
+*   observation relative humidity units: percentage
 * \endcode
 *
 * See Cal_HumidityParameters for filter setup.
@@ -85,6 +113,7 @@ class Cal_RelativeHumidity : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  boost::optional<ufo::RelativeHumidityUnits> relativeHumidityUnits_;
   bool allowSuperSaturation_;
   std::string specifichumidityvariable_;
   std::string pressurevariable_;
@@ -98,6 +127,17 @@ class Cal_RelativeHumidity : public TransformBase {
   std::string dewpointtemperaturevariable_;
   std::string dewpointtemperatureat2mvariable_;
   std::string virtualtempvariable_;
+  float relativeHumidityAtSaturation() const {
+      if (!relativeHumidityUnits_) {
+        throw eckit::BadParameter(
+            "Missing required parameter 'observation relative humidity units' "
+            "when relative humidity is used",
+            Here());
+      }
+      return (*relativeHumidityUnits_ == RelativeHumidityUnits::PERCENTAGE)
+               ? 100.0f
+               : 1.0f;
+  }
   // list of specific implementation(s) - This is controlled by "method"
   void methodDEFAULT(const std::vector<bool> &apply,
                      formulas::Formulation SatVaporPres_fromTemp_form);
@@ -120,6 +160,7 @@ class Cal_RelativeHumidity : public TransformBase {
 * - filter: Variables Transform
 *   Transform: ["SpecificHumidity"]
 *   Method: UKMO            # Using UKMO method
+*   observation relative humidity units: percentage
 * \endcode
 *
 * See VariableTransformParametersBase for filter setup.
@@ -136,6 +177,7 @@ class Cal_SpecificHumidity : public TransformBase {
   void runTransform(const std::vector<bool> &apply) override;
 
  private:
+  boost::optional<ufo::RelativeHumidityUnits> relativeHumidityUnits_;
   std::string specifichumidityvariable_;
   std::string pressurevariable_;
   std::string pressureat2mvariable_;
@@ -143,6 +185,17 @@ class Cal_SpecificHumidity : public TransformBase {
   std::string temperaturevariable_;
   std::string relativehumidityvariable_;
   std::string dewpointtemperaturevariable_;
+  float relativeHumidityAtSaturation() const {
+      if (!relativeHumidityUnits_) {
+        throw eckit::BadParameter(
+            "Missing required parameter 'observation relative humidity units' "
+            "when relative humidity is used",
+            Here());
+      }
+      return (*relativeHumidityUnits_ == RelativeHumidityUnits::PERCENTAGE)
+               ? 100.0f
+               : 1.0f;
+  }
   // list of specific implementation(s) - This is controlled by "method"
   void methodQSat(const std::vector<bool> &apply,
                   formulas::Formulation SatVaporPres_fromTemp_form);

@@ -419,8 +419,10 @@ subroutine vertinterp_simobs_tl_(self, geovals, obss, nvars, nlocs, hofx)
     ! Scaling to hofx
     if (self%hofx_scaling) then
       do iobs = 1, nlocs
-        if (hofx(ivar,iobs) /= missing) then
+        if ((hofx(ivar,iobs) /= missing) .and. (self%scaling_field(iobs) /= missing)) then
           hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+        else
+          hofx(ivar,iobs) = missing
         end if
       end do
     end if
@@ -464,8 +466,10 @@ subroutine vertinterp_simobs_ad_(self, geovals, obss, nvars, nlocs, hofx_in)
     ! Scaling to hofx
     if (self%hofx_scaling) then
       do iobs = 1, nlocs
-        if (hofx(ivar,iobs) /= missing) then
+        if ((hofx(ivar,iobs) /= missing) .and. (self%scaling_field(iobs) /= missing)) then
           hofx(ivar,iobs) = hofx(ivar,iobs) * self%scaling_field(iobs)
+        else
+          hofx(ivar,iobs) = missing
         end if
       end do
     end if

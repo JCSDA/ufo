@@ -94,12 +94,14 @@ class StableLayersCloudTopPressureParameters : public oops::Parameters {
      1.0,
      this};
 
-  /// Relative humidity density.
-  oops::Parameter<float> relativeHumidityDensity
-    {"relative humidity density",
-     "Parameter that controls the density of the relative humidity weights (default=1.0).",
-     1.0,
-     this};
+  /// Relative humidity density, in units of model relative humidity (i.e. as a
+  /// fraction rather than a percentage).
+  oops::Parameter<float> relativeHumidityDensity{
+      "relative humidity density as a fraction",
+      "Parameter that controls the density of the relative humidity weights, "
+      "in units of model relative humidity (i.e. as a fraction rather than a "
+      "percentage) (default=1.0).",
+      1.0, this};
 
   /// Relative humidity offset.
   oops::Parameter<float> relativeHumidityOffset
@@ -157,4 +159,3 @@ class StableLayersCloudTopPressure : public ObsFunctionBase<float> {
 }  // namespace ufo
 
 #endif  // UFO_FILTERS_OBSFUNCTIONS_STABLELAYERSCLOUDTOPPRESSURE_H_
-

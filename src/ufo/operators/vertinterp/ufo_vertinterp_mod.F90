@@ -389,7 +389,12 @@ subroutine vertinterp_simobs_(self, geovals, obss, nvars, nlocs, hofx)
     do iobsvar = 1, size(self%obsvarindices)
       ivar = self%obsvarindices(iobsvar)
       do iobs = 1, nlocs
-        hofx(ivar,iobs) = hofx(ivar,iobs) * scaling_field(iobs)
+        if ((hofx(ivar,iobs) /= missing) .and. &
+            (scaling_field(iobs) /= missing)) then
+           hofx(ivar,iobs) = hofx(ivar,iobs) * scaling_field(iobs)
+        else
+           hofx(ivar,iobs) = missing
+        end if
       end do
     end do
   end if

@@ -91,7 +91,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
   const size_t nlocs = obsdb_.nlocs();
 
 // Get parameters from options.
-  const float rh_threshold = parameters_.rh_threshold.value();
+  const float model_rh_threshold = parameters_.model_rh_threshold.value();
   const float min_pressure = parameters_.min_pressure.value();
   const float max_pressure = parameters_.max_pressure.value();
   const float inversion_temperature = parameters_.inversion_temperature.value();
@@ -183,7 +183,7 @@ void SatwindInversionCorrection::applyFilter(const std::vector<bool> & apply,
               model_vcoord_profile[ilev] < inversion_base &&
               firsttime) {
             //  Check humidity of inversion top
-            if (model_rh_profile[ilev] < rh_threshold) {
+            if (model_rh_profile[ilev] < model_rh_threshold) {
               temp_inversion_top = model_temp_profile[ilev];
               firsttime = false;
             } else {

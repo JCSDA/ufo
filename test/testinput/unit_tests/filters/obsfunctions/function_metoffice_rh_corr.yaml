@@ -32,6 +32,7 @@ observations:
         name: ObsFunction/MetOfficeRelativeHumidityCorrection
         options:
           observed pressure: MetaData/pressure
+          output relative humidity units: percentage
   compareVariables:
   - reference:
       name: TestReference/relativeHumidity
@@ -56,6 +57,7 @@ observations:
         name: ObsFunction/MetOfficeRelativeHumidityCorrection
         options:
           observed pressure: MetaData/pressure
+          output relative humidity units: percentage
           capsupersat: true
   compareVariables:
   - reference:

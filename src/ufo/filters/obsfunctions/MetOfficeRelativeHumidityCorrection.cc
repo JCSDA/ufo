@@ -31,6 +31,12 @@ MetOfficeRelativeHumidityCorrection::MetOfficeRelativeHumidityCorrection
   // Validate and deserialize options
   options_.validateAndDeserialize(conf);
 
+  // Create the scaling factor depending on whether observation RH is in percentage or fraction.
+  // If in percentage, the scaling factor is 100.0, otherwise it is 1.0.
+  observationRelativeHumidityAtSaturation_ = (
+    options_.output_relative_humidity_units.value() ==
+    RelativeHumidityUnits::PERCENTAGE) ? 100.0f : 1.0f;
+
   // Observed air pressure
   invars_ += Variable(options_.observed_pressure.value());
 
@@ -119,7 +125,8 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
 
     // Compute relative humidity from specific humidity and saturation mixing ratio.
     std::transform(gv_q.cbegin(), gv_q.cend(), gv_qsat.cbegin(), rh_from_q.begin(),
-                   [](double q, double qsat) -> double {return 100.0 * q / qsat;});
+                   [](double q, double qsat) -> double {
+                    return q / qsat;});
 
     // Interpolation utility for calculated rh.
     ufo::PiecewiseLinearInterpolation interpolate_rh_from_q
@@ -130,14 +137,14 @@ void MetOfficeRelativeHumidityCorrection::compute(const ObsFilterData & in,
 
     // Cap supersaturated relative humidity if required.
     if (options_.capsupersat) {
-      if (interp_rh > 100.0)
-        interp_rh = 100.0;
-      if (interp_rh_from_q > 100.0)
-        interp_rh_from_q = 100.0;
+      if (interp_rh > 1.0f)
+        interp_rh = 1.0f;
+      if (interp_rh_from_q > 1.0f)
+        interp_rh_from_q = 1.0f;
     }
 
     // Output correction factor.
-    out[0][jloc] = interp_rh - interp_rh_from_q;
+    out[0][jloc] = (interp_rh - interp_rh_from_q) * observationRelativeHumidityAtSaturation_;
   }
 
   oops::Log::trace() << "MetOfficeRelativeHumidityCorrection compute complete" << std::endl;

@@ -56,6 +56,7 @@ observations:
     u background error name: windEastward
     v background error name: windNorthward
     RH background error name: relativeHumidity
+    observation relative humidity units: percentage
   HofX: HofX
   passedBenchmark: 454
   benchmarkFlag: 24
@@ -80,6 +81,7 @@ observations:
     u background error name: windEastward
     v background error name: windNorthward
     RH background error name: relativeHumidity
+    observation relative humidity units: percentage
   HofX: HofX
   expectExceptionWithMessage:  Element #2 of the 'observations' list requires an 'obs diagnostics.filename' section
 # Assign new background errors to the ObsDiag group rather than retrieving them correctly.
@@ -116,6 +118,6 @@ observations:
     u background error name: windEastward
     v background error name: windNorthward
     RH background error name: relativeHumidity
+    observation relative humidity units: percentage
   HofX: HofX
   expectExceptionWithMessage:  Element #3 of the 'observations' list requires an 'obs diagnostics.filename' section
-

@@ -21,6 +21,7 @@ observations:
         name: MetaData/stationElevation
       temperature:
         name: TestReference/airTemperatureAt2M
+      observation relative humidity units: percentage
     variables: [relativeHumidityAt2M]
     tolerance: 1.0e-6
 

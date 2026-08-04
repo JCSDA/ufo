@@ -25,6 +25,7 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMOmixingratio
+    observation relative humidity units: percentage
     AllowSuperSaturation: true
     pressure variable: "pressure"
     temperature variable: "airTemperature"
@@ -58,6 +59,7 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMOmixingratio
+    observation relative humidity units: percentage
     AllowSuperSaturation: false
     pressure variable: "pressure"
     temperature variable: "airTemperature"
@@ -91,6 +93,7 @@ observations:
   - filter: Variable Transforms
     Transform: RelativeHumidity
     Method: UKMOmixingratio
+    observation relative humidity units: percentage
     AllowSuperSaturation: true
     pressure variable: "pressure"
     temperature variable: "airTemperature"
@@ -103,4 +106,3 @@ observations:
       test:
         name: DerivedObsValue/relativeHumidity
       relTol: 1.0e-5
-

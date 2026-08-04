@@ -39,6 +39,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: MetaData/relativeHumidityAt2M_A
           pressure variable:  # Required
@@ -101,6 +102,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: MetaData/relativeHumidityAt2M_B
           pressure variable:  # Required
@@ -141,6 +143,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: MetaData/relativeHumidityAt2M_C
           pressure variable:  # Required
@@ -181,6 +184,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: MetaData/relativeHumidityAt2M_D
           pressure variable:  # Required
@@ -221,6 +225,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: MetaData/relativeHumidityAt2M_E
           pressure variable:  # Required
@@ -280,6 +285,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: ObsValue/relativeHumidity
           pressure variable:  # Required
@@ -287,6 +293,55 @@ observations:
           temperature variable: # Required
             name: ObsValue/airTemperature
           critical relative humidity: 0.940  # Required
+          cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
+          cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
+          cloud cover parameter 3: 1.047197551  # pi/3 - Required
+          total water relative humidity parameter 1: 0.5  # Required
+          total water relative humidity parameter 2: 2.0  # Required
+          total water relative humidity parameter 3: 2.0  # Required
+  compareVariables:
+    - reference:
+        name: TestReference/diagnosedVisibility
+      test:
+        name: MetaData/diagnosedVisibility
+      relTol: 1.0e-4
+
+# As above, but with Relative Humidity as a percentage
+- obs space:
+    name: Test visibility diagnostic - different values per ob - RH percentage
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/visibility_diagnostic.nc4
+    simulated variables: [relativeHumidity, airTemperature, surfacePressure]
+  obs filters:
+
+  - filter: Variable Assignment
+    assignments:
+
+    - name: MetaData/relativeHumidityPercentage
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: ObsValue/relativeHumidity
+          total coefficient: 100.0
+
+    - name: MetaData/diagnosedVisibility
+      type: float
+      function:
+        name: ObsFunction/VisibilityDiagnostic
+        options:
+          aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: percentage
+          relative humidity variable:  # Required
+            name: MetaData/relativeHumidityPercentage
+          pressure variable:  # Required
+            name: ObsValue/surfacePressure
+          temperature variable: # Required
+            name: ObsValue/airTemperature
+          critical relative humidity: 94.0  # Required
           cloud cover parameter 1: 1.060660172  # 3*sqrt(2)/4 - Required
           cloud cover parameter 2: 2.121320344  # 3*sqrt(2)/2 - Required
           cloud cover parameter 3: 1.047197551  # pi/3 - Required
@@ -318,6 +373,7 @@ observations:
         name: ObsFunction/VisibilityDiagnostic
         options:
           aerosol mass concentration: 1E-9  # Required
+          observation relative humidity units: fraction
           relative humidity variable:  # Required
             name: ObsValue/relativeHumidity
           pressure variable:  # Required

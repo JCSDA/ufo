@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2021 UK Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_PROFILE_OBSPROFILEAVERAGEPARAMETERS_H_
@@ -14,6 +14,7 @@
 #include "oops/util/parameters/NumericConstraints.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/Variable.h"
@@ -73,6 +74,10 @@ class ObsProfileAverageParameters : public ObsOperatorParametersBase {
                                              "Name of air pressure group",
                                              "ObsValue",
                                              this};
+
+  oops::Parameter<float> scalingFactor{
+      "scaling factor", "Scaling factor for to apply to input simulated variable GeoVaLs", 1.0,
+      this};
 };
 
 }  // namespace ufo

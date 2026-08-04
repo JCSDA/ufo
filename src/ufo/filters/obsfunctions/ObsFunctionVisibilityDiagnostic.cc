@@ -22,10 +22,20 @@ static ObsFunctionMaker<VisibilityDiagnostic> makerVisibilityDiagnostic_(
     "VisibilityDiagnostic");
 
 VisibilityDiagnostic::VisibilityDiagnostic(
-    const eckit::LocalConfiguration& conf) {
+    const eckit::LocalConfiguration& conf)
+    : options_(oops::validateAndDeserialize<VisibilityDiagnosticParameters>(
+          conf)),
+      relativeHumidityAtSaturation_((options_.rhUnits.value() ==
+                                     RelativeHumidityUnits::PERCENTAGE)
+                                        ? 100.0f
+                                        : 1.0f) {
+  if (options_.rh.value().group() == "GeoVaLs")
+    invars_ += options_.rh.value();
+  if (options_.p.value().group() == "GeoVaLs")
+    invars_ += options_.p.value();
+  if (options_.t.value().group() == "GeoVaLs")
+    invars_ += options_.t.value();
   oops::Log::trace() << "VisibilityDiagnostic constructor" << std::endl;
-  // Check options
-  options_.validateAndDeserialize(conf);
 }
 
 VisibilityDiagnostic::~VisibilityDiagnostic() {
@@ -48,8 +58,15 @@ void VisibilityDiagnostic::compute(const ObsFilterData& in,
   in.get(options_.p.value(), p);
   in.get(options_.t.value(), t);
 
+  // Make sure rh is in fraction but preserve missing values
+  for (float &rh_val : rh) {
+    if (rh_val != missing) {
+      rh_val /= relativeHumidityAtSaturation_;
+    }
+  }
+
   // Controlling parameters (see header file for details)
-  const float rh_crit = options_.rh_crit.value();
+  const float rh_crit = options_.rh_crit.value() / relativeHumidityAtSaturation_;
   const float ccp1 = options_.ccp1.value();
   const float ccp2 = options_.ccp2.value();
   const float ccp3 = options_.ccp3.value();
@@ -72,8 +89,22 @@ void VisibilityDiagnostic::compute(const ObsFilterData& in,
       options_.particle_size_weighting.value();
   const float visibility_limit = options_.visibility_limit.value();
   const float q_tot_min = options_.q_tot_min.value();
-  const float rh_tot_min = options_.rh_tot_min.value();
-  const float rh_tot_max = options_.rh_tot_max.value();
+  // Default values for rh_tot_min and rh_tot_max are set here rather than in
+  // the header file to allow for the relative humidity units to be taken into
+  // account. Outputs must always be fractions, but if user has said that
+  // `observation relative humidity units` is percentage and has set rh_tot_min
+  // or rh_tot_max, then the values must be converted to fractions
+  // (relativeHumidityAtSaturation_ = 100 in this case). If fraction has been
+  // specified then relativeHumidityAtSaturation_ = 1 and the values are
+  // unchanged.
+  const float rh_tot_min =
+      options_.rh_tot_min.value()
+          ? options_.rh_tot_min.value().value() / relativeHumidityAtSaturation_
+          : 0.01f;
+  const float rh_tot_max =
+      options_.rh_tot_max.value()
+          ? options_.rh_tot_max.value().value() / relativeHumidityAtSaturation_
+          : 0.999f;
   const float g_min = options_.g_min.value();
   const float g_max = options_.g_max.value();
   const int max_iterations = options_.max_iterations.value();

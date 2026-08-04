@@ -57,6 +57,9 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
   // Number of profiles in the original ObsSpace.
   const std::size_t nprofs = recnums.size() / 2;
 
+  // Scaling factor to apply to input simulated variable GeoVaLs.
+  const float scalingFactor = data_.getScalingFactor();
+
   // Loop over profiles.
   for (std::size_t jprof = 0; jprof < nprofs; ++jprof) {
     oops::Log::debug() << "Profile " << (jprof + 1) << " / " << nprofs << std::endl;
@@ -89,10 +92,11 @@ void ObsProfileAverage::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
         const std::size_t jloc = slant_path_location[mlev];
         gv.getAtLocation(var_gv, variable, jloc);
         if (data_.geovalsObsSameDir()) {  // geovals and observations are the same way round:
-          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[mlev];
+          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = scalingFactor * var_gv[mlev];
         } else {  // reverse geovals so they're the same way round in extended space as
           // observations / H(x) in original space:
-          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = var_gv[nlevs_var - 1 - mlev];
+          ovec[locsExtended[mlev] * ovec.nvars() + jvar] = scalingFactor *
+            var_gv[nlevs_var - 1 - mlev];
         }
       }
     }

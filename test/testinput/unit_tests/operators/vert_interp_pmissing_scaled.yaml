@@ -1,0 +1,37 @@
+# Test the VertInterp operator with missing air pressure observations and
+# the `hofx scaling field` option.
+# The scaling field chosen is ObsError/airTemperature. This ensures that all combinations of
+# (missing/non-missing) values for both air pressure and the scaling field are covered.
+
+time window:
+  begin: '2018-04-14T20:30:00Z'
+  end: '2018-04-15T03:30:00Z'
+
+observations:
+- obs space:
+    name: Sondes
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sondes_obs_2018041500_s_missingp.nc4
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/sondes_obs_2018041500_s_vertinterp_opr_missingp_out.nc4
+    simulated variables: [airTemperature]
+  obs operator:
+    name: VertInterp
+    observation alias file: ../resources/namemap/test_name_map.yaml
+    observation vertical coordinate: pressure
+    vertical coordinate: air_pressure
+    interpolation method: log-linear
+    hofx scaling field: airTemperature
+    hofx scaling field group: ObsError
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sondes_background_error_vert_interp_air_pressure_geoval_2018041500_s.nc4
+  rms ref: 221.59429268221152
+  tolerance: 1.0e-06
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-11
+    tolerance AD: 1.0e-13

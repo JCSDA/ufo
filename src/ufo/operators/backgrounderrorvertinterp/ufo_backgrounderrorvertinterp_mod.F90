@@ -5,7 +5,7 @@
 
 module ufo_backgrounderrorvertinterp_mod
 
-use, intrinsic :: iso_c_binding,      only: c_ptr
+use, intrinsic :: iso_c_binding,      only: c_ptr, c_char
 use oops_variables_mod, only: oops_variables
 use ufo_geovals_mod,    only: ufo_geovals
 implicit none
@@ -18,13 +18,14 @@ contains
 !> names @p obsvars, fill this diagnostic with estimates of the background error of variable <var>
 !> at observation locations.
 subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoord_group, vcoord_name, &
-                                                      geovals, obsspace, nlocs, obsvars, obsdiags)
+                                                      geovals, obsspace, nlocs, obsvars, conf, obsdiags)
   use kinds,              only: kind_real
   use missing_values_mod, only: missing_value
   use obsspace_mod,       only: obsspace_get_db
   use ufo_vars_mod,       only: MAXVARLEN, var_prs
   use ufo_geovals_mod,    only: ufo_geoval, ufo_geovals, ufo_geovals_get_var
   use vert_interp_mod,    only: vert_interp_weights, vert_interp_apply
+  use fckit_configuration_module, only: fckit_configuration
   implicit none
 
   ! Name of the variable with vertical coordinates of observations
@@ -38,6 +39,7 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
   type(c_ptr), value, intent(in)   :: obsspace
   integer, intent(in)              :: nlocs
   type(oops_variables), intent(in) :: obsvars
+  type(fckit_configuration), intent(in) :: conf
   type(ufo_geovals), intent(inout) :: obsdiags
 
   logical                          :: use_ln
@@ -51,6 +53,11 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
   real(kind_real), allocatable     :: interp_nodes(:)
   real(kind_real)                  :: interp_point
   real(kind_real)                  :: missing
+  logical                          :: error_scaling ! Apply scaling factor to background errors
+  character(kind=c_char,len=:), allocatable :: error_scaling_field
+  character(kind=c_char,len=:), allocatable :: error_scaling_field_group
+  real(kind_real), allocatable     :: scaling_field(:)
+  type(ufo_geoval), pointer        :: scaling_field_gval
 
   character(len=*), parameter      :: suffix = "_background_error"
 
@@ -67,6 +74,19 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
 
   ! Use logarithmic interpolation if the vertical coordinate is background_error_air_pressure
   use_ln = (vcoord_name == "background_error_" // var_prs)
+
+  !> Background error can be scaled by an incoming field from GeoVaLs or ObsSpace
+  error_scaling = .false.
+  if (conf%has("error scaling field")) then
+    error_scaling = .true.
+    ! Get field name
+    call conf%get_or_die("error scaling field", error_scaling_field)
+    ! Get field name group
+    error_scaling_field_group = "GeoVaLs"
+    if (conf%has("error scaling field group")) then
+      call conf%get_or_die("error scaling field group", error_scaling_field_group)
+    end if
+  end if
 
   ! Calculate the interpolation weights
   allocate(interp_nodes(vcoord_profile%nval))
@@ -85,6 +105,18 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
     call vert_interp_weights(vcoord_profile%nval, interp_point, interp_nodes, &
                              wi(iobs), wf(iobs))
   end do
+
+  if (error_scaling) then
+     ! Get the scaling factor
+     allocate(scaling_field(nlocs))
+     if (trim(error_scaling_field_group) == "GeoVaLs") then
+        call ufo_geovals_get_var(geovals, error_scaling_field, scaling_field_gval)
+        scaling_field(:) = scaling_field_gval%vals(1, :)
+     else
+        call obsspace_get_db(obsspace, error_scaling_field_group, error_scaling_field, &
+             scaling_field)
+     end if
+  end if
 
   do ivar = 1, obsdiags%nvar
     varstr = obsdiags%variables(ivar)
@@ -115,6 +147,19 @@ subroutine ufo_backgrounderrorvertinterp_fillobsdiags(obs_vcoord_name, obs_vcoor
                              obsdiags%geovals(ivar)%vals(1,iobs), &
                              wi(iobs), wf(iobs))
     end do
+
+    ! Perform error scaling
+    if (error_scaling) then
+       do iobs = 1, nlocs
+          if ((scaling_field(iobs) /= missing) .and. &
+              (obsdiags%geovals(ivar)%vals(1,iobs) /= missing)) then
+             obsdiags%geovals(ivar)%vals(1,iobs) = obsdiags%geovals(ivar)%vals(1,iobs) * &
+                  scaling_field(iobs)
+          else
+             obsdiags%geovals(ivar)%vals(1,iobs) = missing
+          end if
+       end do
+    end if
   end do
 
   ! Free memory

@@ -14,6 +14,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
                                   # using Default method and default Formulation (Roger 1989)
+    observation relative humidity units: fraction
     pressure group variable: "MetaData"
     pressure variable: "pressure"
     pressure at 2m variable: "stationPressure"
@@ -39,6 +40,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
     Method: UKMO                  # Using UKMO method
+    observation relative humidity units: fraction
     pressure group variable: "MetaData"
     pressure variable: "pressure"
     pressure at 2m variable: "stationPressure"
@@ -64,6 +66,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
     Method: Sonntag                  # Using UKMO method and UKMO default formulation
+    observation relative humidity units: fraction
     pressure group variable: "MetaData"
     pressure variable: "pressure"
     pressure at 2m variable: "stationPressure"
@@ -89,6 +92,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity    # calculate specific humidity from relative humidity
     Method: Walko
+    observation relative humidity units: fraction
     pressure group variable: "MetaData"
     pressure variable: "pressure"
     pressure at 2m variable: "stationPressure"
@@ -114,6 +118,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity
     Method: Murphy
+    observation relative humidity units: fraction
     pressure group variable: "MetaData"
     pressure variable: "pressure"
     pressure at 2m variable: "stationPressure"
@@ -139,6 +144,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
                                   # using Default method and default Formulation (Roger 1989)
+    observation relative humidity units: fraction
     where:
     - variable:
         name: DiagnosticFlags/PermanentStationRejection/stationPressure
@@ -169,6 +175,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity   # calculate specific humidity from relative humidity
                                   # using Default method and default Formulation (Roger 1989)
+    observation relative humidity units: fraction
     pressure group variable: "MetaData"
     pressure variable: "pressure"
     pressure at 2m variable: "stationPressure"
@@ -195,6 +202,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity
     Method: UKMOQsatWater
+    observation relative humidity units: fraction
     pressure group variable: "ObsValue"
     pressure variable: "surfacePressure"
     temperature variable: "airTemperature"
@@ -217,6 +225,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity
     Method: UKMOQsatIceWater
+    observation relative humidity units: fraction
     pressure group variable: "ObsValue"
     pressure variable: "surfacePressure"
     temperature variable: "airTemperature"
@@ -239,6 +248,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity
     Method: UKMOQsatWater
+    observation relative humidity units: fraction
     pressure group variable: "ObsValue"
     pressure variable: "surfacePressure"
     temperature variable: "airTemperature"
@@ -261,6 +271,7 @@ observations:
   - filter: Variable Transforms
     Transform: SpecificHumidity
     Method: UKMOQsatIceWater
+    observation relative humidity units: fraction
     pressure group variable: "ObsValue"
     pressure variable: "surfacePressure"
     temperature variable: "airTemperature"
@@ -271,6 +282,25 @@ observations:
       test:
         name: ObsValue/specificHumidity
       absTol: 1.0e-7
+
+- obs space:
+    name: test_specificHumidity raises exception without observation relative humidity units
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfc_obs_2018041500_metars_small2.nc
+    simulated variables: [relativeHumidity, airTemperature, stationPressure]
+  obs filters:
+  - filter: Variable Transforms
+    Transform: SpecificHumidity   # calculate specific humidity from relative humidity
+                                  # using Default method and default Formulation (Roger 1989)
+    pressure group variable: "MetaData"
+    pressure variable: "pressure"
+    pressure at 2m variable: "stationPressure"
+    temperature variable: "airTemperature"
+    relative humidity variable: "relativeHumidity"
+    specific humidity variable: "specificHumidity"
+  expectExceptionWithMessage: Missing required parameter 'observation relative humidity units'
 
 # The following test is commented out because the HDF5 error causes a significant
 # increase in ctest time, can be added back once that is fixed

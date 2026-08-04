@@ -210,7 +210,7 @@ float VirtualTemp_From_Psat_P_T(float Psat, float P, float T,
 *      - DEFAULT: \f$ \alpha = Psat * Rh * 0.01 \f$
 *
 * \param Rh
-*     Relative humidity
+*     Relative humidity in percentage
 * \param Psat
 *     saturation vapour pressure of pure water vapour
 * \param T

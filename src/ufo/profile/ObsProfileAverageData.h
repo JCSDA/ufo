@@ -58,6 +58,9 @@ namespace ufo {
     /// (Beware, default 'false'!)
     bool geovalsObsSameDir() const {return geovalsObsSameDir_;}
 
+    /// Get the scaling factor to apply to input simulated variable GeoVaLs.
+    float getScalingFactor() const {return options_.scalingFactor.value();}
+
    private:
     /// Set up auxiliary reference variables that are used for comparison with OPS.
     /// These reference variables are called MetOfficeHofX/slant_path_location and

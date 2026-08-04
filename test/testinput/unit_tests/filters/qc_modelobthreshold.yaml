@@ -20,7 +20,7 @@ observations:
   obs filters:
   - filter: ModelOb Threshold
   # Reject any observed Satwind wind components where the model RH at the observation pressure
-  # is less than 30% at 200 hPa or less. The threshold then increases with increasing pressure,
+  # is less than 0.3 at 200 hPa or less. The threshold then increases with increasing pressure,
   # using linear interpolation between points.
     model profile:
       name: GeoVaLs/relative_humidity
@@ -28,7 +28,7 @@ observations:
       name: GeoVaLs/air_pressure
     observation height:
       name: MetaData/pressure
-    thresholds: [50,45,40,30]
+    thresholds: [0.50,0.45,0.40,0.30]
     coordinate values: [100000,80000,50000,20000]
     threshold type: min
   - filter: ModelOb Threshold

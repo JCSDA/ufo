@@ -1,8 +1,8 @@
 /*
  * (C) Crown copyright 2021, Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_PROFILE_PROFILEAVERAGEUTILS_H_
@@ -39,7 +39,8 @@ namespace ufo {
        const std::string & average_name,
        const std::string & qcflags_name,
        const oops::Variable & geovals_testreference_name,
-       const oops::Variable & geovals_qcflags_name);
+       const oops::Variable & geovals_qcflags_name,
+       float geovals_scale = 1.0f);
 
     /// Set values in a profile to missing.
     template <typename T>

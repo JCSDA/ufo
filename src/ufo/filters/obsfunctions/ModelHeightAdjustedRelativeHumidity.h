@@ -11,6 +11,7 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/variabletransforms/Cal_Humidity.h"
 
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
@@ -27,6 +28,10 @@ class ModelHeightAdjustedRelativeHumidityParameters : public oops::Parameters {
   oops::RequiredParameter<Variable> elevation{"elevation", this};
   /// Temperature to be used
   oops::RequiredParameter<Variable> temperature{"temperature", this};
+  /// Units of relative humidity
+  oops::RequiredParameter<RelativeHumidityUnits> observation_relative_humidity_units{
+    "observation relative humidity units",
+    "Units of observation relative humidity (percentage or fraction).", this};
 };
 
 /// \brief  Function to calculate surface relative humidity observation value adjusted from
@@ -48,6 +53,7 @@ class ModelHeightAdjustedRelativeHumidity : public ObsFunctionBase<float> {
  private:
     ModelHeightAdjustedRelativeHumidityParameters parameters_;
     ufo::Variables invars_;
+    float observationRelativeHumidityAtSaturation_;
 };
 }  // namespace ufo
 

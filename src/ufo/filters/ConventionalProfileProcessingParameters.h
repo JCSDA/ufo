@@ -1,8 +1,8 @@
 /*
  * (C) Crown copyright 2020, Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_FILTERS_CONVENTIONALPROFILEPROCESSINGPARAMETERS_H_
@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 
@@ -22,6 +23,8 @@
 #include "ufo/utils/Constants.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 #include "ufo/utils/ProbabilityOfGrossErrorParameters.h"
+
+#include "ufo/variabletransforms/Cal_Humidity.h"
 
 namespace ufo {
 
@@ -202,11 +205,17 @@ namespace ufo {
     /// @name RH check parameters
     /// @{
 
+    /// Units of observed relative humidity - options are "percentage" or
+    /// "fraction"
+    oops::OptionalParameter<RelativeHumidityUnits> relativeHumidityUnits{
+        "observation relative humidity units", this};
+
     /// Initial value of minimum temperature (K)
     oops::Parameter<float> RHCheck_TminInit {"RHCheck_TminInit", 400.0, this};
 
-    /// Tolerance for high level check of relative humidity (%)
-    oops::Parameter<float> RHCheck_SondeRHHiTol {"RHCheck_SondeRHHiTol", 0.0, this};
+    /// Tolerance for high level check of relative humidity (% or fraction,
+    /// depending on `observation relative humidity units`) - default 0.0
+    oops::OptionalParameter<float> RHCheck_SondeRHHiTol {"RHCheck_SondeRHHiTol", this};
 
     /// Threshold for pressure when setting up arrays (Pa)
     oops::Parameter<float> RHCheck_PressInitThresh {"RHCheck_PressInitThresh", 500.0, this};
@@ -220,14 +229,20 @@ namespace ufo {
     /// Threshold for dew point temperature difference (K)
     oops::Parameter<float> RHCheck_tdDiffThresh {"RHCheck_tdDiffThresh", 5.0, this};
 
-    /// Threshold for relative humidity (%)
-    oops::Parameter<float> RHCheck_RHThresh {"RHCheck_RHThresh", 75.0, this};
+    /// Threshold for relative humidity (% or fraction, depending on
+    /// `observation relative humidity units`) - the default scales with the
+    /// chosen `observation relative humidity units` parameter: 75.0 for
+    /// "percentage" or 0.75 for "fraction"
+    oops::OptionalParameter<float> RHCheck_RHThresh {"RHCheck_RHThresh", this};
 
     /// Threshold for pressure difference between adjacent levels (Pa)
     oops::Parameter<float> RHCheck_PressDiffAdjThresh {"RHCheck_PressDiffAdjThresh", 50.0, this};
 
-    /// Threshold for minimum relative humidity (%)
-    oops::Parameter<float> RHCheck_MinRHThresh {"RHCheck_MinRHThresh", 75.0, this};
+    /// Threshold for minimum relative humidity (% or fraction, depending on
+    /// `observation relative humidity units`) - the default scales with the
+    /// chosen `observation relative humidity units` parameter: 75.0 for
+    /// "percentage" or 0.75 for "fraction"
+    oops::OptionalParameter<float> RHCheck_MinRHThresh {"RHCheck_MinRHThresh", this};
 
     /// Upper threshold for Tmin in moisture check
     oops::Parameter<float> RHCheck_TminThresh {"RHCheck_TminThresh", 200.0, this};
@@ -248,13 +263,15 @@ namespace ufo {
     /// @name Background check (T, RH, UV) parameters
     /// @{
 
-    /// Prior probability of 'bad' observations for T
+    /// Prior probability density of 'bad' observations for T
     oops::Parameter<float> BkCheck_PdBad_t {"BkCheck_PdBad_t", 0.05, this};
 
-    /// Prior probability of 'bad' observations for RH
-    oops::Parameter<float> BkCheck_PdBad_rh {"BkCheck_PdBad_rh", 0.05, this};
+    /// Prior probability density of 'bad' observations for RH - default scales
+    /// with the chosen `observation relative humidity units` parameter: 0.0005
+    /// if "fraction" or 0.05 if "percentage".
+    oops::OptionalParameter<float> BkCheck_PdBad_rh {"BkCheck_PdBad_rh", this};
 
-    /// Prior probability of 'bad' observations for u and v
+    /// Prior probability density of 'bad' observations for u and v
     oops::Parameter<float> BkCheck_PdBad_uv {"BkCheck_PdBad_uv", 0.001, this};
 
     /// Observations with a latitude smaller than this value (both N and S)
@@ -277,8 +294,12 @@ namespace ufo {
     oops::Parameter<float> BkCheck_ErrorInflationAbovePsplit
       {"BkCheck_ErrorInflationAbovePsplit", 1.0, this};
 
-    /// Maximum error variance for RH
-    oops::Parameter<float> BkCheck_ErrVarMax_rh {"BkCheck_ErrVarMax_rh", 500.0, this};
+    /// Maximum error variance for RH (% squared or fraction squared, depending
+    /// on `observation relative humidity units`) - default scales with the
+    /// chosen `observation relative humidity units` parameter:
+    /// 0.05 (unitless fraction squared) if "fraction" or 500 (% squared) if
+    /// "percentage" (0.05 * 100.0 % * 100.0 %).
+    oops::OptionalParameter<float> BkCheck_ErrVarMax_rh {"BkCheck_ErrVarMax_rh", this};
 
     /// Pressure thresholds for setting z background errors and 'bad' observation PGE.
     /// This vector must be the same length as BkCheck_zBkgErrs and BkCheck_zBadPGEs.
@@ -417,4 +438,3 @@ namespace ufo {
 }  // namespace ufo
 
 #endif  // UFO_FILTERS_CONVENTIONALPROFILEPROCESSINGPARAMETERS_H_
-

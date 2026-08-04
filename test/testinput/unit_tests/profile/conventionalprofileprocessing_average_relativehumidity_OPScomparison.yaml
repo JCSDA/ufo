@@ -27,10 +27,10 @@ Sondes:
     filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_geovals_extended.nc4
   Conventional Profile Processing:
     Checks: ["Basic", "AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    observation relative humidity units: percentage
     compareWithOPS: true
     flagBasicChecksFail: true
     PrintStationID: true
     Comparison_Tol: 0.1
     alternativeVerticalCoordinate: {"air_pressure_levels_minus_one": "air_pressure_levels_minus_one",
     "LogPA": "air_pressure_levels_minus_one", "ExnerPA": "air_pressure_levels_minus_one"}
-

@@ -55,6 +55,16 @@ class ObsBackgroundErrorVertInterpParameters : public ObsOperatorParametersBase 
 
   /// Name of the GeoVaL storing the interpolation levels of background errors.
   oops::RequiredParameter<std::string> verticalCoordinate{"vertical coordinate", this};
+
+  oops::OptionalParameter<std::string> errorScalingField
+    {"error scaling field",
+     "Name of the variable used to scale the interpolated background errors.",
+     this};
+
+  oops::OptionalParameter<std::string> errorScalingFieldGroup
+    {"error scaling field group",
+     "Group of the variable used to scale the interpolated background errors.",
+     this};
 };
 
 /// \brief An observation operator calculating ObsDiagnostics representing vertically interpolated

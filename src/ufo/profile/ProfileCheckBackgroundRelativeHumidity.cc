@@ -66,7 +66,9 @@ namespace ufo {
     }
 
     // Probability density of 'bad' observations.
-    std::vector <float> PdBad(numProfileLevels, options_.BkCheck_PdBad_rh.value());
+    const float PdBad_rh = options_.BkCheck_PdBad_rh.value().value_or(
+        0.0005 * relativeHumidityAtSaturation());
+    std::vector<float> PdBad(numProfileLevels, PdBad_rh);
     // Local version of relative humidity background error.
     std::vector <float> BackgrErrRH(numProfileLevels, 0.0);
     // Local version of relative humidity observation error.
@@ -83,6 +85,10 @@ namespace ufo {
         ObErrRH[jlev] = sqrt2 * rhObsErr[jlev];
     }
 
+    // 500 %^2 squared or 500 %^2 / (100%)^2 (= 0.05 fraction squared).
+    const float ErrVarMax_rh = options_.BkCheck_ErrVarMax_rh.value().value_or(
+        0.05 * relativeHumidityAtSaturation() * relativeHumidityAtSaturation());
+
     // Calculate probability of gross error.
     ufo::BayesianPGEUpdate(options_.PGEParameters,
                            rhObs,
@@ -96,6 +102,6 @@ namespace ufo {
                            diagFlagsRHPermReject,
                            diagFlagsRHFinalReject,
                            rhPGE,
-                           options_.BkCheck_ErrVarMax_rh.value());
+                           ErrVarMax_rh);
   }
 }  // namespace ufo
