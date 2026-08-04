@@ -141,17 +141,17 @@ void stationPressure_WRFDA::getTemperatureValues(const size_t nobs,
                                                   std::vector<float> & modelVirtualTemp,
                                                   std::vector<float> & obsVirtualTemp) const {
   gv.getAtLevel(modelVirtualTemp, oops::Variable("virtual_temperature"), surface_level_index);
-  if (obsdb.has("ObsValue", "virtualTemperature")) {
-    obsdb.get_db("ObsValue", "virtualTemperature", obsVirtualTemp);
+  if (obsdb.has("ObsValue", "virtualTemperatureAt2M")) {
+    obsdb.get_db("ObsValue", "virtualTemperatureAt2M", obsVirtualTemp);
   } else {
     // If virtual temperature is not available, calculate from air temperature
     obsVirtualTemp.assign(nobs, util::missingValue<float>());
-    if (obsdb.has("ObsValue", "airTemperature")) {
+    if (obsdb.has("ObsValue", "airTemperatureAt2M")) {
        std::vector<float> obsAirTemp(nobs, util::missingValue<float>());
-       obsdb.get_db("ObsValue", "airTemperature", obsAirTemp);
-       if (obsdb.has("ObsValue", "specificHumidity")) {
+       obsdb.get_db("ObsValue", "airTemperatureAt2M", obsAirTemp);
+       if (obsdb.has("ObsValue", "specificHumidityAt2M")) {
           std::vector<float> obsHumidity(nobs, util::missingValue<float>());
-          obsdb.get_db("ObsValue", "specificHumidity", obsHumidity);
+          obsdb.get_db("ObsValue", "specificHumidityAt2M", obsHumidity);
           // Calculate virtual temperature from air temperature and specific humidity
           for (size_t iloc = 0; iloc < nobs; ++iloc) {
              if (obsHumidity[iloc] != util::missingValue<float>() &&
@@ -166,8 +166,8 @@ void stationPressure_WRFDA::getTemperatureValues(const size_t nobs,
           }
         }
     } else {   // Neither virtual temperature nor air temperature is available
-       oops::Log::warning()  << "stationPressure_WRFDA::getDataValues virtualTemperature and "
-            << "airTemperature not found, set to model virtualTemperature" << std::endl;
+       oops::Log::warning()  << "stationPressure_WRFDA::getTemperatureValues virtualTemperatureAt2M"
+            << "and airTemperatureAt2M not found, set to model virtualTemperature" << std::endl;
        for (size_t iloc = 0; iloc < nobs; ++iloc) {
           obsVirtualTemp[iloc] = modelVirtualTemp[iloc];
        }
@@ -564,10 +564,13 @@ void stationPressure_GSL::getDataValues(const ufo::GeoVaLs & gv,
   obsdb.get_db("ObsValue", "stationPressure", obsPressure);
 
   obsVirtualTemp = std::vector<float>(nobs, util::missingValue<float>());
-  if (obsdb.has("ObsValue", "virtualTemperature")) {
-    obsdb.get_db("ObsValue", "virtualTemperature", obsVirtualTemp);
+  if (obsdb.has("ObsValue", "virtualTemperatureAt2M")) {
+    obsdb.get_db("ObsValue", "virtualTemperatureAt2M", obsVirtualTemp);
   }
-  obsdb.get_db("ObsValue", "airTemperature", obsTemp);
+  obsTemp = std::vector<float>(nobs, util::missingValue<float>());
+  if (obsdb.has("ObsValue", "airTemperatureAt2M")) {
+    obsdb.get_db("ObsValue", "airTemperatureAt2M", obsTemp);
+  }
 
   // Get surface height.  If geopotential then convert to geometric height.
   gv.get(modelHeightSurface, oops::Variable(params_.geovarSfcGeomZ.value()));
