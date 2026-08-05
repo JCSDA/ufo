@@ -28,7 +28,8 @@ static LinearObsOperatorMaker<ObsVertInterpTLAD> makerVertInterpTL_("VertInterp"
 
 ObsVertInterpTLAD::ObsVertInterpTLAD(const ioda::ObsSpace & odb,
                                            const Parameters_ & params)
-  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value(),
+                                               params.variableMaps.value())),
     keyOperVertInterp_(0), varin_()
 {
   std::vector<int> operatorVarIndices;

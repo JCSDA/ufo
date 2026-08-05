@@ -28,7 +28,8 @@ static LinearObsOperatorMaker<ObsProfileAverageTLAD> obsProfileAverageMaker_("Pr
 
 ObsProfileAverageTLAD::ObsProfileAverageTLAD(const ioda::ObsSpace & odb,
                                              const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                               parameters.variableMaps.value())),
     odb_(odb), data_(odb, parameters, nameMap_)
 {
   requiredVars_ += data_.requiredVars();

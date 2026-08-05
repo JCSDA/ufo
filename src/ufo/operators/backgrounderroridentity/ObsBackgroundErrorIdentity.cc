@@ -27,7 +27,8 @@ static ObsOperatorMaker<ObsBackgroundErrorIdentity> maker("BackgroundErrorIdenti
 
 ObsBackgroundErrorIdentity::ObsBackgroundErrorIdentity(const ioda::ObsSpace & odb,
                                                        const Parameters_ & parameters)
-  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                         parameters.variableMaps.value())),
     odb_(odb), parameters_(parameters)
 {
   oops::Log::trace() << "ObsBackgroundErrorIdentity constructor start" << std::endl;

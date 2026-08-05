@@ -31,7 +31,8 @@ namespace ufo {
 BackgroundCheck::BackgroundCheck(ioda::ObsSpace & obsdb, const Parameters_ & parameters,
                                  ioda::ObsDataVector<int> & flags,
                                  ioda::ObsDataVector<float> & obserr)
-  : FilterBase(obsdb, parameters, flags, obserr, VariableNameMap(parameters.AliasFile.value())),
+  : FilterBase(obsdb, parameters, flags, obserr, VariableNameMap(parameters.AliasFile.value(),
+                                                                 parameters.variableMaps.value())),
     parameters_(parameters)
 {
   oops::Log::trace() << "BackgroundCheck constructor" << std::endl;

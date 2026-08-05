@@ -27,7 +27,8 @@ static LinearObsOperatorMaker<ObsIdentityTLAD> makerIdentityTL_("Identity");
 // -----------------------------------------------------------------------------
 
 ObsIdentityTLAD::ObsIdentityTLAD(const ioda::ObsSpace & odb, const Parameters_ & parameters)
-    : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())) {
+    : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                                 parameters.variableMaps.value())) {
   oops::Log::trace() << "ObsIdentityTLAD constructor start" << std::endl;
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),

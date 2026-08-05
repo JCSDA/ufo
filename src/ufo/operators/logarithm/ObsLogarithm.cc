@@ -31,7 +31,8 @@ static ObsOperatorMaker<ObsLogarithm> obsLogarithmMaker_("Logarithm");
 
 ObsLogarithm::ObsLogarithm(const ioda::ObsSpace& odb,
                            const Parameters_& parameters)
-    : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+    : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                           parameters.variableMaps.value())),
       odb_(odb) {
   oops::Log::trace() << "ObsLogarithm constructor start" << std::endl;
 

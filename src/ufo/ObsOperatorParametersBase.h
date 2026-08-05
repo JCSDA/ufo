@@ -9,10 +9,12 @@
 #define UFO_OBSOPERATORPARAMETERSBASE_H_
 
 #include <string>
+#include <vector>
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "ufo/utils/VariableNameMap.h"
 
 namespace ioda {
   class ObsVector;
@@ -39,6 +41,11 @@ class ObsOperatorParametersBase : public oops::Parameters {
 
   /// \brief Parameter specifying path to yaml file containing Observation to GeoVaL name mapping
   oops::OptionalParameter<std::string> AliasFile{"observation alias file", this};
+
+  /// \brief Inline variable name mappings (alternative to observation alias file).
+  /// If both are specified, inline maps take precedence over file-based ones for overlapping names.
+  oops::OptionalParameter<std::vector<VariableNameParameters>> variableMaps{
+      "variable maps", this};
 };
 
 // -----------------------------------------------------------------------------

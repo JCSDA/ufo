@@ -27,7 +27,8 @@ static ObsOperatorMaker<ObsIdentity> obsIdentityMaker_("Identity");
 // -----------------------------------------------------------------------------
 
 ObsIdentity::ObsIdentity(const ioda::ObsSpace &odb, const Parameters_ &parameters)
-    : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())) {
+    : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                           parameters.variableMaps.value())) {
   oops::Log::trace() << "ObsIdentity constructor start" << std::endl;
 
   getOperatorVariables(parameters.variables.value(), odb.assimvariables(),

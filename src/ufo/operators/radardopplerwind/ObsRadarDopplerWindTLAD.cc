@@ -26,7 +26,8 @@ static LinearObsOperatorMaker<ObsRadarDopplerWindTLAD> makerRadarDopplerWindTL_(
 
 ObsRadarDopplerWindTLAD::ObsRadarDopplerWindTLAD(const ioda::ObsSpace & odb,
                                                  const Parameters_ & params)
-  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value(),
+                                               params.variableMaps.value())),
     odb_(odb), params_(params)
 {
   const std::vector<std::string> expectedVariables{"radialVelocity"};

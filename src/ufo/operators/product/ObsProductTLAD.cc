@@ -29,7 +29,9 @@ static LinearObsOperatorMaker<ObsProductTLAD> makerProductTL_("Product");
 
 ObsProductTLAD::ObsProductTLAD(const ioda::ObsSpace & odb,
                                  const Parameters_ & parameters)
-  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())), odb_(odb)
+  : LinearObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                               parameters.variableMaps.value())),
+    odb_(odb)
 {
   oops::Log::trace() << "ObsProductTLAD constructor start" << std::endl;
 

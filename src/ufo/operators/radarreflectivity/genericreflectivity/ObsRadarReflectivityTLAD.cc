@@ -27,7 +27,8 @@ makerRadarReflectivityTL_("RadarReflectivity");
 
 ObsRadarReflectivityTLAD::ObsRadarReflectivityTLAD(const ioda::ObsSpace & odb,
                                                    const Parameters_ & params)
-  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value(),
+                                               params.variableMaps.value())),
     odb_(odb)
 {
   oops::Log::trace() << "ObsRadarReflectivityTLAD constructor start" << std::endl;

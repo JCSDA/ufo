@@ -45,7 +45,9 @@ class VariableMapParameters : public oops::Parameters {
 
 class VariableNameMap {
  public:
-    explicit VariableNameMap(const boost::optional<std::string> &);
+    explicit VariableNameMap(
+        const boost::optional<std::string> & aliasFile,
+        const boost::optional<std::vector<VariableNameParameters>> & inlineMaps = boost::none);
     ~VariableNameMap();
 
   oops::Variable convertName(const std::string &) const;

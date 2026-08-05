@@ -11,7 +11,8 @@
 #include "oops/util/Logger.h"
 
 namespace ufo {
-VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile) {
+VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile,
+    const boost::optional<std::vector<VariableNameParameters>> & inlineMaps) {
   Aliases_.emplace("airTemperature", oops::Variable{"air_temperature"});
   Aliases_.emplace("windEastward", oops::Variable{"eastward_wind"});
   Aliases_.emplace("windNorthward", oops::Variable{"northward_wind"});
@@ -31,6 +32,9 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
   Aliases_.emplace("seaSurfaceSalinity", oops::Variable{"sea_surface_salinity"});
   Aliases_.emplace("ozoneProfile", oops::Variable{"mole_fraction_of_ozone_in_air"});
   Aliases_.emplace("seaIceFraction", oops::Variable{"sea_ice_area_fraction"});
+  Aliases_.emplace("airTemperatureAt2M", oops::Variable{"air_temperature_at_2m"});
+  Aliases_.emplace("specificHumidityAt2M",
+                   oops::Variable{"water_vapor_mixing_ratio_wrt_moist_air_at_2m"});
 
 // The lines below (and yaml files) should be removed as all name are hard-wired because of
 // the obs and model naming conventions
@@ -40,6 +44,13 @@ VariableNameMap::VariableNameMap(const boost::optional<std::string> & aliasFile)
     mappingParams.validateAndDeserialize(conf);
 
     for (VariableNameParameters const& variableMap : *mappingParams.variableMap.value()) {
+      Aliases_.insert_or_assign(variableMap.name, oops::Variable{variableMap.alias});
+    }
+  }
+
+// Inline maps take precedence over file-based ones for overlapping names
+  if (inlineMaps.is_initialized()) {
+    for (const VariableNameParameters & variableMap : *inlineMaps) {
       Aliases_.insert_or_assign(variableMap.name, oops::Variable{variableMap.alias});
     }
   }

@@ -33,7 +33,7 @@ static ObsOperatorMaker<PathSumOper> makerPathSum_("PathSum");
 // -----------------------------------------------------------------------------
 PathSumOper::PathSumOper(const ioda::ObsSpace & odb,
                          const Parameters_ & params)
-  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value(), params.variableMaps.value())),
     odb_(odb),
     geovalVar_(oops::Variable(params.geovalVar.value())),
     weightsVar_(params.weightsVar.value() ?

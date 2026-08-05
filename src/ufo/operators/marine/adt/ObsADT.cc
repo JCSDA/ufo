@@ -28,7 +28,7 @@ static ObsOperatorMaker<ObsADT> makerADT_("ADT");
 // -----------------------------------------------------------------------------
 
 ObsADT::ObsADT(const ioda::ObsSpace & odb, const ObsADTParameters & params)
-  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())),
+  : ObsOperatorBase(odb, VariableNameMap(params.AliasFile.value(), params.variableMaps.value())),
     odb_(odb)
 {
   oops::Log::trace() << "ObsADT constructor start" << std::endl;

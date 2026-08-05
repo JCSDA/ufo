@@ -20,6 +20,7 @@
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsFilterParametersBase.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
+#include "ufo/utils/VariableNameMap.h"
 
 namespace ufo {
 
@@ -101,6 +102,11 @@ class FilterParametersBaseWithAbstractActions : public ObsFilterParametersBase {
 
   /// \brief Parameter specifying path to yaml file containing Observation to GeoVaL name mapping
   oops::OptionalParameter<std::string> AliasFile{"observation alias file", this};
+
+  /// \brief Inline variable name mappings (alternative to observation alias file).
+  /// If both are specified, inline maps take precedence over file-based ones for overlapping names.
+  oops::OptionalParameter<std::vector<VariableNameParameters>> variableMaps{
+      "variable maps", this};
 
  protected:
   /// Parameters specifying a single action to be performed on observations flagged by the filter.

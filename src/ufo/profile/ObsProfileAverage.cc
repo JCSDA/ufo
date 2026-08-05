@@ -28,7 +28,8 @@ static ObsOperatorMaker<ObsProfileAverage> obsProfileAverageMaker_("ProfileAvera
 
 ObsProfileAverage::ObsProfileAverage(const ioda::ObsSpace & odb,
                                      const Parameters_ & parameters)
-  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())),
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                         parameters.variableMaps.value())),
     odb_(odb), data_(odb, parameters, nameMap_)
 {
   requiredVars_ += data_.requiredVars();

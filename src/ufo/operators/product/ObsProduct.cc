@@ -28,7 +28,9 @@ static ObsOperatorMaker<ObsProduct> obsProductMaker_("Product");
 
 ObsProduct::ObsProduct(const ioda::ObsSpace & odb,
                          const Parameters_ & parameters)
-  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value())), odb_(odb)
+  : ObsOperatorBase(odb, VariableNameMap(parameters.AliasFile.value(),
+                                         parameters.variableMaps.value())),
+    odb_(odb)
 {
   oops::Log::trace() << "ObsProduct constructor start" << std::endl;
 

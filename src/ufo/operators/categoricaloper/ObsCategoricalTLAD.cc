@@ -27,7 +27,9 @@ static LinearObsOperatorMaker<ObsCategoricalTLAD> makerCategoricalTL_("Categoric
 
 ObsCategoricalTLAD::ObsCategoricalTLAD(const ioda::ObsSpace & odb,
                                        const Parameters_ & params)
-  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value())), odb_(odb)
+  : LinearObsOperatorBase(odb, VariableNameMap(params.AliasFile.value(),
+                                               params.variableMaps.value())),
+    odb_(odb)
 {
   data_.configure(odb, params);
 
