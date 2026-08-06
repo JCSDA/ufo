@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "eckit/config/LocalConfiguration.h"
+#include "eckit/mpi/Comm.h"
 #include "eckit/testing/Test.h"
 
 #include "ioda/ObsSpace.h"
@@ -36,6 +37,10 @@ namespace test {
 
 using ObsSpace_ = ioda::ObsSpace;
 
+// Dirac test for ObsErrorDiffusion: place a unit impulse at one obs, apply R, and log
+// the propagated covariance at the peak and two neighbors. Runs on the world
+// communicator to exercise the multi-PE path; read-outs are keyed by global obs index
+// so the result is identical on any PE count.
 void diracDiffusion() {
   // get time window
   eckit::LocalConfiguration Tconf(::test::TestEnvironment::config());
@@ -53,12 +58,28 @@ void diracDiffusion() {
   // get obsSpace confs
   eckit::LocalConfiguration obsSpaceDiff(conf[0], "obs space");
 
-  // create obsSpace
-  ioda::ObsSpace odb_geo_diff(obsSpaceDiff, oops::mpi::myself(), timeWindow, oops::mpi::myself());
+  // World communicator so obs are distributed across ranks and ObsErrorDiffusion runs
+  // its multi-PE path (the time communicator -- 4th arg -- stays myself()).
+  ioda::ObsSpace odb_geo_diff(obsSpaceDiff, oops::mpi::world(), timeWindow, oops::mpi::myself());
 
   int nlocs = odb_geo_diff.nlocs();
 
   oops::Log::info() << " --> number of locations: " << nlocs << std::endl;
+
+  // Source-file obs index: partition-invariant, so the dirac location and diagnostic
+  // read-outs are PE-agnostic (identical on 1 PE and N PE).
+  const std::vector<std::size_t> & srcIndex = odb_geo_diff.index();
+  const eckit::mpi::Comm & comm = odb_geo_diff.comm();
+
+  // Value of dy at global obs index gLoc, on any rank: exactly one rank owns it
+  // (non-overlapping dist), so a SUM over (value on owner, 0 elsewhere) broadcasts it.
+  auto globalValueAt = [&](const ioda::ObsVector & v, std::size_t gLoc) -> double {
+    double val = 0.0;
+    for (int i = 0; i < nlocs; ++i)
+      if (srcIndex[i] == gLoc) val = v[i];
+    comm.allReduceInPlace(val, eckit::mpi::Operation::SUM);
+    return val;
+  };
 
   std::vector<float> lons(nlocs);
   std::vector<float> lats(nlocs);
@@ -84,10 +105,13 @@ void diracDiffusion() {
   R_diff.randomize(dy);
   ioda::ObsVector dy_diff(dy);
 
+  // `dirac location` is a global obs index; set the impulse on whichever rank owns
+  // that obs (same physical obs at any PE count).
+  int location = testConf.getInt("dirac location");
   if (testConf.getString("test type") == "dirac") {
     dy_diff.zero();
-    int location = testConf.getInt("dirac location");
-    dy_diff[location] = 1;
+    for (int i = 0; i < nlocs; ++i)
+      if (srcIndex[i] == static_cast<std::size_t>(location)) dy_diff[i] = 1;
   }
 
   oops::Log::info() << "Initial diffusion dy_diff:\n" << dy_diff.data() << std::endl;
@@ -97,10 +121,14 @@ void diracDiffusion() {
   oops::Log::info() << "Final diffusion dy:\n" << dy_diff.data() << std::endl;
   oops::Log::info() << "Diffusion Dirac R*dy stats:" << std::endl << dy_diff << std::endl;
   oops::Log::test() << "Diffusion Dirac R*dy stats:" << std::endl << dy_diff << std::endl;
-  oops::Log::test() << "Final peak of dirac impulse: " << dy_diff[50] << std::endl;
-  // print out propogated covariance at the two grid locations closest to the peak
-  oops::Log::test() << "Propogated covariance at location 38: " << dy_diff[38] << std::endl;
-  oops::Log::test() << "Propogated covariance at location 51: " << dy_diff[51] << std::endl;
+  // Read out by GLOBAL obs index so the values are identical on 1 PE and N PE.
+  oops::Log::test() << "Final peak of dirac impulse: "
+                    << globalValueAt(dy_diff, location) << std::endl;
+  // print out propagated covariance at the two grid locations closest to the peak
+  oops::Log::test() << "Propagated covariance at location 38: "
+                    << globalValueAt(dy_diff, 38) << std::endl;
+  oops::Log::test() << "Propagated covariance at location 51: "
+                    << globalValueAt(dy_diff, 51) << std::endl;
 }
 
 class DiffusionDirac : public oops::Test {

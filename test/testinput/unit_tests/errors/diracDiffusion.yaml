@@ -9,6 +9,13 @@ test settings:
 observations:
 - obs space:
     name: abi_g16
+    distribution:
+      name: Atlas
+      grid:
+        type: regular_lonlat
+        nx: 72
+        ny: 36
+        partitioner: equal_regions
     obsdatain:
       engine:
         type: H5File
@@ -19,6 +26,8 @@ observations:
     covariance model: diffusion
     correlation variable names: [brightnessTemperature]
     correlation lengthscale: 200000. # meters
+    as gaussian: true
+    diagonal loading: 0.0 # pure correlated R so the dirac peak is the raw kernel
     normalization iterations: 10000
     control grid:
       grid spacing in degrees: 10 # control grid resolution in degrees

@@ -5,6 +5,13 @@ time window:
 observations:
 - obs space:
     name: abi_g16
+    distribution:
+      name: Atlas
+      grid:
+        type: regular_lonlat
+        nx: 72
+        ny: 36
+        partitioner: equal_regions
     obsdatain:
       engine:
         type: H5File
@@ -14,7 +21,9 @@ observations:
   obs error:
     covariance model: diffusion
     correlation variable names: [brightnessTemperature]
-    correlation lengthscale: 5000.  
+    correlation lengthscale: 5000.
+    as gaussian: true
+    diagonal loading: 0.1
     normalization iterations: 1000
     Obs Error test tolerance: 1.e-8
     control grid:

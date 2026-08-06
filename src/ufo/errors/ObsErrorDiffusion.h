@@ -36,6 +36,7 @@ namespace ufo {
 /// \brief Parameters for correlated obs errors
 class ObsErrorDiffusionParameters : public ObsErrorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsErrorDiffusionParameters, ObsErrorParametersBase)
+
  public:
   class ControlGrid : public oops::Parameters {
     OOPS_CONCRETE_PARAMETERS(ControlGrid, oops::Parameters)
@@ -48,11 +49,25 @@ class ObsErrorDiffusionParameters : public ObsErrorParametersBase {
         "Group/Name obs variable that correlations should be computed for (note: "
         "this variable should be the same variable as obs space is grouped on", this};
   oops::RequiredParameter<double> lscale{"correlation lengthscale",
-        "Gaspari-Cohn correlation lengthscale in meters", this};
+        "Correlation lengthscale in meters, interpreted by default as the "
+        "Gaspari-Cohn cutoff radius. See `as gaussian`.", this};
+  oops::Parameter<bool> asGaussian{"as gaussian",
+        "If false (default), interpret `correlation lengthscale` as a Gaspari-Cohn "
+        "cutoff radius. If true, pass the value through as a Daley length. Mirrors the "
+        "SABER diffusion block's flag.", false, this};
   oops::RequiredParameter<int> normalizationIterations{"normalization iterations", this};
   oops::Parameter<int> InverseIterations{"Number of iterations for computing the inverse",
       100, this};
   oops::Parameter<double> InverseAccuracy{"Accuracy of inverse", 1.0e-7, this};
+  oops::Parameter<double> diagonalLoading{"diagonal loading",
+        "Nugget fraction α in [0, 1]: blends a diagonal (uncorrelated) component "
+        "into R. α=0.0 is pure correlated, α=1.0 pure diagonal. Represents the "
+        "uncorrelated variance fraction; α>0.0 also speeds GMRESR R^-1 convergence "
+        "at wide L_R/Δx.", 0.0, this,
+        {oops::minConstraint(0.0), oops::maxConstraint(1.0)}};
+  oops::Parameter<bool> allowAnyDistribution{"allow any distribution",
+        "Allow a non-Atlas distribution at more than one PE. Only set this if it is known to "
+        "be geographically contiguous, as the diffusion halo requires.", false, this};
   oops::Parameter<bool> outputDiffusionMesh{"output diffusion mesh", false, this};
   // Add parameter for control grid
   oops::OptionalParameter<ControlGrid> controlGrid{"control grid", this};
@@ -138,16 +153,29 @@ class ObsErrorDiffusion : public ObsErrorBase {
   std::unique_ptr<oops::Diffusion> diffusion_;
   atlas::Field hzNorm_;
 
-  // Offset where obs locations start in the merged function space
-  // (0 if no control grid, nRemainingControlPoints otherwise)
+  // Mesh + normalization are built once on the first update() and reused on later
+  // calls (see the reuse guard in update() for why and the caveats).
+  bool meshAndNormBuilt_ = false;
+  int builtObsCount_ = 0;  // this rank's obs count at build time; reuse tripwire
+
+  // Index where obs start in the global grid numbering; control points (if any)
+  // fill [0, obsOffset_).
   atlas::idx_t obsOffset_ = 0;
 
-  /// Creates control grid, removes close control points and
-  //  returns merged grid points (remaining control grid + obs locations)
-  std::vector<atlas::PointLonLat> createControlGrid(
+  // Per local ObsVector location: node index in this PE's mesh for each valid obs,
+  // or -1 for QC-failed locations. Used by multiply()/randomize() to copy values
+  // to/from the diffusion field.
+  std::vector<atlas::idx_t> localObs2node_;
+
+  /// Build the global control grid from obs locations, dropping points within
+  /// \p removeWithin of any obs; each kept point inherits its nearest obs's owner.
+  void createControlGrid(
     const std::vector<atlas::PointLonLat>& obsnodes,
+    const std::vector<int>& obsOwner,
     const double removeWithin,
-    const int gridSpacing);
+    const int gridSpacing,
+    std::vector<atlas::PointLonLat>& ctrlPoints,
+    std::vector<int>& ctrlOwner) const;
 };
 
 // -----------------------------------------------------------------------------

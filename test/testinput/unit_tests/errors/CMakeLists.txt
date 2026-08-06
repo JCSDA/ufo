@@ -49,7 +49,7 @@ ufo_add_test( NAME    obserrordiffusion
               ECBUILD
               SOURCES ../../../mains/TestObsErrorCovariance.cc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiffusion.yaml"
-              MPI     1
+              MPI     2
               LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
@@ -58,7 +58,7 @@ ufo_add_test( NAME    obserror_dirac_diffusion
               ECBUILD
               SOURCES ../../../mains/TestObsErrorDiffusion.cc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/diracDiffusion.yaml"
-              MPI     1
+              MPI     2
               LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

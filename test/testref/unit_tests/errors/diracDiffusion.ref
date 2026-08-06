@@ -2,5 +2,5 @@ Diffusion Dirac R*dy stats:
 abi_g16 nobs= 100 Min=0.0000000000000000e+00, Max=5.8819668131382743e+00, RMS=5.9579901114962719e-01
 
 Final peak of dirac impulse: 5.8819668131382743e+00
-Propogated covariance at location 38: 4.3098762281958142e-01
-Propogated covariance at location 51: 7.9110533955299678e-01
+Propagated covariance at location 38: 4.3098762281958142e-01
+Propagated covariance at location 51: 7.9110533955299678e-01
