@@ -521,6 +521,15 @@ ufo_add_test( NAME    function_ModelSurfaceHeightAdjustRelativeHumidity
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    function_ModelSurfaceHeightAdjustSpecificHumidity
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_ModelSurfaceHeightAdjustSpecificHumidity.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_ModelSurfaceHeightAdjustTemperature
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x

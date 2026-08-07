@@ -1,0 +1,41 @@
+time window:
+  begin: 2021-05-21T00:00:00Z
+  end: 2021-05-21T23:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+# Test 1: With station pressure available
+- obs space:
+    name: Surface_q_default
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_specifichumidity_20210521T1200Z.nc4
+    simulated variables: [specificHumidityAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_geovals_specifichumidity_20210521T1200Z.nc4
+
+  obs function:
+    name: ObsFunction/ModelHeightAdjustedSpecificHumidity
+    options:
+      adjusted temperature variable: ObsValue/adjustedAirTemperatureAt2M
+    variables: [specificHumidityAt2M]
+    tolerance: 1.0e-6
+
+# Test 2: Without station pressure (fall back to model surface pressure)
+- obs space:
+    name: Surface_q_no_station_pressure
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_obs_specifichumidity_nopressure_20210521T1200Z.nc4
+    simulated variables: [specificHumidityAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_geovals_specifichumidity_20210521T1200Z.nc4
+
+  obs function:
+    name: ObsFunction/ModelHeightAdjustedSpecificHumidity
+    options:
+      adjusted temperature variable: ObsValue/adjustedAirTemperatureAt2M
+    variables: [specificHumidityAt2M]
+    tolerance: 1.0e-6
