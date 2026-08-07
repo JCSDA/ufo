@@ -44,8 +44,8 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
 
   // Include list of required data from ObsValue
   invars_ += Variable("ObsValue/stationPressure");
-  invars_ += Variable("ObsValue/virtualTemperature");
-  invars_ += Variable("ObsValue/airTemperature");
+  invars_ += Variable("ObsValue/virtualTemperatureAt2M");
+  invars_ += Variable("ObsValue/airTemperatureAt2M");
 
   // Include list of required data from MetaData
   invars_ += Variable("MetaData/stationElevation");
@@ -96,12 +96,12 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
   // Get ObsValue of virtual temperature (optional), initialize
   // the vector as missing value and get values only if it exists
   std::vector<float> ob_temp_sfc(nlocs, missing);
-  if (data.has(Variable("ObsValue/virtualTemperature"))) {
-    data.get(Variable("ObsValue/virtualTemperature"), ob_temp_sfc);
+  if (data.has(Variable("ObsValue/virtualTemperatureAt2M"))) {
+    data.get(Variable("ObsValue/virtualTemperatureAt2M"), ob_temp_sfc);
   }
-  if (data.has(Variable("ObsValue/airTemperature"))) {
+  if (data.has(Variable("ObsValue/airTemperatureAt2M"))) {
     std::vector<float> ob_temp_sfc2(nlocs);
-    data.get(Variable("ObsValue/airTemperature"), ob_temp_sfc2);
+    data.get(Variable("ObsValue/airTemperatureAt2M"), ob_temp_sfc2);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (ob_temp_sfc[iloc] == missing &&
           ob_temp_sfc2[iloc] != missing) {
