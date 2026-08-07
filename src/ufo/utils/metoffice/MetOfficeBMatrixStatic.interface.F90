@@ -47,7 +47,7 @@ type(fckit_configuration)                  :: f_conf
 character(len=:), allocatable              :: str
 character(len=:), allocatable              :: str_array(:)
 logical                                    :: qtotal_flag
-character(len=200)                         :: filepath
+character(len=800)                         :: filepath
 integer                                    :: varsize
 character(len=200), allocatable            :: background_fields(:)
 

@@ -43,7 +43,7 @@ integer(c_size_t), intent(inout)         :: rtype
 type(ufo_metoffice_rmatrixradiance), pointer :: self
 type(fckit_configuration)                  :: f_conf
 character(len=:), allocatable              :: str
-character(len=200)                         :: filepath
+character(len=800)                         :: filepath
 
 ! Interface and setup
 call ufo_metoffice_rmatrixradiance_registry % setup(c_self, self)
