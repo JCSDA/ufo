@@ -5,11 +5,14 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <algorithm>
+#include <cmath>
 #include <string>
 #include <vector>
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/predictors/Thickness.h"
 #include "ufo/utils/Constants.h"
@@ -50,6 +53,7 @@ void Thickness::compute(const ioda::ObsSpace & odb,
 
   const int t_levs = geovals.nlevs(oops::Variable{"air_temperature"});
   const int p_levs = geovals.nlevs(oops::Variable{"air_pressure"});
+
   std::vector <double> p_prof(t_levs, 0.0);
   std::vector<double> t_prof(p_levs, 0.0);
   std::vector <double> thick(odb.nlocs(), 0.0);
@@ -59,9 +63,20 @@ void Thickness::compute(const ioda::ObsSpace & odb,
   const double pred_mean = parameters_.mean.value();
   const double pred_std_inv = 1.0/parameters_.stDev.value();;
 
+  const double missing = util::missingValue<double>();
+  // Check for missing double or NaN (since it is from geoval)
+  const auto isMissing = [missing](double v) { return v == missing || std::isnan(v); };
+
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     geovals.getAtLocation(p_prof, oops::Variable{"air_pressure"}, jl);
     geovals.getAtLocation(t_prof, oops::Variable{"air_temperature"}, jl);
+
+    // Skip locations with missing pressure or temperature values in the profile
+    if (std::any_of(p_prof.begin(), p_prof.end(), isMissing) ||
+        std::any_of(t_prof.begin(), t_prof.end(), isMissing)) {
+      thick[jl] = missing;
+      continue;
+    }
 
     // Check that layer top is within pressure levels
     if (p_high > p_prof.back()) {
@@ -117,9 +132,10 @@ void Thickness::compute(const ioda::ObsSpace & odb,
 
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
     for (std::size_t jb = 0; jb < nvars; ++jb) {
-      out[jl*nvars+jb] = (thick[jl]
-                         *(dry_air_gas_const/Constants::grav)*km_per_m - pred_mean)
-                         *pred_std_inv;
+      out[jl*nvars+jb] = (thick[jl] == missing) ? missing
+                        : (thick[jl]
+                          *(dry_air_gas_const/Constants::grav)*km_per_m - pred_mean)
+                          *pred_std_inv;
     }
   }
 }

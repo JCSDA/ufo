@@ -5,6 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -12,6 +13,8 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "oops/util/missingValues.h"
 
 #include "ufo/utils/Constants.h"
 
@@ -47,21 +50,29 @@ void ObsMetaDataPredictor::compute(const ioda::ObsSpace & odb,
 
   std::vector<float> obsMetaDataPred(nlocs, 0.0);
 
+  const float fmiss = util::missingValue<float>();
+  const int imiss = util::missingValue<int>();
+
   // retrieve the predictor
 
   if (odb.dtype("MetaData", variable_) == ioda::ObsDtype::Integer) {
     std::vector<int> obsMetaDataPred2(nlocs, 0);
     odb.get_db("MetaData", variable_, obsMetaDataPred2);
     for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
-      obsMetaDataPred[jloc] = static_cast<float>(obsMetaDataPred2[jloc])*1.0f;
+      obsMetaDataPred[jloc] = (obsMetaDataPred2[jloc] == imiss)
+                            ? fmiss
+                            : static_cast<float>(obsMetaDataPred2[jloc])*1.0f;
     }
   } else {
     odb.get_db("MetaData", variable_, obsMetaDataPred);
   }
 
+  const double dmiss = util::missingValue<double>();
+
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
+    const bool isMissing = (obsMetaDataPred[jloc] == fmiss);
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      out[jloc*nvars+jvar] = pow(obsMetaDataPred[jloc], order_);
+      out[jloc*nvars+jvar] = isMissing ? dmiss : std::pow(obsMetaDataPred[jloc], order_);
     }
   }
 }
