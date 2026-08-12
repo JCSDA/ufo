@@ -406,7 +406,11 @@ void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
   // Output into ObsSpace.
   obsdb.put_db("MetaData", "overcastBriTempAtCloudTop", bt_cloud_top);
   obsdb.put_db("MetaData", "standardDeviationAtCloudTop", standard_deviation);
-  obsdb.put_db("DiagnosticFlags/NoStableLayers", "brightnessTemperature", nostablelayers_flag);
+  // nostablelayers_flag has dimension (nlocs*nchans), so the put_db must specify
+  // [Location, Channel] in the dimList parameter (4th parameter), rather than
+  // taking the Location-only default.
+  obsdb.put_db("DiagnosticFlags/NoStableLayers", "brightnessTemperature", nostablelayers_flag,
+               {"Location", "Channel"});
   oops::Log::trace() << "StableLayersCloudTopPressure compute complete" << std::endl;
 }
 

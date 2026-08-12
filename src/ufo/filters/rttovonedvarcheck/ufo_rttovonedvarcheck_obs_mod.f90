@@ -570,23 +570,36 @@ integer :: nobs ! number of observations to be written to database
 character(len=max_string)    :: var
 real(kind_real), allocatable :: surface_pressure(:), ctp(:)
 real(kind_real) :: missing_real
+integer(c_int)               :: chan_slice_dim_ids(2)  ! [Location, Channel] for per-channel writes
 
 missing_real = missing_value(missing_real)
 
-! Put QC flags and retrieved BT's back in database
+! Put QC flags and retrieved BT's back in database.
+! Every variable written in this loop is a single channel slice: the name carries an
+! "_<channel>" suffix and the data spans all locations for that one channel. Declare the
+! obs-space variable as [Location, Channel] so the container creates one column per channel
+! and records the channel dimension. This is necessary for subsequent reads and for getting
+! the correct dimensionality in the output NetCDF file.
+chan_slice_dim_ids = [obsspace_get_location_dim_id(), obsspace_get_channel_dim_id()]
 do jvar = 1, nchans
   var = vars % variable(jvar)
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "FortranQC", self % QCflags(jvar,:))
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % output_BT(jvar,:))
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "FortranQC", self % QCflags(jvar,:), &
+                   chan_slice_dim_ids)
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % output_BT(jvar,:), &
+                   chan_slice_dim_ids)
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarBack", self % background_BT(jvar,:), &
+                   chan_slice_dim_ids)
   if (allocated(self % recalc_BT)) then
-    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarRecalc", self % recalc_BT(jvar,:))
+    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVarRecalc", self % recalc_BT(jvar,:), &
+                     chan_slice_dim_ids)
   end if
   write(var,"(A11,I0)") "emissivity_", self % channels(jvar)
-  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:))
+  call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % emiss(jvar,:), &
+                   chan_slice_dim_ids)
   if (self % Store1DVarTransmittance) then
     write(var,"(A14,I0)") "transmittance_",self % channels(jvar)
-    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % transmittance(jvar,:))
+    call put_1d_indb(self % output_to_db(:), obsdb, trim(var), "OneDVar", self % transmittance(jvar,:), &
+                     chan_slice_dim_ids)
   end if
 end do
 
@@ -707,13 +720,21 @@ end subroutine ufo_rttovonedvarcheck_obs_output
 
 !-------------------------------------------------------------------------------
 
-subroutine put_1dfloat_indb(apply, obsdb, variable, group, outputdata)
+!> Write one Location-length array back to the obs space.
+!!
+!! \p dim_ids declares the shape of the obs-space variable being written, and must be
+!! supplied whenever \p variable names a single channel slice (a name carrying an "_<channel>"
+!! suffix). In that case pass [Location, Channel]: the array holds one value per location for
+!! that one channel, and the suffix selects the slice. Omitting it declares a Location-only
+!! variable, which is correct only for unsuffixed names.
+subroutine put_1dfloat_indb(apply, obsdb, variable, group, outputdata, dim_ids)
 implicit none
 logical, intent(in)             :: apply(:)  !< apply
 type(c_ptr), value, intent(in)  :: obsdb !< pointer to the observation space
 character(len=*), intent(in)    :: variable
 character(len=*), intent(in)    :: group
 real(kind_real), intent(in)     :: outputdata(:)
+integer(c_int), optional, intent(in) :: dim_ids(:)  !< obs-space dimensions of `variable`
 
 real(kind_real), allocatable :: tmp(:)
 real(kind_real) :: missing_real
@@ -740,7 +761,11 @@ do iprof = 1, nobs
 end do
 
 ! Write data to db
-call obsspace_put_db(obsdb, group, variable, tmp)
+if (present(dim_ids)) then
+  call obsspace_put_db(obsdb, group, variable, tmp, dim_ids)
+else
+  call obsspace_put_db(obsdb, group, variable, tmp)
+end if
 
 deallocate(tmp)
 
@@ -748,13 +773,15 @@ end subroutine put_1dfloat_indb
 
 !-------------------------------------------------------------------------------
 
-subroutine put_1dint_indb(apply, obsdb, variable, group, outputdata)
+!> Integer counterpart of put_1dfloat_indb; see there for the meaning of \p dim_ids.
+subroutine put_1dint_indb(apply, obsdb, variable, group, outputdata, dim_ids)
 implicit none
 logical, intent(in)             :: apply(:)  !< apply
 type(c_ptr), value, intent(in)  :: obsdb     !< pointer to the observation space
 character(len=*), intent(in)    :: variable
 character(len=*), intent(in)    :: group
 integer, intent(in)             :: outputdata(:)
+integer(c_int), optional, intent(in) :: dim_ids(:)  !< obs-space dimensions of `variable`
 
 integer, allocatable :: tmp(:)
 integer :: missing_int
@@ -781,7 +808,11 @@ do iprof = 1, nobs
 end do
 
 ! Write data to db
-call obsspace_put_db(obsdb, group, variable, tmp)
+if (present(dim_ids)) then
+  call obsspace_put_db(obsdb, group, variable, tmp, dim_ids)
+else
+  call obsspace_put_db(obsdb, group, variable, tmp)
+end if
 
 deallocate(tmp)
 

@@ -235,6 +235,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   integer                            :: nlevels               ! Number of vertical levels in the data
   integer                            :: ilevel                ! Loop variable, level number
   real(kind_real)                    :: missing               ! Missing data indicator (for reals)
+  integer(c_int), allocatable        :: qc_flags_dim_ids(:)   ! Dimensions of the qc_flags array in the obs-space
 !
 ! Diagnostics to push back to the obs-space
 !
@@ -277,12 +278,18 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
   call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
   call obsspace_get_recnum(self % obsdb, record_number)
 
+  ! qc_flags is allocated as (nlevels * nobs). When nlevels > 1 that is a
+  ! [Location, Channel] array, and it must be declared as such when it is written back
+  ! (see the obsspace_put_db call at the end of this routine). Declaring it as
+  ! Location-only would be a mis-statement of its shape.
   if (nlevels > 1) then
+    qc_flags_dim_ids = [obsspace_get_location_dim_id(), obsspace_get_channel_dim_id()]
     call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags, self % chanList)
     call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param, self % chanList)
     call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle, self % chanList)
     call obsspace_get_db(self % obsdb, "FortranERR", "bendingAngle", obs_err, self % chanList)
   else
+    qc_flags_dim_ids = [obsspace_get_location_dim_id()]
     call obsspace_get_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
     call obsspace_get_db(self % obsdb, "MetaData", "impactParameterRO", impact_param)
     call obsspace_get_db(self % obsdb, "ObsValue", "bendingAngle", obs_bending_angle)
@@ -436,7 +443,7 @@ subroutine ufo_gnssroonedvarcheck_apply(self, geovals, apply)
 
     call deallocate_singleob(Ob)
   end do
-  call obsspace_put_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags)
+  call obsspace_put_db(self % obsdb, "FortranQC", "bendingAngle", qc_flags, qc_flags_dim_ids)
 
   ! Save the diagnostics to the obs-space
   call obsspace_put_db(self % obsdb, "OneDVarDiags", "nIter", niter)
