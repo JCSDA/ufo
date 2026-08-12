@@ -61,38 +61,64 @@ void ObsADT::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & ovec,
   oops::Log::trace() << "ObsADT::simulateObs start" << std::endl;
 
   const double missing = util::missingValue<double>();
+  const size_t nlocs = ovec.nlocs();
 
-  // get geovals
-  std::vector<double> vec(ovec.nlocs());
-  geovals.getAtLevel(vec, oops::Variable{"sea_surface_height_above_geoid"}, 0);
+  // -----------------------
+  // 1. GeoVaLs
+  // -----------------------
+  std::vector<double> vec(nlocs);
+  geovals.getAtLevel(vec,
+                     oops::Variable{"sea_surface_height_above_geoid"}, 0);
 
-  // get obs
+  // -----------------------
+  // 2. Observations
+  // -----------------------
   std::vector<double> obs;
-  odb_.get_db("ObsValue", ovec.varnames().variables()[operatorVarIndex_], obs);
+  odb_.get_db("ObsValue",
+              ovec.varnames().variables()[operatorVarIndex_],
+              obs);
 
-  // calculate global offsets
-  double offset = 0;
+  // -----------------------
+  // 3. Compute global offset (QC-filtered)
+  // -----------------------
+  double offset = 0.0;
+
   auto accumVal = odb_.distribution()->createAccumulator<double>();
   auto accumCnt = odb_.distribution()->createAccumulator<int>();
-  for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
-    // TODO(travis) also remove obs that have failed QC before this point?
-    // Not doing it now to keep answers from changing with this PR.
-    if (obs[jloc] != missing && vec[jloc] != missing) {
+
+  for (size_t jloc = 0; jloc < nlocs; ++jloc) {
+    // per-variable, per-location QC flag (ioda::ObsDataVector<int>)
+    const int qc = qc_flags[operatorVarIndex_][jloc];
+
+    // Note: only using QC flags for passed observations, passive
+    // observations are excluded from the global-mean offset.
+    if (qc == 0 &&
+        obs[jloc] != missing &&
+        vec[jloc] != missing &&
+        std::isfinite(obs[jloc]) &&
+        std::isfinite(vec[jloc])) {
       accumVal->addTerm(jloc, vec[jloc] - obs[jloc]);
       accumCnt->addTerm(jloc, 1);
     }
   }
-  auto count = accumCnt->computeResult();
+
+  const int count = accumCnt->computeResult();
+
   if (count > 0) {
     offset = accumVal->computeResult() / count;
   }
-  // oops::Log::debug() << "ObsADT::simulateObs offset: " << offset << std::endl;
 
-  // subtract offset from geoval
-  for (size_t jloc = 0; jloc < ovec.nlocs(); ++jloc) {
+  // -----------------------
+  // 4. Apply offset (no QC filtering here!)
+  // -----------------------
+  for (size_t jloc = 0; jloc < nlocs; ++jloc) {
     const size_t idx = jloc * ovec.nvars() + operatorVarIndex_;
+
     ovec[idx] = vec[jloc];
-    if (ovec[idx] != missing) ovec[idx] -= offset;
+
+    if (ovec[idx] != missing && std::isfinite(ovec[idx])) {
+      ovec[idx] -= offset;
+    }
   }
 
   oops::Log::trace() << "ObsADT::simulateObs done" << std::endl;

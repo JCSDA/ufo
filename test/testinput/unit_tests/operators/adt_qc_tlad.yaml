@@ -1,0 +1,36 @@
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+  bound to include: begin
+
+# TL/AD counterpart of adt_qc.yaml.
+#
+# ObsADTTLAD caches, at setTrajectory, the same QC-passed set S that the
+# nonlinear ObsADT uses for its global-mean offset, and restricts the TL/AD
+# offset to that set. "QCFlagsGroupName" makes the test driver read the QC
+# flags from the TestQC group of the obs file and pass them to setTrajectory
+# (and to the nonlinear simulateObs used for the finite-difference check), so
+# location 6 is rejected here exactly as the Bounds Check rejects it in
+# adt_qc.yaml. TestQC/absoluteDynamicTopography = [0, 0, 0, 0, 0, 10].
+#
+# This exercises the QC-restricted path: the linearity/TL check compares the
+# tangent linear against a finite difference of the QC-filtered nonlinear
+# operator, and the adjoint check verifies TL/AD are exact transposes.
+observations:
+- obs space:
+    name: ADT
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/adt_qc.nc
+    simulated variables: [absoluteDynamicTopography]
+  obs operator:
+    name: ADT
+  geovals:
+    filename: Data/ufo/testinput_tier_1/adt_qc_geovals.nc
+  linear obs operator test:
+    QCFlagsGroupName: TestQC
+    coef TL: 0.1
+    tolerance TL: 1.0e-10
+    tolerance AD: 1.0e-12
+  tolerance: 1.0e-10

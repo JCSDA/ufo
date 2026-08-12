@@ -1,0 +1,48 @@
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+  bound to include: begin
+
+# Verify that ObsADT computes its global-mean offset over the QC-passed
+# observations only.
+#
+# The ADT operator subtracts a single global offset from H(x):
+#   offset = mean over S of (SSH_geoval - obs),  S = QC-passed, finite obs/SSH
+#   H(x)_i = SSH_i - offset                      (applied at EVERY location)
+#
+# Fixture adt_qc.nc / adt_qc_geovals.nc has 6 locations:
+#   SSH = [1.0, 2.0, 0.5, 1.5, 1.0, 4.0]
+#   obs = [0.5, 1.0, 0.5, 1.0, 0.5, 3.0]
+# The Bounds Check below rejects location 6 (obs = 3.0, outside [-2, 2]) before
+# the operator runs, so it must not contribute to the offset:
+#   kept SSH-obs = [0.5, 1.0, 0.0, 0.5, 0.5]  ->  2.5 / 5  ->  offset = 0.5
+#   H(x) = SSH - 0.5 = [0.5, 1.5, 0.0, 1.0, 0.5, 3.5]  (= TestReference)
+# Were the rejected ob incorrectly included, the offset would be
+# (2.5 + 1.0) / 6 = 0.58333..., giving a different H(x) at every location.
+# All values are exact in floating point, so the comparison is exact.
+observations:
+- obs space:
+    name: ADT
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/adt_qc.nc
+    simulated variables: [absoluteDynamicTopography]
+  obs operator:
+    name: ADT
+  geovals:
+    filename: Data/ufo/testinput_tier_1/adt_qc_geovals.nc
+  # "pre" so the rejection is guaranteed to be in the QC flags the operator sees
+  obs pre filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: absoluteDynamicTopography
+    minvalue: -2.0
+    maxvalue: 2.0
+  compareVariables:
+  - test:
+      name: hofx/absoluteDynamicTopography
+    reference:
+      name: TestReference/absoluteDynamicTopography
+    absTol: 1.0e-10
+  passedBenchmark: 5

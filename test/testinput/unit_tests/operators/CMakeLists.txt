@@ -24,6 +24,24 @@ ufo_add_test( NAME    linopr_adt
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    opr_adt_qc
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/adt_qc.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    linopr_adt_qc
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/adt_qc_tlad.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    opr_aircraft
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x

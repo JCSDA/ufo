@@ -11,6 +11,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/ObsVariables.h"
@@ -58,6 +59,10 @@ class ObsADTTLAD : public LinearObsOperatorBase,
   const ioda::ObsSpace& odb_;
   oops::ObsVariables operatorVars_;
   int operatorVarIndex_;
+  // Cached at setTrajectory: mask for the observations that define the
+  // global-mean offset (QC-passed and finite), and its MPI-global size.
+  std::vector<int> qcmask_;
+  int qccount_ = 0;
 };
 
 // -----------------------------------------------------------------------------
