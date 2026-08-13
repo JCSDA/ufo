@@ -19,7 +19,10 @@ time window:
 
 observations:
 - obs space:
-    name: Model level index
+# The expected level indices are as follows:
+# missing, 0, 0, 1, 1, 4, 9, 9, missing, missing,
+# missing, 9, 9, 9, 8, 5, 0, 0, missing, missing.
+    name: Model level index default settings
     obsdatain:
       engine:
         type: H5File
@@ -41,8 +44,45 @@ observations:
         options:
           observation vertical coordinate: height
           model vertical coordinate: height_above_mean_sea_level
+          select closest model index: false
+          invert model index: false
+          index model levels from one: false
   compareVariables:
   - test:
       name: MetaData/modelLevelIndex
     reference:
       name: TestReference/modelLevelIndex
+- obs space:
+# The expected level indices are as follows:
+# missing, 11, 10, 10, 10, 6, 1, 1, missing, missing,
+# missing, 1, 1, 2, 2, 6, 11, 11, missing, missing.
+    name: Model level index optional settings to true
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/model_level_index_obs.nc4
+    simulated variables: [reflectivity]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/function_modellevelindex_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/model_level_index_geovals.nc
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/modelLevelIndex
+      type: int
+      function:
+        name: IntObsFunction/ModelLevelIndex
+        options:
+          observation vertical coordinate: height
+          model vertical coordinate: height_above_mean_sea_level
+          select closest model index: true
+          invert model index: true
+          index model levels from one: true
+  compareVariables:
+  - test:
+      name: MetaData/modelLevelIndex
+    reference:
+      name: TestReference/modelLevelIndexOptionalTrue

@@ -41,6 +41,26 @@ class ModelLevelIndexParameters : public oops::Parameters {
     modelCoordName{"model vertical coordinate",
       "Name of model vertical coordinate",
       this};
+
+  oops::Parameter<bool>
+    closestModelIndex{"select closest model index",
+      "If true, the model level index returned is that of the closest model level to the "
+      "observation. If false, the model level index returned is that of the model level "
+      "below the observation.",
+      false, this};
+
+  oops::Parameter<bool>
+    invertModelIndex{"invert model index",
+      "The model index returned by default is from the top of the atmosphere to the surface. "
+      "In the case where the user wants the model index to be from the surface to the top of "
+      "the atmosphere, this option should be set to true.",
+      false, this};
+
+  oops::Parameter<bool>
+    indexModelLevelsFromOne{"index model levels from one",
+      "If true, model level indices returned are 1-based. If false, model level indices returned "
+      "are 0-based (i.e. the index of the minimum model level is 0).",
+      false, this};
 };
 
 // -----------------------------------------------------------------------------

@@ -8,9 +8,11 @@
 #include "ufo/filters/obsfunctions/ModelLevelIndex.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/utils/PiecewiseLinearInterpolation.h"
@@ -51,6 +53,7 @@ void ModelLevelIndex::compute(const ObsFilterData & in,
 
   const std::size_t nlocs = obsdb.nlocs();
   const std::size_t nlevs = gv->nlevs(oops::Variable{options_.modelCoordName.value()});
+  const std::size_t indexOffset = options_.indexModelLevelsFromOne.value() ? 1 : 0;
 
   // Get observed vertical coordinate.
   std::vector<float> obsVertCoord(nlocs);
@@ -75,12 +78,26 @@ void ModelLevelIndex::compute(const ObsFilterData & in,
       continue;
     }
 
-    const auto[idx, weight] =
+    auto[idx, weight] =
       ufo::PiecewiseLinearInterpolation::interpolationIndexAndWeight(modelVertCoord, z_ob);
+    if (options_.closestModelIndex.value() && weight <= 0.5) {
+      // If the observation is closer to the adjacent model level (idx + 1), return
+      // that index instead.
+      idx += 1;
+    }
 
-    out[0][jloc] = idx;
+    // Output the user requested index inverting from top-down to bottom-up if requested.
+    out[0][jloc] = missingInt;  // Default to missing in case idx is out of bounds.
+    const int nlevsInt = static_cast<int>(nlevs);
+    const int indexOffsetInt = static_cast<int>(indexOffset);
+    if (idx >= 0 && idx < nlevsInt) {
+      if (options_.invertModelIndex.value()) {
+        out[0][jloc] = nlevsInt - 1 - idx + indexOffsetInt;
+      } else {
+        out[0][jloc] = idx + indexOffsetInt;
+      }
+    }
   }
-
   oops::Log::trace() << "ModelLevelIndex compute complete" << std::endl;
 }
 
@@ -89,7 +106,5 @@ void ModelLevelIndex::compute(const ObsFilterData & in,
 const ufo::Variables & ModelLevelIndex::requiredVariables() const {
   return invars_;
 }
-
-// -----------------------------------------------------------------------------
 
 }  // namespace ufo

@@ -35,6 +35,10 @@ class PiecewiseLinearInterpolation
                             const std::vector<double> &ordinates,
                             double abscissa);
 
+  /// \brief Convenience function that, given a sorted list of coordinate values
+  /// (\p sortedAbscissas) and a test point \p abscissa, returns the lower bracketing
+  /// index \c i and the interpolation weight \c w such that the interpolated value is
+  /// computed from points \c i and \c i+1 as \c f[i]*w + f[i+1]*(1-w)
   static std::pair<int, double> interpolationIndexAndWeight
     (const std::vector<double> &sortedAbscissas, double abscissa);
 
