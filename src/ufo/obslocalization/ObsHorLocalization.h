@@ -303,6 +303,7 @@ ObsHorLocalization<ITERATOR>::getLocalObs(const ITERATOR & i, double lengthscale
     eckit::geometry::Point3 refPoint3DTemp;
     atlas::util::Earth::convertSphericalToCartesian(refPoint2, refPoint3DTemp);
     double alpha =  (lengthscale / options_.radius_earth)/ 2.0;  // angle in radians
+    alpha = std::min(alpha, M_PI/2.0);  // Prevent alpha shrinking with increasing lengthscale
     double chordLength = 2.0*options_.radius_earth * sin(alpha);  // search radius in 3D space
 
     auto closePoints = kd_->findInSphere(refPoint3DTemp, chordLength);
