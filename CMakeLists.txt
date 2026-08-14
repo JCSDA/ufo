@@ -7,7 +7,7 @@
 # UFO
 ################################################################################
 
-cmake_minimum_required( VERSION 3.12 )
+cmake_minimum_required( VERSION 3.23 )
 
 project( ufo VERSION 1.13.0 LANGUAGES C CXX Fortran )
 
@@ -204,9 +204,9 @@ if( BUILD_TESTING )
   set (UFO_CRTM_TESTFILES_PATH ${UFO_CRTM_TESTFILES_PATH} PARENT_SCOPE)
   set (UFO_UFO_TESTFILES_PATH ${UFO_UFO_TESTFILES_PATH} PARENT_SCOPE)
 
-  execute_process( COMMAND ${CMAKE_COMMAND} -E copy
-     ${PROJECT_SOURCE_DIR}/tools/ufo_cpplint.py
-     ${CMAKE_BINARY_DIR}/bin/ufo_cpplint.py )
+  file( MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin )
+  file( COPY_FILE ${PROJECT_SOURCE_DIR}/tools/ufo_cpplint.py
+        ${CMAKE_BINARY_DIR}/bin/ufo_cpplint.py ONLY_IF_DIFFERENT )
   ecbuild_add_test( TARGET ufo_coding_norms
                     TYPE SCRIPT
                     COMMAND ${CMAKE_BINARY_DIR}/bin/ufo_cpplint.py
