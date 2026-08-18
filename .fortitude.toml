@@ -16,6 +16,9 @@ target-std="f2008"
     "C011", # missing-default-case
     "C072", # assumed-size-character-intent
 ]
+"src/ufo/operators/crtm/ufo_extcoeffprofcrtm_*mod.F90" = [
+    "C182", # multiple-allocations-with-stat
+]
 "src/ufo/operators/crtm/ufo_radiancecrtm_*mod.F90" = [
     "C011", # missing-default-case
     "C182", # multiple-allocations-with-stat

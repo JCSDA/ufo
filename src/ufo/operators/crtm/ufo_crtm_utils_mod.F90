@@ -1,4 +1,4 @@
-! (C) Copyright 2018 UCAR
+! (C) Copyright 2018-2026 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -80,6 +80,7 @@ type crtm_conf
  character(len=255), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
+ character(len=255) :: TauCoeff_Format, SpcCoeff_Format
  character(len=255) :: CloudCoeff_Format, AerosolCoeff_Format
  character(len=255) :: Aerosol_Model, Cloud_Model
  character(len=255) :: &
@@ -105,6 +106,7 @@ type crtm_conf
  logical :: flag_deep_conv_mass_flux = .true.
  logical :: read_Cmatrix = .false.
  character(len=max_string) :: Cmatrix_path
+ integer :: n_profilelevels = 1
 end type crtm_conf
 
 
@@ -444,6 +446,11 @@ character(max_string) :: cloud_reff_method
    end if
  end do
 
+ !Get Lidar levels
+ if (f_confOper%has("nProfileLevels")) then
+     call f_confOper%get_or_die("nProfileLevels", conf%n_profilelevels)
+ end if
+
  ! Aerosols
  !---------
  IF (f_confOpts%has("AerosolOption")) THEN
@@ -580,6 +587,19 @@ character(max_string) :: cloud_reff_method
  if (f_confOpts%has("NC_CoefficientPath")) then
     call f_confOpts%get_or_die("NC_CoefficientPath",str)
     conf%NC_COEFFICIENT_PATH = str
+ end if
+
+ ! Spc and Tau coefficient file format
+ conf%SpcCoeff_Format = "Binary"
+ if (f_confOpts%has("SpcCoeff_Format")) then
+    call f_confOpts%get_or_die("SpcCoeff_Format",str)
+    conf%SpcCoeff_Format = str
+ end if
+
+ conf%TauCoeff_Format = "Binary"
+ if (f_confOpts%has("TauCoeff_Format")) then
+    call f_confOpts%get_or_die("TauCoeff_Format",str)
+    conf%TauCoeff_Format = str
  end if
 
  ! Cloud coefficient file, model, and format
@@ -911,6 +931,7 @@ real(kind_real), allocatable :: clouds_mixingratio(:,:)
 real(kind_real), allocatable :: cloudmxr_sum(:,:)
 real(kind_real), allocatable :: pressure_KPa(:)
 integer  :: id_cld(1)
+
   if (present(Is_Active_Sensor)) then
      IsActiveSensor = Is_Active_Sensor
   else
@@ -1694,7 +1715,6 @@ end function uv_to_wdir
 
    SUBROUTINE load_aerosol_data(n_profiles, n_layers, geovals,&
      &conf, var_aerosols, aerosol_model, atm)
-
     USE CRTM_aerosolcoeff, ONLY: aeroc
 
     TYPE(crtm_conf), INTENT(in)    :: conf
@@ -1716,6 +1736,7 @@ end function uv_to_wdir
     CHARACTER(len=MAXVARLEN) :: varname
     CHARACTER(max_string) :: err_msg, message
 
+    character(len=20) :: fname
 
     varname = var_rh
     CALL ufo_geovals_get_var(geovals, varname, geoval)
@@ -1736,7 +1757,6 @@ end function uv_to_wdir
           atm(m)%aerosol(i)%Concentration(1:n_layers)=&
                &MAX(geoval%vals(:,m)*conf%unit_coef*layer_factors, &
                &aerosol_concentration_minvalue_layer)
-
 
           IF (aerosol_model == "CRTM") THEN
 

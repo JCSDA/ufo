@@ -38,6 +38,10 @@ namespace ufo
     oops::RequiredParameter<std::string> CoefficientPath{"CoefficientPath", this};
     /// NetCDF CoefficientPath
     oops::OptionalParameter<std::string> NC_CoefficientPath{"NC_CoefficientPath", this};
+    /// SpcCoeff_Format
+    oops::OptionalParameter<std::string> SpcCoeff_Format{"SpcCoeff_Format", this};
+    /// TauCoeff_Format
+    oops::OptionalParameter<std::string> TauCoeff_Format{"TauCoeff_Format", this};
     /// Cloud_Model
     oops::OptionalParameter<std::string> Cloud_Model{"Cloud_Model", this};
     /// CloudCoeff_File

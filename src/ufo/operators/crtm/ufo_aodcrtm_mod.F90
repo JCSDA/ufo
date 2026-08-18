@@ -73,7 +73,6 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  self%varin(1:size(varin_default)) = varin_default
  self%varin(SIZE(varin_default)+1:) = var_aerosols
 
-
  allocate(self%varin_aero(SIZE(var_aerosols)))
  self%varin_aero(:) = var_aerosols(:)
 

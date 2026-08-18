@@ -1524,6 +1524,17 @@ if( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LIBS    ufo
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+# TODO: This unit test for extinction coefficient profile is commented out now.
+# It will be activated when corresponding CRTM coefficient files are available
+#    ufo_add_test( NAME    opr_extcoeffprof_crtm
+#              ECBUILD
+#              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+#              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/extcoeffprof_crtm.yaml"
+#              MPI     1
+#              LIBS    ufo
+#              LABELS  crtm operators
+#              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
 #
     ufo_add_test( NAME    opr_amsua_crtm

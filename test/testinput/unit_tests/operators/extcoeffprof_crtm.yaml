@@ -1,0 +1,40 @@
+time window:
+  begin: 2019-07-22T02:00:00Z
+  end: 2019-07-22T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+- obs operator:
+    name: ExtinctionCoefficientProfileCRTM
+    nProfileLevels: 399
+    Absorbers: [H2O,O3]
+    obs options:
+      Sensor_ID: v.caliop
+      EndianType: little_endian
+      CoefficientPath: Data/
+      SpcCoeff_Format: netCDF
+      TauCoeff_Format: netCDF
+      AerosolCoeff_File: AerosolCoeff.GOCART-GEOS5.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_gefs
+      model units coeff: 1e9
+  obs space:
+    name: caliop_extcoeffprof
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/caliop_l2_extcoeff_obs_20190722_0217.nc4
+    simulated variables: [extinctionCoefficient_532nm, extinctionCoefficient_1064nm]
+    channels: 1-399
+    #obsdataout:
+    #  engine:
+    #    type: H5File
+    #    obsfile: Data/ufo/hofx.caliop_l2_APro.20190722_0217.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/caliop_l2_extcoeff_geovals_20190722_0217.nc4
+  vector ref: hofx 
+  tolerance: 1.0e-3
+  #linear obs operator test:
+  #  coef TL: 1.0e-3
+  #  tolerance TL: 1.0e-5
+  #  tolerance AD: 1.0e-12
