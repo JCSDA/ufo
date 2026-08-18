@@ -18,10 +18,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
     simulated variables: [atmosphericRefractivity]
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2019123006_refractivity_k1_ukmo_opr_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2019123006_refractivity_k1_ukmo_opr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity.nc4
   norm ref: MetOffice_k1_hofx
@@ -45,10 +45,10 @@ observations:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019123006_refractivity.nc4
     simulated variables: [atmosphericRefractivity]
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2019123006_refractivity_k2_ukmo_opr_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2019123006_refractivity_k2_ukmo_opr_out.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019123006_refractivity.nc4
   norm ref: MetOffice_k2_hofx
