@@ -47,10 +47,9 @@ ufo_add_test( NAME    obserrorwithingroupcorr
 
 ufo_add_test( NAME    obserrordiffusion
               ECBUILD
-              SOURCES ../../../mains/TestObsErrorCovariance.cc
+              COMMAND test_ObsError.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/obserrordiffusion.yaml"
               MPI     2
-              LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
@@ -104,19 +103,17 @@ ufo_add_test( NAME    reconditioning
 
 ufo_add_test( NAME    reconditioning_mpi
               ECBUILD
-              SOURCES ../../../mains/TestReconditioning.cc
+              COMMAND ufo_reconditioning
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reconditioning.yaml"
               MPI     2
-              LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
 ufo_add_test( NAME    reconditioning_within_group
               TIER    1
               ECBUILD
-              SOURCES ../../../mains/TestReconditioning.cc
+              COMMAND ufo_reconditioning
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/reconditioning_withinGroup.yaml"
               MPI     1
-              LIBS    ufo
               LABELS  errors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

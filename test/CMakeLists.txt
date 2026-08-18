@@ -307,10 +307,9 @@ ecbuild_add_test( TARGET  ufo_geometry_calculations
 
 # Test nearest_neighbor interpolation
 ecbuild_add_test( TARGET  ufo_nearest_neighbor_interpolation
-                  SOURCES mains/TestNearestNeighborInterpolation.cc
+                  COMMAND test_NearestNeighborInterpolation.x
                   ARGS    "testinput/empty.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  LIBS    ufo
                   TEST_DEPENDS test_NearestNeighborInterpolation.x)
 
 # Test superob radar template
@@ -354,11 +353,10 @@ ecbuild_add_test( TARGET  ufo_geovals
                   LIBS    ufo )
 
 ecbuild_add_test( TARGET  ufo_geovals_mpi
-                  SOURCES mains/TestGeoVaLs.cc
+                  COMMAND ufo_geovals
                   ARGS    "testinput/geovals.yaml"
                   ENVIRONMENT OOPS_TRAPFPE=1
-                  MPI     4
-                  LIBS    ufo )
+                  MPI     4)
 
 ecbuild_add_test( TARGET  ufo_geovals_spec
                   SOURCES mains/TestGeoVaLsSpec.cc

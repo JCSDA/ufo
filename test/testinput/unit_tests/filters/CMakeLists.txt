@@ -479,10 +479,9 @@ ufo_add_test( NAME    qc_gauss_thinning_satrad
 #
 ufo_add_test( NAME    qc_gauss_thinning_unittests
               ECBUILD
-              SOURCES ../../../mains/TestGaussianThinning.cc
+              COMMAND ufo_qc_gauss_thinning_satrad
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/qc_gauss_thinning_unittests.yaml"
               MPI     1
-              LIBS    ufo
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #

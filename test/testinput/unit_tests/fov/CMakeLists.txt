@@ -17,10 +17,9 @@ ufo_add_test( NAME    fov_amsua
 # Test FOV footprint and antenna power for instrument ssmis_f17
 ufo_add_test( NAME    fov_ssmis
               ECBUILD
-              SOURCES ../../../mains/TestFieldOfView.cc ../../../ufo/FieldOfView.h
+              COMMAND ufo_fov_amsua
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/ssmis_f17_fov.yaml"
               MPI     1
-              LIBS    ufo
               LABELS  unit_tests fov
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 # Test helper methods to sample and reduce over fields of view

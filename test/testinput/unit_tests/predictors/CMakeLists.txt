@@ -68,9 +68,8 @@ ufo_add_test( NAME    bias_covariance_amsua
 #
 ufo_add_test( NAME    bias_covariance_aircraft
               ECBUILD
-              SOURCES ../../../mains/TestObsBiasCovariance.cc
+              COMMAND ufo_bias_covariance_amsua
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
-              LIBS    ufo
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
@@ -84,19 +83,17 @@ ufo_add_test( NAME    bias_covariance_details
 #
 ufo_add_test( NAME    bias_covariance_details_byrecord
               ECBUILD
-              SOURCES ../../../mains/TestObsBiasCovarianceDetails.cc
+              COMMAND ufo_bias_covariance_details
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
-              LIBS    ufo
               LABELS  unit_tests predictors
               TEST_DEPENDS ufo_bias_covariance_aircraft
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    bias_covariance_details_byrecord_2
               ECBUILD
-              SOURCES ../../../mains/TestObsBiasCovarianceDetails.cc
+              COMMAND ufo_bias_covariance_details
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
               MPI     2
-              LIBS    ufo
               LABELS  unit_tests predictors
               TEST_DEPENDS ufo_bias_covariance_details_byrecord
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
@@ -111,10 +108,9 @@ ufo_add_test( NAME    bias_coeff_readwrite
 #
 ufo_add_test( NAME    bias_coeff_readwrite_byrecord
               ECBUILD
-              SOURCES ../../../mains/TestUfoObsBias.cc
+              COMMAND ufo_bias_coeff_readwrite
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coeff_cov_byrecord.yaml"
               MPI     2
-              LIBS    ufo
               LABELS  unit_tests predictors
               TEST_DEPENDS ufo_bias_covariance_details_byrecord_2
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
