@@ -16,11 +16,9 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/util/IntSetParser.h"
-#include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"
-#include "ufo/utils/StringUtils.h"
 
 namespace ufo {
 
@@ -40,17 +38,28 @@ ObsErrorFactorTopoRad::ObsErrorFactorTopoRad(const eckit::LocalConfiguration & c
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels_));
   ASSERT(channels_.size() > 0);
 
+  // Build the channel -> height map.
+  // If no height groups are specified, apply the default reference height (2000 m) to every
+  // channel. Only channels listed in a height group are corrected, using the listed height.
+  const auto &heightGroups = options_.heightGroups.value();
+  if (heightGroups.empty()) {
+    for (int channel : channels_) {
+      channelHeights_[channel] = 2000.0;
+    }
+  } else {
+    for (const auto &group : heightGroups) {
+      std::set<int> groupChannels = oops::parseIntSet(group.channelList);
+      for (int channel : groupChannels) {
+        channelHeights_[channel] = group.height;
+      }
+    }
+  }
+
   // Get sensor information from options
-  const std::string &sensor = options_.sensor.value();
+  sensor_ = options_.sensor.value();
+  ASSERT(sensor_ == "infrared" || sensor_ == "microwave");
 
-  // Get instrument and satellite from sensor
-  std::string inst, sat;
-  splitInstSat(sensor, inst, sat);
-  ASSERT(inst == "amsua" || inst == "atms"    || inst == "mhs" ||
-         inst == "iasi" || inst == "cris-fsr" || inst == "airs" ||
-         inst == "avhrr3" || inst == "seviri" || inst == "abi");
-
-  if (inst == "amsua" || inst == "atms") {
+  if (sensor_ == "infrared") {
     // Get test groups from options
     const std::string &errgrp = options_.testObserr.value();
     const std::string &flaggrp = options_.testQCflag.value();
@@ -78,12 +87,6 @@ ObsErrorFactorTopoRad::~ObsErrorFactorTopoRad() {
 void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
                                   ioda::ObsDataVector<float> & out) const {
   oops::Log::trace() << "ObsErrorFactorTopoRad compute start" << std::endl;
-  // Get sensor information from options
-  const std::string &sensor = options_.sensor.value();
-
-  // Get instrument and satellite from sensor
-  std::string inst, sat;
-  splitInstSat(sensor, inst, sat);
 
   // Get dimensions
   size_t nlocs = in.nlocs();
@@ -94,41 +97,22 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
   std::vector<float> zsges(nlocs);
   in.get(Variable("GeoVaLs/geopotential_height_at_surface"), zsges);
 
-  // Inflate obs error as a function of terrian height (>2000) and surface-to-space transmittance
-  if (inst == "iasi" || inst == "cris-fsr" || inst == "airs" || inst == "avhrr3" ||
-      inst == "seviri" || inst == "abi") {
+  // Inflate obs error as a function of terrain height and surface-to-space transmittance
+  if (sensor_ == "infrared") {
     std::vector<float> tao_sfc(nlocs);
     for (size_t ich = 0; ich < nchans; ++ich) {
       in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich],
              nlevs - 1, tao_sfc);
+      const auto it = channelHeights_.find(channels_[ich]);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         out[ich][iloc] = 1.0;
-        if (zsges[iloc] > 2000.0) {
-          float factor = pow((2000.0/zsges[iloc]), 4);
+        if (it != channelHeights_.end() && zsges[iloc] > it->second) {
+          float factor = pow((it->second/zsges[iloc]), 4);
           out[ich][iloc] = sqrt(1.0 / (1.0 - (1.0 - factor) * tao_sfc[iloc]));
         }
       }
     }
-  } else if (inst == "mhs") {
-    std::vector<float> tao_sfc(nlocs);
-    for (size_t ich = 0; ich < nchans; ++ich) {
-      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        out[ich][iloc] = 1.0;
-        if (zsges[iloc] > 2000.0) {
-          float factor = 2000.0/zsges[iloc];
-          out[ich][iloc] = sqrt(1.0 / factor);
-        }
-      }
-    }
-  } else if (inst == "amsua" || inst == "atms") {
-    // Set channel numbers
-    int ich544 = 0, ich549 = 0, ich890 = 0;
-    if (inst == "amsua") {
-      ich544 = 6, ich549 = 7, ich890 = 15;
-    } else if (inst == "atms") {
-      ich544 = 7, ich549 = 8, ich890 = 16;
-    }
-
+  } else if (sensor_ == "microwave") {
     float factor;
     std::vector<int> qcflagdata;
     std::vector<float> obserrdata;
@@ -136,32 +120,27 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
     const std::string &flaggrp = options_.testQCflag.value();
     const float missing = util::missingValue<float>();
 
-    // Calculate error factors (error_factors) for each channel
-    for (size_t ichan = 0; ichan < nchans; ++ichan) {
-      size_t channel = ichan + 1;
-      in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ichan], obserrdata);
-      in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflagdata);
+    for (size_t ich = 0; ich < nchans; ++ich) {
+      in.get(Variable(errgrp+"/brightnessTemperature", channels_)[ich], obserrdata);
+      in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ich], qcflagdata);
+      const auto it = channelHeights_.find(channels_[ich]);
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        out[ichan][iloc] = 1.0;
+        out[ich][iloc] = 1.0;
         if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                              : qcflagdata[iloc] = 0;
         (qcflagdata[iloc] != 0) ? (factor = 0.0) : (factor = 1.0);
 
-        if (zsges[iloc] > 2000.0) {
-          if (channel <= ich544 || channel >= ich890) {
-            out[ichan][iloc] = (2000.0/zsges[iloc]) * factor;
-          }
-          if ((zsges[iloc] > 4000.0) && (channel == ich549)) {
-            out[ichan][iloc] = (4000.0/zsges[iloc]) * factor;
-          }
-          if (factor > 0.0) out[ichan][iloc] = sqrt(1.0 / out[ichan][iloc]);
+        if (it != channelHeights_.end() && zsges[iloc] > it->second) {
+          out[ich][iloc] = it->second/zsges[iloc] * factor;
+        }
+        if (factor > 0.0) {
+          out[ich][iloc] = sqrt(1.0 / out[ich][iloc]);
         }
       }
     }
-  } else {
-    oops::Log::error() << "ObsErrorFactorTopoRad: Invalid instrument (sensor) specified: " << inst
-                       << "  The valid instruments are: iasi, cris-fsr, airs, avhrr3, seviri, "
-                       << "  amsua, atms, abi, and mhs."
+  } else {  // Already checked but just to include an else statement here
+    oops::Log::error() << "ObsErrorFactorTopoRad: Invalid sensor specified: " << sensor_
+                       << "  The valid sensors are: infrared and microwave."
                        << std::endl;
   }
   oops::Log::trace() << "ObsErrorFactorTopoRad compute complete" << std::endl;

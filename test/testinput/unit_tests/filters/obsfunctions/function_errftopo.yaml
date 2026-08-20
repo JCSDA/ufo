@@ -74,7 +74,8 @@ observations:
     name: ObsFunction/ObsErrorFactorTopoRad
     options:
       channels: *all_channels
-      sensor: iasi_metop-a
+      sensor: infrared
+      #height: 2000 #default
     variables: [error_inflation_factor_topo]
     channels: *all_channels
     tolerance: 1.0e-8

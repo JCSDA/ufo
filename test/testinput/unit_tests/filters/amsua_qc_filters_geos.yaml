@@ -19,10 +19,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500.nc4
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/geos_amsua_n19_obs_2020121500_qc_filters_out.nc4
+    # obsdataout:
+    #   engine:
+    #     type: H5File
+    #     obsfile: Data/geos_amsua_n19_obs_2020121500_qc_filters_out.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-15
   geovals:
@@ -110,8 +110,12 @@ observations:
         name: ObsFunction/ObsErrorFactorTopoRad
         channels: 1-15
         options:
-          sensor: *Sensor_ID
+          sensor: microwave
           channels: 1-15
+          height groups:
+          - channels: 1-6, 15
+          - channels: 7
+            height: 4000        
 # Transmittance Top Check
   - filter: BlackList
     filter variables:
@@ -166,7 +170,11 @@ observations:
           channels: 1-15
           options:
             channels: 1-15
-            sensor: *Sensor_ID
+            sensor: microwave
+            height groups:
+            - channels: 1-6, 15
+            - channels: 7
+              height: 4000
         error parameter vector:
                   [2.500,  2.000,  2.000,  0.550,  0.300,
                    0.230,  0.230,  0.250,  0.250,  0.350,

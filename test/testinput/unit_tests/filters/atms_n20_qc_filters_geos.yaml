@@ -111,8 +111,13 @@ observations:
         name: ObsFunction/ObsErrorFactorTopoRad
         channels: 1-22
         options:
-          sensor: *Sensor_ID
+          sensor: microwave
           channels: 1-22
+          height groups:
+          - channels: 1-7, 16-22
+            #height: 2000 #default
+          - channels: 8
+            height: 4000
 # Transmittance Top Check
   - filter: BlackList
     filter variables:
@@ -167,7 +172,11 @@ observations:
           channels: 1-22
           options:
             channels: 1-22
-            sensor: *Sensor_ID
+            sensor: microwave
+            height groups:
+            - channels: 1-7, 16-22
+            - channels: 8
+              height: 4000
         error parameter vector:
                   [5.000,  5.000,  5.000,  3.000,  0.550,
                    0.300,  0.300,  0.300,  0.300,  0.300,

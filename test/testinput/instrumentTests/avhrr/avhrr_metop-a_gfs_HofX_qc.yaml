@@ -81,7 +81,7 @@ observations:
         channels: *all_channels
         options:
           channels: *all_channels
-          sensor: *Sensor_ID
+          sensor: infrared
 #  Observation Range Sanity Check
   - filter: Bounds Check
     filter variables:

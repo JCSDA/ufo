@@ -192,7 +192,7 @@ observations:
         name: ObsFunction/ObsErrorFactorTopoRad
         channels: *all_channels
         options:
-          sensor: *Sensor_ID
+          sensor: microwave
           channels: *all_channels
 #  Transmittnace Top Check
   - filter: BlackList
@@ -236,7 +236,7 @@ observations:
           channels: *all_channels
           options:
             channels: *all_channels
-            sensor: *Sensor_ID
+            sensor: microwave
         obserr_function:
           name: ObsFunction/ObsErrorModelRamp
           channels: *all_channels
@@ -290,7 +290,7 @@ observations:
           channels: *all_channels
           options:
             channels: *all_channels
-            sensor: *Sensor_ID
+            sensor: microwave
         obserr_function:
           name: ObsFunction/ObsErrorModelRamp
           channels: *all_channels

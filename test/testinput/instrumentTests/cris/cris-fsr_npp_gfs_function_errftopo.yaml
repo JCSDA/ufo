@@ -54,7 +54,7 @@ observations:
     name: ObsFunction/ObsErrorFactorTopoRad
     options:
       channels: *all_channels
-      sensor: cris-fsr_npp
+      sensor: infrared
     variables: [error_inflation_factor_topo]
     channels: *all_channels
     tolerance: 1.0e-8
