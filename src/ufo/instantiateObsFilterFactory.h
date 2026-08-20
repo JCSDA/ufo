@@ -57,6 +57,7 @@
 #include "ufo/filters/SatwindInversionCorrection.h"
 #include "ufo/filters/SharedListCheck.h"
 #include "ufo/filters/SpikeAndStepCheck.h"
+#include "ufo/filters/StepCheck.h"
 #include "ufo/filters/StuckCheck.h"
 #include "ufo/filters/SuperOb.h"
 #include "ufo/filters/SuperRefractionCheckImpactParameter.h"
@@ -183,6 +184,8 @@ void instantiateObsFilterFactory() {
            ShipTrackCheckMaker("Ship Track Check");
   static FilterMaker<SpikeAndStepCheck>
            SpikeAndStepCheckMaker("Spike and Step Check");
+  static FilterMaker<StepCheck>
+           StepCheckMaker("Step Check");
   static FilterMaker<StuckCheck>
            StuckCheckMaker("Stuck Check");
   static FilterMaker<SuperRefractionCheckImpactParameter>

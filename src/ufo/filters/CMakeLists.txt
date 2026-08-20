@@ -117,6 +117,9 @@ set ( filters_files
       SharedListStore.h
       SpikeAndStepCheck.cc
       SpikeAndStepCheck.h
+      StepCheck.cc
+      StepCheck.h
+      StepCheckParameters.h
       StuckCheck.cc
       StuckCheck.h
       StuckCheckParameters.h

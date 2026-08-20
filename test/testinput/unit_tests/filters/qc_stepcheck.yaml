@@ -1,0 +1,594 @@
+# This tests that the Step Check filter flags as expected.
+
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2029-12-12T23:59:59Z
+
+observations:
+
+  - obs space:
+      name: Step Check - Single Step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ pressureSingleStep ]
+      observed variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0 # Pa
+        inclusive step threshold: true # default
+    flaggedObservationsBenchmark:
+      # remove if permuting input obs
+      - 2
+      - 103
+    flaggedBenchmark: 2
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Single Step - no grouping, station_id_variable from track check set
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ pressureSingleStep ]
+      observed variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0 # Pa
+        inclusive step threshold: true # default
+        station_id_variable: MetaData/stationIdentification
+    flaggedObservationsBenchmark:
+      # remove if permuting input obs
+      - 2
+      - 103
+    flaggedBenchmark: 2
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Single Step, Exclusive Threshold
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ pressureSingleStep ]
+      observed variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0 # Pa
+        inclusive step threshold: false
+    flaggedBenchmark: 0 # no flags expected
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Multiple Steps, Number of Steps
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ pressure5Steps ]
+      observed variables: [ pressure5Steps ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressure5Steps ]
+        step threshold: 90.0 # Pa
+        inclusive step threshold: true # default
+        number step tolerance: 4 # i.e. allow 4 steps within threshold, if 5 or more steps beyond threshold then flag.
+    flaggedObservationsBenchmark:
+      - 2
+      - 4
+      - 6
+      - 8
+      - 10
+    flaggedBenchmark: 5
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Multiple Steps, Percentage of Steps
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ pressure10PercentSteps ]
+      observed variables: [ pressure10PercentSteps ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressure10PercentSteps ]
+        step threshold: 90.0 # Pa
+        inclusive step threshold: true # default
+        percentage step tolerance: 5 # 5%, i.e. number step tolerance: 5, for record length 100
+    flaggedObservationsBenchmark:
+      - 1
+      - 3
+      - 5
+      - 7
+      - 9
+      - 11
+      - 13
+      - 15
+      - 17
+      - 19
+    flaggedBenchmark: 10
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Circular Difference
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirection2Steps ]
+      observed variables: [ windDirection2Steps ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirection2Steps ]
+        step threshold: 90.0 # degrees
+        inclusive step threshold: true # default
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+    flaggedObservationsBenchmark:
+      - 20
+      - 70
+    flaggedBenchmark: 2
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Chunking
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirectionChunked ]
+      observed variables: [ windDirectionChunked ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunked ]
+        step threshold: 18.0 # degrees - actual average step is 18.0 degrees
+        inclusive step threshold: true # default
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+        chunk size: 10 # Values are in chunks of 10 - steps within chunks are calculated, averaged and compared to threshold.
+        use average step: true # Will calculate the average step over the data and compare that to the threshold (required for chunking)
+    flaggedBenchmark: 100 # all values flagged as step detected except missing value
+    flaggedObservationsBenchmark:
+      # All of station 0 except missing value at 100
+      [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+        10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
+        20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
+        30,  31,  32,  33,  34,  35,  36,  37,  38,  39,
+        40,  41,  42,  43,  44,  45,  46,  47,  48,  49,
+        50,  51,  52,  53,  54,  55,  56,  57,  58,  59,
+        60,  61,  62,  63,  64,  65,  66,  67,  68,  69,
+        70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
+        80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
+        90,  91,  92,  93,  94,  95,  96,  97,  98,  99 ]
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Chunking with stuck value chunks removed
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirectionChunkedStuck ]
+      observed variables: [ windDirectionChunkedStuck ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunkedStuck ]
+        step threshold: 90.0 # degrees - actual average step within non-stuck chunks at station0 is 80.22 degrees
+        inclusive step threshold: true # default
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+        chunk size: 10 # Values are in chunks of 10 - steps within chunks are calculated, averaged and compared to threshold
+        remove stuck chunks: true # whether to remove chunks where all values are the same
+        use average step: true # Will calculate the average step over the data and compare that to the threshold (required for chunking)
+    flaggedBenchmark: 0 # stuck values were removed so no flags expected
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Chunking with stuck value chunks removed, detect step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirectionChunkedStuck ]
+      observed variables: [ windDirectionChunkedStuck ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunkedStuck ]
+        step threshold: 80.0 # degrees - lower than before to detect 80.22 degree step between non-stuck value chunks
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+        chunk size: 10 # Values are in chunks of 10 - steps within chunks are calculated, averaged and compared to threshold
+        remove stuck chunks: true # whether to remove chunks where all values are the same
+        use average step: true # Will calculate the average step over the data and compare that to the threshold (required for chunking)
+    flaggedBenchmark: 100 # all values flagged as step detected except missing value
+    flaggedObservationsBenchmark:
+      # All of station 0 (101 obs) except missing value at 50
+      [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+        10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
+        20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
+        30,  31,  32,  33,  34,  35,  36,  37,  38,  39,
+        40,  41,  42,  43,  44,  45,  46,  47,  48,  49,
+             51,  52,  53,  54,  55,  56,  57,  58,  59,
+        60,  61,  62,  63,  64,  65,  66,  67,  68,  69,
+        70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
+        80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
+        90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100 ]
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Chunking with stuck value chunks removed using tolerance - detect step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirectionChunkedStuck ]
+      observed variables: [ windDirectionChunkedStuck ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunkedStuck ]
+        step threshold: 90.0 # degrees - detected no step before but chunk 5 will now be considered stuck, so average step between within remaining chunks is 90.0 degrees so step should now be detected
+        inclusive step threshold: true # default
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+        chunk size: 10 # Values are in chunks of 10 - steps within chunks are calculated, averaged and compared to threshold
+        remove stuck chunks: true # whether to remove chunks where all values are the same
+        use average step: true # Will calculate the average step over the data and compare that to the threshold (required for chunking)
+        chunk stuck tolerance: 2.0 # tolerance for determining if values are the same (default 0.0) - with this tolerance the previously not-stuck chunks are now considered stuck
+    flaggedBenchmark: 100 # all values flagged as step detected except missing value
+    flaggedObservationsBenchmark:
+      # All of station 0 (101 obs) except missing value at 50
+      [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+        10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
+        20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
+        30,  31,  32,  33,  34,  35,  36,  37,  38,  39,
+        40,  41,  42,  43,  44,  45,  46,  47,  48,  49,
+             51,  52,  53,  54,  55,  56,  57,  58,  59,
+        60,  61,  62,  63,  64,  65,  66,  67,  68,  69,
+        70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
+        80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
+        90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100 ]
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Chunking with last chunk incomplete and ignored - detect steps
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirectionChunkedIncomplete ]
+      observed variables: [ windDirectionChunkedIncomplete ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunkedIncomplete ]
+        step threshold: 90.0 # degrees - with last chunk ignored average step is 90 degrees so step should be detected
+        inclusive step threshold: true # default
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+        chunk size: 30 # chunks are [30,30,30,11] but last chunk is ignored since it's smaller than chunk size
+        use average step: true # Will calculate the average step over the data and compare that to the threshold (required for chunking)
+        ignore last chunk if incomplete: true # default is false
+    flaggedBenchmark: 101 # all values at station0 flagged as step detected (no missing values here)
+    flaggedObservationsBenchmark:
+      # All of station 0 (101 obs)
+      [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+        10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
+        20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
+        30,  31,  32,  33,  34,  35,  36,  37,  38,  39,
+        40,  41,  42,  43,  44,  45,  46,  47,  48,  49,
+        50,  51,  52,  53,  54,  55,  56,  57,  58,  59,
+        60,  61,  62,  63,  64,  65,  66,  67,  68,  69,
+        70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
+        80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
+        90,  91,  92,  93,  94,  95,  96,  97,  98,  99, 100 ]
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Chunking with last chunk incomplete - detect no step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      #   obsdataout:
+      #     engine:
+      #       type: H5File
+      #       obsfile: Data/step_check_out.nc4
+      simulated variables: [ windDirectionChunkedIncomplete ]
+      observed variables: [ windDirectionChunkedIncomplete ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunkedIncomplete ]
+        step threshold: 90.0 # degrees - with last chunk included average step is 67.5 degrees so step should not be detected
+        inclusive step threshold: true # default
+        circular period: 360.0 # degrees - optional, if specified enables circular difference calculation
+        chunk size: 30 # chunks are [30,30,30,11] but last chunk is included here and has no steps so average is lowered
+        use average step: true # Will calculate the average step over the data and compare that to the threshold (required for chunking)
+        ignore last chunk if incomplete: false # set to false to include last chunk and detect step
+    flaggedBenchmark: 0
+    benchmarkFlag: 32 # step
+
+  # Non-chunked average step mode (use average step: true, no chunk size)
+  # These two tests exercise the non-chunked code path
+
+  - obs space:
+      name: Step Check - Average step (no chunking), detect step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ windDirectionChunked ]
+      observed variables: [ windDirectionChunked ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunked ]
+        step threshold: 1.0 # degrees - well below the actual average step, so step is detected
+        inclusive step threshold: true # default
+        circular period: 360.0
+        use average step: true
+        # No chunk size: exercises the non-chunked code path
+    flaggedBenchmark: 100 # all valid values at station 0 flagged (missing value at 100 excluded)
+    flaggedObservationsBenchmark:
+      [  0,   1,   2,   3,   4,   5,   6,   7,   8,   9,
+        10,  11,  12,  13,  14,  15,  16,  17,  18,  19,
+        20,  21,  22,  23,  24,  25,  26,  27,  28,  29,
+        30,  31,  32,  33,  34,  35,  36,  37,  38,  39,
+        40,  41,  42,  43,  44,  45,  46,  47,  48,  49,
+        50,  51,  52,  53,  54,  55,  56,  57,  58,  59,
+        60,  61,  62,  63,  64,  65,  66,  67,  68,  69,
+        70,  71,  72,  73,  74,  75,  76,  77,  78,  79,
+        80,  81,  82,  83,  84,  85,  86,  87,  88,  89,
+        90,  91,  92,  93,  94,  95,  96,  97,  98,  99 ]
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Average step (no chunking), no step detected
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ windDirectionChunked ]
+      observed variables: [ windDirectionChunked ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ windDirectionChunked ]
+        step threshold: 100.0 # degrees - well above the actual average step, so no step detected
+        inclusive step threshold: true # default
+        circular period: 360.0
+        use average step: true
+        # No chunk size: exercises the non-chunked code path
+    flaggedBenchmark: 0
+    benchmarkFlag: 32 # step
+
+
+  # Boundary tests for percentage step tolerance
+
+  - obs space:
+      name: Step Check - Boundary test - zero percentage tolerance
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressure5Steps ]
+      observed variables: [ pressure5Steps ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressure5Steps ]
+        step threshold: 10.0
+        percentage step tolerance: 0  # Allow 0% exceeding steps - flag if any exceed
+    flaggedObservationsBenchmark:
+      - 2
+      - 4
+      - 6
+      - 8
+      - 10
+    flaggedBenchmark: 5
+    benchmarkFlag: 32 # step
+
+  - obs space:
+      name: Step Check - Boundary test - 100 percent tolerance
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressure5Steps ]
+      observed variables: [ pressure5Steps ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressure5Steps ]
+        step threshold: 10.0
+        percentage step tolerance: 100  # Allow 100% exceeding steps - flag none
+    flaggedBenchmark: 0  # No flags expected
+    benchmarkFlag: 32 # step
+
+
+  # Exception tests - verify that invalid parameter combinations are rejected
+
+  - obs space:
+      name: Step Check - Exception test - both number and percentage tolerance
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        number step tolerance: 5
+        percentage step tolerance: 50
+    expectExceptionWithMessage: "If percentage step tolerance is set"
+
+  - obs space:
+      name: Step Check - Exception test - percentage tolerance out of range (negative)
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        percentage step tolerance: -10
+    expectExceptionWithMessage: "Percentage step tolerance must be between 0 and 100"
+
+  - obs space:
+      name: Step Check - Exception test - percentage tolerance out of range (>100)
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        percentage step tolerance: 150
+    expectExceptionWithMessage: "Percentage step tolerance must be between 0 and 100"
+
+  - obs space:
+      name: Step Check - Exception test - percentage tolerance with use average step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        percentage step tolerance: 50
+        use average step: true
+    expectExceptionWithMessage: "Percentage step tolerance cannot be used with"
+
+  - obs space:
+      name: Step Check - Exception test - number tolerance with use average step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        number step tolerance: 5
+        use average step: true
+    expectExceptionWithMessage: "Use average step cannot be used with"
+
+  - obs space:
+      name: Step Check - Exception test - both tolerances with use average step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        number step tolerance: 5
+        percentage step tolerance: 50
+        use average step: true
+    expectExceptionWithMessage: "If percentage step tolerance is set"
+
+  - obs space:
+      name: Step Check - Exception test - chunking but no use average step
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/step_check_obs.nc4
+        obsgrouping:
+          group variables: [ "stationIdentification" ]
+      simulated variables: [ pressureSingleStep ]
+    obs filters:
+      - filter: Step Check
+        filter variables: [ pressureSingleStep ]
+        step threshold: 100.0
+        chunk size: 10
+        use average step: false
+    expectExceptionWithMessage: "Chunking cannot be used without use average step being set to true"
