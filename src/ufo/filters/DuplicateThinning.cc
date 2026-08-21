@@ -22,7 +22,6 @@
 #include "oops/util/Logger.h"
 
 #include "ufo/filters/ObsAccessor.h"
-#include "ufo/utils/RecordHandler.h"
 #include "ufo/utils/RecursiveSplitter.h"
 
 namespace ufo {
@@ -89,13 +88,21 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
   // Create ObsAccessor to get observations held in multiple MPI rank
   ObsAccessor obsAccessor = createObsAccessor();
   const size_t totalNumObs = obsAccessor.totalNumObservations();
+  if (totalNumObs == 0) {
+    if (obsdb_.comm().rank() == 0) {
+      oops::Log::warning()
+          << "DuplicateThinning: ObsSpace '" << obsdb_.obsname()
+          << "' contains no observations; skipping filter." << std::endl;
+    }
+    return;
+  }
   util::DateTime analysisTime = (parameters_.analysisTime.value() != boost::none)
                                 ? *parameters_.analysisTime.value()
                                 : obsdb_.windowStart();
   std::vector<bool> isThinned(totalNumObs, false);
 
   const std::vector<size_t> validObsIds
-                  = obsAccessor.getValidObservationIds(apply);
+                  = obsAccessor.getValidObservationIds(apply, flags_, filtervars, true);
   // Create RecursiveSplitter to partition array into groups of elements.
   RecursiveSplitter splitter = obsAccessor.splitObservationsIntoIndependentGroups(validObsIds);
   std::vector<util::DateTime> dateTime = obsAccessor.getDateTimeVariableFromObsSpace(
@@ -138,8 +145,17 @@ void DuplicateThinning::applyFilter(const std::vector<bool> & apply,
                       testVars_[i].group(), testVars_[i].variable());
       ASSERT(totalNumObs == obsStrCategories.size());
       splitter.groupBy(obsStrCategories);
-  } else {
+    } else if (obsdb_.dtype(testVars_[i].group(), testVars_[i].variable())
+                == ioda::ObsDtype::Empty) {
+      oops::Log::warning() << "DuplicateThinning found an EMPTY obs space,"
+        << " skipping filter." << std::endl;
+      return;
+    } else if (obsdb_.dtype(testVars_[i].group(), testVars_[i].variable())
+               == ioda::ObsDtype::DateTime) {
       throw eckit::UserError("DuplicateThinning don't support dateTime variables"
+           " for identifying duplicates.", Here());
+    } else {
+      throw eckit::UserError("DuplicateThinning unsupported variable type"
            " for identifying duplicates.", Here());
     }
   }  // end for all variables
