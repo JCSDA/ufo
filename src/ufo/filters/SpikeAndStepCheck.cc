@@ -18,7 +18,6 @@
 
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/SpikeAndStepCheck.h"
 

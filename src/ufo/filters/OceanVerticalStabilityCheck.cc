@@ -9,7 +9,6 @@
 
 #include "oops/util/Logger.h"
 #include "ufo/filters/FilterUtils.h"
-#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/OceanVerticalStabilityCheck.h"
 #include "ufo/filters/SpikeAndStepCheck.h"

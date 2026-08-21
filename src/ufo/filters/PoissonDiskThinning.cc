@@ -23,7 +23,6 @@
 #include "oops/util/IsAnyPointInVolumeInterior.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
-#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/filters/PoissonDiskThinningParameters.h"
 #include "ufo/utils/Constants.h"

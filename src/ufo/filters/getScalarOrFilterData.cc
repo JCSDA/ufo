@@ -19,7 +19,8 @@ namespace ufo {
 // -----------------------------------------------------------------------------
 
 std::vector<float> getScalarOrFilterData(const std::string & strfactor,
-                                         const ObsFilterData & data) {
+                                         const ObsFilterData & data,
+                                         bool skipDerived) {
   std::istringstream iss(strfactor);
   std::vector<float> factors(data.nlocs());
   float factor;
@@ -39,7 +40,7 @@ std::vector<float> getScalarOrFilterData(const std::string & strfactor,
                          << strfactor << std::endl;
       ABORT("getScalarOrFilterData: either a value or a valid variable should be specified");
     }
-    data.get(var, factors);
+    data.get(var, factors, skipDerived);
   }
   return factors;
 }

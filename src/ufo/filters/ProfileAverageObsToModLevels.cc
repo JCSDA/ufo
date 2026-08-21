@@ -19,7 +19,6 @@
 
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/profile/ProfileAverageUtils.h"
 
 namespace ufo {

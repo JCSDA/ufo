@@ -19,10 +19,17 @@ class ObsFilterData;
 //  - if input string contains a float, output vector would be filled in with that number
 //    for nlocs size (e.g. if string is "4.0", output vector would contain nlocs x 4.0)
 //  - otherwise output vector would contain data from ObsFilterData (e.g. if string is
-//    MyFunction@Function, output vector would contatin that. If there's no MyFunction@Function
+//    MyFunction@Function, output vector would contain that. If there's no MyFunction@Function
 //    in ObsFilterData, the function will abort.
+//  - If the optional parameter skipDerived is true, retrieval of a particular group name
+//    from the filter data will only consider that group. If skipDerived is false,
+//    the retrieval will first check for the same group prefixed with "Derived" and if
+//    such a group is present then the data from that will be retrieved. If the Derived
+//    group is not present, data from the original group will then be retrieved. The default
+//    is false (for backwards compatibility).
 //  To be used in error inflation, thresholds for BackgroundCheck, etc
-std::vector<float> getScalarOrFilterData(const std::string &, const ObsFilterData &);
+std::vector<float> getScalarOrFilterData(const std::string &, const ObsFilterData &,
+                                         bool skipDerived = false);
 
 }  // namespace ufo
 

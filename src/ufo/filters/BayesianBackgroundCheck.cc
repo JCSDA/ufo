@@ -21,7 +21,6 @@
 
 #include "oops/util/Logger.h"
 
-#include "ufo/filters/getScalarOrFilterData.h"
 #include "ufo/filters/QCflags.h"
 
 #include "ufo/utils/ProbabilityOfGrossError.h"
