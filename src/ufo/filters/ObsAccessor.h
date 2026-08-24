@@ -321,22 +321,7 @@ class ObsAccessor {
   mutable std::vector<size_t> glocs_;
 
   /// Fill vector of global locations.
-  void fillGlocs(const std::vector<bool> &apply) const {
-    // Only fill glocs_ once.
-    if (glocs_.size() > 0) {
-      return;
-    }
-    const size_t nlocs = obsdb_->nlocs();
-    std::vector<bool> patchObsVec(nlocs);
-    obsDistribution_->patchObs(patchObsVec);
-    for (size_t i = 0; i < nlocs; ++i) {
-      if (apply[i] && patchObsVec[i]) {
-        const size_t gloc = obsDistribution_->globalUniqueConsecutiveLocationIndex(i);
-        glocs_.push_back(gloc);
-      }
-    }
-    oops::mpi::allGatherv(obsdb_->comm(), glocs_);
-  }
+  void fillGlocs(const std::vector<bool> &apply) const;
 };
 
 }  // namespace ufo

@@ -99,40 +99,20 @@ class RecursiveSplitter
     struct BeginTag {};
     struct EndTag {};
 
-    explicit MultiElementGroupIterator(const RecursiveSplitter &splitter, BeginTag)
-      : splitter_(splitter) {
-      if (splitter_.encodedGroups_.empty()) {
-        firstIndexInGroup_ = 0;
-      } else {
-        firstIndexInGroup_ = splitter_.encodedGroups_[0];
-      }
-    }
+    explicit MultiElementGroupIterator(const RecursiveSplitter &splitter, BeginTag);
 
     explicit MultiElementGroupIterator(const RecursiveSplitter &splitter, EndTag)
       : splitter_(splitter) {
       firstIndexInGroup_ = splitter_.encodedGroups_.size();
     }
 
-    Group operator*() const {
-      assert(!isSentinel());
-      size_t lastIndexInGroup = splitter_.encodedGroups_[firstIndexInGroup_ + 1];
-      return Group(splitter_.orderedIds_.begin() + firstIndexInGroup_,
-                   splitter_.orderedIds_.begin() + lastIndexInGroup + 1);
-    }
+    Group operator*() const;
 
     ArrowProxy<Group> operator->() const {
       return ArrowProxy<Group>(operator*());
     }
 
-    MultiElementGroupIterator& operator++() {
-      const size_t lastIndexInGroup = splitter_.encodedGroups_[firstIndexInGroup_ + 1];
-      if (lastIndexInGroup + 1 < splitter_.encodedGroups_.size()) {
-        firstIndexInGroup_ = splitter_.encodedGroups_[lastIndexInGroup + 1];
-      } else {
-        firstIndexInGroup_ = splitter_.encodedGroups_.size();
-      }
-      return *this;
-    }
+    MultiElementGroupIterator& operator++();
 
     bool operator==(const MultiElementGroupIterator& other) const {
       // In principle we should also check splitters for equality. We don't do it for efficiency.
@@ -172,34 +152,13 @@ class RecursiveSplitter
       : MultiElementGroupIterator(splitter, EndTag()), currentIndex_(firstIndexInGroup_)
     {}
 
-    Group operator*() const {
-      assert(!isSentinel());
-      if (currentIndex_ == firstIndexInGroup_) {
-        return MultiElementGroupIterator::operator*();
-      } else {
-        return Group(splitter_.orderedIds_.begin() + currentIndex_,
-                     splitter_.orderedIds_.begin() + currentIndex_ + 1);
-      }
-    }
+    Group operator*() const;
 
     ArrowProxy<Group> operator->() const {
       return ArrowProxy<Group>(operator*());
     }
 
-    GroupIterator& operator++() {
-      if (currentIndex_ == firstIndexInGroup_) {
-        const size_t lastIndexInGroup = splitter_.encodedGroups_[firstIndexInGroup_ + 1];
-        if (lastIndexInGroup + 1 < splitter_.encodedGroups_.size()) {
-          firstIndexInGroup_ = splitter_.encodedGroups_[lastIndexInGroup + 1];
-        } else {
-          firstIndexInGroup_ = splitter_.encodedGroups_.size();
-        }
-        currentIndex_ = lastIndexInGroup + 1;
-      } else {
-        ++currentIndex_;
-      }
-      return *this;
-    }
+    GroupIterator& operator++();
 
     bool operator==(const GroupIterator& other) const {
       // In principle we should also check splitters for equality. We don't do it for efficiency.

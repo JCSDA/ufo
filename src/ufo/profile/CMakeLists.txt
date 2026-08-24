@@ -5,6 +5,7 @@
 
 
 set ( profile_files
+      DataHandlerParameters.cc
       DataHandlerParameters.h
       EntireSampleDataHandler.cc
       EntireSampleDataHandler.h

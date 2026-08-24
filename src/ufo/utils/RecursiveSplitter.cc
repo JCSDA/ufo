@@ -8,6 +8,7 @@
 #include "ufo/utils/RecursiveSplitter.h"
 
 #include <algorithm>
+#include <cassert>
 #include <numeric>
 
 #include "oops/util/Random.h"
@@ -99,5 +100,58 @@ void RecursiveSplitter::setSeed(unsigned int seed, bool force) {
 template void RecursiveSplitter::groupByImpl(const std::vector<int> &);
 template void RecursiveSplitter::groupByImpl(const std::vector<size_t> &);
 template void RecursiveSplitter::groupByImpl(const std::vector<std::string> &);
+
+RecursiveSplitter::MultiElementGroupIterator::MultiElementGroupIterator(
+const RecursiveSplitter &splitter, BeginTag)
+  : splitter_(splitter) {
+  if (splitter_.encodedGroups_.empty()) {
+    firstIndexInGroup_ = 0;
+  } else {
+    firstIndexInGroup_ = splitter_.encodedGroups_[0];
+  }
+}
+
+RecursiveSplitter::Group RecursiveSplitter::MultiElementGroupIterator::operator*() const {
+  assert(!isSentinel());
+  size_t lastIndexInGroup = splitter_.encodedGroups_[firstIndexInGroup_ + 1];
+  return Group(splitter_.orderedIds_.begin() + firstIndexInGroup_,
+               splitter_.orderedIds_.begin() + lastIndexInGroup + 1);
+}
+
+RecursiveSplitter::MultiElementGroupIterator&
+RecursiveSplitter::MultiElementGroupIterator::operator++() {
+  const size_t lastIndexInGroup = splitter_.encodedGroups_[firstIndexInGroup_ + 1];
+  if (lastIndexInGroup + 1 < splitter_.encodedGroups_.size()) {
+    firstIndexInGroup_ = splitter_.encodedGroups_[lastIndexInGroup + 1];
+  } else {
+    firstIndexInGroup_ = splitter_.encodedGroups_.size();
+  }
+  return *this;
+}
+
+RecursiveSplitter::Group RecursiveSplitter::GroupIterator::operator*() const {
+  assert(!isSentinel());
+  if (currentIndex_ == firstIndexInGroup_) {
+    return MultiElementGroupIterator::operator*();
+  } else {
+    return Group(splitter_.orderedIds_.begin() + currentIndex_,
+                 splitter_.orderedIds_.begin() + currentIndex_ + 1);
+  }
+}
+
+RecursiveSplitter::GroupIterator& RecursiveSplitter::GroupIterator::operator++() {
+  if (currentIndex_ == firstIndexInGroup_) {
+    const size_t lastIndexInGroup = splitter_.encodedGroups_[firstIndexInGroup_ + 1];
+    if (lastIndexInGroup + 1 < splitter_.encodedGroups_.size()) {
+      firstIndexInGroup_ = splitter_.encodedGroups_[lastIndexInGroup + 1];
+    } else {
+      firstIndexInGroup_ = splitter_.encodedGroups_.size();
+    }
+    currentIndex_ = lastIndexInGroup + 1;
+  } else {
+    ++currentIndex_;
+  }
+  return *this;
+}
 
 }  // namespace ufo
