@@ -41,8 +41,8 @@ observations:
             corrected brightness temperature: OneDVar/brightnessTemperature
             temperature limit warm: 5.0
             temperature limit cold: -10.0
-            stable density: 0.1
-            relative humidity density as a fraction: 0.4
+            stable denominator: 0.1
+            relative humidity denominator as a fraction: 0.4
             relative humidity offset: -1.0
             relative humidity minimum: 0.0
   - filter: Variable Assignment
@@ -63,8 +63,8 @@ observations:
           corrected brightness temperature: OneDVar/brightnessTemperature
           temperature limit warm: 5.0
           temperature limit cold: -10.0
-          stable density: 0.1
-          relative humidity density as a fraction: 0.8
+          stable denominator: 0.1
+          relative humidity denominator as a fraction: 0.8
           relative humidity offset: -0.1
           relative humidity minimum: 0.1
           where:

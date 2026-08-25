@@ -91,8 +91,8 @@ void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
   // Constants.
   const float tempLimitWarm = options_.tempLimitWarm.value();
   const float tempLimitCold = options_.tempLimitCold.value();
-  const float stableDensity = options_.stableDensity.value();
-  const float relativeHumidityDensity = options_.relativeHumidityDensity.value();
+  const float stableDenominator = options_.stableDenominator.value();
+  const float relativeHumidityDenominator = options_.relativeHumidityDenominator.value();
   const double relativeHumidityOffset = options_.relativeHumidityOffset.value();
   const double relativeHumidityMinimum = options_.relativeHumidityMinimum.value();
 
@@ -258,8 +258,8 @@ void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
 
       // Calculate the weightings that correspond to the lapse rate and relative humidity.
       const double lapse_weight = std::max(std::min((sat_lapse_rate - lapse_rate) /
-                                                    (stableDensity * mean_temp), 1.0), 0.0);
-      const double rh_weight = std::max(std::min((gv_rh[ilev] / relativeHumidityDensity) +
+                                                    (stableDenominator * mean_temp), 1.0), 0.0);
+      const double rh_weight = std::max(std::min((gv_rh[ilev] / relativeHumidityDenominator) +
                                   relativeHumidityOffset, 1.0), relativeHumidityMinimum);
 
       // Initialise the lapse weight for the layer below to 0.0 and calculate its value if we are
@@ -280,7 +280,7 @@ void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
 
         // Calculate the lapse weight for the layer below.
         lapse_weight_below = std::max(std::min((sat_lapse_rate_below - lapse_rate_below) /
-                                        (stableDensity * mean_temp_below), 1.0), 0.0);
+                                        (stableDenominator * mean_temp_below), 1.0), 0.0);
       }
 
       if (!useBTConstraint) {
