@@ -66,6 +66,7 @@
 #include "ufo/filters/Thinning.h"
 #include "ufo/filters/TrackCheck.h"
 #include "ufo/filters/TrackCheckShip.h"
+#include "ufo/filters/UseNearestNeighbors.h"
 #include "ufo/filters/VariableAssignment.h"
 #include "ufo/filters/VariableTransforms.h"
 #include "ufo/ObsFilterBase.h"
@@ -120,6 +121,8 @@ void instantiateObsFilterFactory() {
            polygonCheckMaker("Polygon Check");
   static FilterMaker<FindNearestNeighbors>
            findNearestNeighborsMaker("Find Nearest Neighbors");
+  static FilterMaker<UseNearestNeighbors>
+           useNearestNeighborsMaker("Use Nearest Neighbors");
   static FilterMaker<Gaussian_Thinning>
            gaussianThinningMaker("Gaussian Thinning");
   static FilterMaker<GNSSROOneDVarCheck>

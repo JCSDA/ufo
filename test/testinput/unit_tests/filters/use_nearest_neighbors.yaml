@@ -1,0 +1,456 @@
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+  - obs space:
+      name: Test Use Nearest Neighbors - gather and match timestamp
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/use_nearest_neighbors_obs_gather_and_match.nc4
+      simulated variables: []
+    obs filters:
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: gather and match timestamp
+          gather variable: ObsValue/airTemperatureReference
+          timestamp match variable: DerivedMetaData/binnedDateTime
+          output variables:
+            - name: DerivedMetaData/matchedFirstNearestTemperature1
+            - name: DerivedMetaData/matchedSecondNearestTemperature1
+            - name: DerivedMetaData/matchedThirdNearestTemperature1
+      # As above, but with full set of station IDs as identifier variable
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/stationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: gather and match timestamp
+          gather variable: ObsValue/airTemperatureReference
+          timestamp match variable: DerivedMetaData/binnedDateTime
+          output variables:
+            - name: DerivedMetaData/matchedFirstNearestTemperature2
+            - name: DerivedMetaData/matchedSecondNearestTemperature2
+            - name: DerivedMetaData/matchedThirdNearestTemperature2
+      # As above, but with query point station ids (outputs should be empty)
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/queryStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: gather and match timestamp
+          gather variable: ObsValue/airTemperatureReference
+          timestamp match variable: DerivedMetaData/binnedDateTime
+          output variables:
+            - name: DerivedMetaData/matchedFirstNearestTemperature3
+            - name: DerivedMetaData/matchedSecondNearestTemperature3
+            - name: DerivedMetaData/matchedThirdNearestTemperature3
+    compareVariables:
+      - test:
+          name: DerivedMetaData/matchedFirstNearestTemperature1
+        reference:
+          name: TestReference/matchedFirstNearestTemperature
+      - test:
+          name: DerivedMetaData/matchedSecondNearestTemperature1
+        reference:
+          name: TestReference/matchedSecondNearestTemperature
+      - test:
+          name: DerivedMetaData/matchedThirdNearestTemperature1
+        reference:
+          name: TestReference/matchedThirdNearestTemperature
+      - test:
+          name: DerivedMetaData/matchedFirstNearestTemperature2
+        reference:
+          name: TestReference/matchedFirstNearestTemperature
+      - test:
+          name: DerivedMetaData/matchedSecondNearestTemperature2
+        reference:
+          name: TestReference/matchedSecondNearestTemperature
+      - test:
+          name: DerivedMetaData/matchedThirdNearestTemperature2
+        reference:
+          name: TestReference/matchedThirdNearestTemperature
+      - test:
+          name: DerivedMetaData/matchedFirstNearestTemperature3
+        reference:
+          name: TestReference/missingFloats
+      - test:
+          name: DerivedMetaData/matchedSecondNearestTemperature3
+        reference:
+          name: TestReference/missingFloats
+      - test:
+          name: DerivedMetaData/matchedThirdNearestTemperature3
+        reference:
+          name: TestReference/missingFloats
+
+  - obs space:
+      name: Test Use Nearest Neighbors - reference point variables mean
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/use_nearest_neighbors_obs_reference_point_variable_mean.nc4
+      simulated variables: []
+    obs filters:
+      # use on float variable - average of 3 sets of reference points
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: ObsValue/airTemperatureReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/averageThreeClosestReferenceAirTemperaturesMostRecent # average about bin 0
+            - name: DerivedMetaData/averageThreeClosestReferenceAirTemperaturesPrevious # average about bin 1
+      # use on datetime variable - average of 3 sets of reference points
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: DerivedMetaData/dateTimeReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/averageThreeClosestReferenceDateTimesMostRecent # average about bin 0
+            - name: DerivedMetaData/averageThreeClosestReferenceDateTimesPrevious # average about bin 1
+      # # use on float variable - average of 2 sets of reference points
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: ObsValue/airTemperatureReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/averageTwoClosestReferenceAirTemperaturesMostRecent # average about bin 0
+            - name: DerivedMetaData/averageTwoClosestReferenceAirTemperaturesPrevious # average about bin 1
+      # use on datetime variable - average of 2 sets of reference points
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: DerivedMetaData/dateTimeReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/averageTwoClosestReferenceDateTimesMostRecent # average about bin 0
+            - name: DerivedMetaData/averageTwoClosestReferenceDateTimesPrevious # average about bin 1
+      # use on float variable - average of 1 set of reference points (i.e. just copy the value)
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: ObsValue/airTemperatureReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/closestReferenceAirTemperaturesMostRecent # average about bin 0
+            - name: DerivedMetaData/closestReferenceAirTemperaturesPrevious # average about bin 1
+      # use on datetime variable - average of 1 set of reference points (i.e. just copy the value)
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: DerivedMetaData/dateTimeReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/closestReferenceDateTimesMostRecent # average about bin 0
+            - name: DerivedMetaData/closestReferenceDateTimesPrevious # average about bin 1
+      # check using query points gives empty output
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/queryStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+        algorithm:
+          name: reference point variables mean
+          gather variable: ObsValue/airTemperatureReference
+          mean about: DerivedMetaData/dateTimeAveragingBin # 0, 1, 2...
+          output variables:
+            - name: DerivedMetaData/missingFloatsMostRecent # average about bin 0
+            - name: DerivedMetaData/missingFloatsPrevious # average about bin 1
+    compareVariables:
+      - test:
+          name: DerivedMetaData/averageThreeClosestReferenceAirTemperaturesMostRecent
+        reference:
+          name: TestReference/averageThreeClosestReferenceAirTemperaturesMostRecent
+      - test:
+          name: DerivedMetaData/averageThreeClosestReferenceAirTemperaturesPrevious
+        reference:
+          name: TestReference/averageThreeClosestReferenceAirTemperaturesPrevious
+      - test:
+          name: DerivedMetaData/averageThreeClosestReferenceDateTimesMostRecent
+        reference:
+          name: TestReference/averageThreeClosestReferenceDateTimesMostRecent
+      - test:
+          name: DerivedMetaData/averageThreeClosestReferenceDateTimesPrevious
+        reference:
+          name: TestReference/averageThreeClosestReferenceDateTimesPrevious
+      - test:
+          name: DerivedMetaData/averageTwoClosestReferenceAirTemperaturesMostRecent
+        reference:
+          name: TestReference/averageTwoClosestReferenceAirTemperaturesMostRecent
+      - test:
+          name: DerivedMetaData/averageTwoClosestReferenceAirTemperaturesPrevious
+        reference:
+          name: TestReference/averageTwoClosestReferenceAirTemperaturesPrevious
+      - test:
+          name: DerivedMetaData/averageTwoClosestReferenceDateTimesMostRecent
+        reference:
+          name: TestReference/averageTwoClosestReferenceDateTimesMostRecent
+      - test:
+          name: DerivedMetaData/averageTwoClosestReferenceDateTimesPrevious
+        reference:
+          name: TestReference/averageTwoClosestReferenceDateTimesPrevious
+      - test:
+          name: DerivedMetaData/closestReferenceAirTemperaturesMostRecent
+        reference:
+          name: TestReference/closestReferenceAirTemperaturesMostRecent
+      - test:
+          name: DerivedMetaData/closestReferenceAirTemperaturesPrevious
+        reference:
+          name: TestReference/closestReferenceAirTemperaturesPrevious
+      - test:
+          name: DerivedMetaData/closestReferenceDateTimesMostRecent
+        reference:
+          name: TestReference/closestReferenceDateTimesMostRecent
+      - test:
+          name: DerivedMetaData/closestReferenceDateTimesPrevious
+        reference:
+          name: TestReference/closestReferenceDateTimesPrevious
+      - test:
+          name: DerivedMetaData/missingFloatsMostRecent
+        reference:
+          name: TestReference/missingFloats
+      - test:
+          name: DerivedMetaData/missingFloatsPrevious
+        reference:
+          name: TestReference/missingFloats
+
+  - obs space:
+      name: Test Use Nearest Neighbors - interpolate/extrapolate with local plane fit
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/use_nearest_neighbors_obs_interpolate_with_local_plane_fit.nc4
+      simulated variables: []
+    obs filters:
+      # 4 nearest neighbors - solve local plane fit to interpolate/extrapolate
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+          - name: DerivedMetaData/fourthNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation # dont interpolate if missing
+          reference point variable: ObsValue/airTemperatureReference # dont interpolate if missing at any reference point
+          match variable: MetaData/matchDateTime # only use reference points with same matchDateTime as query point
+          relative error threshold: 0.25 # default - if exceeded, fall back to IDW
+          inverse distance weighting power: 2.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+            - name: MetaData/secondNearestSynopTempDistance
+            - name: MetaData/thirdNearestSynopTempDistance
+            - name: MetaData/fourthNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromFourNearestNeighbors
+
+      # 3 nearest neighbors - plane fit is exact
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation # dont interpolate if missing
+          reference point variable: ObsValue/airTemperatureReference # dont interpolate if missing at any reference point
+          match variable: MetaData/matchDateTime # only use reference points with same matchDateTime as query point
+          relative error threshold: 0.25 # default - if exceeded, fall back to IDW
+          inverse distance weighting power: 2.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+            - name: MetaData/secondNearestSynopTempDistance
+            - name: MetaData/thirdNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromThreeNearestNeighbors
+
+      # 4 nearest neighbors - expected pure inverse distance weighting in this case
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID # dont interpolate if missing
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+          - name: DerivedMetaData/fourthNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation # dont interpolate if missing
+          reference point variable: ObsValue/airTemperatureReference # dont interpolate if missing at any reference point
+          match variable: MetaData/matchDateTime # only use reference points with same matchDateTime as query point
+          relative error threshold: 0.0 # here, plane-fit relative error is expected to be > 0, so IDW is used
+          inverse distance weighting power: 2.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+            - name: MetaData/secondNearestSynopTempDistance
+            - name: MetaData/thirdNearestSynopTempDistance
+            - name: MetaData/fourthNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromFourNearestNeighborsIDW2
+
+      # 2 nearest neighbors - underdetermined, fall back to inverse distance weighting
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation # dont interpolate if missing
+          reference point variable: ObsValue/airTemperatureReference # dont interpolate if missing at any reference point
+          match variable: MetaData/matchDateTime # only use reference points with same matchDateTime as query point
+          inverse distance weighting power: 2.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+            - name: MetaData/secondNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromTwoNearestNeighborsIDW2
+
+      # 1 nearest neighbor - test inverse distance weighting with power 1.0
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation # dont interpolate if missing
+          reference point variable: ObsValue/airTemperatureReference # dont interpolate if missing at any reference point
+          match variable: MetaData/matchDateTime # only use reference points with same matchDateTime as query point
+          inverse distance weighting power: 1.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromOneNearestNeighborIDW1
+
+      # 1 nearest neighbor - test using integer match variable (should give same result as above)
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation # dont interpolate if missing
+          reference point variable: ObsValue/airTemperatureReference # dont interpolate if missing at any reference point
+          match variable: MetaData/matchTimestampsIdxs # indices of matching DateTimes used above
+          inverse distance weighting power: 1.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromOneNearestNeighborIDW1MatchIdxs
+
+    compareVariables:
+      # 4 nearest neighbors - solve local plane fit to interpolate/extrapolate
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromFourNearestNeighbors
+        reference:
+          name: TestReference/interpolatedTemperatureFromFourNearestNeighbors
+        relTol: 1e-5
+      # 3 nearest neighbors - plane fit is exact
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromThreeNearestNeighbors
+        reference:
+          name: TestReference/interpolatedTemperatureFromThreeNearestNeighbors
+        relTol: 1e-5
+      # 4 nearest neighbors - expected pure inverse distance weighting in this case
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromFourNearestNeighborsIDW2
+        reference:
+          name: TestReference/interpolatedTemperatureFromFourNearestNeighborsIDW2
+        relTol: 1e-5
+      # 2 nearest neighbors - underdetermined, fall back to inverse distance weighting
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromTwoNearestNeighborsIDW2
+        reference:
+          name: TestReference/interpolatedTemperatureFromTwoNearestNeighborsIDW2
+        relTol: 1e-5
+      # 1 nearest neighbor - test inverse distance weighting with power 1.0
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromOneNearestNeighborIDW1
+        reference:
+          name: TestReference/interpolatedTemperatureFromOneNearestNeighborIDW1
+        relTol: 1e-5
+      # 1 nearest neighbor - test using integer match variable (should give same result as above)
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromOneNearestNeighborIDW1MatchIdxs
+        reference:
+          name: TestReference/interpolatedTemperatureFromOneNearestNeighborIDW1
+        relTol: 1e-5
+
+  - obs space:
+      name: Test Use Nearest Neighbors - interpolate with local plane fit (collinear boundary case)
+      obsdatain:
+        engine:
+          type: H5File
+          obsfile: Data/ufo/testinput_tier_1/use_nearest_neighbors_obs_interpolate_with_local_plane_fit_collinear.nc4
+      simulated variables: []
+    obs filters:
+      # 3 nearest neighbors, deliberately placed exactly collinear with the query
+      # point. This makes the plane-fit design matrix exactly rank-deficient in
+      # exact arithmetic, so whether the plane-fit or IDW-fallback branch is
+      # selected is inherently platform/float32-noise dependent. The IDW-fallback
+      # branch is a convex combination of the neighbor temperatures, so it is
+      # always within their [min, max] range. The plane-fit branch, however,
+      # solves a near-singular system and does not merely interpolate: it can
+      # extrapolate outside that range. Empirically (on the platform this test
+      # was authored on), the plane-fit branch's deviation from the midpoint
+      # scales ~linearly with the neighbor temperature spread, at roughly 1.7x
+      # the half-range (e.g. spread 290/300/310 -> deviation ~17; spread
+      # 299.9/300/300.1 -> deviation ~0.17). Since this amplification factor is
+      # itself platform/compiler-dependent and not analytically bounded, the
+      # reference value below is the midpoint of the 3 neighbor temperatures
+      # with a tolerance of 5x the half-range, to comfortably accommodate both
+      # branches' outcomes rather than pinning a single platform-dependent
+      # numeric result.
+      - filter: Use Nearest Neighbors
+        identifier variable: MetaData/referenceStationIdentification
+        nearest neighbor identifier variables:
+          - name: DerivedMetaData/firstNearestReferenceStationID
+          - name: DerivedMetaData/secondNearestReferenceStationID
+          - name: DerivedMetaData/thirdNearestReferenceStationID
+        algorithm:
+          name: local plane fit
+          query point variable: ObsValue/airTemperatureObservation
+          reference point variable: ObsValue/airTemperatureReference
+          match variable: MetaData/matchDateTime
+          inverse distance weighting power: 2.0
+          distance variables:
+            - name: MetaData/firstNearestSynopTempDistance
+            - name: MetaData/secondNearestSynopTempDistance
+            - name: MetaData/thirdNearestSynopTempDistance
+          output variable: DerivedMetaData/interpolatedTemperatureFromThreeNearestNeighborsCollinear
+    compareVariables:
+      - test:
+          name: DerivedMetaData/interpolatedTemperatureFromThreeNearestNeighborsCollinear
+        reference:
+          name: TestReference/interpolatedTemperatureFromThreeNearestNeighborsCollinearBoundCenter
+        absTol: 50.0

@@ -95,6 +95,9 @@ set ( filters_files
       QCflags.h
       PerformAction.cc
       PerformAction.h
+      UseNearestNeighbors.cc
+      UseNearestNeighbors.h
+      UseNearestNeighborsParameters.h
       ProfileAverageObsToModLevels.cc
       ProfileAverageObsToModLevels.h
       AverageObsToGeoValLevels.cc
