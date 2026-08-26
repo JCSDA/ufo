@@ -5,12 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "ufo/variabletransforms/Cal_SatZenithAngleCorrection.h"
+
 #include <algorithm>
 #include <cmath>
 
+#include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
-
-#include "ufo/variabletransforms/Cal_SatZenithAngleCorrection.h"
 
 namespace ufo {
 

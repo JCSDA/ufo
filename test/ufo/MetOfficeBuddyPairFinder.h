@@ -10,6 +10,7 @@
 
 #include <iomanip>
 #include <map>
+#include <numeric>
 #include <set>
 #include <string>
 #include <utility>

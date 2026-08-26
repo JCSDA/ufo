@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "oops/util/parameters/RequiredParameter.h"
+#include "oops/util/parameters/RequiredPolymorphicParameter.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/ObsOperatorParametersBase.h"
 #include "ufo/operators/radarreflectivity/genericreflectivity/ReflectivityAlgorithmBase.h"

@@ -8,6 +8,7 @@
 #include "ufo/filters/obsfunctions/DateTimeOffset.h"
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 

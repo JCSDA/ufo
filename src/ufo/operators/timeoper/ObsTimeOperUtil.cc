@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/util/DateTime.h"

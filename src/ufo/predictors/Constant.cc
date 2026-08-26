@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "ioda/ObsVector.h"
+#include "oops/util/abor1_cpp.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/predictors/Constant.h"
 

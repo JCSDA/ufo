@@ -6,6 +6,7 @@
  */
 
 #include "eckit/utils/StringTools.h"
+#include "ioda/ObsSpace.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/variabletransforms/Cal_PotentialTFromT.h"
 

@@ -8,6 +8,8 @@
 #ifndef UFO_ERRORS_OBSERRORBASE_H_
 #define UFO_ERRORS_OBSERRORBASE_H_
 
+#include <Eigen/Dense>
+
 #include <map>
 #include <memory>
 #include <string>

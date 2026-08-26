@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "oops/util/Logger.h"
 #include "ufo/profile/ProfileIndices.h"
 
 namespace ufo {

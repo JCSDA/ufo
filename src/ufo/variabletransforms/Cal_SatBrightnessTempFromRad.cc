@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
+#include "ioda/ObsSpace.h"
 #include "ufo/variabletransforms/Cal_SatBrightnessTempFromRad.h"
 #include "ufo/variabletransforms/Formulas.h"
 

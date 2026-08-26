@@ -8,6 +8,8 @@
 #ifndef UFO_VARIABLETRANSFORMS_CAL_SATRADIANCEFROMPCSCORES_H_
 #define UFO_VARIABLETRANSFORMS_CAL_SATRADIANCEFROMPCSCORES_H_
 
+#include <Eigen/Core>
+
 #include <memory>
 #include <ostream>
 #include <string>

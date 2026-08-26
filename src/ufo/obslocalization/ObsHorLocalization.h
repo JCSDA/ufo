@@ -27,6 +27,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/obslocalization/ObsHorLocParameters.h"

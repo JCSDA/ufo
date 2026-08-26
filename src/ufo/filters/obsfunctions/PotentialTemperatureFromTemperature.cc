@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/Logger.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/utils/Constants.h"

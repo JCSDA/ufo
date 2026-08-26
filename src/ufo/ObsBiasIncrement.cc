@@ -13,6 +13,7 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/Engines/HH.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"

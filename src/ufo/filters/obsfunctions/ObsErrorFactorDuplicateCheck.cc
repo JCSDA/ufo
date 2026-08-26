@@ -13,10 +13,13 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 #include "eckit/exception/Exceptions.h"
 #include "eckit/mpi/Comm.h"
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"

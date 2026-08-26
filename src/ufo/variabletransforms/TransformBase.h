@@ -21,6 +21,7 @@
 #include "eckit/types/FloatCompare.h"
 
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/Logger.h"

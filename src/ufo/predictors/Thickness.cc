@@ -12,6 +12,7 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/predictors/Thickness.h"

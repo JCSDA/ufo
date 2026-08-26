@@ -14,6 +14,7 @@
 #include "ioda/distribution/InefficientDistribution.h"
 #include "ioda/ObsSpace.h"
 #include "oops/mpi/mpi.h"
+#include "oops/util/Logger.h"
 
 #include "ufo/filters/FilterUtils.h"
 #include "ufo/filters/QCflags.h"

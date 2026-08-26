@@ -10,6 +10,7 @@
 
 #include "ufo/variabletransforms/Cal_SatRadianceFromScaledRadiance.h"
 
+#include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 

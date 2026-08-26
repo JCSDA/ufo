@@ -6,6 +6,8 @@
  */
 
 #include "ufo/variabletransforms/Cal_PressureFromHeight.h"
+
+#include "ioda/ObsSpace.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {

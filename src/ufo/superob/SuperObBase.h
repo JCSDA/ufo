@@ -18,9 +18,11 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/util/AssociativeContainers.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/parameters/HasParameters_.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"

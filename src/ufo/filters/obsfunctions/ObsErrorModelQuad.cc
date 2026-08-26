@@ -15,6 +15,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/util/CompareNVectors.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 #include "oops/util/PropertiesOfNVectors.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variable.h"

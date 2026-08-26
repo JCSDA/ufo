@@ -7,6 +7,8 @@
 
 #include "ufo/filters/actions/ReduceObsSpace.h"
 
+#include "oops/util/Logger.h"
+
 #include "eckit/exception/Exceptions.h"
 #include "ioda/ObsSpace.h"
 #include "ufo/filters/ObsFilterData.h"

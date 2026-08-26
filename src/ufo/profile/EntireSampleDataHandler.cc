@@ -9,6 +9,7 @@
 
 #include "eckit/utils/StringTools.h"
 
+#include "oops/util/Logger.h"
 #include "ufo/profile/EntireSampleDataHandler.h"
 #include "ufo/profile/ProfileVariableNames.h"
 

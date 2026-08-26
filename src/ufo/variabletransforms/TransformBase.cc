@@ -7,6 +7,7 @@
 
 #include <map>
 #include <string>
+#include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/variabletransforms/TransformBase.h"
 

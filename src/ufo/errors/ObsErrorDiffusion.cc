@@ -28,6 +28,8 @@
 #include "eckit/exception/Exceptions.h"
 #include "eckit/mpi/Comm.h"
 
+#include "ioda/distribution/Distribution.h"
+
 #include "oops/assimilation/GMRESR.h"
 #include "oops/base/FieldSet3D.h"
 #include "oops/base/IdentityMatrix.h"

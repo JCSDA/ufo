@@ -8,10 +8,12 @@
 #include "ufo/filters/actions/AssignError.h"
 
 #include <algorithm>
+#include <numeric>
 #include <set>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/ObsVariables.h"
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"

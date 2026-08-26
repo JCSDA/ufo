@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 
+#include "ioda/ObsSpace.h"
 #include "oops/util/missingValues.h"
 #include "ufo/variabletransforms/Cal_PStar.h"
 

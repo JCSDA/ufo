@@ -9,6 +9,7 @@
 
 #include "eckit/exception/Exceptions.h"
 
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/filters/Variable.h"

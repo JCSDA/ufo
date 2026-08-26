@@ -6,6 +6,8 @@
  */
 
 #include "ufo/variabletransforms/Cal_ProfileHorizontalDrift.h"
+
+#include "ioda/ObsSpace.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {

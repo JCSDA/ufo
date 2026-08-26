@@ -7,6 +7,8 @@
 
 #include "ufo/errors/ObsError.h"
 
+#include "oops/util/Logger.h"
+
 namespace ufo {
 
 ObsError::ObsError(const eckit::Configuration & obsErrConf, ioda::ObsSpace & odb)

@@ -16,6 +16,7 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/Engines/EngineUtils.h"
 #include "ioda/Engines/HH.h"
 #include "ioda/Layout.h"

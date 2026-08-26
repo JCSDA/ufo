@@ -6,6 +6,8 @@
  */
 
 #include "ufo/variabletransforms/Cal_RadarBeamGeometry.h"
+
+#include "ioda/ObsSpace.h"
 #include "ufo/utils/Constants.h"
 
 

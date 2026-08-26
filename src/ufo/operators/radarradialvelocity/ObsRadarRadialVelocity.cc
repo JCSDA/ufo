@@ -12,6 +12,7 @@
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
 

@@ -6,6 +6,7 @@
  */
 
 #include <map>
+#include <numeric>
 #include <string>
 
 #include "ioda/ObsSpace.h"

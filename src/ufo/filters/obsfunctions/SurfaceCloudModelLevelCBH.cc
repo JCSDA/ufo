@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/SurfaceCloudModelLevelCBH.h"

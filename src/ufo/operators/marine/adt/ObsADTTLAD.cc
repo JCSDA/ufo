@@ -16,6 +16,7 @@
 #include "ioda/distribution/Distribution.h"
 #include "ioda/ObsVector.h"
 
+#include "oops/util/Logger.h"
 #include "ufo/filters/Variable.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/utils/OperatorUtils.h"

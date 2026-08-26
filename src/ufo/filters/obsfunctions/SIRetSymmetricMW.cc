@@ -9,6 +9,7 @@
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/obsfunctions/SIRetMW.h"
 #include "ufo/utils/Constants.h"

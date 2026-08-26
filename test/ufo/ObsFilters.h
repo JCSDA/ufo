@@ -18,8 +18,10 @@
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/testing/Test.h"
+#include "ioda/distribution/Accumulator.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsSpaceParameters.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/base/Locations.h"

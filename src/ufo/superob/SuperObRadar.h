@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/Parameter.h"
+
 #include "ufo/filters/DiagnosticFlag.h"
 
 #include "ufo/superob/SuperObBase.h"

@@ -16,6 +16,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsVector.h"
 #include "oops/util/AssociativeContainers.h"
 #include "ufo/filters/ObsFilterData.h"
 

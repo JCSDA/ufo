@@ -18,6 +18,7 @@
 #include "oops/base/SamplingMethodSelector.h"
 #include "oops/base/Variables.h"
 #include "oops/interface/SampledLocations.h"
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/dateFunctions.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/TimeWindow.h"

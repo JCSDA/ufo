@@ -7,6 +7,7 @@
 
 #include <sstream>
 
+#include "ioda/ObsSpace.h"
 #include "ufo/utils/Constants.h"
 #include "ufo/variabletransforms/Cal_Logarithm.h"
 

@@ -12,6 +12,7 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
+#include "ioda/ObsVector.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/operators/radarreflectivity/genericreflectivity/MetOfficeReflectivity.h"
 #include "ufo/utils/Constants.h"

@@ -8,6 +8,8 @@
 #ifndef UFO_ERRORS_OBSERRORDIAGONAL_H_
 #define UFO_ERRORS_OBSERRORDIAGONAL_H_
 
+#include <Eigen/Dense>
+
 #include <memory>
 #include <string>
 

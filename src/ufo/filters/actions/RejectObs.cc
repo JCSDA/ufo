@@ -8,6 +8,7 @@
 #include "ufo/filters/actions/RejectObs.h"
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/Logger.h"
 #include "ufo/filters/actions/RecordActionUtils.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"

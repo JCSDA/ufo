@@ -10,6 +10,7 @@
 #include "eckit/exception/Exceptions.h"
 #include "ioda/Misc/StringFuncs.h"  // for convertV1PathToV2Path
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"

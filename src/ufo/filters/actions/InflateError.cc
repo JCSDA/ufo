@@ -8,9 +8,11 @@
 #include "ufo/filters/actions/InflateError.h"
 
 #include <algorithm>
+#include <numeric>
 
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
 #include "ufo/filters/Variables.h"

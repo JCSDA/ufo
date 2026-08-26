@@ -12,6 +12,7 @@
 
 #include "oops/util/missingValues.h"
 
+#include "ioda/ObsSpace.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/variabletransforms/Cal_AdjustedHeightCoordinate.h"
 

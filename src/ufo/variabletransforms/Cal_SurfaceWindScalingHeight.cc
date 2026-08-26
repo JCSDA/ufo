@@ -6,14 +6,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "ufo/variabletransforms/Cal_SurfaceWindScalingHeight.h"
+
 #include <algorithm>
 #include <cmath>
 #include <string>
 
+#include "ioda/ObsSpace.h"
 #include "oops/util/missingValues.h"
-
 #include "ufo/GeoVaLs.h"
-#include "ufo/variabletransforms/Cal_SurfaceWindScalingHeight.h"
 
 namespace ufo {
 

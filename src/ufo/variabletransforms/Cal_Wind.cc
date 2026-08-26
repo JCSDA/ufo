@@ -6,8 +6,12 @@
  */
 
 #include "ufo/variabletransforms/Cal_Wind.h"
+
+#include <numeric>
+
 #include "ufo/utils/Constants.h"
 
+#include "ioda/ObsSpace.h"
 #include "ufo/filters/VariableTransformParametersBase.h"
 
 

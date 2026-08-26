@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/filters/obsfunctions/MetOfficeRelativeHumidityCorrection.h"

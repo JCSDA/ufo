@@ -17,7 +17,9 @@
 #include "ioda/ObsSpace.h"
 
 #include "oops/base/Variables.h"
+#include "oops/util/AssociativeContainers.h"
 #include "oops/util/parameters/HasParameters_.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"

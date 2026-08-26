@@ -10,6 +10,8 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
+#include "oops/util/Logger.h"
 
 namespace ufo {
 

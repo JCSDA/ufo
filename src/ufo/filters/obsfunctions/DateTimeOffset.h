@@ -16,6 +16,7 @@
 
 #include "oops/util/Duration.h"
 #include "oops/util/missingValues.h"
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
 

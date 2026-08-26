@@ -5,9 +5,12 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 
 #include "oops/mpi/mpi.h"
+#include "oops/util/Logger.h"
 
 #include "ufo/filters/obsfunctions/MPIRank.h"
 

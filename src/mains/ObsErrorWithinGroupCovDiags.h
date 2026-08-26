@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "ioda/ObsSpace.h"
+#include "ioda/ObsSpaceParameters.h"
 #include "ioda/ObsVector.h"
 
 #include "oops/mpi/mpi.h"

@@ -8,6 +8,7 @@
 #include <set>
 #include <utility>
 
+#include "oops/util/Logger.h"
 #include "ufo/profile/ProfileDataHolder.h"
 
 namespace ufo {

@@ -15,6 +15,7 @@
 
 #include "ioda/ObsVector.h"
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/operators/sfccorrected/EvalSurfacePressure.h"

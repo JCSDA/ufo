@@ -8,6 +8,8 @@
 #ifndef UFO_ERRORS_OBSERRORDIAGONALINVGAMMA_H_
 #define UFO_ERRORS_OBSERRORDIAGONALINVGAMMA_H_
 
+#include <Eigen/Dense>
+
 #include <memory>
 #include <string>
 
@@ -17,6 +19,7 @@
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/errors/ObsErrorBase.h"
 #include "ufo/errors/ObsErrorParametersBase.h"

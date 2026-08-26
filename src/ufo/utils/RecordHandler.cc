@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsSpace.h"
 
 #include "oops/util/missingValues.h"

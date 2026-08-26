@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "oops/base/Variables.h"
+#include "oops/util/Logger.h"
 
 #include "ioda/distribution/Accumulator.h"
 #include "ioda/distribution/Distribution.h"
