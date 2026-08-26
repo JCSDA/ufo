@@ -1,0 +1,281 @@
+#
+#=== Record threshold rejection ===#
+#
+time window:
+  begin: 2020-12-31T23:59:00Z
+  end: 2021-01-01T00:01:00Z
+
+#
+#=== Note that for these tests, we use profile data as they are a subset of records. However, 
+#=== the filter is designed to work with any record data, not just profiles. ===#
+#
+
+#
+#=== First test: reject remainder (in ascending data order) of record entries with any HofX/variable values below 0 ===#
+#=== Record threshold rejection ===#
+#
+
+observations:
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out1.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: less than
+  passedBenchmark: 99  # all HofX/variable values (with observations that aren't missing) are equal to or above 0
+  failedObservationsBenchmark: [0]
+
+#
+#=== Second test: reject remainder (in ascending data order) of record entries with any HofX/variable values below or equal to 0 ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: less than or equal to
+  passedBenchmark: 79  # some missing values now, they happen to be aligned with distinct records.
+  failedObservationsBenchmark: [0,40,41,42,43,44,45,46,47,48,49,90,91,92,93,94,95,96,97,98,99]
+
+#
+#=== Third test: reject remainder (in descending data order) of record entries with any HofX/variable values below or equal to 0 ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: less than or equal to
+    data order: descending
+  passedBenchmark: 89  # rejecting from other side.
+  failedObservationsBenchmark: [0,40,41,42,43,44,90,91,92,93,94]
+
+#
+#=== Fourth test: reject remainder (in ascending data order) of record entries with any HofX/variable values above or equal to 0 ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: greater than or equal to
+  passedBenchmark: 0  # all values are above or equal to 0, so all records are rejected
+
+#
+#=== Fifth test: reject remainder (in ascending data order) of record entries with any HofX/variable values above 0 ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: greater than
+  passedBenchmark: 10  # some values are at zero
+  passedObservationsBenchmark: [40,41,42,43,44,90,91,92,93,94]
+
+
+#
+#=== Sixth test: reject remainder (in descending data order) of record entries with any HofX/variable values above 0 ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: greater than
+    data order: descending
+  passedBenchmark: 0  # all rejected due to descending data order
+
+#
+#=== Seventh test: reject remainder (in descending data order) of record entries with any HofX/variable values above 0, but now with 
+#    ordering given by 'MetaData/ordering' (see obsgrouping section) ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+        sort variable: ordering
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: greater than
+    data order: descending
+  passedBenchmark: 5  # some values are at zero
+  passedObservationsBenchmark: [40,41,42,43,44]
+
+#
+#=== Eighth test: reject remainder (in ascending data order) of record entries 5 and above with any HofX/variable values above 0 ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 0
+    threshold variable: HofX/variable 
+    rejection type: greater than
+    data order: ascending
+    where:
+    - variable:
+        name: MetaData/sequenceNumber
+      minvalue: 5       # Records with sequenceNumber >= 5
+  passedBenchmark: 54   # most of the remaining
+  failedObservationsBenchmark: [0,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,95,96,97,98,99]
+
+
+#
+#=== Ninth test: reject remainder (in ascending data order) of record entries with record-specific thresholds ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+# first set up record-specific thresholds for the data, starting with a default value of 98
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/threshold
+      type: float
+      value: 98
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/sequenceNumber
+      is_in: 2, 7, 8
+    assignments:
+    - name: DerivedMetaData/threshold
+      type: float
+      value: 109
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/sequenceNumber
+      is_in: 4,9
+    assignments:
+    - name: DerivedMetaData/threshold
+      type: float
+      value: 0
+
+# now apply the record threshold rejection filter, using the record-specific thresholds
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: DerivedMetaData/threshold
+    threshold variable: HofX/variable 
+    rejection type: greater than
+    data order: ascending
+  failedObservationsBenchmark: [0,1,2,3,4,5,6,7,8,9,15,16,17,18,19,28,29,31,32,33,34,35,36,37,38,39,45,46,47,48,49,51,52,53,54,55,56,57,58,59,65,66,67,68,69,78,79,95,96,97,98,99]

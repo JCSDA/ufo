@@ -52,6 +52,7 @@
 #include "ufo/filters/ProfileFewObsCheck.h"
 #include "ufo/filters/ProfileMaxDifferenceCheck.h"
 #include "ufo/filters/ProfileUnFlagObsCheck.h"
+#include "ufo/filters/RecordThresholdRejection.h"
 #include "ufo/filters/refractivityonedvarcheck/RefractivityOneDVarCheck.h"
 #include "ufo/filters/SatName.h"
 #include "ufo/filters/SatwindInversionCorrection.h"
@@ -171,6 +172,8 @@ void instantiateObsFilterFactory() {
            ProfileMaxDifferenceCheckMaker("Profile Max Difference Check");
   static FilterMaker<ProfileUnFlagObsCheck>
            ProfileUnFlagObsCheckMaker("Profile Unflag Observations Check");
+  static FilterMaker<RecordThresholdRejection>
+           RecordThresholdRejectionMaker("Record Threshold Rejection");
   static FilterMaker<BlackList>
            rejectListMaker("RejectList");  // same as BlackList
   static FilterMaker<RefractivityOneDVarCheck>

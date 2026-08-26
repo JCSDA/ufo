@@ -185,7 +185,8 @@ void QCmanager::print(std::ostream & os) const {
     {QCflags::superrefraction, "rejected by GNSSRO super refraction QC"},
     {QCflags::superob,       "rejected by superobbing"},
     {QCflags::step,          "rejected by step check"},
-    {QCflags::percentile,    "rejected by percentile filter"}
+    {QCflags::percentile,    "rejected by percentile filter"},
+    {QCflags::recordthreshold, "rejected by record threshold filter"}
   };
   const size_t numSpecialCases = 3;
 

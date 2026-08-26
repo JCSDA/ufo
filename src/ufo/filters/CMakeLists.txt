@@ -110,6 +110,8 @@ set ( filters_files
       ProfileMaxDifferenceCheck.h
       ProfileUnFlagObsCheck.cc
       ProfileUnFlagObsCheck.h
+      RecordThresholdRejection.cc
+      RecordThresholdRejection.h
       SatName.h
       SatName.cc
       SatwindInversionCorrection.cc
