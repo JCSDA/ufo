@@ -142,21 +142,8 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
     call abor1_ftn(err_msg)
   end if
 
-  ! number of channels
-  nchans = size(self%channels)
-
-  ! check that hofx is the correct size for simulated variables
-  ! if we have channels as second dimension then we should have 2*nchans variables
-  ! if we have a single dimension then we should have 2 variables
-  if (nchans /= 0) then
-    if (size(hofx(:,1)) /= 2*nchans) then
-      write(err_msg, "(A,I5,A,I5)") "HofX should have nchans variables for both windEastward and windNorthward. Was given ", size(hofx(:,1)), " but expected ", 2*nchans
-      call fckit_exception%throw(err_msg)
-    end if
-  else
-    if (size(hofx(:,1)) /= 2) then
-      call fckit_exception%throw("HofX should have 2 variables windEastward and windNorthward")
-    end if
+  if (mod(size(hofx,dim=1),2) /= 0) then
+    call fckit_exception%throw("HofX should have 2 variables windEastward and windNorthward")
   end if
 
   write(message, *) myname_, " Running Met Office neutral wind operator with"
@@ -203,17 +190,16 @@ subroutine ufo_scatwind_neutralmetoffice_simobs(self, geovals, obss, nvars, &
   deallocate(surface_type)
   deallocate(CDR10)
 
-  ! if we have channels then need to spread these values across the channels correctly
-  if (nchans /= 0) then
-    ! windEastward hofx is stored in slot 1
-    hofx_u = hofx(1,:)
-    ! windNorthward hofx is stored in slot 2
-    hofx_v = hofx(2,:)
-    chan_loop: do ichan = 1, nchans
-      hofx(ichan,:) = hofx_u
-      hofx(ichan+nchans,:) = hofx_v
-    end do chan_loop
-  end if
+  ! Need to spread these values across the channels correctly
+  ! windEastward hofx is stored in slot 1
+  hofx_u = hofx(1,:)
+  ! windNorthward hofx is stored in slot 2
+  hofx_v = hofx(2,:)
+  nchans = size(hofx,dim=1)/2
+  chan_loop: do ichan = 1, nchans
+    hofx(ichan,:) = hofx_u
+    hofx(ichan+nchans,:) = hofx_v
+  end do chan_loop
 
   write(err_msg,*) "ufo_scatwind_neutralmetoffice_simobs: completed"
   call oops_log%trace(err_msg)
