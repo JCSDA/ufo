@@ -48,12 +48,13 @@ template <typename OBS> class RunCRTM : public oops::Application {
     const util::TimeWindow timeWindow(fullConfig.getSubConfiguration("time window"));
 
 //  Setup observations
-    ObsSpaces_ obsdb(fullConfig, this->getComm(), timeWindow);
+    const eckit::LocalConfiguration obsConfig(fullConfig, "observations");
+    ObsSpaces_ obsdb(obsConfig, this->getComm(), timeWindow);
 
     oops::ObsVariables diagvars;
 
-    std::vector<eckit::LocalConfiguration> conf;
-    fullConfig.get("observations", conf);
+    const std::vector<eckit::LocalConfiguration> conf =
+        obsConfig.getSubConfigurations("observers");
 
     for (std::size_t jj = 0; jj < obsdb.size(); ++jj) {
       eckit::LocalConfiguration obsopconf(conf[jj], "obs operator");
