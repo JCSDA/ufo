@@ -153,7 +153,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
-      (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / pow(values[iloc], 2)) : (values[iloc] = 0.0);
+      (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / std::pow(values[iloc], 2)) : (values[iloc] = 0.0);
       if (use_flag_clddet[ichan] > 0 && use_flag_clddet[ichan]%2 == 1)
           varinv_use[ichan][iloc] = values[iloc];
     }
@@ -292,7 +292,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
             sum2 = sum2 +  dbt[ichan] * dbt[ichan] * varinv_use[ichan][iloc];
           }
         }
-        if (fabs(sum2) < FLT_MIN) sum2 = copysign(1.0e-12, sum2);
+        if (std::fabs(sum2) < FLT_MIN) sum2 = copysign(1.0e-12, sum2);
         cloudp = std::min(std::max((sum/sum2), 0.f), 1.f);
         sum = 0.0;
         for (size_t ichan = 0; ichan < nchans; ++ichan) {
@@ -345,7 +345,7 @@ void CloudDetectMinResidualIR::compute(const ObsFilterData & in,
         sum = sum + innovation[ichan][iloc] * dbtdts[ichan][iloc] * varinv_use[ichan][iloc];
         sum2 = sum2 + dbtdts[ichan][iloc] * dbtdts[ichan][iloc] * varinv_use[ichan][iloc];
       }
-      if (fabs(sum2) < FLT_MIN) sum2 = copysign(1.0e-12, sum2);
+      if (std::fabs(sum2) < FLT_MIN) sum2 = copysign(1.0e-12, sum2);
       dts = std::fabs(sum / sum2);
       if (std::abs(dts) > 1.0) {
         if (sea[iloc] == false) {

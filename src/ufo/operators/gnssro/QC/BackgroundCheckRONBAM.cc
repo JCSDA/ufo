@@ -96,10 +96,10 @@ void BackgroundCheckRONBAM::applyFilter(const std::vector<bool> & apply,
 
         cutoff = 0.0;
         cutoff1  = (-4.725+0.045*imp+0.005*imp*imp);
-        cutoff2  = 1.5+cos(lat);
+        cutoff2  = 1.5+std::cos(lat);
         cutoff3  = 2.0;
         if (tmp > 240.0) cutoff3 = 0.005*tmp*tmp-2.3*tmp+266.0;
-        cutoff4 = (4.0+8.0*cos(lat));
+        cutoff4 = (4.0+8.0*std::cos(lat));
 //      COSMIC-2 and Commercial providers
         if ( (satid >= 750 && satid <= 755) || (satid >= 265 && satid <= 269) ) {
            cutoff1 = cutoff1/2.0;

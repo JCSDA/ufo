@@ -91,7 +91,7 @@ class ObsPPROParameters : public ObsOperatorParametersBase  {
 
   oops::Parameter<double> coeff_melt{
     "tuning coefficient for melting",                // YAML name
-    "Coefficient scaling the geometric mean sqrt(qr*qx)/sqrt(nr*qx) "
+    "Coefficient scaling the geometric mean std::sqrt(qr*qx)/std::sqrt(nr*qx) "
     "in Liu et al. (2024) melting model",            // description
     0.3,                                             // default
     this

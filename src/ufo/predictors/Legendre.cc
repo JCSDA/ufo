@@ -57,7 +57,7 @@ void Legendre::compute(const ioda::ObsSpace & odb,
         -iorder*LegPoly[iorder-1])/(iorder+1);
     }
     for (std::size_t iorder=0; iorder <= order_; ++iorder) {
-        LegPoly[iorder] = sqrt(2*iorder+1)*LegPoly[iorder];
+        LegPoly[iorder] = std::sqrt(2*iorder+1)*LegPoly[iorder];
     }
     for (std::size_t jb = 0; jb < nvars; ++jb) {
         out[jl*nvars+jb] = LegPoly[order_];

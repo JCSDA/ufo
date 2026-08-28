@@ -62,7 +62,7 @@ void ObsWindSpeed::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
 
   // calculate wind speed
   for (size_t w = 0; w < nwinds; w++) {
-    hofx[w] += sqrt(pow(u_wind[w], 2.0) + pow(v_wind[w], 2.0));
+    hofx[w] += std::sqrt(std::pow(u_wind[w], 2.0) + std::pow(v_wind[w], 2.0));
   }
 
   oops::Log::trace() << "ObsWindSpeed::simulateObs done" << std::endl;

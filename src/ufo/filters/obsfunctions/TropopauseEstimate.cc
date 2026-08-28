@@ -98,7 +98,7 @@ void TropopauseEstimate::compute(const ObsFilterData & in,
     answer[jj] = tropo_start + season_factor*5000.0;
 
     // If needed, convert pressure to height.
-    if (convert_p2z) answer[jj] = 44307.692*(1.0 - pow(answer[jj]/101325.0f, 0.19f));
+    if (convert_p2z) answer[jj] = 44307.692*(1.0 - std::pow(answer[jj]/101325.0f, 0.19f));
 
     out[0][jj] = answer[jj];
   }

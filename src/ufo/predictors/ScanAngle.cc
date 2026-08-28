@@ -57,7 +57,7 @@ void ScanAngle::compute(const ioda::ObsSpace & odb,
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      out[jloc*nvars+jvar] = pow(view_angle[jloc] * Constants::deg2rad, order_);
+      out[jloc*nvars+jvar] = std::pow(view_angle[jloc] * Constants::deg2rad, order_);
     }
   }
 }

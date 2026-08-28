@@ -66,7 +66,7 @@ void PotentialTemperatureFromTemperature::compute(const ObsFilterData & in,
      in.get(Variable("GeoVaLs/average_surface_temperature_within_field_of_view"), temperature);
      // Calculate potential temperature
      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-        potentialTemperature[iloc] =  temperature[iloc] * pow(Constants::pref / pressure[iloc],
+        potentialTemperature[iloc] =  temperature[iloc] * std::pow(Constants::pref / pressure[iloc],
                      Constants::rd_over_cp);
      }
   } else {

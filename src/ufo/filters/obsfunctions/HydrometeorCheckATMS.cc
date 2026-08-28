@@ -234,8 +234,8 @@ void HydrometeorCheckATMS::compute(const ObsFilterData & in,
                 0.454 * innov[ich314][iloc] - innov[ich890][iloc]) * w1f6;
       dsval = std::max(static_cast<float>(0.0), dsval);
     }
-    float factch4 = pow(clwx, 2) + pow(innov[ich528][iloc] * w2f4, 2);
-    float factch6 = pow(dsval, 2) + pow(innov[ich544][iloc] * w2f6, 2);
+    float factch4 = std::pow(clwx, 2) + std::pow(innov[ich528][iloc] * w2f4, 2);
+    float factch6 = std::pow(dsval, 2) + std::pow(innov[ich544][iloc] * w2f6, 2);
 
     // Hydrometeor check over water surface
     if (water_frac[iloc] > 0.99) {

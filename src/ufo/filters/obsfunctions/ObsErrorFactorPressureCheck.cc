@@ -264,7 +264,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if (itype[iloc] >= 280 && itype[iloc] < 300) {
           reported_height = true;
         } else if ((itype[iloc] >= 221 && itype[iloc] <= 229) || (itype[iloc] == 261)) {
-          if (abs(obs_height[iloc]) < 1.e10) {
+          if (std::abs(obs_height[iloc]) < 1.e10) {
             reported_height = true;
           }
         }
@@ -292,9 +292,9 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
         if ((itype[iloc] >= 223 && itype[iloc] <= 228) ||
             (itype[iloc] >= 280 && itype[iloc] < 300)) {
           slat = lat[iloc]*deg2rad;
-          sin2  = sin(slat)*sin(slat);
+          sin2  = std::sin(slat)*std::sin(slat);
           termg = grav_equator *
-             ((1.0f+somigliana*sin2)/sqrt(1.0f-eccentricity_sq*sin2));
+             ((1.0f+somigliana*sin2)/std::sqrt(1.0f-eccentricity_sq*sin2));
           termr = semi_major_axis/(1.0f + flattening + grav_ratio -
                 2.0f*flattening*sin2);
           termrg = (termg/grav)*termr;
@@ -314,7 +314,7 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
 
         drpx = 0.0f;
         if ((itype[iloc] >=280 && itype[iloc] < 300) || dpres < 1.0f)
-          drpx = 0.005f*abs(dstn[iloc]-zsges[iloc])*(1.0f-fact);
+          drpx = 0.005f*std::abs(dstn[iloc]-zsges[iloc])*(1.0f-fact);
         if (dpres > static_cast<float>(nlevs)) drpx = 1.e6f;
 
         sfcchk = 0.0f;
@@ -348,13 +348,13 @@ void ObsErrorFactorPressureCheck::compute(const ObsFilterData & data,
               (itype[iloc] >= 192 && itype[iloc] < 199)) {
             if (inflatevars.compare("airTemperature") == 0 ||
               inflatevars.compare("virtualTemperature") == 0) {
-              drpx = abs(1.0f-pow(model_pressure_sfc[iloc]/obs_pressure[iloc],
+              drpx = std::abs(1.0f-std::pow(model_pressure_sfc[iloc]/obs_pressure[iloc],
                    ufo::Constants::rd_over_cp))*ufo::Constants::t0c;
-              if (abs(dpres) > 4.0f) {
+              if (std::abs(dpres) > 4.0f) {
                 drpx = 1.0e10f;
               }
             } else {
-              drpx = abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
+              drpx = std::abs(1.0f-(obs_pressure[iloc]/model_pressure_sfc[iloc])) * 10.0;
             }
           }
 

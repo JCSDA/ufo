@@ -71,7 +71,7 @@ void ObsChlEuzIntegr::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
       continue;
     }
 
-    double euz = Constants::euzc_0 * pow(chl[0][i], Constants::euzc_1);
+    double euz = Constants::euzc_0 * std::pow(chl[0][i], Constants::euzc_1);
     double euz_mod = 0.0;
     int elev = 0;
     for ( std::size_t k = 0; k < nlevs; ++k ) {

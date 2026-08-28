@@ -158,14 +158,14 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
            (pres_local[inds[iobs]] == pres_global[inds_global[jobs]])) {
             // If not equal to itself
             if (inds_global[jobs] != (inds[iobs] + displ)) {
-               tfact = std::min(one, (abs(((datetime_local[inds[iobs]] -
+               tfact = std::min(one, (std::abs(((datetime_local[inds[iobs]] -
                                       datetime_global[inds_global[jobs]]).toSeconds()))/
                                       hours_to_seconds)/time_window_hours);
                dup[inds[iobs]] = dup[inds[iobs]]+1.0-tfact*tfact*(1.0-duplicate_retention_weight);
             }
         }
       }
-      if (dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
+      if (dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = std::sqrt(dup[inds[iobs]]);
   }
   } else {
     for (size_t iobs = 0; iobs < qc_len_local; ++iobs) {
@@ -173,14 +173,14 @@ void ObsErrorFactorDuplicateCheck::compute(const ObsFilterData & data,
         if ( (lat_local[inds[iobs]] == lat_global[inds_global[jobs]]) &&
              (lon_local[inds[iobs]] == lon_global[inds_global[jobs]]) ) {
             if (inds_global[jobs] != (inds[iobs] + displ)) {
-               tfact = std::min(one, (abs(((datetime_local[inds[iobs]] -
+               tfact = std::min(one, (std::abs(((datetime_local[inds[iobs]] -
                                       datetime_global[inds_global[jobs]]).toSeconds()))/
                                       hours_to_seconds)/time_window_hours);
                dup[inds[iobs]] = dup[inds[iobs]]+1.0-tfact*tfact*(1.0-duplicate_retention_weight);
             }
         }
       }
-      if ( dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = sqrt(dup[inds[iobs]]);
+      if ( dup[inds[iobs]] > 1 ) obserr[0][inds[iobs]] = std::sqrt(dup[inds[iobs]]);
     }
   }
   oops::Log::trace() << "ObsErrorFactorDuplicateCheck compute complete" << std::endl;

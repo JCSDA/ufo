@@ -167,7 +167,7 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
         for (size_t geolev = 0; geolev < nlevs-1; ++geolev) {
           // Background pressure level intervals [cb]
           dprsl[geolev] = \
-             abs((prsl[geolev][rSort[thisPoint]]-prsl[geolev+1][rSort[thisPoint]]))*0.001f;
+             std::abs((prsl[geolev][rSort[thisPoint]]-prsl[geolev+1][rSort[thisPoint]]))*0.001f;
         }
 
         for (size_t geolev = 1; geolev < nlevs-1; ++geolev) {
@@ -218,17 +218,19 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
           // the pressure interval, pdiffu
           nextPoint = thisPoint+1;
           while (nextPoint < rSort.size()) {
-            tmp = abs(ob_pressure[rSort[thisPoint]]-ob_pressure[rSort[nextPoint]])*0.001f;
+            tmp = std::abs(ob_pressure[rSort[thisPoint]]-ob_pressure[rSort[nextPoint]])*0.001f;
             if (ob_QCflag[rSort[nextPoint]] == 0 && tmp < vmag) {
               pdiffu = tmp;
               if (distthres > 0.0f) {
                 rlat_next = ob_lat[rSort[nextPoint]]*Constants::deg2rad;
                 rlon_next = ob_lon[rSort[nextPoint]]*Constants::deg2rad;
-                dist_x = cos(rlat_this)*cos(rlon_this)-cos(rlat_next)*cos(rlon_next);
-                dist_y = cos(rlat_this)*sin(rlon_this)-cos(rlat_next)*sin(rlon_next);
-                dist_z = sin(rlat_this)-sin(rlat_next);
-                dist = std::min(1.0f, sqrt(dist_x*dist_x+dist_y*dist_y+dist_z*dist_z));
-                central_angle = 2.0f*asin(dist/2.0f);
+                dist_x = std::cos(rlat_this)*std::cos(rlon_this) -
+                         std::cos(rlat_next)*std::cos(rlon_next);
+                dist_y = std::cos(rlat_this)*std::sin(rlon_this) -
+                         std::cos(rlat_next)*std::sin(rlon_next);
+                dist_z = std::sin(rlat_this)-std::sin(rlat_next);
+                dist = std::min(1.0f, std::sqrt(dist_x*dist_x+dist_y*dist_y+dist_z*dist_z));
+                central_angle = 2.0f*std::asin(dist/2.0f);
                 dist_chord = rearth_equator*central_angle;
                 if (dist_chord > distthres) pdiffu = vmag;
               }
@@ -242,17 +244,19 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
           // the pressure interval, pdiffd
           nextPoint = thisPoint-1;
           while (nextPoint >= 0) {
-            tmp = abs(ob_pressure[rSort[nextPoint]]-ob_pressure[rSort[thisPoint]])*0.001f;
+            tmp = std::abs(ob_pressure[rSort[nextPoint]]-ob_pressure[rSort[thisPoint]])*0.001f;
             if (ob_QCflag[rSort[nextPoint]] == 0 && tmp < vmag) {
               pdiffd = tmp;
               if (distthres > 0.0f) {
                 rlat_next = ob_lat[rSort[nextPoint]]*Constants::deg2rad;
                 rlon_next = ob_lon[rSort[nextPoint]]*Constants::deg2rad;
-                dist_x = cos(rlat_this)*cos(rlon_this)-cos(rlat_next)*cos(rlon_next);
-                dist_y = cos(rlat_this)*sin(rlon_this)-cos(rlat_next)*sin(rlon_next);
-                dist_z = sin(rlat_this)-sin(rlat_next);
-                dist = std::min(1.0f, sqrt(dist_x*dist_x+dist_y*dist_y+dist_z*dist_z));
-                central_angle = 2.0f*asin(dist/2.0f);
+                dist_x = std::cos(rlat_this)*std::cos(rlon_this) -
+                         std::cos(rlat_next)*std::cos(rlon_next);
+                dist_y = std::cos(rlat_this)*std::sin(rlon_this) -
+                         std::cos(rlat_next)*std::sin(rlon_next);
+                dist_z = std::sin(rlat_this)-std::sin(rlat_next);
+                dist = std::min(1.0f, std::sqrt(dist_x*dist_x+dist_y*dist_y+dist_z*dist_z));
+                central_angle = 2.0f*std::asin(dist/2.0f);
                 dist_chord = rearth_equator*central_angle;
                 if (dist_chord > distthres) pdiffd = vmag;
               }
@@ -265,7 +269,7 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
         // When there are multiple observations inside the same model interval, the error_factor
         // will be bigger than 1 based on the spacing of the these observations
         pdifftotal = std::max(pdiffd+pdiffu, 5.0f * tiny_float);
-        error_factor = sqrt(2.0f*vmag/pdifftotal);
+        error_factor = std::sqrt(2.0f*vmag/pdifftotal);
 
        // Output
        obserr[ivar][rSort[thisPoint]] = error_factor;

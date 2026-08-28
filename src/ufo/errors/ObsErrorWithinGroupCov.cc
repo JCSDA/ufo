@@ -39,11 +39,13 @@ double gc99(const double & distnorm) {
   // distnorm - normalized distance in meters
   double gc99value = 0.0;
   if (distnorm < 0.5) {
-    gc99value = -8.0*pow(distnorm, 5.0)+8.0*pow(distnorm, 4.0)+5.0*pow(distnorm, 3.0)-
-                20.0/3.0*pow(distnorm, 2.0)+1.0;
+    gc99value = -8.0*std::pow(distnorm, 5.0)+8.0*std::pow(distnorm, 4.0)+
+                5.0*std::pow(distnorm, 3.0)-
+                20.0/3.0*std::pow(distnorm, 2.0)+1.0;
   } else if (distnorm < 1.0) {
-    gc99value = 8.0/3.0*pow(distnorm, 5.0)-8.0*pow(distnorm, 4.0)+5.0*pow(distnorm, 3.0)+
-                20.0/3.0*pow(distnorm, 2.0)-10.0*distnorm+4.0-1.0/(3.0*distnorm);
+    gc99value = 8.0/3.0*std::pow(distnorm, 5.0)-8.0*std::pow(distnorm, 4.0)+
+                5.0*std::pow(distnorm, 3.0)+
+                20.0/3.0*std::pow(distnorm, 2.0)-10.0*distnorm+4.0-1.0/(3.0*distnorm);
   }
   return gc99value;
 }
@@ -66,11 +68,11 @@ double gaussian(const double & distnorm) {
   // cutoff to zero at normalized distance of 2.5
   double gaussVal = 0.0;
   if (distnorm < 2.5) {
-    gaussVal = exp(-0.5*pow(distnorm, 2));
+    gaussVal = std::exp(-0.5*std::pow(distnorm, 2));
   }
   return gaussVal;
 */
-  return exp(-0.5*pow(distnorm, 2));
+  return std::exp(-0.5*std::pow(distnorm, 2));
 }
 
 // -----------------------------------------------------------------------------

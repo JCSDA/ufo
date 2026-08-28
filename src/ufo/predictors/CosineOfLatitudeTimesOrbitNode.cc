@@ -48,7 +48,7 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
          "Possible values are 0,1,-1.", Here());
       }
       int adjusted_node = (node[jloc] == 0) ? -1 : node[jloc];
-      out[jloc * nvars + jvar] = adjusted_node * cos(cenlat[jloc] * Constants::deg2rad);
+      out[jloc * nvars + jvar] = adjusted_node * std::cos(cenlat[jloc] * Constants::deg2rad);
     }
   }
 }

@@ -70,7 +70,7 @@ void Velocity<FunctionValue>::compute(const ObsFilterData & in,
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
     for (size_t ichan = 0; ichan < nchans; ++ichan) {
       if (u[ichan][iloc] != missing && v[ichan][iloc] != missing) {
-        out[ichan][iloc] = sqrt(u[ichan][iloc]*u[ichan][iloc] + v[ichan][iloc]*v[ichan][iloc]);
+        out[ichan][iloc] = std::sqrt(u[ichan][iloc]*u[ichan][iloc] + v[ichan][iloc]*v[ichan][iloc]);
       } else {
         out[ichan][iloc] = missing;
       }

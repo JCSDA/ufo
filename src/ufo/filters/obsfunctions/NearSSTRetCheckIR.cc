@@ -153,7 +153,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
-      (qcflag[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / pow(values[iloc], 2))
+      (qcflag[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / std::pow(values[iloc], 2))
                           : (varinv[ichan][iloc] = 0.0);
     }
   }
@@ -237,9 +237,9 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
           }
         }
       }
-      ws = 1.0 / pow(e_ts, 2);
-      wa = 1.0 / pow(e_ta, 2);
-      wq = 1.0 / pow(e_qa * (std::max(((tzbgr[iloc]) - ttp)
+      ws = 1.0 / std::pow(e_ts, 2);
+      wa = 1.0 / std::pow(e_ta, 2);
+      wq = 1.0 / std::pow(e_qa * (std::max(((tzbgr[iloc]) - ttp)
                           * 0.03, 0.0) + 0.1), 2);
       a11 = ws;
       a22 = wa;
@@ -251,7 +251,7 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
                                  && dbtdts[ichan][iloc] >= tschk) {
           icount = icount + 1;
           ts_ave = ts_ave + dbtdts[ichan][iloc];
-          float w_rad = pow((1.0 / obserr[ichan]), 2);
+          float w_rad = std::pow((1.0 / obserr[ichan]), 2);
           a11 = a11 + w_rad * dbtdts[ichan][iloc] * dbtdts[ichan][iloc];
           a12 = a12 + w_rad * dbtdts[ichan][iloc] * tb_ta[ichan];
           a13 = a13 + w_rad * dbtdts[ichan][iloc] * tb_qa[ichan];
@@ -284,8 +284,8 @@ void NearSSTRetCheckIR::compute(const ObsFilterData & in,
     if (dtz != -999.0) {
       for (size_t ichan = 0; ichan < nchans; ++ichan) {
         if (use_flag[ichan] >= 1 && varinv[ichan][iloc] > 0.0 && dbtdts[ichan][iloc] > tschk) {
-          float xindx = pow((dbtdts[ichan][iloc] - ts_ave) / (1.0 - ts_ave), 3);
-          float tzchks = tzchk * pow(0.5, xindx);
+          float xindx = std::pow((dbtdts[ichan][iloc] - ts_ave) / (1.0 - ts_ave), 3);
+          float tzchks = tzchk * std::pow(0.5, xindx);
           if (std::fabs(dtz) > tzchks) out[ichan][iloc] = 1;
         }
       }

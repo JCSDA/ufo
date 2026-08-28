@@ -421,7 +421,7 @@ void StableLayersCloudTopPressure::compute(const ObsFilterData & in,
 // Function to calculate saturated adiabatic lapse rate.
 double StableLayersCloudTopPressure::computeSALR(const double p, const double t) const {
     // Use the Clausius-Clapeyron equation to calculate the saturation vapour pressure.
-    const double es = Constants::es_w_0 * exp((Constants::L_c / Constants::rv) *
+    const double es = Constants::es_w_0 * std::exp((Constants::L_c / Constants::rv) *
                                   ((1.0 / Constants::t0c) - (1.0 / t)));
 
     // Calculate the saturation mixing ratio.

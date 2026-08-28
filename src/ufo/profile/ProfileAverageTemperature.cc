@@ -290,8 +290,8 @@ namespace ufo {
       diagFlagVectorsTModObs[diagFlagNameT] = {};
     }
     std::vector <bool> diagFlagsTPartialLayerModObs;
-    std::vector <float> LogP_Min;  // Min log(pressure) used in layer average.
-    std::vector <float> LogP_Max;  // Max log(pressure) used in layer average.
+    std::vector <float> LogP_Min;  // Min std::log(pressure) used in layer average.
+    std::vector <float> LogP_Max;  // Max std::log(pressure) used in layer average.
     // Minimum fraction of a model layer that must have been covered (in the vertical coordinate)
     // by observed values in order for averaging onto that layer to be performed.
     const float SondeDZFraction = options_.AvgT_SondeDZFraction.value();

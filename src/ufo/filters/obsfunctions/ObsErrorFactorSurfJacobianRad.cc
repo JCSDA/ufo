@@ -176,18 +176,18 @@ void ObsErrorFactorSurfJacobianRad::compute(const ObsFilterData & in,
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                           : qcflagdata[iloc] = 0;
-      (qcflagdata[iloc] == 0) ? (varinv = 1.0 / pow(obserrdata[iloc], 2)) : (varinv = 0.0);
+      (qcflagdata[iloc] == 0) ? (varinv = 1.0 / std::pow(obserrdata[iloc], 2)) : (varinv = 0.0);
       out[ichan][iloc] = 1.0;
 
       if (varinv > 0.0) {
         float vaux = demisf[iloc] * std::fabs(dbtdes[iloc]) +
                dtempf[iloc] * std::fabs(dbtdts[iloc]);
-        float term = pow(vaux, 2);
+        float term = std::pow(vaux, 2);
         if (inst == "amsua" || inst == "atms") {
-          if (ichan <= ich536 - 1 || ichan == ich890 - 1) term += 0.2 * pow(clwbias[iloc], 2);
+          if (ichan <= ich536 - 1 || ichan == ich890 - 1) term += 0.2 * std::pow(clwbias[iloc], 2);
         }
         if (term > 0.0) {
-          out[ichan][iloc] = sqrt(1.0 + varinv * term);
+          out[ichan][iloc] = std::sqrt(1.0 + varinv * term);
         }
       }
     }

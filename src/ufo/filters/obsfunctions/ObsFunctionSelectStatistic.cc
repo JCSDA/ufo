@@ -113,7 +113,7 @@ void SelectStatistic::compute(const ObsFilterData & in, ioda::ObsDataVector<int>
                                                   inputSize;
           auto i = std::min_element(inputVec.begin(), inputVec.end(), [=] (float x, float y)
           {
-              return abs(x - inputMean) < abs(y - inputMean);
+              return std::abs(x - inputMean) < std::abs(y - inputMean);
           });
           const size_t meanInd = std::distance(inputVec.begin(), i);
           out[ichan][validObsIds[obs_indices[meanInd]]] = 1;

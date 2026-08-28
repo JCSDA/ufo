@@ -82,7 +82,7 @@ void ROobserrInflationGEOS::apply(const Variables & vars,
             }
          }
          factor[jobs] = inflate_factor;
-         factor[jobs] = sqrt(factor[jobs]);
+         factor[jobs] = std::sqrt(factor[jobs]);
       }
       if (obserr[0][jobs] != missing) obserr[0][jobs] *= factor[jobs];
   }

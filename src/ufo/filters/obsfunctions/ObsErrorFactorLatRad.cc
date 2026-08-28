@@ -59,7 +59,7 @@ void ObsErrorFactorLatRad::compute(const ObsFilterData & in,
       if ( std::abs(lats[jj]) < params[0] ) {
         out[0][jj] = params[1] *(std::abs(lats[jj]) * params[2] + params[3]);
       }
-      out[0][jj] = sqrt(1.0 / out[0][jj]);
+      out[0][jj] = std::sqrt(1.0 / out[0][jj]);
     }
   } else {
     // Skip checking each latitude when latitudinal bound is 0, which means no inflation is wanted.

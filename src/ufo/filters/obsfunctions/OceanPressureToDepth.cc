@@ -74,7 +74,7 @@ void OceanPressureToDepth::compute(const ObsFilterData & in,
   for (size_t loc = 0; loc < nlocs; ++loc) {
     if (pressure[0][loc] != missingFloat) {
       const float p_db = pressure[0][loc] / 10000.0;  // convert Pa to decibars
-      const double sinsq_latitude = pow(std::sin(lats[loc] * Constants::deg2rad), 2);
+      const double sinsq_latitude = std::pow(std::sin(lats[loc] * Constants::deg2rad), 2);
       // latitude-dependent gravitational constant:
       const double g = param1 * (1.0 + (param2 + param3 * sinsq_latitude) * sinsq_latitude) +
                   param4 * p_db;

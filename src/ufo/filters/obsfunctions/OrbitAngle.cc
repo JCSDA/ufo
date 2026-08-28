@@ -141,7 +141,7 @@ void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & 
     // now work out day of year
     util::DateTime startofyear(year, 1, 1, 0, 0, 0);
 
-    double doy = floor((datetime - startofyear).toSeconds() * daysPerSecond)+1;
+    double doy = std::floor((datetime - startofyear).toSeconds() * daysPerSecond)+1;
 
     // check date range is meaningful
     if (doy < 1 || doy > 366) {
@@ -184,7 +184,7 @@ void OrbitAngle::compute(const ObsFilterData & in, ioda::ObsDataVector<float> & 
 
     double days_since_2001 = (year - 2001) * static_cast<double>(365.25);
 
-    double jday = floor(days_since_2001) + doy +
+    double jday = std::floor(days_since_2001) + doy +
                   static_cast<double>(364.5) +
                   static_cast<double>(hour_of_day / 24.0);
 
@@ -273,7 +273,7 @@ float OrbitAngle::vectormod(const std::vector<float> &a) const {
   for (size_t vloc = 0; vloc < a.size(); ++vloc) {
     sumsq += a[vloc]*a[vloc];
   }
-  return sqrt(sumsq);
+  return std::sqrt(sumsq);
 }
 
 // Return the lat long location in cartesian coordinates

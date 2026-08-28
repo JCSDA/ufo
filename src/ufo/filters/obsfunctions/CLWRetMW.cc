@@ -441,7 +441,7 @@ void CLWRetMW::cloudLiquidWater(const std::vector<float> & szas,
   const float c1 = 8.240, c2 = 2.622, c3 = 1.846;
   for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
     if (water_frac[iloc] >= 0.99) {
-      float cossza = cos(Constants::deg2rad * szas[iloc]);
+      float cossza = std::cos(Constants::deg2rad * szas[iloc]);
       float d0 = c1 - (c2 - c3 * cossza) * cossza;
       if (tsavg[iloc] > t0c - 1.0 && bt238[iloc] <= 284.0 && bt314[iloc] <= 284.0
                                   && bt238[iloc] > 0.0 && bt314[iloc] > 0.0) {
@@ -529,8 +529,8 @@ void CLWRetMW::clw_retr_amsr2(const std::vector<float> & bt18v,
       out[iloc] = getBadValue();
     } else {
       // Calculate predictors
-      pred_var_clw[0] = log(bt18v[iloc] - bt18h[iloc]);
-      pred_var_clw[1] = log(bt36v[iloc] - bt36h[iloc]);
+      pred_var_clw[0] = std::log(bt18v[iloc] - bt18h[iloc]);
+      pred_var_clw[1] = std::log(bt36v[iloc] - bt36h[iloc]);
       clw = a0_clw + bt36h[iloc]*regr_coeff_clw[0];
       for (size_t nvar_clw=0; nvar_clw < pred_var_clw.size(); ++nvar_clw) {
         clw = clw + (pred_var_clw[nvar_clw] * regr_coeff_clw[nvar_clw+1]);

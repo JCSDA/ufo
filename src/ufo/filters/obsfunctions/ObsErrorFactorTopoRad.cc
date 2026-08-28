@@ -109,8 +109,8 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
       for (size_t iloc = 0; iloc < nlocs; ++iloc) {
         out[ich][iloc] = 1.0;
         if (it != channelHeights_.end() && zsges[iloc] > it->second) {
-          float factor = pow((it->second/zsges[iloc]), 4);
-          out[ich][iloc] = sqrt(1.0 / (1.0 - (1.0 - factor) * tao_sfc[iloc]));
+          float factor = std::pow((it->second/zsges[iloc]), 4);
+          out[ich][iloc] = std::sqrt(1.0 / (1.0 - (1.0 - factor) * tao_sfc[iloc]));
         }
       }
     }
@@ -136,7 +136,7 @@ void ObsErrorFactorTopoRad::compute(const ObsFilterData & in,
           out[ich][iloc] = it->second/zsges[iloc] * factor;
         }
         if (factor > 0.0) {
-          out[ich][iloc] = sqrt(1.0 / out[ich][iloc]);
+          out[ich][iloc] = std::sqrt(1.0 / out[ich][iloc]);
         }
       }
     }

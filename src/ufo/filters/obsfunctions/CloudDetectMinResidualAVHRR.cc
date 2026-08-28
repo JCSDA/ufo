@@ -154,7 +154,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
     in.get(Variable(flaggrp+"/brightnessTemperature", channels_)[ichan], qcflag);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (flaggrp == "PreQC") values[iloc] == missing ? qcflag[iloc] = 100 : qcflag[iloc] = 0;
-      (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / pow(values[iloc], 2)) : (values[iloc] = 0.0);
+      (qcflag[iloc] == 0) ? (values[iloc] = 1.0 / std::pow(values[iloc], 2)) : (values[iloc] = 0.0);
       if (use_flag_clddet[ichan] > 0 && use_flag_clddet[ichan]%2 == 1)
           varinv_use[ichan][iloc] = values[iloc];
     }
@@ -295,7 +295,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
             sum2 = sum2 +  dbt[ichan][k] * dbt[ichan][k] * varinv_use[ichan][iloc];
           }
         }
-        if (fabs(sum2) < FLT_MIN) sum2 = copysign(1.0e-12, sum2);
+        if (std::fabs(sum2) < FLT_MIN) sum2 = copysign(1.0e-12, sum2);
         cloudp = std::min(std::max((sum/sum2), 0.f), 1.f);
         sum = 0.0;
         for (size_t ichan = 0; ichan < nchans; ++ichan) {
@@ -317,7 +317,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
       size_t ilev;
       out[ichan][iloc] = 0;
       for (ilev = 0; ilev < lcloud; ++ilev) {
-        if (fabs(cldfrac * dbt[ichan][ilev]) > criteria4clddet[ichan]) {
+        if (std::fabs(cldfrac * dbt[ichan][ilev]) > criteria4clddet[ichan]) {
           out[ichan][iloc]= 1;
           varinv_use[ichan][iloc]= 0.0;
           break;
@@ -334,7 +334,7 @@ void CloudDetectMinResidualAVHRR::compute(const ObsFilterData & in,
       sumx = sumx + innovation[ichan][iloc] * dbtdts[ichan][iloc] * varinv_use[ichan][iloc];
       sumx2 = sumx2 + dbtdts[ichan][iloc] * dbtdts[ichan][iloc] * varinv_use[ichan][iloc];
     }
-    if (fabs(sumx2) < FLT_MIN) sumx2 = copysign(1.0e-12, sumx2);
+    if (std::fabs(sumx2) < FLT_MIN) sumx2 = copysign(1.0e-12, sumx2);
     dts = std::fabs(sumx / sumx2);
     if (std::abs(dts) > 1.0) {
       if (sea == false) {

@@ -146,7 +146,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
     for (size_t iloc = 0; iloc < nlocs; iloc++) {
       if (flaggrp == "PreQC") obserrdata[iloc] == missing ? qcflagdata[iloc] = 100
                                                            : qcflagdata[iloc] = 0;
-      (qcflagdata[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / pow(obserrdata[iloc], 2))
+      (qcflagdata[iloc] == 0) ? (varinv[ichan][iloc] = 1.0 / std::pow(obserrdata[iloc], 2))
                               : (varinv[ichan][iloc] = 0.0);
     }
   }
@@ -200,7 +200,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
           size_t channel = ichan + 1;
           if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
             float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
-            term = term + std::min(0.002 * pow(wind_speed_at_surface[iloc], 2) *
+            term = term + std::min(0.002 * std::pow(wind_speed_at_surface[iloc], 2) *
                           (*obserr0)[ichan][iloc], 0.5 * (*obserr0)[ichan][iloc]);
             float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
             term = term + std::min(13.0 * clwtmp * (*obserr0)[ichan][iloc], 3.5 *
@@ -209,9 +209,9 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
               term = term + std::min(1.5 * (scatobs[0][iloc] - 9.0) * (*obserr0)[ichan][iloc],
                                      2.5 * (*obserr0)[ichan][iloc]);
             }
-            term = pow(term, 2.0);
+            term = std::pow(term, 2.0);
             out[ichan][iloc] = 1.0 / (1.0 + varinv[ichan][iloc] * term);
-            out[ichan][iloc] = sqrt(1.0 / out[ichan][iloc]);
+            out[ichan][iloc] = std::sqrt(1.0 / out[ichan][iloc]);
           }
         }
       }
@@ -236,7 +236,7 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
           size_t channel = ichan + 1;
           if (varinv[ichan][iloc] > 0.0 && (channel <= ich536 || channel >= ich890)) {
             float term = (1.0 - icol) * std::abs(innov[ichan][iloc]);
-            term = term + std::min(0.002 * pow(wind_speed_at_surface[iloc], 2) *
+            term = term + std::min(0.002 * std::pow(wind_speed_at_surface[iloc], 2) *
                           obserr0[ichan][iloc], 0.5 * obserr0[ichan][iloc]);
             float clwtmp = std::min(std::abs((clwobs[0][iloc] - clwbkg[0][iloc])), 1.f);
             term = term + std::min(13.0 * clwtmp * obserr0[ichan][iloc], 3.5 *
@@ -245,9 +245,9 @@ void ObsErrorFactorSituDependMW::compute(const ObsFilterData & in,
               term = term + std::min(1.5 * (scatobs[0][iloc] - 9.0) * obserr0[ichan][iloc],
                                      2.5 * obserr0[ichan][iloc]);
             }
-            term = pow(term, 2.0);
+            term = std::pow(term, 2.0);
             out[ichan][iloc] = 1.0 / (1.0 + varinv[ichan][iloc] * term);
-            out[ichan][iloc] = sqrt(1.0 / out[ichan][iloc]);
+            out[ichan][iloc] = std::sqrt(1.0 / out[ichan][iloc]);
           }
         }
       }

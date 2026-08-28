@@ -95,9 +95,9 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
 
     // Convert pressure to log(pressure)
     for (size_t ilev = 0; ilev < nlevs; ++ilev) {
-      logp[ilev] = log(pressure_gval[ilev]);
+      logp[ilev] = std::log(pressure_gval[ilev]);
     }
-    logp_ob = log(ob_pressure[jobs]);
+    logp_ob = std::log(ob_pressure[jobs]);
 
     ufo::PiecewiseLinearInterpolation vert_interp_model(logp, q_profile);
     if ((itype[jobs] >= 180) && (itype[jobs] <= 184)) {

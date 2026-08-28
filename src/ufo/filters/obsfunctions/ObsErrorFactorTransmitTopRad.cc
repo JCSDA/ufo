@@ -65,7 +65,7 @@ void ObsErrorFactorTransmitTopRad::compute(const ObsFilterData & in,
   for (size_t ich = 0; ich < nchans; ++ich) {
     in.get(Variable("ObsDiag/transmittances_of_atmosphere_layer", channels_)[ich], 0, tao_top);
     for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      out[ich][iloc] = sqrt(1.0f / (std::abs(tao_top[iloc])+eps) );
+      out[ich][iloc] = std::sqrt(1.0f / (std::abs(tao_top[iloc])+eps) );
     }
   }
   oops::Log::trace() << "ObsErrorFactorTransmitTopRad compute complete" << std::endl;

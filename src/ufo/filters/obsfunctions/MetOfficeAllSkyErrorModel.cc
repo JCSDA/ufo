@@ -244,18 +244,18 @@ void MetOfficeAllSkyErrorModel::compute(const ObsFilterData & in,
         if (options_.lwpcoef.value() != boost::none && options_.iwpcoef.value() != boost::none
             && lwpcoef[ich] > 0.0f && iwpcoef[ich] > 0.0f) {
           if (ob_lwp[iloc] != missing &&  ob_iwp[iloc] != missing) {
-            out[ich][iloc] = sqrt(out[ich][iloc]) + lwpcoef[ich]*ob_lwp[iloc] +
+            out[ich][iloc] = std::sqrt(out[ich][iloc]) + lwpcoef[ich]*ob_lwp[iloc] +
                     iwpcoef[ich]*ob_iwp[iloc];
             out[ich][iloc] *= out[ich][iloc];
           } else {
-            out[ich][iloc] = sqrt(out[ich][iloc]) + lwpcoef[ich]*maxlwp +
+            out[ich][iloc] = std::sqrt(out[ich][iloc]) + lwpcoef[ich]*maxlwp +
                       iwpcoef[ich]*maxiwp;
             out[ich][iloc] *= out[ich][iloc];
           }
         }
 
         // final step: convert error to standard deviation
-        out[ich][iloc] = sqrt(out[ich][iloc]);
+        out[ich][iloc] = std::sqrt(out[ich][iloc]);
      }
   }
   oops::Log::trace() << "MetOfficeAllSkyErrorModel compute complete" << std::endl;

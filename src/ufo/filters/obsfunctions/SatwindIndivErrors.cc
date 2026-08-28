@@ -223,9 +223,9 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
       }
       // Calculate weight for each background level, avoiding zero divide.
       if (pressure_error[iloc] > 0) {
-        weight = exp(-0.5 *
-                     pow(static_cast<double>(cx_p[ilev] - ob_p[iloc]), 2) /
-                     pow(static_cast<double>(pressure_error[iloc]), 2))
+        weight = std::exp(-0.5 *
+                     std::pow(static_cast<double>(cx_p[ilev] - ob_p[iloc]), 2) /
+                     std::pow(static_cast<double>(pressure_error[iloc]), 2))
                      * std::abs(cx_p[ilev] - cx_p[ilev + 1]);
       } else {
           weight = 0.0;
@@ -237,16 +237,16 @@ void SatwindIndivErrors::compute(const ObsFilterData & in,
         continue;
       }
 
-      sum_top += weight * pow(cx_windcomponent[ilev] - bg_windcomponent[iloc], 2);
+      sum_top += weight * std::pow(cx_windcomponent[ilev] - bg_windcomponent[iloc], 2);
       sum_weight += weight;
     }
 
     if (sum_weight > 0.0) {
-      error_press = sqrt(static_cast<double>(sum_top / sum_weight));
+      error_press = std::sqrt(static_cast<double>(sum_top / sum_weight));
     }
 
-    obserr[0][iloc] = static_cast<float>(sqrt(pow(error_vector, 2) +
-                                              pow(error_press, 2) ));
+    obserr[0][iloc] = static_cast<float>(std::sqrt(std::pow(error_vector, 2) +
+                                              std::pow(error_press, 2) ));
   }
   // sum number of bad QI values
   const std::size_t countQi = countQiAccumulator->computeResult();

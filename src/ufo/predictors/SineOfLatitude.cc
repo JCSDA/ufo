@@ -40,7 +40,7 @@ void SineOfLatitude::compute(const ioda::ObsSpace & odb,
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      out[jloc*nvars+jvar] = sin(cenlat[jloc] * Constants::deg2rad);
+      out[jloc*nvars+jvar] = std::sin(cenlat[jloc] * Constants::deg2rad);
     }
   }
 }

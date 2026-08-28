@@ -471,7 +471,7 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
     for (size_t vv = 0; vv < nvars; ++vv) {
       for (size_t ii = 0; ii < r_inv.nlocs(); ++ii) {
         if (r_inv[ii*nvars + vv] != missing) {
-          r_inv[ii*nvars + vv] = 1.0f / pow(r_inv[ii*nvars + vv], 2);
+          r_inv[ii*nvars + vv] = 1.0f / std::pow(r_inv[ii*nvars + vv], 2);
         } else {
           r_inv[ii*nvars + vv] = 0.0f;
         }
@@ -501,13 +501,13 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
           if (byRecord_) {
             // For by-record BC each MPI task has information about non-overlapping
             // records, and result can be accumulated independently on each task
-            ht_rinv_h_[index(jrec, jvar, jp)] += pow(predx[jloc * vars_.size() + jvar], 2)
+            ht_rinv_h_[index(jrec, jvar, jp)] += std::pow(predx[jloc * vars_.size() + jvar], 2)
                                                   * r_inv[jloc * vars_.size() + jvar];
           } else {
             // For not by-record BC the result is cumulative across MPI tasks
             // and requires MPI accumulator
             ht_rinv_h_accumulator->addTerm(jloc, index(jrec, jvar, jp),
-                                           pow(predx[jloc * vars_.size() + jvar], 2)
+                                           std::pow(predx[jloc * vars_.size() + jvar], 2)
                                              * r_inv[jloc * vars_.size() + jvar]);
           }
         }

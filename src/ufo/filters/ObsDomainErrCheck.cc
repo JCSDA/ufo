@@ -75,7 +75,7 @@ void ObsDomainErrCheck::applyFilter(const std::vector<bool> & inside,
         float bound = 2.5 * obserr_[iv][jobs];
         float obserrinc = parameter * std::max((values[jobs]-9.0), 0.0) * obserr_[iv][jobs];
         obserrinc = std::max(obserr_[iv][jobs], bound);
-        obserr_[iv][jobs] = sqrt(pow(obserr_[iv][jobs], 2) + pow(obserrinc, 2));
+        obserr_[iv][jobs] = std::sqrt(std::pow(obserr_[iv][jobs], 2) + std::pow(obserrinc, 2));
         ++count;
         }
       }

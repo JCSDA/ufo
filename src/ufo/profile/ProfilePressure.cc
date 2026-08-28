@@ -86,7 +86,7 @@ namespace ufo {
     if (ObsType[0] == MetOfficeObsIDs::AtmosphericProfile::Sonde ||
         ObsType[0] == MetOfficeObsIDs::AtmosphericProfile::TSTSonde) {
       AllLevelsHaveValidP = NumValidPLevels >= std::max(numProfileLevels - 2,
-                                                        static_cast<int>(round(numProfileLevels
+                                                        static_cast<int>(std::round(numProfileLevels
                                                                                * 0.98)));
     }
 

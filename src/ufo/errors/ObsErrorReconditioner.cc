@@ -83,7 +83,7 @@ void ObsErrorReconditioner::recondition(Eigen::MatrixXd & R) const {
       oops::Log::debug() << "eval_min = " << eval_min
                          << " , performing a ridge regression to ensure positive definiteness\n";
       double alpha = 1.0 + 1e-15;
-      alpha = (eval_min == 0.0) ? alpha - 1.0 : alpha * abs(eval_min);
+      alpha = (eval_min == 0.0) ? alpha - 1.0 : alpha * std::abs(eval_min);
       for (size_t jvar = 0; jvar < nrows; ++jvar) {
           evals[jvar] += alpha;
       }

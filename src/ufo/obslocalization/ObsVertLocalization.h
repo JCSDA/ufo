@@ -117,7 +117,7 @@ ObsVertLocalization<ITERATOR>::ObsVertLocalization(const eckit::Configuration & 
   if (options_.logTransform.value()) {
     for (unsigned int jj = 0; jj < vCoord_.size(); ++jj) {
       if (vCoord_[jj] == 0) { vCoord_[jj] = FLT_EPSILON; }
-      vCoord_[jj] = log(vCoord_[jj]);
+      vCoord_[jj] = std::log(vCoord_[jj]);
     }
   }
 }
@@ -154,8 +154,8 @@ double ObsVertLocalization<ITERATOR>::computeLocalization(
   if (options_.logTransform.value()) {
     if (vCoord1 == 0) { vCoord1 = FLT_EPSILON; }
     if (vCoord2 == 0) { vCoord2 = FLT_EPSILON; }
-    vCoord1 = log(vCoord1);
-    vCoord2 = log(vCoord2);
+    vCoord1 = std::log(vCoord1);
+    vCoord2 = std::log(vCoord2);
   }
 
   double distance = options_.distance(vCoord1, vCoord2);
@@ -251,7 +251,7 @@ ObsVertLocalization<ITERATOR>::getLocalObs(const ITERATOR & i,
   double vCoordAtIterator = refPoint[2];
   if (options_.logTransform.value()) {
     if (vCoordAtIterator == 0) { vCoordAtIterator = FLT_EPSILON; }
-    vCoordAtIterator = log(vCoordAtIterator);
+    vCoordAtIterator = std::log(vCoordAtIterator);
   }
   size_t nlocs = vCoord_.size();
   for (unsigned int jj = 0; jj < nlocs; ++jj) {

@@ -372,7 +372,7 @@ float GetWindDirection(float u, float v) {
 
   if (u != missing && v != missing) {
     if (u != 0.0f || v != 0.0f) {
-        windDirection = fmod((270.0f - atan2(v, u) * Constants::rad2deg), 360.0f);
+        windDirection = std::fmod((270.0f - std::atan2(v, u) * Constants::rad2deg), 360.0f);
     } else {
         windDirection = 0.0f;
     }
@@ -385,7 +385,7 @@ float GetWindSpeed(float u, float v) {
   float windSpeed = missing;  // wind speed
 
   if (u != missing && v != missing) {
-        windSpeed = hypot(u, v);
+        windSpeed = std::hypot(u, v);
   }
   return windSpeed;
 }
@@ -396,7 +396,7 @@ float GetWind_U(float windSpeed, float windFromDirection) {
 
   if (windFromDirection != missing
       && windSpeed != missing && windSpeed >= 0) {
-    u = -windSpeed * sin(windFromDirection * Constants::deg2rad);
+    u = -windSpeed * std::sin(windFromDirection * Constants::deg2rad);
   }
   return u;
 }
@@ -408,7 +408,7 @@ float GetWind_V(float windSpeed, float windFromDirection) {
 
   if (windFromDirection != missing
       && windSpeed != missing && windSpeed >= 0) {
-    v = -windSpeed * cos(windFromDirection * Constants::deg2rad);
+    v = -windSpeed * std::cos(windFromDirection * Constants::deg2rad);
   }
   return v;
 }
@@ -574,7 +574,7 @@ float BackgroundPressure(float PSurfParamA, float  PSurfParamB, float height) {
   float BkP = util::missingValue<float>();
   double ToRaise =  (PSurfParamA - height)/PSurfParamB;
   if (ToRaise > 0.0) {
-    BkP = pow(ToRaise, (Constants::grav/(Constants::Lclr*Constants::rd)));
+    BkP = std::pow(ToRaise, (Constants::grav/(Constants::Lclr*Constants::rd)));
   }
   return BkP;
 }

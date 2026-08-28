@@ -199,17 +199,17 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
           float variance = 0.f;
           if ((thinnedRandomErrorStandardDeviation.size() > 0)
            && (thinnedRandomErrorStandardDeviation[globalObsId] != util::missingValue<float>())) {
-            variance += pow(thinnedRandomErrorStandardDeviation[globalObsId], 2);
+            variance += std::pow(thinnedRandomErrorStandardDeviation[globalObsId], 2);
           }
           if ((thinnedSystematicErrorStandardDeviation.size() > 0) &&
               (thinnedSystematicErrorStandardDeviation[globalObsId]
                   != util::missingValue<float>())) {
-            variance += pow(thinnedSystematicErrorStandardDeviation[globalObsId], 2);
+            variance += std::pow(thinnedSystematicErrorStandardDeviation[globalObsId], 2);
           }
           if (variance < std::numeric_limits<float>::min()) {
             totalErrorStandardDeviation.emplace_back(util::missingValue<float>());
           } else {
-            totalErrorStandardDeviation.emplace_back(sqrt(variance));
+            totalErrorStandardDeviation.emplace_back(std::sqrt(variance));
           }
         }
       }
@@ -589,10 +589,10 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMedian(
       // find median obs value in bin:
       std::vector<float> obsgroupSorted(obsgroup);
       std::stable_sort(obsgroupSorted.begin(), obsgroupSorted.end());
-      const float obsMedian = 0.5*(obsgroupSorted[floor(0.5*(groupSize-1))]
-                            + obsgroupSorted[ceil(0.5*(groupSize-1))]);
+      const float obsMedian = 0.5*(obsgroupSorted[std::floor(0.5*(groupSize-1))]
+                            + obsgroupSorted[std::ceil(0.5*(groupSize-1))]);
       auto i = std::min_element(obsgroup.begin(), obsgroup.end(), [=] (float x, float y) {
-          return abs(x - obsMedian) < abs(y - obsMedian);
+          return std::abs(x - obsMedian) < std::abs(y - obsMedian);
       });
       const size_t bestValidObsIndex = std::distance(obsgroup.begin(), i);
 
@@ -673,7 +673,7 @@ std::vector<bool> Gaussian_Thinning::identifyThinnedObservationsMean(
         resultValue = sumObs / count;
         break;
       case MeanThinningType::RANDOMERROR:
-        resultValue = sqrt(sumOfVariances) / count;
+        resultValue = std::sqrt(sumOfVariances) / count;
         break;
     }
 

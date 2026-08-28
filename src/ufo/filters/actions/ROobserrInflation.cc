@@ -74,7 +74,7 @@ void ROobserrInflation::apply(const Variables & vars,
       factor[jobs] = 1.0;
       if (super_obs_inlayer[layer_idx[jobs]][rec_idx[jobs]] > 0) {
         factor[jobs] = super_obs_inlayer[layer_idx[jobs]][rec_idx[jobs]];
-        factor[jobs] = sqrt(factor[jobs]);
+        factor[jobs] = std::sqrt(factor[jobs]);
       }
       if (obserr[iallvar][jobs] != missing) obserr[iallvar][jobs] *= factor[jobs];
     }

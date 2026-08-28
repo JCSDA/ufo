@@ -58,9 +58,9 @@ void SunGlintAngle::compute(const ObsFilterData & in,
     sun_azimuth[iloc] *= Constants::deg2rad;
     sat_zenith[iloc]  *= Constants::deg2rad;
     sat_azimuth[iloc] *= Constants::deg2rad;
-    float cosza  = cos(sat_zenith[iloc]);
+    float cosza  = std::cos(sat_zenith[iloc]);
     float bearaz = sun_azimuth[iloc] - sat_azimuth[iloc] + M_PI;
-    sun_glint[iloc] = acos(cos(sun_zenith[iloc])*cosza + sin(sun_zenith[iloc])
+    sun_glint[iloc] = std::acos(std::cos(sun_zenith[iloc])*cosza + std::sin(sun_zenith[iloc])
                             *sin(sat_zenith[iloc])*cos(bearaz))*Constants::rad2deg;
   }
   oops::Log::trace() << "SunGlintAngle compute complete" << std::endl;

@@ -132,7 +132,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
           tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
                     (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
         }
-        out[jloc*nvars+jvar] = pow((tlapchn - tlap[jvar]), order_);
+        out[jloc*nvars+jvar] = std::pow((tlapchn - tlap[jvar]), order_);
     }
   }
 }

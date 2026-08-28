@@ -65,7 +65,7 @@ ObsErrorModelQuad::ObsErrorModelQuad(const eckit::LocalConfiguration & config)
   }
 
   for (size_t i = 0; i < yvar.size(); ++i) {
-    ASSERT(abs(a[i]) > 0.0);
+    ASSERT(std::abs(a[i]) > 0.0);
     ASSERT(err0[i] > 0.0);
     ASSERT(err1[i] > 0.0);
     ASSERT(err1[i] >= err0[i]);
@@ -112,11 +112,11 @@ void ObsErrorModelQuad::compute(const ObsFilterData & in,
     if (a[jvar] < 0.0f) {
       c = err1[jvar];
       x1 = b[jvar];
-      x0 = x1 - sqrt((err0[jvar] - c) / a[jvar]);
+      x0 = x1 - std::sqrt((err0[jvar] - c) / a[jvar]);
     } else {
       c = err0[jvar];
       x0 = b[jvar];
-      x1 = x0 + sqrt((err1[jvar] - c) / a[jvar]);
+      x1 = x0 + std::sqrt((err1[jvar] - c) / a[jvar]);
     }
 
     // Calculate piece-wise function value across locations
@@ -126,7 +126,7 @@ void ObsErrorModelQuad::compute(const ObsFilterData & in,
         if (xvals[ivar][iloc] <= x0) {
           out[jvar][iloc] = err0[jvar];
         } else if (xvals[ivar][iloc] < x1) {
-          out[jvar][iloc] = a[jvar] * pow(xvals[ivar][iloc] - b[jvar], 2) + c;
+          out[jvar][iloc] = a[jvar] * std::pow(xvals[ivar][iloc] - b[jvar], 2) + c;
         } else {
           out[jvar][iloc] = err1[jvar];
         }
