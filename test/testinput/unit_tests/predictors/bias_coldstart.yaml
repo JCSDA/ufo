@@ -1,0 +1,89 @@
+# Test of the VarBC "cold start", the UFO equivalent of WRFDA's da_varbc_coldstart
+# (var/da/da_varbc/da_varbc_coldstart.inc, originally by Tom Auligne, 2007).
+#
+# No `input file` is supplied, so every coefficient starts at zero and every channel is eligible
+# for a cold start. During the first (and only) H(x), the constant-predictor coefficient of each
+# channel is initialized to the mode of the histogram of the uncorrected departures y - H(x).
+#
+# `constant` is the only variational predictor, so the cold-started coefficient IS the bias
+# correction: the resulting bias-corrected H(x) should sit on top of the observations. That is
+# what `vector ref: ObsValue` checks -- a cold start with the wrong sign, or one that silently
+# did nothing, leaves H(x) biased against ObsValue and fails.
+
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
+    obs options:
+      Sensor_ID: &Sensor_ID amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  obs bias:
+    # Deliberately no `input file`: this is the cold-start case.
+    variational bc:
+      predictors:
+      - name: constant
+    cold start:
+      enable: true
+      histogram bins: 200
+      histogram half width: 10.0
+      minimum obs number: 10
+  # Science check: with `constant` as the only variational predictor, the cold-started
+  # coefficient IS the whole bias correction, so the corrected H(x) should sit on top of the
+  # observations. A wrong sign, or a cold start that silently did nothing, fails here.
+  vector ref: ObsValue
+  tolerance: 1.e-1
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
+    obs options:
+      Sensor_ID: &Sensor_ID amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19_regression
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightnessTemperature]
+    channels: &channels 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  obs bias:
+    # Deliberately no `input file`: this is the cold-start case.
+    variational bc:
+      predictors:
+      - name: constant
+    cold start:
+      enable: true
+      histogram bins: 200
+      histogram half width: 10.0
+      minimum obs number: 10
+  # Regression lock. `vector ref` above only bounds the departure at 100*tol = 10 K, which would
+  # not notice a small change in the seeded coefficients. This pins the bias-corrected H(x) to a
+  # relative 1e-8, so any change to the histogram binning, the mode selection or the MPI
+  # reduction shows up immediately. Regenerate if the cold-start algorithm changes on purpose.
+  rms ref: 229.75363925744463
+  tolerance: 1.0e-8

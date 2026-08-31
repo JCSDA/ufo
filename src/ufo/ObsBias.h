@@ -1,8 +1,8 @@
 /*
  * (C) Copyright 2017-2024 UCAR
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_OBSBIAS_H_
@@ -21,6 +21,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "ioda/ObsDataVector.h"
+
 #include "ufo/ObsBiasParameters.h"
 #include "ufo/predictors/PredictorBase.h"
 
@@ -30,6 +32,7 @@ namespace eckit {
 
 namespace ioda {
   class ObsSpace;
+  class ObsVector;
 }
 
 namespace ufo {
@@ -96,6 +99,18 @@ class ObsBias : public util::Printable,
   /// Set all variable predictors coefficients to zero (used in the test)
   void zero();
 
+  /// \brief Initialize coefficients that have no prior value from uncorrected departures.
+  ///
+  /// Reproduces step [1] of WRFDA's `da_varbc_coldstart`: the coefficient of the constant
+  /// predictor is set to the mode of the histogram of `y - H(x)` for each channel that is being
+  /// cold-started. Does nothing unless a cold start is configured and has not yet run.
+  ///
+  /// \param odb      ObsSpace supplying observed values and the MPI distribution.
+  /// \param hofx     Uncorrected H(x), before bias correction has been added.
+  /// \param qcFlags  QC flags; only locations with flag 0 contribute.
+  void coldStart(const ioda::ObsSpace & odb, const ioda::ObsVector & hofx,
+                 const ioda::ObsDataVector<int> & qcFlags);
+
   // Operator
   operator bool() const {
     return (numStaticPredictors_ > 0 || numVariablePredictors_ > 0) && vars_.size() > 0;
@@ -112,6 +127,7 @@ class ObsBias : public util::Printable,
   }
 
   void initPredictor(const PredictorParametersWrapper &params);
+
 
   /// bias correction coefficients (nrecords x nprimitivevariables x npredictors)
   Eigen::VectorXd biascoeffs_;
@@ -158,6 +174,14 @@ class ObsBias : public util::Printable,
 
   /// MPI communicator used in time decomposition for 4DEnVar and weak-constraint 4DVar
   const eckit::mpi::Comm & commTime_;
+
+  /// VarBC cold-start settings, and whether the (one-shot) cold start has already run
+  bool coldStartEnabled_;
+  bool coldStartForce_;
+  bool coldStartDone_;
+  std::size_t coldStartBins_;
+  double coldStartHalfWidth_;
+  std::size_t coldStartMinObs_;
 };
 
 // -----------------------------------------------------------------------------

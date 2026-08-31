@@ -87,6 +87,25 @@ class ObsBiasCovarianceParameters : public oops::Parameters {
   oops::OptionalParameter<std::string> outputFile{"output file", this};
 };
 
+/// Options controlling the "cold start" initialization of VarBC coefficients.
+/// The cold start is applied once, during the first evaluation of H(x), before minimization.
+class ObsBiasColdStartParameters : public oops::Parameters {
+  OOPS_CONCRETE_PARAMETERS(ObsBiasColdStartParameters, Parameters)
+
+ public:
+  /// Enable the cold start. Off by default, so existing configurations are unaffected.
+  oops::Parameter<bool> enable{"enable", false, this};
+  /// Cold-start every variable/channel, discarding whatever was read from `input file`.
+  oops::Parameter<bool> force{"force", false, this};
+  /// Number of histogram bins.
+  oops::Parameter<size_t> bins{"histogram bins", 200, this};
+  /// Histogram half-width.
+  oops::Parameter<double> halfWidth{"histogram half width", 10.0, this};
+  /// Minimum number of valid observations required (globally, across all MPI tasks) before a
+  /// channel is cold-started.
+  oops::Parameter<size_t> minimumObsNumber{"minimum obs number", 10, this};
+};
+
 /// Parameters influencing the bias correction process.
 class ObsBiasParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsBiasParameters, Parameters)
@@ -111,6 +130,8 @@ class ObsBiasParameters : public oops::Parameters {
   oops::OptionalParameter<std::string> outputFileInc{"increment output file", this};
   /// Options controlling the covariance matrix.
   oops::OptionalParameter<ObsBiasCovarianceParameters> covariance{"covariance", this};
+  /// Options controlling the cold-start initialization of coefficients that have no prior value.
+  oops::Parameter<ObsBiasColdStartParameters> coldStart{"cold start", {}, this};
 };
 
 }  // namespace ufo

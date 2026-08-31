@@ -445,7 +445,8 @@ void testFilters(size_t obsSpaceIndex, ioda::ObsSpace &obspace,
 ///   read GeoVaLs, compute H(x) and ObsDiags
     oops::Log::info() << "ObsOperator section specified, computing HofX" << std::endl;
     ufo::ObsOperator hop(obspace, params.obsOperator.value()->toConfiguration());
-    const ufo::ObsBias ybias(obspace, params.obsBias.value().toConfiguration());
+    // Non-const: simulateObs may cold-start VarBC coefficients that have no prior value.
+    ufo::ObsBias ybias(obspace, params.obsBias.value().toConfiguration());
     ioda::ObsVector hofx(obspace);
     oops::Variables vars = hop.requiredVars();
     oops::Variables reducedVars = filters.requiredVars();

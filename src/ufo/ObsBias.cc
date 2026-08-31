@@ -10,12 +10,18 @@
 
 #include <Eigen/Dense>
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include "eckit/config/Configuration.h"
 
+#include "ioda/distribution/Accumulator.h"
 #include "ioda/distribution/Distribution.h"
 #include "ioda/Engines/EngineUtils.h"
 #include "ioda/Engines/HH.h"
@@ -28,6 +34,9 @@
 #include "oops/mpi/mpi.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
+
+#include "ioda/ObsVector.h"
 
 #include "ufo/ObsBiasIncrement.h"
 #include "ufo/utils/IodaGroupIndices.h"
@@ -35,17 +44,105 @@
 
 namespace ufo {
 
+namespace {
+
+/// \brief Mode of the histogram of uncorrected departures `y - H(x)`, per (record, variable).
+///
+/// The numerical core of the VarBC cold start, following step [1] of WRFDA's
+/// `da_varbc_coldstart`. Only entries flagged in \p wanted are accumulated.
+std::vector<double> departureModes(const ioda::ObsSpace & odb, const ioda::ObsVector & hofx,
+                                   const ioda::ObsDataVector<int> & qcFlags,
+                                   const std::vector<bool> & wanted, const size_t nrecs,
+                                   const size_t nbins, const double halfWidth,
+                                   const size_t minObs, const eckit::mpi::Comm & commTime) {
+  const std::vector<std::string> varnames = odb.assimvariables().variables();
+  const size_t nvars = varnames.size();
+  const size_t nlocs = odb.nlocs();
+  const double missing = util::missingValue<double>();
+  ASSERT(nbins > 0 && halfWidth > 0.0);
+  const double binWidth = 2.0 * halfWidth / static_cast<double>(nbins);
+
+  // Histogram only the wanted entries, so a hyperspectral sounder with a few new channels does
+  // not allocate a histogram per channel.
+  std::vector<int> slot(wanted.size(), -1);
+  size_t ncold = 0;
+  for (size_t je = 0; je < wanted.size(); ++je)
+    if (wanted[je]) slot[je] = static_cast<int>(ncold++);
+
+  std::vector<double> modes(wanted.size(), missing);
+  if (ncold == 0) return modes;
+
+  // The Accumulator avoids double-counting observations duplicated across MPI tasks.
+  auto hist = odb.distribution()->createAccumulator<std::size_t>(ncold * nbins);
+  auto count = odb.distribution()->createAccumulator<std::size_t>(ncold);
+  const std::vector<std::size_t> recnums = odb.recidx_all_recnums();
+
+  std::vector<double> obsValues(nlocs);
+  for (size_t jvar = 0; jvar < nvars; ++jvar) {
+    odb.get_db("ObsValue", varnames[jvar], obsValues);
+    for (size_t jloc = 0; jloc < nlocs; ++jloc) {
+      if (qcFlags[jvar][jloc] != 0) continue;
+      const double obs = obsValues[jloc];
+      const double sim = hofx[jloc * nvars + jvar];
+      if (obs == missing || sim == missing) continue;
+
+      size_t jrec = 0;
+      if (nrecs > 1)
+        jrec = std::find(recnums.begin(), recnums.end(), odb.recnum()[jloc]) - recnums.begin();
+      const int icold = slot[jrec * nvars + jvar];
+      if (icold < 0) continue;
+
+      const std::int64_t ibin = std::llround((obs - sim + halfWidth) / binWidth);
+      if (ibin <= 0 || ibin > static_cast<std::int64_t>(nbins)) continue;
+      hist->addTerm(jloc, icold * nbins + (ibin - 1), 1);
+      count->addTerm(jloc, icold, 1);
+    }
+  }
+
+  std::vector<std::size_t> h = hist->computeResult();
+  std::vector<std::size_t> n = count->computeResult();
+  commTime.allReduceInPlace(h.begin(), h.end(), eckit::mpi::sum());   // 4D sub-windows
+  commTime.allReduceInPlace(n.begin(), n.end(), eckit::mpi::sum());
+
+  for (size_t je = 0; je < wanted.size(); ++je) {
+    const int icold = slot[je];
+    if (icold < 0) continue;
+    if (n[icold] < minObs) {
+      // Leave the coefficients alone rather than wiping them: under `force` that keeps the
+      // previous cycle's values, which beats falling back to zero.
+      oops::Log::info() << "ObsBias: cold start skipped for " << varnames[je % nvars] << " ("
+                        << n[icold] << " valid departures, minimum is " << minObs
+                        << "); coefficients left unchanged" << std::endl;
+      continue;
+    }
+    const auto first = h.begin() + icold * nbins;
+    const auto peak = std::max_element(first, first + nbins);
+    if (*peak == 0) continue;
+    modes[je] = static_cast<double>(peak - first + 1) * binWidth - halfWidth;
+  }
+  return modes;
+}
+
+}  // namespace
+
 // -----------------------------------------------------------------------------
 
 ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
   : numStaticPredictors_(0), numVariablePredictors_(0), byRecord_(),
     vars_(odb.assimvariables()), rank_(odb.distribution()->rank()),
-    comm_(odb.comm()), commTime_(odb.commTime()) {
+    comm_(odb.comm()), commTime_(odb.commTime()),
+    coldStartDone_(false) {
   oops::Log::trace() << "ObsBias::create starting." << std::endl;
 
   ObsBiasParameters params;
   params.validateAndDeserialize(config);
   byRecord_ = params.BiasCorrectionByRecord;
+  const ObsBiasColdStartParameters & csParams = params.coldStart.value();
+  coldStartEnabled_ = csParams.enable.value();
+  coldStartForce_ = csParams.force.value();
+  coldStartBins_ = csParams.bins.value();
+  coldStartHalfWidth_ = csParams.halfWidth.value();
+  coldStartMinObs_ = csParams.minimumObsNumber.value();
 
   // Predictor factory
   for (const PredictorParametersWrapper &wrapper :
@@ -63,6 +160,15 @@ ObsBias::ObsBias(ioda::ObsSpace & odb, const eckit::Configuration & config)
   if (byRecord_ && odb.obs_group_vars().size() == 0) {
     throw eckit::BadParameter("ObsBiasParameters: BiasCorrectionByRecord is turned on, "
                               "but the observations are not grouped into records.");
+  }
+  if (byRecord_ && coldStartEnabled_) {
+    // The cold start reduces its histograms over all MPI tasks, but with by-record bias
+    // correction each task owns a different, non-overlapping set of records (see the comment in
+    // ObsBiasCovariance::linearize). The per-task record count would then size the reduction
+    // buffers differently on each rank, so the combination is rejected rather than left to
+    // deadlock or return nonsense.
+    throw eckit::BadParameter("ObsBiasParameters: 'cold start' is not supported together with "
+                              "'bc by record'.");
   }
   ASSERT(nrecs_ > 0);
 
@@ -126,7 +232,13 @@ ObsBias::ObsBias(const ObsBias & other, const bool copy)
     nrecs_(other.nrecs_),
     vars_(other.vars_), varIndexNoBC_(other.varIndexNoBC_),
     geovars_(other.geovars_), hdiags_(other.hdiags_), rank_(other.rank_),
-    comm_(other.comm_), commTime_(other.commTime_) {
+    comm_(other.comm_), commTime_(other.commTime_),
+    coldStartEnabled_(other.coldStartEnabled_),
+    coldStartForce_(other.coldStartForce_),
+    coldStartDone_(other.coldStartDone_),
+    coldStartBins_(other.coldStartBins_),
+    coldStartHalfWidth_(other.coldStartHalfWidth_),
+    coldStartMinObs_(other.coldStartMinObs_) {
   oops::Log::trace() << "ObsBias::copy ctor starting." << std::endl;
 
   // Initialize the biascoeffs
@@ -163,6 +275,12 @@ ObsBias & ObsBias::operator=(const ObsBias & rhs) {
     geovars_    = rhs.geovars_;
     hdiags_     = rhs.hdiags_;
     rank_       = rhs.rank_;
+    coldStartEnabled_    = rhs.coldStartEnabled_;
+    coldStartForce_      = rhs.coldStartForce_;
+    coldStartDone_       = rhs.coldStartDone_;
+    coldStartBins_       = rhs.coldStartBins_;
+    coldStartHalfWidth_  = rhs.coldStartHalfWidth_;
+    coldStartMinObs_     = rhs.coldStartMinObs_;
   }
   return *this;
 }
@@ -222,13 +340,29 @@ void ObsBias::read(const eckit::Configuration & config) {
     // Find indices of variables/channels that we need in the data read from the file
     // Don't throw an exception if the variable is not in the file if it does not need to be
     // bias-corrected.
-    bool throwexception = (varIndexNoBC_.size() == 0) ? true : false;
+    // A variable or channel that is absent from the input file is normally a fatal error. Two
+    // cases are tolerated. It may be explicitly excluded from bias correction via
+    // `variables without bc`; or a cold start may be enabled, in which case the variable simply
+    // has no prior value yet -- the usual situation when a channel is added to an experiment that
+    // is already cycling. Its coefficients are left at zero below, and
+    // flagEntriesNeedingColdStart() then seeds them from the first-guess departures. Channels
+    // that *are* present in the file still load normally, so a genuinely broken file is not
+    // masked: only the missing entries are cold-started, and each one is logged.
+    const bool tolerateMissingVars = (varIndexNoBC_.size() > 0) || coldStartEnabled_;
     const std::vector<int> var_idx = getRequiredVarOrChannelIndices(obsgroup, vars_,
-                                                                    throwexception);
+                                                                    !tolerateMissingVars);
     // sanity check
+    const std::vector<std::string> varnames = vars_.variables();
     for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
       if (var_idx[jvar] == -1) {
-        ASSERT(std::find(varIndexNoBC_.begin(), varIndexNoBC_.end(), jvar) != varIndexNoBC_.end());
+        const bool excludedFromBC =
+            std::find(varIndexNoBC_.begin(), varIndexNoBC_.end(), jvar) != varIndexNoBC_.end();
+        ASSERT(excludedFromBC || coldStartEnabled_);
+        if (!excludedFromBC) {
+          oops::Log::info() << "ObsBias: " << varnames[jvar] << " has no entry in the input file; "
+                            << "it will be cold-started from the first-guess departures."
+                            << std::endl;
+        }
       }
     }
     // Find indices of predictors that we need in the data read from the file
@@ -273,6 +407,65 @@ void ObsBias::read(const eckit::Configuration & config) {
 }
 
 // -----------------------------------------------------------------------------
+
+void ObsBias::coldStart(const ioda::ObsSpace & odb, const ioda::ObsVector & hofx,
+                        const ioda::ObsDataVector<int> & qcFlags) {
+  if (!coldStartEnabled_ || coldStartDone_) return;
+
+  // Only the constant term is ever cold-started.
+  const auto constant = std::find(prednames_.begin() + numStaticPredictors_, prednames_.end(),
+                                  "constant");
+  if (constant == prednames_.end()) {
+    oops::Log::warning() << "ObsBias: cold start requested, but 'constant' is not among the "
+                         << "variational bias predictors; ignoring." << std::endl;
+    return;
+  }
+  const size_t jconst = constant - (prednames_.begin() + numStaticPredictors_);
+
+  // A (record, variable) is cold-started when read() left all of its coefficients at zero: no
+  // input file, or no entry for it in the file.
+  // `force` bypasses the test and re-derives everything.
+  const size_t nvars = vars_.size();
+  std::vector<bool> wanted(nrecs_ * nvars, false);
+  size_t ncold = 0;
+  for (size_t je = 0; je < wanted.size(); ++je) {
+    const size_t jrec = je / nvars, jvar = je % nvars;
+    if (std::find(varIndexNoBC_.begin(), varIndexNoBC_.end(), jvar) != varIndexNoBC_.end())
+      continue;   // excluded from bias correction altogether
+    bool allZero = true;
+    for (size_t jp = 0; jp < numVariablePredictors_ && allZero; ++jp)
+      allZero = (biascoeffs_[index(jrec, jvar, jp)] == 0.0);
+    if (coldStartForce_ || allZero) {
+      wanted[je] = true;
+      ++ncold;
+    }
+  }
+  if (ncold == 0) return;
+  oops::Log::info() << "ObsBias: VarBC cold start for " << ncold << " of " << nrecs_ * nvars
+                    << " (record, variable) pairs." << std::endl;
+
+  const std::vector<double> modes = departureModes(odb, hofx, qcFlags, wanted, nrecs_,
+                                                   coldStartBins_, coldStartHalfWidth_,
+                                                   coldStartMinObs_, commTime_);
+
+  const double missing = util::missingValue<double>();
+  const std::vector<std::string> varnames = vars_.variables();
+  for (size_t jrec = 0; jrec < nrecs_; ++jrec) {
+    for (size_t jvar = 0; jvar < nvars; ++jvar) {
+      const double mode = modes[jrec * nvars + jvar];
+      if (mode == missing) continue;   // not wanted, or too few departures (logged already)
+      for (size_t jp = 0; jp < numVariablePredictors_; ++jp)
+        biascoeffs_[index(jrec, jvar, jp)] = 0.0;
+      biascoeffs_[index(jrec, jvar, jconst)] = mode;
+      oops::Log::info() << "ObsBias: cold-starting " << varnames[jvar] << " --> " << mode
+                        << std::endl;
+    }
+  }
+  coldStartDone_ = true;
+}
+
+// -----------------------------------------------------------------------------
+
 
 void ObsBias::write(const eckit::Configuration & config) const {
   oops::Log::trace() << "ObsBias::write start" << std::endl;

@@ -50,7 +50,7 @@ class ObsOperator : public util::Printable,
   ObsOperator(ioda::ObsSpace &, const eckit::Configuration &);
 
 /// Obs Operator
-  void simulateObs(const GeoVaLs &, ioda::ObsVector &, const ObsBias &,
+  void simulateObs(const GeoVaLs &, ioda::ObsVector &, ObsBias &,
                    const QCFlags_t &, ioda::ObsVector &, ObsDiagnostics &) const;
 /// Operator input required from Model
   const oops::Variables & requiredVars() const;

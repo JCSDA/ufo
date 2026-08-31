@@ -158,6 +158,27 @@ ufo_add_test( NAME    aircraft_bc_mpi
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+# VarBC cold start: the UFO equivalent of WRFDA's da_varbc_coldstart. Run on 1 and 2 MPI tasks to
+# confirm that the histogram reduction gives the same coefficients regardless of decomposition.
+if( crtm_FOUND )
+    ufo_add_test( NAME    bias_coldstart
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coldstart.yaml"
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+    ufo_add_test( NAME    bias_coldstart_mpi
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/bias_coldstart.yaml"
+                  MPI     2
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+endif( crtm_FOUND )
+#
 ufo_add_test( NAME    bias_single_channel
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x

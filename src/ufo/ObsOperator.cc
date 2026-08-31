@@ -51,12 +51,13 @@ ObsOperator::ObsOperator(ioda::ObsSpace & os, const eckit::Configuration & confi
 
 // -----------------------------------------------------------------------------
 void ObsOperator::simulateObs(const GeoVaLs & gvals, ioda::ObsVector & yy,
-                              const ObsBias & biascoeff, const QCFlags_t & qc_flags,
+                              ObsBias & biascoeff, const QCFlags_t & qc_flags,
                               ioda::ObsVector & ybias, ObsDiagnostics & ydiags) const
 {
   ScopedDefaultGeoVaLFormatChange change(gvals, GeoVaLFormat::SAMPLED);
   oper_->simulateObs(gvals, yy, ydiags, qc_flags);
   if (biascoeff) {
+    biascoeff.coldStart(odb_, yy, qc_flags);
     ObsBiasOperator biasoper(odb_);
     biasoper.computeObsBias(gvals, ybias, biascoeff, ydiags, qc_flags);
     // update H(x) with bias correction

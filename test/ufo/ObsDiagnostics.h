@@ -92,7 +92,8 @@ void testObsDiagnostics() {
   ObsOperator hop(ospace, params.obsOperator);
 
   // initialize bias correction
-  const ObsBias ybias(ospace, params.obsBias);
+  // Non-const: simulateObs may cold-start VarBC coefficients that have no prior value.
+  ObsBias ybias(ospace, params.obsBias);
 
   // initialize geovals
   oops::Variables hopvars = hop.requiredVars();
