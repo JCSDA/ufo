@@ -7,20 +7,24 @@
 
 #include "ufo/superob/SuperObMeanOmB.h"
 
+#include <optional>
+#include <cassert>
+
 namespace ufo {
 
 static SuperObMaker<SuperObMeanOmB> makerSuperObMeanOmB_("mean OmB");
 
-SuperObMeanOmB::SuperObMeanOmB(const GenericSuperObParameters & params,
+SuperObMeanOmB::SuperObMeanOmB(const Parameters_ & params,
                                const ObsFilterData & obsdb,
                                const std::vector<bool> & apply,
                                const Variables & filtervars,
                                const ioda::ObsDataVector<int> & flags,
                                std::vector<std::vector<bool>> & flagged)
-  : SuperObBase(params, obsdb, apply, filtervars, flags, flagged)
+  : SuperObBase(params, obsdb, apply, filtervars, flags, flagged),
+    params_(params)
 {}
 
-void SuperObMeanOmB::computeSuperOb(const std::vector<std::size_t> & locs,
+bool SuperObMeanOmB::computeSuperOb(const std::vector<std::size_t> & locs,
                                     const std::vector<float> & obs,
                                     const std::vector<float> & hofx,
                                     const ioda::ObsDataRow<int> & flags,
@@ -28,12 +32,25 @@ void SuperObMeanOmB::computeSuperOb(const std::vector<std::size_t> & locs,
                                     std::vector<bool> & flagged) const {
   const float missing = util::missingValue<float>();
 
-  float meanInnovation = 0.0f;
-  int count = 0;
-  // The superob location is set to the first valid entry in the record.
-  int superobloc = -1;
+  const bool assignToAllValues = params_.assignToAllValues.value();
 
-  for (std::size_t jloc : locs) {
+  // Deduplicate locations if grouping values are provided
+  const std::vector<std::size_t> &locsForComputation =
+      params_.groupingVariable.value()
+          ? getUniqueLocations(locs, *params_.groupingVariable.value(), obs,
+                               flags)
+          : locs;
+
+  bool superObComputed = false;
+  if (locsForComputation.empty()) return superObComputed;
+
+  float meanInnovation = 0.0f;
+  size_t count = 0;
+  // Set on first valid contributing location; optional avoids implying a
+  // default location.
+  std::optional<size_t> superobloc;
+
+  for (std::size_t jloc : locsForComputation) {
     const float obsValue = obs[jloc];
     const float hofxValue = hofx[jloc];
     // Only consider locations which have valid observation and background values
@@ -46,16 +63,19 @@ void SuperObMeanOmB::computeSuperOb(const std::vector<std::size_t> & locs,
     }
     meanInnovation += obsValue - hofxValue;
     count++;
-    if (superobloc < 0) {
+    if (!superObComputed) {
+      superObComputed = true;
       superobloc = jloc;
     }
   }
-  if (count > 0) {
-    meanInnovation /= count;
-    superobs[superobloc] = hofx[superobloc] + meanInnovation;
-    // The superob location is not flagged.
-    flagged[superobloc] = false;
+  if (superObComputed) {
+    meanInnovation /= static_cast<float>(count);
+    assert(superobloc.has_value());
+    const float superobValue = hofx[*superobloc] + meanInnovation;
+    assignSuperObToLocations(locs, superobValue, *superobloc, assignToAllValues,
+                             superobs, flagged);
   }
+  return superObComputed;
 }
 
 }  // namespace ufo

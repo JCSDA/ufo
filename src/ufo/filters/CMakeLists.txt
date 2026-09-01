@@ -133,6 +133,7 @@ set ( filters_files
       PercentileParameters.h
       SuperOb.h
       SuperOb.cc
+      SuperObParameters.h
       SuperRefractionCheckImpactParameter.h
       SuperRefractionCheckImpactParameter.cc
       SuperRefractionCheckNBAM.h

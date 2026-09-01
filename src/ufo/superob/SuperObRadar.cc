@@ -65,7 +65,7 @@ SuperObRadar::SuperObRadar(const Parameters_ & params,
   oops::Log::trace() << "SuperObRadar constructor finished" << std::endl;
 }
 
-void SuperObRadar::computeSuperOb(const std::vector<std::size_t> & locs,
+bool SuperObRadar::computeSuperOb(const std::vector<std::size_t> & locs,
                                   const std::vector<float> & obs,
                                   const std::vector<float> & hofx,
                                   const ioda::ObsDataRow<int> & flags,
@@ -74,6 +74,7 @@ void SuperObRadar::computeSuperOb(const std::vector<std::size_t> & locs,
   oops::Log::trace() << "SuperObRadar::computeSuperOb" << std::endl;
 
   const float missing = util::missingValue<float>();
+  bool superObComputed = false;
 
   // Obtain metadata associated with this scan (ObsSpace record).
   // All metadata values are the same, so can just take the first location in the scan
@@ -201,6 +202,7 @@ void SuperObRadar::computeSuperOb(const std::vector<std::size_t> & locs,
         ufo::sumIntegralImagePatch(hofxArray, i, j, istep, jstep) / numObsInSuperObRegion;
       const double meanInnov = meanObs - meanHofX;
       superobs[locSuperob] = hofx[locSuperob] + meanInnov;
+      superObComputed = true;
 
       // This location is un-flagged.
       flagged[locSuperob] = false;
@@ -221,6 +223,7 @@ void SuperObRadar::computeSuperOb(const std::vector<std::size_t> & locs,
     }
   }
   oops::Log::trace() << "SuperObRadar::computeSuperOb finished" << std::endl;
+  return superObComputed;
 }
 
 void SuperObRadar::saveAuxiliaryVariables(const std::string & variableName) const {

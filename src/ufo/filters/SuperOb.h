@@ -1,8 +1,8 @@
 /*
  * (C) Crown Copyright 2024 Met Office
- * 
+ *
  * This software is licensed under the terms of the Apache Licence Version 2.0
- * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
 #ifndef UFO_FILTERS_SUPEROB_H_
@@ -28,23 +28,6 @@ namespace ioda {
 }
 
 namespace ufo {
-
-class SuperObParametersWrapper : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(SuperObParametersWrapper, oops::Parameters)
- public:
-  /// Name of the superobbing algorithm.
-  /// Valid names are specified using a `SuperObMaker` in subclasses of SuperObBase in the
-  /// ufo/superob directory.
-  oops::RequiredPolymorphicParameter<SuperObParametersBase, SuperObFactory>
-    superObName{"name", this};
-};
-
-class SuperObParameters : public FilterParametersBase {
-  OOPS_CONCRETE_PARAMETERS(SuperObParameters, FilterParametersBase)
- public:
-  /// Parameter that contains details of the algorithm to use.
-  oops::RequiredParameter<SuperObParametersWrapper> algorithmParameters{"algorithm", this};
-};
 
 /// \brief Compute superobs using a specified algorithm.
 ///

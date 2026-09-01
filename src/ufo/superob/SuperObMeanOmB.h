@@ -26,7 +26,9 @@ namespace ufo {
 /// with a passing QC flag.
 class SuperObMeanOmB : public SuperObBase {
  public:
-  explicit SuperObMeanOmB(const GenericSuperObParameters &,
+  using Parameters_ = GenericSuperObParameters;
+
+  explicit SuperObMeanOmB(const Parameters_ &,
                           const ObsFilterData &,
                           const std::vector<bool> &,
                           const Variables &,
@@ -35,13 +37,16 @@ class SuperObMeanOmB : public SuperObBase {
   ~SuperObMeanOmB() {}
 
  private:
-  /// Compute superobs for each record.
-  void computeSuperOb(const std::vector<std::size_t> &,
+  /// Compute superobs for each record. Returns `true` if a
+  /// superob was successfully computed for the record, `false` otherwise.
+  bool computeSuperOb(const std::vector<std::size_t> &,
                       const std::vector<float> &,
                       const std::vector<float> &,
                       const ioda::ObsDataRow<int> &,
                       std::vector<float> &,
                       std::vector<bool> &) const override;
+
+  const Parameters_ & params_;
 };
 
 }  // namespace ufo

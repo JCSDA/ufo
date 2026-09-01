@@ -22,11 +22,16 @@
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 #include "oops/util/parameters/HasParameters_.h"
+#include "oops/util/parameters/OptionalParameter.h"
+#include "oops/util/parameters/Parameters.h"
 #include "oops/util/parameters/RequiredParameter.h"
+#include "ufo/filters/FilterParametersBase.h"
 
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/QCflags.h"
+#include "ufo/filters/SuperObParameters.h"
 #include "ufo/filters/Variables.h"
+
 
 namespace ufo {
 
@@ -41,8 +46,38 @@ class SuperObParametersBase : public oops::Parameters {
 };
 
 /// \brief Concrete class containing the options specified by the SuperObParametersBase.
+/// This can be overwritten by specific superob algorithms if these options are not
+/// appropriate.
 class GenericSuperObParameters : public SuperObParametersBase {
   OOPS_CONCRETE_PARAMETERS(GenericSuperObParameters, SuperObParametersBase)
+ public:
+  /// If true, the superob value is assigned to all values in the record and
+  /// no rejection is performed
+  oops::Parameter<bool> assignToAllValues{"assign to all values in record", false, this};
+
+  /// Optional variable used to group duplicate observations within each record.
+  /// When specified, locations within a record that share the same value in this
+  /// variable are treated as duplicates, and only one representative location from
+  /// each unique value is used in the superob calculation (but not assignment).
+  /// For example, if the variable contains [0, 0, 0, 1, 1] for observation values
+  /// [0.1, 0.1, 0.1, 0.2, 0.2], the superob is computed using the deduplicated set
+  /// [0.1, 0.2], but if "assign to all values in record" is true, all 5 observations
+  /// receive the computed superob value. NOTE: if grouped values are not identical
+  /// or have differing QC flags within a group, an exception is thrown.
+  oops::OptionalParameter<Variable> groupingVariable{
+      "grouping variable", this};
+};
+
+/// \brief Validated and parsed SuperOb parameters.
+/// Encapsulates the parsed and validated parameters that will be used throughout
+/// the superobbing routine.
+struct ValidatedSuperObParameters {
+  std::vector<bool> setValuesOutsideWhereClauseToMissing;
+  std::vector<bool> incrementIfNonMissing;
+  Variables variablesToIncrement;
+  std::vector<int> incrementValues;
+  std::vector<bool> incrementWholeRecord;
+  std::vector<bool> incrementWholeRecordRespectsWhere;
 };
 
 /// \brief SuperOb base class.
@@ -64,14 +99,15 @@ class SuperObBase {
   virtual ~SuperObBase() {}
 
   /// Run the chosen superobbing algorithm on each record in the data set.
-  void runAlgorithm() const;
+  void runAlgorithm(const SuperObParameters &) const;
 
   /// Specifies whether the chosen superobbing algorithm requires H(x).
   virtual bool requireHofX() const {return true;}
 
  protected:
-  /// Compute superob values and errors for each record.
-  virtual void computeSuperOb(const std::vector<std::size_t> &,
+  /// Compute superob values and errors for each record. Returns `true` if a
+  /// superob was successfully computed for the record, `false` otherwise.
+  virtual bool computeSuperOb(const std::vector<std::size_t> &,
                               const std::vector<float> &,
                               const std::vector<float> &,
                               const ioda::ObsDataRow<int> &,
@@ -83,10 +119,49 @@ class SuperObBase {
   /// The parameter `variableName` is the name of the filter variable.
   virtual void saveAuxiliaryVariables(const std::string & variableName) const {}
 
+  /// Helper methods to deduplicate locations based on grouping variable values.
+  /// Returns a vector of locations containing only the first occurrence of each
+  /// unique grouping value.
+  std::vector<std::size_t> getUniqueLocations(
+      const std::vector<std::size_t>& locs,
+      const Variable& groupingVariable,
+      const std::vector<float>& obs,
+      const ioda::ObsDataRow<int>& flags) const;
+  /// Deduplicate locs by groupingValues, returning the index of each
+  /// unique groupingValue's representative location. For example, given
+  /// locs [0, 1, 2, 3] with groupingValues [A, A, B, B], the result
+  /// would be [0, 2] (one loc per distinct groupingValue). For duplicate
+  /// members of a group, the values in obs and flags must match;
+  /// otherwise an exception is thrown.
+  template<typename T>
+  std::vector<std::size_t> deduplicateLocations(
+      const std::vector<std::size_t>& locs,
+      const Variable& groupingValues,
+      const std::vector<float>& obs,
+      const ioda::ObsDataRow<int>& flags) const;
+
+  /// Helper method to assign superob value to locations in a record.
+  /// If assignToAll is true, assigns to all locations and unflags them all.
+  /// Otherwise, assigns only to superobloc then flags and sets all other
+  /// locations to missing.
+  void assignSuperObToLocations(const std::vector<std::size_t> &locs,
+                                const float superobValue,
+                                const std::size_t superobloc,
+                                const bool assignToAll,
+                                std::vector<float> &superobs,
+                                std::vector<bool> &flagged) const;
+
   const ObsFilterData & data_;
   ioda::ObsSpace & obsdb_;
 
  private:
+  /// Validate and parse SuperOb parameters into a single struct.
+  /// Performs all parameter consistency checks, applies defaults, and validates
+  /// constraints that depend on both parameters and data (e.g., variable existence).
+  /// Throws eckit::BadParameter if validation fails.
+  ValidatedSuperObParameters validateAndParseParameters(
+      const SuperObParameters & params) const;
+
   const std::vector<bool> apply_;
   const Variables & filtervars_;
   const ioda::ObsDataVector<int> & flags_;

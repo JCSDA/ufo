@@ -39,7 +39,8 @@ observations:
 
 # Superobbing performed on two filter variables using the `mean OmB` algorithm,
 # selecting locations using the `where` statement.
-# The same number of observations pass, but the superob values change.
+# More observations pass (those outside the where clause pass), and the superob
+# values change.
 - obs space:
     name: Sonde
     obsdatain:
@@ -63,7 +64,7 @@ observations:
       name: mean OmB
     action:
       name: reject
-  passedBenchmark: 4
+  passedBenchmark: 8
   compareVariables:
   - reference:
       name: TestReference/where_airTemperature
@@ -168,3 +169,567 @@ observations:
     action:
       name: reject
   expectExceptionWithMessage: group variables configuration is empty
+
+- obs space:
+    name: SuperOb Advanced Tests 1
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_advanced_test_file.nc4
+      obsgrouping:
+        group variables: [stationIdentification]
+    simulated variables: []
+    observed variables:
+      [
+        airTemperature,
+        airTemperature_missing_station_0,
+        airTemperature_with_one_missing,
+        airTemperature_grouped,
+        windDirection,
+        windDirectionRadians
+      ]
+    derived variables:
+      [
+        airTemperature_mean_at_location,
+        airTemperature_mean_3am_to_11am_at_location,
+        dateTime_mean_at_location,
+        airTemperature_mean_at_location_single_assignment,
+        airTemperature_mean_3am_to_11am_at_location_copy,
+        airTemperature_missing_station_0_mean_at_location,
+        airTemperature_missing_station_0_mean_at_location_twice,
+        airTemperature_mean_at_location_one_missing,
+        airTemperature_range_at_location,
+        dateTime_range_at_location,
+        airTemperature_count_at_location,
+        airTemperature_missing_station_0_count_at_location,
+        airTemperature_max_at_location,
+        airTemperature_max_at_location_single_assignment,
+        dateTime_with_epoch_max_at_location,
+        airTemperature_mean_at_location_grouped,
+        airTemperature_mean_3am_to_11am_at_location_initially_ones,
+        dateTime_mean_at_location_as_float
+      ]
+  obs filters:
+
+  # (A) test with "assign to all values in record: true"
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_mean_at_location
+      type: float
+      source variable: ObsValue/airTemperature
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_at_location
+    algorithm:
+      name: mean obs
+      assign to all values in record: true # Default is false
+
+  # (B) Test with dateTime in where clause - places outside the where will be
+  # missing.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location
+      type: float
+      source variable: ObsValue/airTemperature
+
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+    where:
+    - variable:
+        name: MetaData/dateTime
+      minvalue: "****-**-**T03:00:00Z"
+      maxvalue: "****-**-**T11:00:00Z"
+
+  # (C) Test true dateTime averaging.
+  # dateTime has to be in the list of derived variables for it to work
+  # as a filter variable.
+  # TODO(ufo#4319): SuperObBase reads every filter variable into a
+  # std::vector<float> (32-bit) regardless of its declared dtype. For
+  # DateTime variables holding realistic (post-1970) epoch values
+  # (~1.5e9 seconds), this causes float32 quantization of the summed/
+  # averaged value - see linked issue for details. Separately, the test
+  # harness's compareVariables dispatch (ufo/test/ufo/ObsFilters.h) only
+  # honours absTol/relTol when the *reference* variable's dtype is Float;
+  # for DateTime (and other) dtypes it always does exact equality. So we
+  # can't directly compare DerivedObsValue/dateTime_mean_at_location (a
+  # DateTime) with a tolerance - instead we convert it to a small,
+  # epoch-relative float afterwards (lossless, since the shifted magnitude
+  # is well within float32's exact-integer range) purely so the comparison
+  # can go through the Float/absTol path below. This still exercises the
+  # genuine DateTime Variable Assignment and SuperOb "mean obs" dispatch
+  # on ioda::ObsDtype::DateTime end-to-end.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/dateTime_mean_at_location
+      type: datetime
+      source variable: MetaData/dateTime
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/dateTime_mean_at_location
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/dateTime_mean_at_location_as_float
+      type: float
+      source variable: DerivedObsValue/dateTime_mean_at_location
+      epoch: "2018-04-14T00:00:00Z" # Just before first hour
+
+  # (D)
+  # Test variable incrementing - where all values covered by the where clause
+  # are non-missing for a given record (stationIdentification here) this variable
+  # will be incremented by 1 for that record.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/airTemperature_mean_at_location_non_missing_averages
+      type: int
+      value: 0
+    - name: DerivedObsValue/airTemperature_mean_at_location_single_assignment
+      type: float
+      source variable: ObsValue/airTemperature
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_at_location_single_assignment
+    algorithm:
+      name: mean obs
+      # assign to all values in record: true
+      # note that "assign to all values in record" is left as default false here
+    increment if non-missing: [true] # Default is false
+    variables to increment: [MetaData/airTemperature_mean_at_location_non_missing_averages]
+    increment values: [1]
+    increment whole record: [true]
+  # MetaData/airTemperature_mean_at_location_non_missing_averages should be all
+  # ones since there are no missing values for airTemperature in the input file.
+
+  # (D2)
+  # Test "increment whole record respects where: false". This reuses the same
+  # restrictive where clause as (B) (which selects only a subset of locations
+  # per record) but sets "increment whole record respects where" to false, so
+  # the increment should still be applied to every location in the record,
+  # ignoring the where clause. The expected result is therefore identical to
+  # (D) (all ones), since every record has at least one non-missing value in
+  # the where-selected window (proven by (B) passing) and there are no missing
+  # values for airTemperature - so the golden reference from (D) is reused here.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/airTemperature_mean_at_location_non_missing_averages_respects_where_false
+      type: int
+      value: 0
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location_copy # Recreate to isolate test from (B)
+      type: float
+      source variable: ObsValue/airTemperature
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location_copy
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+    where:
+    - variable:
+        name: MetaData/dateTime
+      minvalue: "****-**-**T03:00:00Z"
+      maxvalue: "****-**-**T11:00:00Z"
+    increment if non-missing: [true]
+    variables to increment: [MetaData/airTemperature_mean_at_location_non_missing_averages_respects_where_false]
+    increment values: [1]
+    increment whole record: [true]
+    increment whole record respects where: [false]
+
+  # (E)
+  # Test variable incrementing 2 - all values missing for station_0. The output
+  # should have missing values for that station, and the increment variable should
+  # remain zero for that station.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/airTemperature_missing_station_0_mean_at_location_non_missing_averages
+      type: int
+      value: 0
+    - name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location
+      type: float
+      source variable: ObsValue/airTemperature_missing_station_0
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+    increment if non-missing: [true]
+    variables to increment: [MetaData/airTemperature_missing_station_0_mean_at_location_non_missing_averages]
+    increment values: [1]
+
+  # (F)
+  # Now try doing it twice, to check increments accumulate correctly. The output
+  # mean should be the same as (E). For station_0 the increment variable should
+  # still remain zero, since it never has a non-missing value to trigger the
+  # increment. For the other station, which has no missing values, the
+  # increment variable should now be doubled (i.e. all twos).
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/airTemperature_missing_station_0_mean_at_location_twice_non_missing_averages
+      type: int
+      value: 0
+    - name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location_twice
+      type: float
+      source variable: ObsValue/airTemperature_missing_station_0
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location_twice
+    - name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location_twice
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+    increment if non-missing: [true, true]
+    variables to increment: [MetaData/airTemperature_missing_station_0_mean_at_location_twice_non_missing_averages, MetaData/airTemperature_missing_station_0_mean_at_location_twice_non_missing_averages]
+    increment values: [1, 1]
+
+  # (G)
+  # If only one value is missing, the increment variable should still be
+  # incremented (i.e. be all ones) and the missing value ignored in the mean
+  # calculation.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/airTemperature_missing_one_value_mean_at_location_non_missing_averages
+      type: int
+      value: 0
+    - name: DerivedObsValue/airTemperature_mean_at_location_one_missing
+      type: float
+      source variable: ObsValue/airTemperature_with_one_missing
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_at_location_one_missing
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+    increment if non-missing: [true]
+    variables to increment: [MetaData/airTemperature_missing_one_value_mean_at_location_non_missing_averages]
+    increment values: [1]
+
+  # (H)
+  # Check range obs algorithm
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_range_at_location
+      type: float
+      source variable: ObsValue/airTemperature
+    - name: DerivedObsValue/dateTime_range_at_location
+      type: float
+      source variable: MetaData/dateTime
+      epoch: "2018-04-14T00:00:00Z" # Just before first hour
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_range_at_location
+    - name: DerivedObsValue/dateTime_range_at_location
+    algorithm:
+      name: range obs
+      assign to all values in record: true
+
+  # (I)
+  # Check the count obs algorithm - counts non missing values in a record
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_count_at_location
+      type: float
+      source variable: ObsValue/airTemperature
+    - name: DerivedObsValue/airTemperature_missing_station_0_count_at_location
+      type: float
+      source variable: ObsValue/airTemperature_missing_station_0
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_count_at_location
+    - name: DerivedObsValue/airTemperature_missing_station_0_count_at_location
+    algorithm:
+      name: count obs
+      assign to all values in record: true
+
+  # (J)
+  # Check the max obs algorithm
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_max_at_location
+      type: float
+      source variable: ObsValue/airTemperature
+    - name: DerivedObsValue/dateTime_with_epoch_max_at_location
+      type: float
+      source variable: MetaData/dateTime
+      epoch: "2018-04-14T00:00:00Z" # Just before first hour
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_max_at_location
+    - name: DerivedObsValue/dateTime_with_epoch_max_at_location
+    algorithm:
+      name: max obs
+      assign to all values in record: true
+
+  # (J2)
+  # Check max obs with default single-location assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_max_at_location_single_assignment
+      type: float
+      source variable: ObsValue/airTemperature
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_max_at_location_single_assignment
+    algorithm:
+      name: max obs
+
+  # (K)
+  # Check that grouping variable works as expected
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_mean_at_location_grouped
+      type: float
+      source variable: ObsValue/airTemperature_grouped
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_at_location_grouped
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+      grouping variable: MetaData/grouping_values
+
+  # (L)
+  # Check circular mean obs algorithm with wind direction
+  - filter: SuperOb
+    filter variables:
+    - name: ObsValue/windDirectionRadians
+    algorithm:
+      name: circular mean obs
+      assign to all values in record: true
+
+  # (M)
+  # Check circular mean obs algorithm with wind direction in degrees
+  - filter: SuperOb
+    filter variables:
+    - name: windDirection
+    algorithm:
+      name: circular mean obs
+      assign to all values in record: true
+      lower bound: 0.0
+      exclusive upper bound: 360.0
+
+  # (N)
+  # Test that where clause works as expected with false for "set values outside
+  # where clause to missing".
+  # Values outside the where clause should be unchanged (in this case, set to 1
+  # by the Variable Assignment filter) and the superob values should only be
+  # placed at locations within the where clause.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location_initially_ones
+      type: float
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location_initially_ones
+      type: float
+      source variable: ObsValue/airTemperature
+    where:
+    - variable:
+        name: MetaData/dateTime
+      minvalue: "****-**-**T03:00:00Z"
+      maxvalue: "****-**-**T11:00:00Z"
+
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location_initially_ones
+    algorithm:
+      name: mean obs
+      assign to all values in record: true
+    set values outside where clause to missing: [false]
+    where:
+    - variable:
+        name: MetaData/dateTime
+      minvalue: "****-**-**T03:00:00Z"
+      maxvalue: "****-**-**T11:00:00Z"
+
+  compareVariables:
+  # (A)
+  - reference:
+      name: TestReference/airTemperature_mean_at_location
+    test:
+      name: DerivedObsValue/airTemperature_mean_at_location
+    relTol: 1.0e-5
+  # (B)
+  - reference:
+      name: TestReference/airTemperature_mean_3am_to_11am_at_location
+    test:
+      name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location
+    relTol: 1.0e-5
+  # (C)
+  # absTol (not relTol) used deliberately - see TODO note above test case (C)
+  # regarding float32 precision limitations in SuperObBase for DateTime
+  # variables with large absolute epoch values. Compared via the epoch-
+  # relative float conversion since DateTime-typed compareVariables entries
+  # always use exact equality regardless of absTol/relTol (see TODO note).
+  - reference:
+      name: TestReference/dateTime_mean_at_location_as_float
+    test:
+      name: DerivedObsValue/dateTime_mean_at_location_as_float
+    absTol: 1000
+  # (D)
+  - reference:
+      name: TestReference/airTemperature_mean_at_location_non_missing_averages
+    test:
+      name: MetaData/airTemperature_mean_at_location_non_missing_averages
+    relTol: 1.0e-5
+  # (D2)
+  - reference:
+      name: TestReference/airTemperature_mean_at_location_non_missing_averages # same as (D)
+    test:
+      name: MetaData/airTemperature_mean_at_location_non_missing_averages_respects_where_false
+    relTol: 1.0e-5
+  # NOTE: DerivedObsValue/airTemperature_mean_at_location_single_assignment is
+  # not checked here because fixture data are randomly permuted at creation.
+  # mean-obs single-assignment writes to the first qualifying location in record
+  # order, so this order-dependent check is covered by "SuperOb Advanced Tests 2
+  # (ordered fixture)" below.
+  # (E)
+  - reference:
+      name: TestReference/airTemperature_missing_station_0_mean_at_location
+    test:
+      name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/airTemperature_missing_station_0_mean_at_location_non_missing_averages
+    test:
+      name: MetaData/airTemperature_missing_station_0_mean_at_location_non_missing_averages
+  # (F)
+  - reference:
+      name: TestReference/airTemperature_missing_station_0_mean_at_location # same as (E)
+    test:
+      name: DerivedObsValue/airTemperature_missing_station_0_mean_at_location_twice
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/airTemperature_missing_station_0_mean_at_location_twice_non_missing_averages
+    test:
+      name: MetaData/airTemperature_missing_station_0_mean_at_location_twice_non_missing_averages
+    relTol: 1.0e-5
+  # (G)
+  - reference:
+      name: TestReference/airTemperature_mean_at_location_one_missing
+    test:
+      name: DerivedObsValue/airTemperature_mean_at_location_one_missing
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/airTemperature_mean_at_location_one_missing_non_missing_averages # same as (D)
+    test:
+      name: MetaData/airTemperature_missing_one_value_mean_at_location_non_missing_averages
+    relTol: 1.0e-5
+  # (H)
+  - reference:
+      name: TestReference/airTemperature_range_at_location
+    test:
+      name: DerivedObsValue/airTemperature_range_at_location
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/dateTime_range_at_location
+    test:
+      name: DerivedObsValue/dateTime_range_at_location
+    relTol: 1.0e-5
+  # (I)
+  - reference:
+      name: TestReference/airTemperature_count_at_location
+    test:
+      name: DerivedObsValue/airTemperature_count_at_location
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/airTemperature_missing_station_0_count_at_location
+    test:
+      name: DerivedObsValue/airTemperature_missing_station_0_count_at_location
+    relTol: 1.0e-5
+  # (J)
+  - reference:
+      name: TestReference/airTemperature_max_at_location
+    test:
+      name: DerivedObsValue/airTemperature_max_at_location
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/airTemperature_max_at_location_single_assignment
+    test:
+      name: DerivedObsValue/airTemperature_max_at_location_single_assignment
+    relTol: 1.0e-5
+  - reference:
+      name: TestReference/dateTime_with_epoch_max_at_location
+    test:
+      name: DerivedObsValue/dateTime_with_epoch_max_at_location
+    relTol: 1.0e-5
+  # (K)
+  - reference:
+      name: TestReference/airTemperature_mean_at_location_grouped
+    test:
+      name: DerivedObsValue/airTemperature_mean_at_location_grouped
+    relTol: 1.0e-5
+  # (L)
+  - reference:
+      name: TestReference/windDirection_circular_mean_at_location_radians
+    test:
+      name: DerivedObsValue/windDirectionRadians
+    relTol: 1.0e-5
+  # (M)
+  - reference:
+      name: TestReference/windDirection_circular_mean_at_location_degrees
+    test:
+      name: DerivedObsValue/windDirection
+    relTol: 1.0e-5
+  # (N)
+  - reference:
+      name: TestReference/airTemperature_mean_3am_to_11am_at_location_initially_ones
+    test:
+      name: DerivedObsValue/airTemperature_mean_3am_to_11am_at_location_initially_ones
+    relTol: 1.0e-5
+
+- obs space:
+    name: Test using variable to increment with DerivedObsValue group raises exception
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_advanced_test_file.nc4
+      obsgrouping:
+        group variables: [stationIdentification]
+    simulated variables: []
+  obs filters:
+  - filter: SuperOb
+    filter variables:
+    - name: airTemperature
+    algorithm:
+      name: mean obs
+    increment if non-missing: [true]
+    variables to increment: [DerivedObsValue/airTemperature_mean_at_location_non_missing_averages]
+    increment values: [1]
+  expectExceptionWithMessage: Variables to increment cannot be in group ObsValue or DerivedObsValue
+
+- obs space:
+    name: SuperOb Advanced Tests 2 (ordered fixture)
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/superob_advanced_test_file_ordered.nc4
+      obsgrouping:
+        group variables: [stationIdentification]
+    simulated variables: []
+    observed variables: [airTemperature]
+    derived variables: [airTemperature_mean_at_location_single_assignment]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/airTemperature_mean_at_location_single_assignment
+      type: float
+      source variable: ObsValue/airTemperature
+  - filter: SuperOb
+    filter variables:
+    - name: DerivedObsValue/airTemperature_mean_at_location_single_assignment
+    algorithm:
+      name: mean obs
+      # Default single-location assignment (assign to all values in record: false)
+  compareVariables:
+  - reference:
+      name: TestReference/airTemperature_mean_at_location_single_assignment
+    test:
+      name: DerivedObsValue/airTemperature_mean_at_location_single_assignment
+    relTol: 1.0e-5

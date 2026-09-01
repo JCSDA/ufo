@@ -6,12 +6,20 @@
 set ( superob_files
       SuperObBase.cc
       SuperObBase.h
+      SuperObCircularMeanO.h
+      SuperObCircularMeanO.cc
+      SuperObCountO.cc
+      SuperObCountO.h
+      SuperObMaxO.cc
+      SuperObMaxO.h
       SuperObMeanO.cc
       SuperObMeanO.h
       SuperObMeanOmB.cc
       SuperObMeanOmB.h
       SuperObRadar.cc
       SuperObRadar.h
+      SuperObRangeO.cc
+      SuperObRangeO.h
       SuperObRadarTemplate.cc
       SuperObRadarTemplate.h
 )

@@ -19,7 +19,9 @@
 
 namespace ufo {
 
-/// Parameters associated with the SuperObRadar class.
+/// Parameters associated with the SuperObRadar class. This replaces the
+/// GenericSuperObParameters class for this specific algorithm and thus excludes
+/// the associated options.
 class SuperObRadarParameters : public SuperObParametersBase {
   OOPS_CONCRETE_PARAMETERS(SuperObRadarParameters, SuperObParametersBase)
  public:
@@ -56,7 +58,7 @@ class SuperObRadarParameters : public SuperObParametersBase {
 /// whose values of O and B were used to compute the superob in each case.
 class SuperObRadar : public SuperObBase {
  public:
-  typedef SuperObRadarParameters Parameters_;
+  using Parameters_ = SuperObRadarParameters;
 
   explicit SuperObRadar(const Parameters_ &,
                         const ObsFilterData &,
@@ -67,8 +69,9 @@ class SuperObRadar : public SuperObBase {
   ~SuperObRadar() {}
 
  private:
-  /// Compute superob values and errors for each record.
-  void computeSuperOb(const std::vector<std::size_t> &,
+  /// Compute superob values and errors for each record. Returns `true` if a
+  /// superob was successfully computed for the record, `false` otherwise.
+  bool computeSuperOb(const std::vector<std::size_t> &,
                       const std::vector<float> &,
                       const std::vector<float> &,
                       const ioda::ObsDataRow<int> &,

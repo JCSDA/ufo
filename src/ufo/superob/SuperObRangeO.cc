@@ -1,54 +1,51 @@
 /*
- * (C) Crown copyright 2024, Met Office
+ * (C) Crown copyright 2025, Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/superob/SuperObMeanO.h"
+#include "ufo/superob/SuperObRangeO.h"
 
 #include <optional>
 #include <cassert>
-#include <map>
-#include <string>
-
-#include "eckit/exception/Exceptions.h"
 
 namespace ufo {
 
-static SuperObMaker<SuperObMeanO> makerSuperObMeanO_("mean obs");
+static SuperObMaker<SuperObRangeO> makerSuperObRangeO_("range obs");
 
-SuperObMeanO::SuperObMeanO(const Parameters_ &params,
-                           const ObsFilterData &obsdb,
-                           const std::vector<bool> &apply,
-                           const Variables &filtervars,
-                           const ioda::ObsDataVector<int> &flags,
-                           std::vector<std::vector<bool>> &flagged)
+SuperObRangeO::SuperObRangeO(const Parameters_& params,
+                             const ObsFilterData& obsdb,
+                             const std::vector<bool>& apply,
+                             const Variables& filtervars,
+                             const ioda::ObsDataVector<int>& flags,
+                             std::vector<std::vector<bool>>& flagged)
     : SuperObBase(params, obsdb, apply, filtervars, flags, flagged),
       params_(params) {}
 
-bool SuperObMeanO::computeSuperOb(const std::vector<std::size_t> &locs,
-                                  const std::vector<float> &obs,
-                                  const std::vector<float> & /*hofx*/,
-                                  const ioda::ObsDataRow<int> &flags,
-                                  std::vector<float> &superobs,
-                                  std::vector<bool> &flagged) const {
+bool SuperObRangeO::computeSuperOb(const std::vector<std::size_t>& locs,
+                                   const std::vector<float>& obs,
+                                   const std::vector<float>& /*hofx*/,
+                                   const ioda::ObsDataRow<int>& flags,
+                                   std::vector<float>& superobs,
+                                   std::vector<bool>& flagged) const {
   const float missing = util::missingValue<float>();
 
   const bool assignToAllValues = params_.assignToAllValues.value();
 
   // Deduplicate locations if grouping values are provided
-  const std::vector<std::size_t> &locsForComputation =
+  const std::vector<std::size_t>& locsForComputation =
       params_.groupingVariable.value()
           ? getUniqueLocations(locs, *params_.groupingVariable.value(), obs,
                                flags)
           : locs;
 
   bool superObComputed = false;
-  if (locsForComputation.empty()) return superObComputed;
+  if (locsForComputation.empty())
+    return superObComputed;  // no superob computed
 
-  float sumO = 0.0f;
-  size_t count = 0;
+  float minObs = std::numeric_limits<float>::max();
+  float maxObs = std::numeric_limits<float>::lowest();
   // Set on first valid contributing location; optional avoids implying a
   // default location.
   std::optional<size_t> superobloc;
@@ -62,8 +59,13 @@ bool SuperObMeanO::computeSuperOb(const std::vector<std::size_t> &locs,
         obsValue == missing) {
       continue;
     }
-    sumO += obsValue;
-    count++;
+
+    if (obsValue < minObs) {
+      minObs = obsValue;
+    }
+    if (obsValue > maxObs) {
+      maxObs = obsValue;
+    }
     if (!superObComputed) {
       superObComputed = true;
       superobloc = jloc;
@@ -71,9 +73,9 @@ bool SuperObMeanO::computeSuperOb(const std::vector<std::size_t> &locs,
   }
 
   if (superObComputed) {
-    const float meanO = sumO / static_cast<float>(count);
+    const float rangeObs = maxObs - minObs;
     assert(superobloc.has_value());
-    assignSuperObToLocations(locs, meanO, *superobloc, assignToAllValues,
+    assignSuperObToLocations(locs, rangeObs, *superobloc, assignToAllValues,
                              superobs, flagged);
   }
   return superObComputed;
