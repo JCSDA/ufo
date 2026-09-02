@@ -22,16 +22,16 @@ Cal_PressureFromHeightForProfile::Cal_PressureFromHeightForProfile(
     const Parameters_ &options, const ObsFilterData &data,
     ioda::ObsDataVector<int> &flags, ioda::ObsDataVector<float> &obserr)
     : TransformBase(options, data, flags, obserr),
+      heightCoord_(options.HeightCoord),
+      pressureCoord_(options.PressureCoord),
+      pressureGroup_(options.PressureGroup),
       relativeHumidityUnits_(
           options.RelativeHumidityUnits.value() != boost::none
               ? options.RelativeHumidityUnits.value()
               : throw eckit::BadParameter(
                     "PressureFromHeightForProfile: missing required "
                     "parameter 'observation relative humidity units'",
-                    Here())),
-      heightCoord_(options.HeightCoord),
-      pressureCoord_(options.PressureCoord),
-      pressureGroup_(options.PressureGroup) {}
+                    Here())) {}
 
 /************************************************************************************/
 
