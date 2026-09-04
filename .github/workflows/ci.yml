@@ -20,6 +20,7 @@ jobs:
       - name: Run fortitude check
         run: |
           fortitude check
+
   build:
     if: |
       ( github.repository_owner == 'JCSDA-internal' && github.event.pull_request.draft == false )
@@ -27,7 +28,7 @@ jobs:
     runs-on: jedi-self-hosted-ext
     env:
       NAMESPACE: pr-${{ github.event.number }}
-      MOBB_CI_PR_BODY_OUT: mobb-ci-gh-pr-body.out
+      MOBB_CI_PR_BODY_OUT: mobb-ci-gh-pr-${{ github.event.number }}-body.out
       REPO: ${{ github.event.repository.name }}
       REPO_TEST_DATA: ${{ github.event.repository.name }}-data
       TIMEOUT_MINUTE: 301
@@ -35,7 +36,7 @@ jobs:
     steps:
       - name: Cleanup (pre)
         run: |
-          rm -fr "./${NAMESPACE}"
+          rm -fr "./${NAMESPACE}" "./${MOBB_CI_PR_BODY_OUT}"
 
       - name: Checkout
         uses: actions/checkout@v5
@@ -82,4 +83,4 @@ jobs:
         timeout-minutes: ${{ fromJSON(env.TIMEOUT_MINUTE) }}
 
       - name: Cleanup (post)
-        run: rm -fr "./${NAMESPACE}"
+        run: rm -fr "./${NAMESPACE}" "./${MOBB_CI_PR_BODY_OUT}"
