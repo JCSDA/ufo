@@ -1624,8 +1624,8 @@ end subroutine get_var_name
 !! from north, similar to an azimuth angle.  Takes the eastward and northward
 !! wind component magnitudes, respectively, as arguments.
 !! Due to the azimuthal convention used here, the inverse equations are:
-!! u = w * cos(wdir * deg2rad)
-!! v = w * sin(wdir * deg2rad)
+!! u = w * sin(wdir * deg2rad)
+!! v = w * cos(wdir * deg2rad)
 !! where w is the wind speed
 function uv_to_wdir(u, v) result(wdir)
 

@@ -1269,9 +1269,11 @@ contains
 
       call ufo_geovals_get_var(geovals, var_sfc_wdir, geoval)
 
+      ! wdir is the azimuth the wind blows toward, clockwise from north
+      ! (the convention produced by uv_to_wdir and consumed by CRTM)
       do iprof = 1, nprofiles
-        profiles(iprof)%near_surface(1) % wind_u10m = windsp(iprof) * cos(geoval%vals(1, iprof) * deg2rad)
-        profiles(iprof)%near_surface(1) % wind_v10m = windsp(iprof) * sin(geoval%vals(1, iprof) * deg2rad)
+        profiles(iprof)%near_surface(1) % wind_u10m = windsp(iprof) * sin(geoval%vals(1, iprof) * deg2rad)
+        profiles(iprof)%near_surface(1) % wind_v10m = windsp(iprof) * cos(geoval%vals(1, iprof) * deg2rad)
       end do
       deallocate(windsp)
     end if
