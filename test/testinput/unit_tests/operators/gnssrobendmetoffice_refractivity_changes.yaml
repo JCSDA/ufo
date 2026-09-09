@@ -17,10 +17,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019050700_1obs.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2019123006_bending_angle_k1_ukmo_opr_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2019123006_bending_angle_k1_ukmo_opr_out.nc4
     simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019050700_1obs.nc4
@@ -44,10 +44,10 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/gnssro_obs_2019050700_1obs.nc4
-    obsdataout:
-      engine:
-        type: H5File
-        obsfile: Data/gnssro_obs_2019123006_bending_angle_k2_ukmo_opr_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: Data/gnssro_obs_2019123006_bending_angle_k2_ukmo_opr_out.nc4
     simulated variables: [bendingAngle]
   geovals:
     filename: Data/ufo/testinput_tier_1/gnssro_geoval_2019050700_1obs.nc4
