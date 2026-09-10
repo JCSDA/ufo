@@ -6,6 +6,7 @@
  */
 
 #include "ufo/usenearestneighbors/UseNearestNeighborsAlgorithmReferencePointVariablesMean.h"
+
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -13,6 +14,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "ioda/distribution/Distribution.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Duration.h"
 #include "oops/util/Logger.h"

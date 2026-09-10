@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "eckit/exception/Exceptions.h"
+#include "ioda/distribution/Distribution.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"

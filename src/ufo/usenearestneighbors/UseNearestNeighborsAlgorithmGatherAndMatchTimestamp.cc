@@ -6,11 +6,14 @@
  */
 
 #include "ufo/usenearestneighbors/UseNearestNeighborsAlgorithmGatherAndMatchTimestamp.h"
+
 #include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "ioda/distribution/Distribution.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
 #include "ufo/usenearestneighbors/UseNearestNeighborsAlgorithmBase.h"
