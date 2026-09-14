@@ -26,35 +26,38 @@ class ObsErrorFactorSnowElevationDiffParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ObsErrorFactorSnowElevationDiffParameters, Parameters)
 
  public:
-  oops::RequiredParameter<std::string> obs_elevation_var{"obs_elevation_var", this};
-  oops::RequiredParameter<std::string> model_elevation_var{"model_elevation_var", this};
-  oops::RequiredParameter<float> elevation_scale_h{"elevation_scale_h", this};
+  oops::Parameter<std::string> obs_elevation_var{"observation_elevation", "MetaData/stationElevation", this};
+  oops::Parameter<std::string> model_elevation_var{"model_elevation", "GeoVaLs/filtered_orography", this};
+  oops::Parameter<float> elevation_scale_h{"elevation_scale_m", 800., this};
 };
 
 // -----------------------------------------------------------------------------
 
-/// \brief Inflate the observation error based on elevation difference between model and observation.
+/// \brief Inflate observation error based on elevation difference between model and observation.
 ///
 /// This routine computes an observation error inflation factor based on the elevation difference
 /// between the model surface elevation and the observed station elevation.
 /// The inflation factor is computed as: 1 / exp(-1 * dz^2 / (h^2))
-/// where dz = |model_elevation - obs_elevation| and h is the elevation_scale_h parameter.
+/// where dz = |model_elevation - obs_elevation| 
+/// and h is the elevation_scale parameter in m (Elevation difference at which the obs-error will be inflated by a factor of exp(1)).
 ///
-/// ~~~~
+/// Authors
+/// First draft: Github Copilot. 
+/// Revisiewd and tested, in accordance with NOAA's use of AI tools, by Tseganeh Z. Gichamo
+/// 
+/// ### example configurations for application of this filter: ###
 ///
-/// ### example configurations for a FilterBase derived class: ###
-///
-///     - filter: BlackList
+///     - filter: Perform Action
 ///       filter variables:
-///       - name: snowDepth
+///       - name: totalSnowDepth
 ///       action:
 ///         name: inflate error
 ///         inflation variable:
 ///           name: ObsFunction/ObsErrorFactorSnowElevationDiff
 ///           options:
-///             obs_elevation_var: MetaData/stationElevation
-///             model_elevation_var: GeoVaLs/filtered_orography
-///             elevation_scale_h: 100.0
+///             observation_elevation: MetaData/stationElevation
+///             model_elevation: GeoVaLs/filtered_orography
+///             elevation_scale_m: 800.0   // (Unit m) 
 ///
 class ObsErrorFactorSnowElevationDiff : public ObsFunctionBase<float> {
  public:
