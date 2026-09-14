@@ -18,7 +18,7 @@
 namespace ufo {
 
 static ObsFunctionMaker<ObsErrorFactorSnowElevationDiff> 
-    makerSnowElevDiff_("ObsErrorFactorSnowElevationDiff");
+    makerObsErrorFactorSnowElevationDiff_("ObsErrorFactorSnowElevationDiff");
 
 // -----------------------------------------------------------------------------
 
@@ -32,11 +32,11 @@ ObsErrorFactorSnowElevationDiff::ObsErrorFactorSnowElevationDiff(
   options_.reset(new ObsErrorFactorSnowElevationDiffParameters());
   options_->deserialize(config);
 
-  // Include required observation elevation variable
+  // Include observation elevation variable
   const std::string obs_elev_var = options_->obs_elevation_var.value();
   invars_ += Variable(obs_elev_var);
 
-  // Include required model elevation variable
+  // Include model elevation variable
   const std::string model_elev_var = options_->model_elevation_var.value();
   invars_ += Variable(model_elev_var);
 }
@@ -55,7 +55,7 @@ void ObsErrorFactorSnowElevationDiff::compute(
   oops::Log::trace() << "ObsErrorFactorSnowElevationDiff compute start" << std::endl;
   
   const float missing = util::missingValue<float>();
-  const float h_scale = options_->elevation_scale_h.value();
+  const float h_scale = options_->elevation_scale_m.value();
 
   // If no observations on this processor then nothing to do
   if (data.nlocs() == 0) return;
@@ -81,9 +81,9 @@ void ObsErrorFactorSnowElevationDiff::compute(
   int iv = 0;
 
   for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-    // If missing observation or model elevation, set factor to 1.0 (no inflation)
+    // If missing observation or model elevation, set obserror to missing
     if (ob_elevation[iloc] == missing || model_elevation[iloc] == missing) {
-      obserr[iv][iloc] = 1.0f;
+      obserr[iv][iloc] = missing;
     } else {
       // Compute elevation difference
       dz = std::abs(model_elevation[iloc] - ob_elevation[iloc]);
@@ -94,8 +94,8 @@ void ObsErrorFactorSnowElevationDiff::compute(
       // Compute output inflation_factor = 1 / inflation_factor_1
       inflation_factor = 1.0f / inflation_factor_1;
       
-      // Return the inflation factor (ratio)
-      obserr[iv][iloc] = inflation_factor;
+      // Inflate error by the inflation factor
+      obserr[iv][iloc] *= inflation_factor;
     }
   }
   
