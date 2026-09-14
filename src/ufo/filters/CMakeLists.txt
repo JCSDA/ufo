@@ -323,6 +323,8 @@ set ( filters_files
       obsfunctions/ObsErrorFactorSfcPressure.h
       obsfunctions/ObsErrorFactorConventional.cc
       obsfunctions/ObsErrorFactorConventional.h
+      obsfunctions/ObsErrorFactorSnowElevationDiff.cc
+      obsfunctions/ObsErrorFactorSnowElevationDiff.h
       obsfunctions/PotentialTemperatureFromTemperature.cc
       obsfunctions/PotentialTemperatureFromTemperature.h
       obsfunctions/NearSSTRetCheckIR.cc
