@@ -479,6 +479,272 @@ observations:
     reference:
       name: TestReference/assigned_int_variable_2
 
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by a float-valued ObsFunction to a new bool variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/conditional_assignment_bool_from_float
+      type: bool
+      function:
+        name: ObsFunction/Conditional
+        options:
+          defaultvalue: 0.0
+          cases:
+          - where:
+            - variable:
+                name: MetaData/int_variable_1
+              is_in: 2-4
+            value: 2.0
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/conditional_assignment_bool_from_float
+      type: bool
+      value: "false"
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: MetaData/int_variable_1
+      is_in: 2-4
+    assignments:
+    - name: TestReference/conditional_assignment_bool_from_float
+      value: "true"
+  compareVariables:
+  - test:
+      name: MetaData/conditional_assignment_bool_from_float
+    reference:
+      name: TestReference/conditional_assignment_bool_from_float
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign values produced by an int-valued ObsFunction to a new bool variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/conditional_assignment_bool_from_int
+      type: bool
+      function:
+        name: IntObsFunction/Conditional
+        options:
+          defaultvalue: 0
+          cases:
+          - where:
+            - variable:
+                name: MetaData/int_variable_1
+              is_in: 2-4
+            value: 2
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/conditional_assignment_bool_from_int
+      type: bool
+      value: "false"
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: MetaData/int_variable_1
+      is_in: 2-4
+    assignments:
+    - name: TestReference/conditional_assignment_bool_from_int
+      value: "true"
+  compareVariables:
+  - test:
+      name: MetaData/conditional_assignment_bool_from_int
+    reference:
+      name: TestReference/conditional_assignment_bool_from_int
+
+- obs space:
+    <<: *ObsSpace
+    name: DateTimeObsFunction assignment to bool variable is rejected
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/conditional_assignment_bool_from_datetime
+      type: bool
+      function:
+        name: DateTimeObsFunction/Conditional
+        options:
+          cases:
+          - where:
+            - variable:
+                name: MetaData/int_variable_1
+              is_in: 2-4
+            value: 2000-01-02T03:04:05Z
+  expectExceptionWithMessage: DateTimeObsFunction/Conditional is not a function producing numeric values
+
+- obs space:
+    <<: *ObsSpace
+    name: Invalid data type for pre existing bool variable, throwing an exception
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/bool_variable_for_dtype_check
+      type: bool
+      value: "true"
+    - name: MetaData/bool_variable_for_dtype_check
+      type: int
+      value: 1
+  expectExceptionWithMessage: "Variable Assignment getDataType for variable: bool_variable_for_dtype_check. The yaml specified type does not match the type of the variable in the ObsSpace. Either change the 'type' option to match the existing variable or write to a new variable that does not already exist."
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign bool values from lenient value parsing tokens
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/bool_from_zero
+      type: bool
+      value: 0
+    - name: MetaData/bool_from_nonzero
+      type: bool
+      value: 2
+    - name: MetaData/bool_from_true_upper
+      type: bool
+      value: "TRUE"
+    - name: MetaData/bool_from_false_mixed
+      type: bool
+      value: "False"
+    - name: TestReference/bool_all_false
+      type: bool
+      value: "false"
+    - name: TestReference/bool_all_true
+      type: bool
+      value: "true"
+  compareVariables:
+  - test:
+      name: MetaData/bool_from_zero
+    reference:
+      name: TestReference/bool_all_false
+  - test:
+      name: MetaData/bool_from_nonzero
+    reference:
+      name: TestReference/bool_all_true
+  - test:
+      name: MetaData/bool_from_true_upper
+    reference:
+      name: TestReference/bool_all_true
+  - test:
+      name: MetaData/bool_from_false_mixed
+    reference:
+      name: TestReference/bool_all_false
+
+- obs space:
+    <<: *ObsSpace
+    name: Assign bool values to a pre-existing bool variable
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/preexisting_bool
+      type: bool
+      value: "false"
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: MetaData/int_variable_1
+      is_in: 2-4
+    assignments:
+    - name: MetaData/preexisting_bool
+      type: bool
+      value: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/preexisting_bool
+      type: bool
+      value: "false"
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: MetaData/int_variable_1
+      is_in: 2-4
+    assignments:
+    - name: TestReference/preexisting_bool
+      value: "true"
+  compareVariables:
+  - test:
+      name: MetaData/preexisting_bool
+    reference:
+      name: TestReference/preexisting_bool
+
+- obs space:
+    <<: *ObsSpace
+    name: Copy bool source variable to a new bool variable
+  obs filters:
+  # Create a source bool variable to copy from
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/source_bool_for_copy
+      type: bool
+      value: "false"
+  - filter: Variable Assignment
+    where:
+    - variable:
+        name: MetaData/int_variable_1
+      is_in: 2-4
+    assignments:
+    - name: MetaData/source_bool_for_copy
+      value: "true"
+  # do the copy
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/copied_bool_from_source
+      type: bool
+      source variable:
+        name: MetaData/source_bool_for_copy
+  compareVariables:
+  - test:
+      name: MetaData/copied_bool_from_source
+    reference:
+      name: MetaData/source_bool_for_copy
+
+- obs space:
+    <<: *ObsSpace
+    name: Invalid bool value token in value option, throwing an exception
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/bool_invalid_token
+      type: bool
+      value: maybe
+  expectExceptionWithMessage: "Value 'maybe' could not be converted to the required type"
+
+- obs space:
+    <<: *ObsSpace
+  # Rationale: for bool, missingValue<bool>() is false, so "missing"
+  # would be ambiguous with a valid false value.
+    name: Bool missing token in value option is rejected
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/bool_missing_token
+      type: bool
+      value: missing
+  expectExceptionWithMessage: "Assigning 'missing' to a bool variable is not supported"
+
+- obs space:
+    <<: *ObsSpace
+  # Rationale: bool destination values in DerivedObsValue would make
+  # QC missing/pass transitions ambiguous.
+    name: Bool assignment to DerivedObsValue variable is rejected
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/bool_variable_in_derived
+      type: bool
+      value: "true"
+  expectExceptionWithMessage: Assignment to bool variables in ObsValue or DerivedObsValue groups is not supported
+
+- obs space:
+    <<: *ObsSpace
+    name: DateTime source variable assignment to bool variable is rejected
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/bool_from_datetime_source
+      type: bool
+      source variable:
+        name: MetaData/dateTime
+  expectExceptionWithMessage: Converting a DateTime to bool is not supported
+
 - obs space: &ObsSpace
     name: Assign values produced by a string-valued ObsFunction to a string variable
     obsdatain:
@@ -1183,5 +1449,5 @@ observations:
     - name: MetaData/float_variable
       channels: 1, 4
       type: int
-      value: 75     
+      value: 75
   expectExceptionWithMessage: "Variable Assignment getDataType for variable: float_variable_1. The yaml specified type does not match the type of the variable in the ObsSpace. Either change the 'type' option to match the existing variable or write to a new variable that does not already exist."

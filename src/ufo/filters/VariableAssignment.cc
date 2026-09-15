@@ -8,6 +8,7 @@
 #include "ufo/filters/VariableAssignment.h"
 
 #include <algorithm>
+#include <cctype>
 #include <limits>
 #include <set>
 #include <string>
@@ -34,7 +35,7 @@ namespace ufo {
 
 namespace {
 
-/// Convert a float \p x to an int by rounding. If \p is equal to \p missingIn, return \p
+/// Convert a float \p x to an int by rounding. If \p x is equal to \p missingIn, return \p
 /// missingOut. If the value to be returned is too large to be represented by an int, throw an
 /// exception.
 int safeCast(float x, float missingIn, int missingOut) {
@@ -45,12 +46,30 @@ int safeCast(float x, float missingIn, int missingOut) {
   return boost::math::iround(x);
 }
 
-/// Cast an int \p x to a float. If \p is equal to \p missingIn, return \p missingOut.
+/// Convert a float \p x to a bool by treating any nonzero value as true. If \p x is equal to
+/// \p missingIn, return \p missingOut.
+bool safeCast(float x, float missingIn, bool missingOut) {
+  if (x == missingIn) {
+    return missingOut;
+  }
+  return (x != 0.0f);
+}
+
+/// Cast an int \p x to a float. If \p x is equal to \p missingIn, return \p missingOut.
 float safeCast(int x, int missingIn, float missingOut) {
   if (x == missingIn) {
     return missingOut;
   }
   return x;
+}
+
+/// Convert an int \p x to a bool by treating any nonzero value as true. If \p x is equal to
+/// \p missingIn, return \p missingOut.
+bool safeCast(int x, int missingIn, bool missingOut) {
+  if (x == missingIn) {
+    return missingOut;
+  }
+  return (x != 0);
 }
 
 /// Convert a util::DateTime \p x to a numeric type DestinationVariableType by computing the number
@@ -92,6 +111,42 @@ void assignValue(const std::string &valueAsString,
 
   for (size_t ival = 0; ival < values.nvars(); ++ival) {
     std::vector<VariableType> &currentValues = values[ival];
+    for (size_t iloc = 0; iloc < apply.size(); ++iloc)
+      if (apply[iloc]) {
+        currentValues[iloc] = newValue;
+      }
+  }
+}
+
+/// Specialization handling lenient parsing of bool constants.
+template <>
+void assignValue<bool>(const std::string &valueAsString,
+                       const std::vector<bool> &apply,
+                       ioda::ObsDataVector<bool> &values) {
+  bool newValue;
+  std::string valueLower = valueAsString;
+  std::transform(valueLower.begin(), valueLower.end(), valueLower.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  if (valueAsString == "missing") {
+    // For bool, missingValue<bool>() is false, so `missing` is ambiguous.
+    throw eckit::BadParameter(
+        "Assigning 'missing' to a bool variable is not supported", Here());
+  } else if (valueLower == "true") {
+    newValue = true;
+  } else if (valueLower == "false") {
+    newValue = false;
+  } else {
+    float numericValue;
+    if (!ufo::readFloat(valueAsString, numericValue)) {
+      throw eckit::BadCast("Value '" + valueAsString +
+                               "' could not be converted to the required type",
+                           Here());
+    }
+    newValue = (numericValue != 0.0f);
+  }
+
+  for (size_t ival = 0; ival < values.nvars(); ++ival) {
+    std::vector<bool> &currentValues = values[ival];
     for (size_t iloc = 0; iloc < apply.size(); ++iloc)
       if (apply[iloc]) {
         currentValues[iloc] = newValue;
@@ -247,8 +302,19 @@ void assignNumericValues(const AssignmentParameters &params,
       assignVariable<int>(*params.sourceVariable.value(), params.skipDerived,
                           apply, data, values);
       break;
+    case ioda::ObsDtype::Bool:
+      if constexpr (std::is_same_v<VariableType, bool>) {
+        assignVariable<bool>(*params.sourceVariable.value(), params.skipDerived,
+                             apply, data, values);
+      } else {
+        throw eckit::BadParameter(params.sourceVariable.value()->fullName() +
+                                  " is not a numeric variable", Here());
+      }
+      break;
     case ioda::ObsDtype::DateTime:
-      if (params.epoch.value() != boost::none) {
+      if constexpr (std::is_same_v<VariableType, bool>) {
+        throw eckit::BadParameter("Converting a DateTime to bool is not supported", Here());
+      } else if (params.epoch.value() != boost::none) {
         assignVariable(*params.sourceVariable.value(),
                        *params.epoch.value(),
                        params.skipDerived,
@@ -385,6 +451,28 @@ void assignToFloatVariable(const ufo::Variable &variable,
   }
 }
 
+/// Works like `assignToIntVariable()`, but for bool variables.
+void assignToBoolVariable(const ufo::Variable &variable,
+                          const AssignmentParameters &params,
+                          const std::vector<bool> &apply,
+                          const ObsFilterData &data, ioda::ObsSpace &obsdb) {
+  if (variable.group() == "ObsValue" || variable.group() == "DerivedObsValue") {
+    // updateQCFlags() toggles QC flags by comparing values against
+    // util::missingValue<VariableType>(). For bool, missingValue<bool>() is
+    // false, so valid false values are indistinguishable from missing values.
+    // Assignment to ObsValue or DerivedObsValue groups has to be disallowed
+    // here, since it would lead to incorrect QC flag updates.
+    throw eckit::BadParameter(
+        "Assignment to bool variables in ObsValue or DerivedObsValue groups "
+        "is not supported",
+        Here());
+  }
+  ioda::ObsDataVector<bool> values =
+      getCurrentValues<bool>(variable, obsdb, params.skipDerived);
+  assignNumericValues(params, variable, apply, data, values);
+  saveValues(variable, values, obsdb);
+}
+
 /// Retrieve the current values of a non-numeric variable \p variable from \p obsdb (or if it
 /// doesn't already exist, fill it with missing values), assign new values to elements selected by
 /// the `where` clause and save the results to \p obsdb.
@@ -419,6 +507,9 @@ void assignToVariable(const ufo::Variable &variable,
     break;
   case ioda::ObsDtype::Integer:
     assignToIntVariable(variable, params, apply, data, obsdb, qcflags);
+    break;
+  case ioda::ObsDtype::Bool:
+    assignToBoolVariable(variable, params, apply, data, obsdb);
     break;
   case ioda::ObsDtype::String:
     assignToNonnumericVariable<std::string>(variable, params, apply, data, obsdb, qcflags);
@@ -486,7 +577,7 @@ ioda::ObsDtype getDataType(boost::optional<ioda::ObsDtype> dtypeParam,
     // The variable doesn't exist yet.
     throw eckit::BadParameter("You need to specify the type of the variable to be created "
                               "by setting the 'type' option of the filter to 'float', 'int', "
-                              "'string' or 'datetime'.");
+                              "'string', 'datetime' or 'bool'.");
   }
 }
 

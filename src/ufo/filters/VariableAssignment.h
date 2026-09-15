@@ -38,8 +38,15 @@ class AssignmentParameters : public oops::Parameters {
   /// Set of channels to which new values should be assigned.
   oops::Parameter<std::string> channels{"channels", "", this};
 
-  /// Value to be assigned to the specified variable (at all locations selected be the `where`
-  /// statement, if present).
+  /// Value to be assigned to the specified variable (at all locations selected
+  /// be the `where` statement, if present).
+  ///
+  /// If `type` is `bool`, values may be strings "true"/"false" (any case) or
+  /// numeric strings; numeric values are interpreted as `false` if zero and
+  /// `true` otherwise. The `missing` token is not supported for `bool`.
+  ///
+  /// Rationale: in oops, `missingValue<bool>()` is `false`, so `missing`
+  /// would be indistinguishable from a valid `false` value.
   ///
   /// Exactly one of the `value` and `function` options must be given.
   oops::OptionalParameter<std::string> value_{"value", this};
@@ -63,11 +70,19 @@ class AssignmentParameters : public oops::Parameters {
   /// Exactly one of the `value`, `source variable` and `function` options must be given.
   oops::OptionalParameter<ufo::Variable> function{"function", this};
 
-  /// Type (int, float, string or datetime) of the variable to which new values should be assigned.
+  /// Type (int, float, string, datetime or bool) of the variable to which new values should be
+  /// assigned.
   ///
   /// This option must be provided if the variable doesn't exist yet. If this option is provided
   /// and the variable already exists, its type must match the value of this option,
   /// otherwise an exception will be thrown.
+  ///
+  /// Assignments to `bool` variables accept float-valued and int-valued ObsFunctions, but not
+  /// DateTime-valued ObsFunctions. `bool` assignments to ObsValue and
+  /// DerivedObsValue groups are not supported.
+  ///
+  /// Rationale: bool has no distinct missing sentinel, so allowing bool in
+  /// ObsValue/DerivedObsValue would make QC missing/pass transitions ambiguous.
   oops::OptionalParameter<ioda::ObsDtype> type{"type", this};
 
   /// DateTime epoch required for the conversion of DateTimes to numerical values.
