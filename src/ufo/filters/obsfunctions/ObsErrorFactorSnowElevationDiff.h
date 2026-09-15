@@ -41,9 +41,7 @@ class ObsErrorFactorSnowElevationDiffParameters : public oops::Parameters {
 /// where dz = |model_elevation - obs_elevation| 
 /// and h is the elevation_scale parameter in m (Elevation difference at which the obs-error will be inflated by a factor of exp(1)).
 ///
-/// Authors
-/// First draft: Github Copilot. 
-/// Revisiewd and tested, in accordance with NOAA's use of AI tools, by Tseganeh Z. Gichamo
+/// Authors: Tseganeh Z Gichamo and Gihub Copilot. All the ML generated code sections have been revised and tested by Tseganeh Z. Gichamo
 /// 
 /// ### example configurations for application of this filter: ###
 ///
