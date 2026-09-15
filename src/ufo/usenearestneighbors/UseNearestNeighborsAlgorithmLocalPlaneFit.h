@@ -150,10 +150,15 @@ class UseNearestNeighborsAlgorithmLocalPlaneFit
       const Variables& filtervars, const ioda::ObsDataVector<int>& flags,
       std::vector<std::vector<bool>>& flagged);
 
- private:
+ public:
   // Helper structs
 
   /// \brief Data gathered from the nearest neighbors of a single query point.
+  ///
+  /// These helper structs are public so that namespace-scope aliases in the
+  /// implementation file can reference them without running into compiler
+  /// access-control issues (some compilers are stricter than others here).
+  /// See https://github.com/JCSDA-internal/ufo/issues/4358
   template <typename GatherType>
   struct NeighborData {
     bool isValid;                       ///< False if any required data is missing.
@@ -173,6 +178,7 @@ class UseNearestNeighborsAlgorithmLocalPlaneFit
     FailureReason reason;
   };
 
+ private:
   void execute(const UseNearestNeighborsAlgorithmParametersBase& algParams,
                const UseNearestNeighborsParameters& options) const override;
 
