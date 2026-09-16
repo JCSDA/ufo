@@ -279,6 +279,8 @@ set ( filters_files
       obsfunctions/CloudFirstGuessMinimumResidual.h
       obsfunctions/CircularDifference.cc
       obsfunctions/CircularDifference.h
+      obsfunctions/LocationToObsSpace.cc
+      obsfunctions/LocationToObsSpace.h
       obsfunctions/MetOfficeAllSkyErrorModel.cc
       obsfunctions/MetOfficeAllSkyErrorModel.h
       obsfunctions/ModelHeightAdjustedWindVectorComponent.cc
