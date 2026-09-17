@@ -29,6 +29,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out1.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -55,6 +56,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -81,6 +83,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -108,6 +111,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -133,6 +137,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -160,6 +165,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -188,6 +194,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -215,6 +222,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
   - filter: Record Threshold Rejection
     filter variables: [variable]
@@ -247,6 +255,7 @@ observations:
 #       type: H5File
 #       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
     simulated variables: [variable]
+  HofX: HofX
   obs filters:
 # first set up record-specific thresholds for the data, starting with a default value of 98
   - filter: Variable Assignment

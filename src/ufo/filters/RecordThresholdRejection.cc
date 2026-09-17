@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <sstream>
 
 #include "ufo/filters/RecordThresholdRejection.h"
 
@@ -35,6 +36,29 @@ RecordThresholdRejection::RecordThresholdRejection(ioda::ObsSpace & obsdb,
   : FilterBase(obsdb, parameters, flags, obserr), parameters_(parameters)
 {
   oops::Log::trace() << "RecordThresholdRejection constructor" << std::endl;
+
+  // local function to add a variable to the allvars_ list if the parameter value is not a scalar
+  const auto addToAllVarsIfNotScalar = [this](const std::string & value) {
+    std::istringstream iss(value);
+    float factor;
+    iss >> factor;
+    // Check float was read - there are three cases which need checking:
+    // 1. value is a string which starts with a digit but then has non-digit characters, so
+    // value == 9.0blah -> iss.eof() == false, iss.fail() == false.
+    //
+    // 2. value is a string which starts with non-digit characters, so
+    // value == blah9.0 -> iss.eof() == false, iss.fail() == true.
+    //
+    // 3. value is a string which consists only of digits, so
+    // value == 9.0 -> iss.eof() == true, iss.fail() == false.
+    //
+    if (!(iss.eof() && !iss.fail())) {
+      allvars_ += Variable(value);
+    }
+  };
+
+  addToAllVarsIfNotScalar(parameters_.threshold_value.value());
+  addToAllVarsIfNotScalar(parameters_.threshold_variable.value());
 }
 
 // -----------------------------------------------------------------------------
