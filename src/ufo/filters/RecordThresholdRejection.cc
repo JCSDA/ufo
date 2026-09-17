@@ -93,6 +93,8 @@ void RecordThresholdRejection::applyFilter(const std::vector<bool> & apply,
 
   RecordThresholdRejectionDataOrder dataOrder = parameters_.data_order;
 
+  const bool useAllLocsForCheck = parameters_.threshold_from_all_locations_in_record.value();
+
   // True channel count from ObsSpace (0 for non-radiance data).
   const size_t nChans = obsdb_.nchans();
   // Effective channel count for indexing: use one slot for non-channel data.
@@ -146,14 +148,14 @@ void RecordThresholdRejection::applyFilter(const std::vector<bool> & apply,
         const size_t iFilterVar = iVar * nEffectiveChans + iChan;
         bool reject = false;
 
-        // Count the number of valid observations in this record
+        // Scan for first threshold hit and then flag all remaining downstream locations
         for (size_t jobs : recordIdxs) {
-          if (apply[jobs]) {
-              if  (thrVariable[jobs] != missing && thrValue[jobs] != missing
-                   && inequality(thrVariable[jobs], thrValue[jobs])) {
-                reject = true;
-              }
-            if (reject) flagged[iFilterVar][jobs] = true;
+          if (useAllLocsForCheck || apply[jobs]) {
+            if  (thrVariable[jobs] != missing && thrValue[jobs] != missing
+                 && inequality(thrVariable[jobs], thrValue[jobs])) {
+              reject = true;
+            }
+            if (reject && apply[jobs]) flagged[iFilterVar][jobs] = true;
           }
         }
       }

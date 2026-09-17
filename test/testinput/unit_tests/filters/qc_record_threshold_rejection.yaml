@@ -288,3 +288,77 @@ observations:
     rejection type: greater than
     data order: ascending
   failedObservationsBenchmark: [0,1,2,3,4,5,6,7,8,9,15,16,17,18,19,28,29,31,32,33,34,35,36,37,38,39,45,46,47,48,49,51,52,53,54,55,56,57,58,59,65,66,67,68,69,78,79,95,96,97,98,99]
+
+#
+#=== Tenth test: reject remainder (in ascending data order) of record entries 9 and above with diagnostic flag less than 1, except
+#    locations where the MetaData/ordering is 1. ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    threshold value: 1
+    threshold variable: DiagnosticFlags/LevelSubsampleReject/variable
+    rejection type: less than
+    data order: ascending
+    where:
+    - variable:
+        name: MetaData/sequenceNumber
+      minvalue: 9       # Records with sequenceNumber >= 9
+    - variable:
+        name: MetaData/ordering
+      is_not_in: 1
+  passedBenchmark: 92
+  failedObservationsBenchmark: [0,93,94,95,96,97,98,99]
+
+#
+#=== Eleventh test: reject remainder (in ascending data order) of record entries 9 and above with diagnostic flag less than 1, except
+#    locations where the MetaData/ordering is 1. The where process in Record Threshold Rejection will be ignored when considering
+#    whether the threshold is met at the location (so ignored values can still affect downstream rejections). ===#
+#
+
+- obs space:
+    name: test data
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/profile_filter_testdata.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/profile_filter_few_observationcheck_out2.nc4
+    simulated variables: [variable]
+  obs filters:
+  - filter: Record Threshold Rejection
+    filter variables: [variable]
+    # The next line makes sure that any locations ignored in the where process are still
+    # considered when determining whether the threshold is met at other locations in the record
+    threshold from all locations in record: true
+    threshold value: 1
+    threshold variable: DiagnosticFlags/LevelSubsampleReject/variable
+    rejection type: less than
+    data order: ascending
+    where:
+    - variable:
+        name: MetaData/sequenceNumber
+      minvalue: 9       # Records with sequenceNumber >= 9
+    - variable:
+        name: MetaData/ordering
+      is_not_in: 1
+  passedBenchmark: 91
+  failedObservationsBenchmark: [0,92,93,94,95,96,97,98,99]

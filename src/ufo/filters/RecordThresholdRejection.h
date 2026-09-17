@@ -87,6 +87,14 @@ class RecordThresholdRejectionParameters : public FilterParametersBase {
 
   oops::Parameter<RecordThresholdRejectionDataOrder> data_order{"data order",
     RecordThresholdRejectionDataOrder::Ascending, this};
+
+  /// If true, the thresholding will be determined from all locations in the record, even for
+  /// the locations which are excluded from having flags changed (due to a where clause).
+  /// If false, the thresholding will be determined only from the locations which are included in
+  /// the where clause. The default is false.
+  oops::Parameter<bool> threshold_from_all_locations_in_record{
+    "threshold from all locations in record",
+    false, this};
 };
 
 // -----------------------------------------------------------------------------
