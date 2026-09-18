@@ -17,6 +17,7 @@
 #include <utility>
 #include <vector>
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 

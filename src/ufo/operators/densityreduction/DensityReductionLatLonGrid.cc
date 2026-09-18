@@ -9,6 +9,8 @@
 
 #include <unordered_map>
 
+#include "ioda/distribution/Distribution.h"
+
 #include "oops/mpi/mpi.h"
 
 namespace ufo {

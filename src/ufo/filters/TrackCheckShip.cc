@@ -14,6 +14,7 @@
 #include <cmath>
 #include <functional>
 #include <map>
+#include <numeric>
 #include <string>
 #include <tuple>
 #include <utility>

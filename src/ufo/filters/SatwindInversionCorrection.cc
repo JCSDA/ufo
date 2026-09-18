@@ -10,6 +10,7 @@
 #include <limits>
 
 #include "ioda/distribution/Accumulator.h"
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 

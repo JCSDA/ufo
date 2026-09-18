@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <numeric>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"

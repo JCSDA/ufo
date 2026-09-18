@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "ioda/distribution/Accumulator.h"
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsSpace.h"
 
 #include "oops/mpi/mpi.h"

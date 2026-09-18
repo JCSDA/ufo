@@ -7,10 +7,12 @@
 
 #include <algorithm>
 #include <memory>
+#include <numeric>
 #include <set>
 #include <string>
 #include <utility>
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 

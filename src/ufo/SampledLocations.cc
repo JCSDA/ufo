@@ -13,14 +13,11 @@
 #include "eckit/config/Configuration.h"
 #include "eckit/exception/Exceptions.h"
 
-#include "ioda/Engines/EngineUtils.h"
-#include "ioda/Group.h"
 #include "ioda/ObsSpace.h"
 
 #include "oops/mpi/mpi.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Logger.h"
-#include "oops/util/missingValues.h"
 
 namespace ufo {
 
@@ -37,26 +34,10 @@ SampledLocations::SampledLocations(
   const size_t npaths = times_.size();
   ASSERT(npaths == lons.size());
   ASSERT(npaths == lats.size());
-  lons_.resize(npaths);
-  lats_.resize(npaths);
-  for (size_t jj = 0; jj < npaths; ++jj) {
-    lons_[jj] = lons[jj];
-    lats_[jj] = lats[jj];
-  }
-
-  initializeObsGroup(npaths);
-
-  // Set float_params that add safety in case of missing values and optimize the
-  // potential future use of hdf5's "memory file" as the ObsGroup backend.
-  const float floatMissing = util::missingValue<float>();
-  ioda::VariableCreationParameters float_params;
-  float_params.chunk = true;
-  float_params.compressWithGZIP();
-  float_params.setFillValue<float>(floatMissing);
-
-  const ioda::Variable npathsVar = og_.vars["npaths"];
-  og_.vars.createWithScales<float>("longitude", {npathsVar}, float_params).write(lons);
-  og_.vars.createWithScales<float>("latitude", {npathsVar}, float_params).write(lats);
+  // assign() rather than resize()+fill: every element is written from the input, so no
+  // element is ever left unset.
+  lons_.assign(lons.begin(), lons.end());
+  lats_.assign(lats.begin(), lats.end());
 
   oops::Log::trace() << "ufo::SampledLocations::SampledLocations done"
                      << std::endl;
@@ -91,28 +72,13 @@ SampledLocations::SampledLocations(const eckit::Configuration & conf, const ecki
   const size_t nlocs = obspace.nlocs();
   dist_ = obspace.distribution();
 
-  initializeObsGroup(nlocs);
-
-  // Set float_params that add safety in case of missing values and optimize the
-  // potential future use of hdf5's "memory file" as the ObsGroup backend.
-  const float floatMissing = util::missingValue<float>();
-  ioda::VariableCreationParameters float_params;
-  float_params.chunk = true;
-  float_params.compressWithGZIP();
-  float_params.setFillValue<float>(floatMissing);
-
-  const ioda::Variable npathsVar = og_.vars["npaths"];
   std::vector<float> buffer(nlocs);
-  lons_.resize(nlocs);
-  lats_.resize(nlocs);
 
   obspace.get_db("MetaData", "longitude", buffer);
-  for (size_t jj = 0; jj < nlocs; ++jj) lons_[jj] = buffer[jj];
-  og_.vars.createWithScales<float>("longitude", {npathsVar}, float_params).write(buffer);
+  lons_.assign(buffer.begin(), buffer.end());
 
   obspace.get_db("MetaData", "latitude", buffer);
-  for (size_t jj = 0; jj < nlocs; ++jj) lats_[jj] = buffer[jj];
-  og_.vars.createWithScales<float>("latitude", {npathsVar}, float_params).write(buffer);
+  lats_.assign(buffer.begin(), buffer.end());
 
   times_.resize(nlocs);
   obspace.get_db("MetaData", "dateTime", times_);
@@ -122,31 +88,6 @@ SampledLocations::SampledLocations(const eckit::Configuration & conf, const ecki
 
 SampledLocations & SampledLocations::operator+=(
     const SampledLocations & other) {
-  // Resize ObsGroup to new total size
-  const ioda::Variable npathsVar = og_.vars["npaths"];
-  const size_t npaths = npathsVar.getDimensions().dimsCur[0];
-  const size_t other_npaths = other.og_.vars["npaths"].getDimensions().dimsCur[0];
-  const ioda::Dimensions_t total_npaths = npaths + other_npaths;
-
-  og_.resize({std::make_pair(npathsVar, total_npaths)});
-
-  // Append variables from other's ObsGroup to end of local ObsGroup variables
-  const std::vector<ioda::Dimensions_t> start(1, npaths);
-  const std::vector<ioda::Dimensions_t> other_start(1, 0);
-  const std::vector<ioda::Dimensions_t> counts(1, other_npaths);
-
-  ioda::Selection feSelect;
-  feSelect.extent({total_npaths}).select({ioda::SelectionOperator::SET, other_start, counts});
-  ioda::Selection beSelect;
-  beSelect.select({ioda::SelectionOperator::SET, start, counts});
-
-  std::vector<float> buffer(other_npaths);
-  other.og_.vars["longitude"].read<float>(gsl::make_span(buffer));
-  og_.vars["longitude"].write<float>(buffer, feSelect, beSelect);
-
-  other.og_.vars["latitude"].read<float>(gsl::make_span(buffer));
-  og_.vars["latitude"].write<float>(buffer, feSelect, beSelect);
-
   times_.insert(times_.end(), other.times_.begin(), other.times_.end());
   lats_.insert(lats_.end(), other.lats_.begin(), other.lats_.end());
   lons_.insert(lons_.end(), other.lons_.begin(), other.lons_.end());
@@ -174,21 +115,13 @@ size_t SampledLocations::size() const {
 // -------------------------------------------------------------------------------------------------
 
 std::vector<float> SampledLocations::lons() const {
-  ASSERT(og_.vars.exists("longitude"));
-  const size_t npaths = size();
-  std::vector<float> lons(npaths);
-  og_.vars["longitude"].read<float>(gsl::make_span(lons));
-  return lons;
+  return std::vector<float>(lons_.begin(), lons_.end());
 }
 
 // -------------------------------------------------------------------------------------------------
 
 std::vector<float> SampledLocations::lats() const {
-  ASSERT(og_.vars.exists("latitude"));
-  const size_t npaths = size();
-  std::vector<float> lats(npaths);
-  og_.vars["latitude"].read<float>(gsl::make_span(lats));
-  return lats;
+  return std::vector<float>(lats_.begin(), lats_.end());
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -211,16 +144,6 @@ bool SampledLocations::areLocationsSampledOnceAndInOrder() const {
       return false;
 
   return true;
-}
-
-// -------------------------------------------------------------------------------------------------
-
-void SampledLocations::initializeObsGroup(const size_t npaths) {
-  ioda::Engines::BackendCreationParameters params;
-  ioda::Group g = constructBackend(ioda::Engines::BackendNames::ObsStore, params);
-  const ioda::NewDimensionScales_t dimScales{{
-      ioda::NewDimensionScale<int>("npaths", npaths, ioda::Unlimited, npaths)}};
-  og_ = ioda::ObsGroup::generate(g, dimScales);
 }
 
 // -------------------------------------------------------------------------------------------------

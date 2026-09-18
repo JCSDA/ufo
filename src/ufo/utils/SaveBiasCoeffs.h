@@ -8,10 +8,14 @@
 #ifndef UFO_UTILS_SAVEBIASCOEFFS_H_
 #define UFO_UTILS_SAVEBIASCOEFFS_H_
 
+#include <Eigen/Core>
+
 #include <string>
 #include <vector>
 
-#include "ioda/ObsGroup.h"
+namespace ioda {
+  class Group;
+}
 
 namespace ufo {
 

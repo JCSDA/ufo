@@ -15,6 +15,8 @@
 #include <vector>
 
 #include "eckit/container/KDTree.h"
+#include "eckit/geometry/KPoint.h"
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"

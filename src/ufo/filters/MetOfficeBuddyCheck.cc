@@ -19,6 +19,7 @@
 
 #include <boost/format.hpp>
 
+#include "ioda/distribution/Distribution.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 #include "oops/base/Variables.h"

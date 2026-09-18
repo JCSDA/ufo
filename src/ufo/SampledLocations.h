@@ -15,9 +15,6 @@
 
 #include "eckit/mpi/Comm.h"
 
-#include "ioda/distribution/Distribution.h"
-#include "ioda/ObsGroup.h"
-
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -25,6 +22,10 @@
 
 namespace eckit {
   class Configuration;
+}
+
+namespace ioda {
+  class Distribution;
 }
 
 namespace ufo {
@@ -113,14 +114,9 @@ class SampledLocations : public util::Printable,
   bool areLocationsSampledOnceAndInOrder() const;
 
  private:
-  void initializeObsGroup(size_t npaths);
   void print(std::ostream & os) const override;
 
   std::shared_ptr<const ioda::Distribution> dist_;   /// sampled locations' MPI distribution
-  ioda::ObsGroup og_;  /// interpolation paths on current MPI task
-  // Note on implementation: at time of writing, the ObsGroup does not support the util::DateTime
-  // type, so instead of doing expensive conversions of times to/from string representations, we
-  // opt to keep the times outside the ObsGroup.
   std::vector<util::DateTime> times_;  /// interpolation path times on current MPI task
   std::vector<double> lons_;  /// interpolation path longitudes on current MPI task
   std::vector<double> lats_;  /// interpolation path latitudes on current MPI task

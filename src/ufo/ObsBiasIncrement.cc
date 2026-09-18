@@ -15,6 +15,7 @@
 
 #include "ioda/distribution/Distribution.h"
 #include "ioda/Engines/HH.h"
+#include "ioda/ObsGroup.h"
 #include "ioda/ObsSpace.h"
 #include "oops/util/Logger.h"
 #include "ufo/ObsBias.h"
