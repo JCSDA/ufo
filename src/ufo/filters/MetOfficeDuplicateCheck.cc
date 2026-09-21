@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "ioda/ObsSpace.h"
+
 #include "ufo/filters/ObsAccessor.h"
 #include "ufo/utils/metoffice/MetOfficeSort.h"
 #include "ufo/utils/RecursiveSplitter.h"

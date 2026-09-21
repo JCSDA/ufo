@@ -16,6 +16,8 @@
 #include <memory>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+#include "ioda/ObsSpace.h"
 #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"
 #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.interface.h"
 #include "ufo/GeoVaLs.h"

@@ -20,11 +20,11 @@
 #include "oops/base/ObsVariables.h"
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameters.h"
+#include "oops/util/parameters/RequiredParameter.h"
 
 #include "ufo/errors/ObsErrorBase.h"
 #include "ufo/errors/ObsErrorParametersBase.h"
 #include "ufo/errors/ObsErrorReconditioner.h"
-#include "ufo/ObsTraits.h"
 
 namespace ioda {
   class ObsSpace;

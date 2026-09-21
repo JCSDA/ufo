@@ -18,7 +18,6 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsFilterBase.h"
-#include "ufo/ObsTraits.h"
 #include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ioda {

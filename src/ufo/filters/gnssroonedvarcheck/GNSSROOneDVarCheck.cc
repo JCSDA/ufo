@@ -17,6 +17,8 @@
 #include <set>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.h"
 #include "ufo/filters/gnssroonedvarcheck/GNSSROOneDVarCheck.interface.h"
 #include "ufo/GeoVaLs.h"

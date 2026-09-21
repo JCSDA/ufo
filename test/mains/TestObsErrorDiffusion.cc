@@ -11,7 +11,6 @@
 
 #include "../ufo/DiffusionDirac.h"
 
-#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);

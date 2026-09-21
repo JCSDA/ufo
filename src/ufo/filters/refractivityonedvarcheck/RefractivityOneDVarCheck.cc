@@ -16,6 +16,8 @@
 #include <memory>
 #include <vector>
 
+#include "ioda/ObsDataVector.h"
+
 #include "ufo/filters/refractivityonedvarcheck/RefractivityOneDVarCheck.h"
 #include "ufo/filters/refractivityonedvarcheck/RefractivityOneDVarCheck.interface.h"
 #include "ufo/GeoVaLs.h"

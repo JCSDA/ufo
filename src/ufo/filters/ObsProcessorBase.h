@@ -15,7 +15,6 @@
 #include "ufo/filters/ObsFilterData.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/ObsFilterBase.h"
-#include "ufo/ObsTraits.h"
 
 namespace ioda {
   template <typename DATATYPE> class ObsDataVector;

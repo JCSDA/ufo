@@ -27,7 +27,6 @@
 
 #include "ufo/errors/ObsErrorBase.h"
 #include "ufo/errors/ObsErrorParametersBase.h"
-#include "ufo/ObsTraits.h"
 
 namespace ioda {
   class ObsSpace;

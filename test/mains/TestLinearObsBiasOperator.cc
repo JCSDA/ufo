@@ -7,7 +7,6 @@
 
 #include "../ufo/LinearObsBiasOperator.h"
 #include "oops/runs/Run.h"
-#include "ufo/ObsTraits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);

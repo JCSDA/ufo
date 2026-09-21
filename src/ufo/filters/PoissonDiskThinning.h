@@ -16,6 +16,7 @@
 
 #include <boost/optional.hpp>
 
+#include "eckit/mpi/Comm.h"
 #include "ioda/ObsDataVector.h"
 #include "oops/util/ObjectCounter.h"
 #include "ufo/filters/FilterBase.h"

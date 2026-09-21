@@ -29,6 +29,7 @@
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
+#include "ufo/ObsTraits.h"
 #include "ufo/utils/StringUtils.h"
 
 namespace ufo {

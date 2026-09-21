@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/base/ParameterTraitsObsVariables.h"
 #include "oops/base/ParameterTraitsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"

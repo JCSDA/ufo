@@ -15,6 +15,8 @@
 #include "ioda/Layout.h"
 #include "ioda/ObsGroup.h"
 
+#include "oops/util/Logger.h"
+
 #include "ufo/errors/ObsErrorReconditioner.h"
 #include "ufo/utils/IodaGroupIndices.h"
 

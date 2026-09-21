@@ -27,7 +27,6 @@
 #include "ufo/errors/ObsErrorDiffusion.h"
 #include "ufo/errors/ObsErrorWithinGroupCov.h"
 
-#include "ufo/ObsTraits.h"
 
 #include "test/interface/ObsTestsFixture.h"
 #include "test/TestEnvironment.h"

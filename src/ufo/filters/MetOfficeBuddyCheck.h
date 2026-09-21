@@ -8,6 +8,8 @@
 #ifndef UFO_FILTERS_METOFFICEBUDDYCHECK_H_
 #define UFO_FILTERS_METOFFICEBUDDYCHECK_H_
 
+#include <Eigen/Core>
+
 #include <map>
 #include <memory>
 #include <ostream>

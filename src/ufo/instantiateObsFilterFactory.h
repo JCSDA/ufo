@@ -82,7 +82,6 @@
   #include "ufo/filters/rttovonedvarcheck/RTTOVOneDVarCheck.h"
 #endif
 
-#include "ufo/ObsTraits.h"
 
 namespace ufo {
 void instantiateObsFilterFactory() {
