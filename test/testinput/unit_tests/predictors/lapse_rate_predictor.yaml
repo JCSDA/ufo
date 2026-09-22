@@ -1,0 +1,36 @@
+time window:
+  begin: 2020-12-14T21:00:00Z
+  end: 2020-12-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Test of the lapseRate predictor's missing-value handling.
+#  - geos_amsua_n19_geoval_2020121500_missingVals.nc4: copy of the standard AMSU-A geovals
+#    with GeoVaLs/air_temperature missing at one level of location 10,
+#    and GeoVaLs/average_surface_temperature_within_field_of_view
+#    missing at location 12
+#  - geos_amsua_n19_diagnostics_missingVals.nc4:
+#    transmittances_of_atmosphere_layer_* same for every location/channel, except channel 1
+#    at location 11 which has one level set to missing.
+#  - geos_amsua_n19_obs_2020121500_missingVals.nc4: copy of the standard AMSU-A obs file
+#    with a TestReference_lapserate group.
+
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13,15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geos_amsua_n19_geoval_2020121500_missingVals.nc4
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/geos_amsua_n19_diagnostics_missingVals.nc4
+  obs bias:
+    variational bc:
+      predictors:
+      - name: lapseRate
+        tlapse: Data/ufo/testinput_tier_1/geos_amsua_n19_tlapmean.txt
+  reference group: TestReference_lapserate
+  tolerance: 1.0e-5

@@ -491,6 +491,8 @@ void ObsBiasCovariance::linearize(const ObsBias & bias, const eckit::Configurati
       // only keep the diagnoal
       for (size_t jvar = 0; jvar < vars_.size(); ++jvar) {
         for (size_t jloc = 0; jloc < predx.nlocs(); ++jloc) {
+          // Skip locations where this predictor is missing
+          if (predx[jloc * vars_.size() + jvar] == missing) continue;
           size_t jrec = 0;
           if (nrecs_ > 1) {
             std::size_t jrec_global = odb_.recnum()[jloc];

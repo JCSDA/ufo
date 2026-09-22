@@ -3,6 +3,10 @@ time window:
   end: 2020-12-15T03:00:00Z
   bound to include: begin  # consistency with test data from "ncdiag"
 
+# Updated test with ObsValue/brightnessTemperature set to missing for the cloudWaterContent
+# predictor's channels (37v/37h, channels 6/7).
+# The missing-value locations are already excluded by the first Bounds Check filter
+# (raw brightnessTemperature, minvalue 50.0), so passedBenchmark is unchanged.
 observations:
 - obs operator:
     name: CRTM
@@ -17,15 +21,11 @@ observations:
       EndianType: little_endian
       CoefficientPath: Data/
   obs space:
-    name: GMI GPM
+    name: GMI GPM missing brightness temperatures
     obsdatain:
       engine:
         type: H5File
-        obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020121500_m.nc4
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/gmi_gpm_obs_2020121500_out.nc4
+        obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020121500_m_missingVals.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-13
   geovals:

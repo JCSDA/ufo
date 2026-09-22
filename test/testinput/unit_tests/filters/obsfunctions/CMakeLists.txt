@@ -17,6 +17,17 @@ if( crtm_FOUND )
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 endif( crtm_FOUND )
 #
+if( crtm_FOUND )
+    ufo_add_test( NAME    amsr2_clw_ret_missing
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsr2_clw_ret_missing.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm filters obsfunctions tier2
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+endif( crtm_FOUND )
+#
 ufo_add_test( NAME    function_osw_windspeed
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
@@ -1077,6 +1088,17 @@ if( crtm_FOUND )
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_clw_ret.yaml"
+                  MPI     1
+                  LIBS    ufo
+                  LABELS  crtm filters obsfunctions
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+endif( crtm_FOUND )
+#
+if( crtm_FOUND )
+    ufo_add_test( NAME    gmi_clw_ret_missing
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_clw_ret_missing.yaml"
                   MPI     1
                   LIBS    ufo
                   LABELS  crtm filters obsfunctions

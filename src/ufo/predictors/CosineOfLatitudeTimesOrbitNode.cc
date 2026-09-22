@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2020-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,6 +11,7 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/util/missingValues.h"
 #include "ufo/utils/Constants.h"
 
 namespace ufo {
@@ -34,6 +35,9 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
   const std::size_t nlocs = out.nlocs();
   const std::size_t nvars = out.nvars();
 
+  const float fmiss = util::missingValue<float>();
+  const double dmiss = util::missingValue<double>();
+
   // retrieve the sensor view angle
   std::vector<float> cenlat(nlocs, 0.0);
   std::vector<float> node(nlocs, 0.0);
@@ -42,13 +46,17 @@ void CosineOfLatitudeTimesOrbitNode::compute(const ioda::ObsSpace & odb,
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
+      if (node[jloc] == fmiss || cenlat[jloc] == fmiss) {
+        out[jloc * nvars + jvar] = dmiss;
+        continue;
+      }
       if (node[jloc] != 0 && node[jloc] != 1 && node[jloc] != -1) {
         throw eckit::BadParameter(std::to_string(node[jloc]) +
          " is not a valid satelliteAscendingFlag. "
          "Possible values are 0,1,-1.", Here());
       }
       int adjusted_node = (node[jloc] == 0) ? -1 : node[jloc];
-      out[jloc * nvars + jvar] = adjusted_node * std::cos(cenlat[jloc] * Constants::deg2rad);
+      out[jloc * nvars + jvar] = adjusted_node * cos(cenlat[jloc] * Constants::deg2rad);
     }
   }
 }

@@ -24,6 +24,14 @@ if( crtm_FOUND )
                   LABELS  crtm unit_tests predictors
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+    ufo_add_test( NAME    gmi_crtm_bc_geos
+                  ECBUILD
+                  COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                  ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gmi_crtm_bc_geos.yaml"
+                  LIBS    ufo
+                  LABELS  crtm unit_tests predictors
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
     ufo_add_test( NAME    amsua_crtm_bc_obsoperator
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
@@ -203,6 +211,22 @@ ufo_add_test( NAME    cosine_of_latitude_predictor
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    emissivity_jacobian_predictor
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/emissivity_jacobian_predictor.yaml"
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    lapse_rate_predictor
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/lapse_rate_predictor.yaml"
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    legendre_predictor
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
@@ -223,6 +247,14 @@ ufo_add_test( NAME    orbital_angle_predictor
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/orbital_angle_predictor.yaml"
+              LIBS    ufo
+              LABELS  unit_tests predictors
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    scan_angle_predictor
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_Predictor.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/scan_angle_predictor.yaml"
               LIBS    ufo
               LABELS  unit_tests predictors
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )

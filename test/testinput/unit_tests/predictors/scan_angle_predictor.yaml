@@ -1,0 +1,22 @@
+time window:
+  begin: 2019-12-29T21:00:00Z
+  end: 2019-12-30T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Test of the sensorScanAngle predictor's missing-value handling
+# MetaData/sensorScanPosition is missing at location 0, valid everywhere else.
+observations:
+- obs space:
+    name: atms_n20
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov_biaspred_redo_scan.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-22
+  obs bias:
+    variational bc:
+      predictors:
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+  tolerance: 1.0e-6

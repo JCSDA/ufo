@@ -1,0 +1,83 @@
+time window:
+  begin: 2020-12-14T21:00:00Z
+  end: 2020-12-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Regression test for CLWRetMW::CIret_37v37h_diff (GMI 37V/37H branch) with missing input
+# brightness temperatures. gmi_gpm_obs_2020121500_m_missingVals.nc4 has missing values for
+# ObsValue/brightnessTemperature at three locations: channel 6 (37V) only
+# at location 0, channel 7 (37H) only at location 1, and both at location 2.
+# All three locations must retrieve bad_clwret_value_ (1000) and be rejected
+# here (13 channels x 3 locations = 39 rejections out of 1300 = 1261).
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice, Rain, Snow]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: &Sensor_ID gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: GMI FROM GPM missing brightness temperatures
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020121500_m_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020121500_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/gmi_gpm.20201214_21z.satbias.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        tlapse: &gmigpmtlap Data/ufo/testinput_tier_1/gmi_gpm.tlapse.txt
+      - name: lapseRate
+        tlapse: *gmigpmtlap
+      - name: emissivityJacobian
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        order: 2
+        tlapse: *gmigpmtlap
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        tlapse: *gmigpmtlap
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 4
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 3
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 2
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+  obs filters:
+  #  Check CLW retrievals from observations
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-13
+    test variables:
+    - name: ObsFunction/CLWRetMW
+      options:
+        clwret_ch37v: 6
+        clwret_ch37h: 7
+        clwret_types: [ObsValue]
+    maxvalue: 999.0
+    action:
+      name: reject
+  passedBenchmark: 1261

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2020-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -12,6 +12,8 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "oops/util/missingValues.h"
 
 #include "ufo/utils/Constants.h"
 
@@ -49,7 +51,11 @@ void ScanAngle::compute(const ioda::ObsSpace & odb,
     std::vector<int> view_angle2(nlocs, 0);
     odb.get_db("MetaData", var_name_, view_angle2);
     for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
-      view_angle[jloc] = view_angle2[jloc]*1.0f;
+      if (view_angle2[jloc] == util::missingValue<int>()) {
+        view_angle[jloc] = util::missingValue<float>();
+      } else {
+        view_angle[jloc] = view_angle2[jloc]*1.0f;
+      }
     }
   } else {
     odb.get_db("MetaData", var_name_, view_angle);
@@ -57,7 +63,11 @@ void ScanAngle::compute(const ioda::ObsSpace & odb,
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      out[jloc*nvars+jvar] = std::pow(view_angle[jloc] * Constants::deg2rad, order_);
+      if (view_angle[jloc] == util::missingValue<float>()) {
+        out[jloc*nvars+jvar] = util::missingValue<double>();
+      } else {
+        out[jloc*nvars+jvar] = pow(view_angle[jloc] * Constants::deg2rad, order_);
+      }
     }
   }
 }

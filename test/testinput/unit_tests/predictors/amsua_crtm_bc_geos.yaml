@@ -67,3 +67,63 @@ observations:
     tolerance TL: 1.0e-3
     tolerance AD: 1.0e-11
 
+# Same as above, but reads a fixture with ObsValue/brightnessTemperature set to missing for
+# the cloudWaterContent predictor's channels (238/314 GHz, channels 1/2) at three locations:
+# channel 1 only missing, channel 2 only missing, and both missing.
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: &Sensor_ID_missing_bt amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13,15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geos_amsua_n19_geoval_2020121500.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/geos_satbias_amsua_n19.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: cloudWaterContent
+        sensor: AMSUA
+        clwdif_ch238: 1
+        clwdif_ch314: 2
+      - name: lapseRate
+        order: 2
+        tlapse: &amsua19tlap_missing_bt Data/ufo/testinput_tier_1/geos_amsua_n19_tlapmean.txt
+      - name: lapseRate
+        tlapse: *amsua19tlap_missing_bt
+      - name: emissivityJacobian
+      - name: sensorScanAngle
+        order: 4
+      - name: sensorScanAngle
+        order: 3
+      - name: sensorScanAngle
+        order: 2
+      - name: sensorScanAngle
+    covariance:
+      minimal required obs number: 20
+      variance range: [1.0e-6, 10.0]
+      step size: 1.0e-4
+      largest analysis variance: 10000.0
+      prior:
+        input file: Data/ufo/testinput_tier_1/geos_satbias_amsua_n19.nc4
+        inflation:
+          ratio: 1.1
+          ratio for small dataset: 2.0
+  vector ref: ObsValue
+  tolerance: 1.e-1
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

@@ -1,9 +1,10 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2020-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
+#include <cmath>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -16,6 +17,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
@@ -108,8 +110,6 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
     geovals.getAtLevel(pred, oops::Variable{"air_temperature"}, js);
     tvp.push_back(pred);
   }
-  nlevs = geovals.nlevs(oops::Variable{"air_pressure"});
-  float tlapchn;
 
   // sort out the tlapmean based on vars
   std::vector<float> tlap;
@@ -124,15 +124,30 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
     }
   }
 
+  const float fmiss = util::missingValue<float>();
+  const double dmiss = util::missingValue<double>();
+  const auto isBad = [fmiss](float v) { return v == fmiss || std::isnan(v); };
+  float tlapchn = 0.0;
+
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-        tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
-                  (tsavg5[jloc]-tvp[nlevs-2][jloc]);
-        for (std::size_t k = 1; k < nlevs-1; ++k) {
-          tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
-                    (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
-        }
-        out[jloc*nvars+jvar] = std::pow((tlapchn - tlap[jvar]), order_);
+      // Check for missing or NaN values.
+      bool missingInput = isBad(tsavg5[jloc]);
+      for (std::size_t lev = 0; lev < nlevs && !missingInput; ++lev) {
+        missingInput = isBad(tvp[lev][jloc]) || isBad(ptau5[jvar][lev][jloc]);
+      }
+      if (missingInput) {
+        out[jloc*nvars+jvar] = dmiss;
+        continue;
+      }
+
+      tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
+                (tsavg5[jloc]-tvp[nlevs-2][jloc]);
+      for (std::size_t k = 1; k < nlevs-1; ++k) {
+        tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
+                  (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
+      }
+      out[jloc*nvars+jvar] = pow((tlapchn - tlap[jvar]), order_);
     }
   }
 }

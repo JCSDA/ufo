@@ -16,6 +16,8 @@ observations:
 #       obsfile: Data/ssmis_sine_latitude_predictor_out.nc4
     simulated variables: [brightnessTemperature]
     channels: &channels 1-24
+  # MetaData/latitude (and the matching TestReference) is missing at location 0, valid at
+  # the other 99 locations.
   obs bias:
     variational bc:
       predictors:

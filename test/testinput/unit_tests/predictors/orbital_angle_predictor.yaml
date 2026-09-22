@@ -17,6 +17,8 @@ observations:
 #       obsfile: Data/ssmis_obs_20191230T0000Z_orbital_angle_out.nc4
     simulated variables: [brightnessTemperature]
     channels: &channels 1-24
+  # MetaData/satelliteOrbitalAngle (and the matching TestReference) is missing at location 0,
+  # valid at the other 99 locations.
   geovals:
     filename: Data/ufo/testinput_tier_1/ssmis_geovals_20191230T0000Z_100subset.nc4
   obs bias:

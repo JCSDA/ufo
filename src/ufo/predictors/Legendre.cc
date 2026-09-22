@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020-2024 UCAR
+ * (C) Copyright 2020-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -10,6 +10,7 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/util/missingValues.h"
 #include "ufo/predictors/Legendre.h"
 
 namespace ufo {
@@ -45,8 +46,16 @@ void Legendre::compute(const ioda::ObsSpace & odb,
   std::vector<double> LegPoly(order_+1, 0);
 
   odb.get_db("MetaData", "sensorScanPosition", scan_position);
+  const int imiss = util::missingValue<int>();
+  const double dmiss = util::missingValue<double>();
   const std::size_t nvars = vars_.size();
   for (std::size_t jl = 0; jl < nlocs; ++jl) {
+    if (scan_position[jl] == imiss) {
+      for (std::size_t jb = 0; jb < nvars; ++jb) {
+        out[jl*nvars+jb] = dmiss;
+      }
+      continue;
+    }
     double xscan{-1.0 + 2.0 * (scan_position[jl] - 1) / (nscan_ - 1)};
     // Transformed variable for the scan position in the range -1 to 1.
     // Calculate Legendre Polynomial for current scan position

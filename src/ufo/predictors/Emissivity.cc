@@ -1,10 +1,11 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2020-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <cmath>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@
 #include "oops/base/ObsVariables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
+#include "oops/util/missingValues.h"
 
 namespace ufo {
 
@@ -48,6 +50,9 @@ void Emissivity::compute(const ioda::ObsSpace & odb,
   const std::size_t nvars = out.nvars();
   const std::size_t nlocs = out.nlocs();
 
+  const float fmiss = util::missingValue<float>();
+  const double dmiss = util::missingValue<double>();
+
   std::vector<float> pred(nlocs, 0.0);
   std::vector<float> h2o_frac(nlocs, 0.0);
   geovals.get(h2o_frac, oops::Variable{"water_area_fraction"});
@@ -58,7 +63,10 @@ void Emissivity::compute(const ioda::ObsSpace & odb,
              std::to_string(vars_.channels()[jvar]);
     ydiags.get(pred, hdiags);
     for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
-      if (h2o_frac[jloc] < 0.99 && std::fabs(pred[jloc]) > 0.001) {
+      if (h2o_frac[jloc] == fmiss || std::isnan(h2o_frac[jloc]) ||
+          pred[jloc] == fmiss || std::isnan(pred[jloc])) {
+        out[jloc*nvars+jvar] = dmiss;
+      } else if (h2o_frac[jloc] < 0.99 && std::fabs(pred[jloc]) > 0.001) {
         out[jloc*nvars+jvar] = pred[jloc];
       }
     }

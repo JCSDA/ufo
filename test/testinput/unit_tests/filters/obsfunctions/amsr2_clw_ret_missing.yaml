@@ -1,0 +1,56 @@
+time window:
+  begin: 2020-11-14T21:00:00Z
+  end: 2020-11-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Regression test for CLWRetMW::clw_retr_amsr2 with missing input brightness temperatures.
+# Total Obs = 6515 locations x 14 channels = 91210, except that
+# ObsValue/brightnessTemperature is set to missing at five locations: channel 7 (18V) only at
+# location 0, channel 8 (18H) only at location 1, channel 11 (36V) only at location 2, channel 12
+# (36H) only at location 3, and both channel 7 and channel 12 at location 4.
+# All five locations must retrieve bad_clwret_value_ and be rejected
+# (14 channels x 5 locations = 70 rejections out of 91210 = 91140).
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: amsr2_gcom-w1
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsr2_gcom-w1 missing brightness temperatures
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsr2_gcom-w1_obs_2020111500_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-14
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsr2_gcom-w1_geoval_2020111500.nc4
+  obs filters:
+  - filter: Bounds Check
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-14
+    test variables:
+    - name: ObsFunction/CLWRetMW
+      options:
+        clwret_ch18v: 7
+        clwret_ch18h: 8
+        clwret_ch36v: 11
+        clwret_ch36h: 12
+        sys_bias: [0.4800, 3.0737, 0.7433, 3.6430,
+                   3.5304, 4.4270, 5.1448, 5.0785,
+                   4.9763, 9.3215, 2.5789, 5.5274,
+                   0.6641, 1.3674]
+        clwret_types: [ObsValue]
+    maxvalue: 999.0
+    action:
+      name: reject
+  passedBenchmark: 91140

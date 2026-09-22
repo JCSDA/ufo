@@ -1,0 +1,35 @@
+time window:
+  begin: 2020-12-14T21:00:00Z
+  end: 2020-12-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Test of the emissivityJacobian predictor's missing-value handling.
+#
+#  - geos_amsua_n19_geoval_2020121500_missingVals.nc4: copy of the standard AMSU-A obs file
+#    except GeoVaLs/water_area_fraction set to missing at location 3 +
+#    GeoVaLs/air_temperature and GeoVaLs/average_surface_temperature_within_field_of_view 
+#    missing at locations 10/12
+#  - geos_amsua_n19_diagnostics_missingVals.nc4:
+#    constant 0.05 for every brightness_temperature_jacobian_surface_emissivity(channel, location),
+#    except channel 1 at location 5 which is set to missing.
+#  - geos_amsua_n19_obs_2020121500_missingVals.nc4: copy of the standard AMSU-A obs file
+#    with a TestReference_emissivity group
+observations:
+- obs space:
+    name: amsua_n19
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/geos_amsua_n19_obs_2020121500_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13,15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geos_amsua_n19_geoval_2020121500_missingVals.nc4
+  obs diagnostics:
+    filename: Data/ufo/testinput_tier_1/geos_amsua_n19_diagnostics_missingVals.nc4
+  obs bias:
+    variational bc:
+      predictors:
+      - name: emissivityJacobian
+  reference group: TestReference_emissivity
+  tolerance: 1.0e-6

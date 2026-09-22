@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021 Met Office
+ * (C) Copyright 2021-2026 Met Office
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,6 +11,7 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/util/missingValues.h"
 #include "ufo/predictors/OrbitalAngle.h"
 #include "ufo/utils/Constants.h"
 
@@ -48,24 +49,24 @@ void OrbitalAngle::compute(const ioda::ObsSpace & odb,
   std::vector<double> orbital_angle(nlocs, 0.0);
   odb.get_db("MetaData", "satelliteOrbitalAngle", orbital_angle);
 
-  switch (component_)
-  {
-    case FourierTermType::COS:
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        double cos_oa{ std::cos(orbital_angle[jl]*order_*Constants::deg2rad)};
-        for (std::size_t jb = 0; jb < nvars; ++jb) {
-          out[jl*nvars+jb] = cos_oa;
-        }
+  const double dmiss = util::missingValue<double>();
+
+  for (std::size_t jl = 0; jl < nlocs; ++jl) {
+    double val = dmiss;
+    if (orbital_angle[jl] != dmiss) {
+      switch (component_)
+      {
+        case FourierTermType::COS:
+          val = std::cos(orbital_angle[jl]*order_*Constants::deg2rad);
+          break;
+        case FourierTermType::SIN:
+          val = std::sin(orbital_angle[jl]*order_*Constants::deg2rad);
+          break;
       }
-      break;
-    case FourierTermType::SIN:
-      for (std::size_t jl = 0; jl < nlocs; ++jl) {
-        double sin_oa{ std::sin(orbital_angle[jl]*order_*Constants::deg2rad)};
-        for (std::size_t jb = 0; jb < nvars; ++jb) {
-          out[jl*nvars+jb] = sin_oa;
-        }
-      }
-      break;
+    }
+    for (std::size_t jb = 0; jb < nvars; ++jb) {
+      out[jl*nvars+jb] = val;
+    }
   }
 }
 

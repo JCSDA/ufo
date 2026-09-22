@@ -83,7 +83,6 @@ observations:
       options:
         sensor: *Sensor_ID
         channels: 1-15
-        #Hui test_biaspredictor: cloud_liquid_waterPredictor
         test_biaspredictor: cloudWaterContentPredictor
     maxvalue: 0.0
     action:

@@ -15,6 +15,9 @@ observations:
   #   engine:
   #     type: H5File
   #     obsfile: Data/cosineOfLatitudeTimesOrbitNode_out.nc4
+  # MetaData/latitude (and the matching TestReference) is missing at location 0,
+  # the predictor should come out missing at location 0 rather than
+  # computing cos() of the missing sentinel value.
   obs bias:
     variational bc:
       predictors:

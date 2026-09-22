@@ -472,9 +472,12 @@ void CLWRetMW::CIret_37v37h_diff(const std::vector<float> & bt_clr_37v,
   /// Tb_37v_clr and Tb_37h_clr for calculated Tb at 37V and 37H GHz from model values
   /// assuming in clear-sky condition. Tb_37v and Tb_37h are Tb observations at 37 V and 37H GHz.
   ///
+  const float missing = util::missingValue<float>();
   const float eps = std::numeric_limits<float>::epsilon();
   for (size_t iloc = 0; iloc < water_frac.size(); ++iloc) {
-    if (water_frac[iloc] >= 0.99) {
+    if (bt37v[iloc] == missing || bt37h[iloc] == missing) {
+      out[iloc] = getBadValue();
+    } else if (water_frac[iloc] >= 0.99) {
       if (bt37h[iloc] <= bt37v[iloc] && std::fabs(bt_clr_37v[iloc] - bt_clr_37h[iloc]) > eps) {
         out[iloc] = 1.0 - (bt37v[iloc] - bt37h[iloc])/(bt_clr_37v[iloc] - bt_clr_37h[iloc]);
         out[iloc] = std::max(0.f, out[iloc]);
@@ -501,9 +504,14 @@ void CLWRetMW::mhs_si(const std::vector<float> & bt_clr_89v,
   /// and 166V GHz from model values assuming in clear-sky condition. bt_89v and bt_166v
   /// are Tb observations at 89V and 166V GHz.
   ///
+  const float missing = util::missingValue<float>();
   for (size_t iloc = 0; iloc < bt_clr_89v.size(); ++iloc) {
-    out[iloc] = (bt89v[iloc] - bt166v[iloc]) - (bt_clr_89v[iloc] - bt_clr_166v[iloc]);
-    out[iloc] = std::max(0.f, out[iloc]);
+    if (bt89v[iloc] == missing || bt166v[iloc] == missing) {
+      out[iloc] = getBadValue();
+    } else {
+      out[iloc] = (bt89v[iloc] - bt166v[iloc]) - (bt_clr_89v[iloc] - bt_clr_166v[iloc]);
+      out[iloc] = std::max(0.f, out[iloc]);
+    }
   }
 }
 
@@ -521,9 +529,13 @@ void CLWRetMW::clw_retr_amsr2(const std::vector<float> & bt18v,
   const float a0_clw = -0.65929;
   // regression coefficients
   float regr_coeff_clw[3] = {-0.00013, 1.64692, -1.51916};
+  const float missing = util::missingValue<float>();
 
   for (size_t iloc = 0; iloc < bt18v.size(); ++iloc) {
-    if (bt18v[iloc] <= bt18h[iloc]) {
+    if (bt18v[iloc] == missing || bt18h[iloc] == missing ||
+        bt36v[iloc] == missing || bt36h[iloc] == missing) {
+      out[iloc] = getBadValue();
+    } else if (bt18v[iloc] <= bt18h[iloc]) {
       out[iloc] = getBadValue();
     } else if (bt36v[iloc] <= bt36h[iloc]) {
       out[iloc] = getBadValue();

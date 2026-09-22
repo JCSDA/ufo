@@ -79,6 +79,8 @@ observations:
 #       obsfile: Data/aod_obs_2018041500_m_predictors_out.nc4
     simulated variables: [aerosolOpticalDepth]
     channels: &channels 4
+  # ObsValue/aerosolOpticalDepth (and the matching TestReference) is missing at location 0,
+  # valid at the other 99 locations, should come out missing at location 0 rather than 0
   geovals:
     filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
   obs bias:

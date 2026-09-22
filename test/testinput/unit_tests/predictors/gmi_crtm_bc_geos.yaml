@@ -1,0 +1,131 @@
+time window:
+  begin: 2020-12-14T21:00:00Z
+  end: 2020-12-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice, Rain, Snow]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: &Sensor_ID gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: gmi_gpm
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020121500_m.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020121500_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/gmi_gpm.20201214_21z.satbias.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        tlapse: &gmigpmtlap Data/ufo/testinput_tier_1/gmi_gpm.tlapse.txt
+      - name: lapseRate
+        tlapse: *gmigpmtlap
+      - name: emissivityJacobian
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        order: 2
+        tlapse: *gmigpmtlap
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        tlapse: *gmigpmtlap
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 4
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 3
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 2
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+  vector ref: ObsValue
+  tolerance: 1.e-1
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11
+
+# Same as above, but reads a fixture with ObsValue/brightnessTemperature set to missing for
+# the cloudWaterContent predictor's channels (37v/37h, channels 6/7).
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice, Rain, Snow]
+    Cloud_Fraction: 1.0
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water]
+    obs options:
+      Sensor_ID: &Sensor_ID_missing_bt gmi_gpm
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: gmi_gpm
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020121500_m_missingVals.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-13
+  geovals:
+    filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020121500_m.nc4
+  obs bias:
+    input file: Data/ufo/testinput_tier_1/gmi_gpm.20201214_21z.satbias.nc4
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        tlapse: &gmigpmtlap_missing_bt Data/ufo/testinput_tier_1/gmi_gpm.tlapse.txt
+      - name: lapseRate
+        tlapse: *gmigpmtlap_missing_bt
+      - name: emissivityJacobian
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        order: 2
+        tlapse: *gmigpmtlap_missing_bt
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        tlapse: *gmigpmtlap_missing_bt
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 4
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 3
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 2
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+  vector ref: ObsValue
+  tolerance: 1.e-1
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

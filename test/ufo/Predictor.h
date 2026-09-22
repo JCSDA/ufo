@@ -70,17 +70,30 @@ void testPredictor() {
     }
     gval->setDefaultFormat(GeoVaLFormat::REDUCED);
 
+    const Predictors & predictors = ybias.predictors();
+
     // initialize Obs diagnostics
+    // Build diagvars from each predictor's own requiredHdiagnostics() ,
+    // and only the diagnostics predictors actually read via ydiags.get() in compute().
     oops::ObsVariables diagvars;
-    diagvars += ybias.requiredHdiagnostics();
-    std::vector<float> lons(ospace.nlocs());
-    std::vector<float> lats(ospace.nlocs());
-    std::vector<util::DateTime> times(ospace.nlocs());
-    ospace.get_db("MetaData", "latitude", lats);
-    ospace.get_db("MetaData", "longitude", lons);
-    ospace.get_db("MetaData", "dateTime", times);
-    auto locs = std::make_unique<SampledLocations>(lons, lats, times, ospace.distribution());
-    ObsDiagnostics ydiags(ospace, SampledLocations_(std::move(locs)), diagvars);
+    for (const auto & pred : predictors) {
+      diagvars += pred->requiredHdiagnostics();
+    }
+    std::unique_ptr<ObsDiagnostics> ydiags;
+    if (conf.has("obs diagnostics")) {
+      // Read obs diagnostics from a file, instead of running the operator.
+      const eckit::LocalConfiguration diagconf(conf, "obs diagnostics");
+      ydiags.reset(new ObsDiagnostics(diagconf, ospace, diagvars));
+    } else {
+      std::vector<float> lons(ospace.nlocs());
+      std::vector<float> lats(ospace.nlocs());
+      std::vector<util::DateTime> times(ospace.nlocs());
+      ospace.get_db("MetaData", "latitude", lats);
+      ospace.get_db("MetaData", "longitude", lons);
+      ospace.get_db("MetaData", "dateTime", times);
+      auto locs = std::make_unique<SampledLocations>(lons, lats, times, ospace.distribution());
+      ydiags.reset(new ObsDiagnostics(ospace, SampledLocations_(std::move(locs)), diagvars));
+    }
 
     bool expect_error_message = false;
 
@@ -89,16 +102,15 @@ void testPredictor() {
     EXPECT(npreds > 0);
     std::vector<ioda::ObsVector> predData(npreds, ioda::ObsVector(ospace));
 
-    const Predictors & predictors = ybias.predictors();
     for (std::size_t p = 0; p < npreds; ++p) {
       if (conf.has("expectExceptionWithMessage")) {
         const std::string msg = conf.getString("expectExceptionWithMessage");
-        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, ydiags, ybias,
+        EXPECT_THROWS_MSG(predictors[p]->compute(ospace, *gval, *ydiags, ybias,
                                                  predData[p]), msg.c_str());
         expect_error_message = true;
         break;
       }
-      predictors[p]->compute(ospace, *gval, ydiags, ybias, predData[p]);
+      predictors[p]->compute(ospace, *gval, *ydiags, ybias, predData[p]);
       predData[p].save(predictors[p]->name() + "Predictor");
     }
 
@@ -108,6 +120,10 @@ void testPredictor() {
 
     // Read in tolerance from yaml
     const double tol = conf.getDouble("tolerance");
+
+    // Group holding the reference predictor values, normally "TestReference".
+    // Multiple predictors reference values can share one obsfile under group names.
+    const std::string refGroup = conf.getString("reference group", "TestReference");
 
     // Get output variable names and read test data
     // Note prepend predictor_ to predictor names to distingush
@@ -135,7 +151,7 @@ void testPredictor() {
         else
           refVarName += std::to_string(testvars.channels()[jv]);
 
-        ospace.get_db("TestReference", refVarName, testData);
+        ospace.get_db(refGroup, refVarName, testData);
 
         // compare test and reference vectors
         double rms = 0.0;

@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2020 UCAR
+ * (C) Copyright 2020-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,6 +11,8 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+
+#include "oops/util/missingValues.h"
 
 #include "ufo/utils/Constants.h"
 
@@ -38,9 +40,13 @@ void SineOfLatitude::compute(const ioda::ObsSpace & odb,
   std::vector<float> cenlat(nlocs, 0.0);
   odb.get_db("MetaData", "latitude", cenlat);
 
+  const float fmiss = util::missingValue<float>();
+  const double dmiss = util::missingValue<double>();
+
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      out[jloc*nvars+jvar] = std::sin(cenlat[jloc] * Constants::deg2rad);
+      out[jloc*nvars+jvar] = (cenlat[jloc] == fmiss ?
+          dmiss : sin(cenlat[jloc] * Constants::deg2rad));
     }
   }
 }
