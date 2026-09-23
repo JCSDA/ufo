@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install linter
         run: |
-          python3 -m pip install fortitude-lint
+          python3 -m pip install fortitude-lint==0.9.2
       - name: Run fortitude check
         run: |
           fortitude check
