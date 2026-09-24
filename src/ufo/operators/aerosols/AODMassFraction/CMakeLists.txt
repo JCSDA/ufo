@@ -7,6 +7,8 @@
 set ( aodmassfraction_src_files
     ObsAodMassFraction.h
     ObsAodMassFraction.cc
+    ObsAodMassFractionTLAD.h
+    ObsAodMassFractionTLAD.cc
     ObsAodMassFractionParameters.h
 PARENT_SCOPE
 )

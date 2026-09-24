@@ -155,8 +155,8 @@ double ObsAodMassFraction::getUKCADustDiameter(const double num, const double ma
   const double c = (mode == "accumulation") ? c_a : c_c;
 
   // Return the diameter (m) if mass and number fractions are non-zero and positive.
-  // Else return zero.
-  return (num > 0 && mass > 0) ? std::pow(c*(mass / num), 1.0 / 3.0) : 0.0;
+  // Else return small diameter value. Try one micron (1e-6 m) as a small value.
+  return (num > 0 && mass > 0) ? std::pow(c*(mass / num), 1.0 / 3.0) : 1.0e-6;
 }
 
 // -----------------------------------------------------------------------------

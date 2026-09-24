@@ -74,7 +74,9 @@ class ObsAodMassFraction : public ObsOperatorBase,
   * not used.
   *
   * \date Dec. 2025: Created by H. Lawrence and P. Siwek (Met Office)
-  *
+  * \date May 2026: TL and AD added by C. Charlton-Perez (Met Office)
+  * 
+  * 
   */
   // -----------------------------------------------------------------------------
   ObsAodMassFraction(const ioda::ObsSpace &, const Parameters_ &);
@@ -86,6 +88,8 @@ class ObsAodMassFraction : public ObsOperatorBase,
 
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}
+  double getUKCADustDiameter(const double num, const double mass, const std::string & mode) const;
+  double getUKCADustKExt(const double diameter, const std::string & mode) const;
 
  private:
   void print(std::ostream &) const override;
@@ -102,8 +106,6 @@ class ObsAodMassFraction : public ObsOperatorBase,
                                       // fit parameters
   std::vector<double> accumulationParams_;  // UKCA dust accumulation mode extinction
                                             // coefficient fit parameters
-  double getUKCADustDiameter(const double num, const double mass, const std::string & mode) const;
-  double getUKCADustKExt(const double diameter, const std::string & mode) const;
 };
 
 // -----------------------------------------------------------------------------
