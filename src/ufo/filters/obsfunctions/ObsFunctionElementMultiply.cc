@@ -7,6 +7,8 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionElementMultiply.h"
 
+#include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include "ioda/ObsDataVector.h"

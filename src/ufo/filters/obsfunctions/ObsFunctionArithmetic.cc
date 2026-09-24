@@ -7,6 +7,8 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionArithmetic.h"
 
+#include <algorithm>
+#include <cmath>
 #include <string>
 #include <vector>
 
