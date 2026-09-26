@@ -36,6 +36,14 @@ class ObsAodExtParameters : public ObsOperatorParametersBase {
      "list of background wavelengths",
      this};
 
+  oops::Parameter<double> modelExtUnitConvert
+    {"model extinction units coeff",
+     "Positive multiplicative factor used to convert the units of the model extinction GeoVaL "
+     "(e.g. 1000 for km-1 to m-1). Defaults to 1, i.e. no conversion.",
+     1.0,
+     this,
+     {oops::exclusiveMinConstraint<double>(0.0)}};
+
   oops::Parameter<bool> doing_log
     {"doing_log_transform_aod",
      "doing log transform aod",

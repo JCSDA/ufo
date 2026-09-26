@@ -8,6 +8,7 @@ observations:
         name: AodExt
         nprofiles: 2
         bkg_wavelengths: [470.0,870.0]
+        model extinction units coeff: 1000.
         doing_log_transform_aod: false 
       obs space:
         name: AodExt
@@ -36,6 +37,7 @@ observations:
         name: AodExt
         nprofiles: 2
         bkg_wavelengths: [470.0,870.0]
+        model extinction units coeff: 1000.
         doing_log_transform_aod: true
         eps_for_log_transform_aod: 0.01
       obs space:

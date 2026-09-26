@@ -27,6 +27,7 @@ module ufo_aodext_tlad_mod
   real(kind_real),    allocatable :: obss_wavelength(:)!(nobs_wav) observed AOD wavelengths [nm]
   integer, public,           allocatable :: channels(:)!(nvars) selected observed wavelengths from config [nm]
   real(kind_real), public, allocatable :: wavelength(:)!(nch) background extinction profile's wavelengths[nm]
+  real(kind_real), public         :: model_ext_unit_convert ! unit conversion factor for ext
   logical, public                 :: doing_log         ! doing log transform aod
   real(kind_real), public         :: eps ! offset for log transform aod
   integer :: nlayers,  nprofiles
@@ -131,7 +132,11 @@ character(len=maxvarlen) :: err_msg
            call abor1_ftn(err_msg)
    end if
 
-  ! Option for doing log
+   ! Unit conversion for extinction
+   call f_conf%get_or_die("model extinction units coeff", self%model_ext_unit_convert)
+
+   ! Option for doing log
+
    call f_conf%get_or_die("doing_log_transform_aod", self%doing_log)
    if (self%doing_log) call f_conf%get_or_die("eps_for_log_transform_aod", self%eps)
 
@@ -253,9 +258,9 @@ real(c_double) :: missing
        do km = 1, self%nlayers
 
         aod_bkg(nobs,nch) = aod_bkg(nobs, nch) + (self%ext(km,nobs,nch) * self%delp(km,nobs)&
-                            * 1./(self%airdens(km,nobs) * grav*1000.0_kind_real))
+                            * 1./(self%airdens(km,nobs) * grav*self%model_ext_unit_convert))
         aod_bkg_tl(nobs,nch) = aod_bkg_tl(nobs, nch) + (ext_tl(km,nobs,nch) * self%delp(km,nobs)&
-                            * 1./(self%airdens(km,nobs) * grav*1000.0_kind_real))
+                            * 1./(self%airdens(km,nobs) * grav*self%model_ext_unit_convert))
 
        end do
     end do
@@ -341,7 +346,7 @@ real(c_double) :: missing
        do km = 1, self%nlayers
 
         aod_bkg(nobs,nch) = aod_bkg(nobs, nch) + (self%ext(km,nobs,nch) * self%delp(km,nobs) &
-                            * 1./(self%airdens(km,nobs)*grav*1000.0_kind_real))
+                            * 1./(self%airdens(km,nobs)*grav*self%model_ext_unit_convert))
 
        end do
     end do
@@ -411,7 +416,8 @@ real(c_double) :: missing
     do nobs = nlocs, 1, -1
        do km = self%nlayers, 1, -1
           ext_ad(km, nobs, nch) = ext_ad(km, nobs, nch) + self%delp(km, nobs) &
-                                  * aod_bkg_ad(nobs, nch) * 1./(self%airdens(km, nobs) * grav * 1000.)
+                                  * aod_bkg_ad(nobs, nch) &
+                                  * 1./(self%airdens(km, nobs) * grav * self%model_ext_unit_convert)
        end do
     end do
  end do

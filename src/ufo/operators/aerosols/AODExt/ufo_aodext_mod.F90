@@ -26,6 +26,7 @@ module ufo_aodext_mod
    type(oops_variables), public :: geovars
    real(kind_real), public, allocatable :: wavelength(:)!(nprofiles)
    integer, public              :: nprofiles
+   real(kind_real), public      :: model_ext_unit_convert ! unit conversion factor for extinction
    integer, public, allocatable :: channels(:) !List of observed wavelengths to use (specified in yaml)
    logical, public              :: doing_log
    real(kind_real), public      :: eps ! offset for log transform aod
@@ -115,6 +116,9 @@ character(len=maxvarlen) :: err_msg
       end if
       n = n + 1
    end do
+
+   ! Get the unit conversion coef
+   call f_conf%get_or_die("model extinction units coeff", self%model_ext_unit_convert)
 
    ! save obs wavelengths to use
    allocate(self%channels(size(channels)))
@@ -225,7 +229,8 @@ integer :: nobs, nch, ic, i, j, k
  do nch = 1, self%nprofiles
     do nobs = 1, nlocs
        do k =1, nlayers
-        aod_bkg(nobs,nch) = aod_bkg(nobs, nch) + (ext(k,nobs,nch) * delp(k,nobs)/(airdens(k,nobs))/(grav*1000.0_kind_real))
+        aod_bkg(nobs,nch) = aod_bkg(nobs, nch) + (ext(k,nobs,nch) * delp(k,nobs) &
+                            /(airdens(k,nobs))/(grav*self%model_ext_unit_convert))
        end do
     end do
  end do
