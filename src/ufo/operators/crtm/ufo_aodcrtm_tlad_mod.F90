@@ -33,6 +33,7 @@ module ufo_aodcrtm_tlad_mod
   type(CRTM_Atmosphere_type), allocatable :: atm_K(:,:)
   type(CRTM_Surface_type), allocatable :: sfc_K(:,:)
   REAL(kind_real), allocatable  :: scaling_factor(:,:)
+  type(CRTM_Options_type), allocatable :: Options(:)
   logical :: ltraj
  contains
   procedure :: setup  => ufo_aodcrtm_tlad_setup
@@ -101,6 +102,7 @@ class(ufo_aodcrtm_tlad), intent(inout) :: self
    deallocate(self%scaling_factor)
  end if
 
+ if (allocated(self%Options)) deallocate(self%Options)
 
 end subroutine ufo_aodcrtm_tlad_delete
 
@@ -191,6 +193,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
              self%atm_K( self%N_Channels, self%n_Profiles ) , &
              self%sfc_K( self%N_Channels, self%n_Profiles ) , &
              self%scaling_factor(self%n_Layers,self%n_Profiles ) , &
+             self%Options(self%n_Profiles)                  , &
              rts_K( self%N_Channels, self%n_Profiles )      , &
              STAT = alloc_stat                                )
    if ( alloc_stat /= 0 ) THEN
@@ -222,6 +225,10 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !--------------------------------
    CALL Load_Atm_Data(self%N_PROFILES,self%N_LAYERS,geovals,atm,self%conf)
 
+   do m = 1, self%n_Profiles
+     self%Options(m)%Skip_Profile = .not. crtm_pressure_is_monotonic(atm(m))
+   end do
+
    IF (TRIM(self%conf%aerosol_option) /= "") then
      CALL load_aerosol_data(self%n_profiles, self%n_layers, geovals,&
         &self%conf, self%varin, trim(def_aero_mod), atm)
@@ -247,7 +254,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
                              rts_K       , &  ! K-MATRIX Input
                              chinfo(n:n) , &  ! Input
                              rts         , &  ! FORWARD  Output
-                             self%atm_K    )  ! K-MATRIX Output
+                             self%atm_K  , &  ! K-MATRIX Output
+                             self%Options  )  ! Input
    if ( err_stat /= SUCCESS ) THEN
       message = "Error calling CRTM (setTraj) K-Matrix Model for "//TRIM(self%conf%SENSOR_ID(n))
       call Display_Message( PROGRAM_NAME, message, FAILURE )
@@ -349,6 +357,8 @@ CHARACTER(len=MAXVARLEN), ALLOCATABLE :: var_aerosols(:)
  ! Multiply by Jacobian and add to hofx
  do jprofile = 1, self%n_profiles
 
+  if (self%Options(jprofile)%Skip_Profile) cycle
+
    do jchannel = 1, size(self%channels)
      DO jaero = 1, self%conf%n_aerosols
         CALL ufo_geovals_get_var(geovals, var_aerosols(jaero), var_p)
@@ -410,6 +420,7 @@ INTEGER :: jaero
 
 ! Multiply by Jacobian and add to hofx (adjoint)
     DO jprofile = 1, self%n_Profiles
+      if (self%Options(jprofile)%Skip_Profile) cycle
        DO jchannel = 1, size(self%channels)
           if (hofx(jchannel, jprofile) /= missing) then
             DO jlevel = 1, var_p%nval
@@ -420,8 +431,13 @@ INTEGER :: jaero
        END DO
     END DO
 
-    FORALL (jlevel=1:var_p%nval,jprofile=1:self%n_profiles) &
-        var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) * self%scaling_factor(jlevel,jprofile) * self%conf%unit_coef
+    DO jprofile = 1, self%n_profiles
+      if (self%Options(jprofile)%Skip_Profile) cycle
+      DO jlevel = 1, var_p%nval
+        var_p%vals(jlevel,jprofile) = var_p%vals(jlevel,jprofile) * &
+             self%scaling_factor(jlevel,jprofile) * self%conf%unit_coef
+      END DO
+    END DO
 
  END DO
 

@@ -120,6 +120,7 @@ integer :: n_Layers
 integer :: n_Channels
 
 logical :: jacobian_needed
+type(CRTM_Options_type), allocatable :: Options(:)
 
 ! Define the Channel Info and Geometry  arguments
 type(CRTM_ChannelInfo_type)             :: chinfo(self%conf%n_Sensors)
@@ -213,6 +214,11 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    !--------------------------------
    call Load_Atm_Data(n_Profiles,n_Layers,geovals,atm,self%conf)
 
+   allocate(Options(n_Profiles))
+   do m = 1, n_Profiles
+     Options(m)%Skip_Profile = .not. crtm_pressure_is_monotonic(atm(m))
+   end do
+
    if (trim(self%conf%aerosol_option) /= "") then
      call load_aerosol_data(n_profiles, n_layers, geovals, &
        & self%conf, self%varin_aero, trim(def_aero_mod), atm)
@@ -289,7 +295,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
             rts_K                   , &  ! K-MATRIX Input
             chinfo(n:n)             , &  ! Input
             rts                     , &  ! FORWARD  Output
-            atm_k        )               ! K-MATRIX Output
+            atm_k                   , &  ! K-MATRIX Output
+            Options        )             ! Input
 
        if ( err_stat /= SUCCESS ) then
          message = "Error calling CRTM K-Matrix Model for "//TRIM(self%conf%SENSOR_ID(n))
@@ -315,7 +322,8 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
        ! ------------------------------------------
        err_stat = CRTM_AOD( atm          , &  ! FORWARD  Input
                             chinfo(n:n)  , &  ! Input
-                            rts          )    ! FORWARD  Output
+                            rts          , &  ! FORWARD  Output
+                            Options      )    ! Input
 
        if ( err_stat /= SUCCESS ) then
          message = "Error calling CRTM Forward Model for "//TRIM(self%conf%SENSOR_ID(n))
@@ -334,6 +342,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
    hofx = missing
 
    do m = 1, n_profiles
+       if (Options(m)%Skip_Profile) cycle
        do l = 1, size(self%channels)
          hofx(l,m) = sum(rts(self%channels(l),m)%Layer_Optical_Depth)
       end do
@@ -346,7 +355,7 @@ type(CRTM_RTSolution_type), allocatable :: rts_K(:,:)
 
    ! Deallocate all arrays
    ! ---------------------
-   deallocate(geo, atm, sfc, rts, STAT = alloc_stat)
+   deallocate(geo, atm, sfc, rts, Options, STAT = alloc_stat)
    if ( alloc_stat /= 0 ) THEN
       message = "Error deallocating structure arrays"
       call Display_Message( PROGRAM_NAME, message, FAILURE )

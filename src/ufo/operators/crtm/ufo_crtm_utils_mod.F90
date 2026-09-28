@@ -33,6 +33,7 @@ public get_var_name
 public Load_Atm_Data
 public Load_Sfc_Data
 public Load_Geom_Data
+public crtm_pressure_is_monotonic
 public ufo_crtm_skip_profiles
 
 PUBLIC Load_Aerosol_Data
@@ -246,6 +247,26 @@ END INTERFACE qsmith
 
 
 contains
+
+! ------------------------------------------------------------------------------
+
+logical function crtm_pressure_is_monotonic(atm)
+
+implicit none
+
+type(CRTM_Atmosphere_type), intent(in) :: atm
+
+integer :: jlevel
+
+ crtm_pressure_is_monotonic = .true.
+ do jlevel = atm%n_layers, 1, -1
+   if (atm%level_pressure(jlevel) <= atm%level_pressure(jlevel-1)) then
+     crtm_pressure_is_monotonic = .false.
+     return
+   end if
+ end do
+
+end function crtm_pressure_is_monotonic
 
 ! ------------------------------------------------------------------------------
 
@@ -790,7 +811,7 @@ logical, intent(in):: Is_Active_Sensor
 logical, intent(in):: Is_Vis_or_UV
 type(CRTM_Options_type),    intent(inout) :: Options(:)
 
-integer :: jprofile, jchannel, jlevel
+integer :: jprofile, jchannel
 character(len=MAXVARLEN) :: varname
 character(len=64) :: obsGroupName
 character(len=max_string) :: message
@@ -851,12 +872,10 @@ end do
    Options(jprofile)%Skip_Profile = all(ObsVal(jprofile,:) == missing_d)
 
    ! check for pressure monotonicity
-   do jlevel = atm(jprofile)%n_layers, 1, -1
-     if ( atm(jprofile)%level_pressure(jlevel) <= atm(jprofile)%level_pressure(jlevel-1) ) then
-       Options(jprofile)%Skip_Profile = .TRUE.
-       cycle profile_loop
-     end if
-   end do
+   if (.not. crtm_pressure_is_monotonic(atm(jprofile))) then
+     Options(jprofile)%Skip_Profile = .TRUE.
+     cycle profile_loop
+   end if
 
    ! Sum of the coverage types can be found less than 1 near the boundary of regional configurations. Skip those data points for CRTM.
    if ( abs(sfc(jprofile)%Water_Coverage+sfc(jprofile)%Land_Coverage+sfc(jprofile)%Snow_Coverage+sfc(jprofile)%Ice_Coverage - one ) > 1.0e-6_kind_real) then
