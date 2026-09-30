@@ -122,8 +122,7 @@ void HistoryCheck::applyFilter(const std::vector<bool> & apply,
   // If the stuck check filter parameters were set and if the stuck check filter has the potential
   // to flag observations (number of observations is greater than the numberStuckTolerance value)
   if (stuckOptions &&
-      widerObsSpace.index().size() >
-      stuckOptions->numberStuckTolerance.value().value()) {
+      widerObsSpace.nlocs() > stuckOptions->numberStuckTolerance.value().value()) {
     // If the observation subtype is one which the stuck check filter should be run on
     if (subtype != SurfaceObservationSubtype::TEMP &&
         subtype != SurfaceObservationSubtype::BATHY &&
