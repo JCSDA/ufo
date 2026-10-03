@@ -34,11 +34,7 @@ ModelHeightAdjustedAirTemperature::ModelHeightAdjustedAirTemperature(
   parameters_.validateAndDeserialize(conf);
 
   // Required observation data (configurable, defaults to ObsValue/airTemperatureAt2M)
-  std::string obsVarFullName = "ObsValue/airTemperatureAt2M";
-  if (parameters_.observedVariable.value() != boost::none) {
-    obsVarFullName = parameters_.observedVariable.value()->name.value();
-  }
-  invars_ += Variable(obsVarFullName);
+  invars_ += parameters_.observedTemperature.value();
 
   // Required model height (terrain or lowest model level)
   std::string modelHeightFrom = "terrain";
@@ -79,12 +75,6 @@ void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
   oops::Log::trace() << "ModelHeightAdjustedAirTemperature compute start" << std::endl;
   const size_t nlocs = in.nlocs();
 
-  // Determine observed variable name
-  std::string obsVarFullName = "ObsValue/airTemperatureAt2M";
-  if (parameters_.observedVariable.value() != boost::none) {
-    obsVarFullName = parameters_.observedVariable.value()->name.value();
-  }
-
   // Determine model height option and offset
   std::string modelHeightFrom = "terrain";
   float modelHeightOffset = 0.0f;
@@ -104,7 +94,7 @@ void ModelHeightAdjustedAirTemperature::compute(const ObsFilterData & in,
   std::vector<float> ModelHeight(nlocs);
   std::vector<float> StationHeight(nlocs);
 
-  in.get(Variable(obsVarFullName), obsValue);
+  in.get(parameters_.observedTemperature.value(), obsValue);
   if (modelHeightFrom == "terrain") {
     in.get(Variable("GeoVaLs/height_above_mean_sea_level_at_surface"), ModelHeight);
   } else {

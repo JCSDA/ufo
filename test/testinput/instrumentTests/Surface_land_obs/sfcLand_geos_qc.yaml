@@ -59,20 +59,19 @@ observations:
 
   obs filters:
 
-  # only variables airTemperature/virtualTemperature are present in the data files.
-  # SfcCorrectedPressure/GSL and ObsErrorFactorSfcPressure look for
-  # airTemperatureAt2M/virtualTemperatureAt2M.
-  # ObsValue lookups fall back to DerivedObsValue, so alias them here.
+  # Obs file is out-dated, and has varName instead of
+  # varNamesAt2M. Alias to correct names here for use
+  # in obsfunctions below
   - filter: Variable Assignment
     assignments:
     - name: DerivedObsValue/airTemperatureAt2M
       type: float
       source variable:
         name: ObsValue/airTemperature
-    - name: DerivedObsValue/virtualTemperatureAt2M
+    - name: DerivedObsValue/specificHumidityAt2M
       type: float
       source variable:
-        name: ObsValue/virtualTemperature
+        name: ObsValue/specificHumidity
 
   # Apply variable changes needed for rescaled height coordinate
   # ------------------------------------------------------------
@@ -334,4 +333,4 @@ observations:
     action:
       name: reject
 
-  passedBenchmark: 8
+  passedBenchmark: 7

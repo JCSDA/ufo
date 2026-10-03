@@ -1,0 +1,52 @@
+time window:
+  begin: 2020-10-01T03:00:00Z
+  end: 2020-10-01T09:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Tests of the GSL station pressure method where the observed virtual temperature is derived
+# from observed air temperature and specific humidity (no virtualTemperatureAt2M in the obs file).
+# Most locations have co-located T and q; the remainder fall back on model virtual temperature.
+observations:
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    observed temperature variable: ObsValue/airTemperatureAt2M
+    observed specific humidity variable: ObsValue/specificHumidity
+  obs space:
+    name: Surface operator station pressure GSL method with Tv derived from obs T and q
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/2020100106_metars_small_GSL_Tq_out.nc
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfcobs_geovals_gfsC48_2020100106_small.nc
+  rms ref: 99074.47171838
+  tolerance: 1.e-08
+ # Same as above, but the specific humidity variable is absent from the obs file, so the
+# observed air temperature is used in place of virtual temperature. The rms ref differs
+# from the test above, confirming that the humidity contributes to the result.
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    observed temperature variable: ObsValue/airTemperatureAt2M
+    observed specific humidity variable: ObsValue/specificHumidityAt2M
+  obs space:
+    name: Surface operator station pressure GSL method with obs T and no obs q
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/2020100106_metars_small.nc
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/2020100106_metars_small_GSL_T_out.nc
+    simulated variables: [stationPressure]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfcobs_geovals_gfsC48_2020100106_small.nc
+  rms ref: 99082.50558433
+  tolerance: 1.e-08

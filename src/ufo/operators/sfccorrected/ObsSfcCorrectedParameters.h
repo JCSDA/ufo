@@ -172,6 +172,18 @@ class ObsSfcCorrectedParameters : public ObsOperatorParametersBase {
       "stationElevation",
       this};
 
+  oops::Parameter<ufo::Variable> obsTemperature{
+      "observed temperature variable",
+      "Observed air temperature variable (group/variable format)",
+      ufo::Variable("ObsValue/airTemperatureAt2M"),
+      this};
+
+  oops::Parameter<ufo::Variable> obsSpecificHumidity{
+      "observed specific humidity variable",
+      "Observed specific humidity variable (group/variable format)",
+      ufo::Variable("ObsValue/specificHumidityAt2M"),
+      this};
+
   oops::Parameter<SfcCorrectionType> correctionType{
       "correction scheme to use",
       "Scheme used for correction ('WRFDA' or 'UKMO' or 'GSL')",

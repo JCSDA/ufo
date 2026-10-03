@@ -22,15 +22,6 @@
 
 namespace ufo {
 
-/// \brief Parameters for the observed variable configuration
-class ObservedVariableParameters : public oops::Parameters {
-  OOPS_CONCRETE_PARAMETERS(ObservedVariableParameters, Parameters)
-
- public:
-  /// Full variable name (group/variable format)
-  oops::Parameter<std::string> name{"name", "ObsValue/airTemperatureAt2M", this};
-};
-
 /// \brief Parameters for the model height configuration
 class ModelHeightParameters : public oops::Parameters {
   OOPS_CONCRETE_PARAMETERS(ModelHeightParameters, Parameters)
@@ -83,9 +74,10 @@ class ModelHeightAdjustedAirTemperatureParameters : public oops::Parameters {
   /// Input observation station height to be used
   oops::RequiredParameter<Variable> elevation{"elevation", this};
 
-  /// Observed variable configuration (optional; defaults to ObsValue/airTemperatureAt2M)
-  oops::OptionalParameter<ObservedVariableParameters> observedVariable{
-      "observed variable", this};
+  /// Observed temperature variable (default: ObsValue/airTemperatureAt2M)
+  oops::Parameter<Variable> observedTemperature{
+      "observed temperature variable",
+      Variable("ObsValue/airTemperatureAt2M"), this};
 
   /// Model height configuration (optional; defaults to terrain with 0m offset)
   oops::OptionalParameter<ModelHeightParameters> modelHeight{

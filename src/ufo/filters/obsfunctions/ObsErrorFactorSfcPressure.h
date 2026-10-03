@@ -18,6 +18,7 @@
 
 #include "ufo/filters/obsfunctions/ObsFunctionBase.h"
 #include "ufo/filters/Variables.h"
+#include "ufo/utils/parameters/ParameterTraitsVariable.h"
 
 namespace ufo {
 
@@ -30,6 +31,14 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
   oops::Parameter<std::string> geovar_geomz{"geovar_geomz", "height_above_mean_sea_level", this};
   oops::Parameter<std::string> geovar_sfc_geomz{"geovar_sfc_geomz",
                                                 "height_above_mean_sea_level_at_surface", this};
+  /// Observed air temperature variable (group/variable format).
+  oops::Parameter<Variable> obsTemperature{"observed temperature variable",
+                                           Variable("ObsValue/airTemperatureAt2M"), this};
+  /// Observed specific humidity variable (group/variable format).
+  oops::Parameter<Variable> obsSpecificHumidity{"observed specific humidity variable",
+                                                Variable("ObsValue/specificHumidityAt2M"), this};
+  /// Name of the observation height variable (MetaData group).
+  oops::Parameter<std::string> obsHeightName{"station_altitude", "height", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -38,7 +47,7 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///
 /// This routine was designed to mimic the GSI observer code (i.e., setupps.f90) to inflate
 /// the observation error for surface pressure using the following inputs:
-///   Observed surface pressure, station height, virtual temperature or air temperature.
+///   Observed surface pressure, station height, air temperature and specific humidity.
 ///   Model first-guess fields interpolated to the observation location.
 /// The starting obserror is then altered by this code with the "inflate error" action,
 /// For testing purposes, the optional parameter of original_obserr group name such as ObsError
@@ -63,6 +72,10 @@ class ObsErrorFactorSfcPressureParameters : public oops::Parameters {
 ///             geovar_geomz: geopotential_height
 ///             # default is height_above_mean_sea_level_at_surface
 ///             geovar_sfc_geomz: geopotential_height_at_surface
+///             # default is ObsValue/airTemperatureAt2M
+///             observed temperature variable: ObsValue/airTemperature
+///             # default is ObsValue/specificHumidityAt2M
+///             observed specific humidity variable: ObsValue/specificHumidity
 ///
 class ObsErrorFactorSfcPressure : public ObsFunctionBase<float> {
  public:

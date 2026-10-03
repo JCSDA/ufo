@@ -104,8 +104,6 @@ observations:
     options:
       elevation:
         name: MetaData/stationElevation
-      observed variable:
-        name: ObsValue/airTemperatureAt2M
       temperature lapse rate in K/km:
         scheme: local
         level1: 1

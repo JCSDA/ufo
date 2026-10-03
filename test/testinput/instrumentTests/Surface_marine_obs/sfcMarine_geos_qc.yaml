@@ -50,6 +50,8 @@ observations:
        geovar_geomz: geopotential_height
        geovar_sfc_geomz: height_above_mean_sea_level_at_surface
        station_altitude: height
+       observed temperature variable: ObsValue/airTemperature
+       observed specific humidity variable: ObsValue/specificHumidity
 
      # Specific humidity is using the lowest model level (identity)
      - name: Identity
@@ -146,6 +148,8 @@ observations:
           geovar_geomz: geopotential_height
           geovar_sfc_geomz: height_above_mean_sea_level_at_surface
           station_altitude: height
+          observed temperature variable: ObsValue/airTemperature
+          observed specific humidity variable: ObsValue/specificHumidity
   # assign TempObsErrorData/stationPressure <--- ObsErrorData before changing its Min and Max
   - filter: Variable Assignment
     assignments:

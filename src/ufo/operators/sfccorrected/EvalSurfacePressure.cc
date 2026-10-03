@@ -558,18 +558,29 @@ void stationPressure_GSL::getDataValues(const ufo::GeoVaLs & gv,
   const size_t nobs = obsdb.nlocs();
   const oops::Variable geomz_var = oops::Variable(params_.geovarGeomZ.value());
   const int surface_level_index = gv.nlevs(geomz_var) - 1;
+  const float missing = util::missingValue<float>();
 
-  obsdb.get_db("MetaData", "stationElevation", obsHeight);
+  obsdb.get_db("MetaData", params_.obsHeightName.value(), obsHeight);
   obsdb.get_db("MetaData", "latitude", obsLats);
   obsdb.get_db("ObsValue", "stationPressure", obsPressure);
 
-  obsVirtualTemp = std::vector<float>(nobs, util::missingValue<float>());
-  if (obsdb.has("ObsValue", "virtualTemperatureAt2M")) {
-    obsdb.get_db("ObsValue", "virtualTemperatureAt2M", obsVirtualTemp);
+  obsVirtualTemp = std::vector<float>(nobs, missing);
+  obsTemp = std::vector<float>(nobs, missing);
+  const ufo::Variable & tempVar = params_.obsTemperature.value();
+  const ufo::Variable & humidityVar = params_.obsSpecificHumidity.value();
+  if (obsdb.has(tempVar.group(), tempVar.variable())) {
+    obsdb.get_db(tempVar.group(), tempVar.variable(), obsTemp);
   }
-  obsTemp = std::vector<float>(nobs, util::missingValue<float>());
-  if (obsdb.has("ObsValue", "airTemperatureAt2M")) {
-    obsdb.get_db("ObsValue", "airTemperatureAt2M", obsTemp);
+  // Derive observed virtual temperature if specific humidity is available.
+  if (obsdb.has(humidityVar.group(), humidityVar.variable())) {
+    std::vector<float> obsHumidity(nobs, missing);
+    obsdb.get_db(humidityVar.group(), humidityVar.variable(), obsHumidity);
+    for (size_t iloc = 0; iloc < nobs; ++iloc) {
+      if (obsTemp[iloc] != missing && obsHumidity[iloc] != missing) {
+        obsVirtualTemp[iloc] =
+            formulas::VirtualTemp_From_Sh_AT(obsHumidity[iloc], obsTemp[iloc]);
+      }
+    }
   }
 
   // Get surface height.  If geopotential then convert to geometric height.
@@ -578,7 +589,7 @@ void stationPressure_GSL::getDataValues(const ufo::GeoVaLs & gv,
     oops::Log::trace()  << "ObsSfcCorrected::simulateObs_GSL do geopotential conversion for "
                         << "model surface level" << std::endl;
     for (size_t iloc = 0; iloc < nobs; ++iloc) {
-      if (obsPressure[iloc] != util::missingValue<float>()) {
+      if (obsPressure[iloc] != missing) {
         modelHeightSurface[iloc] = formulas::Geopotential_to_Geometric_Height(obsLats[iloc],
                   modelHeightSurface[iloc]);
       }

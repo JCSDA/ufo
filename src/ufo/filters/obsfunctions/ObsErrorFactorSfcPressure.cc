@@ -44,11 +44,11 @@ ObsErrorFactorSfcPressure::ObsErrorFactorSfcPressure(const eckit::Configuration 
 
   // Include list of required data from ObsValue
   invars_ += Variable("ObsValue/stationPressure");
-  invars_ += Variable("ObsValue/virtualTemperatureAt2M");
-  invars_ += Variable("ObsValue/airTemperatureAt2M");
+  invars_ += options_->obsTemperature.value();
+  invars_ += options_->obsSpecificHumidity.value();
 
   // Include list of required data from MetaData
-  invars_ += Variable("MetaData/stationElevation");
+  invars_ += Variable("MetaData/" + options_->obsHeightName.value());
 
   // Include list of required data from GeoVaLs
   invars_ += Variable("GeoVaLs/air_pressure_at_surface");
@@ -87,25 +87,27 @@ void ObsErrorFactorSfcPressure::compute(const ObsFilterData & data,
 
   // Get MetaData of station elevation
   std::vector<float> ob_elevation(nlocs);
-  data.get(Variable("MetaData/height"), ob_elevation);
+  data.get(Variable("MetaData/" + options_->obsHeightName.value()), ob_elevation);
 
   // Get ObsValue of surface pressure
   std::vector<float> ob_pressure_sfc(nlocs);
   data.get(Variable("ObsValue/stationPressure"), ob_pressure_sfc);
 
-  // Get ObsValue of virtual temperature (optional), initialize
-  // the vector as missing value and get values only if it exists
+  // Convert temperature to virtual temperature where specific
+  // humidity is available.
+  const Variable & temperatureVar = options_->obsTemperature.value();
+  const Variable & humidityVar = options_->obsSpecificHumidity.value();
   std::vector<float> ob_temp_sfc(nlocs, missing);
-  if (data.has(Variable("ObsValue/virtualTemperatureAt2M"))) {
-    data.get(Variable("ObsValue/virtualTemperatureAt2M"), ob_temp_sfc);
-  }
-  if (data.has(Variable("ObsValue/airTemperatureAt2M"))) {
-    std::vector<float> ob_temp_sfc2(nlocs);
-    data.get(Variable("ObsValue/airTemperatureAt2M"), ob_temp_sfc2);
-    for (size_t iloc = 0; iloc < nlocs; ++iloc) {
-      if (ob_temp_sfc[iloc] == missing &&
-          ob_temp_sfc2[iloc] != missing) {
-        ob_temp_sfc[iloc] =  ob_temp_sfc2[iloc];
+  if (data.has(temperatureVar)) {
+    data.get(temperatureVar, ob_temp_sfc);
+    if (data.has(humidityVar)) {
+      std::vector<float> ob_humidity(nlocs, missing);
+      data.get(humidityVar, ob_humidity);
+      for (size_t iloc = 0; iloc < nlocs; ++iloc) {
+        if (ob_temp_sfc[iloc] != missing && ob_humidity[iloc] != missing) {
+          ob_temp_sfc[iloc] =
+              formulas::VirtualTemp_From_Sh_AT(ob_humidity[iloc], ob_temp_sfc[iloc]);
+        }
       }
     }
   }

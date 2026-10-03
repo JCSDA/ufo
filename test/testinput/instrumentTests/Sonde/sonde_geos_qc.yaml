@@ -47,6 +47,8 @@ observations:
        geovar_geomz: geopotential_height
        geovar_sfc_geomz: height_above_mean_sea_level_at_surface
        station_altitude: height
+       observed temperature variable: ObsValue/airTemperature
+       observed specific humidity variable: ObsValue/specificHumidity
 
   obs filters:
 
@@ -109,6 +111,8 @@ observations:
           geovar_geomz: geopotential_height
           geovar_sfc_geomz: height_above_mean_sea_level_at_surface
           station_altitude: height
+          observed temperature variable: ObsValue/airTemperature
+          observed specific humidity variable: ObsValue/specificHumidity
 
 # Note: Obs Erorr should between [min ~ max] for gross error checks.
 # However, duplicate factors are applied to those obs erros which are not reset between [min~max].
