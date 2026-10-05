@@ -1670,7 +1670,7 @@ contains
       nprofiles = 1
       nlevels = size(profiles(1) % p)
 
-      profiles(1) % zenangle    = ob_info % sensor_zenith_angle
+      profiles(1) % zenangle    = abs(ob_info % sensor_zenith_angle)
       profiles(1) % azangle     = ob_info % sensor_azimuth_angle
       profiles(1) % sunzenangle = ob_info % solar_zenith_angle
       profiles(1) % sunazangle  = ob_info % solar_azimuth_angle
@@ -1718,6 +1718,12 @@ contains
       variable_present = obsspace_has(obss, "MetaData", "sensorZenithAngle")
       if (variable_present) then
         call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", profiles(1:nprofiles)%zenangle)
+        ! Some data streams (e.g. GSI/ncdiag-derived files) sign the zenith
+        ! angle by scan side; RTTOV requires a magnitude and rejects negative
+        ! values in its profile checks. The scan-side information belongs to
+        ! sensorViewAngle/azimuth, so taking the absolute value here is lossless
+        ! (and a no-op for data that is already non-negative).
+        profiles(1:nprofiles)%zenangle = abs(profiles(1:nprofiles)%zenangle)
       else
         message = "ERROR: Mandatory input MetaData/sensorZenithAngle not in database. Aborting..."
         call abor1_ftn(message)
