@@ -51,6 +51,7 @@ struct Constants {
   static constexpr double four           = 4.0;
   static constexpr double five           = 5.0;
   static constexpr double ten            = 10.0;
+  static constexpr double thousand       = 1000.0;
   static constexpr double k_t            = 0.65;         // Thermal conductivity of water at 20degC
                                                          // (W m^-1 K^-1)
   static constexpr double L_e            = 2.26e+06;     // Latent heat of vaporization at 373.15K

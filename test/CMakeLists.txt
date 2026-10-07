@@ -108,6 +108,8 @@ foreach(pattern
   "(.*)scatwind_obs_2d_2020100106.nc4"
   "(.*)superob_testdata.nc4"
   "(.*)mtgirs_obserror_fstest.nc4"  # used with drawFromFile obsfunction
+  # CRTM coefficient files, not obs
+  "(.*)/crtm_coeff/(.*)"
 )
   list(FILTER OBS_FILES EXCLUDE REGEX ${pattern})
 endforeach()
@@ -694,6 +696,20 @@ if( crtm_FOUND )
     create_symlink_filename( ${UFO_CRTM_TESTFILES_PATH}
                              ${CMAKE_CURRENT_BINARY_DIR}/Data
                              ${crtm_test_input} )
+
+    # CALIOP coefficients are not in the current CRTM fix release, so fall back to
+    # the copies in ufo-data. Once a CRTM fix release provides them, move these
+    # into crtm_test_input and delete this block and ufo-data's crtm_coeff/.
+    foreach( coeff SpcCoeff/netCDF/v.caliop.SpcCoeff.nc
+                   TauCoeff/ODPS/netCDF/v.caliop.TauCoeff.nc )
+      get_filename_component( coeff_name ${coeff} NAME )
+      if( EXISTS ${UFO_CRTM_TESTFILES_PATH}/${coeff} )
+        set( coeff_src ${UFO_CRTM_TESTFILES_PATH}/${coeff} )
+      else()
+        set( coeff_src ${ufo_data_testinput_tier_1_local}/crtm_coeff/${coeff_name} )
+      endif()
+      file( CREATE_LINK ${coeff_src} ${CMAKE_CURRENT_BINARY_DIR}/Data/${coeff_name} SYMBOLIC )
+    endforeach()
 endif()
 
 #####################################################################

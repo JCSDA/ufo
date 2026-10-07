@@ -17,9 +17,6 @@ namespace ufo
   class ObsExtCoeffProfCRTMParameters : public ObsRadianceCRTMParameters
   {
     OOPS_CONCRETE_PARAMETERS(ObsExtCoeffProfCRTMParameters, ObsRadianceCRTMParameters)
-   public:
-    /// number of lidar levels
-    oops::RequiredParameter<int> nProfileLevels{"nProfileLevels", this};
   };  // end class ObsExtCoeffProfCRTMParameters
 
 }  // namespace ufo

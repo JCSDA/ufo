@@ -31,6 +31,7 @@ real(kind_real), parameter, public :: four    = 4.0_kind_real
 real(kind_real), parameter, public :: five    = 5.0_kind_real
 real(kind_real), parameter, public :: six     = 6.0_kind_real
 real(kind_real), parameter, public :: ten     = 10.0_kind_real
+real(kind_real), parameter, public :: thousand = 1000.0_kind_real
 real(kind_real), parameter, public :: k_t   = 0.65_kind_real       !> Thermal conductivity of water (W m^-1 K^-1)
 real(kind_real), parameter, public :: L_e   = 2.26e+06_kind_real !> Latent heat of vaporization at 373.15K (J kg^-1)
 real(kind_real), parameter, public :: eps   = 0.1_kind_real      !> Albedo of sea water
