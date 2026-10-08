@@ -122,9 +122,14 @@ void ObsErrorFactorConventional::compute(const ObsFilterData & data,
   }
 
   // Get GeoVaLs of air pressure [Pa] in vertical column
+  // JEDI convention is top down (model top is index 0)
+  // reverse for this function so the level nearest the surface is 0
+  // dprsl[thislev] below is then the model layer containing
+  // the observation
   std::vector<std::vector<float>> prsl(nlevs, std::vector<float>(nlocs));
-  for (size_t geolev = 0; geolev < nlevs; ++geolev) {
-    data.get(Variable("GeoVaLs/air_pressure"), geolev, prsl[geolev]);
+  for (size_t ilev = 0; ilev < nlevs; ++ilev) {
+    const size_t level = nlevs - ilev - 1;
+    data.get(Variable("GeoVaLs/air_pressure"), level, prsl[ilev]);
   }
 
   for (size_t ivar = 0; ivar < varsize; ++ivar) {   // Variable loop
