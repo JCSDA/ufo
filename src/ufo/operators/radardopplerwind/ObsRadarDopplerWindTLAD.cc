@@ -141,6 +141,7 @@ void ObsRadarDopplerWindTLAD::simulateObsTL(const GeoVaLs & dx,
     const double dw = ufo::PiecewiseLinearInterpolation::interpolate(vec_z_w, inc_w, z_ob);
 
     // Combine u, v and w with beam geometry variable to produced final dH.
+    // (params_.terminalVelocity is a constant, so it drops out of the linearization)
     if (ufo::anyEqualTo(missingDouble, du, dv, dw)) {
       dy[jloc] = missingDouble;
     } else {

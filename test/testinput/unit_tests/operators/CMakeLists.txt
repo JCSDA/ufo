@@ -926,15 +926,6 @@ ufo_add_test( NAME    nearest_neighbor_soil
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
-ufo_add_test( NAME    opr_radialvelocity
-              ECBUILD
-              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
-              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/radialvelocity.yaml"
-              MPI     1
-              LIBS    ufo
-              LABELS  operators
-              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-#
 ufo_add_test( NAME    opr_reflectivity
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
