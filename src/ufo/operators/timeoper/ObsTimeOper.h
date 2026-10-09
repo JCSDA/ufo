@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/ObsOperatorBase.h"
@@ -54,6 +55,8 @@ class ObsTimeOper : public ObsOperatorBase,
 
   Locations_ locations() const override;
 
+  void computeReducedVars(const oops::Variables & vars, GeoVaLs & geovals) const override;
+
 // Other
   const oops::Variables & requiredVars() const override {return actualoperator_->requiredVars();}
 
@@ -61,6 +64,7 @@ class ObsTimeOper : public ObsOperatorBase,
   void print(std::ostream &) const override;
   std::unique_ptr<ObsOperatorBase> actualoperator_;
   const ioda::ObsSpace& odb_;
+  util::Duration windowSub_;
   std::vector<std::vector<float>> timeWeights_;
 };
 

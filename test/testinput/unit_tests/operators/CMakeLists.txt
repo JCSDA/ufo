@@ -1245,6 +1245,15 @@ ufo_add_test( NAME    linopr_timeoper
               LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    opr_timeoper_two_states
+              ECBUILD
+              SOURCES ../../../mains/TestObsTimeOper.cc ../../../ufo/ObsTimeOper.h
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/timeoper_two_states.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    opr_tropomi_no2
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
