@@ -12,7 +12,7 @@
 #include <string>
 
 #include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/RequiredParameter.h"
+#include "oops/util/parameters/Parameter.h"
 
 #include "ufo/predictors/PredictorBase.h"
 
@@ -33,8 +33,14 @@ class LapseRateParameters : public PredictorParametersBase {
   OOPS_CONCRETE_PARAMETERS(LapseRateParameters, PredictorParametersBase);
 
  public:
-  /// Path to an input file.
-  oops::RequiredParameter<std::string> tlapse{"tlapse", this};
+  /// Path to a mean lapse-rate file. Either this must be provided or \ref onlineMean
+  /// must be true.
+  oops::OptionalParameter<std::string> tlapse{"tlapse", this};
+
+  /// If true, per-channel means are computed online on the first compute for this obs space
+  /// (then frozen). Defaults to false. Exactly one of this (when true) and \ref tlapse must be
+  /// configured.
+  oops::Parameter<bool> onlineMean{"online mean", false, this};
 
   /// Power to which to raise the lapse rate. By default, 1.
   ///
@@ -60,7 +66,8 @@ class LapseRate : public PredictorBase {
                ioda::ObsVector &) const override;
 
  private:
-  std::map<int, float> tlapmean_;  // <channel, tlaps>
+  std::map<int, float> tlapmean_;  // <channel, tlaps> from optional tlapse file
+  bool useOnlineMeans_;
   int order_;
 };
 
