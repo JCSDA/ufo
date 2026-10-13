@@ -77,7 +77,7 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
       if (isBad(tlapchn_val) || isBad(means[jvar])) {
         out[jloc*nvars+jvar] = dmiss;
       } else {
-        out[jloc*nvars+jvar] = pow((tlapchn_val - means[jvar]), order_);
+        out[jloc*nvars+jvar] = std::pow((tlapchn_val - means[jvar]), order_);
       }
     }
   }
