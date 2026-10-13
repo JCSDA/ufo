@@ -6,7 +6,6 @@
  */
 
 #include <cmath>
-#include <fstream>
 #include <iomanip>
 #include <string>
 #include <vector>
@@ -89,28 +88,10 @@ CloudLiquidWater::CloudLiquidWater(const Parameters_ & parameters, const oops::O
     }
     hdiags_ += oops::ObsVariables({"brightness_temperature"}, vars.channels());
     hdiags_ += oops::ObsVariables({"brightness_temperature_assuming_clear_sky"}, vars.channels());
-    hdiags_ += oops::ObsVariables({"transmittances_of_atmosphere_layer"}, vars.channels());
-    geovars_ += oops::Variables({"water_area_fraction",
-                                 "air_temperature",
-                                 "air_pressure",
-                                 "average_surface_temperature_within_field_of_view"});
-//  Read tlap rate from the "tlapse_file". Copied this part from "LapseRate.cc"
-    const std::string & tlapse_file = options_.tlapse.value().get();
-    std::ifstream infile(tlapse_file);
-    std::string nusis;   //  sensor/instrument/satellite
-    int nuchan;  //  channel number
-    float tlapse;
-
-    if (infile.is_open()) {
-      while (!infile.eof()) {
-        infile >> nusis;
-        infile >> nuchan;
-        infile >> tlapse;
-        tlapmean_[nuchan] = tlapse;
-      }
-      infile.close();
-    }
-//  End of reading tlapmean.
+    geovars_ += oops::Variables({"water_area_fraction"});
+    lapseHelper_.emplace(options_.lapseMean, vars);
+    geovars_ += LapseRateHelper::requiredGeovars();
+    hdiags_ += lapseHelper_->requiredHdiags();
   } else {
     std::string errString = "Currently only SSMIS, AMSUA, ATMS sensor are supported.";
     oops::Log::error() << errString;
@@ -262,49 +243,41 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     ydiags.get(bt_clr_37ho, "brightness_temperature_assuming_clear_sky_" +
                std::to_string(channels_[jch37h]));
 
-    // retrieve the average surface temperature
-    std::vector<float> tsavg5(nlocs, 0.0);
-    geovals.get(tsavg5, oops::Variable{"average_surface_temperature_within_field_of_view"});
-
     std::vector<int> scanpos(nlocs, 0);
     odb.get_db("MetaData", "sensorScanPosition", scanpos);
 
-    // common vectors storage, ptau5
-    std::vector <float> pred(nlocs, 0.0);
-    // Retrieve the transmittances_of_atmosphere_layer from Hdiag
-    std::vector<std::vector<std::vector<float>>> ptau5;
-    std::vector<std::vector<float>> tmpvar;
+    std::vector<std::vector<float>> tlapchn_all;
+    std::vector<float> means_all;
+    lapseHelper_->fillTlapchnAndMeans(odb, geovals, ydiags, tlapchn_all, means_all);
 
-    std::string hdiags;
-    for (std::size_t jvar = 0; jvar < channels_.size(); ++jvar) {
-      hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(channels_[jvar]);
-      tmpvar.clear();
-      for (std::size_t js = 0; js < ydiags.nlevs(hdiags); ++js) {
-        ydiags.get(pred, hdiags, js);
-        tmpvar.push_back(pred);
-      }
-      ptau5.push_back(tmpvar);
+    if (nvars != tlapchn_all.size()) {
+      oops::Log::error() << "LapseRate: nvars (" << nvars
+                         << ") != number of channels (" << tlapchn_all.size() << ")"
+                         << std::endl;
+      ABORT("LapseRate: nvars mismatch");
     }
 
-    // Retrieve the temperature,tvp
-    std::vector<std::vector<float>> tvp;
-    std::size_t nlevs = geovals.nlevs(oops::Variable{"air_temperature"});
-    for (std::size_t js = 0; js < nlevs; ++js) {
-      geovals.getAtLevel(pred, oops::Variable{"air_temperature"}, js);
-      tvp.push_back(pred);
+    std::vector<std::size_t> assimIch(channels_.size());
+    const std::vector<int> all_channels = vars_.channels();
+    for (std::size_t jvar = 0; jvar < channels_.size(); ++jvar) {
+      assimIch[jvar] = all_channels.size(); // default to missing
+      for (std::size_t ich = 0; ich < all_channels.size(); ++ich) {
+        if (all_channels[ich] == channels_[jvar]) {
+          assimIch[jvar] = ich;
+          break;
+        }
+      }
+      if (assimIch[jvar] == all_channels.size()) {
+        oops::Log::error() << "CloudLiquidWater: channel " << channels_[jvar]
+                           << " not found in " << all_channels << std::endl;
+        ABORT("CloudLiquidWater: channel not found in vars_.channels()");
+      }
     }
 
     // sort out the tlapmean based on vars, tlap
     std::vector<float> tlap;
     for (std::size_t jvar = 0; jvar < channels_.size(); ++jvar) {
-      auto it = tlapmean_.find(channels_[jvar]);
-      if (it != tlapmean_.end()) {
-        tlap.push_back(it->second);
-      } else {
-        oops::Log::error() << "Could not locate tlapemean for channel: " <<
-                              channels_[jvar] << std::endl;
-        ABORT("Could not locate tlapemean value");
-      }
+      tlap.push_back(means_all[assimIch[jvar]]);
     }
 
     // btMissing checks missing ObsValue brightness temperatures. Now check for
@@ -326,11 +299,11 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
 
     clw_bias_correction_gmi(biascoeffs,
                             bt_hofx_37vo, bt_hofx_37ho, bt_clr_37vo, bt_clr_37ho, bt37v, bt37h,
-                            water_frac, tsavg5, scanpos, ptau5, tvp, tlap, channels_, nlevs,
-                            clw, clw_gmi_ch1_4);
+                            water_frac, scanpos, tlapchn_all[assimIch[jch37v]], tlapchn_all[assimIch[jch37h]],
+                            tlap, channels_, clw, clw_gmi_ch1_4);
   }
   if (sensor == "AMSUA" || sensor == "ATMS") {
-    CloudLiquidWater::clwDerivative_amsua(tsavg, water_frac, bt238o, bt314o,
+    clwDerivative_amsua(tsavg, water_frac, bt238o, bt314o,
                                           bt238fBC, bt314fBC, clw);
   }
 
@@ -412,16 +385,14 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
              const std::vector<float> & bt37v,
              const std::vector<float> & bt37h,
              const std::vector<float> & water_frac,
-             const std::vector<float> & tsavg5,
              const std::vector<int> & scanpos,
-             const std::vector<std::vector<std::vector<float>>> & ptau5,
-             const std::vector<std::vector<float>> & tvp,
-             const std::vector<float> & tlap,
-             const std::vector<int>  & channels_,
-             const int & nlevs,
+             const std::vector<float> & tlapchn_v,
+             const std::vector<float> & tlapchn_h,
+             const std::vector<float> & tlap_mean,
+             const std::vector<int> & channels_,
              std::vector<float> & clw,
              std::vector<float> & clw_gmi_ch1_4) {
-    // Indices of data at channeles 37v and 37h in the array "channels"
+    // Indices of data at channeles 37v and 37h in the array "channels_"
     const int jch37v = 0;
     const int jch37h = 1;
     //  Beginning constant and scan_angle terms
@@ -462,31 +433,18 @@ void CloudLiquidWater::clw_bias_correction_gmi(const ObsBias & biascoeffs,
       }
     }
 
-//  Beginning of tlap BC for GMI data. Modified from "LapseRate.cc".
-    float tlapchn;
+//  Beginning of tlap_mean BC for GMI data. Modified from "LapseRate.cc".
     for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
 //    For channel_37v
-      int jvar = jch37v;
-      tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
-                (tsavg5[jloc]-tvp[nlevs-2][jloc]);
-      for (std::size_t k = 1; k < nlevs-1; ++k) {
-        tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
-                  (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
-      }
-      bias_37v[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[1]) *
-                        std::pow((tlapchn - tlap[jvar]), 2));
-      bias_37v[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[2])*(tlapchn - tlap[jvar]));
+      bias_37v[jloc] += (biascoeffs(0, channels_[jch37v]-1, id_pred[1]) *
+                        std::pow((tlapchn_v[jloc] - tlap_mean[jch37v]), 2));
+      bias_37v[jloc] += (biascoeffs(0, channels_[jch37v]-1, id_pred[2])*
+                        (tlapchn_v[jloc] - tlap_mean[jch37v]));
 //    For channel_37h
-      jvar = jch37h;
-      tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
-                (tsavg5[jloc]-tvp[nlevs-2][jloc]);
-      for (std::size_t k = 1; k < nlevs-1; ++k) {
-        tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
-                  (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
-      }
-      bias_37h[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[1]) *
-                        std::pow((tlapchn - tlap[jvar]), 2));
-      bias_37h[jloc] += (biascoeffs(0, channels_[jvar]-1, id_pred[2])*(tlapchn - tlap[jvar]));
+      bias_37h[jloc] += (biascoeffs(0, channels_[jch37h]-1, id_pred[1]) *
+                        std::pow((tlapchn_h[jloc] - tlap_mean[jch37h]), 2));
+      bias_37h[jloc] += (biascoeffs(0, channels_[jch37h]-1, id_pred[2])*
+                        (tlapchn_h[jloc] - tlap_mean[jch37h]));
     }
 //  End of tlap BC for GMI data
 
