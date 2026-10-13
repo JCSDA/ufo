@@ -8,6 +8,7 @@
 #ifndef UFO_OBSLOCALIZATION_OBSHORLOCPARAMETERS_H_
 #define UFO_OBSLOCALIZATION_OBSHORLOCPARAMETERS_H_
 
+#include <cmath>
 #include <string>
 #include <utility>
 
@@ -22,7 +23,7 @@
 namespace ufo {
 
 enum class DistanceType {
-  GEODESIC, CARTESIAN
+  GEODESIC, CARTESIAN, PERIODIC
 };
 
 enum class SearchMethod {
@@ -34,7 +35,8 @@ struct DistanceTypeParameterTraitsHelper {
   static constexpr char enumTypeName[] = "DistanceType";
   static constexpr util::NamedEnumerator<DistanceType> namedValues[] = {
     { DistanceType::GEODESIC, "geodesic" },
-    { DistanceType::CARTESIAN, "cartesian" }
+    { DistanceType::CARTESIAN, "cartesian" },
+    { DistanceType::PERIODIC, "periodic" }
   };
 };
 
@@ -84,21 +86,43 @@ class ObsHorLocParameters : public oops::Parameters {
   /// Maximum number of obs
   oops::OptionalParameter<int> maxnobs{"max nobs", this};
 
-  /// Distance calculation type: geodesic (on sphere) or cartesian (euclidian)
+  /// Distance calculation type: geodesic (on sphere), cartesian (euclidian) or periodic
+  /// (planar distance on a doubly periodic domain, see longitude and latitude periods below)
   /// Default: geodesic
   oops::Parameter<DistanceType> distanceType{"distance type", DistanceType::GEODESIC, this};
+
+  /// Periods (in degrees) of a periodic domain in longitude and latitude, used with the periodic
+  /// distance type. The domain is treated as planar: the distance between two points is the earth
+  /// radius times the euclidian norm of their longitude and latitude differences (in radians),
+  /// each difference being taken modulo its period (nearest periodic image). The longitude and
+  /// latitude of a cartesian domain should be defined accordingly, as its x and y coordinates
+  /// divided by the earth radius. Without a period, there is no wrap-around in that direction.
+  oops::OptionalParameter<double> longitudePeriod{"longitude period", this};
+  oops::OptionalParameter<double> latitudePeriod{"latitude period", this};
 
   /// returns distance between points \p p1 and \p p2, depending on the
   /// distance calculation type distanceType
   double distance(const eckit::geometry::Point3 & p1, const eckit::geometry::Point3 & p2) const {
     if (distanceType == DistanceType::GEODESIC) {
       eckit::geometry::Point2 q1(p1[0], p1[1]);
-      eckit::geometry::Point2 q2(p1[0], p1[1]);
+      eckit::geometry::Point2 q2(p2[0], p2[1]);
       return eckit::geometry::Sphere::distance(radius_earth, q1, q2);
+    } else if (distanceType == DistanceType::PERIODIC) {
+      const double dlon = periodicDifference(p1[0]-p2[0], longitudePeriod.value());
+      const double dlat = periodicDifference(p1[1]-p2[1], latitudePeriod.value());
+      return radius_earth*M_PI/180.0*std::sqrt(dlon*dlon+dlat*dlat);
     } else {
       ASSERT(distanceType == DistanceType::CARTESIAN);
       return p1.distance(p2);
     }
+  }
+
+  /// returns the difference \p diff of two coordinates, wrapped to the nearest periodic image
+  /// if a period is given
+  static double periodicDifference(const double diff, const boost::optional<double> & period) {
+    if (period == boost::none) return diff;
+    ASSERT(*period > 0.0);
+    return diff - *period*std::round(diff / *period);
   }
 
   // Earth radius in m

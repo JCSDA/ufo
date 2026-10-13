@@ -86,6 +86,10 @@ class ObsHorLocalization: public ObsLocalizationBase<ITERATOR> {
   /// Get the lengthscale specified in the parameters.
   double lengthscale() const {return options_.lengthscale;}
 
+  /// Horizontal distance between two points: geodesic, unless the periodic distance type is used.
+  double horizontalDistance(const eckit::geometry::Point3 &,
+                            const eckit::geometry::Point3 &) const;
+
  private:
   ObsHorLocParameters options_;
 
@@ -190,10 +194,22 @@ template<typename ITERATOR>
 double ObsHorLocalization<ITERATOR>::computeLocalization(
       const eckit::geometry::Point3 & p1,
       const eckit::geometry::Point3 & p2) const {
+  double distance = horizontalDistance(p1, p2);
+  return (distance >= options_.lengthscale) ? 0.0 : 1.0;
+}
+
+// -----------------------------------------------------------------------------
+
+template<typename ITERATOR>
+double ObsHorLocalization<ITERATOR>::horizontalDistance(
+      const eckit::geometry::Point3 & p1,
+      const eckit::geometry::Point3 & p2) const {
+  if (options_.distanceType == DistanceType::PERIODIC) {
+    return options_.distance(p1, p2);
+  }
   eckit::geometry::Point2 p1_2(p1[0], p1[1]);
   eckit::geometry::Point2 p2_2(p2[0], p2[1]);
-  double distance = atlas::util::Earth::distance(p1_2, p2_2);
-  return (distance >= options_.lengthscale) ? 0.0 : 1.0;
+  return atlas::util::Earth::distance(p1_2, p2_2);
 }
 
 // -----------------------------------------------------------------------------
@@ -296,9 +312,9 @@ ObsHorLocalization<ITERATOR>::getLocalObs(const ITERATOR & i, double lengthscale
 
     oops::Log::trace() << "Local obs searching via KDTree" << std::endl;
 
-    if ( options_.distanceType == DistanceType::CARTESIAN)
+    if ( options_.distanceType != DistanceType::GEODESIC)
       ABORT("ObsHorLocalization:: search method must be 'brute_force' when using"
-            " 'cartesian' distance");
+            " 'cartesian' or 'periodic' distance");
 
     // Using the radius of the earth
     eckit::geometry::Point3 refPoint3DTemp;

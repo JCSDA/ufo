@@ -80,6 +80,62 @@ obs localizations:
     reference value: 0.89237
     tolerance: 1.0e-3
 
+  # Periodic distance: planar distance on a 6 deg x 4 deg doubly periodic domain,
+  # 1 deg = 6.371e6*pi/180 = 111194.93 m, longitude/latitude differences taken
+  # to the nearest periodic image
+- localization:
+    localization method: Horizontal Gaspari-Cohn
+    lengthscale: 200000.0   # 200 km
+    distance type: periodic
+    search method: brute_force
+    longitude period: 6.0
+    latitude period: 4.0
+  point pair tests:
+    # No wrap: 1 deg = 111194.93 m -> gc99(0.5559746) ~= 0.1379828
+  - p1: [0.0, 0.0, 0.0]
+    p2: [1.0, 0.0, 0.0]
+    reference value: 0.1379828
+    tolerance: 1.0e-6
+    # Across the longitude period: 5.5 deg -> 0.5 deg = 55597.46 m -> gc99 ~= 0.6267237
+  - p1: [-2.75, 0.0, 0.0]
+    p2: [2.75, 0.0, 0.0]
+    reference value: 0.6267237
+    tolerance: 1.0e-6
+    # Across the latitude period: 3.8 deg -> 0.2 deg = 22238.99 m -> gc99 ~= 0.9255325
+  - p1: [0.0, -1.9, 0.0]
+    p2: [0.0, 1.9, 0.0]
+    reference value: 0.9255325
+    tolerance: 1.0e-6
+    # Across both periods (corners): (0.2, 0.2) deg = 31450.67 m -> gc99 ~= 0.8587086
+    # (vertical coordinates are ignored)
+  - p1: [-2.9, -1.9, 0.0]
+    p2: [2.9, 1.9, 500.0]
+    reference value: 0.8587086
+    tolerance: 1.0e-6
+    # Half a period apart: 3 deg = 333584.78 m -> outside 200 km -> 0.0
+  - p1: [0.0, 0.0, 0.0]
+    p2: [3.0, 0.0, 0.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
+- localization:
+    localization method: Horizontal Box car
+    lengthscale: 200000.0   # 200 km
+    distance type: periodic
+    search method: brute_force
+    longitude period: 6.0
+  point pair tests:
+    # Across the longitude period: 0.5 deg -> inside 200 km -> 1.0
+  - p1: [-2.75, 0.0, 0.0]
+    p2: [2.75, 0.0, 0.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # No latitude period: 3.8 deg = 422540.72 m -> outside 200 km -> 0.0
+  - p1: [0.0, -1.9, 0.0]
+    p2: [0.0, 1.9, 0.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
   # Vertical Box Car: returns 1.0 if |z1-z2| < lengthscale, 0.0 otherwise
 - localization:
     localization method: Vertical localization
