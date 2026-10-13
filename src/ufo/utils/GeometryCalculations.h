@@ -39,7 +39,9 @@ double haversine(const double,
 /// * Beam tilt angle relative to the horizontal [deg].
 /// Output values modified in place:
 /// * Calculated observation latitude [deg].
-/// * Calculated observation longitude [deg].
+/// * Calculated observation longitude [deg]. This is expressed in the same convention as the
+///   station longitude: [-180, 180) if the station longitude is negative, [0, 360) if it is
+///   greater than 180, and otherwise the value closest to the station longitude.
 void convertRangeAzimToLatLon(const double,
                               const double,
                               const double,
@@ -64,7 +66,9 @@ void convertRangeAzimToLatLon(const double,
 /// * Beam tilt angle relative to the horizontal [deg].
 /// Return values (in a pair):
 /// * Calculated observation latitude [deg].
-/// * Calculated observation longitude [deg].
+/// * Calculated observation longitude [deg]. This is expressed in the same convention as the
+///   station longitude: [-180, 180) if the station longitude is negative, [0, 360) if it is
+///   greater than 180, and otherwise the value closest to the station longitude.
 std::pair<double, double> convertRangeAzimToLatLon(const double,
                                                    const double,
                                                    const double,
