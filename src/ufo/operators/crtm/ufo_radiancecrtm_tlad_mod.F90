@@ -1,4 +1,4 @@
-! (C) Copyright 2017-2018 UCAR
+! (C) Copyright 2017-2026 UCAR
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -217,6 +217,7 @@ integer(c_size_t) :: nvars, nlocs
 integer :: n_skipped, n_good
 integer :: qc_ff
 integer :: ispec
+integer :: ivar
 logical:: skip_prof
 
 ! set a local boolean variable for whether we are in vis or ultraviolet channels
@@ -277,7 +278,6 @@ integer, allocatable :: zeroCloudInCRTM0(:)
  ! Loop over all sensors. Not necessary if we're calling CRTM for each sensor
  ! ----------------------------------------------------------------------------
  Sensor_Loop:do n = 1, self%conf_traj%n_Sensors
-
 
    ! Pass channel list to CRTM
    ! -------------------------
@@ -619,17 +619,17 @@ integer, allocatable :: zeroCloudInCRTM0(:)
        call abor1_ftn(err_msg)
     end if
 
-   ! If desired, zero out Jacobian following a user-defined range setting
-   ! --------------------------------------------------------------------
-   if (self%conf%zeroO3JacRange(1)>0.0 .and. self%conf%zeroO3JacRange(2)<1.0e9) then
+   ! If desired, nullify out Jacobian for a user-defined per-variable channel list
+   ! ---------------------------------------------------------------------------------------
+   if (size(self%conf%nullifyJacVars) > 0) then
      do jspec = 1, self%conf%n_Absorbers
-       ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
-       if (self%conf%Absorbers(ispec) == var_oz) then
+       ivar = ufo_vars_getindex(self%conf%nullifyJacVars, self%conf%Absorbers(jspec))
+       if (ivar > 0) then
+          ispec = ufo_vars_getindex(self%conf_traj%Absorbers, self%conf%Absorbers(jspec))
           do jprofile = 1, self%n_Profiles
             if (.not.self%Options(jprofile)%Skip_Profile) then
                do lch = 1, size(self%channels)
-                  if (sc(n)%wavenumber(lch) < self%conf%zeroO3JacRange(1) .or. &
-                      sc(n)%wavenumber(lch) > self%conf%zeroO3JacRange(2)) then
+                  if (any(self%conf%nullifyJacChannels(ivar)%channels == self%channels(lch))) then
                      self%atm_K(lch,jprofile)%Absorber(:,ispec) = ZERO
                   end if
                end do

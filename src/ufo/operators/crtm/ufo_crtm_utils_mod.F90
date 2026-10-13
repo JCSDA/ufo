@@ -27,6 +27,7 @@ private
 
 public crtm_comm_stat_check
 public crtm_conf
+public nullify_jac_channels_type
 public crtm_conf_setup
 public crtm_conf_delete
 public get_var_name
@@ -63,6 +64,11 @@ REAL(kind_real), PARAMETER :: &
 integer, parameter, public :: max_string=800
 real(kind_real), parameter  :: threshold_reflectivity = 100.0
 
+!Type to hold the list of channels to zero for one nullify jacobian params entry
+type nullify_jac_channels_type
+ integer, allocatable :: channels(:)
+end type nullify_jac_channels_type
+
 !Type for general config
 type crtm_conf
  integer :: n_Sensors
@@ -70,7 +76,6 @@ type crtm_conf
  integer :: n_Clouds
  integer :: n_Aerosols
  integer :: n_Surfaces
- integer :: n_zeroO3JacRange
  character(len=MAXVARLEN), allocatable :: Absorbers(:)
  integer, allocatable :: Absorber_Id(:)
  integer, allocatable :: Absorber_Units(:)
@@ -99,7 +104,9 @@ type crtm_conf
  real(kind_real) :: co2_rescale_to_ppmv = co2_rescale_to_ppmv
  real(kind_real) :: co2_ppmv_value = co2_ppmv_value
  real(kind_real) :: midpoint_julday = midpoint_julday
- real(kind_real) :: zeroO3JacRange(2)
+ ! nullifyJacVars(i) is zeroed for channels in nullifyJacChannels(i)%channels
+ character(len=MAXVARLEN), allocatable :: nullifyJacVars(:)
+ type(nullify_jac_channels_type), allocatable :: nullifyJacChannels(:)
  logical :: Cloud_Seeding = .false.
  logical :: cal_cloud_frac_in_fov = .false.
  logical :: cal_cloud_reff_in_fov  = .false.
@@ -290,7 +297,8 @@ integer :: jspec, ivar
 character(len=max_string) :: message
 character(len=:), allocatable :: str
 character(len=:), allocatable :: str_array(:)
-real(kind_real), allocatable :: flt_array(:)
+integer, allocatable :: int_array(:)
+type(fckit_configuration), allocatable :: nullifyJacParams_confs(:)
 
 character(len=maxvarlen), allocatable :: var_aerosols(:)
 logical, save :: message_flag = .true.
@@ -544,24 +552,24 @@ character(max_string) :: cloud_reff_method
    call fckit_exception % throw(message)
  end if
 
- ! Range of wavelength to zero out O3 Jacobians
- ! ---------------------------------------------
- conf%n_zeroO3JacRange = 0
- conf%zeroO3JacRange(1) = 0.0
- conf%zeroO3JacRange(2) = 1.0e9
- if (f_confOper%has("zeroO3JacRange")) then
-   conf%n_zeroO3JacRange = conf%n_zeroO3JacRange + f_confOper%get_size("zeroO3JacRange")
+ ! Per-variable list of channels whose Jacobian is zeroed
+ ! ---------------------------------------------------------------------------------------
+ if (f_confOper%has("nullify jacobian params")) then
+   call f_confOper%get_or_die("nullify jacobian params", nullifyJacParams_confs)
 
-   if (conf%n_zeroO3JacRange /= size(conf%zeroO3JacRange) ) then
-     write(message,*) "crtm_conf_setup error: invalid O3 Jac range "
-     call fckit_exception % throw(message)
-   end if
+   allocate(conf%nullifyJacVars(size(nullifyJacParams_confs)))
+   allocate(conf%nullifyJacChannels(size(nullifyJacParams_confs)))
 
-   call f_confOper%get_or_die("zeroO3JacRange",flt_array)
-   conf%zeroO3JacRange(1:conf%n_zeroO3JacRange) = flt_array
-   write(message,*) trim(ROUTINE_NAME),&
-        " Zeroing-out Jacobian wrt ozone for wavelength < ", conf%zeroO3JacRange(1),&
-        " and > ", conf%zeroO3JacRange(2)
+   do jspec = 1, size(nullifyJacParams_confs)
+     call nullifyJacParams_confs(jspec)%get_or_die("variable", str)
+     conf%nullifyJacVars(jspec) = str
+
+     call nullifyJacParams_confs(jspec)%get_or_die("channels", int_array)
+     conf%nullifyJacChannels(jspec)%channels = int_array
+   end do
+ else
+   allocate(conf%nullifyJacVars(0))
+   allocate(conf%nullifyJacChannels(0))
  end if
 
  ! observation midpoint Julian day in proleptic Julian calendar (from 01Jan 4713BC)

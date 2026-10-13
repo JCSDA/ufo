@@ -67,3 +67,38 @@ observations:
     coef TL: 1.e-3
     tolerance TL: 2.0e-3
     tolerance AD: 1.0e-11
+
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    SurfaceWindGeoVars: uv
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Surfaces: [Water_Temperature, Land_Temperature, Ice_Temperature, Snow_Temperature]
+      nullify jacobian params:
+        - variable: mole_fraction_of_carbon_dioxide_in_air
+          channels: 19-100
+        - variable: mole_fraction_of_ozone_in_air
+          channels: 561-673
+        - variable: water_vapor_mixing_ratio_wrt_dry_air
+          channels: 1000-1350
+    obs options:
+      Sensor_ID: cris-fsr_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: cris-fsr_npp_nullify_jacobian
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/cris-fsr_npp_obs_2018041500_m_unittest.nc4
+    simulated variables: [brightnessTemperature]
+    channels: *all_channels
+  geovals:
+    filename: Data/ufo/testinput_tier_1/cris-fsr_npp_geoval_2018041500_m_unittest.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11

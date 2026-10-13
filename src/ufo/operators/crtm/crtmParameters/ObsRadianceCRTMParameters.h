@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2021 UCAR
+ * (C) Copyright 2021 - 2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -82,6 +82,19 @@ namespace ufo
           "Conversion between model units", 1.0, this};
   };  // end class ObsOptionsParameters
 
+  /// \brief One entry of zeroJacParams: a variable name and the channels whose Jacobian
+  /// is nullified.
+  class NullifyJacobianParameters : public oops::Parameters
+  {
+    OOPS_CONCRETE_PARAMETERS(NullifyJacobianParameters, Parameters)
+   public:
+    /// UFO variable name (must match an entry of Absorbers)
+    oops::RequiredParameter<std::string> variable{"variable", this};
+    /// channel numbers whose Jacobian is nullified; comma-separated integers and/or ranges,
+    /// e.g. 1, 5-10, 12; parsed with oops::parseIntSet
+    oops::RequiredParameter<std::string> channelList{"channels", this};
+  };  // end class NullifyJacobianParameters
+
   /// \brief Sub-parameters for the linear obs operator
   class CRTMLinearObsOperatorParameters : public ObsOperatorParametersBase
   {
@@ -96,8 +109,9 @@ namespace ufo
     //// use qc flags
     oops::Parameter<bool> UseQCFlagsToSkipHofX{"UseQCFlagsToSkipHofX",
        "do not calculate hofx for values not passing qc (true or false)", false, this};
-    //// range of wavelengths (m^-1) to zero-out jacobian of ozone
-    oops::OptionalParameter<std::vector<float>> zeroO3JacRange{"zeroO3JacRange", this};
+    //// per-variable name and channels whose jacobian is nullified
+    oops::OptionalParameter<std::vector<NullifyJacobianParameters>> NullifyJacobianParams{
+      "nullify jacobian params", this};
   };  // end class CRTMLinearObsOperatorParameters
 
 
