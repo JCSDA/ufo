@@ -81,6 +81,7 @@ observations:
       - name: lapseRate
         order: 2
         online mean: true
+        # save means: Data/amsua_n19_tlapse_online_means.txt
       - name: lapseRate
         online mean: true
       - name: emissivityJacobian

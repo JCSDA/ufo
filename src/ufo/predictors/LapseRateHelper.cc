@@ -69,7 +69,9 @@ oops::ObsVariables LapseRateHelper::requiredHdiags() const {
 
 LapseRateHelper::LapseRateHelper(const LapseRateMeanParameters & parameters,
                                  const oops::ObsVariables & vars)
-  : onlineMean_(parameters.onlineMean.value()) {
+  : onlineMean_(parameters.onlineMean.value()),
+    saveFile_(parameters.saveFile.value().value_or("")) {
+
   channels_.assign(vars.channels().begin(), vars.channels().end());
 
   const bool hasTlapseFile = parameters.tlapse.value() != boost::none;
@@ -189,6 +191,11 @@ void LapseRateHelper::fillTlapchnAndMeans(
   ObsSpaceMeanCache & cache = cacheByObsSpace_[&odb];
   const std::size_t nchannels = channels_.size();
 
+  if (odb.nchans() != nchannels) {
+    oops::Log::error() << "Channel mismatch between ObsSpace / LapseRateHelper vars" << std::endl;
+    ABORT("Channel mismatch between ObsSpace / LapseRateHelper vars");
+  }
+
   if (!cache.ready) {
     // Freeze means after this first fill (file-like lifetime across fillTlapchnAndMeans calls).
     cache.means.resize(nchannels);
@@ -232,6 +239,21 @@ void LapseRateHelper::fillTlapchnAndMeans(
       }
     }
     cache.ready = true;
+
+    // optionally save means to text file
+    if (!saveFile_.empty()) {
+      std::ofstream outfile(saveFile_);
+      for (std::size_t ich = 0; ich < nchannels; ++ich) {
+        outfile << odb.obsname() << " " << channels_[ich] << " " << cache.means[ich] << std::endl;
+      }
+      outfile.close();
+    }
+  } else {
+    if (!saveFile_.empty()) {
+      oops::Log::warning() <<
+        "`save means` is only supported on the first lapseRate or cloudWaterContent predictor,"
+        " and ignored on all others" << std::endl;
+    }
   }
 
   ASSERT(cache.means.size() == nchannels);

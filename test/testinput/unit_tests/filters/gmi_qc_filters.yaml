@@ -191,6 +191,7 @@ observations:
       - name: lapseRate
         order: 2
         online mean: true
+        # save means: Data/gmi_gpm_tlapse_online_means.txt
       - name: lapseRate
         online mean: true
       - name: emissivityJacobian

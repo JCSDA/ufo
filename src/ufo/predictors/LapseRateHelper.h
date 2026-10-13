@@ -45,6 +45,9 @@ class LapseRateMeanParameters : public oops::Parameters {
   /// (then frozen). Defaults to false. Exactly one of this (when true) and \ref tlapse must be
   /// configured.
   oops::Parameter<bool> onlineMean{"online mean", false, this};
+
+  /// Path to a file to save the per-channel means to.
+  oops::OptionalParameter<std::string> saveFile{"save means", this};
 };
 
 // -----------------------------------------------------------------------------
@@ -74,6 +77,7 @@ class LapseRateHelper {
   bool onlineMean_;
   std::vector<int> channels_;
   std::map<int, float> fileMeans_;
+  std::string saveFile_;
 };
 
 // -----------------------------------------------------------------------------
