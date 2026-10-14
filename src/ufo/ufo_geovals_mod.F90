@@ -1881,7 +1881,8 @@ do ivar = 1, self%nvar
   ! set the missing value equal to IODA missing_value
   do my_loc = 1, obs_nlocs
     do ival = 1, nval
-      if(self%geovals(ivar)%vals(ival, my_loc) > 1.0e08) then
+      if (self%geovals(ivar)%vals(ival, my_loc) == real(nf90_fill_float, kind_real) .or. &
+          self%geovals(ivar)%vals(ival, my_loc) == real(nf90_fill_double, kind_real)) then
         self%geovals(ivar)%vals(ival, my_loc) = self%missing_value
       end if
     end do
