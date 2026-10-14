@@ -75,9 +75,10 @@ class LapseRateHelper {
                    std::vector<std::vector<float>> & tlapchn_by_chan) const;
 
   bool onlineMean_;
+  std::string tlapseFile_;
+  std::string saveFile_;
   std::vector<int> channels_;
   std::map<int, float> fileMeans_;
-  std::string saveFile_;
 };
 
 // -----------------------------------------------------------------------------

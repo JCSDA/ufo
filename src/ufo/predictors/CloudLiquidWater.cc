@@ -269,7 +269,7 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
       }
       if (assimIch[jvar] == all_channels.size()) {
         oops::Log::error() << "CloudLiquidWater: channel " << channels_[jvar]
-                           << " not found in " << all_channels << std::endl;
+                           << " not found in vars_.channels()" << std::endl;
         ABORT("CloudLiquidWater: channel not found in vars_.channels()");
       }
     }

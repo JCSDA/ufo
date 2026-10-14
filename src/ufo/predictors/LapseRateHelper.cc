@@ -47,6 +47,8 @@ float missingFloat() {
 // in oops TL/AD tests, where some drivers hold two ObsBias objects for the same ObsSpace.
 struct ObsSpaceMeanCache {
   bool ready = false;
+  bool onlineMean = false;
+  std::string tlapseFile;
   std::vector<float> means;
 };
 std::map<const ioda::ObsSpace *, ObsSpaceMeanCache> cacheByObsSpace_;
@@ -70,11 +72,12 @@ oops::ObsVariables LapseRateHelper::requiredHdiags() const {
 LapseRateHelper::LapseRateHelper(const LapseRateMeanParameters & parameters,
                                  const oops::ObsVariables & vars)
   : onlineMean_(parameters.onlineMean.value()),
+    tlapseFile_(parameters.tlapse.value().value_or("")),
     saveFile_(parameters.saveFile.value().value_or("")) {
 
   channels_.assign(vars.channels().begin(), vars.channels().end());
 
-  const bool hasTlapseFile = parameters.tlapse.value() != boost::none;
+  const bool hasTlapseFile = !tlapseFile_.empty();
   if (hasTlapseFile == onlineMean_) {
     throw eckit::UserError(
       "LapseRate predictors must specify exactly one of 'tlapse' (file path) or "
@@ -84,8 +87,7 @@ LapseRateHelper::LapseRateHelper(const LapseRateMeanParameters & parameters,
 
   if (!onlineMean_) {
     // Offline file reading
-    const std::string & tlapse_file = parameters.tlapse.value().value();
-    std::ifstream infile(tlapse_file);
+    std::ifstream infile(tlapseFile_);
     std::string nusis;   //  sensor/instrument/satellite
     int nuchan;  //  channel number
     float tlapse;
@@ -100,7 +102,7 @@ LapseRateHelper::LapseRateHelper(const LapseRateMeanParameters & parameters,
       infile.close();
     } else {
       oops::Log::error() << "Unable to open file : "
-                         << tlapse_file << std::endl;
+                         << tlapseFile_ << std::endl;
       ABORT("Unable to open tlapse file ");
     }
   }
@@ -192,12 +194,14 @@ void LapseRateHelper::fillTlapchnAndMeans(
   const std::size_t nchannels = channels_.size();
 
   if (odb.nchans() != nchannels) {
-    oops::Log::error() << "Channel mismatch between ObsSpace / LapseRateHelper vars" << std::endl;
-    ABORT("Channel mismatch between ObsSpace / LapseRateHelper vars");
+    oops::Log::error() << "LapseRateHelper: Channel mismatch between ObsSpace / LapseRateHelper vars" << std::endl;
+    ABORT("LapseRateHelper: Channel mismatch between ObsSpace / LapseRateHelper vars");
   }
 
   if (!cache.ready) {
     // Freeze means after this first fill (file-like lifetime across fillTlapchnAndMeans calls).
+    cache.onlineMean = onlineMean_;
+    cache.tlapseFile = tlapseFile_;
     cache.means.resize(nchannels);
     if (onlineMean_) {
       // First compute on this ObsSpace (typically trajectory / setTrajectory or first H(x)).
@@ -234,7 +238,7 @@ void LapseRateHelper::fillTlapchnAndMeans(
         } else {
           oops::Log::error() << "Could not locate tlapsemean for channel: "
                              << channels_[ich] << std::endl;
-          ABORT("Could not locate tlapsemean value");
+          ABORT("LapseRateHelper: Could not locate tlapsemean value");
         }
       }
     }
@@ -243,12 +247,34 @@ void LapseRateHelper::fillTlapchnAndMeans(
     // optionally save means to text file
     if (!saveFile_.empty()) {
       std::ofstream outfile(saveFile_);
-      for (std::size_t ich = 0; ich < nchannels; ++ich) {
-        outfile << odb.obsname() << " " << channels_[ich] << " " << cache.means[ich] << std::endl;
+      if (outfile.is_open()) {
+        for (std::size_t ich = 0; ich < nchannels; ++ich) {
+          outfile << odb.obsname() << " " << channels_[ich] << " "
+                  << cache.means[ich] << std::endl;
+        }
+        outfile.close();
+      } else {
+        oops::Log::error() << "LapseRateHelper: Unable to open file : " << saveFile_ << std::endl;
+        ABORT("LapseRateHelper: Unable to open save means file ");
       }
-      outfile.close();
     }
   } else {
+    if (cache.onlineMean != onlineMean_) {
+      oops::Log::error() << "LapseRateHelper: inconsistent mean source for ObsSpace '"
+                         << odb.obsname() << "': cache uses "
+                         << (cache.onlineMean ? "'online mean'" : "'tlapse' file")
+                         << " but this predictor uses "
+                         << (onlineMean_ ? "'online mean'" : "'tlapse' file")
+                         << std::endl;
+      ABORT("LapseRateHelper: inconsistent online mean / tlapse configuration");
+    }
+    if (!onlineMean_ && cache.tlapseFile != tlapseFile_) {
+      oops::Log::error() << "LapseRateHelper: inconsistent tlapse file for ObsSpace '"
+                         << odb.obsname() << "': cache uses '" << cache.tlapseFile
+                         << "' but this predictor uses '" << tlapseFile_ << "'"
+                         << std::endl;
+      ABORT("LapseRateHelper: inconsistent tlapse file configuration");
+    }
     if (!saveFile_.empty()) {
       oops::Log::warning() <<
         "`save means` is only supported on the first lapseRate or cloudWaterContent predictor,"
