@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2018 UCAR
+ * (C) Copyright 2017-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -7,11 +7,14 @@
 
 #include "ufo/operators/crtm/ObsRadianceCRTMTLAD.h"
 
+#include <set>
 #include <vector>
 
+#include "eckit/config/LocalConfiguration.h"
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 #include "oops/util/dateFunctions.h"
+#include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
 #include "oops/util/TimeWindow.h"
 #include "ufo/GeoVaLs.h"
@@ -22,6 +25,35 @@ namespace ufo {
 
 // -----------------------------------------------------------------------------
 static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
+// -----------------------------------------------------------------------------
+
+void ObsRadianceCRTMTLAD::nullifyJacParamSetup(
+                        const CRTMLinearObsOperatorParameters & linearParams,
+                        eckit::LocalConfiguration & conf) {
+  if (linearParams.NullifyJacobianParams.value() == boost::none) {
+    oops::Log::info() << "No nullifyJacobianParams specified in the config. "
+                    << "Jacobian will not be nullified for any variable or channel."
+                    << std::endl;
+    return;
+  }
+  const std::vector<NullifyJacobianParameters> & nullifyJacobianParams =
+        linearParams.NullifyJacobianParams.value().value();
+
+  oops::Log::info() << "Nullifying Jacobian for size:" << nullifyJacobianParams.size()
+                  << std::endl;
+  std::vector<eckit::LocalConfiguration> nullifyJacobianConfs(nullifyJacobianParams.size());
+  for (size_t jj = 0; jj < nullifyJacobianParams.size(); ++jj) {
+    const std::set<int> channels =
+                        oops::parseIntSet(nullifyJacobianParams[jj].channelList.value());
+    nullifyJacobianConfs[jj].set("variable", nullifyJacobianParams[jj].variable.value());
+    nullifyJacobianConfs[jj].set("channels", std::vector<int>(channels.begin(), channels.end()));
+  }
+
+  eckit::LocalConfiguration linearConf = conf.getSubConfiguration("linear obs operator");
+  linearConf.set("nullify jacobian params", nullifyJacobianConfs);
+  conf.set("linear obs operator", linearConf);
+}
+
 // -----------------------------------------------------------------------------
 
 ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
@@ -41,8 +73,13 @@ ObsRadianceCRTMTLAD::ObsRadianceCRTMTLAD(const ioda::ObsSpace & odb,
                                                               std::stoi(month),
                                                               std::stoi(day));
 
+  eckit::LocalConfiguration conf = params.toConfiguration();
+  if (params.LinearObsOperator.value() != boost::none) {
+    nullifyJacParamSetup(params.LinearObsOperator.value().value(), conf);
+  }
+
   // call Fortran setup routine
-  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, params.toConfiguration(),
+  ufo_radiancecrtm_tlad_setup_f90(keyOperRadianceCRTM_, conf,
                                   channels_list.size(), channels_list[0], midPointJulday,
                                   varin_, odb.comm());
 
