@@ -251,16 +251,16 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
     lapseHelper_->fillTlapchnAndMeans(odb, geovals, ydiags, tlapchn_all, means_all);
 
     if (nvars != tlapchn_all.size()) {
-      oops::Log::error() << "LapseRate: nvars (" << nvars
+      oops::Log::error() << "CloudLiquidWater: nvars (" << nvars
                          << ") != number of channels (" << tlapchn_all.size() << ")"
                          << std::endl;
-      ABORT("LapseRate: nvars mismatch");
+      ABORT("CloudLiquidWater: nvars mismatch");
     }
 
     std::vector<std::size_t> assimIch(channels_.size());
     const std::vector<int> all_channels = vars_.channels();
     for (std::size_t jvar = 0; jvar < channels_.size(); ++jvar) {
-      assimIch[jvar] = all_channels.size(); // default to missing
+      assimIch[jvar] = all_channels.size();  // default to missing
       for (std::size_t ich = 0; ich < all_channels.size(); ++ich) {
         if (all_channels[ich] == channels_[jvar]) {
           assimIch[jvar] = ich;
@@ -280,26 +280,25 @@ void CloudLiquidWater::compute(const ioda::ObsSpace & odb,
       tlap.push_back(means_all[assimIch[jvar]]);
     }
 
+    const std::vector<float> & tlapchn_v = tlapchn_all[assimIch[jch37v]];
+    const std::vector<float> & tlapchn_h = tlapchn_all[assimIch[jch37h]];
+
     // btMissing checks missing ObsValue brightness temperatures. Now check for
     // locations where any of the other inputs to clw_bias_correction_gmi is missing or NaN.
     const auto isBadGmi = [fmiss](float v) { return v == fmiss || std::isnan(v); };
     for (std::size_t iloc = 0; iloc < nlocs; ++iloc) {
       if (btMissing[iloc]) continue;
-      bool missingInput = isBadGmi(bt_hofx_37vo[iloc]) || isBadGmi(bt_hofx_37ho[iloc]) ||
-                          isBadGmi(bt_clr_37vo[iloc]) || isBadGmi(bt_clr_37ho[iloc]) ||
-                          isBadGmi(tsavg5[iloc]);
-      for (std::size_t lev = 0; lev < nlevs && !missingInput; ++lev) {
-        missingInput = isBadGmi(tvp[lev][iloc]) ||
-                       isBadGmi(ptau5[jch37v][lev][iloc]) || isBadGmi(ptau5[jch37h][lev][iloc]);
-      }
-      if (missingInput) {
+      if (isBadGmi(bt_hofx_37vo[iloc]) || isBadGmi(bt_hofx_37ho[iloc]) ||
+          isBadGmi(bt_clr_37vo[iloc]) || isBadGmi(bt_clr_37ho[iloc]) ||
+          isBadGmi(tlapchn_v[iloc]) || isBadGmi(tlapchn_h[iloc]) ||
+          isBadGmi(tlap[jch37v]) || isBadGmi(tlap[jch37h])) {
         btMissing[iloc] = true;
       }
     }
 
     clw_bias_correction_gmi(biascoeffs,
                             bt_hofx_37vo, bt_hofx_37ho, bt_clr_37vo, bt_clr_37ho, bt37v, bt37h,
-                            water_frac, scanpos, tlapchn_all[assimIch[jch37v]], tlapchn_all[assimIch[jch37h]],
+                            water_frac, scanpos, tlapchn_v, tlapchn_h,
                             tlap, channels_, clw, clw_gmi_ch1_4);
   }
   if (sensor == "AMSUA" || sensor == "ATMS") {
