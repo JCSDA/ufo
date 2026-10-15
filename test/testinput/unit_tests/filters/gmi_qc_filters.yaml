@@ -8,7 +8,7 @@ time window:
 # The missing-value locations are already excluded by the first Bounds Check filter
 # (raw brightnessTemperature, minvalue 50.0), so passedBenchmark is unchanged.
 observations:
-- obs operator:
+- obs operator: &obs_operator
     name: CRTM
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice, Rain, Snow]
@@ -20,7 +20,7 @@ observations:
       Sensor_ID: &Sensor_ID gmi_gpm
       EndianType: little_endian
       CoefficientPath: Data/
-  obs space:
+  obs space: &obs_space
     name: GMI GPM missing brightness temperatures
     obsdatain:
       engine:
@@ -28,9 +28,9 @@ observations:
         obsfile: Data/ufo/testinput_tier_1/gmi_gpm_obs_2020121500_m_missingVals.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-13
-  geovals:
+  geovals: &geovals
     filename: Data/ufo/testinput_tier_1/gmi_gpm_geoval_2020121500_m.nc4
-  obs bias:
+  obs bias: &obs_bias
     input file: Data/ufo/testinput_tier_1/gmi_gpm.20201214_21z.satbias.nc4
     variational bc:
       predictors:
@@ -63,7 +63,7 @@ observations:
         order: 2
       - name: sensorScanAngle
         var_name: sensorScanPosition
-  obs filters:
+  obs filters: &obs_filters
   - filter: Bounds Check
     filter variables:
     - name: brightnessTemperature
@@ -175,4 +175,47 @@ observations:
     - name: brightnessTemperature
       channels: 5,6,7,10,12,13
     threshold: 2.0
+  passedBenchmark: 624
+
+# Online mean lapse rates; same setup as above except predictors and obs space name.
+- obs operator: *obs_operator
+  obs space:
+    <<: *obs_space
+    name: GMI GPM missing tlapse_online
+  geovals: *geovals
+  obs bias:
+    <<: *obs_bias
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        online mean: true
+        # save means: Data/gmi_gpm_tlapse_online_means.txt
+      - name: lapseRate
+        online mean: true
+      - name: emissivityJacobian
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        order: 2
+        online mean: true
+      - name: cloudWaterContent
+        sensor: GMI_GPM
+        ch37v: 6
+        ch37h: 7
+        online mean: true
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 4
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 3
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+        order: 2
+      - name: sensorScanAngle
+        var_name: sensorScanPosition
+  obs filters: *obs_filters
   passedBenchmark: 624
