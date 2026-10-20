@@ -38,27 +38,10 @@ ObsSfcCorrected::ObsSfcCorrected(const ioda::ObsSpace & odb,
   getOperatorVariables(params_.variables.value(), odb.assimvariables(),
                        operatorVars_, operatorVarIndices_);
 
-  // Get surface correction type as a string
-  std::string methodname;
-  for (util::NamedEnumerator<SfcCorrectionType> namedValue :
-       SfcCorrectionTypeParameterTraitsHelper::namedValues) {
-    if (namedValue.value == params_.correctionType.value()) {
-      methodname = namedValue.name;
-    }
-  }
+  // Create one surface operator per variable for the configured correction scheme
+  operators_ = SurfaceOperatorFactory::createForVariables(operatorVars_, params_, requiredVars_);
 
-  std::string operatorname;
-  // Create operators for each variable / surface correction type combination
-  for (std::string var : operatorVars_.variables()) {
-    operatorname = var + "_" + methodname;
-    std::unique_ptr<SurfaceOperatorBase> oper =
-        SurfaceOperatorFactory::create(operatorname, params_);
-    requiredVars_ += oper->requiredVars();
-    operators_.push_back(std::move(oper));
-  }
-
-  oops::Log::trace() << "ObsSfcCorrected operator " << operatorname << " constructed."
-        << std::endl;
+  oops::Log::trace() << "ObsSfcCorrected constructor done." << std::endl;
 }
 
 // -----------------------------------------------------------------------------

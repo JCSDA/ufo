@@ -119,21 +119,6 @@ void stationPressure_WRFDA::simobs(const ufo::GeoVaLs & gv,
 }
 
 // --------------------------------------------------------------------------------
-void stationPressure_WRFDA::settraj() const {
-  throw eckit::Exception("stationPressure_WRFDA::settraj not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_WRFDA::TL() const {
-  throw eckit::Exception("stationPressure_WRFDA::TL not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_WRFDA::AD() const {
-  throw eckit::Exception("stationPressure_WRFDA::AD not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
 void stationPressure_WRFDA::getTemperatureValues(const size_t nobs,
                                                   const int surface_level_index,
                                                   const ufo::GeoVaLs & gv,
@@ -376,21 +361,6 @@ void stationPressure_UKMO::simobs(const ufo::GeoVaLs & gv,
 }
 
 // --------------------------------------------------------------------------------
-void stationPressure_UKMO::settraj() const {
-  throw eckit::Exception("stationPressure_UKMO::settraj not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_UKMO::TL() const {
-  throw eckit::Exception("stationPressure_UKMO::TL not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_UKMO::AD() const {
-  throw eckit::Exception("stationPressure_UKMO::AD not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
 void stationPressure_UKMO::getDataValues(const ufo::GeoVaLs & gv,
                                           const ioda::ObsSpace & obsdb,
                                           const Parameters_ & params_,
@@ -526,21 +496,6 @@ void stationPressure_GSL::simobs(const ufo::GeoVaLs & gv,
     hofx[iloc] = adjusted_model_surface_height_pressure[iloc];
   }
   oops::Log::trace() << "stationPressure_GSL::simobs done" << std::endl;
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_GSL::settraj() const {
-  throw eckit::Exception("stationPressure_GSL::settraj not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_GSL::TL() const {
-  throw eckit::Exception("stationPressure_GSL::TL not yet implemented");
-}
-
-// --------------------------------------------------------------------------------
-void stationPressure_GSL::AD() const {
-  throw eckit::Exception("stationPressure_GSL::AD not yet implemented");
 }
 
 // --------------------------------------------------------------------------------

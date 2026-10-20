@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/AssociativeContainers.h"
 #include "ufo/operators/sfccorrected/ObsSfcCorrectedParameters.h"
@@ -26,7 +27,9 @@ namespace ufo {
 
 /// \brief SurfaceOperator base class.
 ///
-/// Subclasses of this class must implement the `simobs`, `settraj`, `TL` and `AD` method.
+/// Subclasses of this class must implement the `simobs` method.
+/// Subclasses with a linearized operator override `settraj`, `TL` and `AD`
+/// defaults for the linearized subclass throw "not yet implemented".
 class SurfaceOperatorBase {
  public:
   typedef ObsSfcCorrectedParameters Parameters_;
@@ -43,13 +46,15 @@ class SurfaceOperatorBase {
   const oops::Variables & requiredVars() const {return requiredVars_;}
 
   /// Calculate the trajectory
-  virtual void settraj() const = 0;
+  virtual void settraj(const GeoVaLs &, const ioda::ObsSpace &);
 
   /// Calculate the tangent linear
-  virtual void TL() const = 0;
+  virtual void TL(const GeoVaLs &,
+                  std::vector<double> &) const;
 
   /// Calculate the adjoint
-  virtual void AD() const = 0;
+  virtual void AD(GeoVaLs &,
+                  std::vector<double> &) const;
 
  protected:
   // Required variables from the GeoVaLs
@@ -57,6 +62,9 @@ class SurfaceOperatorBase {
 
   // Save a copy of the parameters
   Parameters_ params_;
+
+  // Operator name, e.g. airTemperatureAt2M_GSL
+  std::string name_;
 };
 
 /// SurfaceOperator factory.
@@ -68,6 +76,11 @@ class SurfaceOperatorFactory {
   /// and `correctionType`.
   static std::unique_ptr<SurfaceOperatorBase> create(const std::string &,
                                                      const Parameters_ &);
+
+  /// Create one surface operator per variable for the configured `correctionType`
+  /// and add each operator's required GeoVaLs to `requiredVars`.
+  static std::vector<std::unique_ptr<SurfaceOperatorBase>>
+  createForVariables(const oops::ObsVariables &, const Parameters_ &, oops::Variables &);
 
   /// \brief Return the names of all predictors that can be created by one of the registered makers.
   static std::vector<std::string> getMakerNames() {

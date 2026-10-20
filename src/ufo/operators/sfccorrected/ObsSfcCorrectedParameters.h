@@ -28,12 +28,30 @@ enum class SfcCorrectionType {
   GSL     /// GSL method uses model surface and level 1 data.
 };
 struct SfcCorrectionTypeParameterTraitsHelper {
-  typedef SfcCorrectionType EnumType;
+  using EnumType = SfcCorrectionType;
   static constexpr char enumTypeName[] = "SfcCorrectionType";
   static constexpr util::NamedEnumerator<SfcCorrectionType> namedValues[] = {
     { SfcCorrectionType::UKMO, "UKMO" },
     { SfcCorrectionType::WRFDA, "WRFDA" },
     { SfcCorrectionType::GSL, "GSL" }
+  };
+};
+
+/// Linearization mode for the GSL lapse rate in TL/AD.
+/// MatchSimobs: differentiate the configured lapse-rate calculation
+/// (consistent linearization).
+/// NoAdjustment: treat trajectory-time lapse rate as constant in TL/AD,
+/// dropping contribution from model temperature levels used to compute it.
+enum class GslTladLapseRateOption {
+  MatchSimobs,
+  NoAdjustment
+};
+struct GslTladLapseRateOptionParameterTraitsHelper {
+  using EnumType = GslTladLapseRateOption;
+  static constexpr char enumTypeName[] = "GslTladLapseRateOption";
+  static constexpr util::NamedEnumerator<GslTladLapseRateOption> namedValues[] = {
+    { GslTladLapseRateOption::MatchSimobs, "MatchSimobs" },
+    { GslTladLapseRateOption::NoAdjustment, "NoAdjustment" }
   };
 };
 
@@ -45,7 +63,7 @@ enum class GslLapseRateOption {
   NoAdjustment    /// No temperature adjustment
 };
 struct GslLapseRateOptionParameterTraitsHelper {
-  typedef GslLapseRateOption EnumType;
+  using EnumType = GslLapseRateOption;
   static constexpr char enumTypeName[] = "GslLapseRateOption";
   static constexpr util::NamedEnumerator<GslLapseRateOption> namedValues[] = {
     { GslLapseRateOption::Constant, "Constant" },
@@ -68,6 +86,12 @@ struct ParameterTraits<ufo::SfcCorrectionType> :
 template <>
 struct ParameterTraits<ufo::GslLapseRateOption> :
     public EnumParameterTraits<ufo::GslLapseRateOptionParameterTraitsHelper>
+{};
+
+/// Extraction of GslTladLapseRateOption parameters from config
+template <>
+struct ParameterTraits<ufo::GslTladLapseRateOption> :
+    public EnumParameterTraits<ufo::GslTladLapseRateOptionParameterTraitsHelper>
 {};
 
 }  // namespace oops
@@ -140,6 +164,38 @@ class GslCorrectionParameters : public oops::Parameters {
     "Only used when temperature lapse rate option = Local and "
     "temperature lapse rate threshold = true",
     10.0,
+    this
+  };
+
+  /// Linearization mode for the lapse rate in TL/AD. Defaults to
+  /// MatchSimobs (consistent linearization). Set to NoAdjustment to
+  /// freeze the lapse rate at trajectory time in TL/AD.
+  oops::Parameter<GslTladLapseRateOption> tladLapseRateOption{
+    "tlad lapse rate option",
+    "Linearization mode for the lapse rate in TL/AD: 'MatchSimobs' "
+    "(consistent linearization, default) or 'NoAdjustment' (treat the "
+    "trajectory lapse rate as constant in TL/AD.",
+    GslTladLapseRateOption::MatchSimobs,
+    this
+  };
+
+  /// If true, and lapse rate has zero derivative w.r.t. the model state
+  /// (temperature lapse rate option = Constant or NoAdjustment, or
+  /// tlad lapse rate option = NoAdjustment freezing a Local lapse rate),
+  /// add the lowest model level's temperature increment to the
+  /// air_temperature_at_2m increment in TL/AD.
+  /// Defaults to false, exact linearization (dhofx = dT_2m).
+  /// If the model's TL/AD does not carry an independent
+  /// active increment for air_temperature_at_2m, this can be used
+  /// so the observation can reach the 3D prognostic field.
+  oops::Parameter<bool> tladSpreadToLowestLevel{
+    "tlad spread to lowest level",
+    "When the lapse rate has zero derivative w.r.t. the model state "
+    "(Constant, NoAdjustment, or tlad lapse rate option = NoAdjustment), "
+    "add the lowest model level's air_temperature increment to the "
+    "air_temperature_at_2m increment in TL/AD, so the observation "
+    "increment still reaches the 3D prognostic field",
+    false,
     this
   };
 };

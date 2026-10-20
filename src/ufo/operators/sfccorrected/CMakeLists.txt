@@ -11,6 +11,8 @@ set ( sfccorrected_files
     EvalSurfaceTemperature.cc
     ObsSfcCorrected.h
     ObsSfcCorrected.cc
+    ObsSfcCorrectedTLAD.h
+    ObsSfcCorrectedTLAD.cc
     ObsSfcCorrectedParameters.h
     SurfaceOperatorBase.h
     SurfaceOperatorBase.cc

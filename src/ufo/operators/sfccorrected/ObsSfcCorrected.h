@@ -17,6 +17,7 @@
 #include "ioda/ObsDataVector.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+#include "ufo/LinearObsOperatorBase.h"
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/sfccorrected/ObsSfcCorrectedParameters.h"
 #include "ufo/operators/sfccorrected/SurfaceOperatorBase.h"
