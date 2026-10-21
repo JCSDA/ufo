@@ -16,7 +16,9 @@
 #include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/AssociativeContainers.h"
+#include "oops/util/missingValues.h"
 #include "ufo/operators/sfccorrected/ObsSfcCorrectedParameters.h"
+#include "ufo/variabletransforms/Formulas.h"
 
 namespace ioda {
   class ObsSpace;
@@ -24,6 +26,33 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+
+/// Converts a single profile of geopotential heights at one location to geometric height.
+/// Missing levels are left unchanged; nothing is done if the latitude is missing.
+template <typename T>
+void convertToGeometricHeight(const float lat, std::vector<T> & heights) {
+  if (lat == util::missingValue<float>()) return;
+  const T missing = util::missingValue<T>();
+  for (T & h : heights) {
+    if (h != missing) {
+      h = static_cast<T>(formulas::Geopotential_to_Geometric_Height(lat, static_cast<float>(h)));
+    }
+  }
+}
+
+/// Converts one geopotential height per location to geometric height, using the latitude
+/// at each location. Locations with a missing latitude or height are left unchanged.
+template <typename T>
+void convertToGeometricHeight(const std::vector<float> & lats, std::vector<T> & heights) {
+  const float missingFloat = util::missingValue<float>();
+  const T missing = util::missingValue<T>();
+  for (size_t iloc = 0; iloc < heights.size(); ++iloc) {
+    if (lats[iloc] != missingFloat && heights[iloc] != missing) {
+      heights[iloc] = static_cast<T>(formulas::Geopotential_to_Geometric_Height(
+          lats[iloc], static_cast<float>(heights[iloc])));
+    }
+  }
+}
 
 /// \brief SurfaceOperator base class.
 ///

@@ -8,7 +8,6 @@
 #ifndef UFO_OPERATORS_SFCCORRECTED_EVALSURFACEPRESSURE_H_
 #define UFO_OPERATORS_SFCCORRECTED_EVALSURFACEPRESSURE_H_
 
-#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>

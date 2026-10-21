@@ -246,5 +246,5 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/sfc_geoval_2018041500_new.nc4
     levels_are_top_down: false
-  rms ref: 99672.65679965
+  rms ref: 99673.24123197
   tolerance: 1.e-08
