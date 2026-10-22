@@ -1,0 +1,89 @@
+time window:
+  begin: 2019-12-29T21:00:00Z
+  end: 2019-12-30T03:00:00Z
+
+# Multi-channel select_mean tests (ATMS brightnessTemperature).
+# Case 1: single channel, fine mesh → singleton bins; Derived ≈ ObsValue.
+# Case 2: channels 1-3, fine mesh → anti-wipeout gate (all channels get Derived).
+# Case 3: channels 1-3, coarse mesh → shared FOV thinning with per-channel means.
+
+observations:
+# Case 1: single-channel radiance mean (regression for channelled ObsValue path)
+- obs space:
+    name: ATMS select_mean single channel
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1
+    select_mean: true
+    min_num_obs_per_bin: 1
+    # Fine mesh: each location is alone in its bin → mean equals ObsValue
+    horizontal_mesh: 1.0
+  passedBenchmark: 100
+  compareVariables:
+    - reference:
+        name: ObsValue/brightnessTemperature_1
+      test:
+        name: DerivedObsValue/brightnessTemperature_1
+      absTol: 1.0e-4
+
+# Case 2: multi-channel anti-wipeout — Derived must match ObsValue on all channels
+- obs space:
+    name: ATMS select_mean channels 1-3 singleton bins
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-3
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-3
+    select_mean: true
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 1.0  # fine mesh → singleton bins
+  passedBenchmark: 300  # 100 locations * 3 channels
+  compareVariables:
+    - reference:
+        name: ObsValue/brightnessTemperature_1
+      test:
+        name: DerivedObsValue/brightnessTemperature_1
+      absTol: 1.0e-4
+    - reference:
+        name: ObsValue/brightnessTemperature_2
+      test:
+        name: DerivedObsValue/brightnessTemperature_2
+      absTol: 1.0e-4
+    - reference:
+        name: ObsValue/brightnessTemperature_3
+      test:
+        name: DerivedObsValue/brightnessTemperature_3
+      absTol: 1.0e-4
+
+# Case 3: multi-channel with thinning (shared FOV keep-mask)
+- obs space:
+    name: ATMS select_mean channels 1-3 with thinning
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/atms_n20_obs_20191230T0000_rttov.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-3
+  obs filters:
+  - filter: Gaussian Thinning
+    filter variables:
+    - name: brightnessTemperature
+      channels: 1-3
+    select_mean: true
+    min_num_obs_per_bin: 1
+    horizontal_mesh: 1111.949266  # km = 10 deg at equator; 4 of 100 locations kept
+  passedBenchmark: 12  # 4 locations * 3 channels
