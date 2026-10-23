@@ -45,10 +45,9 @@ ObsAodMetOfficeTLAD::ObsAodMetOfficeTLAD(const ioda::ObsSpace & odb, const Param
   // check the size of AodKExt_ is consistent with NDustBins_
   ASSERT(AodKExt_.size() == NDustBins_);
 
-  // 2. Define which model fields will be needed
-  // pressure fields:
-  varin_.push_back("air_pressure_levels");
-  varin_.push_back("air_pressure_at_surface");
+  // 2. Define which model increment fields will be needed (_d variables).
+  //    Note that while pressure is an input variable it is not incremented
+  //    by the AOD observation operator and so is not included here.
 
   // dust mass concentration:
   std::string dust_var_name;  // dust variable name in geovals
@@ -74,16 +73,16 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
     oops::Log::trace() << "ObsAodMetOfficeTLAD::setTrajectory start" << std::endl;
     // Get number of obs locations & number of model pressure levels:
     std::size_t nprofiles = geovals.nlocs();
-    // number of full (rho) levels
-    std::size_t nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+    // number of half (theta) levels
+    std::size_t nlevels   = geovals.nlevs(oops::Variable{"mass_fraction_of_dust001_in_air"});
 
     // Get 2-D surface pressure
     std::vector<double> ps(nprofiles);  // surface pressure (Pa)
     geovals.get(ps, oops::Variable{"air_pressure_at_surface"});
 
     // Get 3-D air pressure on rho levels (Pa), one level at a time
-    std::vector<std::vector<double>> plev(nlevels, std::vector<double>(nprofiles));
-    for (std::size_t i = 0; i < nlevels; ++i) {
+    std::vector<std::vector<double>> plev(nlevels + 1, std::vector<double>(nprofiles));
+    for (std::size_t i = 0; i < nlevels + 1; ++i) {
           geovals.getAtLevel(plev[i], oops::Variable{"air_pressure_levels"}, i);
           }
 
@@ -100,8 +99,8 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
     kMatrix_.resize(NDustBins_);
     for (size_t d = 0; d < NDustBins_; d++)
     {
-        kMatrix_[d].resize(nlevels - 1);
-        for (size_t k = 0; k < (nlevels - 1); k++)
+        kMatrix_[d].resize(nlevels);
+        for (size_t k = 0; k < (nlevels); k++)
         {
            kMatrix_[d][k].resize(nprofiles);
         }
@@ -112,10 +111,10 @@ void ObsAodMetOfficeTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics 
       // loop over dust bins and calculate gradient w.r.t mass concentration per bin:
       for (size_t d = 0; d < NDustBins_; d++) {
         // lowest model layer:
-        kMatrix_[d][nlevels - 2][p] = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 2][p]) *
+        kMatrix_[d][nlevels - 1][p] = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 1][p]) *
                 AodKExt_[d];
         // loop over the rest of the model layers
-        for (size_t k = 0; k < (nlevels - 2); k++) {
+        for (size_t k = 0; k < (nlevels - 1); k++) {
           kMatrix_[d][k][p] = (1.0 / Constants::grav) * (plev[k+1][p] - plev[k][p]) *
                   AodKExt_[d];
         }
@@ -131,15 +130,15 @@ void ObsAodMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector
 
     // Get number of obs locations & number of model pressure levels:
     std::size_t nprofiles = geovals.nlocs();
-    // number of full (rho) levels
-    std::size_t nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+    // number of half (theta) levels
+    std::size_t nlevels   = geovals.nlevs(oops::Variable{"mass_fraction_of_dust001_in_air"});
     // Check hofx size and initialise hofx to zero
     ASSERT(geovals.nlocs() == hofx.nlocs());
     hofx.zero();
 
     // calculate tangent linear
 
-    std::vector<double> mass_d(nlevels - 1);  // mass concentration increments
+    std::vector<double> mass_d(nlevels);  // mass concentration increments
     // loop over profiles
     for (size_t p = 0; p < nprofiles; p++) {
       // loop over dust bins and calculate gradient w.r.t mass concentration per bin:
@@ -147,7 +146,7 @@ void ObsAodMetOfficeTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector
         oops::Variable dust_var{"mass_fraction_of_dust00" + std::to_string(d+1) + "_in_air"};
         geovals.getAtLocation(mass_d, dust_var, p);
         // loop over model layers
-        for (size_t k=0; k < (nlevels - 1); k++) {
+        for (size_t k=0; k < (nlevels); k++) {
           hofx[p] += kMatrix_[d][k][p] * mass_d[k];
         }
       }
@@ -164,8 +163,8 @@ void ObsAodMetOfficeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector
 
   // Get number of obs locations & number of model pressure levels:
   std::size_t nprofiles = geovals.nlocs();
-  // number of full (rho) levels
-  std::size_t nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+  // number of half (theta) levels
+  std::size_t nlevels   = geovals.nlevs(oops::Variable{"mass_fraction_of_dust001_in_air"});
 
   // Check hofx size
   ASSERT(geovals.nlocs() == hofx.nlocs());
@@ -175,21 +174,21 @@ void ObsAodMetOfficeTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector
 
   // Loop through the obs, adding the increment to the model state
 
-  std::vector<double> mass_d(nlevels - 1);  // mass concentration increments on half (theta) levels
+  std::vector<double> mass_d(nlevels);  // mass concentration increments on half (theta) levels
   // loop over profiles
   for (size_t p = 0; p < nprofiles; p++) {
-    if (hofx[p] != missing) {
-      // loop over dust bins and calculate gradient w.r.t mass concentration per bin:
-      for (size_t d = 0; d < NDustBins_; d++) {
-        oops::Variable dust_var{"mass_fraction_of_dust00" + std::to_string(d+1) + "_in_air"};
-        geovals.getAtLocation(mass_d, dust_var, p);
-        // loop over the model layers
-        for (size_t k=0; k < (nlevels - 1); k++) {
-          mass_d[k] += kMatrix_[d][k][p] * hofx[p];
-        }
-        // Store the updated model state increments
-        geovals.putAtLocation(mass_d, dust_var, p);
+    if (hofx[p] == missing) continue;
+
+    // loop over dust bins and calculate gradient w.r.t mass concentration per bin:
+    for (size_t d = 0; d < NDustBins_; d++) {
+      oops::Variable dust_var{"mass_fraction_of_dust00" + std::to_string(d+1) + "_in_air"};
+      geovals.getAtLocation(mass_d, dust_var, p);
+      // loop over the model layers
+      for (size_t k=0; k < (nlevels); k++) {
+        mass_d[k] += kMatrix_[d][k][p] * hofx[p];
       }
+      // Store the updated model state increments
+      geovals.putAtLocation(mass_d, dust_var, p);
     }
   }
 

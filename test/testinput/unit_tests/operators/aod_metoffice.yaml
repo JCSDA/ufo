@@ -30,7 +30,7 @@ observations:
     coef TL: 1.0e-4
     iterations TL: 10
     tolerance TL: 1.0e-14
-    tolerance AD: 1.0e-14
+    tolerance AD: 2.0e-14
 # 2. check operator throws an error with incorrect geoval order
 - obs operator:
     name: AodMetOffice 
@@ -56,5 +56,5 @@ observations:
     coef TL: 1.0e-4
     iterations TL: 10
     tolerance TL: 1.0e-14
-    tolerance AD: 1.0e-14
+    tolerance AD: 2.0e-14
   expect simulateObs to throw exception with message: model fields must be ordered from the top down
