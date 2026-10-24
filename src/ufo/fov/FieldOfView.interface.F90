@@ -12,6 +12,8 @@ module ufo_fov_mod_c
 
   implicit none
   private
+  public :: ufo_fov_ellipse_c, ufo_antenna_power_within_fov_c, ufo_fov_delete_c, &
+            ufo_fov_setup_c
 
   ! ------------------------------------------------------------------------------
 #define LISTED_TYPE ufo_fov
