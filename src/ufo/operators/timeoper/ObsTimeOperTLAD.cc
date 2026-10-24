@@ -21,6 +21,7 @@
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/operators/timeoper/ObsTimeOperUtil.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -56,19 +57,10 @@ void ObsTimeOperTLAD::setTrajectory(const GeoVaLs & geovals,
   // oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
   //                    << geovals << std::endl;
 
-  GeoVaLs gv1(geovals);
-  GeoVaLs gv2(geovals);
-
-  gv1 *= timeWeights_[0];
-  gv2 *= timeWeights_[1];
-  gv1 += gv2;
-
-  // oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory final geovals gv1 "
-  //                    << gv1 << std::endl;
-
-  actualoperator_->setTrajectory(gv1, ydiags, qc_flags);
-
-  // oops::Log::debug() << gv1;
+  GeoVaLs gvt(geovals);
+  timeInterpolate(gvt, timeWeights_);
+  ScopedDefaultGeoVaLFormatChange change(gvt, GeoVaLFormat::REDUCED);
+  actualoperator_->setTrajectory(gvt, ydiags, qc_flags);
 
   oops::Log::trace() << "ObsTimeOperTLAD::setTrajectory done" << std::endl;
 }
@@ -81,17 +73,10 @@ void ObsTimeOperTLAD::simulateObsTL(const GeoVaLs & geovals, ioda::ObsVector & o
   // oops::Log::debug() << "ObsTimeOperTLAD::setTrajectory input geovals "
   //                    << geovals << std::endl;
 
-  GeoVaLs gv1(geovals);
-  GeoVaLs gv2(geovals);
-
-  gv1 *= timeWeights_[0];
-  gv2 *= timeWeights_[1];
-  gv1 += gv2;
-
-  // oops::Log::debug() << "ObsTimeOperTLAD::simulateObsTL final geovals gv1 "
-  //                    << gv1 << std::endl;
-
-  actualoperator_->simulateObsTL(gv1, ovec);
+  GeoVaLs gvt(geovals);
+  timeInterpolate(gvt, timeWeights_);
+  ScopedDefaultGeoVaLFormatChange change(gvt, GeoVaLFormat::REDUCED);
+  actualoperator_->simulateObsTL(gvt, ovec);
 
   oops::Log::trace() << "ObsTimeOperTLAD::simulateObsTL done" << std::endl;
 }
@@ -104,14 +89,14 @@ void ObsTimeOperTLAD::simulateObsAD(GeoVaLs & geovals, const ioda::ObsVector & o
   // oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD input geovals "
   //                    << geovals << std::endl;
 
-  actualoperator_->simulateObsAD(geovals, ovec);
-
-  GeoVaLs gv2(geovals);
-
-  geovals *= timeWeights_[0];
-  gv2 *= timeWeights_[1];
-
-  geovals += gv2;
+  GeoVaLs gvad(geovals);
+  gvad.zero();
+  timeInterpolate(gvad, timeWeights_);  // allocates the reduced format
+  {
+    ScopedDefaultGeoVaLFormatChange change(gvad, GeoVaLFormat::REDUCED);
+    actualoperator_->simulateObsAD(gvad, ovec);
+  }
+  timeInterpolateAD(geovals, gvad, timeWeights_);
 
   // oops::Log::debug() << "ObsTimeOperTLAD::simulateObsAD final geovals "
   //                    << geovals << std::endl;
