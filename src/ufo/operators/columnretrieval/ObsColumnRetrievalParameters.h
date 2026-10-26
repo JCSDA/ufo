@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2022 UCAR
+ * (C) Copyright 2022-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -11,9 +11,40 @@
 #include <string>
 #include <vector>
 
+#include "oops/util/parameters/NumericConstraints.h"
 #include "oops/util/parameters/Parameter.h"
+#include "oops/util/parameters/ParameterTraits.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/ObsOperatorParametersBase.h"
+
+namespace ufo {
+
+/// How the obs and model pressure vertices are aligned before integration.
+enum class StretchVertices {
+  none, top, bottom, topbottom
+};
+
+struct StretchVerticesParameterTraitsHelper {
+  typedef StretchVertices EnumType;
+  static constexpr char enumTypeName[] = "StretchVertices";
+  static constexpr util::NamedEnumerator<StretchVertices> namedValues[] = {
+    { StretchVertices::none,      "none" },
+    { StretchVertices::top,       "top" },
+    { StretchVertices::bottom,    "bottom" },
+    { StretchVertices::topbottom, "topbottom" }
+  };
+};
+
+}  // namespace ufo
+
+namespace oops {
+
+template <>
+struct ParameterTraits<ufo::StretchVertices> :
+    public EnumParameterTraits<ufo::StretchVerticesParameterTraitsHelper>
+{};
+
+}  // namespace oops
 
 namespace ufo {
 
@@ -22,15 +53,19 @@ class ObsColumnRetrievalParameters : public ObsOperatorParametersBase {
   OOPS_CONCRETE_PARAMETERS(ObsColumnRetrievalParameters, ObsOperatorParametersBase)
 
  public:
+  /// Checks that the combination of options is consistent.
+  void deserialize(util::CompositePath &path, const eckit::Configuration &config) override;
+
   oops::Parameter <int> nlayers_retrieval
     {"nlayers_retrieval",
      "Number of layers in the retrieval kernel",
      1,
-     this};
+     this,
+     {oops::minConstraint(1)}};
 
   oops::RequiredParameter <std::vector<std::string>> tracerVariables
     {"tracer variables",
-     "Names of model tracer variables",
+     "Name of the model tracer variable (exactly one; the operator simulates a single variable)",
      this};
 
   oops::Parameter <bool> isApriori
@@ -45,10 +80,10 @@ class ObsColumnRetrievalParameters : public ObsOperatorParametersBase {
      false,
      this};
 
-  oops::Parameter <std::string> stretchVertices
+  oops::Parameter <StretchVertices> stretchVertices
     {"stretchVertices",
      "match Obs and Bkg vertices, options: top, bottom, topbottom and none (default)",
-     "none",
+     StretchVertices::none,
      this};
 
   oops::Parameter <double> modelUnitsCoeff

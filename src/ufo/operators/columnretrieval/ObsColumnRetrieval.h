@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 UCAR
+ * (C) Copyright 2017-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -12,11 +12,11 @@
 #include <string>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/base/Variable.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 
 #include "ufo/ObsOperatorBase.h"
-#include "ufo/operators/columnretrieval/ObsColumnRetrieval.interface.h"
 #include "ufo/operators/columnretrieval/ObsColumnRetrievalParameters.h"
 
 /// Forward declarations
@@ -51,14 +51,20 @@ class ObsColumnRetrieval : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
-  int & toFortran() {return keyOper_;}
-  const int & toFortran() const {return keyOper_;}
-
  private:
   void print(std::ostream &) const override;
-  F90hop keyOper_;
+
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
+  oops::Variable tracerVar_;
+  oops::Variable prsiVar_;
+  int nlayers_;
+  bool isApriori_;
+  bool isAveragingKernel_;
+  bool totalNoVertice_;
+  StretchVertices stretch_;
+  double modelUnitsCoeff_;
+  double tropopause_;
 };
 
 // -----------------------------------------------------------------------------
