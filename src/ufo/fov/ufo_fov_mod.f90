@@ -50,6 +50,11 @@ contains
         self%ichan = 15
         self%is_crosstrack = .true.
         self%expansion = 2.9_kind_real
+      case("mhs")
+        self%instr = 13
+        self%ichan = 1
+        self%is_crosstrack = .true.
+        self%expansion = 2.9_kind_real
       case("atms")
         self%instr = 20
         self%ichan = 16
