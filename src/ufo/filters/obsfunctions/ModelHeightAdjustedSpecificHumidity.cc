@@ -5,7 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -111,8 +110,7 @@ void ModelHeightAdjustedSpecificHumidity::compute(const ObsFilterData & in,
     if (qsatObs > 0.0f) {
       rh = qObs[jj] / qsatObs;
     }
-    // Clamp RH to [0, 1] to prevent unphysical values
-    rh = std::max(0.0f, std::min(1.0f, rh));
+    // RH is not clamped: the adjusted q may exceed the model qsat
 
     // Compute saturation specific humidity at model surface (T_adj, P_model_surface)
     float esatAdj = formulas::SatVaporPres_fromTemp(tAdj[jj],
