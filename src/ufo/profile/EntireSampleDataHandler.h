@@ -24,6 +24,7 @@
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
 
+#include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/filters/ObsFilterData.h"
@@ -131,6 +132,9 @@ namespace ufo {
 
    private:  // functions
     /// Put entire data vector on obsdb.
+    /// Vectors that do not have one entry per location (e.g. groups listed in
+    /// groups_singlevalue) cannot be stored in a Location-dimensioned variable
+    /// and are therefore not written.
     template <typename T>
       void putDataVector(const std::string &fullname,
                          const std::vector <T> &datavec)
@@ -138,6 +142,12 @@ namespace ufo {
         std::string varname;
         std::string groupname;
         ufo::splitVarGroup(fullname, varname, groupname);
+        if (options_.getEntriesPerProfile(groupname) != 0) {
+          oops::Log::info() << "Not writing " << fullname
+                            << " to ObsSpace: not stored with one value per location"
+                            << std::endl;
+          return;
+        }
         obsdb_.put_db(groupname, varname, datavec);
       }
 
