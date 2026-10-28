@@ -8,7 +8,7 @@
 
 module ufo_groundgnss_metoffice_tlad_mod
 
-use, intrinsic :: iso_c_binding, only: c_bool, c_double, c_float, c_ptr
+use, intrinsic :: iso_c_binding, only: c_bool, c_double, c_float, c_int, c_ptr
 use kinds, only: kind_real
 use ufo_vars_mod
 use ufo_geovals_mod
@@ -41,6 +41,7 @@ type, extends(ufo_basis_tlad), public ::  ufo_groundgnss_metoffice_tlad
   real(kind_real) :: min_temp_grad
   real(kind_real) :: dryRefractivityConstant
   real(kind_real) :: wetRefractivityConstant
+  integer :: num_fov                     ! Number of field-of-view sampling points (1 = no averaging)
   contains
     procedure :: setup      => ufo_groundgnss_metoffice_setup
     procedure :: delete     => ufo_groundgnss_metoffice_tlad_delete
@@ -60,7 +61,8 @@ subroutine ufo_groundgnss_metoffice_setup(self, &
                                           pseudoLevels, &
                                           minTempGrad, &
                                           dryRefractivityConstant, &
-                                          wetRefractivityConstant)
+                                          wetRefractivityConstant, &
+                                          numFOV)
 
 use fckit_configuration_module, only: fckit_configuration
 implicit none
@@ -70,12 +72,14 @@ logical(c_bool), intent(in) :: pseudoLevels
 real(c_float), intent(in) :: minTempGrad
 real(c_float), intent(in) :: dryRefractivityConstant
 real(c_float), intent(in) :: wetRefractivityConstant
+integer(c_int), intent(in) :: numFOV
 
 self % vert_interp_ops = vertInterpOPS
 self % pseudo_ops = pseudoLevels
 self % min_temp_grad = minTempGrad
 self % dryRefractivityConstant = dryRefractivityConstant
 self % wetRefractivityConstant = wetRefractivityConstant
+self % num_fov = numFOV
 
 end subroutine ufo_groundgnss_metoffice_setup
 
@@ -111,6 +115,9 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   real(kind_real), allocatable :: humidity(:)        ! Model background specific humidity  (in pressure monotonic order)
   real(kind_real), allocatable :: za(:)              ! Model heights of rho levs (in pressure monotonic order)
   real(kind_real), allocatable :: zb(:)              ! Model heights of theta levs (in pressure monotonic order)
+  integer                      :: num_fov            ! Number of field-of-view sampling points
+  integer                      :: ifov               ! Loop variable, sampling point number
+  integer                      :: ipath              ! Index of a sampling point in the geovals
 
 ! Make sure that any previous values of geovals don't get carried over
   call self%delete()
@@ -125,6 +132,7 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   self % nlevp = prs % nval
   self % nlevq = q % nval
   self % nlocs = obsspace_get_nlocs(obss)
+  num_fov = self % num_fov
 
 ! Get the meta-data from the observations
   nobs  = obsspace_get_nlocs(obss)
@@ -143,10 +151,30 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   if (self % nlocs > 0) then
     obs_loop: do iobs = 1, self % nlocs
 
-        pressure = prs % vals(:,iobs)
-        humidity = q % vals(:,iobs)
-        za = rho_heights % vals(:,iobs)
-        zb = theta_heights % vals(:,iobs)
+        if (num_fov > 1) then
+          ! Linearise about the field-of-view average of the model state, matching the
+          ! averaging done by the non-linear operator.  Equal weights.
+          pressure(:) = 0.0
+          humidity(:) = 0.0
+          za(:) = 0.0
+          zb(:) = 0.0
+          do ifov = 1, num_fov
+            ipath = (iobs-1)*num_fov + ifov
+            pressure = pressure + prs % vals(:,ipath)
+            humidity = humidity + q % vals(:,ipath)
+            za = za + rho_heights % vals(:,ipath)
+            zb = zb + theta_heights % vals(:,ipath)
+          end do
+          pressure = pressure / num_fov
+          humidity = humidity / num_fov
+          za = za / num_fov
+          zb = zb / num_fov
+        else
+          pressure = prs % vals(:,iobs)
+          humidity = q % vals(:,iobs)
+          za = rho_heights % vals(:,iobs)
+          zb = theta_heights % vals(:,iobs)
+        end if
 
         CALL groundgnss_jacobian_interface(self % nlevp,                   &   ! Number of pressure levels
                                            self % nlevq,                   &   ! Number of specific humidity levels
@@ -169,6 +197,10 @@ subroutine ufo_groundgnss_metoffice_tlad_settraj(self, geovals, obss)
   self%ltraj = .true.
 
   deallocate(zStation)
+  deallocate(pressure)
+  deallocate(humidity)
+  deallocate(za)
+  deallocate(zb)
 
 end subroutine ufo_groundgnss_metoffice_tlad_settraj
 
@@ -200,20 +232,32 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
   real(kind_real), allocatable :: pressure_d(:) ! Increment to the air pressure (monotonic order)
   real(kind_real), allocatable :: humidity_d(:) ! Increment to the specific humidity  (in pressure monotonic order)
   real(kind_real), allocatable :: x_d(:)        ! Increment to the complete state
+  integer                      :: num_fov       ! Number of field-of-view sampling points
+  integer                      :: ifov          ! Loop variable, sampling point number
+  integer                      :: ipath         ! Index of a sampling point in the geovals
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
      call abor1_ftn(trim(myname_) // " trajectory wasnt set!")
   end if
 
-! Check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
-     call abor1_ftn(trim(myname_) // " error: nlocs inconsistent!")
-  end if
-
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi,  prs_d)       ! pressure on rho levels
+
+  num_fov = self % num_fov
+
+! Check if the geovals and hofx agree on how many obs there are.  With FOV averaging each
+! observation is sampled along num_fov paths, so it is the profile count that must match.
+  if (num_fov > 1) then
+     if (q_d%nprofiles /= size(hofx)*num_fov .or. prs_d%nprofiles /= size(hofx)*num_fov) then
+        call abor1_ftn(trim(myname_) // " error: number of sampled profiles inconsistent!")
+     end if
+  else
+     if (geovals%nlocs /= size(hofx)) then
+        call abor1_ftn(trim(myname_) // " error: nlocs inconsistent!")
+     end if
+  end if
 
   nlocs = self % nlocs ! number of observations
 
@@ -227,8 +271,21 @@ subroutine ufo_groundgnss_metoffice_simobs_tl(self, geovals, hofx, obss)
 
     obs_loop: do iobs = 1, nlocs   ! order of loop doesn't matter
 
-      pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
-      humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
+      if (num_fov > 1) then
+        ! Tangent linear of the field-of-view average in the non-linear operator.
+        pressure_d(:) = 0.0
+        humidity_d(:) = 0.0
+        do ifov = 1, num_fov
+          ipath = (iobs-1)*num_fov + ifov
+          pressure_d = pressure_d + prs_d % vals(:,ipath)
+          humidity_d = humidity_d + q_d % vals(:,ipath)
+        end do
+        pressure_d = pressure_d / num_fov
+        humidity_d = humidity_d / num_fov
+      else
+        pressure_d(1:self % nlevp) = prs_d % vals(:,iobs)
+        humidity_d(1:self % nlevq) = q_d % vals(:,iobs)
+      end if
 
       x_d(1:prs_d%nval) = pressure_d
       x_d(prs_d%nval+1:prs_d%nval+q_d%nval) = humidity_d
@@ -275,20 +332,32 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
   real(kind_real), allocatable :: x_d(:)        ! Perturbation to the full model state
   real(kind_real), allocatable :: pressure_d(:) ! Perturbation to pressure (monotonic order)
   real(kind_real), allocatable :: humidity_d(:) ! Perturbation to specific humidity  (in pressure monotonic order)
+  integer                      :: num_fov       ! Number of field-of-view sampling points
+  integer                      :: ifov          ! Loop variable, sampling point number
+  integer                      :: ipath         ! Index of a sampling point in the geovals
 
 ! Check if trajectory was set
   if (.not. self%ltraj) then
      call abor1_ftn(trim(myname_) // " trajectory wasnt set!")
   end if
 
-! Check if nlocs is consistent in geovals & hofx
-  if (geovals%nlocs /= size(hofx)) then
-     call abor1_ftn(trim(myname_) // " error: nlocs inconsistent!")
-  end if
-
 ! Get variables from geovals
   call ufo_geovals_get_var(geovals, var_q,     q_d)         ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi,  prs_d)       ! pressure
+
+  num_fov = self % num_fov
+
+! Check if the geovals and hofx agree on how many obs there are.  With FOV averaging each
+! observation is sampled along num_fov paths, so it is the profile count that must match.
+  if (num_fov > 1) then
+     if (q_d%nprofiles /= size(hofx)*num_fov .or. prs_d%nprofiles /= size(hofx)*num_fov) then
+        call abor1_ftn(trim(myname_) // " error: number of sampled profiles inconsistent!")
+     end if
+  else
+     if (geovals%nlocs /= size(hofx)) then
+        call abor1_ftn(trim(myname_) // " error: nlocs inconsistent!")
+     end if
+  end if
 
   missing = missing_value(missing)
   allocate(x_d(1:prs_d%nval + q_d%nval))
@@ -299,8 +368,19 @@ subroutine ufo_groundgnss_metoffice_simobs_ad(self, geovals, hofx, obss)
 
       if (hofx(iobs) /= missing) then
           x_d = self % K(iobs,:) * hofx(iobs)
-          prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
-          q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+          if (num_fov > 1) then
+            ! Adjoint of the field-of-view average: the increment is spread back over the
+            ! sampling points with the same equal weights used in the forward direction.
+            do ifov = 1, num_fov
+              ipath = (iobs-1)*num_fov + ifov
+              prs_d % vals(:,ipath) = prs_d % vals(:,ipath) + x_d(1:prs_d%nval) / num_fov
+              q_d % vals(:,ipath) = q_d % vals(:,ipath) + &
+                                    x_d(prs_d%nval+1:prs_d%nval+q_d%nval) / num_fov
+            end do
+          else
+            prs_d % vals(:,iobs) = prs_d % vals(:,iobs) + x_d(1:prs_d%nval)
+            q_d % vals(:,iobs) = q_d % vals(:,iobs) + x_d(prs_d%nval+1:prs_d%nval+q_d%nval)
+          end if
       end if
     end do obs_loop
   end if

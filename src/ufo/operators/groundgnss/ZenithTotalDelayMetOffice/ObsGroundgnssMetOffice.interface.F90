@@ -35,7 +35,9 @@ subroutine ufo_groundgnss_metoffice_setup_c(c_key_self, &
                                             c_pseudoLevels, &
                                             c_minTempGrad, &
                                             c_dryRefractivityConstant, &
-                                            c_wetRefractivityConstant) bind(c,name="ufo_groundgnss_metoffice_setup_f90")
+                                            c_wetRefractivityConstant, &
+                                            c_numFOV, &
+                                            c_fovRadius) bind(c,name="ufo_groundgnss_metoffice_setup_f90")
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 logical(c_bool), intent(in) :: c_vertInterpOPS
@@ -43,13 +45,16 @@ logical(c_bool), intent(in) :: c_pseudoLevels
 real(c_float), intent(in) :: c_minTempGrad
 real(c_float), intent(in) :: c_dryRefractivityConstant
 real(c_float), intent(in) :: c_wetRefractivityConstant
+integer(c_int), intent(in) :: c_numFOV
+real(c_float), intent(in) :: c_fovRadius
 
 type(ufo_groundgnss_MetOffice), pointer :: self
 
 call ufo_groundgnss_MetOffice_registry%setup(c_key_self, self)
 
 call self%setup(c_vertInterpOPS, c_pseudoLevels, c_minTempGrad, &
-                c_dryRefractivityConstant, c_wetRefractivityConstant)
+                c_dryRefractivityConstant, c_wetRefractivityConstant, &
+                c_numFOV, c_fovRadius)
 
 end subroutine ufo_groundgnss_MetOffice_setup_c
 
@@ -82,6 +87,25 @@ call ufo_groundgnss_MetOffice_registry%get(c_key_self, self)
 call self%opr_simobs(c_key_geovals, c_obsspace, c_hofx)
 
 end subroutine ufo_groundgnss_metoffice_simobs_c
+
+! ------------------------------------------------------------------------------
+
+subroutine ufo_groundgnss_metoffice_locs_init_c(c_key_self, c_obsspace, c_npaths, &
+                                                c_lons, c_lats) &
+    bind(c,name="ufo_groundgnss_metoffice_locs_init_f90")
+implicit none
+integer(c_int),     intent(in)    :: c_key_self
+type(c_ptr), value, intent(in)    :: c_obsspace
+integer(c_int),     intent(in)    :: c_npaths
+real(c_float),      intent(inout) :: c_lons(c_npaths)
+real(c_float),      intent(inout) :: c_lats(c_npaths)
+
+type(ufo_groundgnss_MetOffice), pointer :: self
+
+call ufo_groundgnss_MetOffice_registry%get(c_key_self, self)
+call ufo_groundgnss_metoffice_locs_init(self, c_obsspace, c_npaths, c_lons, c_lats)
+
+end subroutine ufo_groundgnss_metoffice_locs_init_c
 
 ! ------------------------------------------------------------------------------
 

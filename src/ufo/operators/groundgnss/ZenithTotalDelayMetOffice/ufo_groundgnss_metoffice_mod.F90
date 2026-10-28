@@ -25,6 +25,8 @@ implicit none
 public             :: ufo_groundgnss_metoffice
 private
 
+integer, parameter :: max_string = 800
+
   !> Fortran derived type for groundgnss trajectory
 type, extends(ufo_basis) :: ufo_groundgnss_MetOffice
   logical :: vert_interp_ops
@@ -32,10 +34,14 @@ type, extends(ufo_basis) :: ufo_groundgnss_MetOffice
   real(kind_real) :: min_temp_grad
   real(kind_real) :: dryRefractivityConstant
   real(kind_real) :: wetRefractivityConstant
+  integer :: num_fov                    ! Number of field-of-view sampling points (1 = no averaging)
+  real(kind_real) :: fov_radius         ! radius of the sampling points, in km
   contains
     procedure :: setup     => ufo_groundgnss_metoffice_setup
     procedure :: simobs    => ufo_groundgnss_metoffice_simobs
 end type ufo_groundgnss_MetOffice
+
+public :: ufo_groundgnss_metoffice_locs_init
 
 contains
 
@@ -48,7 +54,9 @@ subroutine ufo_groundgnss_metoffice_setup(self, &
                                          pseudoLevels, &
                                          minTempGrad, &
                                          dryRefractivityConstant, &
-                                         wetRefractivityConstant)
+                                         wetRefractivityConstant, &
+                                         numFOV, &
+                                         fovRadius)
 
 use fckit_configuration_module, only: fckit_configuration
 implicit none
@@ -58,15 +66,125 @@ logical(c_bool), intent(in) :: pseudoLevels
 real(c_float), intent(in) :: minTempGrad
 real(c_float), intent(in) :: dryRefractivityConstant
 real(c_float), intent(in) :: wetRefractivityConstant
+integer(c_int), intent(in) :: numFOV
+real(c_float), intent(in) :: fovRadius
+
+character(max_string) :: err_msg
 
 self % vert_interp_ops = vertInterpOPS
 self % pseudo_ops = pseudoLevels
 self % min_temp_grad = minTempGrad
 self % dryRefractivityConstant = dryRefractivityConstant
 self % wetRefractivityConstant = wetRefractivityConstant
+self % num_fov = numFOV
+self % fov_radius = fovRadius
+
+! Reject unsupported values up front rather than silently sampling at undefined locations.
+if (.NOT. ANY(numFOV == [1, 9])) then
+  write(err_msg,"(A,I0)") "ufo_groundgnss_metoffice_setup: num_fov is set 1 or 9 currently, more options (e.g., num_fov=5) can be added "
+  call abor1_ftn(err_msg)
+end if
 
 end subroutine ufo_groundgnss_metoffice_setup
 
+
+! -----------------------------------------------------------------------------------------------
+! Work out where the model state should be sampled for each observation.
+! For num_fov = 9, 8 sample points are on the circle of radius (fov_radius) centered at obs locs.
+! (that is, on the directions: 0=N, 45=NE, 90=E, 135=SE, 180=S, 225=SW, 270=W, 315=NW)
+! The points of observation i occupy entries (i-1)*num_fov+1 : i*num_fov of lons/lats, which is
+! the grouping that ObsGroundgnssMetOffice::locations() reports to OOPS.
+!
+! Another option of num_fov = 5 can be added in case of limited memory, using 4 sample points
+! on the circle (that is, on the directions: 0=N, 90=E, 180=S, 270=W)
+! -----------------------------------------------------------------------------------------------
+subroutine ufo_groundgnss_metoffice_locs_init(self, obss, npaths, lons, lats)
+
+implicit none
+
+class(ufo_groundgnss_MetOffice), intent(in)    :: self
+type(c_ptr), value,              intent(in)    :: obss     ! The observations and their meta-data
+integer,                         intent(in)    :: npaths   ! nobs * num_fov
+real(c_float),                   intent(inout) :: lons(npaths)
+real(c_float),                   intent(inout) :: lats(npaths)
+
+character(len=*), parameter  :: myname_ = "ufo_groundgnss_metoffice_locs_init"
+integer                      :: iobs, nobs, num_fov
+real(kind_real)              :: fov_radius               ! Sampling radius, km
+real(kind_real), dimension(self%num_fov) :: lat_2d, lon_2d     ! Sample points
+real(kind_real), allocatable :: lon(:), lat(:)           ! Observation positions
+character(max_string)        :: err_msg
+
+num_fov = self % num_fov
+fov_radius = self % fov_radius
+nobs = npaths / num_fov
+
+if (num_fov /= 9) then
+    write(err_msg,"(A,I0)") myname_ // ": unsupported num_fov ", num_fov
+    call abor1_ftn(err_msg)
+end if
+
+allocate(lon(nobs), lat(nobs))
+call obsspace_get_db(obss, "MetaData", "longitude", lon)   ! degrees
+call obsspace_get_db(obss, "MetaData", "latitude", lat)    ! degrees
+
+do iobs = 1, nobs
+  call fov_sample_points(lat(iobs), lon(iobs), fov_radius, lat_2d, lon_2d, num_fov)
+  lons( (iobs-1)*num_fov+1 : iobs*num_fov) = real(lon_2d(1:num_fov), c_float)
+  lats( (iobs-1)*num_fov+1 : iobs*num_fov) = real(lat_2d(1:num_fov), c_float)
+end do
+
+deallocate(lon, lat)
+end subroutine ufo_groundgnss_metoffice_locs_init
+
+!-----------------------------------------------------------------------------
+subroutine fov_sample_points(lat0, lon0, fov_radius, lat_2d, lon_2d, num_fov)
+!-----------------------------------------------------------------------------
+use ufo_constants_mod, only : mean_earth_rad_m, deg2rad, rad2deg
+implicit none
+
+integer, intent(in) :: num_fov
+real(kind_real), intent(in) :: lat0, lon0     ! obs loc in degree
+real(kind_real), intent(in) :: fov_radius     ! FOV average radius in km
+real(kind_real), intent(out) :: lat_2d(num_fov), lon_2d(num_fov)    ! sample points
+
+! For num_fov =9 (obs loc + 8 points along a circle of radius 25km centered at obs loc)
+real(kind_real), parameter :: bearings(8) = [ &
+                 0.0,   45.0,  90.0, 135.0, 180.0,  225.0, 270.0, 315.0 ]
+
+real(kind_real) :: lat1, lon1, lat2, lon2
+real(kind_real) :: theta, angular_dist, rearth
+character(max_string)        :: err_msg
+integer :: i
+
+if( abs(lat0) > 89.0) then
+  write(err_msg,*) " FOV sampling points not defined near the earth poles!"
+  call abor1_ftn(err_msg)
+end if
+
+! Save the center point to the 1st of the sample points
+   lat_2d(1) = lat0
+   lon_2d(1) = lon0
+
+   lat1 = lat0 * deg2rad
+   lon1 = lon0 * deg2rad
+
+! Distance on Earth's surface -> angular distance
+rearth = mean_earth_rad_m *0.001       ! km
+angular_dist = fov_radius / rearth
+
+! Define the sample points along a circle centered at the obs location
+   do i = 2, num_fov
+      theta = bearings(i-1) * deg2rad
+      lat2 = asin( sin(lat1)*cos(angular_dist) + &
+                   cos(lat1)*sin(angular_dist)*cos(theta) )
+      lon2 = lon1 + atan2(sin(theta)*sin(angular_dist)*cos(lat1), &
+                   cos(angular_dist) - sin(lat1)*sin(lat2) )
+
+      lat_2d(i) = lat2 * rad2deg
+      lon_2d(i) = lon2 * rad2deg
+   end do
+end subroutine fov_sample_points
 
 ! ------------------------------------------------------------------------------
 ! Ground GNSS forward operator for the Met Office system
@@ -84,7 +202,6 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   type(c_ptr), value,              intent(in)    :: obss     ! The observations, and meta-data for those observations
 
   character(len=*), parameter        :: myname_ = "ufo_groundgnss_metoffice_simobs"
-  integer, parameter                 :: max_string = 800
 
   character(max_string)              :: err_msg         ! Error message for output
   character(max_string)              :: message         ! General message for output
@@ -104,17 +221,31 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   REAL(kind_real), allocatable :: za(:)         ! Model heights of rho levs (in pressure monotonic order)
   REAL(kind_real), allocatable :: zb(:)         ! Model heights of theta levs (in pressure monotonic order)
 
-! check if nlocs is consistent in geovals & hofx
-  IF (geovals%nlocs /= size(hofx)) THEN
-    write(err_msg,*) myname_, " error: nlocs inconsistent!"
-    call abor1_ftn(err_msg)
-  END IF
+  INTEGER :: num_fov, ifov, ipath             ! Field-of-view sampling counters
 
 ! get variables from geovals
   call ufo_geovals_get_var(geovals, var_q, q)               ! specific humidity
   call ufo_geovals_get_var(geovals, var_prsi, prs)          ! pressure
   call ufo_geovals_get_var(geovals, var_z, theta_heights)   ! Geopotential height of the normal model levels
   call ufo_geovals_get_var(geovals, var_zi, rho_heights)    ! Geopotential height of the pressure levels
+
+  num_fov = self % num_fov
+
+! check that geovals and hofx agree on how many obs there are.  With FOV averaging each
+! observation is sampled along num_fov paths, so it is the profile count that must match.
+  IF (num_fov > 1) THEN
+    IF (q%nprofiles /= size(hofx)*num_fov .OR. prs%nprofiles /= size(hofx)*num_fov .OR. &
+        theta_heights%nprofiles /= size(hofx)*num_fov .OR. &
+        rho_heights%nprofiles /= size(hofx)*num_fov) THEN
+      write(err_msg,*) myname_, " error: number of sampled profiles inconsistent!"
+      call abor1_ftn(err_msg)
+    END IF
+  ELSE
+    IF (geovals%nlocs /= size(hofx)) THEN
+      write(err_msg,*) myname_, " error: nlocs inconsistent!"
+      call abor1_ftn(err_msg)
+    END IF
+  END IF
 
   nlevp = prs % nval
   nlevq = q % nval
@@ -134,10 +265,30 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   if (nobs > 0) then
     obs_loop: do iobs = 1, nobs
 
-      pressure = prs % vals(:,iobs)
-      humidity = q % vals(:,iobs)
-      za = rho_heights % vals(:,iobs)
-      zb = theta_heights % vals(:,iobs)
+      if (num_fov > 1) then
+        ! Average the model state over the field-of-view sampling points before running the
+        ! forward model, giving one representative profile per observation.  Equal weights.
+        pressure(:) = 0.0
+        humidity(:) = 0.0
+        za(:) = 0.0
+        zb(:) = 0.0
+        do ifov = 1, num_fov
+          ipath = (iobs-1)*num_fov + ifov
+          pressure = pressure + prs % vals(:,ipath)
+          humidity = humidity + q % vals(:,ipath)
+          za = za + rho_heights % vals(:,ipath)
+          zb = zb + theta_heights % vals(:,ipath)
+        end do
+        pressure = pressure / num_fov
+        humidity = humidity / num_fov
+        za = za / num_fov
+        zb = zb / num_fov
+      else
+        pressure = prs % vals(:,iobs)
+        humidity = q % vals(:,iobs)
+        za = rho_heights % vals(:,iobs)
+        zb = theta_heights % vals(:,iobs)
+      end if
 
       call Ops_Groundgnss_ForwardModel(nlevp,                  &
                                        nlevq,                  &
@@ -166,10 +317,10 @@ subroutine ufo_groundgnss_metoffice_simobs(self, geovals, hofx, obss)
   deallocate(humidity)
   deallocate(za)
   deallocate(zb)
+  deallocate(zStation)
 
 end subroutine ufo_groundgnss_metoffice_simobs
 ! ------------------------------------------------------------------------------
-
 
 SUBROUTINE Ops_Groundgnss_ForwardModel(nlevp,                &
                                        nlevq,                &
@@ -263,7 +414,6 @@ CALL Ops_groundgnss_TopCorrection(pressure,    &
                                   dryRefractivityConstant, &
                                   TopCorrection)
 
-
 CALL Ops_Groundgnss_ZTD  (nlevq,     &
                           refrac,    &
                           zb,        &
@@ -274,7 +424,6 @@ Model_ZTD = Model_ZTD + TopCorrection
 
 write(message,"(A,F16.14)") "Model_ZTD = ", Model_ZTD
 call fckit_log%debug(message)
-
 
 END SUBROUTINE ops_groundgnss_forwardmodel
 

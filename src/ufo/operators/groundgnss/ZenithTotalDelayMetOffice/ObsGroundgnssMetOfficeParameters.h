@@ -54,6 +54,22 @@ class ObsGroundgnssMetOfficeParameters : public ObsOperatorParametersBase {
      "Constant used to multiply the wet refractivity components",
      Constants::wet_refractivity_constant,
      this};
+
+  oops::Parameter<int> numFOV
+    {"num_fov",
+     "Number of sampling points used to average the model state over the observation "
+     "field-of-view (FOV). The default, 1, disables FOV averaging, so the model state is "
+     "taken at the observation location only. Supported values are 1 and 9, the "
+     "sampling points are laid out on a regular grid centred on the observation.",
+     1,
+     this};
+
+  oops::Parameter<float> fovRadius
+    {"fov_radius",
+     "Radius, in km, FOV sampling points along a circle centered at each obs loc."
+     "Ignored if num_fov is 1.",
+     25.0,
+     this};
 };
 
 }  // namespace ufo
