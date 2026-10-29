@@ -1,0 +1,630 @@
+#
+#=== PropagateOneValuePerRecord ObsFunction ===#
+#
+
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+
+observations:
+
+#=== This example checks that an exception is thrown if the obs space is not grouped into records. ===#
+
+- obs space:
+    name: ObsSpace not grouped into records
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+    simulated variables: [Value]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/PropagatedLastWord
+      type: string
+      function:
+        name: StringObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/sentence # ["here","is","a","nice","string","with","words"]
+          in-record location of value to propagate: -1
+  expectExceptionWithMessage: Group variables configuration is empty
+
+#=== This example checks that exception is thrown when trying to propagate to a companion without 
+# extending the obs space. ===#
+
+- obs space:
+    name: ObsSpace not extended
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [Value]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/PropagatedLastWord
+      type: string
+      function:
+        name: StringObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/sentence # ["here","is","a","nice","string","with","words"]
+          propagate to companion as well: true
+          propagation direction: from original
+          in-record location of value to propagate: -1
+  expectExceptionWithMessage: The extended obs space has not been produced
+
+
+#=== This example checks that exception is thrown when propagating to companion without specifying
+# propagation direction. ===#
+
+- obs space:
+    name: Propagation direction not specified when propagating to companion
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [Value]
+    extension:
+      allocate companion records with length: 1
+      variables filled with non-missing values:
+      - "sequenceNumber"   # original is [0,1,1,1,1,2,2]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/PropagatedLastWord
+      type: string
+      function:
+        name: StringObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/sentence # ["here","is","a","nice","string","with","words",_,_,_]
+          propagate to companion as well: true
+          in-record location of value to propagate: -1
+  expectExceptionWithMessage: Propagation direction must be specified when propagating to companion
+
+#=== This example checks that exception is thrown when not propagating to companion but still specifying
+# propagation direction. ===#
+
+- obs space:
+    name: Propagation direction specified when not propagating to companion
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [Value]
+    extension:
+      allocate companion records with length: 1
+      variables filled with non-missing values:
+      - "sequenceNumber"   # original is [0,1,1,1,1,2,2]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/PropagatedLastWord
+      type: string
+      function:
+        name: StringObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/sentence # ["here","is","a","nice","string","with","words",_,_,_]
+          propagation direction: from original
+          in-record location of value to propagate: -1
+  expectExceptionWithMessage: Propagation direction must not be specified if not propagating to companion
+
+#=== This example checks that exception is thrown when trying to propagate from a variable with many channels
+# to a variable with a single channel. ===#
+
+- obs space:
+    name: Propagate attempt to mismatched channels
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/multichannel_variable_assignment_testdata.nc
+      obsgrouping:
+        group variables: ["dateTime"]
+    simulated variables: [airTemperature]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/positiveFloatValue
+      type: float
+      channels: 1,2,3
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate:
+            name: ObsValue/airTemperature # contents irrelevant
+            # channels: 1,2,3    # uncomment this line to avoid the exception about mismatched channels
+          in-record location of value to propagate: 0
+  expectExceptionWithMessage: Number of channels in the variable to propagate does not match the number of channels in the output variable
+
+
+#=== This example highlights how the conversion from a float to an int is handled depending on
+# whether you specify an IntObsFunction/PropagateOneValuePerRecord or ObsFunction/PropagateOneValuePerRecord. ===#
+- obs space:
+    name: Propagate first value of ObsValue/Value in each record to DerivedMetaData/FirstValue
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/obsfunction_propagateonevalueperrecord_out1.nc4
+    simulated variables: [Value]
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/positiveIntValueRound
+      type: int
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/positiveFloatValue # [1.99,1.01,1.01,1.01,1.01,1.99,1.99]
+          skip derived: true
+          in-record location of value to propagate: 0
+    - name: DerivedMetaData/positiveIntValueTruncate
+      type: int
+      function:
+        name: IntObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/positiveFloatValue # [1.99,1.01,1.01,1.01,1.01,1.99,1.99]
+          skip derived: true
+          in-record location of value to propagate: 0
+    - name: DerivedMetaData/negativeIntValueRound
+      type: int
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/negativeFloatValue # [-1.99,-1.01,-1.01,-1.01,-1.01,-1.99,-1.99]
+          skip derived: true
+          in-record location of value to propagate: 0
+    - name: DerivedMetaData/negativeIntValueTruncate
+      type: int
+      function:
+        name: IntObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/negativeFloatValue # [-1.99,-1.01,-1.01,-1.01,-1.01,-1.99,-1.99]
+          skip derived: true
+          in-record location of value to propagate: 0
+  compareVariables:
+  - test:
+      name: DerivedMetaData/positiveIntValueRound # [2,1,1,1,1,2,2]
+    reference:
+      name: MetaData/TestRef/positiveIntValueRound
+  - test:
+      name: DerivedMetaData/positiveIntValueTruncate # [1,1,1,1,1,1,1]
+    reference:
+      name: MetaData/TestRef/positiveIntValueTruncate
+  - test:
+      name: DerivedMetaData/negativeIntValueRound # [-2,-1,-1,-1,-1,-2,-2]
+    reference:
+      name: MetaData/TestRef/negativeIntValueRound
+  - test:
+      name: DerivedMetaData/negativeIntValueTruncate # [-1,-1,-1,-1,-1,-1,-1]
+    reference:
+      name: MetaData/TestRef/negativeIntValueTruncate
+
+
+#=== This example propagates the second value of :code:`MetaData/dateTime` from each record into all entries of the
+# record of the assignment variable :code:`DerivedMetaData/SecondDateTime`. Note that if a record
+# has less than two locations, then a missing value is used. ===#
+
+- obs space:
+    name: Propagate second value of MetaData/dateTime in each record to DerivedMetaData/SecondDateTime
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/obsfunction_propagateonevalueperrecord_out2.nc4
+    simulated variables: [Value]
+
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/SecondDateTime
+      type: datetime
+      function:
+        name: DateTimeObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/dateTime # [1523667600,1523667610,1523667611,1523667612,1523667613,1523667620,1523667621]
+          in-record location of value to propagate: 1
+  compareVariables:
+  - test:
+      name: DerivedMetaData/SecondDateTime
+    reference:
+      name: MetaData/TestRef/dateTimeSecondValue # [_,1523667611,1523667611,1523667611,1523667611,1523667621,1523667621]
+
+#=== The remainder of these tests are for the case where one wants to propagate a value of a variable within a record to
+# its companion record as well. ===#
+
+#=== This example propagates first value of :code:`ObsValue/Value` from each record in the original ObsSpace
+# into all entries of assignment variable :code:`DerivedMetaData/PropagatedFirstValue`'s
+# original and companion record locations. As a bonus, it also highlights the use of the
+# :code:`skip derived` option. ===#
+
+- obs space:
+    name: Propagating to both the original and extended ObsSpace, highlighting skip derived option
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/obsfunction_propagateonevalueperrecord_out3.nc4
+    simulated variables: [Value]
+    extension:
+      allocate companion records with length: 3
+      variables filled with non-missing values:
+      - "sequenceNumber" # original is [0,1,1,1,1,2,2]
+      - "TestRef/FirstValue" # original is [0.3,-4,-4,-4,-4,100,100]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/PropagatedFirstValue
+      type: float
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          propagate to companion as well: true
+          propagation direction: from original
+          variable to propagate: ObsValue/Value # [0.3,-4,3,2,1,100,0.2,_,_,_,_,_,_,_,_,_]
+          skip derived: true
+          in-record location of value to propagate: 0
+
+  # these next two variable assignments do the same thing, highlighting what happens for the case
+  # where a derived variable exists and you omit the "skip derived" option.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/DerivedPropagatedFirstValue
+      type: float
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: DerivedObsValue/Value # [0,1,2,3,4,5,6 ,_,_,_,_,_,_,_,_,_]
+          propagate to companion as well: true
+          propagation direction: from original
+          skip derived: true
+          in-record location of value to propagate: 0
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/SneakyDerivedPropagatedFirstValue
+      type: float
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: ObsValue/Value
+          propagate to companion as well: true
+          propagation direction: from original
+          in-record location of value to propagate: 0
+          # no skip derived specified, so will actually read in DerivedObsValue/Value
+
+  compareVariables:
+  - test:
+      name: DerivedMetaData/PropagatedFirstValue # [0.3,-4,-4,-4,-4,100,100,0.3,0.3,0.3,-4,-4,-4,100,100,100]
+    reference:
+      name: MetaData/TestRef/FirstValue
+  - test:
+      name: DerivedMetaData/SneakyDerivedPropagatedFirstValue # [0,1,1,1,1,5,5,0,0,0,1,1,1,5,5,5]
+    reference:
+      name: DerivedMetaData/DerivedPropagatedFirstValue
+
+
+#=== This example propagates the last value of :code:`MetaData/sentence` from each record in the original ObsSpace
+# into all entries of assignment variable :code:`DerivedMetaData/PropagatedLastWord`'s 
+# original and companion record locations. This test demonstrates that the obsfunction works for
+# string variables. ===#
+
+- obs space:
+    name: Propagate last value of MetaData/sentence in each record to original and extended ObsSpace
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/obsfunction_propagateonevalueperrecord_out4.nc4
+    simulated variables: [Value]
+    extension:
+      allocate companion records with length: 1
+      variables filled with non-missing values:
+      - "sequenceNumber"   # original is [0,1,1,1,1,2,2]
+      - "TestRef/sentenceLastValue" # original is ["here","string","string","string","string","words","words"]
+  obs filters:
+
+  # originally stated goal done here in this variable assignment.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/PropagatedLastWord
+      type: string
+      function:
+        name: StringObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: MetaData/sentence # ["here","is","a","nice","string","with","words",_,_,_]
+          propagate to companion as well: true
+          propagation direction: from original
+          in-record location of value to propagate: -1
+  compareVariables:
+  - test:
+      name: DerivedMetaData/PropagatedLastWord # ["here","string","string","string","string","words","words","here","string","words"]
+    reference:
+      name: MetaData/TestRef/sentenceLastValue
+
+
+#=== This next configuration consists of two examples. It is kept as a single configuration to avoid having 
+# to redefine several variables along the way. A large chunk of the configuration below is just doing this
+# variable definition. ===#
+
+
+# Part A): This example propagates the first value of :code:`DerivedObsValue/Value` from each record in the
+# extended ObsSpace into the variable :code:`DerivedMetaData/ExtendedFirstValueOnlyInOriginal`
+# of its companion record in the original ObsSpace. All locations in the extended ObsSpace of 
+# :code:`DerivedMetaData/ExtendedFirstValueOnlyInOriginal` are left untouched since the filter is only
+# applied in the original ObsSpace (where :code:`MetaData/extendedObsSpace` is 0).
+
+
+# Part B): This example propagates the first value of :code:`DerivedObsValue/Value` from each record in
+# the extended ObsSpace into its companion record in the original ObsSpace, overwriting any existing values
+# of :code:`DerivedObsValue/Value` in the original ObsSpace. Writing into the same variable requires
+# specifying this variable both in the :code:`ObsFunction` and the :code:`Variable Assignment`. All 
+# locations in the extended ObsSpace of :code:`DerivedObsValue/Value` are left untouched since the filter
+# is only applied in the original ObsSpace (where :code:`MetaData/extendedObsSpace` is 0).
+
+- obs space:
+    name: Propagating values without overwriting existing values
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/obsfunction_propagateonevalueperrecord.nc4
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    obsdataout:
+      engine:
+        type: H5File
+        obsfile: Data/obsfunction_propagateonevalueperrecord_out5.nc4
+    simulated variables: [Value]
+    extension:
+      allocate companion records with length: 3
+      variables filled with non-missing values:
+      - "sequenceNumber"
+  obs filters:
+  
+  # Assign specific values to DerivedObsValue/Value for members of the extended ObsSpace.
+  # Before the next section of code, the values of DerivedObsValue/Value are all missing for 
+  # the extended ObsSpace. After the next section of code, these extended ObsSpace values
+  # will be set to [33,45,60,0.5,_,23,-2.1,4,0]. Therefore, the values of DerivedObsValue/Value
+  # at all locations will be [0,1,2,3,4,5,6,33,45,60,0.5,_,23,-2.1,4,0] after the next section of code.
+
+  # !! PLEASE NOTE: This next section of code is strictly for setting this variable,
+  # you can safely scroll past or ctrl+f "!!" if you trust that the values are set correctly.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/RecordIndex # will be [0,0,1,2,3,0,1,0,1,2,0,1,2,0,1,2]
+      type: int
+      function:
+        name: IntObsFunction/LocationToObsSpace
+        options:
+          label type: in-record location
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 33
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 0
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 0
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 45
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 1
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 0
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 60
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 2
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 0
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 0.5
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 0
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 1
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 23
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 2
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 1
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: -2.1
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 0
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 2
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 4
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 1
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 2
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      value: 0
+    where:
+    - variable:
+        name: MetaData/RecordIndex
+      is_in: 1
+    - variable:
+        name: MetaData/sequenceNumber
+      is_in: 2
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+  # !!
+  # !! end of section of code that sets up the values for DerivedObsValue/Value in the extended ObsSpace
+  # !!
+
+  # assign some values to a new variable to demonstrate they aren't overwritten by the PropagateOneValuePerRecord ObsFunction,
+  # which is the expected behaviour.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/ExtendedValue    # will be [_,_,_,_,_,_,_,0,1,2,0,1,2,0,1,2]
+      type: float
+      source variable: MetaData/RecordIndex
+    - name: MetaData/TestRef/DerivedFirstValue          # will be [33,0.5,0.5,0.5,0.5,-2.1,-2.1,0,1,2,0,1,2,0,1,2]
+      type: float
+      source variable: MetaData/RecordIndex
+    where:
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+
+  # Part A as described above.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/ExtendedValue    # will be [33,0.5,0.5,0.5,0.5,-2.1,-2.1,0,1,2,0,1,2,0,1,2]
+      type: float
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: DerivedObsValue/Value    # [0,1,2,3,4,5,6,33,45,60,0.5,_,23,-2.1,4,0]
+          propagate to companion as well: true
+          propagation direction: from extended
+          in-record location of value to propagate: 0
+    where:
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 0
+
+  # Part A over, now back to more variable definitions for later comparison.
+  - filter: Variable Assignment
+    assignments:
+    - name: TestRef/Value3 # will be [33,0.5,0.5,0.5,0.5,-2.1,-2.1,_,_,_,_,_,_,_,_,_]
+      type: float
+      source variable: MetaData/TestRef/DerivedFirstValue
+    where:
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 0
+  - filter: Variable Assignment
+    assignments:
+    - name: TestRef/Value3 # will be [33,0.5,0.5,0.5,0.5,-2.1,-2.1,33,45,60,0.5,_,23,-2.1,4,0]
+      type: float
+      source variable: DerivedObsValue/Value
+    where:
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 1
+
+  # Part B as described above.
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedObsValue/Value
+      type: float
+      function:
+        name: ObsFunction/PropagateOneValuePerRecord
+        options:
+          variable to propagate: DerivedObsValue/Value
+          propagate to companion as well: true
+          propagation direction: from extended
+          in-record location of value to propagate: 0
+    where:
+    - variable:
+        name: MetaData/extendedObsSpace
+      is_in: 0
+  compareVariables:
+  - test:
+      name: DerivedMetaData/ExtendedValue # [33,0.5,0.5,0.5,0.5,-2.1,-2.1,0,1,2,0,1,2,0,1,2]
+    reference:
+      name: MetaData/TestRef/DerivedFirstValue
+  - test:
+      name: DerivedObsValue/Value # [33,0.5,0.5,0.5,0.5,-2.1,-2.1,33,45,60,0.5,_,23,-2.1,4,0]
+    reference:
+      name: TestRef/Value3
