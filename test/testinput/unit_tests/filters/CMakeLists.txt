@@ -1239,14 +1239,14 @@ if( ${rttov_FOUND} )
                   LIBS    ufo
                   LABELS  rttov ${RTTOV_VERSION_LABEL} filters tier2
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
-# DAR: I cannot make this test work
+#
     ufo_add_test( NAME    iasi_rttov_ops_qc_rttovonedvarcheck
                   ECBUILD
                   COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
                   ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops_qc_rttovonedvarcheck${RTTOV_VERSION_SUFFIX}.yaml"
                   MPI     2
                   LIBS    ufo
-                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters ci_oneapi_disable
+                  LABELS  rttov ${RTTOV_VERSION_LABEL} filters
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
     ufo_add_test( NAME    mtgirs_reconrad_obsop_check
