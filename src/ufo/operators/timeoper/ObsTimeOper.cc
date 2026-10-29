@@ -25,6 +25,7 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/ObsTraits.h"
 #include "ufo/operators/timeoper/ObsTimeOperUtil.h"
+#include "ufo/ScopedDefaultGeoVaLFormatChange.h"
 
 namespace ufo {
 
@@ -39,7 +40,8 @@ ObsTimeOper::ObsTimeOper(const ioda::ObsSpace & odb,
                       odb,
                       oops::validateAndDeserialize<ObsOperatorParametersWrapper>(
                         parameters.obsOperator.value()).operatorParameters)),
-    odb_(odb), timeWeights_(timeWeightCreate(odb, parameters))
+    odb_(odb), windowSub_(parameters.windowSub.value()),
+    timeWeights_(timeWeightCreate(odb, parameters))
 {
   oops::Log::trace() << "ObsTimeOper constructor start" << std::endl;
 
@@ -51,6 +53,9 @@ ObsTimeOper::ObsTimeOper(const ioda::ObsSpace & odb,
 
   if (window == windowSub) {
     ABORT("Time Interpolation of obs not implemented when assimilation window = subWindow");
+  }
+  if (window.toSeconds() % windowSub.toSeconds() != 0) {
+    ABORT("Time Interpolation of obs requires windowSub to divide the assimilation window");
   }
   oops::Log::trace() << "ObsTimeOper constructor done" << std::endl;
 }
@@ -66,7 +71,15 @@ ObsTimeOper::~ObsTimeOper() {
 
 ObsTimeOper::Locations_ ObsTimeOper::locations() const {
   oops::Log::trace() << "ObsOperatorTime::locations start" << std::endl;
-  return actualoperator_->locations();
+  return timeOperLocations(odb_, windowSub_);
+}
+
+// -----------------------------------------------------------------------------
+
+void ObsTimeOper::computeReducedVars(const oops::Variables &, GeoVaLs & geovals) const {
+  oops::Log::trace() << "ObsTimeOper::computeReducedVars start" << std::endl;
+  timeInterpolate(geovals, timeWeights_);
+  oops::Log::trace() << "ObsTimeOper::computeReducedVars done" << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -78,16 +91,10 @@ void ObsTimeOper::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec,
 
   oops::Log::debug() << gv <<  std::endl;
 
-  GeoVaLs gv1(gv);
-  GeoVaLs gv2(gv);
-
-  oops::Log::debug() << gv1 << std::endl;
-  oops::Log::debug() << gv2 << std::endl;
-
-  gv1 *= timeWeights_[0];
-  gv2 *= timeWeights_[1];
-  gv1 += gv2;
-  actualoperator_->simulateObs(gv1, ovec, ydiags, qc_flags);
+  GeoVaLs gvt(gv);
+  timeInterpolate(gvt, timeWeights_);
+  ScopedDefaultGeoVaLFormatChange change(gvt, GeoVaLFormat::REDUCED);
+  actualoperator_->simulateObs(gvt, ovec, ydiags, qc_flags);
 
   oops::Log::trace() << "ObsTimeOper::simulateObs done " <<  std::endl;
 }
