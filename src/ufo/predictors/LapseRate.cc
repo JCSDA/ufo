@@ -5,7 +5,6 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 #include <cmath>
-#include <fstream>
 #include <string>
 #include <vector>
 
@@ -14,12 +13,12 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
-#include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/missingValues.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/ObsBias.h"
 #include "ufo/ObsDiagnostics.h"
 
 namespace ufo {
@@ -30,6 +29,7 @@ static PredictorMaker<LapseRate> makerFuncLapseRate_("lapseRate");
 
 LapseRate::LapseRate(const Parameters_ & parameters, const oops::ObsVariables & vars)
   : PredictorBase(parameters, vars),
+    lapseHelper_(parameters.lapseMean, vars),
     order_(parameters.order.value().value_or(1))
 {
   if (parameters.order.value() != boost::none) {
@@ -37,37 +37,12 @@ LapseRate::LapseRate(const Parameters_ & parameters, const oops::ObsVariables & 
     name() = name() + "_order_" + std::to_string(order_);
   }
 
-  // required variables
-  geovars_ += oops::Variables({"air_temperature",
-                               "air_pressure",
-                               "average_surface_temperature_within_field_of_view"});
   if (vars.size() > 0) {
-    hdiags_ += oops::ObsVariables({"transmittances_of_atmosphere_layer"}, vars.channels());
+    geovars_ += LapseRateHelper::requiredGeovars();
+    hdiags_ += lapseHelper_.requiredHdiags();
   } else {
     oops::Log::error() << "Channels size is ZERO !" << std::endl;
     ABORT("Channels size is ZERO !");
-  }
-
-  // This is a very preliminary method, please revisit
-  // more flexibilites are needed
-  const std::string & tlapse_file = parameters.tlapse;
-  std::ifstream infile(tlapse_file);
-  std::string nusis;   //  sensor/instrument/satellite
-  int nuchan;  //  channel number
-  float tlapse;
-
-  if (infile.is_open()) {
-    while (!infile.eof()) {
-      infile >> nusis;
-      infile >> nuchan;
-      infile >> tlapse;
-      tlapmean_[nuchan] = tlapse;
-    }
-    infile.close();
-  } else {
-    oops::Log::error() << "Unable to open file : "
-                       << tlapse_file << std::endl;
-    ABORT("Unable to open tlapse file ");
   }
 }
 
@@ -81,73 +56,29 @@ void LapseRate::compute(const ioda::ObsSpace & odb,
   const std::size_t nvars = out.nvars();
   const std::size_t nlocs = out.nlocs();
 
-  // common vectors storage
-  std::vector <float> pred(nlocs, 0.0);
+  std::vector<std::vector<float>> tlapchn;
+  std::vector<float> means;
+  lapseHelper_.fillTlapchnAndMeans(odb, geovals, ydiags, tlapchn, means);
 
-  // retrieve the average surface temperature
-  std::vector<float> tsavg5(nlocs, 0.0);
-  geovals.get(tsavg5, oops::Variable{"average_surface_temperature_within_field_of_view"});
-
-  // Retrieve the transmittances_of_atmosphere_layer from Hdiag
-  std::vector<std::vector<std::vector<float>>> ptau5;
-  std::vector<std::vector<float>> tmpvar;
-
-  std::string hdiags;
-  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    hdiags = "transmittances_of_atmosphere_layer_" + std::to_string(vars_.channels()[jvar]);
-    tmpvar.clear();
-    for (std::size_t js = 0; js < ydiags.nlevs(hdiags); ++js) {
-      ydiags.get(pred, hdiags, js);
-      tmpvar.push_back(pred);
-    }
-    ptau5.push_back(tmpvar);
-  }
-
-  // Retrieve the temperature
-  std::vector<std::vector<float>> tvp;
-  std::size_t nlevs = geovals.nlevs(oops::Variable{"air_temperature"});
-  for (std::size_t js = 0; js < nlevs; ++js) {
-    geovals.getAtLevel(pred, oops::Variable{"air_temperature"}, js);
-    tvp.push_back(pred);
-  }
-
-  // sort out the tlapmean based on vars
-  std::vector<float> tlap;
-  for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-    auto it = tlapmean_.find(vars_.channels()[jvar]);
-    if (it != tlapmean_.end()) {
-      tlap.push_back(it->second);
-    } else {
-      oops::Log::error() << "Could not locate tlapemean for channel: " <<
-                            vars_.channels()[jvar] << std::endl;
-      ABORT("Could not locate tlapemean value");
-    }
+  if (nvars != tlapchn.size()) {
+    oops::Log::error() << "LapseRate: nvars (" << nvars
+                       << ") != number of channels (" << tlapchn.size() << ")"
+                       << std::endl;
+    ABORT("LapseRate: nvars mismatch");
   }
 
   const float fmiss = util::missingValue<float>();
   const double dmiss = util::missingValue<double>();
   const auto isBad = [fmiss](float v) { return v == fmiss || std::isnan(v); };
-  float tlapchn = 0.0;
 
   for (std::size_t jloc = 0; jloc < nlocs; ++jloc) {
     for (std::size_t jvar = 0; jvar < nvars; ++jvar) {
-      // Check for missing or NaN values.
-      bool missingInput = isBad(tsavg5[jloc]);
-      for (std::size_t lev = 0; lev < nlevs && !missingInput; ++lev) {
-        missingInput = isBad(tvp[lev][jloc]) || isBad(ptau5[jvar][lev][jloc]);
-      }
-      if (missingInput) {
+      const float tlapchn_val = tlapchn[jvar][jloc];
+      if (isBad(tlapchn_val) || isBad(means[jvar])) {
         out[jloc*nvars+jvar] = dmiss;
-        continue;
+      } else {
+        out[jloc*nvars+jvar] = std::pow((tlapchn_val - means[jvar]), order_);
       }
-
-      tlapchn = (ptau5[jvar][nlevs-2][jloc]-ptau5[jvar][nlevs-1][jloc])*
-                (tsavg5[jloc]-tvp[nlevs-2][jloc]);
-      for (std::size_t k = 1; k < nlevs-1; ++k) {
-        tlapchn = tlapchn+(ptau5[jvar][nlevs-k-2][jloc]-ptau5[jvar][nlevs-k-1][jloc])*
-                  (tvp[nlevs-k][jloc]-tvp[nlevs-k-2][jloc]);
-      }
-      out[jloc*nvars+jvar] = pow((tlapchn - tlap[jvar]), order_);
     }
   }
 }

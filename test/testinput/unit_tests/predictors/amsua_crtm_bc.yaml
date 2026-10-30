@@ -4,7 +4,7 @@ time window:
   bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
-- obs operator:
+- obs operator: &obs_operator
     name: CRTM
     Absorbers: [H2O,O3,CO2]
     Clouds: [Water, Ice]
@@ -17,7 +17,7 @@ observations:
       Sensor_ID: &Sensor_ID amsua_n19
       EndianType: little_endian
       CoefficientPath: Data/
-  obs space:
+  obs space: &obs_space
     name: amsua_n19
     obsdatain:
       engine:
@@ -29,9 +29,9 @@ observations:
 #       obsfile: Data/amsua_n19_obs_2018041500_m_qc_crtm_bc_out.nc4
     simulated variables: [brightnessTemperature]
     channels: &channels 1-15
-  geovals:
+  geovals: &geovals
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
-  obs bias:
+  obs bias: &obs_bias
     input file: Data/ufo/testinput_tier_1/satbias_amsua_n19.nc4
     variational bc:
       predictors:
@@ -61,9 +61,37 @@ observations:
           ratio for small dataset: 2.0
   vector ref: ObsValue
   tolerance: 1.e-1
-  linear obs operator test:
+  linear obs operator test: &linear_obs_operator_test
     iterations TL: 2
     coef TL: 1.e-3
     tolerance TL: 1.0e-3
     tolerance AD: 1.0e-11
 
+# Online mean lapse rates; same setup as above except predictors and obs space name.
+- obs operator: *obs_operator
+  obs space:
+    <<: *obs_space
+    name: amsua_n19_tlapse_online
+  geovals: *geovals
+  obs bias:
+    <<: *obs_bias
+    variational bc:
+      predictors:
+      - name: constant
+      - name: lapseRate
+        order: 2
+        online mean: true
+        # save means: Data/amsua_n19_tlapse_online_means.txt
+      - name: lapseRate
+        online mean: true
+      - name: emissivityJacobian
+      - name: sensorScanAngle
+        order: 4
+      - name: sensorScanAngle
+        order: 3
+      - name: sensorScanAngle
+        order: 2
+      - name: sensorScanAngle
+  vector ref: ObsValue
+  tolerance: 1.e-1
+  linear obs operator test: *linear_obs_operator_test
