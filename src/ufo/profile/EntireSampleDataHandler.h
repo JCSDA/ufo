@@ -10,12 +10,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <tuple>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -174,7 +174,7 @@ namespace ufo {
     bool defaultValue(const std::vector <bool> &vec, const std::string &groupname);
 
     /// Container of each variable in the entire data set.
-    std::unordered_map <std::string, boost::variant
+    std::map <std::string, boost::variant
                         <std::vector <int>,
                          std::vector <float>,
                          std::vector <std::string>,

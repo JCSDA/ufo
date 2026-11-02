@@ -96,6 +96,15 @@ ufo_add_test( NAME    conventionalprofileprocessing_average_single_level_profile
               LABELS  unit_tests profile
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    conventionalprofileprocessing_MPI_column_consistency
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ConventionalProfileProcessing.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/conventionalprofileprocessing_column_consistency.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  unit_tests profile
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    conventionalprofileprocessing_average_temperature_obsfilter
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

@@ -15,10 +15,12 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "oops/util/Logger.h"
 
 #define ECKIT_TESTING_SELF_REGISTER_CASES 0
 
 #include "eckit/config/LocalConfiguration.h"
+#include "eckit/exception/Exceptions.h"
 #include "eckit/testing/Test.h"
 #include "ioda/ObsDataVector.h"
 #include "ioda/ObsSpace.h"
@@ -52,6 +54,54 @@
 
 namespace ufo {
 namespace test {
+
+// Function to verify that column schema is the same on both empty
+// and non-empty ranks.
+void expectSameOutputColumnsOnAllRanks(const ioda::ObsSpace &obsspace,
+                                       const bool expectEmptyAndNonEmptyRanks) {
+  const auto &comm = obsspace.comm();
+
+  // If there's only one rank, nothing to compare so skip
+  if (comm.size() == 1) {
+    std::string msg =
+        "Current test only runs on 1 MPI rank. Skipping testing that "
+        "column schema are the same on all ranks. Consider removing "
+        "\'CheckColumnSchemaAcrossRanks: true\' from your yaml.";
+    oops::Log::info() << msg << std::endl;
+    return;
+  }
+
+  // Get the number of locations on a rank, for each rank.
+  // The EXPECT_EQUAL is used to ensure that we get reports from all ranks.
+  std::vector<int> localNlocs{static_cast<int>(obsspace.nlocs())};
+  oops::mpi::allGatherv(comm, localNlocs);
+  EXPECT_EQUAL(localNlocs.size(), comm.size());
+  if (localNlocs.size() != static_cast<std::size_t>(comm.size())) {
+    return;
+  }
+
+  // Verify that test case has both empty and non-empty ranks before testing
+  // (enabled by default).
+  // To disable this check, add `ExpectEmptyAndNonEmptyRanks: false` to your yaml.
+  if (expectEmptyAndNonEmptyRanks) {
+    bool hasEmptyRank = false;
+    bool hasPopulatedRank = false;
+    for (const int nlocs : localNlocs) {
+      hasEmptyRank = hasEmptyRank || nlocs == 0;
+      hasPopulatedRank = hasPopulatedRank || nlocs > 0;
+    }
+    EXPECT(hasEmptyRank);
+    EXPECT(hasPopulatedRank);
+  }
+
+  // Compare each rank's ordered variable list with rank 0's list.
+  const std::vector<std::string> localColumns = obsspace.listVariables(true);
+  oops::Variables rankZeroColumns;
+  if (comm.rank() == 0)
+    rankZeroColumns = oops::Variables(localColumns);
+  oops::mpi::broadcast(comm, rankZeroColumns, 0);
+  EXPECT(rankZeroColumns.variables() == localColumns);
+}
 
 void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   util::TimeWindow timeWindow(conf.getSubConfiguration("time window"));
@@ -124,6 +174,11 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     return;
   }
   filter.postFilter(*geovals, hofx, bias, obsdiags);
+
+  if (conf.getBool("CheckColumnSchemaAcrossRanks", false)) {
+    bool expectEmptyAndNonEmptyRanks = conf.getBool("ExpectEmptyAndNonEmptyRanks", true);
+    expectSameOutputColumnsOnAllRanks(obsspace, expectEmptyAndNonEmptyRanks);
+  }
 
   // Determine whether the mismatch check should be bypassed or not.
   // It might be necessary to disable the mismatch check in tests which are
