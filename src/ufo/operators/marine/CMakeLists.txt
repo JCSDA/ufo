@@ -10,6 +10,7 @@ add_subdirectory( adt )
 add_subdirectory( coolskin )
 add_subdirectory( seaicefraction )
 add_subdirectory( seaicethickness )
+add_subdirectory( seaicefreeboard )
 add_subdirectory( chleuzintegr )
 if( ${gsw_FOUND} )
   add_subdirectory( insitutemperature )
@@ -20,6 +21,7 @@ PREPEND( _p_adt_files                 "operators/marine/adt"                 ${a
 PREPEND( _p_coolskin_files            "operators/marine/coolskin"            ${coolskin_files} )
 PREPEND( _p_seaicefraction_files      "operators/marine/seaicefraction"      ${seaicefraction_files} )
 PREPEND( _p_seaicethickness_files     "operators/marine/seaicethickness"     ${seaicethickness_files} )
+PREPEND( _p_seaicefreeboard_files     "operators/marine/seaicefreeboard"     ${seaicefreeboard_files} )
 PREPEND( _p_chleuzintegr_files        "operators/marine/chleuzintegr"        ${chleuzintegr_files} )
 if( ${gsw_FOUND} )
   PREPEND( _p_insitutemperature_files   "operators/marine/insitutemperature"   ${insitutemperature_files} )
@@ -32,6 +34,7 @@ set ( marine_src_files
     ${_p_obsop_files}
     ${_p_seaicefraction_files}
     ${_p_seaicethickness_files}
+    ${_p_seaicefreeboard_files}
     ${_p_insitutemperature_files}
     ${_p_chleuzintegr_files}
     PARENT_SCOPE

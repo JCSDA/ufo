@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2017-2022 UCAR
+ * (C) Copyright 2017-2026 UCAR
  *
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -10,13 +10,15 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "ioda/ObsDataVector.h"
+#include "oops/base/Variable.h"
 #include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
+
 #include "ufo/LinearObsOperatorBase.h"
 #include "ufo/operators/columnretrieval/ObsColumnRetrievalParameters.h"
-#include "ufo/operators/columnretrieval/ObsColumnRetrievalTLAD.interface.h"
 
 // Forward declarations
 namespace ioda {
@@ -26,6 +28,7 @@ namespace ioda {
 
 namespace ufo {
   class GeoVaLs;
+  class ObsDiagnostics;
 
 // -----------------------------------------------------------------------------
 /// ColumnRetrieval TL/AD observation operator class
@@ -50,13 +53,33 @@ class ObsColumnRetrievalTLAD : public LinearObsOperatorBase,
   // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
-  int & toFortran() {return keyOperColumnRetrieval_;}
-  const int & toFortran() const {return keyOperColumnRetrieval_;}
-
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperColumnRetrieval_;
+
+  /// Copy the stored trajectory at location \p iobs into the per-location work arrays.
+  void getTrajectoryAtLocation(size_t iobs, std::vector<double> & prsiModel,
+                               std::vector<double> & avgKernel,
+                               std::vector<double> & prsiObs) const;
+
+  const ioda::ObsSpace& odb_;
   oops::Variables varin_;
+  oops::Variable tracerVar_;
+  oops::Variable prsiVar_;
+  int nlayers_;
+  bool isApriori_;
+  bool isAveragingKernel_;
+  bool totalNoVertice_;
+  StretchVertices stretch_;
+  double modelUnitsCoeff_;
+  double tropopause_;
+
+  // Trajectory storage (populated by setTrajectory)
+  size_t nlocs_;
+  size_t nval_;
+  std::vector<double> avgKernelObs_;  // size nlayers_ * nlocs_
+  std::vector<double> prsiObs_;       // size (nlayers_+1) * nlocs_
+  std::vector<double> prsiModel_;     // size nval_ * nlocs_
+  std::vector<bool> validLoc_;        // false where obs data are missing, size nlocs_
 };
 
 // -----------------------------------------------------------------------------

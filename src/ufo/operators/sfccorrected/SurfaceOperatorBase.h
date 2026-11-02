@@ -13,9 +13,12 @@
 #include <string>
 #include <vector>
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/AssociativeContainers.h"
+#include "oops/util/missingValues.h"
 #include "ufo/operators/sfccorrected/ObsSfcCorrectedParameters.h"
+#include "ufo/variabletransforms/Formulas.h"
 
 namespace ioda {
   class ObsSpace;
@@ -24,9 +27,38 @@ namespace ioda {
 namespace ufo {
   class GeoVaLs;
 
+/// Converts a single profile of geopotential heights at one location to geometric height.
+/// Missing levels are left unchanged; nothing is done if the latitude is missing.
+template <typename T>
+void convertToGeometricHeight(const float lat, std::vector<T> & heights) {
+  if (lat == util::missingValue<float>()) return;
+  const T missing = util::missingValue<T>();
+  for (T & h : heights) {
+    if (h != missing) {
+      h = static_cast<T>(formulas::Geopotential_to_Geometric_Height(lat, static_cast<float>(h)));
+    }
+  }
+}
+
+/// Converts one geopotential height per location to geometric height, using the latitude
+/// at each location. Locations with a missing latitude or height are left unchanged.
+template <typename T>
+void convertToGeometricHeight(const std::vector<float> & lats, std::vector<T> & heights) {
+  const float missingFloat = util::missingValue<float>();
+  const T missing = util::missingValue<T>();
+  for (size_t iloc = 0; iloc < heights.size(); ++iloc) {
+    if (lats[iloc] != missingFloat && heights[iloc] != missing) {
+      heights[iloc] = static_cast<T>(formulas::Geopotential_to_Geometric_Height(
+          lats[iloc], static_cast<float>(heights[iloc])));
+    }
+  }
+}
+
 /// \brief SurfaceOperator base class.
 ///
-/// Subclasses of this class must implement the `simobs`, `settraj`, `TL` and `AD` method.
+/// Subclasses of this class must implement the `simobs` method.
+/// Subclasses with a linearized operator override `settraj`, `TL` and `AD`
+/// defaults for the linearized subclass throw "not yet implemented".
 class SurfaceOperatorBase {
  public:
   typedef ObsSfcCorrectedParameters Parameters_;
@@ -43,13 +75,15 @@ class SurfaceOperatorBase {
   const oops::Variables & requiredVars() const {return requiredVars_;}
 
   /// Calculate the trajectory
-  virtual void settraj() const = 0;
+  virtual void settraj(const GeoVaLs &, const ioda::ObsSpace &);
 
   /// Calculate the tangent linear
-  virtual void TL() const = 0;
+  virtual void TL(const GeoVaLs &,
+                  std::vector<double> &) const;
 
   /// Calculate the adjoint
-  virtual void AD() const = 0;
+  virtual void AD(GeoVaLs &,
+                  std::vector<double> &) const;
 
  protected:
   // Required variables from the GeoVaLs
@@ -57,6 +91,9 @@ class SurfaceOperatorBase {
 
   // Save a copy of the parameters
   Parameters_ params_;
+
+  // Operator name, e.g. airTemperatureAt2M_GSL
+  std::string name_;
 };
 
 /// SurfaceOperator factory.
@@ -68,6 +105,11 @@ class SurfaceOperatorFactory {
   /// and `correctionType`.
   static std::unique_ptr<SurfaceOperatorBase> create(const std::string &,
                                                      const Parameters_ &);
+
+  /// Create one surface operator per variable for the configured `correctionType`
+  /// and add each operator's required GeoVaLs to `requiredVars`.
+  static std::vector<std::unique_ptr<SurfaceOperatorBase>>
+  createForVariables(const oops::ObsVariables &, const Parameters_ &, oops::Variables &);
 
   /// \brief Return the names of all predictors that can be created by one of the registered makers.
   static std::vector<std::string> getMakerNames() {

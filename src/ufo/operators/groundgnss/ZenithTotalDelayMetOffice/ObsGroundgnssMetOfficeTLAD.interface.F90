@@ -34,7 +34,8 @@ subroutine ufo_groundgnss_metoffice_tlad_setup_c(c_key_self, &
                                                  pseudoLevels, &
                                                  minTempGrad, &
                                                  dryRefractivityConstant, &
-                                                 wetRefractivityConstant) bind(c,name="ufo_groundgnss_metoffice_tlad_setup_f90")
+                                                 wetRefractivityConstant, &
+                                                 numFOV) bind(c,name="ufo_groundgnss_metoffice_tlad_setup_f90")
 implicit none
 integer(c_int), intent(inout)  :: c_key_self
 logical(c_bool), intent(in) :: vertInterpOPS
@@ -42,13 +43,14 @@ logical(c_bool), intent(in) :: pseudoLevels
 real(c_float), intent(in) :: minTempGrad
 real(c_float), intent(in) :: dryRefractivityConstant
 real(c_float), intent(in) :: wetRefractivityConstant
+integer(c_int), intent(in) :: numFOV
 
 type(ufo_groundgnss_metoffice_tlad), pointer :: self
 
 call ufo_groundgnss_metoffice_tlad_registry%setup(c_key_self, self)
 
 call self%setup(vertInterpOPS, pseudoLevels, minTempGrad, &
-                dryRefractivityConstant, wetRefractivityConstant)
+                dryRefractivityConstant, wetRefractivityConstant, numFOV)
 
 end subroutine ufo_groundgnss_metoffice_tlad_setup_c
 

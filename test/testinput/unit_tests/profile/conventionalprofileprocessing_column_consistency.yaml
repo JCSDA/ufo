@@ -1,0 +1,157 @@
+#
+# Confirm same columns in same order after Conventional Profile Processing checks
+# where one rank is non-empty and the other is empty.
+# Case names correspond to the check they are testing.
+#
+
+Basic:
+  time window:
+    begin: 2000-01-01T00:00:00Z
+    end: 2030-01-01T00:00:00Z
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [airTemperature]
+  Conventional Profile Processing:
+    Checks: ["Basic"]
+    flagBasicChecksFail: true
+  IgnoreGeoVaLs: true
+  CheckColumnSchemaAcrossRanks: true
+
+UInterpAlternative:
+  time window:
+    begin: 2019-06-14T20:30:00Z
+    end: 2019-06-15T03:30:00Z
+    bound to include: begin
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [windEastward, windNorthward]
+  Conventional Profile Processing:
+    Checks: ["UInterpAlternative"]
+    flagBasicChecksFail: true
+  IgnoreGeoVaLs: true
+  CheckColumnSchemaAcrossRanks: true
+
+AveragePressure:
+  time window:
+    begin: 2019-06-14T20:30:00Z
+    end: 2019-06-15T03:30:00Z
+    bound to include: begin
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [airTemperature]
+    extension:
+      allocate companion records with length: 71
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["AveragePressure"]
+    flagBasicChecksFail: true
+    alternativeVerticalCoordinate:
+      air_pressure_levels_minus_one: air_pressure_levels_minus_one
+  CheckColumnSchemaAcrossRanks: true
+
+AverageTemperature:
+  time window:
+    begin: 2019-06-14T20:30:00Z
+    end: 2019-06-15T03:30:00Z
+    bound to include: begin
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [airTemperature]
+    extension:
+      allocate companion records with length: 71
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["AveragePressure", "AverageTemperature"]
+    flagBasicChecksFail: true
+    alternativeVerticalCoordinate:
+      air_pressure_levels_minus_one: air_pressure_levels_minus_one
+  CheckColumnSchemaAcrossRanks: true
+
+AverageRelativeHumidity:
+  time window:
+    begin: 2019-06-14T20:30:00Z
+    end: 2019-06-15T03:30:00Z
+    bound to include: begin
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [airTemperature, relativeHumidity]
+    extension:
+      allocate companion records with length: 71
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["AveragePressure", "AverageTemperature", "AverageRelativeHumidity"]
+    observation relative humidity units: percentage
+    flagBasicChecksFail: true
+    alternativeVerticalCoordinate:
+      air_pressure_levels_minus_one: air_pressure_levels_minus_one
+  CheckColumnSchemaAcrossRanks: true
+
+AverageWindSpeed:
+  time window:
+    begin: 2019-06-14T20:30:00Z
+    end: 2019-06-15T03:30:00Z
+    bound to include: begin
+  obs space:
+    name: Radiosonde
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_obs.nc4
+      obsgrouping:
+        group variables: ["stationIdentification"]
+        sort variable: "pressure"
+        sort order: "descending"
+    simulated variables: [windEastward, windNorthward]
+    extension:
+      allocate companion records with length: 71
+  geovals:
+    filename: Data/ufo/testinput_tier_1/met_office_conventional_profile_processing_average_single_profile_geovals.nc4
+  Conventional Profile Processing:
+    Checks: ["AveragePressure", "AverageWindSpeed"]
+    flagBasicChecksFail: true
+    alternativeVerticalCoordinate:
+      air_pressure_levels_minus_one: air_pressure_levels_minus_one
+  CheckColumnSchemaAcrossRanks: true

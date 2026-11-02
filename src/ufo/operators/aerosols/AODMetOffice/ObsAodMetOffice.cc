@@ -78,16 +78,16 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
 
   // Get number of obs locations & number of model pressure levels:
   std::size_t nprofiles = geovals.nlocs();
-  // number of full (rho) levels
-  std::size_t nlevels   = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+  // number of half (theta) levels (obtained assuming there will always be dust bin 1)
+  std::size_t nlevels   = geovals.nlevs(oops::Variable{"mass_fraction_of_dust001_in_air"});
 
   // Get 2-D surface pressure
   std::vector<double> ps(nprofiles);  // surface pressure (Pa)
   geovals.get(ps, oops::Variable{"air_pressure_at_surface"});
 
   // Get 3-D air pressure on rho levels (Pa), one level at a time
-  std::vector<std::vector<double>> plev(nlevels, std::vector<double>(nprofiles));
-  for (std::size_t i = 0; i < nlevels; ++i) {
+  std::vector<std::vector<double>> plev(nlevels + 1, std::vector<double>(nprofiles));
+  for (std::size_t i = 0; i < nlevels + 1; ++i) {
         geovals.getAtLevel(plev[i], oops::Variable{"air_pressure_levels"}, i);
         }
 
@@ -97,7 +97,7 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
   }
 
   double alpha;
-  std::vector<double> mass(nlevels - 1);  // mass concentration on half (theta) levels
+  std::vector<double> mass(nlevels);  // mass concentration on half (theta) levels
 
   // loop over profiles
   for (size_t p = 0; p < nprofiles; p++) {
@@ -108,10 +108,10 @@ void ObsAodMetOffice::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hof
       geovals.getAtLocation(mass, dust_var, p);
       // start with lowest model layer, using surface pressure
       // NB this assumes the first mass layer is the lowest layer just above the surface
-      alpha = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 2][p]) * AodKExt_[d];
-      hofx[p] += mass[nlevels - 2] * alpha;
+      alpha = (1.0 / Constants::grav) * (ps[p] - plev[nlevels - 1][p]) * AodKExt_[d];
+      hofx[p] += mass[nlevels - 1] * alpha;
       // loop over the rest of the model layers
-      for (size_t k = 0; k < (nlevels - 2); k++) {
+      for (size_t k = 0; k < (nlevels - 1); k++) {
         alpha = (1.0 / Constants::grav) * (plev[k+1][p] - plev[k][p]) * AodKExt_[d];
         hofx[p] += mass[k]*alpha;
       }

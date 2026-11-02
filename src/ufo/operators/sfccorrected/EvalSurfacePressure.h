@@ -8,7 +8,6 @@
 #ifndef UFO_OPERATORS_SFCCORRECTED_EVALSURFACEPRESSURE_H_
 #define UFO_OPERATORS_SFCCORRECTED_EVALSURFACEPRESSURE_H_
 
-#include <algorithm>
 #include <cmath>
 #include <string>
 #include <vector>
@@ -38,9 +37,6 @@ class stationPressure_WRFDA : public SurfaceOperatorBase {
   void simobs(const ufo::GeoVaLs &,
               const ioda::ObsSpace &,
               std::vector<float> &) const override;
-  void settraj() const override;
-  void TL() const override;
-  void AD() const override;
 
  private:
   void getDataValues(const ufo::GeoVaLs &,
@@ -72,9 +68,6 @@ class stationPressure_UKMO : public SurfaceOperatorBase {
   void simobs(const ufo::GeoVaLs &,
               const ioda::ObsSpace &,
               std::vector<float> &) const override;
-  void settraj() const override;
-  void TL() const override;
-  void AD() const override;
 
  private:
   void getDataValues(const ufo::GeoVaLs &,
@@ -96,9 +89,6 @@ class stationPressure_GSL : public SurfaceOperatorBase {
   void simobs(const ufo::GeoVaLs &,
               const ioda::ObsSpace &,
               std::vector<float> &) const override;
-  void settraj() const override;
-  void TL() const override;
-  void AD() const override;
 
  private:
   void getDataValues(const ufo::GeoVaLs &,

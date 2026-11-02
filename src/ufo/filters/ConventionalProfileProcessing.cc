@@ -23,6 +23,7 @@
 #include "ufo/filters/ConventionalProfileProcessingParameters.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/profile/ProfileVariableNames.h"
 
 namespace ufo {
 
@@ -106,6 +107,22 @@ namespace ufo {
     oops::Log::debug() << "Basic profile checks" << std::endl;
 
     const CheckSubgroup basicChecks{false, {"Basic"}};
+
+    if (!options_.BChecks_Skip.value()) {
+      profileDataHandler.get<float>(
+          ufo::ProfileVariableNames::obs_air_pressure);
+      profileDataHandler.get<bool>(
+          ufo::ProfileVariableNames::diagflags_final_reject_t);
+      profileDataHandler.get<bool>(
+          ufo::ProfileVariableNames::diagflags_final_reject_u);
+      profileDataHandler.get<bool>(
+          ufo::ProfileVariableNames::diagflags_final_reject_v);
+      profileDataHandler.get<bool>(
+          ufo::ProfileVariableNames::diagflags_final_reject_rh);
+    }
+    profileDataHandler.get<bool>(
+        ufo::ProfileVariableNames::diagflags_final_reject_report);
+    profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumAnyErrors);
 
     // Logical `or` of Basic checks performed on all profiles on this rank.
     bool resultLogicalOr = false;

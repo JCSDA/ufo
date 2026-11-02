@@ -2570,8 +2570,7 @@ contains
            if (self % ch_diags(jvar) < 0) then
              self % ystr_diags(jvar) = varstr
            else
-             self % ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
-             self % ystr_diags(jvar)(str_pos(3):) = ""
+             self % ystr_diags(jvar)(:) = varstr(1:str_pos(3)-1)
            end if
          end if
        end do

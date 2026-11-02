@@ -1712,7 +1712,7 @@ character(len=30) :: geo_nlocs_str
 integer(c_size_t), allocatable, dimension(:) :: global_loc_by_my_loc
 integer(c_size_t), allocatable, dimension(:) :: global_path_by_my_path
 type(ufo_index_range), allocatable :: path_ranges_by_loc(:)
-real, allocatable :: field2d(:,:), field1d(:)
+real(kind_real), allocatable :: field2d(:,:), field1d(:)
 
 ! At the time being, the NetCDF GeoVaLs file format requires all GeoVaLs to be interpolated
 ! along the same set of paths composed of as many paths as there are observation locations.
@@ -1881,7 +1881,8 @@ do ivar = 1, self%nvar
   ! set the missing value equal to IODA missing_value
   do my_loc = 1, obs_nlocs
     do ival = 1, nval
-      if(self%geovals(ivar)%vals(ival, my_loc) > 1.0e08) then
+      if (self%geovals(ivar)%vals(ival, my_loc) == real(nf90_fill_float, kind_real) .or. &
+          self%geovals(ivar)%vals(ival, my_loc) == real(nf90_fill_double, kind_real)) then
         self%geovals(ivar)%vals(ival, my_loc) = self%missing_value
       end if
     end do

@@ -52,14 +52,25 @@ class ObsGroundgnssMetOffice : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return *varin_;}
 
+  /// Sample each location at numfov_ points spread over the observation field of view.
+  /// Falls back on the base-class (single path per location) behaviour when FOV averaging
+  /// is switched off, so that num_fov: 1 reproduces the operator's original results exactly.
+  Locations_ locations() const override;
+
+  /// Average the sampled GeoVaLs over the field-of-view points to give one profile per
+  /// location. Needed because filters and bias predictors read GeoVaLs in the reduced format,
+  /// which has no default meaning once a location is sampled along several paths.
+  void computeReducedVars(const oops::Variables & vars, GeoVaLs & geovals) const override;
+
   int & toFortran() {return keyOperGroundgnssMetOffice_;}
   const int & toFortran() const {return keyOperGroundgnssMetOffice_;}
 
  private:
   void print(std::ostream &) const override;
-  F90hop keyOperGroundgnssMetOffice_;
+  F90hop keyOperGroundgnssMetOffice_ = 0;
   const ioda::ObsSpace& odb_;
   std::unique_ptr<const oops::Variables> varin_;
+  size_t numfov_;
 };
 
 // -----------------------------------------------------------------------------

@@ -66,11 +66,9 @@ ObsAodMassFractionTLAD::ObsAodMassFractionTLAD(const ioda::ObsSpace &odb, const 
     throw eckit::UserError("nspecies must be 1 or higher", Here());
   }
 
-  // Define which model fields will be needed
-  // pressure fields:
-  varin_.push_back("air_pressure_levels");
-  varin_.push_back("air_pressure_at_surface");
-
+  // Define the model increment fields used by the TL/AD operator (_d variables).
+  // Note that while pressure is an input variable it is not incremented
+  // by the AOD observation operator and so is not included here.
   for (const auto &var : varaerosolmass_) {
     varin_.push_back(var);
   }
@@ -129,10 +127,9 @@ ObsAodMassFractionTLAD::~ObsAodMassFractionTLAD() {
 void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostics &,
                                            const QCFlags_t &qc_flags) {
   oops::Log::trace() << "ObsAodMassFractionTLAD::setTrajectory start" << std::endl;
-  // Get number of obs locations & number of model pressure levels:
+  // Get number of obs locations and aerosol mass-fraction levels:
   std::size_t nprofiles = geovals.nlocs();
-  // number of full (rho) levels
-  std::size_t nlevels = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+  std::size_t nlevels = geovals.nlevs(oops::Variable{varaerosolmass_[0]});
 
   // Check whether the model has number fraction fields for the aerosol species/modes.
   // If not, then the TL/AD will only consider the mass fraction contributions.
@@ -147,7 +144,7 @@ void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostic
   kMatrix_.assign(
       nspecies_,
       std::vector<std::vector<std::vector<double>>>(
-          nlevels - 1,
+          nlevels,
           std::vector<std::vector<double>>(
               nprofiles,
               std::vector<double>(2, 0.0))));
@@ -157,7 +154,7 @@ void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostic
   geovals.get(ps, oops::Variable{"air_pressure_at_surface"});
 
   // Get 3-D air pressure on rho levels (Pa), one level at a time
-  std::vector<double> plev(nlevels);
+  std::vector<double> plev(nlevels + 1);
   geovals.getAtLocation(plev, oops::Variable{"air_pressure_levels"}, 0);
 
   // check model fields are ordered from top down, fail if not
@@ -176,8 +173,8 @@ void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostic
     geovals.getAtLocation(plev, oops::Variable{"air_pressure_levels"}, jloc);
 
     for (std::size_t jmode = 0; jmode < nspecies_; ++jmode) {
-      std::vector<double> massfrac(nlevels - 1, 0.0);  // initialise to zero
-      std::vector<double> numfrac(nlevels - 1, 0.0);  // initialise to zero
+      std::vector<double> massfrac(nlevels, 0.0);  // initialise to zero
+      std::vector<double> numfrac(nlevels, 0.0);  // initialise to zero
       double gamma0 = 0.0;
       double gamma1 = 0.0;
 
@@ -188,7 +185,7 @@ void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostic
         geovals.getAtLocation(numfrac, numberFraction, jloc);
       }
 
-      for (std::size_t k = 0; k < (nlevels - 1); ++k) {
+      for (std::size_t k = 0; k < (nlevels); ++k) {
         if (massfrac[k] == 0) {
             massfrac[k] = 1.0e-12;  // set to small value to avoid division by zero
         }
@@ -197,7 +194,7 @@ void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostic
         }
       }
 
-      for (std::size_t k = 0; k < (nlevels - 2); ++k) {
+      for (std::size_t k = 0; k < (nlevels - 1); ++k) {
         const double diameter =
             obsOperator_->getUKCADustDiameter(numfrac[k], massfrac[k], speciesList_[jmode]);
 
@@ -219,24 +216,24 @@ void ObsAodMassFractionTLAD::setTrajectory(const GeoVaLs &geovals, ObsDiagnostic
       }
 
       const double diameter = obsOperator_->getUKCADustDiameter(
-                              numfrac[nlevels - 2], massfrac[nlevels - 2], speciesList_[jmode]);
+                              numfrac[nlevels - 1], massfrac[nlevels - 1], speciesList_[jmode]);
 
       gamma0 = obsOperator_->getUKCADustKExt(diameter, speciesList_[jmode]) +
-               massfrac[nlevels - 2] * getUKCAExtinctionDerivatives(
+               massfrac[nlevels - 1] * getUKCAExtinctionDerivatives(
                                              diameter,
                                              speciesList_[jmode]) *
-                                       getUKCADiameterDerivatives(numfrac[nlevels - 2],
-                                          massfrac[nlevels - 2],
+                                       getUKCADiameterDerivatives(numfrac[nlevels - 1],
+                                          massfrac[nlevels - 1],
                                           speciesList_[jmode], "mass");
-      gamma1 = massfrac[nlevels - 2] * getUKCAExtinctionDerivatives(
+      gamma1 = massfrac[nlevels - 1] * getUKCAExtinctionDerivatives(
                                              diameter,
                                              speciesList_[jmode]) *
-                                       getUKCADiameterDerivatives(numfrac[nlevels - 2],
-                                                                  massfrac[nlevels - 2],
+                                       getUKCADiameterDerivatives(numfrac[nlevels - 1],
+                                                                  massfrac[nlevels - 1],
                                                                   speciesList_[jmode], "number");
 
-      kMatrix_[jmode][nlevels - 2][jloc][0] = beta(ps[jloc] - plev[nlevels - 2]) * gamma0;
-      kMatrix_[jmode][nlevels - 2][jloc][1] = beta(ps[jloc] - plev[nlevels - 2]) * gamma1;
+      kMatrix_[jmode][nlevels - 1][jloc][0] = beta(ps[jloc] - plev[nlevels - 1]) * gamma0;
+      kMatrix_[jmode][nlevels - 1][jloc][1] = beta(ps[jloc] - plev[nlevels - 1]) * gamma1;
     }  // end loop over species/modes
   }  // end loop over profiles
 
@@ -318,14 +315,14 @@ void ObsAodMassFractionTLAD::simulateObsTL(const GeoVaLs &geovals, ioda::ObsVect
   const bool hasNumberFraction = !varaerosolnumber_.empty();
 
   const std::size_t nprofiles = geovals.nlocs();
-  const std::size_t nlevels = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+  const std::size_t nlevels = geovals.nlevs(oops::Variable{varaerosolmass_[0]});
 
   hofx.zero();
 
   for (std::size_t jloc = 0; jloc < nprofiles; ++jloc) {
     for (std::size_t jmode = 0; jmode < nspecies_; ++jmode) {
-      std::vector<double> massfrac_d(nlevels - 1, 0.0);
-      std::vector<double> numfrac_d(nlevels - 1, 0.0);
+      std::vector<double> massfrac_d(nlevels, 0.0);
+      std::vector<double> numfrac_d(nlevels, 0.0);
 
       const oops::Variable massFraction{varaerosolmass_[jmode]};
       geovals.getAtLocation(massfrac_d, massFraction, jloc);
@@ -335,7 +332,7 @@ void ObsAodMassFractionTLAD::simulateObsTL(const GeoVaLs &geovals, ioda::ObsVect
         geovals.getAtLocation(numfrac_d, numberFraction, jloc);
       }
 
-      for (std::size_t k = 0; k < (nlevels - 1); ++k) {
+      for (std::size_t k = 0; k < nlevels; ++k) {
         hofx[jloc] += kMatrix_[jmode][k][jloc][0] * massfrac_d[k];
         if (hasNumberFraction) {
           hofx[jloc] += kMatrix_[jmode][k][jloc][1] * numfrac_d[k];
@@ -354,10 +351,10 @@ void ObsAodMassFractionTLAD::simulateObsAD(GeoVaLs &geovals, const ioda::ObsVect
 
   const bool hasNumberFraction = !varaerosolnumber_.empty();
 
-  // Get number of obs locations & number of model pressure levels:
+  // Get number of obs locations & number of aerosol levels:
   std::size_t nprofiles = geovals.nlocs();
-  // number of full (rho) levels
-  std::size_t nlevels = geovals.nlevs(oops::Variable{"air_pressure_levels"});
+  // number of aerosol levels
+  std::size_t nlevels = geovals.nlevs(oops::Variable{varaerosolmass_[0]});
 
   // Check hofx size
   ASSERT(geovals.nlocs() == hofx.nlocs());
@@ -367,33 +364,33 @@ void ObsAodMassFractionTLAD::simulateObsAD(GeoVaLs &geovals, const ioda::ObsVect
 
   // Loop through the obs, adding the increment to the model state
   for (std::size_t jloc = 0; jloc < nprofiles; jloc++) {
-    if (hofx[jloc] != missing) {
-      // loop over the aerosol species/modes (nspecies)
-      for (std::size_t jmode = 0; jmode < nspecies_; jmode++) {
-        std::vector<double> massfrac_d(nlevels - 1, 0.0);
-        std::vector<double> numfrac_d(nlevels - 1, 0.0);
+    if (hofx[jloc] == missing) continue;
 
-        const oops::Variable massFraction{varaerosolmass_[jmode]};
-        geovals.getAtLocation(massfrac_d, massFraction, jloc);
+    // loop over the aerosol species/modes (nspecies)
+    for (std::size_t jmode = 0; jmode < nspecies_; jmode++) {
+      std::vector<double> massfrac_d(nlevels, 0.0);
+      std::vector<double> numfrac_d(nlevels, 0.0);
+
+      const oops::Variable massFraction{varaerosolmass_[jmode]};
+      geovals.getAtLocation(massfrac_d, massFraction, jloc);
+      if (hasNumberFraction) {
+        const oops::Variable numberFraction{varaerosolnumber_[jmode]};
+        geovals.getAtLocation(numfrac_d, numberFraction, jloc);
+      }
+
+      // loop over the model layers
+      for (std::size_t k = 0; k < nlevels; ++k) {
+        massfrac_d[k] += kMatrix_[jmode][k][jloc][0] * hofx[jloc];
         if (hasNumberFraction) {
-          const oops::Variable numberFraction{varaerosolnumber_[jmode]};
-          geovals.getAtLocation(numfrac_d, numberFraction, jloc);
+          numfrac_d[k]  += kMatrix_[jmode][k][jloc][1] * hofx[jloc];
         }
+      }
 
-        // loop over the model layers
-        for (std::size_t k = 0; k < (nlevels - 1); ++k) {
-          massfrac_d[k] += kMatrix_[jmode][k][jloc][0] * hofx[jloc];
-          if (hasNumberFraction) {
-            numfrac_d[k]  += kMatrix_[jmode][k][jloc][1] * hofx[jloc];
-          }
-        }
-
-        // Store the updated model state increments
-        geovals.putAtLocation(massfrac_d, massFraction, jloc);
-        if (hasNumberFraction) {
-          const oops::Variable numberFraction{varaerosolnumber_[jmode]};
-          geovals.putAtLocation(numfrac_d, numberFraction, jloc);
-        }
+      // Store the updated model state increments
+      geovals.putAtLocation(massfrac_d, massFraction, jloc);
+      if (hasNumberFraction) {
+        const oops::Variable numberFraction{varaerosolnumber_[jmode]};
+        geovals.putAtLocation(numfrac_d, numberFraction, jloc);
       }
     }
   }
