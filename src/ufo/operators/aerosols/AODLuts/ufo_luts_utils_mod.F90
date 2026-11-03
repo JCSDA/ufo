@@ -175,11 +175,9 @@ CONTAINS
 
        DO k=1,n_layers
           DO m = 1, n_profiles
-!correct for mixing ratio factor
-!being calculated from dry pressure, cotton eq. (2.4)
-!p_dry=p_total/(1+r_v/r_d*mixing_ratio)
+             ! Caculate dry-air mass using 1/(1 + water_vapor_mixing_ratio)
              factors(k,m)=(pint(k+1,m)-pint(k,m))/grav/&
-                  &(1.0_kind_real+rv_rd*sphum(k,m)/(1.0_kind_real-sphum(k,m)))
+                  &(1.0_kind_real+sphum(k,m)/(1.0_kind_real-sphum(k,m)))
           END DO
        END DO
 

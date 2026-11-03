@@ -2172,7 +2172,7 @@ end function uv_to_wdir
         !p_dry=p_total/(1+1.61*mixing_ratio)
         layer_factors(k)=1e-9_kind_real*(atm%Level_Pressure(k)-&
              &atm%Level_Pressure(k-1))*100.0_kind_real/grav/&
-             &(1.0_kind_real+rv_rd*atm%Absorber(k,1)*1e-3_kind_real)
+             &(1.0_kind_real+atm%Absorber(k,1)*1e-3_kind_real)
      END DO
 
    END SUBROUTINE calculate_aero_layer_factor_atm_profile
@@ -2185,12 +2185,10 @@ end function uv_to_wdir
 
      DO k=1,SIZE(layer_factors,1)
         DO m=1,SIZE(layer_factors,2)
-           !correct for mixing ratio factor layer_factors
-           !being calculated from dry pressure, cotton eq. (2.4)
-           !p_dry=p_total/(1+1.61*mixing_ratio)
+           ! Caculate dry-air mass using 1/(1 + water_vapor_mixing_ratio)
            layer_factors(k,m)=1e-9_kind_real*(atm(m)%Level_Pressure(k)-&
                 &atm(m)%Level_Pressure(k-1))*100.0_kind_real/grav/&
-                &(1.0_kind_real+rv_rd*atm(m)%Absorber(k,1)*1.e-3_kind_real)
+                &(1.0_kind_real+atm(m)%Absorber(k,1)*1.e-3_kind_real)
         END DO
      END DO
 
