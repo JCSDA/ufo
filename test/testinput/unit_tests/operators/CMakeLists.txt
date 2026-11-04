@@ -291,7 +291,7 @@ ufo_add_test( NAME    opr_gnssrobendmetoffice
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    linopr_gnssrobendmetoffice
@@ -300,7 +300,7 @@ ufo_add_test( NAME    linopr_gnssrobendmetoffice
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    opr_gnssrobendmetoffice_nopseudo
@@ -309,7 +309,7 @@ ufo_add_test( NAME    opr_gnssrobendmetoffice_nopseudo
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nopseudo.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    linopr_gnssrobendmetoffice_nopseudo
@@ -318,7 +318,7 @@ ufo_add_test( NAME    linopr_gnssrobendmetoffice_nopseudo
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nopseudo.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    opr_gnssrobendmetoffice_profile
@@ -336,7 +336,7 @@ ufo_add_test( NAME    opr_gnssrobendmetoffice_nosupercheck
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    opr_gnssrobendmetoffice_nosupercheck_missingdata
@@ -345,7 +345,7 @@ ufo_add_test( NAME    opr_gnssrobendmetoffice_nosupercheck_missingdata
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck_missingdata.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    linopr_gnssrobendmetoffice_nosupercheck
@@ -354,7 +354,7 @@ ufo_add_test( NAME    linopr_gnssrobendmetoffice_nosupercheck
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_nosupercheck.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    opr_gnssrobendmetoffice_refractivity_changes
@@ -363,7 +363,7 @@ ufo_add_test( NAME    opr_gnssrobendmetoffice_refractivity_changes
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    linopr_gnssrobendmetoffice_refractivity_changes
@@ -372,7 +372,7 @@ ufo_add_test( NAME    linopr_gnssrobendmetoffice_refractivity_changes
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_refractivity_changes.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  operators ci_oneapi_disable
+              LABELS  operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    opr_gnssrobndnbam

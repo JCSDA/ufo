@@ -95,7 +95,7 @@ ufo_add_test( NAME    gnssrobendmetoffice_qc
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_qc.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters ci_oneapi_disable
+              LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    gnssrobendmetoffice_qc_profile
@@ -113,7 +113,7 @@ ufo_add_test( NAME    gnssrobendmetoffice_obserror
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssrobendmetoffice_obserror.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters ci_oneapi_disable
+              LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    gnssrorefmetoffice_qc
@@ -168,7 +168,7 @@ ufo_add_test( NAME    gnssro_super_refraction_check
               ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/gnssro_super_refraction_check.yaml"
               MPI     1
               LIBS    ufo
-              LABELS  filters ci_oneapi_disable
+              LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
 ufo_add_test( NAME    metar_qc_filters
