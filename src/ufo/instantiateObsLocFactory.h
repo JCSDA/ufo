@@ -8,6 +8,7 @@
 #ifndef UFO_INSTANTIATEOBSLOCFACTORY_H_
 #define UFO_INSTANTIATEOBSLOCFACTORY_H_
 
+#include "ufo/obslocalization/Obs3DLocalization.h"
 #include "ufo/obslocalization/ObsHorLocalization.h"
 #include "ufo/obslocalization/ObsHorLocGC99.h"
 #include "ufo/obslocalization/ObsHorLocSOAR.h"
@@ -25,6 +26,8 @@ template<typename ITERATOR> void instantiateObsLocFactory() {
            makerBoxCar_("Horizontal Box car");
   static ObsLocalizationMaker<ITERATOR, ObsVertLocalization<ITERATOR>>
            makerVertLoc_("Vertical localization");
+  static ObsLocalizationMaker<ITERATOR, Obs3DLocalization<ITERATOR>>
+           maker3DGC_("3D Gaspari-Cohn");
 }
 
 }  // namespace ufo
