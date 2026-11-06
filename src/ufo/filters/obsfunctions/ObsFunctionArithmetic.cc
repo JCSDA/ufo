@@ -56,7 +56,7 @@ void Arithmetic<FunctionValue>::compute(
   // number of input variables
   const size_t nv = invars_.size();
 
-  // get exponent coefficients
+  // get multiplicative coefficients
   std::vector<FunctionValue> coefs(nv, 1);
   if (options_.coefs.value() != boost::none)
     coefs = options_.coefs.value().get();
@@ -143,9 +143,25 @@ void Arithmetic<FunctionValue>::compute(
                                    ? missing
                                    : static_cast<float>(channels[ichan]);
         }
-        if (varin[ichan][iloc] == missing || out[ichan][iloc] == missing) {
+        FunctionValue value = varin[ichan][iloc];
+        if (value != missing) {
+          if (absolute_value[ivar]) {
+            value = std::abs(value);
+          }
+          if (truncate[ivar] > 0) {
+            value = std::trunc(value / truncate[ivar]) * truncate[ivar];
+          }
+        }
+        if (value == missing || out[ichan][iloc] == missing) {
           out[ichan][iloc] = missing;
-        } else if (varin[ichan][iloc] < 0 &&
+        } else if (!log_bases[ivar].empty() && value <= 0) {
+          std::stringstream msg;
+          msg << "Log of non-positive value error. "
+                 "Variable is "
+              << invars_[ivar] << " at location " << iloc << ".";
+          warnOrThrow<eckit::BadValue>(msg.str());
+          out[ichan][iloc] = missing;
+        } else if (value < 0 &&
                    static_cast<int>(exponents[ivar]) != exponents[ivar]) {
           std::stringstream msg;
           msg << "Coefficient exponent error. "
@@ -155,7 +171,7 @@ void Arithmetic<FunctionValue>::compute(
               << invars_[ivar] << " at location " << iloc << ".";
           warnOrThrow<eckit::NotImplemented>(msg.str());
           out[ichan][iloc] = missing;
-        } else if (varin[ichan][iloc] == 0 && exponents[ivar] <= 0) {
+        } else if (value == 0 && exponents[ivar] <= 0) {
           std::stringstream msg;
           msg << "Div/0 error! "
                  "Variable is "
@@ -163,19 +179,18 @@ void Arithmetic<FunctionValue>::compute(
           warnOrThrow<eckit::BadValue>(msg.str());
           out[ichan][iloc] = missing;
         } else {
-          FunctionValue value = varin[ichan][iloc];
-          if (absolute_value[ivar]) {
-            value = std::abs(value);
-          }
-          if (truncate[ivar] > 0) {
-            value = std::trunc(value / truncate[ivar]) * truncate[ivar];
-          }
           out[ichan][iloc] +=
               coefs[ivar] * logpower(value, exponents[ivar], log_bases[ivar]);
           if (ivar == nv - 1) {
-            if (out[ichan][iloc] < 0 &&
-                static_cast<int>(total_exponent) != total_exponent &&
-                out[ichan][iloc] != missing) {
+            if (out[ichan][iloc] <= 0 && !total_log_base.empty()) {
+              std::stringstream msg;
+              msg << "Log of non-positive value error. "
+                  << "Variable is " << invars_[ivar] << " at location "
+                  << iloc << ".";
+              warnOrThrow<eckit::BadValue>(msg.str());
+              out[ichan][iloc] = missing;
+            } else if (out[ichan][iloc] < 0 &&
+                       static_cast<int>(total_exponent) != total_exponent) {
               std::stringstream msg;
               msg << "Total coefficient exponent error. "
                      "Trying to raise a negative number to a non-integer "
@@ -242,12 +257,7 @@ FunctionValue Arithmetic<FunctionValue>::logpower(
 template <typename FunctionValue>
 FunctionValue Arithmetic<FunctionValue>::logbasen(
     FunctionValue value, const std::string& log_base) const {
-  if (value <= 0.0) {
-    std::stringstream msg;
-    msg << "Invalid log value '" << value
-        << "' for log base '" + log_base + "'.";
-    throw eckit::BadValue(msg.str(), Here());
-  }
+  ASSERT(value > 0);
   if (log_base == "e") {
     return std::log(value);
   }

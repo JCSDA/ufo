@@ -62,9 +62,10 @@ class ArithmeticParameters : public oops::Parameters {
   /// truncation is performed before any other operation apart from taking the
   /// absolute value.
   oops::OptionalParameter<std::vector<int>> truncate{"truncate", this};
-  /// If \c true (the default), will raise exceptions when trying to perform
-  /// invalid or unsupported operations. Otherwise will set output values as
-  /// missing.
+  /// If \c true, will raise exceptions when trying to perform invalid or
+  /// unsupported operations (raising a negative number to a non-integer
+  /// power, dividing by zero, or taking the log of a non-positive number).
+  /// Otherwise (the default) will set output values as missing.
   oops::Parameter<bool> abortIfInvalid{"abort if invalid operation", false,
                                        this};
   /// Use channel number in the calculation not the value from the variable
