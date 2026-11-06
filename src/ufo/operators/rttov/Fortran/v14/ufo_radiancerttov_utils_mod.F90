@@ -2292,7 +2292,10 @@ contains
         case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_cli, var_tb_overcast)
 
           hofxdiags%geovals(jvar)%nval = nlevels
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2349,7 +2352,10 @@ contains
         case (var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit)
           ! always returned
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2383,7 +2389,10 @@ contains
 
         case ("ozoneTotal")
           hofxdiags % geovals(jvar) % nval = 1
-          if(.not. allocated(hofxdiags % geovals(jvar) % vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags % geovals(jvar) % vals) .or. &
+              size(hofxdiags % geovals(jvar) % vals, 1) /= hofxdiags % geovals(jvar) % nval) then
+            if (allocated(hofxdiags % geovals(jvar) % vals)) deallocate(hofxdiags % geovals(jvar) % vals)
             allocate(hofxdiags % geovals(jvar) % vals(hofxdiags % geovals(jvar) % nval, nprofiles))
             hofxdiags % geovals(jvar) % vals = missing
           end if
@@ -2392,7 +2401,10 @@ contains
         case default
           ! not a supported obsdiag but we allocate and initialise here anyway for use later on
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2412,7 +2424,10 @@ contains
         case (var_ts,var_mixr,var_q,var_clw,var_cli)
 
           hofxdiags%geovals(jvar)%nval = nlevels
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2461,7 +2476,10 @@ contains
         case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_ps, var_sfc_u10, var_sfc_v10, &
               "cloud_top_pressure", "cloud_fraction")
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if

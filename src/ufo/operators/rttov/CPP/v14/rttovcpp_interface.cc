@@ -14,6 +14,7 @@
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/IntSetParser.h"
 #include "oops/util/Logger.h"
@@ -389,7 +390,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
         int ch = channels_[ich];
         oops::Variables this_var({varname+"_"+std::to_string(ch)});
         if (ydiag.has(this_var[0])) {
-          ydiag.allocate(this_nlevels, this_var);
+          d.allocate(this_nlevels, oops::ObsVariables({this_var[0].name()}));
         } else {
           // this ydiag is not needed according to JEDI Yaml settings.
           // no ydiag related QC or BC procedures; no ydiag output request.

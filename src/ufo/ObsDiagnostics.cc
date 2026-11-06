@@ -23,7 +23,8 @@ namespace ufo {
 
 ObsDiagnostics::ObsDiagnostics(const ioda::ObsSpace & os, const Locations_ & locs,
                                const oops::ObsVariables & vars)
-  : obsdb_(os), gdiags_(locs, oops::Variables(vars.variables()))
+  : obsdb_(os),
+    gdiags_(locs, oops::Variables(vars.variables()), std::vector<size_t>(vars.size(), 0))
 {}
 
 // -----------------------------------------------------------------------------

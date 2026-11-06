@@ -30,6 +30,7 @@
 #include "oops/util/Expect.h"
 #include "oops/util/FloatCompare.h"
 #include "test/TestEnvironment.h"
+#include "EmptyGeoVaLs.h"
 #include "ufo/filters/ConventionalProfileProcessing.h"
 #include "ufo/filters/ConventionalProfileProcessingParameters.h"
 #include "ufo/filters/ObsFilterData.h"
@@ -159,7 +160,7 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
     const eckit::LocalConfiguration geovalsConf(conf, "geovals");
     geovals.reset(new GeoVaLs(geovalsConf, obsspace, geovars));
   } else {
-    geovals.reset(new GeoVaLs(obsspace.distribution(), oops::Variables()));
+    geovals = makeEmptyGeoVaLs(obsspace);
   }
   geovals->setDefaultFormat(GeoVaLFormat::REDUCED);
 

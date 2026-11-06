@@ -42,6 +42,8 @@ class ObsDiagnostics : public util::Printable,
  public:
   typedef oops::Locations<ObsTraits> Locations_;
 
+  // Diagnostics start with zero levels; obs operators allocate each one (see allocate())
+  // once they know its number of levels.
   ObsDiagnostics(const ioda::ObsSpace &, const Locations_ &, const oops::ObsVariables &);
   ObsDiagnostics(const eckit::Configuration &, const ioda::ObsSpace &, const oops::ObsVariables &);
   ~ObsDiagnostics() {}

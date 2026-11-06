@@ -44,6 +44,7 @@ namespace ioda {
 }
 
 namespace ufo {
+class ObsDiagnostics;
 struct ObsTraits;
 
 // -----------------------------------------------------------------------------
@@ -145,10 +146,6 @@ class GeoVaLs : public util::Printable,
   GeoVaLs(const Locations_ & locations, const GeoVaLs &,
           const eckit::Configuration & initConf = eckit::LocalConfiguration());
 
-// Deprecated constructor - Please do not use this constructor in new code.
-  GeoVaLs(std::shared_ptr<const ioda::Distribution> dist, const oops::Variables & vars);
-// Deprecated constructor - Please do not use this constructor in new code.
-  GeoVaLs(const Locations_ & locations, const oops::Variables & vars);
 // Constructor for tests - Please do not use this constructor in new code.
   GeoVaLs(const eckit::Configuration &, const ioda::ObsSpace &, const oops::Variables &);
 
@@ -164,22 +161,6 @@ class GeoVaLs : public util::Printable,
   GeoVaLs & operator -= (const GeoVaLs &);
   GeoVaLs & operator *= (const GeoVaLs &);
   double dot_product_with(const GeoVaLs &) const;
-
-  /// \brief Deprecated method. Allocates GeoVaLs for \p vars variables with
-  /// \p nlev number of levels
-  /// \details Please do not use in any new code. This method is currently
-  /// only used for ObsDiagnostics and will be removed soon. Rely on
-  ///
-  ///     GeoVaLs(const Locations &, const oops::Variables &,
-  ///             const std::vector<size_t> &)
-  ///
-  /// to allocate GeoVaLs correctly.
-  /// Fails if at least one of the \p vars doesn't exist in GeoVaLs.
-  /// Only allocates variables that haven't been allocated before.
-  /// Fails if one of \p vars is already allocated with number of levels
-  /// different than \p nlev; doesn't reallocate variables that are already
-  /// allocated with \p nlev.
-  void allocate(const int & nlev, const oops::Variables & vars);
 
   /// \brief Instructs a GeoVaLs object to store some GeoVaLs in the reduced format.
   ///
@@ -365,6 +346,18 @@ class GeoVaLs : public util::Printable,
   const int & toFortran() const {return keyGVL_;}
 
  private:
+  // ObsDiagnostics creates its GeoVaLs with zero levels and lets obs operators size each
+  // diagnostic once they know its number of levels.
+  friend class ObsDiagnostics;
+
+  /// \brief Allocates GeoVaLs for \p vars variables with \p nlev number of levels.
+  /// \details Only for ObsDiagnostics, whose diagnostics are created with zero levels.
+  /// Fails if at least one of the \p vars doesn't exist in GeoVaLs.
+  /// Allocates variables that have zero levels. Fails if one of \p vars already has a
+  /// non-zero number of levels different than \p nlev; doesn't reallocate variables that
+  /// already have \p nlev levels.
+  void allocate(const int & nlev, const oops::Variables & vars);
+
   void print(std::ostream &) const;
 
   /// Convert data stored in a Locations_ object into the form required by

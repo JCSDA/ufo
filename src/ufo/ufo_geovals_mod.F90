@@ -464,10 +464,10 @@ end if
 end subroutine ufo_geovals_partial_setup
 
 ! ------------------------------------------------------------------------------
-!> Deprecated. Rely on ufo_geovals_setup to allocate GeoVaLs instead.
 !> Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
-!> If the GeoVaLs for this variable were allocated before with different size,
-!> aborts.
+!> Used by ObsDiagnostics, whose diagnostics are set up with zero levels (or not allocated at all,
+!> after ufo_geovals_partial_setup). Variables with zero levels are reallocated; if a variable
+!> already has a non-zero number of levels different from \p nlevels, aborts.
 subroutine ufo_geovals_allocate(self, vars, nlevels)
 use oops_variables_mod
 implicit none
@@ -502,13 +502,15 @@ contains
     implicit none
     integer, intent(in) :: igeoval
 
-    if (allocated(self%geovals(igeoval)%vals) .and. (self%geovals(igeoval)%nval /= nlevels)) then
+    if (allocated(self%geovals(igeoval)%vals) .and. self%geovals(igeoval)%nval /= 0 .and. &
+        self%geovals(igeoval)%nval /= nlevels) then
       write(err_msg,*) "ufo_geovals_allocate: attempting to allocate already allocated geovals for ",       &
                        trim(vars%variable(ivar)), ". Previously allocated as ", self%geovals(igeoval)%nval, &
                        " levels; now trying to allocate as ", nlevels, " levels."
       call abor1_ftn(err_msg)
-    ! only allocate if not already allocated
-    else if (.not. allocated(self%geovals(igeoval)%vals)) then
+    ! only allocate if not allocated yet or allocated with zero levels
+    else if (.not. allocated(self%geovals(igeoval)%vals) .or. self%geovals(igeoval)%nval == 0) then
+      if (allocated(self%geovals(igeoval)%vals)) deallocate(self%geovals(igeoval)%vals)
       self%geovals(igeoval)%nval  = nlevels
       allocate(self%geovals(igeoval)%vals(nlevels, self%geovals(igeoval)%nprofiles))
     end if

@@ -32,6 +32,7 @@
 #include "oops/util/Expect.h"
 #include "oops/util/IntSetParser.h"
 #include "test/interface/ObsTestsFixture.h"
+#include "EmptyGeoVaLs.h"
 #include "ufo/ObsTraits.h"
 
 
@@ -66,7 +67,7 @@ void testPredictor() {
       gval.reset(new GeoVaLs(gconf, ospace, gvars));
     } else {
       // Create an empty GeoVaLs object
-      gval.reset(new GeoVaLs(ospace.distribution(), oops::Variables()));
+      gval = makeEmptyGeoVaLs(ospace);
     }
     gval->setDefaultFormat(GeoVaLFormat::REDUCED);
 

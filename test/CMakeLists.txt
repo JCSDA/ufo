@@ -192,7 +192,8 @@ CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_te
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
-install( FILES ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h ufo/Predictor.h
+install( FILES ufo/EmptyGeoVaLs.h ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h
+         ufo/Predictor.h
          DESTINATION ${INSTALL_INCLUDE_DIR}/ufo/test/ufo)
 
 #####################################################################

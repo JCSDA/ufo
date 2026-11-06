@@ -25,6 +25,7 @@
 #include "oops/runs/Test.h"
 #include "oops/util/Expect.h"
 #include "test/TestEnvironment.h"
+#include "EmptyGeoVaLs.h"
 #include "ufo/filters/MetOfficeBuddyCheck.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
@@ -85,8 +86,8 @@ void testMetOfficeBuddyCheck(const eckit::LocalConfiguration &conf) {
     obsDiags.save(diag, name, 0);
   }
 
-  const GeoVaLs gval(obsSpace.distribution(), oops::Variables());
-  filter.postFilter(gval, hofx, bias, obsDiags);
+  const std::unique_ptr<GeoVaLs> gval = makeEmptyGeoVaLs(obsSpace);
+  filter.postFilter(*gval, hofx, bias, obsDiags);
 
   const eckit::LocalConfiguration pgeConf(conf, "ExpectedGrossErrorProbabilities");
   for (const std::string & varNameGroup : pgeConf.keys()) {
