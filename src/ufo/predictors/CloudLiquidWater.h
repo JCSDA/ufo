@@ -8,14 +8,17 @@
 #ifndef UFO_PREDICTORS_CLOUDLIQUIDWATER_H_
 #define UFO_PREDICTORS_CLOUDLIQUIDWATER_H_
 
-#include <map>
+#include <cstddef>
 #include <string>
 #include <vector>
+
+#include "boost/optional.hpp"
 
 #include "oops/util/parameters/OptionalParameter.h"
 #include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 
+#include "ufo/predictors/LapseRateHelper.h"
 #include "ufo/predictors/PredictorBase.h"
 
 namespace ioda {
@@ -52,8 +55,7 @@ class CloudLiquidWaterParameters : public PredictorParametersBase {
     oops::OptionalParameter<int> clwret_ch37v{"clwret_ch37v", this};
     oops::OptionalParameter<int> clwret_ch37h{"clwret_ch37h", this};
     oops::OptionalParameter<int> order{"order", this};
-    /// Path to an tlapse rate file for GMI only.
-    oops::OptionalParameter<std::string> tlapse{"tlapse", this};
+    LapseRateMeanParameters lapseMean{this};
 };
 
 // -----------------------------------------------------------------------------
@@ -73,13 +75,14 @@ class CloudLiquidWater : public PredictorBase {
                const ObsBias &,
                ioda::ObsVector &) const override;
 
+ private:
   static void clwDerivative_amsua(const std::vector<float> &,
-                           const std::vector<float> &,
-                           const std::vector<float> &,
-                           const std::vector<float> &,
-                           const std::vector<float> &,
-                           const std::vector<float> &,
-                           std::vector<float> &);
+                                  const std::vector<float> &,
+                                  const std::vector<float> &,
+                                  const std::vector<float> &,
+                                  const std::vector<float> &,
+                                  const std::vector<float> &,
+                                  std::vector<float> &);
   static void clw_bias_correction_gmi(const ObsBias &,
                                       const std::vector<float> &,
                                       const std::vector<float> &,
@@ -88,21 +91,18 @@ class CloudLiquidWater : public PredictorBase {
                                       const std::vector<float> &,
                                       const std::vector<float> &,
                                       const std::vector<float> &,
+                                      const std::vector<int> &,
+                                      const std::vector<float> &,
+                                      const std::vector<float> &,
                                       const std::vector<float> &,
                                       const std::vector<int> &,
-                                      const std::vector<std::vector<std::vector<float>>> &,
-                                      const std::vector<std::vector<float>> &,
-                                      const std::vector<float> &,
-                                      const std::vector<int> &,
-                                      const  int &,
                                       std::vector<float> &,
                                       std::vector<float> &);
 
- private:
   CloudLiquidWaterParameters options_;
+  boost::optional<LapseRateHelper> lapseHelper_;
   std::vector<int> channels_;
   int order_;
-  std::map<int, float> tlapmean_;  // <channel, tlaps>
   static constexpr float bad_clwret_value_ = 1000.f;
 };
 

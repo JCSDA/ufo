@@ -18,6 +18,8 @@ set ( predictor_files
   InterpolateDataFromFile.cc
   LapseRate.h
   LapseRate.cc
+  LapseRateHelper.h
+  LapseRateHelper.cc
   Legendre.h
   Legendre.cc
   OrbitalAngle.h
