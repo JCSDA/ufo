@@ -60,8 +60,11 @@ class ObsRadianceRTTOVCPPTLAD : public LinearObsOperatorBase,
   void print(std::ostream &) const override;
   oops::Variables varin_;
   std::string        CoefFileName;
+  std::string        HydrotableName;
   std::vector<int>   channels_;
-  mutable std::size_t        nlevels;  // need this in order to allocate dx
+  mutable std::size_t        nlevels = 0;  // need this in order to allocate dx
+  bool useHydrometeors_;
+  std::vector<std::string> hydrometeorVars_;
   std::vector<bool>  skip_profile;
 
 // Declare a RttovSafe object for one single sensor

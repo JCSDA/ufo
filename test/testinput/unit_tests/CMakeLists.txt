@@ -9,7 +9,6 @@ option(ENABLE_RTTOVCPP_TESTS "Enable RTTOVCPP operator tests" ON)
 # Set version-specific suffix and label for RTTOV tests
 if( rttov_FOUND )
   if( rttov_VERSION VERSION_GREATER_EQUAL "14.0" )
-        set(ENABLE_RTTOVCPP_TESTS OFF CACHE BOOL "Enable RTTOVCPP operator tests" FORCE)
         set( RTTOV_VERSION_SUFFIX "_v14" )
         set( RTTOV_VERSION_LABEL "rttov14" )
     else()

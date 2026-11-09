@@ -30,6 +30,9 @@ class ObsRadianceRTTOVCPPParameters : public ObsOperatorParametersBase {
     {"SensorID",
      "Name of optical depth coefficients file",
      this};
+
+  oops::Parameter<bool> useHydrometeors{"use hydrometeors", false, this};
+  oops::Parameter<std::vector<std::string>> hydrometeors{"hydrometeor variables", {}, this};
 };
 
 }  // namespace ufo

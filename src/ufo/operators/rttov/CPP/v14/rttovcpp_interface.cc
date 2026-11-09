@@ -7,6 +7,8 @@
 
 #include "ufo/operators/rttov/CPP/v14/rttovcpp_interface.h"
 
+#include <algorithm>
+#include <map>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -50,6 +52,8 @@ namespace ufo {
 * \param[in] odb_ reference to the input observational information
 * \param[in] CoefFileName rttov coef file to be loaded
 * \param[in] channels_ indexes for a subset of channels for a single sensor
+* \param[in] hydrometeorVars list of hydrometeor variable names requested for all-sky DA,
+*                            configured in YAML (determines useHydrometeors status)
 * \param[out] nlevels number of model vertical levels
 * \param[out] aRttov_ reference to the output rttov object
 * \param[out] skip_profile logical to determine if a profile is used or not
@@ -61,13 +65,26 @@ namespace ufo {
 * \date July 2025, updated from rttov12 to rttov14
 * \author Zhiquan (Jake) Liu and Lipeng Jiang (NCAR/MMM)
 *
+* \date Aug. 2026, added interface for all-sky DA with hydrometeors 
+* \author Ju-Hye Kim (NSF/NCAR)
+*
 */
 void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
-                        rttov::RttovSafe & aRttov_, const std::string CoefFileName,
+                        rttov::RttovSafe & aRttov_,
+                        const bool useHydrometeors,
+                        const std::vector<std::string> & hydrometeorVars,
+                        const std::string CoefFileName,
+                        const std::string HydrotableName,
                         const std::vector<int> channels_, std::size_t & nlevels,
                         std::vector<bool> & skip_profile) {
   // 1. Set options for a RttovSafe instance:
   //-----------------------------------------------
+  // 1.0 Read the 'hydrometeors' from YAML, defaulting to 'false' if not found
+  aRttov_.options.setHydrometeors(useHydrometeors);
+  if (useHydrometeors) {
+      aRttov_.setFileHydrotable(HydrotableName);
+  }
+
   // 1.1 general setting for all sensors: clear-sky
 
   aRttov_.setFileCoef(CoefFileName);
@@ -81,7 +98,6 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
   // aRttov_.options.setStoreTrans(true);      // Enable Transmittance retrieval
   // aRttov_.options.setStoreDiagOutput(true); // Enable diag retrieval
   aRttov_.options.setCheckProfiles(false);
-  aRttov_.options.setHydrometeors(false);
   aRttov_.options.setStoreEmisRefl(true);
   aRttov_.options.setStoreTrans(true);
 
@@ -176,6 +192,75 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
           profiles[i].setQ(tmpvar1d);
       }
       std::vector<std::vector<double>>().swap(tmpvar3d_Q);
+
+    if (useHydrometeors) {
+    // 3.1.4 Retrieve All-Sky Hydrometeors (mixing ratios and cloud fraction)
+    // ----------------------------------------------------------------------
+        const std::string clwName   = "mixing_ratio_of_cloud_liquid_water";
+        const std::string ciwName   = "mixing_ratio_of_cloud_ice";
+        const std::string rainName  = "mixing_ratio_of_rain";
+        const std::string snowName  = "mixing_ratio_of_snow";
+        const std::string graupName = "mixing_ratio_of_graupel";
+        const std::string cfracName = "cloud_area_fraction_in_atmosphere_layer";
+
+        // 3D fields [nlevels][nprofiles] keyed by variable name, so that each field
+        // is looked up by name below rather than by its position in a list
+        std::map<std::string, std::vector<std::vector<double>>> hydro3d;
+
+     // Create a zero-filled vector for positions where a hydrometeor is omitted
+        const std::vector<double> zero_level(nprofiles, 0.0);
+
+        for (const std::string & name : {clwName, ciwName, rainName,
+                                         snowName, graupName, cfracName}) {
+            const bool hasVar = (std::find(hydrometeorVars.begin(), hydrometeorVars.end(), name)
+                                 != hydrometeorVars.end());
+            std::vector<std::vector<double>> & field = hydro3d[name];
+            field.reserve(nlevels);
+            for (std::size_t k = 0; k < nlevels; ++k) {
+                if (hasVar) {
+                    geovals.getAtLevel(tmpvar2d, oops::Variable{name}, k);
+                    field.push_back(tmpvar2d);
+                } else {
+                    field.push_back(zero_level);
+                }
+            }
+        }
+
+        const auto & clw3d   = hydro3d.at(clwName);
+        const auto & ciw3d   = hydro3d.at(ciwName);
+        const auto & rain3d  = hydro3d.at(rainName);
+        const auto & snow3d  = hydro3d.at(snowName);
+        const auto & graup3d = hydro3d.at(graupName);
+        const auto & cfrac3d = hydro3d.at(cfracName);
+
+        // Map to RTTOV Profiles
+        for (std::size_t i = 0; i < nprofiles; ++i) {
+            std::vector<double> clw_profile(nlevels);
+            std::vector<double> ciw_profile(nlevels);
+            std::vector<double> rain_profile(nlevels);
+            std::vector<double> snow_profile(nlevels);
+            std::vector<double> graup_profile(nlevels);
+            std::vector<double> cc_profile(nlevels);
+
+            for (std::size_t k = 0; k < nlevels; ++k) {
+                clw_profile[k]   = clw3d[k][i];
+                ciw_profile[k]   = ciw3d[k][i];
+                rain_profile[k]  = rain3d[k][i];
+                snow_profile[k]  = snow3d[k][i];
+                graup_profile[k] = graup3d[k][i];
+                cc_profile[k]    = std::min(1.0, std::max(0.0, cfrac3d[k][i]));
+            }
+
+            // Set values in the RTTOV profile object
+            profiles[i].setMmrHydro(true);
+            profiles[i].setMwClw(clw_profile);
+            profiles[i].setMwCiw(ciw_profile);
+            profiles[i].setMwRain(rain_profile);
+            profiles[i].setMwSnow(snow_profile);
+            profiles[i].setMwGraupel(graup_profile);
+            profiles[i].setHydroFrac(cc_profile);
+        }
+    }
 
     // 3.2 2D surface fields at obs locations
     //-------------------------------------------

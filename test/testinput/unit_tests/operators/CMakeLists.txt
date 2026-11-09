@@ -1966,6 +1966,15 @@ if(ENABLE_RTTOVCPP_TESTS)
               LIBS    ufo
               LABELS  rttov ${RTTOV_VERSION_LABEL} rttovcpp operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    opr_amsua_rttovcpp_allsky
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/amsua_rttovcpp_allsky${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL} rttovcpp operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 endif(ENABLE_RTTOVCPP_TESTS)
 #
     ufo_add_test( NAME    linopr_atms_rttov_tlad_qc
