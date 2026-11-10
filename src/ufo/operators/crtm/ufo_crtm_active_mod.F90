@@ -7,7 +7,7 @@
 
 module ufo_crtm_active_mod
 
- use crtm_module
+ use CRTM_Module
 
  use fckit_configuration_module, only: fckit_configuration
  use, intrinsic :: iso_c_binding
@@ -20,7 +20,7 @@ module ufo_crtm_active_mod
  use ufo_vars_mod
  use ufo_crtm_utils_mod
 
- use ufo_constants_mod, only: deg2rad
+ use ufo_constants_mod, only: deg2rad, threshold_reflectivity
  use ufo_crtm_passive_mod
 
  implicit none
@@ -62,20 +62,19 @@ call obsspace_get_db(obss, "MetaData", "modelLayer", modelLayer)
 modelLayer = modelLayer + 1 ! convert from 0 index to 1
 
 do m = 1, n_Profiles
-   if (.not.Options(m)%Skip_Profile) then
-      jlayer = modelLayer(m)
-      do l = 1, n_Channels
-        if (abs(rts(l,m)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
-           hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(jlayer)
-        end if
-      end do
-   end if
+   if (Options(m)%Skip_Profile) cycle
+   jlayer = modelLayer(m)
+   do l = 1, n_Channels
+      if (abs(rts(l,m)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
+         hofx(l,m) = rts(l,m)%Reflectivity_Attenuated(jlayer)
+      end if
+   end do
 end do
 
 end subroutine ufo_crtm_active_sim
 
 
-subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options,&
+subroutine ufo_crtm_active_diag(rts, rts_K, atm, atm_K, sfc_K, conf, isensor, Options,&
              channels, geovals, obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags,&
              ch_diags, hofxdiags, err_stat)
 use fckit_mpi_module,   only: fckit_mpi_comm
@@ -98,21 +97,13 @@ type(CRTM_Options_type),   intent(in) :: Options(:)
 character(len=MAXVARLEN), dimension(:), intent(in) :: &
                           ystr_diags, xstr_diags
 integer, intent(in) :: ch_diags(:)
-integer, intent(in) :: n_Sensor
+integer, intent(in) :: isensor
 integer, intent(out)  :: err_stat
 
 ! Local Variables
-!character(*), parameter :: PROGRAM_NAME = 'ufo_crtm_active_diag'
-!character(255) :: message, version
 character(max_string) :: err_msg
-!integer        :: err_stat, alloc_stat
-!integer        :: l, m, n
-integer :: jvar, jprofile, jlevel, jchannel, ichannel, jspec, jlayer
+integer :: jvar, jprofile, jchannel, jspec, jlayer
 real(c_double) :: missing
-real(kind_real) :: total_od, secant_term, wfunc_max
-real(kind_real), allocatable :: TmpVar(:)
-real(kind_real), allocatable :: Tao(:)
-real(kind_real), allocatable :: Wfunc(:)
 integer, allocatable   :: modelLayer(:)
 
 ! allocate observation elevation for reflectivity profiles
@@ -128,7 +119,7 @@ modelLayer = modelLayer + 1 ! convert from 0 index to 1
 ! Put simulated diagnostics into hofxdiags
 ! We need to call the routines for passive instrument as well when dealing with active obs
 call ufo_crtm_passive_diag( &
-    rts, rts_K, atm, atm_K, sfc_K, conf, n_Sensor, Options, channels, geovals, &
+    rts, rts_K, atm, atm_K, sfc_K, conf, isensor, Options, channels, geovals, &
     obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, &
     hofxdiags, err_stat)
 
@@ -137,21 +128,16 @@ do jvar = 1, hofxdiags%nvar
    if (len(trim(hofxdiags%variables(jvar))) < 1) cycle
 
    if (ch_diags(jvar) > 0) then
-      if (size(pack(channels,channels==ch_diags(jvar))) /= 1) then
-         write(err_msg,*) "ufo_crtm_active_diags: mismatch between// &
-                           & h(x) channels(", channels,") and// &
-                           & ch_diags(jvar) = ", ch_diags(jvar)
+      if (count(channels == ch_diags(jvar)) /= 1) then
+         write(err_msg,"(a,i0,a,*(1x,i0))") "ufo_crtm_active_diag: ch_diags(jvar) = ", ch_diags(jvar), &
+                                            " must appear exactly once in the h(x) channels:", channels
          call abor1_ftn(err_msg)
       end if
    end if
 
-   jchannel = -1
-   do ichannel = 1, size(channels)
-      if (ch_diags(jvar) == channels(ichannel)) then
-         jchannel = ichannel
-         exit
-      end if
-   end do
+   ! position of the diagnosed channel in channels (-1 if it is not there)
+   jchannel = findloc(channels, ch_diags(jvar), 1)
+   if (jchannel == 0) jchannel = -1
 
    if (allocated(hofxdiags%geovals(jvar)%vals)) then
      deallocate(hofxdiags%geovals(jvar)%vals)
@@ -163,160 +149,75 @@ do jvar = 1, hofxdiags%nvar
    ! Diagnostics used for QC and bias correction
    !============================================
    if (xstr_diags(jvar) == "") then
-      ! forward h(x) diags
+      ! forward h(x) diags (one value per profile, at the observation's model layer)
       select case(ystr_diags(jvar))
          ! variable: reflectivity_CH Non attenuated
          case (var_rad_refl)
-            ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
-            hofxdiags%geovals(jvar)%nval = 1 !n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
+            call alloc_diag(1)
             do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  jlayer = modelLayer(jprofile)
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     if (abs(rts(jchannel,jprofile)%Reflectivity(jlayer)) < threshold_reflectivity) then
-                          hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                              rts(jchannel,jprofile) % Reflectivity(jlayer)
-                     end if
-                  end do
+               if (Options(jprofile)%Skip_Profile) cycle
+               jlayer = modelLayer(jprofile)
+               if (abs(rts(jchannel,jprofile)%Reflectivity(jlayer)) < &
+                   threshold_reflectivity) then
+                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                     rts(jchannel,jprofile) % Reflectivity(jlayer)
                end if
             end do
 
          ! variable: attenuated_reflectivity_CH
          case (var_rad_refl_att)
-            ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
-            hofxdiags%geovals(jvar)%nval = 1 !n_Layers
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
+            call alloc_diag(1)
             do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  jlayer = modelLayer(jprofile)
-                  do jlevel = 1, hofxdiags%geovals(jvar)%nval
-                     if (abs(rts(jchannel,jprofile)%Reflectivity_Attenuated(jlayer)) < threshold_reflectivity) then
-                         hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                             rts(jchannel,jprofile) % Reflectivity_Attenuated(jlayer)
-                     end if
-                  end do
+               if (Options(jprofile)%Skip_Profile) cycle
+               jlayer = modelLayer(jprofile)
+               if (abs(rts(jchannel,jprofile)%Reflectivity_Attenuated(jlayer)) < &
+                   threshold_reflectivity) then
+                  hofxdiags%geovals(jvar)%vals(1,jprofile) = &
+                     rts(jchannel,jprofile) % Reflectivity_Attenuated(jlayer)
                end if
             end do
 
          case default
-!           write(err_msg,*) 'ufo_crtm_active_diags: //&
-!                             & ObsDiagnostic is unsupported, ', &
-!                             & hofxdiags%variables(jvar)
-!           call fckit_log%info(err_msg)
-            ! SET n_Layers = 1 => hofxdiags%geovals(jvar)%nval
-            hofxdiags%geovals(jvar)%nval = 1
-            allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
+            ! unsupported forward diagnostic: fill with missing
+            call alloc_diag(1)
       end select
    else if ((ystr_diags(jvar) == var_rad_refl) .or. (ystr_diags(jvar) == var_rad_refl_att)) then
       ! var_rad_refl jacobians
       select case (xstr_diags(jvar))
-         ! variable: reflectivity_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer_CH
-         case (var_clw_wp)
-            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clw_wp)
-
+         ! variable: reflectivity_jacobian_mass_content_of_<species>_in_atmosphere_layer_CH,
+         ! for cloud liquid water, cloud ice, rain, snow, graupel and hail
+         case (var_clw_wp, var_cli_wp, var_clr_wp, var_cls_wp, var_clg_wp, var_clh_wp)
+            call alloc_diag(n_Layers)
+            jspec = ufo_vars_getindex(conf%Clouds(:,1), xstr_diags(jvar))
             do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
-                  end do
-               end if
-            end do
-         ! variable: reflectivity_jacobian_mass_content_of_cloud_ice_in_atmosphere_layer_CH
-         case (var_cli_wp)
-            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cli_wp)
-
-            do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
-                  end do
-               end if
-            end do
-         ! variable: reflectivity_jacobian_mass_content_of_rain_in_atmosphere_layer_CH
-         case (var_clr_wp)
-            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clr_wp)
-
-            do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
-                  end do
-               end if
-            end do
-         ! variable: reflectivity_jacobian_mass_content_of_snow_in_atmosphere_layer_CH
-         case (var_cls_wp)
-            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_cls_wp)
-
-            do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
-                  end do
-               end if
-            end do
-         ! variable: reflectivity_jacobian_mass_content_of_graupel_in_atmosphere_layer_CH
-         case (var_clg_wp)
-            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clg_wp)
-
-            do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
-                  end do
-               end if
-            end do
-         ! variable: reflectivity_jacobian_mass_content_of_hail_in_atmosphere_layer_CH
-         case (var_clh_wp)
-            allocate(hofxdiags%geovals(jvar)%vals(n_Layers, n_Profiles))
-            hofxdiags%geovals(jvar)%vals = missing
-            jspec = ufo_vars_getindex(conf%Clouds(:,1), var_clh_wp)
-
-            do jprofile = 1, n_Profiles
-               if (.not.Options(jprofile)%Skip_Profile) then
-                  do jlevel = 1, n_Layers
-                     hofxdiags%geovals(jvar)%vals(jlevel,jprofile) = &
-                        atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(jlevel)
-                  end do
-               end if
+               if (Options(jprofile)%Skip_Profile) cycle
+               hofxdiags%geovals(jvar)%vals(:,jprofile) = &
+                  atm_K(jchannel,jprofile) % Cloud(jspec) % Water_Content(1:n_Layers)
             end do
 
          case default
-            write(err_msg,*) "ufo_crtm_active_diags: //&
-                              & ObsDiagnostic is unsupported, ", &
-                              & hofxdiags%variables(jvar)
-            call fckit_log%info(err_msg)
-            !call abor1_ftn(err_msg)
+            err_msg = "ufo_crtm_active_diag: ObsDiagnostic is unsupported, " // &
+                      hofxdiags%variables(jvar)
+            call fckit_log%error(err_msg)
             err_stat = 1
       end select
    else
-      write(err_msg,*) "ufo_crtm_active_diags: //&
-                        & ObsDiagnostic is unsupported, ", &
-                        & hofxdiags%variables(jvar)
-      call fckit_log%info(err_msg)
-      !call abor1_ftn(err_msg)
+      err_msg = "ufo_crtm_active_diag: ObsDiagnostic is unsupported, " // &
+                hofxdiags%variables(jvar)
+      call fckit_log%error(err_msg)
       err_stat = 1
    end if
 end do
 
+contains
+
+  !> Allocate hofxdiags variable jvar with nval levels, filled with missing.
+  subroutine alloc_diag(nval)
+    integer, intent(in) :: nval
+    hofxdiags%geovals(jvar)%nval = nval
+    allocate(hofxdiags%geovals(jvar)%vals(nval, n_Profiles))
+    hofxdiags%geovals(jvar)%vals = missing
+  end subroutine alloc_diag
 
 end subroutine ufo_crtm_active_diag
 

@@ -14,14 +14,13 @@ MODULE ufo_aodluts_mod
 
   USE ufo_geovals_mod, ONLY: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   USE ufo_vars_mod
-  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names, max_string, upper2lower
+  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names => ufo_crtm_assign_aerosol_names, max_string
   USE ufo_luts_utils_mod, ONLY: luts_conf, luts_conf_setup, &
-       &luts_conf_delete, calculate_aero_layers
+       &luts_conf_delete, luts_set_wavelengths, calculate_aero_layers
   USE crtm_module
-  USE crtm_spccoeff, ONLY: sc
   USE obsspace_mod
 
-  USE cf_mieobs_mod, ONLY: get_cf_aod,get_rc_wavelengths
+  USE cf_mieobs_mod, ONLY: get_cf_aod
 
   IMPLICIT NONE
   PRIVATE
@@ -54,8 +53,7 @@ CONTAINS
     TYPE(fckit_configuration), INTENT(in)    :: f_confoper
     INTEGER(c_int),            INTENT(in)    :: channels(:)  !list of channels to use
 
-    INTEGER :: nvars_in, rc
-    CHARACTER(len=max_string) :: err_msg
+    INTEGER :: nvars_in
     TYPE(fckit_configuration) :: f_confopts
 
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
@@ -74,9 +72,10 @@ CONTAINS
     self%varin(SIZE(varin_default)+1:) = var_aerosols
 
     ALLOCATE(self%channels(SIZE(channels)))
-    ALLOCATE(self%conf%wavelengths(SIZE(channels)))
 
     self%channels(:) = channels(:)
+
+    CALL luts_set_wavelengths(self%conf, self%channels)
 
     DEALLOCATE(var_aerosols)
 
@@ -110,21 +109,14 @@ CONTAINS
 
 ! local variables
     CHARACTER(*), PARAMETER :: program_name = "ufo_aodluts_mod.f90"
-    CHARACTER(255) :: message, version
-    INTEGER        :: err_stat, alloc_stat
-    INTEGER        :: l, m, n, i
+    CHARACTER(255) :: message
+    INTEGER        :: n
     TYPE(ufo_geoval), POINTER :: temp
-    REAL(c_double) :: missing
 
     INTEGER :: n_profiles
     INTEGER :: n_layers
-    INTEGER :: n_channels
     INTEGER :: n_aerosols
 
-! define the "non-demoninational" arguments
-    TYPE(crtm_channelinfo_type)             :: chinfo(self%conf%n_sensors)
-
-    REAL(kind_real), ALLOCATABLE :: wavelengths_all(:)
     REAL(kind_real), ALLOCATABLE :: aero_layers(:,:,:),rh(:,:)
 
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
@@ -143,50 +135,7 @@ CONTAINS
     ALLOCATE(aero_layers(n_aerosols,n_layers,n_profiles),&
          &rh(n_layers,n_profiles))
 
-    IF (self%conf%use_crtm) THEN
-       err_stat = crtm_init( self%conf%sensor_id, &
-            chinfo, &
-            file_path=TRIM(self%conf%coefficient_path), &
-            quiet=.TRUE.)
-
-       IF ( err_stat /= success ) THEN
-          message = "error initializing crtm"
-          CALL display_message( program_name, message, failure )
-          STOP
-       END IF
-    END IF
-
     sensor_loop:DO n = 1, self%conf%n_sensors
-
-       IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
-
-       IF (self%conf%use_crtm) THEN
-
-          n_channels = crtm_channelinfo_n_channels(chinfo(n))
-
-          ALLOCATE(wavelengths_all(n_channels), stat = alloc_stat)
-
-          IF ( alloc_stat /= 0 ) THEN
-             message = "error allocating wavelengths_all"
-             CALL display_message( program_name, message, failure )
-             STOP
-          END IF
-
-          wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
-
-       ELSE
-
-          CALL get_rc_wavelengths(self%conf%rcfile,wavelengths_all,rc)
-
-          IF ( rc /= 0 ) THEN
-             message = "error getting wavelengths from rcfile"
-             CALL display_message( program_name, message, failure )
-             STOP
-          END IF
-
-       END IF
-
-       self%conf%wavelengths=wavelengths_all(self%channels)
 
        CALL calculate_aero_layers(self%conf,&
             &n_aerosols, n_profiles, n_layers,&
@@ -232,7 +181,7 @@ CONTAINS
                &aod_tot = hofx, rc = rc)
        END IF
 
-       DEALLOCATE(aero_layers,rh,wavelengths_all)
+       DEALLOCATE(aero_layers,rh)
 
        IF (rc /= 0) THEN
           message = "error on exit from get_cf_aod"
@@ -241,15 +190,6 @@ CONTAINS
        END IF
 
     END DO sensor_loop
-
-    IF (self%conf%use_crtm) THEN
-       err_stat = crtm_destroy( chinfo )
-       IF ( err_stat /= success ) THEN
-          message = "error destroying crtm (settraj)"
-          CALL display_message( program_name, message, failure )
-          STOP
-       END IF
-    END IF
 
   END SUBROUTINE ufo_aodluts_simobs
 

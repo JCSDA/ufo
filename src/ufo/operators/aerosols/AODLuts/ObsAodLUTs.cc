@@ -10,6 +10,7 @@
 
 #include "ioda/ObsVector.h"
 
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 
 #include "ufo/GeoVaLs.h"
@@ -28,7 +29,7 @@ ObsAodLUTs::ObsAodLUTs(const ioda::ObsSpace & odb,
   : ObsOperatorBase(odb), keyOperAodLUTs_(0), odb_(odb), varin_()
 {
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.obsvariables();
+  const oops::ObsVariables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
   // call Fortran setup routine

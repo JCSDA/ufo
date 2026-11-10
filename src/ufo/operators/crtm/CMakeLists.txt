@@ -20,7 +20,6 @@ set ( crtm_files
   ufo_radiancecrtm_mod.F90
   ufo_radiancecrtm_tlad_mod.F90
   ufo_crtm_utils_mod.F90
-  ufo_ghg_utils_mod.F90
   ObsAodCRTM.h
   ObsAodCRTM.cc
   ObsAodCRTMTLAD.h

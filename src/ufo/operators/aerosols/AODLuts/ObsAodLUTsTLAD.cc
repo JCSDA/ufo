@@ -12,6 +12,7 @@
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
+#include "oops/base/ObsVariables.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Logger.h"
 #include "ufo/GeoVaLs.h"
@@ -28,7 +29,7 @@ ObsAodLUTsTLAD::ObsAodLUTsTLAD(const ioda::ObsSpace & odb,
   : LinearObsOperatorBase(odb), keyOperAodLUTs_(0), varin_()
 {
   // parse channels from the config and create variable names
-  const oops::Variables & observed = odb.obsvariables();
+  const oops::ObsVariables & observed = odb.obsvariables();
   std::vector<int> channels_list = observed.channels();
 
   ufo_aodluts_tlad_setup_f90(keyOperAodLUTs_, params.toConfiguration(),

@@ -38,6 +38,10 @@ namespace ufo
     oops::RequiredParameter<std::string> CoefficientPath{"CoefficientPath", this};
     /// NetCDF CoefficientPath
     oops::OptionalParameter<std::string> NC_CoefficientPath{"NC_CoefficientPath", this};
+    /// share one CRTM coefficient load with other operators of the same settings
+    oops::Parameter<bool> ShareCoefficients{"ShareCoefficients",
+       "keep coefficients loaded and shared with other CRTM operators (true) or load "
+       "them for each call (false)", true, this};
     /// SpcCoeff_Format
     oops::OptionalParameter<std::string> SpcCoeff_Format{"SpcCoeff_Format", this};
     /// TauCoeff_Format

@@ -42,7 +42,7 @@ ObsAodCRTMTLAD::ObsAodCRTMTLAD(const ioda::ObsSpace & odb,
 
   ufo_aodcrtm_tlad_setup_f90(keyOperAodCRTM_, params.toConfiguration(),
                              channels_list.size(), channels_list[0], midPointJulday,
-                             varin_);
+                             varin_, odb.comm());
   oops::Log::info() << "ObsAodCRTMTLAD variables: " << varin_ << std::endl;
   oops::Log::info() << "ObsAodCRTMTLAD channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsAodCRTMTLAD constructor done" << std::endl;

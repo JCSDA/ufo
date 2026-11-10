@@ -17,8 +17,11 @@ MODULE ufo_luts_utils_mod
   USE ufo_geovals_mod, ONLY: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   USE obsspace_mod
 
-  USE ufo_crtm_utils_mod, ONLY: qsmith, assign_aerosol_names, upper2lower
-  USE ufo_crtm_utils_mod, ONLY: grav,rv_rd,&
+  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names => ufo_crtm_assign_aerosol_names, &
+       &ufo_crtm_sensor_wavelengths
+  USE cf_mieobs_mod, ONLY: get_rc_wavelengths
+  USE ufo_utils_mod, ONLY: upper2lower
+  USE ufo_constants_mod, ONLY: grav, rd_over_rv, c_virtual, t0c,&
        &aerosol_concentration_minvalue,&
        &aerosol_concentration_minvalue_layer
 
@@ -28,9 +31,18 @@ MODULE ufo_luts_utils_mod
   PUBLIC luts_conf
   PUBLIC luts_conf_setup
   PUBLIC luts_conf_delete
+  PUBLIC luts_set_wavelengths
   PUBLIC :: calculate_aero_layers
 
   INTEGER, PARAMETER, PUBLIC :: max_string=800
+
+! Saturation vapor pressure table for qsmith: es over water every 1/es_table_per_k K,
+! starting es_table_below_triple K below the triple point (113.16 K to 375.16 K)
+  INTEGER, PARAMETER :: es_table_per_k = 10
+  INTEGER, PARAMETER :: es_table_n = 2621
+  REAL,    PARAMETER :: es_table_below_triple = 160.
+! es table and its forward differences, built on first use
+  REAL, ALLOCATABLE, SAVE :: es_table(:), es_table_diff(:)
 
 
 !type for general config
@@ -59,7 +71,6 @@ CONTAINS
     TYPE(fckit_configuration),  INTENT(in)    :: f_confopts
     TYPE(fckit_configuration),  INTENT(in)    :: f_confoper
 
-    CHARACTER(*), PARAMETER :: routine_name = "luts_conf_setup"
     CHARACTER(len=:), ALLOCATABLE :: str
 
     CALL f_confopts%get_or_die("AerosolOption",str)
@@ -110,6 +121,31 @@ CONTAINS
 
 ! ------------------------------------------------------------------------------
 
+!> Set conf%wavelengths for the channels used, from the sensor's CRTM SpcCoeff file
+!> (use_crtm) or from the rc file. Reads the file directly, with no CRTM_Init.
+  SUBROUTINE luts_set_wavelengths(conf, channels)
+
+    IMPLICIT NONE
+    TYPE(luts_conf), INTENT(inout) :: conf
+    INTEGER,         INTENT(in)    :: channels(:)
+
+    REAL(kind_real), ALLOCATABLE :: wavelengths_all(:)
+    INTEGER :: rc
+
+    IF (conf%use_crtm) THEN
+       CALL ufo_crtm_sensor_wavelengths(conf%coefficient_path, conf%sensor_id(1), &
+            &wavelengths_all)
+    ELSE
+       CALL get_rc_wavelengths(conf%rcfile, wavelengths_all, rc)
+       IF (rc /= 0) CALL abor1_ftn("luts_set_wavelengths: error getting wavelengths from rcfile")
+    END IF
+
+    conf%wavelengths = wavelengths_all(channels)
+
+  END SUBROUTINE luts_set_wavelengths
+
+! ------------------------------------------------------------------------------
+
   SUBROUTINE calculate_aero_layers(conf,&
        &n_aerosols, n_profiles, n_layers, &
        &geovals, aero_layers, rh, layer_factors)
@@ -128,7 +164,6 @@ CONTAINS
     INTEGER :: m, ivar,k
     TYPE(ufo_geoval), POINTER :: geoval
     CHARACTER(max_string) :: err_msg
-    CHARACTER(len=maxvarlen) :: varname
     REAL(kind_real), DIMENSION(n_layers,n_profiles) :: t,sphum,pmid
     REAL(kind_real), DIMENSION(n_layers+1,n_profiles) :: pint
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
@@ -175,7 +210,9 @@ CONTAINS
 
        DO k=1,n_layers
           DO m = 1, n_profiles
-             ! Caculate dry-air mass using 1/(1 + water_vapor_mixing_ratio)
+             ! Convert to a dry-air mass basis. delta_p/g is the moist-air mass, so use
+             ! the mass fraction 1/(1+mixing_ratio), not the dry partial-pressure ratio
+             ! of Cotton eq. (2.4), p_dry=p_total/(1+r_v/r_d*mixing_ratio) (ufo#4450).
              factors(k,m)=(pint(k+1,m)-pint(k,m))/grav/&
                   &(1.0_kind_real+sphum(k,m)/(1.0_kind_real-sphum(k,m)))
           END DO
@@ -206,6 +243,94 @@ CONTAINS
     IF ( PRESENT(layer_factors) ) layer_factors=conf%convert_factor_model*factors
 
   END SUBROUTINE calculate_aero_layers
+
+! ------------------------------------------------------------------------------
+
+!> Relative humidity rh = q/qs (not capped at 1) from a saturation vapor pressure
+!> lookup table (ported from GFDL FV3 qsmith, which returns qs). es(T) is linearly
+!> interpolated in the table and qs = (rd/rv) * es * (1 + c_virtual*q) / p.
+!>   t [K], sphum = specific humidity [kg/kg], p [Pa], all (n_layers, n_profiles).
+  SUBROUTINE qsmith(t,sphum,p,rh)
+
+    REAL(kind_real), DIMENSION(:,:), INTENT(in) :: t,sphum,p
+    REAL(kind_real), DIMENSION(:,:), INTENT(out) :: rh
+
+    REAL :: es, qs, q
+    REAL :: ap1
+    REAL :: Tmin
+    INTEGER :: i, k, it, n_layers, n_profiles
+
+    n_layers=SIZE(t,1)
+    n_profiles=SIZE(t,2)
+
+! The lookup starts at t0c, the table at the triple point (0.01 K apart), as in
+! the original code
+    Tmin = t0c-es_table_below_triple
+
+    IF ( .NOT. ALLOCATED(es_table) ) CALL qsmith_init()
+
+    DO k=1,n_layers
+       DO i=1,n_profiles
+          ap1 = REAL(es_table_per_k)*DIM(t(k,i), Tmin) + 1.
+          ap1 = MIN(REAL(es_table_n), ap1)
+          it = ap1
+          es = es_table(it) + (ap1-it)*es_table_diff(it)
+          q=sphum(k,i)
+          qs = rd_over_rv*es*(1.+c_virtual*q)/p(k,i)
+          rh(k,i) = q/qs
+       END DO
+    END DO
+
+  END SUBROUTINE qsmith
+
+! ------------------------------------------------------------------------------
+
+!> Build the es table and its forward differences
+!> es_table_diff(i) = es_table(i+1) - es_table(i), used for linear interpolation.
+  SUBROUTINE qsmith_init()
+
+    INTEGER :: i
+
+    ALLOCATE(es_table(es_table_n), es_table_diff(es_table_n))
+
+    CALL qs_table(es_table_n, es_table)
+
+    DO i=1,es_table_n-1
+       es_table_diff(i) = es_table(i+1) - es_table(i)
+    END DO
+    es_table_diff(es_table_n) = es_table_diff(es_table_n-1)
+
+  END SUBROUTINE qsmith_init
+
+! ------------------------------------------------------------------------------
+
+!> Saturation vapor pressure over water [Pa] on n points from es_table_below_triple K
+!> below the triple point, every 1/es_table_per_k K (Goff-Gratch formula, Smithsonian
+!> Meteorological Tables p. 350).
+  SUBROUTINE qs_table(n,table)
+
+    INTEGER, INTENT(in):: n
+    REAL, INTENT(out) :: table (n)
+
+    REAL, PARAMETER :: esbasw = 1013246.0  ! es at the steam point (dyn cm**-2)
+    REAL, PARAMETER :: tbasw  = 373.16     ! steam point of water (K)
+    REAL, PARAMETER :: tbasi  = 273.16     ! triple point of water (K)
+    REAL, PARAMETER :: dt = 1./es_table_per_k
+    REAL :: Tmin, tem, aa, b, c, d, e
+    INTEGER :: i
+
+    Tmin = tbasi - es_table_below_triple
+    DO  i=1,n
+       tem = Tmin+dt*REAL(i-1)
+       aa  = -7.90298*(tbasw/tem-1)
+       b   =  5.02808*log10(tbasw/tem)
+       c   = -1.3816e-07*(10**((1-tem/tbasw)*11.344)-1)
+       d   =  8.1328e-03*(10**((tbasw/tem-1)*(-3.49149))-1)
+       e   =  log10(esbasw)
+       table(i)  = 0.1*10**(aa+b+c+d+e)  ! dyn cm**-2 to Pa
+    END DO
+
+  END SUBROUTINE qs_table
 
 ! ------------------------------------------------------------------------------
 

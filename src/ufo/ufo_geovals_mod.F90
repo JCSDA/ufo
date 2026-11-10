@@ -18,7 +18,7 @@ integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval, ufo_index_range
 public :: ufo_geoval_sampled, ufo_geoval_reduced
-public :: ufo_geovals_get_var, ufo_geovals_get_var_by_index
+public :: ufo_geovals_get_var, ufo_geovals_get_var_by_index, ufo_geovals_nlevs
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_partial_setup, ufo_geovals_delete
 public :: ufo_geovals_setup_sampling_method, ufo_geovals_setup_trivial_sampling_method
 public :: ufo_geovals_add_reduced_vars, ufo_geovals_get_vars
@@ -872,6 +872,23 @@ else
 end if
 
 end subroutine ufo_geovals_get_var
+
+! ------------------------------------------------------------------------------
+
+!> Number of levels (nval) of the GeoVaL `varname`; aborts if `varname` is not found.
+!> `format` selects the sampled or reduced GeoVaL (default: self%default_format).
+integer function ufo_geovals_nlevs(self, varname, format)
+implicit none
+type(ufo_geovals), target, intent(in) :: self
+character(len=*), intent(in) :: varname
+integer(c_int), intent(in), optional :: format
+
+type(ufo_geoval), pointer :: geoval
+
+call ufo_geovals_get_var(self, varname, geoval, format)
+ufo_geovals_nlevs = geoval%nval
+
+end function ufo_geovals_nlevs
 
 ! ------------------------------------------------------------------------------
 

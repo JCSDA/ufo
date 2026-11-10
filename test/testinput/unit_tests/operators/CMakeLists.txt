@@ -1770,6 +1770,53 @@ endif( crtm_FOUND AND crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
               LABELS  crtm operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+    ufo_add_test( NAME    crtm_shared_load_tlad
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/crtm_shared_load.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    crtm_shared_load_together
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorShared.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/crtm_shared_load.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    ufo_add_test( NAME    crtm_coeff_format
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/crtm_coeff_format.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  crtm operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+    if( ${geos-aero_FOUND} )
+      ufo_add_test( NAME    crtm_shared_load_aodluts
+                ECBUILD
+                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/crtm_shared_load_aodluts.yaml"
+                MPI     1
+                LIBS    ufo
+                LABELS  crtm operators
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+      ufo_add_test( NAME    crtm_shared_load_aodluts_tlad
+                ECBUILD
+                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/crtm_shared_load_aodluts.yaml"
+                MPI     1
+                LIBS    ufo
+                LABELS  crtm operators
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    endif( ${geos-aero_FOUND} )
+#
     ufo_add_test( NAME    linopr_iasi_crtm
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x

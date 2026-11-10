@@ -1,0 +1,62 @@
+# AodLUTs after AodCRTM in one executable. AodCRTM leaves its CRTM coefficients
+# loaded (shared load), so AodLUTs must get its wavelengths without a CRTM_Init.
+# AodCRTM uses its single-operator reference (GsiHofX); AodLUTs uses an rms ref.
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+- obs operator:
+    name: AodCRTM
+    Absorbers: [H2O,O3]
+    obs options:
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      AerosolCoeff_File: AerosolCoeff.nc4
+      AerosolCoeff_Format: netCDF
+      AerosolOption: aerosols_gocart_gefs
+  obs space:
+    name: Aod_crtm
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosolOpticalDepth]
+    channels: 4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-3
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-12
+- obs operator:
+    name: AodLUTs
+    obs options:
+      AerosolOption: aerosols_gocart_gefs
+      RCFile: geosaod.rc
+      Sensor_ID: v.viirs-m_npp
+      EndianType: little_endian
+      CoefficientPath: Data/
+      model units coeff: 1.e-9
+  obs space:
+    name: Aod_luts
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/aod_obs_2018041500_m.nc4
+    simulated variables: [aerosolOpticalDepth]
+    channels: 4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/aod_geoval_2018041500_m.nc4
+  # HofX_1 in aod_obs_2018041500_m.nc4 predates Mar 2024 (AodLUTs was not built
+  # after that) and differs by RMS ~1.1e-4; use the RMS of this run instead.
+  rms ref: 0.058806578119230339
+  tolerance: 1.0e-06
+  linear obs operator test:
+    coef TL: 1.0e-3
+    tolerance TL: 1.0e-5
+    tolerance AD: 1.0e-13

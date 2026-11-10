@@ -14,11 +14,10 @@ MODULE ufo_aodluts_tlad_mod
 
   USE ufo_geovals_mod, ONLY: ufo_geovals, ufo_geoval, ufo_geovals_get_var
   USE ufo_vars_mod
-  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names, max_string
+  USE ufo_crtm_utils_mod, ONLY: assign_aerosol_names => ufo_crtm_assign_aerosol_names, max_string
   USE ufo_luts_utils_mod, ONLY: luts_conf, luts_conf_setup, &
-       &luts_conf_delete, calculate_aero_layers
+       &luts_conf_delete, luts_set_wavelengths, calculate_aero_layers
   USE crtm_module
-  USE crtm_spccoeff, ONLY: sc
   USE obsspace_mod
 
   USE cf_mieobs_mod, ONLY: get_cf_aod
@@ -35,7 +34,6 @@ MODULE ufo_aodluts_tlad_mod
      TYPE(luts_conf) :: conf
      INTEGER :: n_profiles
      INTEGER :: n_layers
-     INTEGER :: n_channels
      INTEGER :: n_aerosols
      REAL(kind_real), ALLOCATABLE  :: bext(:,:,:,:)
      REAL(kind_real), ALLOCATABLE  :: layer_factors(:,:)
@@ -62,7 +60,6 @@ CONTAINS
     TYPE(fckit_configuration) :: f_confopts
 
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
-    CHARACTER(len=:), ALLOCATABLE :: str
 
     CALL f_confoper%get_or_die("obs options",f_confopts)
 
@@ -75,9 +72,10 @@ CONTAINS
     self%varin(1:self%n_aerosols) = var_aerosols
 
     ALLOCATE(self%channels(SIZE(channels)))
-    ALLOCATE(self%conf%wavelengths(SIZE(channels)))
 
     self%channels(:) = channels(:)
+
+    CALL luts_set_wavelengths(self%conf, self%channels)
 
     DEALLOCATE(var_aerosols)
 
@@ -115,17 +113,12 @@ CONTAINS
 
 ! local variables
     CHARACTER(*), PARAMETER :: program_name = "ufo_aodluts_tlad_mod.f90"
-    CHARACTER(255) :: message, version
-    INTEGER        :: err_stat
-    INTEGER        :: n,l,m
+    CHARACTER(255) :: message
+    INTEGER        :: n
     TYPE(ufo_geoval), POINTER :: temp
-
-! define the "non-denominational" arguments
-    TYPE(crtm_channelinfo_type)             :: chinfo(self%conf%n_sensors)
 
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
     REAL(kind_real), ALLOCATABLE :: aero_layers(:,:,:),rh(:,:)
-    REAL(kind_real), ALLOCATABLE :: wavelengths_all(:)
 
     INTEGER :: rc,nvars
 
@@ -156,16 +149,6 @@ CONTAINS
     self%n_layers = temp%nval
     NULLIFY(temp)
 
-    err_stat = crtm_init( self%conf%sensor_id, &
-         chinfo, &
-         file_path=TRIM(self%conf%coefficient_path), &
-         quiet=.TRUE.)
-    IF ( err_stat /= success ) THEN
-       message = "error initializing crtm (settraj)"
-       CALL display_message( program_name, message, failure )
-       STOP
-    END IF
-
     ALLOCATE(aero_layers(self%n_aerosols,self%n_layers,self%n_profiles),&
          &rh(self%n_layers,self%n_profiles))
 
@@ -174,16 +157,6 @@ CONTAINS
     nvars=SIZE(self%channels)
 
     sensor_loop:DO n = 1, self%conf%n_sensors
-
-       self%n_channels = crtm_channelinfo_n_channels(chinfo(n))
-
-       IF (ALLOCATED(wavelengths_all)) DEALLOCATE(wavelengths_all)
-
-       ALLOCATE(wavelengths_all(self%n_channels))
-
-       wavelengths_all=1.e7/sc(chinfo(n)%sensor_index)%wavenumber(:)
-
-       self%conf%wavelengths=wavelengths_all(self%channels)
 
        CALL calculate_aero_layers(self%conf,&
             &self%n_aerosols, self%n_profiles, self%n_layers,&
@@ -205,17 +178,8 @@ CONTAINS
 
        DEALLOCATE(rh)
        DEALLOCATE(aero_layers)
-       DEALLOCATE(wavelengths_all)
 
     END DO sensor_loop
-
-    err_stat = crtm_destroy( chinfo )
-    IF ( err_stat /= success ) THEN
-       message = "error destroying crtm (settraj)"
-       CALL display_message( program_name, message, failure )
-       STOP
-    END IF
-
 
 ! set flag that the tracectory was set
 
@@ -302,7 +266,6 @@ CONTAINS
 
     REAL(kind_real), DIMENSION(:,:,:), ALLOCATABLE :: qm_ad
     CHARACTER(len=maxvarlen), ALLOCATABLE :: var_aerosols(:)
-    REAL(kind_real), DIMENSION(:,:), ALLOCATABLE :: layer_factors
 
 
 ! initial checks

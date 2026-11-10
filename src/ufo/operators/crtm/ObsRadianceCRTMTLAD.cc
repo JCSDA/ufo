@@ -30,17 +30,12 @@ static LinearObsOperatorMaker<ObsRadianceCRTMTLAD> makerCRTMTL_("CRTM");
 void ObsRadianceCRTMTLAD::nullifyJacParamSetup(
                         const CRTMLinearObsOperatorParameters & linearParams,
                         eckit::LocalConfiguration & conf) {
-  if (linearParams.NullifyJacobianParams.value() == boost::none) {
-    oops::Log::info() << "No nullifyJacobianParams specified in the config. "
-                    << "Jacobian will not be nullified for any variable or channel."
-                    << std::endl;
-    return;
-  }
+  if (linearParams.NullifyJacobianParams.value() == boost::none) return;
   const std::vector<NullifyJacobianParameters> & nullifyJacobianParams =
         linearParams.NullifyJacobianParams.value().value();
 
-  oops::Log::info() << "Nullifying Jacobian for size:" << nullifyJacobianParams.size()
-                  << std::endl;
+  oops::Log::debug() << "Nullifying Jacobian for size:" << nullifyJacobianParams.size()
+                     << std::endl;
   std::vector<eckit::LocalConfiguration> nullifyJacobianConfs(nullifyJacobianParams.size());
   for (size_t jj = 0; jj < nullifyJacobianParams.size(); ++jj) {
     const std::set<int> channels =

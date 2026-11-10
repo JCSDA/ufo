@@ -38,7 +38,7 @@ extern "C" {
 
   void ufo_aodcrtm_setup_f90(F90hop &, const eckit::Configuration &,
                              const int &, const int &, const uint64_t &,
-                             oops::Variables &);
+                             oops::Variables &, const eckit::mpi::Comm &);
   void ufo_aodcrtm_delete_f90(F90hop &);
   void ufo_aodcrtm_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                               const int &, const int &, double &);
