@@ -238,7 +238,11 @@ contains
     end if
 
     ! Sanity checks
-    if (nprofiles == 0) return
+    if (nprofiles == 0) then
+      ! Collective with tasks holding profiles (see save_tc_ozone)
+      if (.not. present(ob_info)) call self % RTprof % save_tc_ozone(obss)
+      return
+    end if
 
     ! Allocate RTTOV profiles for ALL geovals for the direct calculation
     write(message,"(2A, I0, A, I0, A)") &
@@ -254,6 +258,7 @@ contains
       call self % RTprof % setup_rtprof(geovals,obss,self % conf,ob_info=ob_info)
     else
       call self % RTprof % setup_rtprof(geovals,obss,self % conf)
+      call self % RTprof % save_tc_ozone(obss)
     end if
     do_profile_diagnostics = .false.
     if (any(self % RTProf % print_profile(:))) do_profile_diagnostics = .true.

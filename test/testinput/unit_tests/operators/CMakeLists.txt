@@ -2105,6 +2105,16 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+    ufo_add_test( NAME    opr_iasi_rttov_ops_2pe
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/iasi_rttov_ops${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+#
     ufo_add_test( NAME    linopr_iasi_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x

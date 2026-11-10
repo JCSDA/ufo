@@ -156,3 +156,32 @@ observations:
     coef TL: 1.e-4
     tolerance TL: 1.0e-2
     tolerance AD: 1.0e-11
+
+# Test the forward and linear model where one MPI task has zero observations
+- obs operator:
+    name: RTTOV
+    Absorbers: [Ozone]
+    linear obs operator:
+      increment variables: [air_temperature, water_vapor_mixing_ratio_wrt_moist_air]
+    obs options:
+      <<: *rttov_options
+  obs space:
+    name: Test one observation file with two MPI threads
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metopb_obs_2021011500_oneob_v14.nc4
+    simulated variables: [brightnessTemperature]
+    channels: *all_channels
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/iasi_metopb_obs_2021011500_oneob_opr_out.nc4
+  geovals:
+    filename: Data/ufo/testinput_tier_1/geovals_iasi_2021011500Z_oneob.nc4
+  rms ref: 248.6507788
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-4
+    tolerance TL: 2.0e-2
+    tolerance AD: 1.0e-11

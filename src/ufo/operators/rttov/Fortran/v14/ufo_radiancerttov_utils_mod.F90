@@ -20,7 +20,7 @@ module ufo_radiancerttov_utils_mod
   use logger_mod, only: oops_log
   use missing_values_mod, only : missing_value
   use obsspace_mod, only : obsspace_get_nlocs, obsspace_has, obsspace_get_db, obsspace_put_db, &
-    obsspace_get_window
+    obsspace_get_window, obsspace_get_comm
 
   use rttov_types, only : rttov_options, rttov_profile, rttov_coefs, &
     rttov_radiance, rttov_transmission, rttov_emis_refl, rttov_chanprof
@@ -139,6 +139,7 @@ module ufo_radiancerttov_utils_mod
 
     real(kind_real), allocatable     :: ciw(:,:)                ! pointer to either ice from MW scattering or diagnosed ice from Qsplit
     real(kind_real), allocatable     :: tc_ozone(:)             ! total column ozone
+    logical                          :: tc_ozone_to_obsspace = .false. ! tc_ozone awaits writing by save_tc_ozone
 
     logical, allocatable             :: q_profile_reset(:,:)    ! flag to say if the humidity has been reset to a minimum value
     logical, allocatable             :: clw_profile_reset(:,:)  ! flag to say if cloud liquid water has been reset to a minimum value
@@ -164,6 +165,7 @@ module ufo_radiancerttov_utils_mod
     procedure :: print_rtprof            => ufo_rttov_print_rtprof
     procedure :: scale_ozone             => ufo_rttov_scale_ozone
     procedure :: calculate_tc_ozone      => ufo_rttov_calculate_tc_ozone
+    procedure :: save_tc_ozone           => ufo_rttov_save_tc_ozone
     procedure :: rad_to_bt               => ufo_rttov_Rad_to_BT
     procedure :: dBT_dRad                => ufo_rttov_dBT_dRad
 
@@ -945,6 +947,7 @@ contains
     missing = missing_value(missing)
 
     profiles => self % profiles
+    self % tc_ozone_to_obsspace = .false.
 
     if(present(ob_info)) then
       self % nlocs_total = 1
@@ -1169,9 +1172,8 @@ contains
             call self % calculate_tc_ozone(obss)
           end if
 
-          if(.not. present(ob_info)) then
-            call obsspace_put_db(obss, "MetaData", "ozoneTotal", self % tc_ozone)
-          end if
+          ! Written to MetaData/ozoneTotal by save_tc_ozone, which must be called on all tasks
+          if(.not. present(ob_info)) self % tc_ozone_to_obsspace = .true.
         end if
       case (var_co2)
         if (associated(profiles(1)%co2)) then
@@ -2744,6 +2746,42 @@ contains
     end do
 
   end subroutine ufo_rttov_calculate_tc_ozone
+
+  ! ------------------------------------------------------------------------------
+  !> Write the total column ozone flagged by setup_rtprof to MetaData/ozoneTotal.
+  !!
+  !! \details This is a collective call that must be made on every task of the ObsSpace
+  !! communicator, including tasks with no locations (which skip setup_rtprof). If any task
+  !! has total column ozone to write, every task writes the variable (tasks without profiles
+  !! write zero-length data) so that the ObsSpace columns are identical across tasks.
+  subroutine ufo_rttov_save_tc_ozone(self, obss)
+    use fckit_mpi_module, only: fckit_mpi_comm, fckit_mpi_max
+
+    implicit none
+
+    class(ufo_rttov_io), intent(inout) :: self
+    type(c_ptr), value,  intent(in)    :: obss
+
+    type(fckit_mpi_comm)               :: f_comm
+    integer                            :: write_flag
+    real(kind_real), allocatable       :: empty(:)
+
+    write_flag = merge(1, 0, self % tc_ozone_to_obsspace)
+    call obsspace_get_comm(obss, f_comm)
+    call f_comm % allreduce(write_flag, fckit_mpi_max())
+
+    if (write_flag == 1) then
+      if (self % tc_ozone_to_obsspace) then
+        call obsspace_put_db(obss, "MetaData", "ozoneTotal", self % tc_ozone)
+      else
+        allocate(empty(0))
+        call obsspace_put_db(obss, "MetaData", "ozoneTotal", empty)
+      end if
+    end if
+
+    self % tc_ozone_to_obsspace = .false.
+
+  end subroutine ufo_rttov_save_tc_ozone
 
   subroutine get_from_obsspace(name, obss, outarray)
     implicit none

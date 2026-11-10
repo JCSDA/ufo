@@ -218,9 +218,11 @@ contains
     end if
 
     ! Sanity checks
-    if (self % nprofiles == 0) return
-
-    ! Allocate RTTOV profiles for ALL geovals for the direct calculation
+    if (self % nprofiles == 0) then
+      ! Collective with tasks holding profiles (see save_tc_ozone)
+      call self % RTprof_K % save_tc_ozone(obss)
+      return
+    end if
     write(message,"(2A, I0, A, I0, A)") &
       trim(routine_name), ": Allocating ", self % nprofiles, " profiles with ", self % nlevels, " levels"
     call oops_log%trace(message)
@@ -230,6 +232,7 @@ contains
     message = trim(routine_name) // ": Creating RTTOV profiles from geovals"
     call oops_log%trace(message)
     call self % RTprof_K % setup_rtprof(geovals,obss,self % conf)
+    call self % RTprof_K % save_tc_ozone(obss)
     do_profile_diagnostics = .false.
     if (any(self % RTProf_K % print_profile(:))) do_profile_diagnostics = .true.
 
