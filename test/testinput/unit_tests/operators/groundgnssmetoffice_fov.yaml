@@ -1,0 +1,36 @@
+time window:
+  begin: 2019-12-30T03:00:00Z
+  end: 2019-12-30T09:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Field-of-view averaging over 9 sampling points, with bias correction switched on.
+# The GeoVaLs file repeats every observation's profile at all 9 sampling points, so the FOV mean
+# must reproduce the single-point H(x) stored in the obs file.
+observations:
+- obs operator:
+    name: GroundgnssMetOffice
+    min_temp_grad: 1.0e-6
+    num_fov: 9
+  obs space:
+    name: Groundgnss
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/groundgnss_obs_2019123006_obs.nc
+    simulated variables: [zenithTotalDelay]
+  obs bias:
+    variational bc:
+      predictors:
+      - name: constant
+    covariance:
+      minimal required obs number: 1
+  geovals:
+    filename: Data/ufo/testinput_tier_1/groundgnss_geovals_fov9_20191230T0600Z.nc4
+    loc_multiplier: 9
+  norm ref: HofX
+  tolerance: 1.0e-5
+  linear obs operator test:
+    coef TL: 1.0e-4
+    iterations TL: 10
+    tolerance TL: 1.0e-14
+    tolerance AD: 1.0e-14

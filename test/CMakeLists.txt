@@ -7,14 +7,10 @@
 include( ufo_functions )
 
 # CRTM test data - from tarball if not provided locally
-# It's unclear if anyone is using the local data functionality, therefore comment it out
-# for now and add in if someone complains / remove if completely if not.
-#if (crtm_FOUND AND DEFINED ENV{UFO_CRTM_TESTFILES})
-#  message(STATUS "Use crtm test data from local directory $ENV{UFO_CRTM_TESTFILES}")
-#  # A bit of guesswork here, I don't know if folks using this option stored it in the same directory structure
-#  set (UFO_CRTM_TESTFILES_PATH "$ENV{UFO_CRTM_TESTFILES}")
-#elseif (crtm_FOUND)
-if (crtm_FOUND)
+if (crtm_FOUND AND DEFINED ENV{UFO_CRTM_TESTFILES})
+  message(STATUS "Use crtm test data from local directory $ENV{UFO_CRTM_TESTFILES}")
+  set (UFO_CRTM_TESTFILES_PATH "$ENV{UFO_CRTM_TESTFILES}")
+elseif (crtm_FOUND)
   get_property(UFO_CRTM_TESTFILES_PATH GLOBAL PROPERTY CRTM_TESTFILES_PATH)
   message(STATUS "CRTM test data path from global property CRTM_TESTFILES_PATH: ${UFO_CRTM_TESTFILES_PATH}")
   if (EXISTS ${UFO_CRTM_TESTFILES_PATH})
@@ -108,6 +104,8 @@ foreach(pattern
   "(.*)scatwind_obs_2d_2020100106.nc4"
   "(.*)superob_testdata.nc4"
   "(.*)mtgirs_obserror_fstest.nc4"  # used with drawFromFile obsfunction
+  # CRTM coefficient files, not obs
+  "(.*)/crtm_coeff/(.*)"
 )
   list(FILTER OBS_FILES EXCLUDE REGEX ${pattern})
 endforeach()
@@ -194,7 +192,8 @@ CREATE_SYMLINK( ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${ufo_te
 #####################################################################
 # Install headers used in tests of interfaces that may be implemented by clients.
 
-install( FILES ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h ufo/Predictor.h
+install( FILES ufo/EmptyGeoVaLs.h ufo/ObsDiagnostics.h ufo/ObsFilters.h ufo/ObsFunction.h
+         ufo/Predictor.h
          DESTINATION ${INSTALL_INCLUDE_DIR}/ufo/test/ufo)
 
 #####################################################################
@@ -222,6 +221,11 @@ ecbuild_add_executable( TARGET  test_ObsOperator.x
 
 ecbuild_add_executable( TARGET  test_ObsOperatorTLAD.x
                         SOURCES mains/TestObsOperatorTLAD.cc
+                        LIBS    ufo
+                       )
+
+ecbuild_add_executable( TARGET  test_ObsOperatorShared.x
+                        SOURCES mains/TestObsOperatorShared.cc
                         LIBS    ufo
                        )
 
@@ -694,6 +698,20 @@ if( crtm_FOUND )
     create_symlink_filename( ${UFO_CRTM_TESTFILES_PATH}
                              ${CMAKE_CURRENT_BINARY_DIR}/Data
                              ${crtm_test_input} )
+
+    # CALIOP coefficients are not in the current CRTM fix release, so fall back to
+    # the copies in ufo-data. Once a CRTM fix release provides them, move these
+    # into crtm_test_input and delete this block and ufo-data's crtm_coeff/.
+    foreach( coeff SpcCoeff/netCDF/v.caliop.SpcCoeff.nc
+                   TauCoeff/ODPS/netCDF/v.caliop.TauCoeff.nc )
+      get_filename_component( coeff_name ${coeff} NAME )
+      if( EXISTS ${UFO_CRTM_TESTFILES_PATH}/${coeff} )
+        set( coeff_src ${UFO_CRTM_TESTFILES_PATH}/${coeff} )
+      else()
+        set( coeff_src ${ufo_data_testinput_tier_1_local}/crtm_coeff/${coeff_name} )
+      endif()
+      file( CREATE_LINK ${coeff_src} ${CMAKE_CURRENT_BINARY_DIR}/Data/${coeff_name} SYMBOLIC )
+    endforeach()
 endif()
 
 #####################################################################
@@ -726,6 +744,8 @@ if( ${rttov_FOUND} )
     rttov7pred54L/rtcoef_jpss_0_atms.dat
     rttov7pred54L/rtcoef_noaa_20_atms.dat
     rttov7pred101L/rtcoef_mtg_2_irs.${RTTOV_COEF_EXT}
+    rttov13pred54L/rtcoef_noaa_19_amsua_o3.dat
+    hydrotable/rttov_hydrotable_noaa_19_amsua_o3.dat
     )
   list( APPEND rttov_emis_atlas_data
     CAMEL_coef_climatology_01Month_V00${RTTOV_CAMEL_VERSION}.${RTTOV_COEF_EXT}

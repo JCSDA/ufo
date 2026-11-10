@@ -20,11 +20,14 @@ namespace ufo {
    public:
     explicit ProfileCheckBasic(const ConventionalProfileProcessingParameters &options);
 
-    /// Run check
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// Return result of basic checks
     bool getResult() override {return result_;}
+
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Run check
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
 
    private:
     /// Result of basic checks

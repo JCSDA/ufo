@@ -18,7 +18,7 @@ integer, parameter :: max_string=800
 
 public :: ufo_geovals, ufo_geoval, ufo_index_range
 public :: ufo_geoval_sampled, ufo_geoval_reduced
-public :: ufo_geovals_get_var, ufo_geovals_get_var_by_index
+public :: ufo_geovals_get_var, ufo_geovals_get_var_by_index, ufo_geovals_nlevs
 public :: ufo_geovals_default_constr, ufo_geovals_setup, ufo_geovals_partial_setup, ufo_geovals_delete
 public :: ufo_geovals_setup_sampling_method, ufo_geovals_setup_trivial_sampling_method
 public :: ufo_geovals_add_reduced_vars, ufo_geovals_get_vars
@@ -464,10 +464,10 @@ end if
 end subroutine ufo_geovals_partial_setup
 
 ! ------------------------------------------------------------------------------
-!> Deprecated. Rely on ufo_geovals_setup to allocate GeoVaLs instead.
 !> Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
-!> If the GeoVaLs for this variable were allocated before with different size,
-!> aborts.
+!> Used by ObsDiagnostics, whose diagnostics are set up with zero levels (or not allocated at all,
+!> after ufo_geovals_partial_setup). Variables with zero levels are reallocated; if a variable
+!> already has a non-zero number of levels different from \p nlevels, aborts.
 subroutine ufo_geovals_allocate(self, vars, nlevels)
 use oops_variables_mod
 implicit none
@@ -502,13 +502,15 @@ contains
     implicit none
     integer, intent(in) :: igeoval
 
-    if (allocated(self%geovals(igeoval)%vals) .and. (self%geovals(igeoval)%nval /= nlevels)) then
+    if (allocated(self%geovals(igeoval)%vals) .and. self%geovals(igeoval)%nval /= 0 .and. &
+        self%geovals(igeoval)%nval /= nlevels) then
       write(err_msg,*) "ufo_geovals_allocate: attempting to allocate already allocated geovals for ",       &
                        trim(vars%variable(ivar)), ". Previously allocated as ", self%geovals(igeoval)%nval, &
                        " levels; now trying to allocate as ", nlevels, " levels."
       call abor1_ftn(err_msg)
-    ! only allocate if not already allocated
-    else if (.not. allocated(self%geovals(igeoval)%vals)) then
+    ! only allocate if not allocated yet or allocated with zero levels
+    else if (.not. allocated(self%geovals(igeoval)%vals) .or. self%geovals(igeoval)%nval == 0) then
+      if (allocated(self%geovals(igeoval)%vals)) deallocate(self%geovals(igeoval)%vals)
       self%geovals(igeoval)%nval  = nlevels
       allocate(self%geovals(igeoval)%vals(nlevels, self%geovals(igeoval)%nprofiles))
     end if
@@ -870,6 +872,23 @@ else
 end if
 
 end subroutine ufo_geovals_get_var
+
+! ------------------------------------------------------------------------------
+
+!> Number of levels (nval) of the GeoVaL `varname`; aborts if `varname` is not found.
+!> `format` selects the sampled or reduced GeoVaL (default: self%default_format).
+integer function ufo_geovals_nlevs(self, varname, format)
+implicit none
+type(ufo_geovals), target, intent(in) :: self
+character(len=*), intent(in) :: varname
+integer(c_int), intent(in), optional :: format
+
+type(ufo_geoval), pointer :: geoval
+
+call ufo_geovals_get_var(self, varname, geoval, format)
+ufo_geovals_nlevs = geoval%nval
+
+end function ufo_geovals_nlevs
 
 ! ------------------------------------------------------------------------------
 
@@ -1712,7 +1731,7 @@ character(len=30) :: geo_nlocs_str
 integer(c_size_t), allocatable, dimension(:) :: global_loc_by_my_loc
 integer(c_size_t), allocatable, dimension(:) :: global_path_by_my_path
 type(ufo_index_range), allocatable :: path_ranges_by_loc(:)
-real, allocatable :: field2d(:,:), field1d(:)
+real(kind_real), allocatable :: field2d(:,:), field1d(:)
 
 ! At the time being, the NetCDF GeoVaLs file format requires all GeoVaLs to be interpolated
 ! along the same set of paths composed of as many paths as there are observation locations.
@@ -1881,7 +1900,8 @@ do ivar = 1, self%nvar
   ! set the missing value equal to IODA missing_value
   do my_loc = 1, obs_nlocs
     do ival = 1, nval
-      if(self%geovals(ivar)%vals(ival, my_loc) > 1.0e08) then
+      if (self%geovals(ivar)%vals(ival, my_loc) == real(nf90_fill_float, kind_real) .or. &
+          self%geovals(ivar)%vals(ival, my_loc) == real(nf90_fill_double, kind_real)) then
         self%geovals(ivar)%vals(ival, my_loc) = self%missing_value
       end if
     end do

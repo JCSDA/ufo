@@ -4,7 +4,7 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 if( ${geos-aero_FOUND} )
-  set ( aodlut_src_files
+  set ( aodluts_src_files
     ObsAodLUTs.h
     ObsAodLUTs.cc
     ObsAodLUTsTLAD.h

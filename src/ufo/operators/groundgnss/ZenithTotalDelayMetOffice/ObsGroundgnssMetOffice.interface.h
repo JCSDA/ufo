@@ -24,7 +24,10 @@ extern "C" {
 // Ground Based GNSS Observation Operator - (Met Office)
 // -----------------------------------------------------------------------------
   void ufo_groundgnss_metoffice_setup_f90(F90hop &, const bool &, const bool &, const float &,
-                                          const float &, const float &);
+                                          const float &, const float &, const int &,
+                                          const float &);
+  void ufo_groundgnss_metoffice_locs_init_f90(const F90hop &, const ioda::ObsSpace &, const int &,
+                                              float &, float &);
   void ufo_groundgnss_metoffice_delete_f90(F90hop &);
   void ufo_groundgnss_metoffice_simobs_f90(const F90hop &, const F90goms &, const ioda::ObsSpace &,
                                        const int &, double &);

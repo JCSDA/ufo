@@ -40,6 +40,7 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
   std::set<int> channelset = oops::parseIntSet(parameters_.channelList);
   std::vector<int> channels;
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
+  const int noChannels = 0;  // not read by Fortran when nchans == 0
 
   // Setup fortran object
   ufo_gnssroonedvarcheck_create_f90(key_,
@@ -58,7 +59,7 @@ GNSSROOneDVarCheck::GNSSROOneDVarCheck(ioda::ObsSpace & obsdb,
                                     parameters_.y_test.value(),
                                     GNSSROOneDVarCheck::qcFlag(),
                                     channels.size(),
-                                    channels[0],
+                                    channels.empty() ? noChannels : channels[0],
                                     parameters_.noSuperCheck.value(),
                                     parameters_.dryRefractivityConstant.value(),
                                     parameters_.wetRefractivityConstant.value());

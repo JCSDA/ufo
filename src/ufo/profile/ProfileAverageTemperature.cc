@@ -28,15 +28,15 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileAverageTemperature::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileAverageTemperature::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Temperature averaging" << std::endl;
 
     // Produce vector of profiles containing data for the temperature averaging.
-    std::vector <std::string> variableNamesInt =
+    variableNamesInt_ =
       {ufo::ProfileVariableNames::counter_NumGapsT,
        ufo::ProfileVariableNames::extended_obs_space};
-    std::vector <std::string> variableNamesFloat =
+    variableNamesFloat_ =
       {ufo::ProfileVariableNames::obs_air_temperature,
        ufo::ProfileVariableNames::obscorrection_air_temperature,
        ufo::ProfileVariableNames::pge_air_temperature,
@@ -48,7 +48,7 @@ namespace ufo {
        ufo::ProfileVariableNames::modellevels_logP_derived,
        ufo::ProfileVariableNames::modellevels_air_temperature_derived,
        ufo::ProfileVariableNames::air_temperature_derived};
-    std::vector <std::string> variableNamesBool =
+    variableNamesBool_ =
       {ufo::ProfileVariableNames::diagflags_final_reject_t,
        ufo::ProfileVariableNames::diagflags_perm_reject_t,
        ufo::ProfileVariableNames::diagflags_back_reject_t,
@@ -60,42 +60,45 @@ namespace ufo {
        ufo::ProfileVariableNames::diagflags_perm_reject_rh,
        ufo::ProfileVariableNames::diagflags_back_reject_rh,
        ufo::ProfileVariableNames::diagflags_interpolation_rh};
-    oops::Variables variableNamesGeoVaLs{
+    variableNamesGeoVaLs_ = oops::Variables{
       {oops::Variable{ufo::ProfileVariableNames::geovals_air_potential_temperature}}};
 
     if (options_.compareWithOPS.value()) {
-      variableNamesFloat.insert
-        (variableNamesFloat.end(),
+      variableNamesFloat_.insert
+        (variableNamesFloat_.end(),
          {addOPSPrefix(ufo::ProfileVariableNames::modellevels_air_temperature_derived),
              addOPSPrefix(ufo::ProfileVariableNames::air_temperature_derived)});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable{ufo::ProfileVariableNames::geovals_air_temperature});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable {ufo::ProfileVariableNames::geovals_testreference_air_temperature});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable{ufo::ProfileVariableNames::geovals_testreference_air_temperature_qcflags});
     }
 
     // In order to correctly handle MPI ranks with zero entries,
     // ensure that all of the variables defined above have been added to the ObsSpace
     // on each rank. This prevents a hang when saving the ObsSpace.
-    for (const auto & variableInt : variableNamesInt) {
+    for (const auto & variableInt : variableNamesInt_) {
       profileDataHandler.get<int>(variableInt);
     }
-    for (const auto & variableFloat : variableNamesFloat) {
+    for (const auto & variableFloat : variableNamesFloat_) {
       profileDataHandler.get<float>(variableFloat);
     }
-    for (const auto & variableBool : variableNamesBool) {
+    for (const auto & variableBool : variableNamesBool_) {
       profileDataHandler.get<bool>(variableBool);
     }
+  }
 
+  void ProfileAverageTemperature::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <ProfileDataHolder> profiles =
       profileDataHandler.produceProfileVector
-      (variableNamesInt,
-       variableNamesFloat,
+      (variableNamesInt_,
+       variableNamesFloat_,
        {},
-       variableNamesBool,
-       variableNamesGeoVaLs);
+       variableNamesBool_,
+       variableNamesGeoVaLs_);
 
     // Run temperature averaging on each profile in the original ObsSpace,
     // saving averaged output to the equivalent extended profile.

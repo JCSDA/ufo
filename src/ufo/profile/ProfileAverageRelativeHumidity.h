@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 #include "ufo/profile/ProfileAverageUtils.h"
@@ -45,11 +46,6 @@ namespace ufo {
    public:
     explicit ProfileAverageRelativeHumidity(const ConventionalProfileProcessingParameters &options);
 
-    /// Average relative humidity observations onto model levels and store the results.
-    /// \throws eckit::BadValue if vectors produced by the AveragePressure routine
-    /// are not present.
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}
 
@@ -64,11 +60,24 @@ namespace ufo {
           oops::Variable{ufo::ProfileVariableNames::geovals_testreference_relative_humidity_qcflags}
         });}
 
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Average relative humidity observations onto model levels and store the results.
+    /// \throws eckit::BadValue if vectors produced by the AveragePressure routine
+    /// are not present.
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
+
    private:
     /// Run check on a profile in the original ObsSpace and
     /// put the averaged data into the corresponding profile in the extended ObsSpace.
     void runCheckOnProfiles(ProfileDataHolder &profileOriginal,
                             ProfileDataHolder &profileExtended);
+
+    std::vector<std::string> variableNamesInt_;
+    std::vector<std::string> variableNamesFloat_;
+    std::vector<std::string> variableNamesBool_;
+    oops::Variables variableNamesGeoVaLs_;
   };
 }  // namespace ufo
 

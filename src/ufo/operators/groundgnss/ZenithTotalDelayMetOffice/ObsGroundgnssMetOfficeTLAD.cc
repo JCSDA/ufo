@@ -41,7 +41,8 @@ ObsGroundgnssMetOfficeTLAD::ObsGroundgnssMetOfficeTLAD(const ioda::ObsSpace & od
                                           parameters.pseudoLevels.value(),
                                           parameters.minTempGrad.value(),
                                           parameters.dryRefractivityConstant.value(),
-                                          parameters.wetRefractivityConstant.value());
+                                          parameters.wetRefractivityConstant.value(),
+                                          parameters.numFOV.value());
 
   oops::Log::info() << "ObsGroundgnssMetOfficeTLAD vars: " << *varin_ << std::endl;
   oops::Log::trace() << "ObsGroundgnssMetOfficeTLAD constructor done" << std::endl;

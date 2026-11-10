@@ -31,6 +31,7 @@ real(kind_real), parameter, public :: four    = 4.0_kind_real
 real(kind_real), parameter, public :: five    = 5.0_kind_real
 real(kind_real), parameter, public :: six     = 6.0_kind_real
 real(kind_real), parameter, public :: ten     = 10.0_kind_real
+real(kind_real), parameter, public :: thousand = 1000.0_kind_real
 real(kind_real), parameter, public :: k_t   = 0.65_kind_real       !> Thermal conductivity of water (W m^-1 K^-1)
 real(kind_real), parameter, public :: L_e   = 2.26e+06_kind_real !> Latent heat of vaporization at 373.15K (J kg^-1)
 real(kind_real), parameter, public :: eps   = 0.1_kind_real      !> Albedo of sea water
@@ -79,6 +80,12 @@ real(kind_real), parameter, public :: kg_to_g = 1000.0_kind_real
 real(kind_real), parameter, public :: co2_rescale_to_ppmv = 1.e6_kind_real
 real(kind_real), parameter, public :: co2_ppmv_value = 407.0_kind_real
 real(kind_real), parameter, public :: midpoint_julday = -1.0_kind_real
+real(kind_real), parameter, public :: qsmall = 1.0e-6_kind_real
+real(kind_real), parameter, public :: cloudfractionsmall = 1.001e-12_kind_real
+real(kind_real), parameter, public :: aerosol_concentration_minvalue = 1.e-16_kind_real
+real(kind_real), parameter, public :: aerosol_concentration_minvalue_layer = tiny(rd)
+real(kind_real), parameter, public :: ozone_default_value = 1.e-3_kind_real ! in ppmv in crtm
+real(kind_real), parameter, public :: threshold_reflectivity = 100.0_kind_real
 
 ! constants used in RTTOV interface
 real(kind_real), parameter, public :: g_to_kg = 0.001_kind_real
@@ -106,6 +113,8 @@ real(kind_real), parameter, public :: rhoh=913._kind_real      ! Density of hail
 real(kind_real), parameter, public :: rhos=100._kind_real      ! Density of snow (kg m**-3)
 real(kind_real), parameter, public :: rhog=400._kind_real      ! Density of graupel (kg m**-3)
 real(kind_real), parameter, public :: am_s = 0.069_kind_real   ! Empirical constant used in radar Z for dry snow;from Thompson MP
+
+real(kind_real), parameter, public :: rhow = 1000._kind_real   ! Density of liquid water (kg m**-3)
 
 end module ufo_constants_mod
 

@@ -354,6 +354,17 @@ observations:
 
   - filter: Variable Assignment
     assignments:
+    - name: MetaData/log_of_negative
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/variable_minus_1
+          log bases: [e]
+
+  - filter: Variable Assignment
+    assignments:
     - name: MetaData/absolutevalue_false
       type: float
       function:
@@ -512,6 +523,11 @@ observations:
       name: TestReference/missing
 
   - test:
+      name: MetaData/log_of_negative
+    reference:
+      name: TestReference/missing
+
+  - test:
       name: MetaData/absolutevalue_false
     reference:
       name: TestReference/absolutevalue_false
@@ -627,7 +643,8 @@ observations:
           total coefficient: 2
           intercept: 4
           log bases: [2]
-  expectExceptionWithMessage: Invalid log value '0' for log base '2'.
+          abort if invalid operation: True
+  expectExceptionWithMessage: Log of non-positive value error. Variable is MetaData/variable at location 0.
 
 - obs space:
     <<: *ObsSpace
@@ -653,7 +670,8 @@ observations:
           intercept: 4
           log bases: [3]
           total log base: 2
-  expectExceptionWithMessage: Invalid log value '0' for log base '2'.
+          abort if invalid operation: True
+  expectExceptionWithMessage: Log of non-positive value error. Variable is MetaData/variable at location 0.
 
 - obs space:
     <<: *ObsSpace

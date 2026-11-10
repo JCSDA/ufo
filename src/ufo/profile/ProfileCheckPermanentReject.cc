@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckPermanentReject.h"
 
 namespace ufo {
@@ -17,11 +20,36 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckPermanentReject::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckPermanentReject::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Permanent rejection check" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_final_reject_report,
+       ufo::ProfileVariableNames::diagflags_perm_reject_report,
+       ufo::ProfileVariableNames::diagflags_track_reject_report,
+       ufo::ProfileVariableNames::diagflags_surplus_report,
+       ufo::ProfileVariableNames::diagflags_out_of_area_report,
+       ufo::ProfileVariableNames::diagflags_perm_reject_t,
+       ufo::ProfileVariableNames::diagflags_perm_reject_u,
+       ufo::ProfileVariableNames::diagflags_perm_reject_v,
+       ufo::ProfileVariableNames::diagflags_perm_reject_rh,
+       ufo::ProfileVariableNames::diagflags_perm_reject_z,
+       ufo::ProfileVariableNames::diagflags_final_reject_t,
+       ufo::ProfileVariableNames::diagflags_final_reject_u,
+       ufo::ProfileVariableNames::diagflags_final_reject_v,
+       ufo::ProfileVariableNames::diagflags_final_reject_rh,
+       ufo::ProfileVariableNames::diagflags_final_reject_z};
+
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckPermanentReject::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
+    std::vector <bool> &diagFlagsReportFinalReject =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_report);
     const std::vector <bool> &diagFlagsReportPermReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_report);
     const std::vector <bool> &diagFlagsReportTrackReject =
@@ -30,8 +58,6 @@ namespace ufo {
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_surplus_report);
     const std::vector <bool> &diagFlagsReportOutOfArea =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_out_of_area_report);
-    std::vector <bool> &diagFlagsReportFinalReject =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_report);
     std::vector <bool> &diagFlagsTPermReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_t);
     std::vector <bool> &diagFlagsUPermReject =
@@ -52,6 +78,8 @@ namespace ufo {
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_rh);
     std::vector <bool> &diagFlagsZFinalReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_z);
+
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
 
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::extended_obs_space);

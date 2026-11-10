@@ -101,7 +101,7 @@ void ObsErrorSatSpecHumidity::compute(const ObsFilterData & data,
 
     ufo::PiecewiseLinearInterpolation vert_interp_model(logp, q_profile);
     if ((itype[jobs] >= 180) && (itype[jobs] <= 184)) {
-      satSpecificHumidity = q_profile[0];
+      satSpecificHumidity = q_profile[nlevs - 1];
     } else {
       satSpecificHumidity = vert_interp_model(logp_ob);
     }

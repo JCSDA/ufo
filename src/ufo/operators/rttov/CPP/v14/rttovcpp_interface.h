@@ -26,6 +26,8 @@
 #include "rttov/wrapper/RttovProfile.h"
 #include "rttov/wrapper/RttovSafe.h"
 
+namespace eckit { class Configuration; }
+
 namespace ioda {
   class ObsSpace;
   class ObsVector;
@@ -39,7 +41,11 @@ namespace ufo {
 namespace ufo {
 
 void rttovcpp_interface(const GeoVaLs &, const ioda::ObsSpace & odb_,
-                        rttov::RttovSafe & aRttov_, const std::string CoefFileName,
+                        rttov::RttovSafe & aRttov_,
+                        const bool useHydrometeors,
+                        const std::vector<std::string> & hydrometeorVars,
+                        const std::string CoefFileName,
+                        const std::string HydrotableName,
                         const std::vector<int> channels_, std::size_t & nlevels,
                         std::vector<bool> & skip_profile);
 

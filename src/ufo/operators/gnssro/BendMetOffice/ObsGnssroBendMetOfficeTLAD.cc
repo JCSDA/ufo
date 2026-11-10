@@ -41,13 +41,14 @@ ObsGnssroBendMetOfficeTLAD::ObsGnssroBendMetOfficeTLAD(const ioda::ObsSpace & od
   std::set<int> channelset = oops::parseIntSet(parameters.channelList);
   std::vector<int> channels;
   std::copy(channelset.begin(), channelset.end(), std::back_inserter(channels));
+  const int noChannels = 0;  // not read by Fortran when nchans == 0
 
   ufo_gnssro_bendmetoffice_tlad_setup_f90(keyOperGnssroBendMetOffice_,
                                           parameters.vertInterpOPS,
                                           parameters.pseudoLevels,
                                           parameters.minTempGrad,
                                           channels.size(),
-                                          channels[0],
+                                          channels.empty() ? noChannels : channels[0],
                                           parameters.noSuperCheck,
                                           parameters.dryRefractivityConstant,
                                           parameters.wetRefractivityConstant);

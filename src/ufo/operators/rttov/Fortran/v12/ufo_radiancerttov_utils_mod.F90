@@ -1670,7 +1670,7 @@ contains
       nprofiles = 1
       nlevels = size(profiles(1) % p)
 
-      profiles(1) % zenangle    = ob_info % sensor_zenith_angle
+      profiles(1) % zenangle    = abs(ob_info % sensor_zenith_angle)
       profiles(1) % azangle     = ob_info % sensor_azimuth_angle
       profiles(1) % sunzenangle = ob_info % solar_zenith_angle
       profiles(1) % sunazangle  = ob_info % solar_azimuth_angle
@@ -1718,6 +1718,12 @@ contains
       variable_present = obsspace_has(obss, "MetaData", "sensorZenithAngle")
       if (variable_present) then
         call obsspace_get_db(obss, "MetaData", "sensorZenithAngle", profiles(1:nprofiles)%zenangle)
+        ! Some data streams (e.g. GSI/ncdiag-derived files) sign the zenith
+        ! angle by scan side; RTTOV requires a magnitude and rejects negative
+        ! values in its profile checks. The scan-side information belongs to
+        ! sensorViewAngle/azimuth, so taking the absolute value here is lossless
+        ! (and a no-op for data that is already non-negative).
+        profiles(1:nprofiles)%zenangle = abs(profiles(1:nprofiles)%zenangle)
       else
         message = "ERROR: Mandatory input MetaData/sensorZenithAngle not in database. Aborting..."
         call abor1_ftn(message)
@@ -2564,7 +2570,10 @@ contains
         case (var_opt_depth, var_lvl_transmit, var_lvl_weightfunc, var_cli, var_tb_overcast)
 
           hofxdiags%geovals(jvar)%nval = nlevels
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2624,7 +2633,10 @@ contains
         case (var_radiance, var_tb_clr, var_tb, var_sfc_emiss, var_pmaxlev_weightfunc, var_total_transmit)
           ! always returned
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2660,7 +2672,10 @@ contains
 
         case ("ozoneTotal")
           hofxdiags % geovals(jvar) % nval = 1
-          if(.not. allocated(hofxdiags % geovals(jvar) % vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags % geovals(jvar) % vals) .or. &
+              size(hofxdiags % geovals(jvar) % vals, 1) /= hofxdiags % geovals(jvar) % nval) then
+            if (allocated(hofxdiags % geovals(jvar) % vals)) deallocate(hofxdiags % geovals(jvar) % vals)
             allocate(hofxdiags % geovals(jvar) % vals(hofxdiags % geovals(jvar) % nval, nprofiles))
             hofxdiags % geovals(jvar) % vals = missing
           end if
@@ -2669,7 +2684,10 @@ contains
         case default
           ! not a supported obsdiag but we allocate and initialise here anyway for use later on
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2689,7 +2707,10 @@ contains
         case (var_ts,var_q,var_clw,var_cli)
 
           hofxdiags%geovals(jvar)%nval = nlevels
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if
@@ -2738,7 +2759,10 @@ contains
         case (var_sfc_t2m, var_sfc_tskin, var_sfc_emiss, var_sfc_q2m, var_ps, var_sfc_u10, var_sfc_v10, &
               "cloud_top_pressure", "cloud_fraction")
           hofxdiags%geovals(jvar)%nval = 1
-          if(.not. allocated(hofxdiags%geovals(jvar)%vals)) then
+          ! hofxdiags may have been set up with zero levels (see ObsDiagnostics)
+          if (.not. allocated(hofxdiags%geovals(jvar)%vals) .or. &
+              size(hofxdiags%geovals(jvar)%vals, 1) /= hofxdiags%geovals(jvar)%nval) then
+            if (allocated(hofxdiags%geovals(jvar)%vals)) deallocate(hofxdiags%geovals(jvar)%vals)
             allocate(hofxdiags%geovals(jvar)%vals(hofxdiags%geovals(jvar)%nval,nprofiles))
             hofxdiags%geovals(jvar)%vals = missing
           end if

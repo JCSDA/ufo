@@ -4,7 +4,7 @@ time window:
 
 observations:
 - obs space:
-    name: Sonde
+    name: Radar
     obsdatain:
       engine:
         type: H5File
@@ -54,3 +54,66 @@ observations:
       name: BackgroundUncertainty/radialVelocity
     absTol: 1.0e-5
 
+- obs space:
+    name: RadarLongitudeRange
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_doppler_wind.nc
+      # Group observations into radar scans.
+      obsgrouping:
+        group variables: [dateTime, beamTiltAngle, stationIdentification]
+    observed variables: [radialVelocity]
+    simulated variables: [radialVelocity]
+  HofX: HofX
+  obs post filters:
+  - filter: Perform Action
+    # Reject observations that have already been flagged (in the test data set).
+    where:
+     - variable:
+         name: MetaData/QCflag
+       is_not_in: 0
+    action:
+      name: reject
+  # The station longitude in the test data set is expressed in the [0, 360) convention
+  # (357.405 degrees). Re-express it in the [-180, 180) convention (-2.595 degrees) to check
+  # that the superobs are unchanged when a data provider uses the other convention.
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/stationLongitude
+      type: float
+      function:
+        name: ObsFunction/Arithmetic
+        options:
+          variables:
+          - name: MetaData/stationLongitude
+          intercept: -360.0
+  - filter: SuperOb
+    filter variables:
+    - name: radialVelocity
+    algorithm:
+      name: radar
+      number of beams in superob region: 5
+      superob region radial extent [m]: 5000.0
+      minimum number of observations in superob region: 5
+  # Assign arbitrary obs error.
+  - filter: Perform Action
+    action:
+      name: assign error
+      error parameter: 1
+  compareVariables:
+  - reference:
+      name: TestReference/radialVelocity
+    test:
+      name: DerivedObsValue/radialVelocity
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/radialVelocityTotalUncertainty
+    test:
+      name: TotalUncertainty/radialVelocity
+    absTol: 1.0e-5
+  - reference:
+      name: TestReference/radialVelocityBackgroundUncertainty
+    test:
+      name: BackgroundUncertainty/radialVelocity
+    absTol: 1.0e-5

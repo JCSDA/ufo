@@ -205,6 +205,8 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
         IF (obs_diags % variables(ivar) == "atmosphericRefractivity") THEN
             IF (iobs == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(refractivity)
+                ! obs_diags have been set up with zero levels (see ObsDiagnostics)
+                IF (ALLOCATED(obs_diags % geovals(iVar) % vals)) DEALLOCATE(obs_diags % geovals(iVar) % vals)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(refractivity), obs_diags % nlocs))
             END IF
 
@@ -220,6 +222,8 @@ subroutine ufo_gnssro_refmetoffice_simobs(self, geovals, obss, hofx, obs_diags)
         IF (obs_diags % variables(ivar) == "geopotentialHeight") THEN
             IF (iobs == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(model_heights)
+                ! obs_diags have been set up with zero levels (see ObsDiagnostics)
+                IF (ALLOCATED(obs_diags % geovals(iVar) % vals)) DEALLOCATE(obs_diags % geovals(iVar) % vals)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(model_heights), obs_diags % nlocs))
             END IF
 

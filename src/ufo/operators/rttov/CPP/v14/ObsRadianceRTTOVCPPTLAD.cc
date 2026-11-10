@@ -33,6 +33,9 @@ ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
                                            const Parameters_ & parameters)
   : LinearObsOperatorBase(odb), varin_()
 {
+  useHydrometeors_ = parameters.useHydrometeors.value();
+  hydrometeorVars_ = parameters.hydrometeors.value();
+
   // Increment fields to be requested from getvalues and stored in geovals
   const std::vector<std::string> vv{
      "air_temperature",
@@ -51,6 +54,7 @@ ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
   const std::string CoefPath = parameters.CoefPath;
   const std::string SensorID = parameters.SensorID;
   CoefFileName = CoefPath + "rtcoef_" + SensorID + ".dat";
+  HydrotableName = CoefPath + "rttov_hydrotable_" + SensorID + ".dat";
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD created." << std::endl;
 }
@@ -65,8 +69,8 @@ ObsRadianceRTTOVCPPTLAD::~ObsRadianceRTTOVCPPTLAD() {
 
 void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnostics & d,
                                             const QCFlags_t & qc_flags) {
-//
-  ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, CoefFileName, channels_,
+  ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, useHydrometeors_, hydrometeorVars_,
+                          CoefFileName, HydrotableName, channels_,
                           nlevels, skip_profile);
   ufo::rttovcpp_setYdiag(geovals, aRttov_, d, channels_, nlevels);
 

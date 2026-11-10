@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckRH.h"
 #include "ufo/profile/ProfileVariableNames.h"
 
@@ -17,11 +20,59 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckRH::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckRH::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Relative humidity check" << std::endl;
 
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_tropo_t,
+       ufo::ProfileVariableNames::diagflags_final_reject_t,
+       ufo::ProfileVariableNames::diagflags_interpolation_rh,
+       ufo::ProfileVariableNames::diagflags_final_reject_rh};
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::obscorrection_air_temperature};
+    const std::vector<std::string> variableNamesInt =
+      {ufo::ProfileVariableNames::counter_TotCProfs,
+       ufo::ProfileVariableNames::counter_TotHProfs,
+       ufo::ProfileVariableNames::counter_TotCFlags,
+       ufo::ProfileVariableNames::counter_TotHFlags,
+       ufo::ProfileVariableNames::counter_TotLFlags};
+
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+    for (const auto &variableInt : variableNamesInt) {
+      profileDataHandler.get<int>(variableInt);
+    }
+  }
+
+  void ProfileCheckRH::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
+    const std::vector <bool> &diagFlagsTTropopause =
+       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_tropo_t);
+    profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
+    std::vector <bool> &diagFlagsRHInterp =
+       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_rh);
+    std::vector <bool> &diagFlagsRHFinalReject =
+       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_rh);
+    const std::vector <float> &tObsCorrection =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
+    std::vector <int> &TotCProfs =
+       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotCProfs);
+    std::vector <int> &TotHProfs =
+       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotHProfs);
+    std::vector <int> &TotCFlags =
+       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotCFlags);
+    std::vector <int> &TotHFlags =
+       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotHFlags);
+    std::vector <int> &TotLFlags =
+       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotLFlags);
+
     const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+
     const std::vector <float> &pressures =
        profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
     const std::vector <float> &tObs =
@@ -34,26 +85,6 @@ namespace ufo {
        profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_relative_humidity);
     const std::vector <float> &tdObs =
        profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_dew_point_temperature);
-    const std::vector <bool> &diagFlagsTTropopause =
-       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_tropo_t);
-       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
-    std::vector <bool> &diagFlagsRHInterp =
-       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_rh);
-    std::vector <bool> &diagFlagsRHFinalReject =
-       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_rh);
-    const std::vector <float> &tObsCorrection =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
-
-    std::vector <int> &TotCProfs =
-       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotCProfs);
-    std::vector <int> &TotHProfs =
-       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotHProfs);
-    std::vector <int> &TotCFlags =
-       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotCFlags);
-    std::vector <int> &TotHFlags =
-       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotHFlags);
-    std::vector <int> &TotLFlags =
-       profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_TotLFlags);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, RHObs, RHBkg,
                                          tdObs,

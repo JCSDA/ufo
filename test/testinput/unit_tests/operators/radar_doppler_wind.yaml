@@ -47,3 +47,52 @@ observations:
     vertical coordinate for horizontal wind: height_above_mean_sea_level_levels_minus_one
     vertical coordinate for vertical wind: height_above_mean_sea_level
   expect constructor to throw exception with message: This operator can only be used to simulate radialVelocity
+
+- obs operator:
+    name: RadarDopplerWind
+    vertical coordinate for horizontal wind: height_above_mean_sea_level
+    vertical coordinate for vertical wind: height_above_mean_sea_level
+    terminal velocity: 5 #rain
+  obs space:
+    name: RadarRadialVelocity replaced with RadarDopplerWind and terminal velocity
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_rw_obs_2020101300_m.nc
+          # obsdataout:
+          #   engine:
+          #     type: H5File
+          #     obsfile: Data/radar_rw_obs_2020101300_m_radar_radialvelocity_opr_out.nc4
+    simulated variables: [radialVelocity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_rw_geoval_2020101300_m.nc4
+  vector ref: Hofx_Ref
+  tolerance: 1.0e-05
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: RadarDopplerWind
+    vertical coordinate for horizontal wind: height_above_mean_sea_level
+    vertical coordinate for vertical wind: height_above_mean_sea_level
+  obs space:
+    name: RadarRadialVelocity replaced with RadarDopplerWind
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/radar_rw_obs_2020101300_m.nc
+#   obsdataout:
+#     engine:
+#       type: H5File
+#       obsfile: Data/radar_rw_obs_2020101300_m_radar_radialvelocity_opr_out.nc4
+    simulated variables: [radialVelocity]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/radar_rw_geoval_2020101300_m.nc4
+  vector ref: GsiHofX
+  tolerance: 1.0e-05
+  linear obs operator test:
+    coef TL: 0.1
+    tolerance TL: 1.0e-13
+    tolerance AD: 1.0e-11
+

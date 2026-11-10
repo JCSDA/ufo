@@ -32,9 +32,6 @@ namespace ufo {
       explicit ProfileCheckUInterpAlternative
         (const ConventionalProfileProcessingParameters &options);
 
-    /// Run check on all profiles.
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// Run check on an individual profile.
     void runCheckOnProfile(ProfileDataHolder &profile);
 
@@ -43,6 +40,12 @@ namespace ufo {
 
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}
+
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Run check on all profiles.
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
 
    private:
     /// Number of failed checks by level
@@ -53,6 +56,10 @@ namespace ufo {
 
     /// Interpolated value of v
     std::vector <float> vInterp_;
+
+    std::vector<std::string> variableNamesInt_;
+    std::vector<std::string> variableNamesFloat_;
+    std::vector<std::string> variableNamesBool_;
   };
 }  // namespace ufo
 

@@ -51,6 +51,7 @@ struct Constants {
   static constexpr double four           = 4.0;
   static constexpr double five           = 5.0;
   static constexpr double ten            = 10.0;
+  static constexpr double thousand       = 1000.0;
   static constexpr double k_t            = 0.65;         // Thermal conductivity of water at 20degC
                                                          // (W m^-1 K^-1)
   static constexpr double L_e            = 2.26e+06;     // Latent heat of vaporization at 373.15K
@@ -67,6 +68,7 @@ struct Constants {
   static constexpr double v_w            = 0.8e-6;       // Water kinematic viscosity (m^2/s)
   static constexpr double Rou            = 1000.0;
   static constexpr double DU             = 21.4e-6;      // Dobson unit, kg O3/m**2
+  static constexpr double M_dryair       = 0.0289645;    // Molar mass of dry air (kg/mol)
   static constexpr double Lclr           = 0.0065;       // constant dry adiabatic lapse rate (K/m)
   static constexpr double t2tv           = 0.608;        // constant moist adiabatic lapse rate
                                                          // (degC/km)

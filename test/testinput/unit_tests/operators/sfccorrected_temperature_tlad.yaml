@@ -1,0 +1,115 @@
+time window:
+  begin: 2025-08-31T21:00:00Z
+  length: PT6H
+# Note on tolerances: SurfaceOperatorBase::simobs computes hofx in float
+# (std::vector<float>), which sets a Taylor-test residual floor of order
+# eps_float * |hofx| ~ 2e-5 K per location. With coef TL = 1e-4 the actual
+# residuals across all four cases below sit at ~1.1e-5; tolerance TL = 1e-4
+# leaves a ~10x margin above that floor. Adjoint identity is exact in double.
+observations:
+# GSL temperature: Local lapse rate, MatchSimobs linearization (consistent).
+# The forward model is exactly linear here (modulo the lapse-rate threshold
+# clamp); coef TL is small enough that no perturbation crosses the clamp.
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Local
+      tlad lapse rate option: MatchSimobs
+  obs space:
+    name: SfcCorrected GSL temperature - Local + MatchSimobs
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 1.0e-2
+    tolerance AD: 1.0e-11
+# GSL temperature: Local lapse rate, NoAdjustment linearization.
+# In TL/AD the Local lapse-rate computation is treated as constant.
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Local
+      tlad lapse rate option: NoAdjustment
+  obs space:
+    name: SfcCorrected GSL temperature - Local simobs + NoAdjustment linearization
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 5.0e-2
+    tolerance AD: 1.0e-11
+# GSL temperature: Constant lapse rate.
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Constant
+      temperature lapse rate: 9.8
+  obs space:
+    name: SfcCorrected GSL temperature - Constant lapse rate
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 5.0e-2
+    tolerance AD: 1.0e-11
+# GSL temperature: Constant lapse rate, with "tlad spread to lowest level"
+# dhofx = dT_2m + dT_lev1 (the additive option, for models whose TL/AD
+# carries no independent active increment for air_temperature_at_2m).
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: Constant
+      temperature lapse rate: 9.8
+      tlad spread to lowest level: true
+  obs space:
+    name: SfcCorrected GSL temperature - Constant lapse rate + spread to lowest level
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 5.0e-2
+    tolerance AD: 1.0e-11
+# GSL temperature: NoAdjustment (lapse_rate = 0, a fixed scalar with zero
+# derivative w.r.t. the model state, same as Constant): dhofx = dT_2m.
+- obs operator:
+    name: SfcCorrected
+    correction scheme to use: GSL
+    gsl parameters:
+      temperature lapse rate option: NoAdjustment
+  obs space:
+    name: SfcCorrected GSL temperature - NoAdjustment
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/surface_tquv_obs_2025090100.nc4
+    simulated variables: [airTemperatureAt2M]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/surface_tquv_geovals_2025090100.nc4
+  linear obs operator test:
+    coef TL: 1.0e-4
+    tolerance TL: 5.0e-2
+    tolerance AD: 1.0e-11

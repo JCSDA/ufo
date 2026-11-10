@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileSondeFlags.h"
 
 namespace ufo {
@@ -17,17 +20,33 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileSondeFlags::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileSondeFlags::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Set sonde QC Flags" << std::endl;
 
-    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_surface_level_t,
+       ufo::ProfileVariableNames::diagflags_surface_level_rh,
+       ufo::ProfileVariableNames::diagflags_surface_level_u,
+       ufo::ProfileVariableNames::diagflags_surface_level_v,
+       ufo::ProfileVariableNames::diagflags_standard_level_t,
+       ufo::ProfileVariableNames::diagflags_standard_level_rh,
+       ufo::ProfileVariableNames::diagflags_standard_level_u,
+       ufo::ProfileVariableNames::diagflags_standard_level_v,
+       ufo::ProfileVariableNames::diagflags_tropo_t,
+       ufo::ProfileVariableNames::diagflags_max_wind_u,
+       ufo::ProfileVariableNames::diagflags_max_wind_v,
+       ufo::ProfileVariableNames::diagflags_sig_temp_t,
+       ufo::ProfileVariableNames::diagflags_sig_wind_u,
+       ufo::ProfileVariableNames::diagflags_sig_wind_v};
 
-    const std::vector <int> &ObsType =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::ObsType);
-    const std::vector <int> &LevelType =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::LevelType);
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
 
+  void ProfileSondeFlags::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <bool> &diagFlagsTSurfaceLevel =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_surface_level_t);
     std::vector <bool> &diagFlagsRHSurfaceLevel =
@@ -56,6 +75,13 @@ namespace ufo {
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_sig_wind_u);
     std::vector <bool> &diagFlagsVSigWind =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_sig_wind_v);
+
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+
+    const std::vector <int> &ObsType =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::ObsType);
+    const std::vector <int> &LevelType =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::LevelType);
 
     if (!oops::allVectorsSameNonZeroSize(diagFlagsTSurfaceLevel,
                                          diagFlagsRHSurfaceLevel,

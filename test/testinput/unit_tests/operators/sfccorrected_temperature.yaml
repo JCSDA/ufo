@@ -97,7 +97,7 @@ observations:
     simulated variables: [airTemperatureAt2M]
   geovals:
     filename: Data/ufo/testinput_tier_1/surface_tquv_missing_geovals_2025090100.nc4
-  rms ref: 1.684398e+38
+  rms ref: 1.684398e+38 # missing geoval value causes hofx to have a missing value.
   tolerance: 1.e-5
 - obs operator:
     name: SfcCorrected

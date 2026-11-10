@@ -76,7 +76,7 @@ geovals test:
       direction: top2bottom
       tolerance: 1.0e-12 
 
-# section for testGeoVaLsAllocatePutGet
+# section for testGeoVaLsPutGet
 geovals get test:
   time window:
     begin: 2018-04-14T21:00:00Z  # required for initializing SampledLocations from the obs space below

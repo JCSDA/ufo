@@ -1,6 +1,6 @@
 time window:
-  begin: 2020-10-23T22:00:00Z
-  end: 2020-10-23T23:59:00Z
+  begin: 2020-10-23T23:00:00Z
+  end: 2020-10-24T01:00:00Z
   bound to include: begin  # consistency with test data from "ncdiag"
 
 observations:
@@ -9,7 +9,7 @@ observations:
     path type: slant
     geoval variable: electron_density
     weight variable: path_weight    # weight from geoval
-    scaling factor: 1.0e-07        # used to unit conversion for output
+    scaling factor: 1.0e-16        # used to unit conversion for output
   obs space:
     name: GNSSVTEC_readweight
     obsdatain:
@@ -24,18 +24,17 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_madirgal_slant-tec_202010232345_100locs.nc4
   vector ref: TestReference
-  tolerance: 1.0e-02
+  tolerance: 1.0e-06
   norm ref: TestReference
-  tolerance: 1.0e-04
+  tolerance: 1.0e-06
 - obs operator:
     name: PathSum
-    path type: slant            
+    path type: slant
     geoval variable: electron_density
     path point latitude variable: path_latitude    # geodetic latitude along the path
     path point longitude variable: path_longitude  # geodetic longitude along the path
-    path point height variable: height_wrt_surface # geodetic height along the path
-    use km for height: true
-    scaling factor: 1.0e-07        
+    path point height variable: height_above_reference_ellipsoid # geodetic height along the path
+    scaling factor: 1.0e-16
   obs space:
     name: GNSSVTEC_computeweight
     obsdatain:
@@ -50,17 +49,17 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_madirgal_slant-tec_202010232345_100locs.nc4
   vector ref: TestReference1
-  tolerance: 1.0e-02
+  tolerance: 1.0e-06
   norm ref: TestReference1
-  tolerance: 1.0e-04
+  tolerance: 1.0e-06
 - obs operator:
     name: PathSum
     path type: slant
     geoval variable: electron_density
-    weights: [1.0, 2.0, 3.0]     
-    path point height variable: height_wrt_surface # geodetic height along the path
-    height range: [0, 105]      
-    scaling factor: 1.0e-04
+    weights: [1000.0, 2000.0, 3000.0]
+    path point height variable: height_above_reference_ellipsoid # geodetic height along the path
+    height range: [0., 105000.]
+    scaling factor: 1.0e-16
   obs space:
     name: PathSum_yamlweight
     obsdatain:
@@ -75,17 +74,17 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_gridded_slant-tec_202010232345_synthetic.nc4
   vector ref: TestReference
-  tolerance: 1.0e-03
+  tolerance: 1.0e-06
   norm ref: TestReference
   tolerance: 1.0e-06
 - obs operator:
     name: PathSum
     path type: slant
     geoval variable: electron_density
-    weight variable: weights   
-    path point height variable: height_wrt_surface
-    height range: [0, 105]     
-    scaling factor: 1.0e-04
+    weight variable: weights
+    path point height variable: height_above_reference_ellipsoid
+    height range: [0.0, 105000.0]
+    scaling factor: 1.0e-16
   obs space:
     name: PathSum_readweight
     obsdatain:
@@ -100,7 +99,7 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_gridded_slant-tec_202010232345_synthetic.nc4
   vector ref: TestReference1
-  tolerance: 1.0e-03
+  tolerance: 1.0e-06
   norm ref: TestReference1
   tolerance: 1.0e-06
 - obs operator:
@@ -108,7 +107,7 @@ observations:
     path type: slant
     geoval variable: electron_density
     weight variable: weights    # weight from geoval
-    scaling factor: 1.0e-04
+    scaling factor: 1.0e-16
   obs space:
     name: PathSum_basic
     obsdatain:
@@ -123,6 +122,6 @@ observations:
   geovals:
     filename: Data/ufo/testinput_tier_1/geovals_gridded_slant-tec_202010232345_synthetic.nc4
   vector ref: TestReference2
-  tolerance: 1.0e-03
+  tolerance: 1.0e-06
   norm ref: TestReference2
   tolerance: 1.0e-06

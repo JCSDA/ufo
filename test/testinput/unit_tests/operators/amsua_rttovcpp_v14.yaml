@@ -6,8 +6,9 @@ time window:
 observations:
 - obs operator:
     name: RTTOVCPP
-    SensorID: noaa_19_amsua
+    SensorID: noaa_19_amsua_o3
     CoefPath: Data/
+    use hydrometeors: false
 #    linear obs operator:
   obs space:
     name: noaa_19_amsua
@@ -15,15 +16,15 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/amsua_n19_hofxnm_2018041500_m_rttovcpp.nc4
-#   obsdataout:
-#     engine:
-#       type: H5File
-#       obsfile: Data/amsua_n19_obs_2018041500_m_rttovcpp_out.nc4
+#    obsdataout:
+#      engine:
+#        type: H5File
+#        obsfile: ./amsua_n19_obs_2018041500_m_rttovcpp_out.clr.nc4
     simulated variables: [brightnessTemperature]
     channels: 1-15
   geovals:
     filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_rttovcpp.nc4
-  vector ref: HofX
+  vector ref: hofx 
   tolerance: 1.e-7
   linear obs operator test:
     coef TL: 1.e-3

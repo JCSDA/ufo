@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckUInterp.h"
 #include "ufo/profile/ProfileVariableNames.h"
 
@@ -18,28 +21,44 @@ namespace ufo {
     ProfileStandardLevels(options)
   {}
 
-  void ProfileCheckUInterp::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckUInterp::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " U interpolation check" << std::endl;
 
+    const std::vector<std::string> variableNamesInt =
+      {ufo::ProfileVariableNames::counter_NumSamePErrObs,
+       ufo::ProfileVariableNames::counter_NumInterpErrObs};
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_interpolation_u,
+       ufo::ProfileVariableNames::diagflags_standard_level_u};
+
+    for (const auto &variableInt : variableNamesInt) {
+      profileDataHandler.get<int>(variableInt);
+    }
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckUInterp::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
+    std::vector <int> &NumSamePErrObs =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumSamePErrObs);
+    std::vector <int> &NumInterpErrObs =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumInterpErrObs);
+    std::vector <bool> &uDiagFlagsProfileInterp =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_u);
+    const std::vector <bool> &uDiagFlagsProfileStdLev =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_standard_level_u);
+
     const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+
     const std::vector <float> &pressures =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
     const std::vector <float> &uObs =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_eastward_wind);
     const std::vector <float> &vObs =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_northward_wind);
-    std::vector <int> &NumSamePErrObs =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumSamePErrObs);
-    std::vector <int> &NumInterpErrObs =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumInterpErrObs);
-    std::vector <bool> &uDiagFlagsProfileInterp =
-      profileDataHandler.get<bool>
-      (ufo::ProfileVariableNames::diagflags_interpolation_u);
-    const std::vector <bool> &uDiagFlagsProfileStdLev =
-      profileDataHandler.get<bool>
-      (ufo::ProfileVariableNames::diagflags_standard_level_u);
-
     if (!oops::allVectorsSameNonZeroSize(pressures, uObs, vObs,
                                          uDiagFlagsProfileInterp,
                                          uDiagFlagsProfileStdLev)) {

@@ -245,6 +245,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
         IF (obs_diags % variables(ivar) == "atmosphericRefractivity_model") THEN
             IF (iloc == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(refractivity)
+                ! obs_diags have been set up with zero levels (see ObsDiagnostics)
+                IF (ALLOCATED(obs_diags % geovals(iVar) % vals)) DEALLOCATE(obs_diags % geovals(iVar) % vals)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(refractivity), obs_diags % nlocs))
             END IF
 
@@ -260,6 +262,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
         IF (obs_diags % variables(ivar) == "geopotentialHeight_model") THEN
             IF (iloc == 1) THEN
                 obs_diags % geovals(iVar) % nval = SIZE(model_heights)
+                ! obs_diags have been set up with zero levels (see ObsDiagnostics)
+                IF (ALLOCATED(obs_diags % geovals(iVar) % vals)) DEALLOCATE(obs_diags % geovals(iVar) % vals)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(SIZE(model_heights), obs_diags % nlocs))
             END IF
 
@@ -275,6 +279,8 @@ subroutine ufo_gnssro_bendmetoffice_simobs(self, geovals, obss, nlevels, nlocs, 
         IF (obs_diags % variables(ivar) == "virtualTemperature") THEN
             IF (iloc == 1) THEN
                 obs_diags % geovals(iVar) % nval = nlevels
+                ! obs_diags have been set up with zero levels (see ObsDiagnostics)
+                IF (ALLOCATED(obs_diags % geovals(iVar) % vals)) DEALLOCATE(obs_diags % geovals(iVar) % vals)
                 ALLOCATE(obs_diags % geovals(iVar) % vals(nlevels, obs_diags % nlocs))
             END IF
 

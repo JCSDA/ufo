@@ -28,17 +28,17 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileAverageWindSpeed::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileAverageWindSpeed::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Wind speed averaging" << std::endl;
 
     // Produce vector of profiles containing data for the wind speed averaging.
-    std::vector <std::string> variableNamesInt =
+    variableNamesInt_ =
       {ufo::ProfileVariableNames::counter_NumGapsU,
        ufo::ProfileVariableNames::counter_NumGapsUWP,
        ufo::ProfileVariableNames::ObsType,
        ufo::ProfileVariableNames::extended_obs_space};
-    std::vector <std::string> variableNamesFloat =
+    variableNamesFloat_ =
       {ufo::ProfileVariableNames::obs_eastward_wind,
        ufo::ProfileVariableNames::obs_northward_wind,
        ufo::ProfileVariableNames::pge_eastward_wind,
@@ -47,7 +47,7 @@ namespace ufo {
        ufo::ProfileVariableNames::modellevels_logP_derived,
        ufo::ProfileVariableNames::eastward_wind_derived,
        ufo::ProfileVariableNames::northward_wind_derived};
-    std::vector <std::string> variableNamesBool =
+    variableNamesBool_ =
       {ufo::ProfileVariableNames::diagflags_final_reject_u,
        ufo::ProfileVariableNames::diagflags_perm_reject_u,
        ufo::ProfileVariableNames::diagflags_back_reject_u,
@@ -58,44 +58,47 @@ namespace ufo {
        ufo::ProfileVariableNames::diagflags_back_reject_v,
        ufo::ProfileVariableNames::diagflags_interpolation_v,
        ufo::ProfileVariableNames::diagflags_partial_layer_v};
-    oops::Variables variableNamesGeoVaLs{
+    variableNamesGeoVaLs_ = oops::Variables{
       {oops::Variable{ufo::ProfileVariableNames::geovals_air_pressure_at_surface}}};
 
     if (options_.compareWithOPS.value()) {
-      variableNamesFloat.insert
-        (variableNamesFloat.end(),
+      variableNamesFloat_.insert
+        (variableNamesFloat_.end(),
          {addOPSPrefix(ufo::ProfileVariableNames::eastward_wind_derived),
              addOPSPrefix(ufo::ProfileVariableNames::northward_wind_derived)});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable{ufo::ProfileVariableNames::geovals_testreference_eastward_wind});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable{ufo::ProfileVariableNames::geovals_testreference_eastward_wind_qcflags});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable{ufo::ProfileVariableNames::geovals_testreference_northward_wind});
-      variableNamesGeoVaLs.push_back
+      variableNamesGeoVaLs_.push_back
         (oops::Variable{ufo::ProfileVariableNames::geovals_testreference_northward_wind_qcflags});
     }
 
     // In order to correctly handle MPI ranks with zero entries,
     // ensure that all of the variables defined above have been added to the ObsSpace
     // on each rank. This prevents a hang when saving the ObsSpace.
-    for (const auto & variableInt : variableNamesInt) {
+    for (const auto & variableInt : variableNamesInt_) {
       profileDataHandler.get<int>(variableInt);
     }
-    for (const auto & variableFloat : variableNamesFloat) {
+    for (const auto & variableFloat : variableNamesFloat_) {
       profileDataHandler.get<float>(variableFloat);
     }
-    for (const auto & variableBool : variableNamesBool) {
+    for (const auto & variableBool : variableNamesBool_) {
       profileDataHandler.get<bool>(variableBool);
     }
+  }
 
+  void ProfileAverageWindSpeed::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <ProfileDataHolder> profiles =
       profileDataHandler.produceProfileVector
-      (variableNamesInt,
-       variableNamesFloat,
+      (variableNamesInt_,
+       variableNamesFloat_,
        {},
-       variableNamesBool,
-       variableNamesGeoVaLs);
+       variableNamesBool_,
+       variableNamesGeoVaLs_);
 
     // Run wind speed averaging on each profile in the original ObsSpace,
     // saving averaged output to the equivalent extended profile.

@@ -83,39 +83,6 @@ call ufo_geovals_setup(self, c_nlocs, vars, c_nvars, c_sizes, &
 end subroutine ufo_geovals_setup_c
 
 ! ------------------------------------------------------------------------------
-!> Setup GeoVaLs (store nlocs, variables; don't do allocation yet)
-subroutine ufo_geovals_partial_setup_c(c_key_self, c_nlocs, c_vars, c_nvars, c_nsampling_methods, &
-                                       c_sampling_method_by_var, &
-                                       c_reduced_vars, c_is_sampling_method_trivial) &
-                                       bind(c,name="ufo_geovals_partial_setup_f90")
-use oops_variables_mod
-implicit none
-integer(c_int), intent(inout)  :: c_key_self
-integer(c_int), intent(in)     :: c_nlocs, c_nvars
-type(c_ptr), value, intent(in) :: c_vars
-integer(c_size_t), intent(in)  :: c_nsampling_methods
-integer(c_size_t), intent(in)  :: c_sampling_method_by_var(c_nvars)
-type(c_ptr), value, intent(in) :: c_reduced_vars
-logical(c_bool), intent(in)    :: c_is_sampling_method_trivial(c_nsampling_methods)
-
-type(ufo_geovals), pointer :: self
-type(oops_variables) :: vars, reduced_vars
-integer              :: nsampling_methods
-integer(c_size_t)    :: sampling_method_by_var(c_nvars)
-
-call ufo_geovals_registry%init()
-call ufo_geovals_registry%add(c_key_self)
-call ufo_geovals_registry%get(c_key_self, self)
-
-vars = oops_variables(c_vars)
-nsampling_methods = c_nsampling_methods
-sampling_method_by_var(:) = 1 + c_sampling_method_by_var(:)  ! convert 0- to 1-based indexing
-reduced_vars = oops_variables(c_reduced_vars)
-call ufo_geovals_partial_setup(self, c_nlocs, vars, c_nvars, nsampling_methods, &
-                               sampling_method_by_var, reduced_vars, c_is_sampling_method_trivial)
-
-end subroutine ufo_geovals_partial_setup_c
-
 !> Allocate GeoVaLs
 subroutine ufo_geovals_allocate_c(c_key_self, c_nlevels, c_vars) bind(c,name="ufo_geovals_allocate_f90")
 use oops_variables_mod

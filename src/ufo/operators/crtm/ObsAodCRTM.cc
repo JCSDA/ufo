@@ -46,7 +46,7 @@ ObsAodCRTM::ObsAodCRTM(const ioda::ObsSpace & odb,
   // call Fortran setup routine
   ufo_aodcrtm_setup_f90(keyOperAodCRTM_, parameters_.toConfiguration(),
                         channels_list.size(), channels_list[0], midPointJulday,
-                        varin_);
+                        varin_, odb.comm());
   oops::Log::info() << "ObsAodCRTM variables: " << varin_ << std::endl;
   oops::Log::info() << "ObsAodCRTM channels: " << channels_list << std::endl;
   oops::Log::trace() << "ObsAodCRTM constructor done." << std::endl;

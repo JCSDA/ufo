@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckUnstableLayer.h"
 #include "ufo/profile/ProfileVariableNames.h"
 
@@ -18,18 +21,32 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckUnstableLayer::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckUnstableLayer::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Unstable layer/superadiabat check" << std::endl;
 
-    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_final_reject_t,
+       ufo::ProfileVariableNames::diagflags_superadiabat_t};
+    const std::vector<std::string> variableNamesInt =
+      {ufo::ProfileVariableNames::counter_NumAnyErrors,
+       ufo::ProfileVariableNames::counter_NumSuperadiabat};
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::obscorrection_air_temperature};
 
-    const std::vector <float> &pressures =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
-    const std::vector <float> &tObs =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
-    const std::vector <float> &tBkg =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+    for (const auto &variableInt : variableNamesInt) {
+      profileDataHandler.get<int>(variableInt);
+    }
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+  }
+
+  void ProfileCheckUnstableLayer::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <bool> &diagFlagsTFinalReject =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
     std::vector <bool> &diagFlagsTSuperadiabat =
@@ -40,6 +57,15 @@ namespace ufo {
        profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumSuperadiabat);
     const std::vector <float> &tObsCorrection =
        profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
+
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+
+    const std::vector <float> &pressures =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
+    const std::vector <float> &tBkg =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg,
                                          diagFlagsTFinalReject,

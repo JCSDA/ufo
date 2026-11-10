@@ -153,7 +153,14 @@ message(STATUS "PPRO: Including built-in PPRO dual-polarization radar operator")
 # Set values for downloading crtm test data from tarball
 
 if( ${crtm_FOUND} )
-    if( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
+    if( crtm_VERSION VERSION_GREATER_EQUAL 3.1.6 AND crtm_VERSION VERSION_LESS 3.2.0 )
+        #https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.6.0.tgz
+        set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM")
+        set (crtm_data_tag "fix_REL-3.1.6.0")
+        set (crtm_data_tag_postfix "fix/")
+        set (crtm_data_tarball_hash "fe65edff7621935c37976b406832d627")
+        set (crtm_data_tarball_name ${crtm_data_tag}.tgz)
+    elseif( crtm_VERSION VERSION_GREATER_EQUAL 3.0.0 )
         #https://bin.ssec.wisc.edu/pub/s4/CRTM/fix_REL-3.1.2.0.tgz
         set (crtm_data_download_url "https://bin.ssec.wisc.edu/pub/s4/CRTM")
         set (crtm_data_tag "fix_REL-3.1.2.0")  #this may cause problems with older CRTM

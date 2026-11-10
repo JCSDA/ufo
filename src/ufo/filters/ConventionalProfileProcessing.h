@@ -102,28 +102,11 @@ namespace ufo {
       void applyFilter(const std::vector<bool> &, const Variables &,
                        std::vector<std::vector<bool>> &) const override;
 
-      /// Run Basic profile check on all profiles in the sample and
-      /// return the logical `or` of the results of each check.
+      /// Run Basic profile checks and return the logical OR of the stored results.
       bool basicProfileChecks(ProfileDataHandler &profileDataHandler,
                               ProfileChecker &profileChecker) const;
 
-      /// Run checks on MPI ranks with zero ObsSpace locations.
-      /// Most profile QC checks produce new variables which are then
-      /// saved to the ObsSpace with the `put_db` function.
-      /// However, these checks are not run on empty ranks when called by either the
-      /// `individualProfileChecks` or `entireSampleChecks` functions, both of which exit early
-      /// in the event of an empty ObsSpace.
-      /// If the list of variables written to the ObsSpace varies between ranks,
-      /// there will be an indefinite hang when saving the ObsSpace to a file.
-      /// This function ensures that all of the checks are run on empty ranks,
-      /// and therefore that `put_db` is called for the same variables on all ranks.
-      /// This prevents a hang when saving the ObsSpace.
-      ///
-      /// The `earlyReturnOnBasicFailed` parameter is computed with the `basicProfileChecks`
-      /// function and indicates whether or not all of the Basic checks failed for all profiles
-      /// on all ranks. If so, no further checks are run on the empty ranks,
-      /// avoiding a case in which extra variables are inadvertently written to the ObsSpace
-      /// on these ranks, which would again lead to an indefinite hang.
+      /// Handle a check subgroup on a rank with no ObsSpace locations.
       void emptyObsSpaceChecks(ProfileDataHandler &profileDataHandler,
                                ProfileChecker &profileChecker,
                                const CheckSubgroup &subGroupChecks,

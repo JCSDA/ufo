@@ -6,7 +6,6 @@ time window:
 observations:
 - obs operator:
     name: ExtinctionCoefficientProfileCRTM
-    nProfileLevels: 399
     Absorbers: [H2O,O3]
     obs options:
       Sensor_ID: v.caliop
@@ -24,15 +23,17 @@ observations:
       engine:
         type: H5File
         obsfile: Data/ufo/testinput_tier_1/caliop_l2_extcoeff_obs_20190722_0217.nc4
-    simulated variables: [extinctionCoefficient_532nm, extinctionCoefficient_1064nm]
-    channels: 1-399
+      obsgrouping:
+        group variables: ["sequenceNumber"]
+    simulated variables: [extinctionCoefficient]
+    channels: 1-2
     #obsdataout:
     #  engine:
     #    type: H5File
     #    obsfile: Data/ufo/hofx.caliop_l2_APro.20190722_0217.nc4
   geovals:
     filename: Data/ufo/testinput_tier_1/caliop_l2_extcoeff_geovals_20190722_0217.nc4
-  vector ref: hofx 
+  vector ref: TestReference
   tolerance: 1.0e-3
   #linear obs operator test:
   #  coef TL: 1.0e-3

@@ -29,14 +29,17 @@ namespace ufo {
    public:
       explicit ProfileCheckHydrostatic(const ConventionalProfileProcessingParameters &options);
 
-    /// Run check
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// This check requires HofX to have been calculated.
     bool requiresHofX() override {return true;}
 
     /// Fill variables in validator
     void fillValidationData(ProfileDataHandler &profileDataHandler) override;
+
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Run check
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
 
    private:
     /// Hydrostatic error descriptions

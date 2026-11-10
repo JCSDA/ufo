@@ -46,6 +46,10 @@ class ObsExtCoeffProfCRTM : public ObsOperatorBase,
 // Other
   const oops::Variables & requiredVars() const override {return varin_;}
 
+  Locations_ locations() const override;
+
+  void computeReducedVars(const oops::Variables & reducedVars, GeoVaLs & geovals) const override;
+
   int & toFortran() {return keyOperExtCoeffProfCRTM_;}
   const int & toFortran() const {return keyOperExtCoeffProfCRTM_;}
 

@@ -4,6 +4,8 @@
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 set ( obslocalization_files
+      Obs3DLocalization.h
+      Obs3DLocParameters.h
       ObsHorLocGC99.h
       ObsHorLocSOAR.h
       ObsHorLocSOARParameters.h

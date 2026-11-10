@@ -35,23 +35,34 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   // Fields to be requested from getvalues and stored in geovals
   // need to be consistent with those defined in ufo_variables_mod.F90
   //-----------------------------------------------------------------------------
-  const std::vector<std::string> vv{
+  useHydrometeors_ = parameters.useHydrometeors.value();
+  hydrometeorVars_ = parameters.hydrometeors.value();
+
+  // 1. Always push the base clear-sky variables
+  const std::vector<std::string> vv_clr{
     "air_pressure_levels",
     "air_temperature",
     "water_vapor_mixing_ratio_wrt_moist_air",
     "air_pressure_at_surface",
-    "air_temperature_at_2m",   // this is actually var_sfc_t2m
+    "air_temperature_at_2m",
     "water_vapor_mixing_ratio_wrt_moist_air_at_2m",
     "eastward_wind_at_10m",
     "northward_wind_at_10m",
     "skin_temperature_at_surface",
-    "seaice_fraction",   // this is actually var_sfc_seaicefrac
-    "landmask",   // this is actually var_sfc_landmask
+    "seaice_fraction",
+    "landmask",
     "geopotential_height_at_surface"
   };
 
-  for (size_t jvar = 0; jvar < vv.size(); ++jvar) {
-     varin_.push_back(vv[jvar]);  // set private data member varin_
+  for (const auto& var : vv_clr) {
+    varin_.push_back(var);
+  }
+
+  // 2. Conditionally push the extra variables if all-sky is enabled
+  if (useHydrometeors_) {
+    for (const auto& var : hydrometeorVars_) {
+       varin_.push_back(var);
+    }
   }
 
   // get channels from observations
@@ -62,7 +73,15 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   const std::string CoefPath = parameters.CoefPath;
   const std::string SensorID = parameters.SensorID;
   CoefFileName = CoefPath + "rtcoef_" + SensorID + ".dat";
-  oops::Log::info() << CoefFileName << std::endl;
+  oops::Log::trace() << "RTTOV Coef file: " << CoefFileName << std::endl;
+
+  // Define the full path to the hydrotable file
+  if (useHydrometeors_) {
+    HydrotableName = CoefPath + "rttov_hydrotable_" + SensorID + ".dat";
+    oops::Log::trace() << "RTTOV Hydrotable file: " << HydrotableName << std::endl;
+  } else {
+    HydrotableName = "";
+  }
 
   oops::Log::trace() << "ObsRadianceRTTOVCPP created." << std::endl;
 }
@@ -78,15 +97,17 @@ ObsRadianceRTTOVCPP::~ObsRadianceRTTOVCPP() {
 void ObsRadianceRTTOVCPP::simulateObs(const GeoVaLs & geovals, ioda::ObsVector & hofx,
                                    ObsDiagnostics & d, const QCFlags_t & qc_flags) const {
 //
+  std::size_t nprofiles = geovals.nlocs();
   std::vector<bool>  skip_profile;
-  ufo::rttovcpp_interface(geovals, odb_, aRttov_, CoefFileName, channels_,
+
+  ufo::rttovcpp_interface(geovals, odb_, aRttov_, useHydrometeors_, hydrometeorVars_,
+                          CoefFileName, HydrotableName, channels_,
                           nlevels, skip_profile);
   ufo::rttovcpp_setYdiag(geovals, aRttov_, d, channels_, nlevels);
 
 // ------------------------------------------------------------------------
 // Obtain calculated brightness temperature for all profiles/channels
 // ------------------------------------------------------------------------
-  std::size_t nprofiles = geovals.nlocs();
   std::size_t nchannels = aRttov_.getNchannels();
 
   ASSERT(geovals.nlocs() == hofx.nlocs());

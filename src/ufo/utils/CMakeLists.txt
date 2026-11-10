@@ -76,6 +76,7 @@ set ( utils_files
       VertInterp.interface.h
       vert_interp.F90
       thermo_utils.F90
+      ufo_ghg_utils_mod.F90
 )
 
 if( ${gsw_FOUND} )

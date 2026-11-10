@@ -10,6 +10,7 @@
 
 #include <string>
 
+#include "oops/util/parameters/Parameter.h"
 #include "oops/util/parameters/RequiredParameter.h"
 #include "ufo/ObsOperatorParametersBase.h"
 
@@ -29,6 +30,9 @@ class ObsRadarDopplerWindParameters : public ObsOperatorParametersBase {
     verticalCoordinate_w{"vertical coordinate for vertical wind",
       "Name of model vertical coordinate for vertical wind.",
       this};
+
+  oops::Parameter<double>
+    terminalVelocity{"terminal velocity", 0.0, this};
 };
 
 template <typename comparatorType>

@@ -115,7 +115,7 @@ void ObsRadarDopplerWind::simulateObs(const GeoVaLs & gv, ioda::ObsVector & ovec
     } else {
       ovec[jloc] = sinAzimuthCosTilt[jloc] * u +
         cosAzimuthCosTilt[jloc] * v +
-        sinTilt[jloc] * w;
+        sinTilt[jloc] * (w - params_.terminalVelocity.value());
     }
   }
 

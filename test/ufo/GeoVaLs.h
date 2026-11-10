@@ -67,11 +67,6 @@ void testGeoVaLs() {
     const oops::Variables ingeovars(gconf, "state variables");
     const GeoVaLs gval(geovalsconf, ospace, ingeovars);
 
-/// Check that GeoVaLs default constructor works
-     oops::Log::trace() <<
-      "GeoVaLs default constructor - does not allocate fields" << std::endl;
-    GeoVaLs gv_temp(ospace.distribution(), ingeovars);
-
 /// Check that GeoVaLs constructor to create a GeoVaLs with one location works
     if (gconf.has("one location check")) {
       oops::Log::trace() << "Check that GeoVaLs constructor for one location works" << std::endl;
@@ -286,10 +281,10 @@ void testPutProfileOrPutAtLocationAndGetAtLevel(
   }
 }
 
-/// \brief Tests GeoVaLs::allocate, GeoVals::put, GeoVaLs::get,
+/// \brief Tests GeoVals::put, GeoVaLs::get,
 /// GeoVaLs::putAtLevel, GeoVaLs::getAtLevel,
 /// GeoVaLs::putProfile and GeoVaLs::getProfile.
-void testGeoVaLsAllocatePutGet() {
+void testGeoVaLsPutGet() {
   typedef oops::SampledLocations<ObsTraits> SampledLocations_;
 
   const eckit::LocalConfiguration conf(::test::TestEnvironment::config());
@@ -300,36 +295,20 @@ void testGeoVaLsAllocatePutGet() {
   const oops::Variable var2{"variable2"};
   const oops::Variables testvars({var1, var2});
 
-  /// Setup GeoVaLs that are not filled in or allocated; test that they are not allocated
+  /// Setup GeoVaLs with a 3D first variable and a 2D second variable; test that they are
+  /// allocated correctly
   SampledLocations_ sampledLocations(testconf, oops::mpi::world());
   const size_t nprofiles = sampledLocations.sampledLocations().size();
-  GeoVaLs gval(std::move(sampledLocations), testvars);
-  oops::Log::test() << "GeoVals allocate test: created empty GeoVaLs with " << testvars <<
-                       " variables " << std::endl;
-  EXPECT_EQUAL(gval.nlevs(var1), 0);
-  EXPECT_EQUAL(gval.nlevs(var2), 0);
-  std::cout << "gval.nprofiles(var1): " << gval.nprofiles(var1) << std::endl;
-
-  EXPECT_EQUAL(gval.nprofiles(var1), nprofiles);
-  EXPECT_EQUAL(gval.nprofiles(var2), nprofiles);
-
-  /// Allocate only the first variable, and test that it's allocated correctly
-  const oops::Variables testvar1({var1});
   const int nlevs1 = 10;
-  gval.allocate(nlevs1, testvar1);
-  oops::Log::test() << "Allocated " << var1 << "; nlevs(var1) = " << gval.nlevs(var1) <<
-                                               "; nlevs(var2) = " << gval.nlevs(var2) << std::endl;
-  EXPECT_EQUAL(gval.nlevs(var1), nlevs1);
-  EXPECT_EQUAL(gval.nlevs(var2), 0);
-
-  /// Allocate only the second variable (2D variable), test that it's allocated correctly
-  const oops::Variables testvar2({var2});
   const int nlevs2 = 1;
-  gval.allocate(nlevs2, testvar2);
-  oops::Log::test() << "Allocated " << var2 << "; nlevs(var1) = " << gval.nlevs(var1) <<
-                                               "; nlevs(var2) = " << gval.nlevs(var2) << std::endl;
+  GeoVaLs gval(std::move(sampledLocations), testvars, {nlevs1, nlevs2});
+  oops::Log::test() << "GeoVals put/get test: created GeoVaLs with " << testvars <<
+                       " variables; nlevs(var1) = " << gval.nlevs(var1) <<
+                       "; nlevs(var2) = " << gval.nlevs(var2) << std::endl;
   EXPECT_EQUAL(gval.nlevs(var1), nlevs1);
   EXPECT_EQUAL(gval.nlevs(var2), nlevs2);
+  EXPECT_EQUAL(gval.nprofiles(var1), nprofiles);
+  EXPECT_EQUAL(gval.nprofiles(var2), nprofiles);
 
   /// Set all values for the first level of a 2D variable to an arbitrary number with the
   /// put method. Then check that the get method returns the expected values in each case.
@@ -744,21 +723,6 @@ void testSampledAndReducedFormatsAfterOneStageConstruction() {
   testSampledAndReducedFormats(geovals);
 }
 
-void testSampledAndReducedFormatsAfterTwoStageConstruction() {
-  oops::Variables variables({oops::Variable{"var1_sampled"},
-                             oops::Variable{"var3_sampled_aliased_with_reduced"},
-                             oops::Variable{"var4_sampled_distinct_from_reduced"}});
-  GeoVaLs geovals(createLocationsForFormatsTest(), variables);
-  geovals.allocate(1, variables);
-  oops::Variables reducedVariables({oops::Variable{"var2_reduced"},
-                                    oops::Variable{"var3_sampled_aliased_with_reduced"},
-                                    oops::Variable{"var4_sampled_distinct_from_reduced"}});
-  std::vector<size_t> nReducedLevels{1, 1, 1};
-  geovals.addReducedVars(reducedVariables, nReducedLevels);
-
-  testSampledAndReducedFormats(geovals);
-}
-
 // -----------------------------------------------------------------------------
 
 class GeoVaLs : public oops::Test {
@@ -774,16 +738,14 @@ class GeoVaLs : public oops::Test {
 
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLs")
       { testGeoVaLs(); });
-    ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsAllocatePutGet")
-      { testGeoVaLsAllocatePutGet(); });
+    ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsPutGet")
+      { testGeoVaLsPutGet(); });
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsConstructor")
       { testGeoVaLsConstructor(); });
     ts.emplace_back(CASE("ufo/GeoVaLs/testGeoVaLsWithMultipleSamplingMethods")
       { testGeoVaLsWithMultipleSamplingMethods(); });
     ts.emplace_back(CASE("ufo/GeoVaLs/testSampledAndReducedFormatsAfterOneStageConstruction")
       { testSampledAndReducedFormatsAfterOneStageConstruction(); });
-    ts.emplace_back(CASE("ufo/GeoVaLs/testSampledAndReducedFormatsAfterTwoStageConstruction")
-      { testSampledAndReducedFormatsAfterTwoStageConstruction(); });
   }
 
   void clear() const override {}

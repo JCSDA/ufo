@@ -63,51 +63,6 @@ std::ostream & operator<<(std::ostream &os, GeoVaLFormat format) {
 }
 
 // -----------------------------------------------------------------------------
-/*! \brief Deprecated constructor - does not allocate fields.
- *
- * \details Please do not use this constructor in new code.
- */
-GeoVaLs::GeoVaLs(std::shared_ptr<const ioda::Distribution> dist, const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), dist_(std::move(dist))
-{
-  oops::Log::trace() << "GeoVaLs default constructor starting" << std::endl;
-  ufo_geovals_default_constr_f90(keyGVL_);
-  oops::Log::trace() << "GeoVaLs default constructor end" << std::endl;
-}
-
-// -----------------------------------------------------------------------------
-/*! \brief Deprecated constructor given Locations_ and Variables
- *
- * \details Please do not use in any new code. This constructor is currently
- * only used for ObsDiagnostics and will be removed soon. Use the
- *
- *     GeoVaLs(const Locations_ &, const oops::Variables &, const std::vector<size_t> &)
- *
- * constructor instead.
- * This ufo::GeoVaLs constructor is used to initialize GeoVaLs for specified
- * Locations_ and oops::Variables hold all. Note that nothing is allocated
- * when this constructor is called.
- */
-GeoVaLs::GeoVaLs(const Locations_ & locations, const oops::Variables & vars)
-  : keyGVL_(-1), vars_(vars), dist_(getSharedDistribution(locations))
-{
-  oops::Log::trace() << "GeoVaLs contructor starting" << std::endl;
-
-  size_t nlocs;
-  std::vector<size_t> numPathsByMethod;
-  std::vector<size_t> samplingMethodByVar;
-  std::unique_ptr<bool[]> isSamplingMethodTrivial;
-  fillSetupInputs(locations, nlocs, numPathsByMethod, samplingMethodByVar, isSamplingMethodTrivial);
-  ufo_geovals_partial_setup_f90(keyGVL_, nlocs, vars_, vars_.size(),
-                                numPathsByMethod.size(), samplingMethodByVar.data(),
-                                oops::Variables() /*no reduced variables*/,
-                                isSamplingMethodTrivial.get());
-  setupSamplingMethods(locations);
-
-  oops::Log::trace() << "GeoVaLs contructor key = " << keyGVL_ << std::endl;
-}
-
-// -----------------------------------------------------------------------------
 /*! \brief Constructor allocating space for the storage of specified variables.
  *
  * \param locations
@@ -265,6 +220,7 @@ void GeoVaLs::setupSamplingMethods(const Locations_ & locations) {
   }
 }
 // -----------------------------------------------------------------------------
+// Only for ObsDiagnostics (see GeoVaLs.h)
 void GeoVaLs::allocate(const int & nlevels, const oops::Variables & vars)
 {
   oops::Log::trace() << "GeoVaLs::allocate starting" << std::endl;

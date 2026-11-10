@@ -230,6 +230,46 @@ obs localizations:
     reference value: 0.0
     tolerance: 1.0e-10
 
+  # 3D Gaspari-Cohn (ellipsoid): combined = sqrt((rH/LH)^2 + (rV/LV)^2),
+  # weight = gc99(combined); 0 outside the unit ellipsoid.
+  # LH = 1000 km, LV = 1000 m. Horizontal distance uses atlas Earth
+  # (radius 6371229 m): 5 deg lon at equator ~= 555994.6 m.
+- localization:
+    localization method: 3D Gaspari-Cohn
+    horizontal lengthscale: 1000000.0   # 1000 km
+    vertical lengthscale: 1000.0        # 1000 m
+    ioda vertical coordinate group: MetaData
+    ioda vertical coordinate: height
+  point pair tests:
+    # Same point -> combined = 0 -> gc99(0) = 1.0
+  - p1: [0.0, 0.0, 100.0]
+    p2: [0.0, 0.0, 100.0]
+    reference value: 1.0
+    tolerance: 1.0e-10
+    # Pure horizontal: 5 deg lon, same height. rH/LH = 0.555995
+    # -> gc99(0.555995) ~= 0.1379609
+  - p1: [0.0, 0.0, 100.0]
+    p2: [5.0, 0.0, 100.0]
+    reference value: 0.1379609
+    tolerance: 1.0e-6
+    # Pure vertical: same location, 500 m apart. rV/LV = 0.5
+    # -> gc99(0.5) = 0.2083333
+  - p1: [0.0, 0.0, 0.0]
+    p2: [0.0, 0.0, 500.0]
+    reference value: 0.2083333
+    tolerance: 1.0e-6
+    # Combined: 5 deg lon and 500 m apart.
+    # combined = sqrt(0.555995^2 + 0.5^2) = 0.747750 -> gc99 ~= 0.0170652
+  - p1: [0.0, 0.0, 0.0]
+    p2: [5.0, 0.0, 500.0]
+    reference value: 0.0170652
+    tolerance: 1.0e-6
+    # Outside the unit ellipsoid: 10 deg lon apart -> combined > 1 -> 0.0
+  - p1: [0.0, 0.0, 100.0]
+    p2: [10.0, 0.0, 100.0]
+    reference value: 0.0
+    tolerance: 1.0e-10
+
 # Tests that drive computeLocalization(p1, p2) with Point3 values produced
 # by ObsIterator (rather than hand-built). Verifies the integration of
 # ioda's `iterator vertical coordinate` -> Point3.z -> ObsVertLocalization.

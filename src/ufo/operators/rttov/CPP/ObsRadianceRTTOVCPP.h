@@ -19,6 +19,7 @@
 #include "ufo/ObsOperatorBase.h"
 #include "ufo/operators/rttov/CPP/ObsRadianceRTTOVCPPParameters.h"
 
+#include "eckit/config/Configuration.h"
 #include "rttov/wrapper/RttovSafe.h"
 
 namespace ioda {
@@ -57,8 +58,11 @@ class ObsRadianceRTTOVCPP : public ObsOperatorBase,
   const ioda::ObsSpace& odb_;
   oops::Variables varin_;
   std::string        CoefFileName;
+  std::string        HydrotableName;
   std::vector<int>   channels_;
-  mutable std::size_t        nlevels;  // need this in order to allocate dx
+  mutable std::size_t        nlevels = 0;  // need this in order to allocate dx
+  bool useHydrometeors_;
+  std::vector<std::string> hydrometeorVars_;
 
 // Declare a RttovSafe object for one single sensor
   mutable rttov::RttovSafe  aRttov_ = rttov::RttovSafe();

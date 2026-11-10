@@ -1,0 +1,28 @@
+# A radiance operator reads its coefficients in the configured SpcCoeff_Format.
+# There are no netCDF amsua_n19 coefficient files, so setup must fail on the .nc file.
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+      SpcCoeff_Format: netCDF
+      TauCoeff_Format: netCDF
+  obs space:
+    name: amsua_n19_netcdf
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  expect constructor to throw exception with message: amsua_n19.SpcCoeff.nc

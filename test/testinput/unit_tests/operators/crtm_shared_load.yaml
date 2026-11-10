@@ -1,0 +1,131 @@
+# Shared CRTM coefficient loads (ShareCoefficients, default true).
+# test_ObsOperatorTLAD.x builds and deletes one operator at a time, so each shared
+# load holds one sensor; iasi_metop-b_noshare (ShareCoefficients: false) loads its
+# own coefficients for each call.
+# test_ObsOperatorShared.x keeps all operators alive together, amsua_n19 and iasi_metop-b
+# share one load in which iasi_metop-b is sensor 2
+# Each H(x) is compared with the reference in its obs file (GsiHofX, refHofx),
+# the same as in the single-sensor tests: sharing must not change the answers.
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2023-12-01T03:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+observations:
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: iasi_metop-b
+      EndianType: little_endian
+      CoefficientPath: Data/
+      ReconstructedRadianceCorrection: true
+      CMatrixPath: Data/ufo/testinput_tier_1/resources/auxillary/iasi_cmatrix_and_bias
+    linear obs operator:
+      Absorbers: [H2O,O3]
+      Surfaces: [Water_Temperature,Land_Temperature,Ice_Temperature,Snow_Temperature]
+  obs space:
+    name: iasi_metop-b
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metop-b_pcobs_2023120100.nc4
+    observed variables: [brightnessTemperature]
+    simulated variables: [brightnessTemperature]
+    channels: 1-1997
+  geovals:
+    filename: Data/ufo/testinput_tier_1/iasi_metop-b_pcobs_geovals_2023120100.nc4
+  vector ref: refHofx
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    obs options:
+      Sensor_ID: iasi_metop-b
+      EndianType: little_endian
+      CoefficientPath: Data/
+      ShareCoefficients: false
+      ReconstructedRadianceCorrection: true
+      CMatrixPath: Data/ufo/testinput_tier_1/resources/auxillary/iasi_cmatrix_and_bias
+    linear obs operator:
+      Absorbers: [H2O,O3]
+      Surfaces: [Water_Temperature,Land_Temperature,Ice_Temperature,Snow_Temperature]
+  obs space:
+    name: iasi_metop-b_noshare
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/iasi_metop-b_pcobs_2023120100.nc4
+    observed variables: [brightnessTemperature]
+    simulated variables: [brightnessTemperature]
+    channels: 1-1997
+  geovals:
+    filename: Data/ufo/testinput_tier_1/iasi_metop-b_pcobs_geovals_2023120100.nc4
+  vector ref: refHofx
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 2.0e-3
+    tolerance AD: 1.0e-11
+- obs operator:
+    name: CRTM
+    Absorbers: [H2O,O3,CO2]
+    Clouds: [Water, Ice]
+    Cloud_Fraction: 1.0
+    SurfaceWindGeoVars: uv
+    linear obs operator:
+      Absorbers: [H2O,O3,CO2]
+      Clouds: [Water, Ice]
+    obs options:
+      Sensor_ID: amsua_n19
+      EndianType: little_endian
+      CoefficientPath: Data/
+  obs space:
+    name: amsua_n19_second
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/amsua_n19_obs_2018041500_m_qc.nc4
+    simulated variables: [brightnessTemperature]
+    channels: 1-15
+  geovals:
+    filename: Data/ufo/testinput_tier_1/amsua_n19_geoval_2018041500_m_qc.nc4
+  vector ref: GsiHofX
+  tolerance: 1.e-7
+  linear obs operator test:
+    coef TL: 1.e-3
+    tolerance TL: 1.0e-3
+    tolerance AD: 1.0e-11

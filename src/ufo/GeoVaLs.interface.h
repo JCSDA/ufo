@@ -39,42 +39,6 @@ namespace ufo {
 extern "C" {
   void ufo_geovals_default_constr_f90(F90goms &);
 
-  /// \brief Creates Fortran GeoVaLs without allocating arrays storing GeoVaL values.
-  ///
-  /// Deprecated; use ufo_geovals_setup_f90 instead.
-  ///
-  /// \param key
-  ///   Key of the GeoVaLs object to act on.
-  /// \param nlocs
-  ///   Number of observation locations.
-  /// \param vars
-  ///   Names of the variables to be stored in the new GeoVaLs in the sampled format.
-  /// \param nvars
-  ///   Number of variables in `vars`.
-  /// \param nsampling_methods
-  ///   Number of distinct methods of sampling the observation locations with sets of interpolation
-  ///   paths.
-  /// \param sampling_method_by_var
-  ///   An array of length `nvars` whose ith element is the index of the observation location
-  ///   sampling method producing the set of paths along which the ith variable in `vars` will be
-  ///   interpolated. Valid values are integers from 0 to `nsampling_methods - 1`.
-  /// \param reduced_vars
-  ///   Names of the variables to be stored in the new GeoVaLs in the reduced format.
-  /// \param is_sampling_method_trivial
-  ///   Array of length `nsampling_methods` whose ith element indicates whether the ith sampling
-  ///   method produces a set of interpolation paths sampling all locations exactly once in
-  ///   ascending order.
-  ///
-  /// This call must be followed by calls to ufo_geovals_setup_(trivial_)sampling_method_f90 mapping
-  /// locations to interpolation paths and ufo_geovals_allocate_f90 allocating specific GeoVaLs.
-  void ufo_geovals_partial_setup_f90(F90goms & key, const size_t & nlocs,
-                                     const oops::Variables & vars,
-                                     const size_t & nvars,
-                                     const size_t & nsampling_methods,
-                                     const size_t * sampling_method_by_var,
-                                     const oops::Variables & reduced_vars,
-                                     const bool * is_sampling_method_trivial);
-
   /// \brief Creates and allocates Fortran GeoVaLs.
   ///
   /// \param key
@@ -122,9 +86,9 @@ extern "C" {
                              const size_t & nreduced_vars, const size_t * nreduced_levs,
                              const bool * is_sampling_method_trivial);
 
-  /// Deprecated, rely on ufo_geovals_setup_f90 to allocate GeoVaLs instead.
   /// Allocates GeoVaLs for \p vars variables with \p nlevels number of levels.
-  /// If the GeoVaLs for this variable were allocated before with different size,
+  /// Used by ObsDiagnostics, whose diagnostics are created with zero levels.
+  /// If a variable already has a non-zero number of levels different from \p nlevels,
   /// aborts.
   void ufo_geovals_allocate_f90(const F90goms &, const size_t & nlevels,
                                 const oops::Variables & vars);
