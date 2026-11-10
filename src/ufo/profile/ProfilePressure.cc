@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include <utility>
 
 #include "ufo/profile/ProfilePressure.h"
@@ -21,9 +24,29 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfilePressure::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfilePressure::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Pressure calculations" << std::endl;
+
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_no_pressure_report};
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::obs_derived_air_pressure};
+
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+  }
+
+  void ProfilePressure::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
+    std::vector <bool> &diagFlagsNoPressureSensor =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_no_pressure_report);
+    std::vector <float> &pressures =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_derived_air_pressure);
 
     const int numProfileLevels = profileDataHandler.getNumProfileLevels();
 
@@ -32,9 +55,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_geopotential_height);
     const std::vector <int> &ObsType =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::ObsType);
-    std::vector <bool> &diagFlagsNoPressureSensor =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_no_pressure_report);
-
     if (!oops::allVectorsSameNonZeroSize(zObs, ObsType, diagFlagsNoPressureSensor)) {
       oops::Log::debug() << "At least one vector is the wrong size. "
                          << "Profile pressure routine will not run." << std::endl;
@@ -64,8 +84,6 @@ namespace ufo {
     }
 
     // Retrive the vector of observed pressures.
-    std::vector <float> &pressures =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_derived_air_pressure);
     // If pressures have not been recorded, initialise the vector with missing values.
     if (pressures.empty())
       pressures.assign(numProfileLevels, missingValueFloat);

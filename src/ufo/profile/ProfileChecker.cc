@@ -82,6 +82,8 @@ namespace ufo {
                                  const CheckSubgroup &subGroupChecks,
                                  const bool earlyReturnOnBasicFailed)
   {
+    bool runRemainingChecks = true;
+
     // Run all checks requested
     for (const auto& check : subGroupChecks.checkNames) {
       std::unique_ptr<ProfileCheckBase> profileCheck =
@@ -92,23 +94,28 @@ namespace ufo {
         if (profileCheck->runOnEntireSample() == subGroupChecks.runOnEntireSample) {
           // For checks on the entire sample, reset profile indices
           // prior to looping through the profiles
-          if (profileCheck->runOnEntireSample())
+          if (profileCheck->runOnEntireSample()) {
             profileDataHandler.resetProfileIndices();
-          // Run check
-          profileCheck->runCheck(profileDataHandler);
-          // Actions taken if a single profile was processed.
-          if (!profileCheck->runOnEntireSample()) {
-            // Fill validation information if required
-            if (options_.compareWithOPS.value())
+          }
+          if (runRemainingChecks) {
+            profileCheck->runCheck(profileDataHandler);
+            // Actions taken if a single profile was processed.
+            if (!profileCheck->runOnEntireSample() && options_.compareWithOPS.value()) {
+              // Fill validation information if required
               profileCheck->fillValidationData(profileDataHandler);
-            // Do not proceed if basic checks failed
-            if (earlyReturnOnBasicFailed &&
-                !profileCheck->getResult() &&
-                check == "Basic") {
-              oops::Log::debug() << "Basic checks failed" << std::endl;
-              setBasicCheckResult(false);
-              break;
             }
+            // If basic checks failed, report to other checks that they may
+            // short-circuit
+            if (earlyReturnOnBasicFailed && check == "Basic" &&
+                !profileCheck->getResult()) {
+              setBasicCheckResult(false);
+              runRemainingChecks = false;
+              oops::Log::warning() << "Basic checks failed. Preparing remaining "
+                                    "output columns only."
+                                 << std::endl;
+            }
+          } else {
+            profileCheck->prepareOutputColumns(profileDataHandler);
           }
         }
       } else {

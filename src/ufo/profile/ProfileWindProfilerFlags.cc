@@ -5,8 +5,11 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "ufo/profile/ProfileWindProfilerFlags.h"
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileVariableNames.h"
+#include "ufo/profile/ProfileWindProfilerFlags.h"
 
 namespace ufo {
 
@@ -17,16 +20,28 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileWindProfilerFlags::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileWindProfilerFlags::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Wind profiler flag check" << std::endl;
 
-    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_final_reject_u,
+       ufo::ProfileVariableNames::diagflags_final_reject_v};
 
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileWindProfilerFlags::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <bool> &diagFlagsUFinalReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_u);
     std::vector <bool> &diagFlagsVFinalReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_v);
+
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+
     const std::vector <int> &WinProQualInf =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::qualinf_wind_profiler);
     const std::vector <int> &ObsType =

@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 #include "oops/base/Variables.h"
@@ -48,11 +49,6 @@ namespace ufo {
    public:
     explicit ProfileAverageTemperature(const ConventionalProfileProcessingParameters &options);
 
-    /// Average temperature observations onto model levels and store the results.
-    /// \throws eckit::BadValue if vectors produced by the AveragePressure routine
-    /// are not present.
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// Run this check on the entire sample?
     bool runOnEntireSample() override {return true;}
 
@@ -67,11 +63,24 @@ namespace ufo {
             ufo::ProfileVariableNames::geovals_testreference_air_temperature_qcflags
             });}
 
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Average temperature observations onto model levels and store the results.
+    /// \throws eckit::BadValue if vectors produced by the AveragePressure routine
+    /// are not present.
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
+
    private:
     /// Run check on a profile in the original ObsSpace and
     /// put the averaged data into the corresponding profile in the extended ObsSpace.
     void runCheckOnProfiles(ProfileDataHolder &profileOriginal,
                             ProfileDataHolder &profileExtended);
+
+    std::vector<std::string> variableNamesInt_;
+    std::vector<std::string> variableNamesFloat_;
+    std::vector<std::string> variableNamesBool_;
+    oops::Variables variableNamesGeoVaLs_;
   };
 }  // namespace ufo
 

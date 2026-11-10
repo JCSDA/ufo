@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckBackgroundRelativeHumidity.h"
 
 namespace ufo {
@@ -17,20 +20,29 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundRelativeHumidity::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckBackgroundRelativeHumidity::doPrepareOutputColumns(
+      ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for relative humidity" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const std::vector <float> &rhObs =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_relative_humidity);
-    const std::vector <float> &rhObsErr =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obserr_relative_humidity);
-    const std::vector <float> &rhBkg =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_relative_humidity);
-    const std::vector <float> &rhBkgErr =
-      profileDataHandler.get<float>
-      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_relative_humidity.value());
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::pge_relative_humidity};
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_back_perf_rh,
+       ufo::ProfileVariableNames::diagflags_back_reject_rh,
+       ufo::ProfileVariableNames::diagflags_perm_reject_rh,
+       ufo::ProfileVariableNames::diagflags_final_reject_rh};
+
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckBackgroundRelativeHumidity::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <float> &rhPGE =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::pge_relative_humidity);
     std::vector <bool> &diagFlagsRHBackPerf =
@@ -41,6 +53,16 @@ namespace ufo {
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_rh);
     std::vector <bool> &diagFlagsRHFinalReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_rh);
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector <float> &rhObs =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_relative_humidity);
+    const std::vector <float> &rhObsErr =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obserr_relative_humidity);
+    const std::vector <float> &rhBkg =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_relative_humidity);
+    const std::vector <float> &rhBkgErr =
+      profileDataHandler.get<float>
+      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_relative_humidity.value());
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::extended_obs_space);
     const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)

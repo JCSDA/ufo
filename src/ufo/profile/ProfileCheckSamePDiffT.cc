@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckSamePDiffT.h"
 #include "ufo/profile/ProfileVariableNames.h"
 
@@ -17,9 +20,43 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckSamePDiffT::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckSamePDiffT::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Test for same pressure and different temperature" << std::endl;
+
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_final_reject_t,
+       ufo::ProfileVariableNames::diagflags_interpolation_t};
+    const std::vector<std::string> variableNamesInt =
+      {ufo::ProfileVariableNames::counter_NumAnyErrors,
+       ufo::ProfileVariableNames::counter_NumSamePErrObs};
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::obscorrection_air_temperature};
+
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+    for (const auto &variableInt : variableNamesInt) {
+      profileDataHandler.get<int>(variableInt);
+    }
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+  }
+
+  void ProfileCheckSamePDiffT::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
+    std::vector <bool> &diagFlagsTFinalReject =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
+    std::vector <bool> &diagFlagsTInterpolation =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_t);
+    std::vector <int> &NumAnyErrors =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumAnyErrors);
+    std::vector <int> &NumSamePErrObs =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumSamePErrObs);
+    const std::vector <float> &tObsCorrection =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
+
     int jlevprev = -1;
     int NumErrors = 0;
 
@@ -31,16 +68,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
     const std::vector <float> &tBkg =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
-    std::vector <bool> &diagFlagsTFinalReject =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
-    std::vector <bool> &diagFlagsTInterpolation =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_t);
-    std::vector <int> &NumAnyErrors =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumAnyErrors);
-    std::vector <int> &NumSamePErrObs =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumSamePErrObs);
-    const std::vector <float> &tObsCorrection =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg,
                                          diagFlagsTFinalReject,

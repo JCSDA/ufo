@@ -24,15 +24,18 @@ namespace ufo {
    public:
     explicit ProfileCheckSign(const ConventionalProfileProcessingParameters &options);
 
-    /// Run check
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// This check requires HofX to have been calculated.
     bool requiresHofX() override {return true;}
 
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
       return oops::Variables({ufo::ProfileVariableNames::geovals_pressure});}
+
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Run check
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 

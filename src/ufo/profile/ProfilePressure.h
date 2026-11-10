@@ -39,9 +39,6 @@ namespace ufo {
    public:
     explicit ProfilePressure(const ConventionalProfileProcessingParameters &options);
 
-    /// Run check
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// List of names of required GeoVaLs.
     oops::Variables getGeoVaLNames() override {
       return oops::Variables({oops::Variable
@@ -52,6 +49,12 @@ namespace ufo {
 
     /// Fill variables in validator
     void fillValidationData(ProfileDataHandler &profileDataHandler) override;
+
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Run check
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 

@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckHydrostatic.h"
 #include "ufo/profile/ProfileVariableNames.h"
 
@@ -18,23 +21,43 @@ namespace ufo {
     ProfileStandardLevels(options)
   {}
 
-  void ProfileCheckHydrostatic::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckHydrostatic::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Hydrostatic check" << std::endl;
 
-    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_interpolation_t,
+       ufo::ProfileVariableNames::diagflags_hydro_t,
+       ufo::ProfileVariableNames::diagflags_surface_level_t,
+       ufo::ProfileVariableNames::diagflags_standard_level_t,
+       ufo::ProfileVariableNames::diagflags_final_reject_t,
+       ufo::ProfileVariableNames::diagflags_hydro_z,
+       ufo::ProfileVariableNames::diagflags_data_correct_z,
+       ufo::ProfileVariableNames::diagflags_final_reject_z};
+    const std::vector<std::string> variableNamesInt =
+      {ufo::ProfileVariableNames::counter_NumAnyErrors,
+       ufo::ProfileVariableNames::counter_Num925Miss,
+       ufo::ProfileVariableNames::counter_Num100Miss,
+       ufo::ProfileVariableNames::counter_NumStdMiss,
+       ufo::ProfileVariableNames::counter_NumHydErrObs,
+       ufo::ProfileVariableNames::counter_NumIntHydErrors};
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::obscorrection_air_temperature,
+       ufo::ProfileVariableNames::obscorrection_geopotential_height};
 
-    const std::vector <float> &pressures =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
-    const std::vector <float> &tObs =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
-    const std::vector <float> &tBkg =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
-    const std::vector <float> &zObs =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_geopotential_height);
-    const std::vector <float> &zBkg =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_geopotential_height);
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+    for (const auto &variableInt : variableNamesInt) {
+      profileDataHandler.get<int>(variableInt);
+    }
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+  }
 
+  void ProfileCheckHydrostatic::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <bool> &diagFlagsTInterp =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_t);
     std::vector <bool> &diagFlagsTHydro =
@@ -45,14 +68,12 @@ namespace ufo {
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_standard_level_t);
     std::vector <bool> &diagFlagsTFinalReject =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
-
     std::vector <bool> &diagFlagsZHydro =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_hydro_z);
     std::vector <bool> &diagFlagsZDataCorrect =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_data_correct_z);
     std::vector <bool> &diagFlagsZFinalReject =
        profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_z);
-
     std::vector <int> &NumAnyErrors =
        profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumAnyErrors);
     std::vector <int> &Num925Miss =
@@ -69,6 +90,19 @@ namespace ufo {
        profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
     std::vector <float> &zObsCorrection =
        profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_geopotential_height);
+
+    const int numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector <float> &pressures =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
+    const std::vector <float> &tBkg =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
+    const std::vector <float> &zObs =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_geopotential_height);
+    const std::vector <float> &zBkg =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_geopotential_height);
+
 
     if (!oops::allVectorsSameNonZeroSize(pressures, tObs, tBkg, zObs, zBkg,
                                          diagFlagsTInterp, diagFlagsTHydro,
@@ -389,4 +423,3 @@ namespace ufo {
     profileDataHandler.set(ufo::ProfileVariableNames::HydError, std::move(HydError_));
   }
 }  // namespace ufo
-

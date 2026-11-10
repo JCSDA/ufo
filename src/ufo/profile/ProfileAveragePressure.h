@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <vector>
 
 #include "ufo/profile/ProfileCheckBase.h"
@@ -32,9 +33,6 @@ namespace ufo {
    public:
     explicit ProfileAveragePressure(const ConventionalProfileProcessingParameters &options);
 
-    /// Run check on all profiles.
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
-
     /// Fill variables in validator.
     void fillValidationData(ProfileDataHolder &profileDataHolder,
                             bool extended_obs_space);
@@ -54,6 +52,12 @@ namespace ufo {
             ufo::ProfileVariableNames::geovals_testreference_logP_rho,
             ufo::ProfileVariableNames::geovals_testreference_ExnerP_rho});}
 
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
+    /// Run check on all profiles.
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
+
    private:  // functions
     /// Calculate log(pressure).
     void logPressure(const std::vector <float> &pressures,
@@ -72,6 +76,11 @@ namespace ufo {
     /// put the averaged data into the corresponding profile in the extended ObsSpace.
     void runCheckOnProfiles(ProfileDataHolder &profileOriginal,
                             ProfileDataHolder &profileExtended);
+
+    std::vector<std::string> variableNamesInt_;
+    std::vector<std::string> variableNamesFloat_;
+    std::vector<std::string> variableNamesBool_;
+    oops::Variables variableNamesGeoVaLs_;
   };
 }  // namespace ufo
 

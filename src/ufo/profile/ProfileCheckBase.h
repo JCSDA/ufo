@@ -40,8 +40,16 @@ namespace ufo {
 
     virtual ~ProfileCheckBase() {}
 
-    /// Run check
-    virtual void runCheck(ProfileDataHandler &profileDataHandler) = 0;
+    /// Prepare persistent output columns without performing the check.
+    void prepareOutputColumns(ProfileDataHandler &profileDataHandler) {
+      doPrepareOutputColumns(profileDataHandler);
+    }
+
+    /// Always prepare output columns before performing the check.
+    void runCheck(ProfileDataHandler &profileDataHandler) {
+      prepareOutputColumns(profileDataHandler);
+      doRunCheck(profileDataHandler);
+    }
 
     /// Fill variables in validator using a ProfileDataHandler.
     /// This function will only be called for subclasses of ProfileCheckBase
@@ -70,6 +78,12 @@ namespace ufo {
     virtual oops::Variables getObsDiagNames() {return oops::Variables();}
 
    protected:  // functions
+    /// Fetch variables that must persist to ObsSpace even when the check is skipped.
+    virtual void doPrepareOutputColumns(ProfileDataHandler &) {}
+
+    /// Perform calculations after output columns have been prepared.
+    virtual void doRunCheck(ProfileDataHandler &profileDataHandler) = 0;
+
     /// Apply correction to vector of values
     template <typename T>
       void correctVector(const std::vector <T> &v1,

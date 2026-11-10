@@ -33,8 +33,11 @@ namespace ufo {
    public:
     explicit ProfileWindProfilerFlags(const ConventionalProfileProcessingParameters &options);
 
+   protected:
+    void doPrepareOutputColumns(ProfileDataHandler &profileDataHandler) override;
+
     /// Run check
-    void runCheck(ProfileDataHandler &profileDataHandler) override;
+    void doRunCheck(ProfileDataHandler &profileDataHandler) override;
   };
 }  // namespace ufo
 

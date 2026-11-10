@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckBackgroundGeopotentialHeight.h"
 
 namespace ufo {
@@ -17,9 +20,51 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundGeopotentialHeight::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckBackgroundGeopotentialHeight::doPrepareOutputColumns(
+      ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for geopotential height" << std::endl;
+
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::pge_geopotential_height,
+       ufo::ProfileVariableNames::obscorrection_geopotential_height};
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_interpolation_z,
+       ufo::ProfileVariableNames::diagflags_hydro_z,
+       ufo::ProfileVariableNames::diagflags_back_perf_z,
+       ufo::ProfileVariableNames::diagflags_back_reject_z,
+       ufo::ProfileVariableNames::diagflags_perm_reject_z,
+       ufo::ProfileVariableNames::diagflags_final_reject_z,
+       ufo::ProfileVariableNames::diagflags_surface_level_t};
+
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckBackgroundGeopotentialHeight::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
+    std::vector <float> &zPGE =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::pge_geopotential_height);
+    std::vector <bool> &diagFlagsZInterp =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_z);
+    std::vector <bool> &diagFlagsZHydro =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_hydro_z);
+    std::vector <bool> &diagFlagsZBackPerf =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_back_perf_z);
+    std::vector <bool> &diagFlagsZBackReject =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_back_reject_z);
+    std::vector <bool> &diagFlagsZPermReject =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_z);
+    std::vector <bool> &diagFlagsZFinalReject =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_z);
+    const std::vector <bool> &diagFlagsTSurfaceLevel =
+      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_surface_level_t);
+    const std::vector <float> &zObsCorrection =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_geopotential_height);
 
     const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
     const std::vector <float> &Zstation =
@@ -32,27 +77,6 @@ namespace ufo {
       profileDataHandler.get<float>(ufo::ProfileVariableNames::obserr_geopotential_height);
     const std::vector <float> &zBkg =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_geopotential_height);
-    std::vector <float> &zPGE =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::pge_geopotential_height);
-    std::vector <bool> &diagFlagsZInterp =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_interpolation_z);
-    std::vector <bool> &diagFlagsZHydro =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_hydro_z);
-
-    std::vector <bool> &diagFlagsZBackPerf =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_back_perf_z);
-    std::vector <bool> &diagFlagsZBackReject =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_back_reject_z);
-    std::vector <bool> &diagFlagsZPermReject =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_z);
-    std::vector <bool> &diagFlagsZFinalReject =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_z);
-
-
-    const std::vector <bool> &diagFlagsTSurfaceLevel =
-      profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_surface_level_t);
-    const std::vector <float> &zObsCorrection =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_geopotential_height);
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::extended_obs_space);
     const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)

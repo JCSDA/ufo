@@ -8,6 +8,7 @@
 #ifndef TEST_UFO_CONVENTIONALPROFILEPROCESSING_H_
 #define TEST_UFO_CONVENTIONALPROFILEPROCESSING_H_
 
+#include <algorithm>
 #include <iomanip>
 #include <map>
 #include <memory>
@@ -34,6 +35,7 @@
 #include "ufo/filters/ConventionalProfileProcessing.h"
 #include "ufo/filters/ConventionalProfileProcessingParameters.h"
 #include "ufo/filters/ObsFilterData.h"
+#include "ufo/filters/processWhere.h"
 #include "ufo/filters/Variables.h"
 #include "ufo/GeoVaLs.h"
 #include "ufo/ObsDiagnostics.h"
@@ -44,6 +46,7 @@
 #include "ufo/profile/ProfileCheckBackgroundTemperature.h"
 #include "ufo/profile/ProfileCheckBackgroundWindSpeed.h"
 #include "ufo/profile/ProfileCheckBase.h"
+#include "ufo/profile/ProfileCheckBasic.h"
 #include "ufo/profile/ProfileCheckTime.h"
 #include "ufo/profile/ProfileCheckUInterp.h"
 
@@ -56,6 +59,53 @@
 namespace ufo {
 namespace test {
 
+// Bare minimum check for testing the wrapper interface in ProfileCheckBase
+class ProfileCheckExecutionProbe : public ProfileCheckBase {
+ public:
+  ProfileCheckExecutionProbe(const ConventionalProfileProcessingParameters &options,
+                            bool entireSample)
+    : ProfileCheckBase(options), entireSample_(entireSample) {}
+
+  bool runOnEntireSample() override {return entireSample_;}
+
+  const std::vector<std::string> &events() const {return events_;}
+
+ protected:
+  void doPrepareOutputColumns(ProfileDataHandler &) override {
+    events_.push_back("prepare");
+  }
+
+  void doRunCheck(ProfileDataHandler &) override {
+    events_.push_back("run");
+  }
+
+ private:
+  bool entireSample_;
+  std::vector<std::string> events_;
+};
+
+// Verify that the public methods exposed by ProfileCheckBase adhere
+// to the wrapper contract.
+// i.e. prepareOutputColumns() should only "prepare," while
+// runChecks() should "prepare" and "run"
+void testProfileCheckExecution(ProfileDataHandler &data,
+                               const ConventionalProfileProcessingParameters &options) {
+  for (const bool entireSample : {false, true}) {
+    ProfileCheckExecutionProbe probe(options, entireSample);
+    ProfileCheckBase &check = probe;
+
+    check.prepareOutputColumns(data);
+    EXPECT(probe.events() == std::vector<std::string>({"prepare"}));
+
+    check.runCheck(data);
+    EXPECT(probe.events() == std::vector<std::string>({"prepare", "prepare", "run"}));
+
+    ProfileCheckExecutionProbe freshProbe(options, entireSample);
+    freshProbe.runCheck(data);
+    EXPECT(freshProbe.events() == std::vector<std::string>({"prepare", "run"}));
+  }
+}
+
 // Function to verify that column schema is the same on both empty
 // and non-empty ranks.
 void expectSameOutputColumnsOnAllRanks(const ioda::ObsSpace &obsspace,
@@ -65,7 +115,7 @@ void expectSameOutputColumnsOnAllRanks(const ioda::ObsSpace &obsspace,
   // If there's only one rank, nothing to compare so skip
   if (comm.size() == 1) {
     std::string msg =
-        "Current test only runs on 1 MPI rank. Skipping testing that "
+        "Current test only running on 1 MPI rank. Skipping testing that "
         "column schema are the same on all ranks. Consider removing "
         "\'CheckColumnSchemaAcrossRanks: true\' from your yaml.";
     oops::Log::info() << msg << std::endl;
@@ -82,8 +132,8 @@ void expectSameOutputColumnsOnAllRanks(const ioda::ObsSpace &obsspace,
   }
 
   // Verify that test case has both empty and non-empty ranks before testing
-  // (enabled by default).
-  // To disable this check, add `ExpectEmptyAndNonEmptyRanks: false` to your yaml.
+  // (disabled by default).
+  // To enable this check, add `ExpectEmptyAndNonEmptyRanks: true` to your yaml.
   if (expectEmptyAndNonEmptyRanks) {
     bool hasEmptyRank = false;
     bool hasPopulatedRank = false;
@@ -91,8 +141,13 @@ void expectSameOutputColumnsOnAllRanks(const ioda::ObsSpace &obsspace,
       hasEmptyRank = hasEmptyRank || nlocs == 0;
       hasPopulatedRank = hasPopulatedRank || nlocs > 0;
     }
-    EXPECT(hasEmptyRank);
-    EXPECT(hasPopulatedRank);
+    if (!hasEmptyRank || !hasPopulatedRank) {
+      throw eckit::UserError(
+          "ConventionalProfileProcessing::expectSameOutputColumnsOnAllRanks "
+          "with expectEmptyAndNonEmptyRanks:true requires some MPI tasks with "
+          "locations and some without.",
+          Here());
+    }
   }
 
   // Compare each rank's ordered variable list with rank 0's list.
@@ -102,6 +157,87 @@ void expectSameOutputColumnsOnAllRanks(const ioda::ObsSpace &obsspace,
     rankZeroColumns = oops::Variables(localColumns);
   oops::mpi::broadcast(comm, rankZeroColumns, 0);
   EXPECT(rankZeroColumns.variables() == localColumns);
+}
+
+// Verify that the expected combination of passing and failing profiles are
+// present in the ObsSpaces. Throws if the user specified expected combination
+// is not found in the input file with the current YAML settings.
+void expectBasicCheckResults(
+    ioda::ObsSpace &obsspace,
+    const ObsFilterData &filterdata,
+    const Variables &filtervars,
+    ioda::ObsDataVector<int> &qcflags,
+    const ConventionalProfileProcessingParameters &options,
+    const bool expectMixedResults) {
+  const std::vector<bool> apply =
+    processWhere(options.where, filterdata, options.whereOperator);
+  std::vector<std::vector<bool>> flagged;
+  ProfileDataHandler profileDataHandler(filterdata,
+                                        qcflags,
+                                        options.DHParameters,
+                                        apply,
+                                        filtervars,
+                                        flagged);
+  int passed = 0;
+  int failed = 0;
+  for (size_t jprof = 0; jprof < obsspace.nrecs(); ++jprof) {
+    profileDataHandler.initialiseNextProfile();
+    ProfileCheckBasic basicCheck(options);
+    basicCheck.runCheck(profileDataHandler);
+    if (basicCheck.getResult())
+      ++passed;
+    else
+      ++failed;
+  }
+
+  std::vector<int> passingRanks{static_cast<int>(passed > 0)};
+  std::vector<int> failingRanks{static_cast<int>(failed > 0)};
+  oops::mpi::allGatherv(obsspace.comm(), passingRanks);
+  oops::mpi::allGatherv(obsspace.comm(), failingRanks);
+  const bool existsPassingRanks =
+      std::count(passingRanks.begin(), passingRanks.end(), 1) > 0;
+  const bool existsFailingRanks =
+      std::count(failingRanks.begin(), failingRanks.end(), 1) > 0;
+
+  if (!existsFailingRanks) {
+    std::string msg =
+        "YAML option [ExpectBasicCheckFailure: true] requires all profiles on "
+        "at least one populated rank to fail Basic checks. Current input data "
+        "and YAML settings do not produce this scenario.";
+    throw eckit::UserError(msg, Here());
+  }
+  if (expectMixedResults) {
+    if (!existsPassingRanks) {
+      std::string msg =
+          "YAML option [ExpectBasicPassAndFailure: true] requires at least one "
+          "profile to pass Basic checks, in addition to all profiles failing "
+          "on at least one populated rank. Current input data and YAML "
+          "settings do not produce this scenario.";
+      throw eckit::UserError(msg, Here());
+    }
+    bool populatedRankWithOnlyFailures = false;
+    for (size_t rank = 0; rank < passingRanks.size(); ++rank) {
+      populatedRankWithOnlyFailures =
+          populatedRankWithOnlyFailures ||
+          (failingRanks[rank] && !passingRanks[rank]);
+    }
+    if (!populatedRankWithOnlyFailures) {
+      std::string msg =
+          "YAML option [ExpectBasicPassAndFailure: true] requires all profiles "
+          "to fail Basic checks on at least one populated rank, in addition "
+          "to one profile passing on some other rank. Current input data and "
+          "YAML settings do not produce this scenario.";
+      throw eckit::UserError(msg, Here());
+    }
+  } else {
+    if (std::count(passingRanks.begin(), passingRanks.end(), 1) != 0) {
+      std::string msg =
+          "YAML option [ExpectBasicPassAndFailure: false (default)] requires "
+          "all profiles across all ranks to fail Basic checks. Current input "
+          "data and YAML settings do not produce this scenario.";
+      throw eckit::UserError(msg, Here());
+    }
+  }
 }
 
 void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
@@ -132,6 +268,41 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   const eckit::LocalConfiguration filterConf(conf, "Conventional Profile Processing");
   ufo::ConventionalProfileProcessingParameters filterParameters;
   filterParameters.validateAndDeserialize(filterConf);
+
+  // Set to true if the user requires Basic to fail for some number of profiles.
+  const bool expectBasicCheckFailure =
+      conf.getBool("ExpectBasicCheckFailure", false);
+
+  if (expectBasicCheckFailure) {
+    // When ExpectBasicCheckFailure is true, ExpectMixedBasicResults indicates
+    // whether the user requires Basic checks to pass for any number of
+    // profiles.
+    // -- true: Basic should fail for every profile on at least one populated
+    // rank, but some rank should have a passing profile.
+    // -- false: Basic should fail for every profile on all ranks. Empty ranks
+    // are allowed, but some rank should have a failing profile.
+    const bool expectMixedBasicResults =
+        conf.getBool("ExpectBasicPassAndFailure", false);
+    expectBasicCheckResults(obsspace, filterdata, filtervars, qcflags,
+                            filterParameters, expectMixedBasicResults);
+  }
+
+  // Set up variable for checkTimeWindRejection
+  const bool checkTimeWindRejection = conf.has("ExpectTimeCheckWindRejection");
+  if (checkTimeWindRejection) {
+    // Start from clear flags so the post-filter assertion measures this execution.
+    const std::vector<bool> clearFlags(obsspace.nlocs(), false);
+    for (const std::string variable : {"windEastward", "windNorthward"})
+      obsspace.put_db("DiagnosticFlags/PermanentStationRejection", variable, clearFlags);
+  }
+
+  // Verify whether ProfileCheckBase is adhering to the wrapper contract
+  // See testProfileCheckExecution() for more details.
+  std::vector<bool> apply(obsspace.nlocs(), true);
+  std::vector<std::vector<bool>> flagged;
+  ProfileDataHandler profileDataHandler(filterdata, qcflags, filterParameters.DHParameters,
+                                          apply, filtervars, flagged);
+  testProfileCheckExecution(profileDataHandler, filterParameters);
 
   // Determine whether an exception is expected to be thrown.
   // Exceptions can be thrown in the following places:
@@ -176,8 +347,23 @@ void testConventionalProfileProcessing(const eckit::LocalConfiguration &conf) {
   }
   filter.postFilter(*geovals, hofx, bias, obsdiags);
 
+  // if ExpectTimeCheckWindRejection: true in the test yaml, we expect
+  // the eastward wind surface-level to exist and that each wind component
+  // has at least one rejection globally (i.e. on any rank)
+  if (checkTimeWindRejection) {
+    EXPECT(obsspace.has("DiagnosticFlags/SurfaceLevelInAscent", "windEastward"));
+    for (const std::string variable : {"windEastward", "windNorthward"}) {
+      std::vector<bool> flags;
+      obsspace.get_db("DiagnosticFlags/PermanentStationRejection", variable, flags);
+      std::vector<int> counts{static_cast<int>(std::count(flags.begin(), flags.end(), true))};
+      oops::mpi::allGatherv(obsspace.comm(), counts);
+      const bool anyRejected = std::any_of(counts.begin(), counts.end(),
+                                           [](int count) { return count > 0; });
+      EXPECT_EQUAL(anyRejected, conf.getBool("ExpectTimeCheckWindRejection"));
+    }
+  }
   if (conf.getBool("CheckColumnSchemaAcrossRanks", false)) {
-    bool expectEmptyAndNonEmptyRanks = conf.getBool("ExpectEmptyAndNonEmptyRanks", true);
+    bool expectEmptyAndNonEmptyRanks = conf.getBool("ExpectEmptyAndNonEmptyRanks", false);
     expectSameOutputColumnsOnAllRanks(obsspace, expectEmptyAndNonEmptyRanks);
   }
 

@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckBackgroundTemperature.h"
 
 namespace ufo {
@@ -17,27 +20,35 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBackgroundTemperature::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckBackgroundTemperature::doPrepareOutputColumns(
+      ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Background check for temperature" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const std::vector <float> &Latitude =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::Latitude);
-    const std::vector <float> &pressures =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
-    const std::vector <float> &tObs =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
-    const std::vector <float> &tObsErr =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::obserr_air_temperature);
-    const std::vector <float> &tBkg =
-      profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
-    const std::vector <float> &tBkgErr =
-      profileDataHandler.get<float>
-      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_air_temperature.value());
+    const std::vector<std::string> variableNamesFloat =
+      {ufo::ProfileVariableNames::pge_air_temperature,
+       ufo::ProfileVariableNames::obscorrection_air_temperature};
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_superadiabat_t,
+       ufo::ProfileVariableNames::diagflags_interpolation_t,
+       ufo::ProfileVariableNames::diagflags_hydro_t,
+       ufo::ProfileVariableNames::diagflags_back_perf_t,
+       ufo::ProfileVariableNames::diagflags_back_reject_t,
+       ufo::ProfileVariableNames::diagflags_perm_reject_t,
+       ufo::ProfileVariableNames::diagflags_final_reject_t};
+
+    for (const auto &variableFloat : variableNamesFloat) {
+      profileDataHandler.get<float>(variableFloat);
+    }
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckBackgroundTemperature::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <float> &tPGE =
       profileDataHandler.get<float>(ufo::ProfileVariableNames::pge_air_temperature);
-
     std::vector <bool> &diagFlagsTSuperadiabat =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_superadiabat_t);
     std::vector <bool> &diagFlagsTInterp =
@@ -52,9 +63,22 @@ namespace ufo {
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_t);
     std::vector <bool> &diagFlagsTFinalReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_final_reject_t);
-
     const std::vector <float> &tObsCorrection =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obscorrection_air_temperature);
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
+    const std::vector <float> &Latitude =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::Latitude);
+    const std::vector <float> &pressures =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
+    const std::vector <float> &tObs =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_temperature);
+    const std::vector <float> &tObsErr =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::obserr_air_temperature);
+    const std::vector <float> &tBkg =
+      profileDataHandler.get<float>(ufo::ProfileVariableNames::hofx_air_temperature);
+    const std::vector <float> &tBkgErr =
+      profileDataHandler.get<float>
+      (options_.bkgErrGroup.value() + "/" + options_.bkgErrName_air_temperature.value());
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::extended_obs_space);
     const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)

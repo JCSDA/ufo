@@ -177,7 +177,6 @@ namespace ufo {
           oops::Log::debug() << "Station ID: " << station_ID[0] << std::endl;
       }
 
-      // Run checks
       profileChecker.runChecks(profileDataHandler,
                                subGroupChecks);
 
@@ -203,8 +202,7 @@ namespace ufo {
     oops::Log::debug() << "Running checks on entire profile sample..." << std::endl;
 
     // Run checks
-    profileChecker.runChecks(profileDataHandler,
-                             subGroupChecks);
+    profileChecker.runChecks(profileDataHandler, subGroupChecks);
 
     // Write various quantities to the obsdb.
     profileDataHandler.writeQuantitiesToObsdb();
@@ -239,26 +237,27 @@ namespace ufo {
     // In order to ensure this code works for MPI ranks without any observations,
     // run the Basic checks for all profiles on this rank.
     // Aggregate the results for this rank.
-    const bool basicResultLogicalOr = basicProfileChecks(profileDataHandler,
-                                                         profileChecker);
+    const bool basicResultLogicalOr =
+        basicProfileChecks(profileDataHandler, profileChecker);
 
     // Gather the results from all ranks onto this rank.
     std::vector<int> vBasicCheckResult{static_cast<int>(basicResultLogicalOr)};
     oops::mpi::allGatherv(obsdb_.comm(), vBasicCheckResult);
 
-    // If any of the Basic checks passed, a failing Basic check for an empty ObsSpace
-    // does not result in the remaining checks being skipped.
+    // If any of the Basic checks passed, a failing Basic check for an empty
+    // ObsSpace does not result in the remaining checks being skipped.
     const bool earlyReturnOnBasicFailed =
-      std::all_of(vBasicCheckResult.cbegin(), vBasicCheckResult.cend(),
-                  [](int i){return i == 0;});
+        std::all_of(vBasicCheckResult.cbegin(), vBasicCheckResult.cend(),
+                    [](int i) { return i == 0; });
 
     // Loop over each check subgroup in turn.
     const auto checkSubgroups = profileChecker.getCheckSubgroups();
     for (const auto& checkSubgroup : checkSubgroups) {
       if (obsdb_.nlocs() == 0) {
         // Run checks on MPI ranks with zero ObsSpace locations.
-        // The behaviour when the Basic check is failed depends on whether
-        // any of the Basic checks (for all profiles on all ranks) passed.
+        // The aggregated Basic result (across all ranks and profiles)
+        // determines whether individual checks run or only prepare their output
+        // columns.
         emptyObsSpaceChecks(profileDataHandler,
                             profileChecker,
                             checkSubgroup,

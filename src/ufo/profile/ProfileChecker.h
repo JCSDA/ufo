@@ -42,9 +42,9 @@ namespace ufo {
     typedef std::vector <CheckSubgroup> CheckSubgroupList;
 
     /// Run all checks requested.
-    /// By default, if the Basic check fails, no further checks are performed.
-    /// This can be overridden by setting the `earlyReturnOnBasicFailed` parameter
-    /// to `false`.
+    /// Individual checks prepare their outputs but skip processing if Basic
+    /// checks failed and they are in the same subgroup as Basic.
+    /// Set earlyReturnOnBasicFailed to false to run calculations regardless.
     void runChecks(ProfileDataHandler &profileDataHandler,
                    const CheckSubgroup &subGroupChecks,
                    const bool earlyReturnOnBasicFailed = true);

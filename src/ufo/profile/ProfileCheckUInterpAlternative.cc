@@ -22,56 +22,60 @@ namespace ufo {
     ProfileStandardLevels(options)
   {}
 
-  void ProfileCheckUInterpAlternative::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckUInterpAlternative::doPrepareOutputColumns(
+      ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Alternative U interpolation check" << std::endl;
 
-    // Produce vector of profiles containing data for the alternative U interpolation check.
-    std::vector <std::string> variableNamesInt =
+    /// Produce vector of profiles containing data for the alternative U interpolation check.
+    variableNamesInt_ =
       {ufo::ProfileVariableNames::counter_NumSamePErrObs,
        ufo::ProfileVariableNames::counter_NumInterpErrObs,
        ufo::ProfileVariableNames::extended_obs_space};
-    std::vector <std::string> variableNamesFloat =
+    variableNamesFloat_ =
       {ufo::ProfileVariableNames::obs_air_pressure,
        ufo::ProfileVariableNames::obs_eastward_wind,
        ufo::ProfileVariableNames::obs_northward_wind};
-    std::vector<std::string> variableNamesBool = {
+    variableNamesBool_ = {
       ufo::ProfileVariableNames::diagflags_interpolation_u,
       ufo::ProfileVariableNames::diagflags_standard_level_u};
     if (options_.compareWithOPS.value()) {
-      variableNamesInt.insert(variableNamesInt.end(),
+      variableNamesInt_.insert(variableNamesInt_.end(),
                               {ufo::ProfileVariableNames::StdLev,
                                   ufo::ProfileVariableNames::SigAbove,
                                   ufo::ProfileVariableNames::SigBelow,
                                   ufo::ProfileVariableNames::LevErrors,
                                   ufo::ProfileVariableNames::NumStd,
                                   ufo::ProfileVariableNames::NumSig});
-      variableNamesFloat.insert(variableNamesFloat.end(),
+      variableNamesFloat_.insert(variableNamesFloat_.end(),
                                 {ufo::ProfileVariableNames::uInterp,
                                     ufo::ProfileVariableNames::vInterp,
                                     ufo::ProfileVariableNames::LogP});
     }
 
     // Ensure variables are added to the ObsSpace on ranks with zero obs.
-    for (const auto &variable : variableNamesInt) {
+    for (const auto &variable : variableNamesInt_) {
       profileDataHandler.get<int>(variable);
     }
-    for (const auto &variable : variableNamesFloat) {
+    for (const auto &variable : variableNamesFloat_) {
       profileDataHandler.get<float>(variable);
     }
-    for (const auto &variable : variableNamesBool) {
+    for (const auto &variable : variableNamesBool_) {
       profileDataHandler.get<bool>(variable);
     }
     profileDataHandler.get<bool>(
         ufo::ProfileVariableNames::diagflags_final_reject_report);
     profileDataHandler.get<int>(ufo::ProfileVariableNames::counter_NumAnyErrors);
+  }
 
+  void ProfileCheckUInterpAlternative::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <ProfileDataHolder> profiles =
       profileDataHandler.produceProfileVector
-      (variableNamesInt,
-       variableNamesFloat,
+      (variableNamesInt_,
+       variableNamesFloat_,
        {},
-       variableNamesBool,
+       variableNamesBool_,
        {});
 
     // Run alternative U interpolation check on each original profile.

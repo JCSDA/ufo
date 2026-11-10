@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include "ufo/profile/ProfileCheckBasic.h"
 #include "ufo/profile/ProfileVariableNames.h"
 
@@ -16,7 +19,23 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckBasic::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckBasic::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
+  {
+    if (options_.BChecks_Skip.value())
+      return;
+
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_final_reject_t,
+       ufo::ProfileVariableNames::diagflags_final_reject_u,
+       ufo::ProfileVariableNames::diagflags_final_reject_v,
+       ufo::ProfileVariableNames::diagflags_final_reject_rh};
+
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckBasic::doRunCheck(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Basic checks" << std::endl;
 

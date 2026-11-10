@@ -5,6 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
+#include <vector>
+
 #include <set>
 #include <utility>
 
@@ -20,21 +23,35 @@ namespace ufo {
     : ProfileCheckBase(options)
   {}
 
-  void ProfileCheckTime::runCheck(ProfileDataHandler &profileDataHandler)
+  void ProfileCheckTime::doPrepareOutputColumns(ProfileDataHandler &profileDataHandler)
   {
     oops::Log::debug() << " Time check" << std::endl;
 
-    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
-    const std::vector <int> &ObsType =
-      profileDataHandler.get<int>(ufo::ProfileVariableNames::ObsType);
-    const std::vector <float> &pressures =
-       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
+    const std::vector<std::string> variableNamesBool =
+      {ufo::ProfileVariableNames::diagflags_surface_level_u,
+       ufo::ProfileVariableNames::diagflags_perm_reject_u,
+       ufo::ProfileVariableNames::diagflags_perm_reject_v};
+
+    for (const auto &variableBool : variableNamesBool) {
+      profileDataHandler.get<bool>(variableBool);
+    }
+  }
+
+  void ProfileCheckTime::doRunCheck(ProfileDataHandler &profileDataHandler)
+  {
     std::vector <bool> &diagFlagsUSurfaceLevel =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_surface_level_u);
     std::vector <bool> &diagFlagsUPermReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_u);
     std::vector <bool> &diagFlagsVPermReject =
       profileDataHandler.get<bool>(ufo::ProfileVariableNames::diagflags_perm_reject_v);
+
+    const size_t numProfileLevels = profileDataHandler.getNumProfileLevels();
+
+    const std::vector <int> &ObsType =
+      profileDataHandler.get<int>(ufo::ProfileVariableNames::ObsType);
+    const std::vector <float> &pressures =
+       profileDataHandler.get<float>(ufo::ProfileVariableNames::obs_air_pressure);
     const std::vector <int> &extended_obs_space =
       profileDataHandler.get<int>(ufo::ProfileVariableNames::extended_obs_space);
     const bool ModelLevels = std::find(extended_obs_space.begin(), extended_obs_space.end(), 1)
