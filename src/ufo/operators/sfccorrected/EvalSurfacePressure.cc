@@ -314,7 +314,7 @@ void stationPressure_UKMO::simobs(const ufo::GeoVaLs & gv,
   const bool convertLevel1GeopotentialHeight =
       isGeopotentialHeightVariable(params_.geovarGeomZ.value());
 
-  const double height_used = 2000.0;
+  const double height_above_surface = 2000.0;
   int index = 0;
   double weight = 0.0;
   double power_exponent = ( (ufo::Constants::Lclr * ufo::Constants::rd) / ufo::Constants::grav);
@@ -335,9 +335,11 @@ void stationPressure_UKMO::simobs(const ufo::GeoVaLs & gv,
       if (convertLevel1GeopotentialHeight) {
         convertToGeometricHeight(obs_lats[iloc], model_height_level1);
       }
+      const double height_used = static_cast<double>(model_height_surface[iloc]) +
+                                 height_above_surface;
       vert_interp_weights_f90(model_nlevs, height_used, model_height_level1.data(),
                               index, weight);
-      // Vertical interpolation to get model pressure and temperature at 2000 m
+      // Vertical interpolation to get model pressure and temperature at 2000 m above surface
       vert_interp_apply_f90(model_nlevs, model_pressure.data(),
                             adjusted_model_pressure_2000m[iloc], index, weight);
       vert_interp_apply_f90(model_nlevs, model_virtual_T.data(),
