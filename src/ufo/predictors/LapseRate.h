@@ -8,12 +8,11 @@
 #ifndef UFO_PREDICTORS_LAPSERATE_H_
 #define UFO_PREDICTORS_LAPSERATE_H_
 
-#include <map>
 #include <string>
 
 #include "oops/util/parameters/OptionalParameter.h"
-#include "oops/util/parameters/RequiredParameter.h"
 
+#include "ufo/predictors/LapseRateHelper.h"
 #include "ufo/predictors/PredictorBase.h"
 
 namespace oops {
@@ -33,8 +32,7 @@ class LapseRateParameters : public PredictorParametersBase {
   OOPS_CONCRETE_PARAMETERS(LapseRateParameters, PredictorParametersBase);
 
  public:
-  /// Path to an input file.
-  oops::RequiredParameter<std::string> tlapse{"tlapse", this};
+  LapseRateMeanParameters lapseMean{this};
 
   /// Power to which to raise the lapse rate. By default, 1.
   ///
@@ -60,7 +58,7 @@ class LapseRate : public PredictorBase {
                ioda::ObsVector &) const override;
 
  private:
-  std::map<int, float> tlapmean_;  // <channel, tlaps>
+  LapseRateHelper lapseHelper_;
   int order_;
 };
 
