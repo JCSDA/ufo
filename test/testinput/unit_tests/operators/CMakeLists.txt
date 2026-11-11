@@ -1994,6 +1994,42 @@ endif( crtm_FOUND )
 
 if( ${rttov_FOUND} )
 
+ufo_add_test( NAME    opr_atms_rttov_no_channels
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_no_channels${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    linopr_atms_rttov_no_channels
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_no_channels${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+ufo_add_test( NAME    opr_atms_rttov_no_channels_2mpi
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_no_channels${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+ufo_add_test( NAME    linopr_atms_rttov_no_channels_2mpi
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_no_channels${RTTOV_VERSION_SUFFIX}.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
 # RTTOVCPP tests (optional, controlled by ENABLE_RTTOVCPP_TESTS option)
 if(ENABLE_RTTOVCPP_TESTS)
     ufo_add_test( NAME    opr_amsua_rttovcpp

@@ -426,115 +426,116 @@ contains
       ! --------------------------------------------------------------------------
       ! Call RTTOV K model
       ! --------------------------------------------------------------------------
+      if (nchan_sim > 0) then
+        call rttov_k( errorstatus,                                                      &
+                      self % conf % rttov_opts,                                         &
+                      self % conf % rttov_coef_array(sensor_index),                     &
+                      chanprof(1:nchan_sim),                                            &
+                      self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1), &
+                      self % RTProf_K % profiles_k(nchan_total+1:nchan_total+nchan_sim),&
+                      self % RTProf_K % emissivity,                                     &
+                      self % RTProf_K % emissivity_k,                                   &
+                      self % RTProf_K % transmission,                                   &
+                      self % RTProf_K % transmission_k,                                 &
+                      self % RTProf_K % radiance,                                       &
+                      self % RTProf_K % radiance_k )
 
-      call rttov_k( errorstatus,                                                      &
-                    self % conf % rttov_opts,                                         &
-                    self % conf % rttov_coef_array(sensor_index),                     &
-                    chanprof(1:nchan_sim),                                            &
-                    self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1), &
-                    self % RTProf_K % profiles_k(nchan_total+1:nchan_total+nchan_sim),&
-                    self % RTProf_K % emissivity,                                     &
-                    self % RTProf_K % emissivity_k,                                   &
-                    self % RTProf_K % transmission,                                   &
-                    self % RTProf_K % transmission_k,                                 &
-                    self % RTProf_K % radiance,                                       &
-                    self % RTProf_K % radiance_k )
-
-      if (self % conf % read_Cmatrix) then
-        jacobian_needed_rr = .true.
-        call self % reconradop % hofx_jac_calc(self % RTprof_K, self % conf, chanprof(1:nchan_sim), prof_start, jacobian_needed_rr)
-      end if
-
-      if(self % conf % SatRad_compatibility) then
-        ! Zero jacobians if the humidity had been set to the minimum threshold
-        if (self % conf % UseMinimumQ) then
-          do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
-            iprof = prof_start + chanprof(ichan) % prof - 1
-            ! Humidity profile
-            do ilev = 1, self % nlevels
-              if (self % RTProf_K % q_profile_reset(iprof, ilev)) then
-                do localchan = 1, self % RTprof_K % nchan_inst
-                  self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) % q(ilev) = zero
-                end do
-              end if
-            end do
-          end do
+        if (self % conf % read_Cmatrix) then
+          jacobian_needed_rr = .true.
+          call self % reconradop % hofx_jac_calc(self % RTprof_K, self % conf, chanprof(1:nchan_sim), prof_start, jacobian_needed_rr)
         end if
 
-        ! Zero jacobians if selected variables had been set to the minimum threshold
-        do ivar = 1, size(self % varin)
-          varname = self % varin(ivar)
-          select case (trim(varname))
-
-            ! cloud liquid water
-            case(var_clw)
-              if (self % conf % UseMinimumClw .or. self % conf % MWScattZeroJacPress > 0.0) then
-                do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
-                  iprof = prof_start + chanprof(ichan) % prof - 1
-                  do ilev = 1, self % nlevels
-                    if (self % RTProf_K % clw_profile_reset(iprof, ilev)) then
-                      do localchan = 1, self % RTprof_K % nchan_inst
-                        if (self % conf % do_mw_scatt) then
-                          self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
-                            % hydro(self % conf % rttov_hydro_index_clw, ilev) = zero
-                        else
-                          self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
-                            % clw(ilev) = zero
-                        end if
-                      end do
-                    end if
+        if(self % conf % SatRad_compatibility) then
+          ! Zero jacobians if the humidity had been set to the minimum threshold
+          if (self % conf % UseMinimumQ) then
+            do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+              iprof = prof_start + chanprof(ichan) % prof - 1
+              ! Humidity profile
+              do ilev = 1, self % nlevels
+                if (self % RTProf_K % q_profile_reset(iprof, ilev)) then
+                  do localchan = 1, self % RTprof_K % nchan_inst
+                    self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) % q(ilev) = zero
                   end do
-                end do
-              end if
+                end if
+              end do
+            end do
+          end if
 
-            ! cloud ice
-            case(var_cli)
-              if (self % conf % UseMinimumCiw .or. self % conf % MWScattZeroJacPress > 0.0) then
-                if (self % conf % do_mw_scatt) then
+          ! Zero jacobians if selected variables had been set to the minimum threshold
+          do ivar = 1, size(self % varin)
+            varname = self % varin(ivar)
+            select case (trim(varname))
+
+              ! cloud liquid water
+              case(var_clw)
+                if (self % conf % UseMinimumClw .or. self % conf % MWScattZeroJacPress > 0.0) then
                   do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
                     iprof = prof_start + chanprof(ichan) % prof - 1
                     do ilev = 1, self % nlevels
-                      if (self % RTProf_K % ciw_profile_reset(iprof, ilev)) then
+                      if (self % RTProf_K % clw_profile_reset(iprof, ilev)) then
                         do localchan = 1, self % RTprof_K % nchan_inst
-                          self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
-                                          % hydro(self % conf % rttov_hydro_index_ciw, ilev) = zero
+                          if (self % conf % do_mw_scatt) then
+                            self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
+                              % hydro(self % conf % rttov_hydro_index_clw, ilev) = zero
+                          else
+                            self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
+                              % clw(ilev) = zero
+                          end if
                         end do
                       end if
                     end do
                   end do
-                else
-                  message = &
-                    "ufo_radiancerttov_tlad_settraj: Cloud Ice Water only supported for RTTOV-SCATT"
-                  call oops_log%warning(message)
                 end if
-              end if
 
-          end select
-        end do
-      end if
+              ! cloud ice
+              case(var_cli)
+                if (self % conf % UseMinimumCiw .or. self % conf % MWScattZeroJacPress > 0.0) then
+                  if (self % conf % do_mw_scatt) then
+                    do ichan = 1, nchan_sim, self % RTprof_K % nchan_inst
+                      iprof = prof_start + chanprof(ichan) % prof - 1
+                      do ilev = 1, self % nlevels
+                        if (self % RTProf_K % ciw_profile_reset(iprof, ilev)) then
+                          do localchan = 1, self % RTprof_K % nchan_inst
+                            self % RTprof_K % profiles_k(nchan_total + ichan + localchan - 1) &
+                                            % hydro(self % conf % rttov_hydro_index_ciw, ilev) = zero
+                          end do
+                        end if
+                      end do
+                    end do
+                  else
+                    message = &
+                      "ufo_radiancerttov_tlad_settraj: Cloud Ice Water only supported for RTTOV-SCATT"
+                    call oops_log%warning(message)
+                  end if
+                end if
 
-      if(do_profile_diagnostics) then
-        do ichan = 1, ichan_sim, self % RTprof_K % nchan_inst
-          iprof = prof_start + chanprof(ichan) % prof - 1
-          if(self % RTprof_K % print_profile(iprof)) then
-          write(*,*) "tlad profile ", iprof
-          write(*,*) "tlad emissivity out = ",self % RTprof_K % emissivity(1) % emis_out(ichan:ichan+self%RTprof_K%nchan_inst-1)
-          write(*,*) "tlad hofx out = ", self % RTprof_K % radiance % bt(ichan:ichan+self%RTprof_K%nchan_inst-1)
-          end if
-        end do
-      end if
-
-      if ( errorstatus /= errorstatus_success ) then
-        write(message,"(3A, I6, A, I6)") trim(routine_name), "after rttov_k: error\n", "skipping profiles ", &
-                                         prof_start, " -- ", prof_start + nprof_sim - 1
-        call oops_log%warning(message)
-      else
-        ! Put simulated diagnostics into hofxdiags
-        ! ----------------------------------------------
-        if(hofxdiags % nvar > 0) then
-          call hofxdiags_methods % populate(self % RTprof_K, chanprof, self % conf, prof_start, hofxdiags)
+            end select
+          end do
         end if
-      end if
+
+        if(do_profile_diagnostics) then
+          do ichan = 1, ichan_sim, self % RTprof_K % nchan_inst
+            iprof = prof_start + chanprof(ichan) % prof - 1
+            if(self % RTprof_K % print_profile(iprof)) then
+            write(*,*) "tlad profile ", iprof
+            write(*,*) "tlad emissivity out = ",self % RTprof_K % emissivity(1) % emis_out(ichan:ichan+self%RTprof_K%nchan_inst-1)
+            write(*,*) "tlad hofx out = ", self % RTprof_K % radiance % bt(ichan:ichan+self%RTprof_K%nchan_inst-1)
+            end if
+          end do
+        end if
+
+        if ( errorstatus /= errorstatus_success ) then
+          write(message,"(3A, I6, A, I6)") trim(routine_name), "after rttov_k: error\n", "skipping profiles ", &
+                                            prof_start, " -- ", prof_start + nprof_sim - 1
+          call oops_log%warning(message)
+        else
+          ! Put simulated diagnostics into hofxdiags
+          ! ----------------------------------------------
+          if(hofxdiags % nvar > 0) then
+            call hofxdiags_methods % populate(self % RTprof_K, chanprof, self % conf, prof_start, hofxdiags)
+          end if
+        end if
+      end if ! nchan_sim > 0
 
       ! increment profile and channel counters
       nchan_total = nchan_total + nchan_sim
