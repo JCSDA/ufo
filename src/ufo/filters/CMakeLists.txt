@@ -414,6 +414,8 @@ set ( filters_files
       obsfunctions/RecordNumberToObsSpace.h
       obsfunctions/ModelLevelIndex.cc
       obsfunctions/ModelLevelIndex.h
+      obsfunctions/ModelLevelsBelowSurface.cc
+      obsfunctions/ModelLevelsBelowSurface.h
 )
 
 if( ${gsw_FOUND} )

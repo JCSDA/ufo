@@ -505,6 +505,15 @@ ufo_add_test( NAME    function_modellevelindex
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    function_modellevelsbelowsurface
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_modellevelsbelowsurface.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_metoffice_rh_corr
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

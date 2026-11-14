@@ -1,0 +1,41 @@
+# There are 6 locations in the test data set.
+#
+# The air_pressure GeoVaLs have 4 levels: 700, 800, 900 and 1000 hPa.
+# The air_pressure_at_surface GeoVaLs are: 1010, 990, 1010, 1020, 980, 1000 hPa.
+#
+# The observed pressures are: 900, 1000, 1010, 1050, 1111 hPa and missing.
+#
+# The expected numbers of model levels below the model surface, ln(p/psfc) / ln(1000/900)
+# below the surface and zero above it, are:
+# 0, 0.0954, 0, 0.275, 1.191, missing.
+time window:
+  begin: 2000-01-01T00:00:00Z
+  end: 2030-01-01T00:00:00Z
+  bound to include: begin
+
+observations:
+- obs space:
+    name: Model levels below surface
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/model_levels_below_surface_obs.nc4
+    simulated variables: [airTemperature]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/model_levels_below_surface_geovals.nc
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: DerivedMetaData/modelLevelsBelowSurface
+      type: float
+      function:
+        name: ObsFunction/ModelLevelsBelowSurface
+        options:
+          observation pressure:
+            name: MetaData/pressure
+  compareVariables:
+  - test:
+      name: DerivedMetaData/modelLevelsBelowSurface
+    reference:
+      name: TestReference/modelLevelsBelowSurface
+    absTol: 1.0e-5
