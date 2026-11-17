@@ -59,6 +59,7 @@ public ufo_crtm_define_aerosol_model
 public ufo_crtm_calculate_aero_layer_factor
 
 integer, parameter, public :: max_string=800
+integer, parameter, public :: sensor_id_len=255   ! length of CRTM sensor IDs
 
 ! Set once the CRTM library version has been logged (once per process)
 logical :: crtm_version_logged = .false.
@@ -81,7 +82,7 @@ logical :: gmi_hf_geometry_warned = .false.
 type shared_load_group
   character(len=:),   allocatable :: key            ! coefficient settings
   logical                         :: aerosol        ! aerosol-only (vs radiance) CRTM_Init
-  character(len=255), allocatable :: sensor_ids(:)  ! registered sensors
+  character(len=sensor_id_len), allocatable :: sensor_ids(:)  ! registered sensors
   integer,            allocatable :: n_users(:)     ! operators using each sensor
 end type shared_load_group
 type(shared_load_group),     allocatable :: shared_groups(:)
@@ -113,7 +114,7 @@ type crtm_conf
  character(len=MAXVARLEN), allocatable :: Surfaces(:)
  character(len=MAXVARLEN), allocatable :: Aerosols(:)  ! aerosol species of aerosol_option
 
- character(len=255), allocatable :: SENSOR_ID(:)
+ character(len=sensor_id_len), allocatable :: SENSOR_ID(:)
  character(len=255) :: ENDIAN_TYPE
  character(len=255) :: COEFFICIENT_PATH, NC_COEFFICIENT_PATH
  character(len=255) :: TauCoeff_Format, SpcCoeff_Format
@@ -1084,7 +1085,8 @@ integer :: g, n, k
        " sensors; set ShareCoefficients: false in the obs options of some operators"
      call fckit_exception%throw(message)
    end if
-   shared_groups(g)%sensor_ids = [shared_groups(g)%sensor_ids, conf%SENSOR_ID(n)]
+   shared_groups(g)%sensor_ids = [character(len=sensor_id_len) :: shared_groups(g)%sensor_ids, &
+                                  conf%SENSOR_ID(n)]
    shared_groups(g)%n_users = [shared_groups(g)%n_users, 1]
    if (loaded_group == g) loaded_group = -g   ! in memory, but now missing a sensor
  end do
@@ -1124,7 +1126,8 @@ integer :: g, n, k
    shared_groups(g)%n_users(k) = shared_groups(g)%n_users(k) - 1
    if (shared_groups(g)%n_users(k) > 0) cycle
    ! a load in memory keeps the sensor until the group is next loaded
-   shared_groups(g)%sensor_ids = [shared_groups(g)%sensor_ids(:k-1), shared_groups(g)%sensor_ids(k+1:)]
+   shared_groups(g)%sensor_ids = [character(len=sensor_id_len) :: &
+                                  shared_groups(g)%sensor_ids(:k-1), shared_groups(g)%sensor_ids(k+1:)]
    shared_groups(g)%n_users = [shared_groups(g)%n_users(:k-1), shared_groups(g)%n_users(k+1:)]
  end do
 
@@ -2065,7 +2068,7 @@ implicit none
 type(c_ptr), value,       intent(in)    :: obss
 type(CRTM_Geometry_type), intent(inout) :: geo(:)
 type(CRTM_Geometry_type), intent(inout), optional :: geo_hf(:)
-character(len=255),       intent(in),    optional :: sensor_id
+character(len=sensor_id_len), intent(in),  optional :: sensor_id
 integer, allocatable :: scan_position(:)
 integer :: nlocs
 character(len=:), allocatable :: missing_hf  ! channel 10-13 angles not in MetaData
