@@ -49,5 +49,11 @@ variable maps:
     alias: mass_content_of_water_in_top_soil_layer
   - name: snowArealDensity
     alias: surface_snow_amount_over_land
-  - name: Btop
-    alias: B_F2_top
+  - name: f2PeakHeight
+    alias: f2_peak_height
+  - name: log10f2PeakElectronDensity
+    alias: log10_f2_peak_electron_density
+  - name: f2TopsideThickness
+    alias: f2_topside_thickness
+  - name: f2BottomsideThickness
+    alias: f2_bottomside_thickness
