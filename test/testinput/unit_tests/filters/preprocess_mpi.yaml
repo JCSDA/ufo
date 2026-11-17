@@ -1,0 +1,25 @@
+# Same as preprocess.yaml, but run on several MPI tasks with the default io pool and
+# "write multiple files: false". The output must be one file at the configured name,
+# whatever the number of tasks (see the ufo_preprocess_mpi_output test).
+time window:
+  begin: 2018-04-14T20:30:00Z
+  end: 2018-04-15T03:30:00Z
+
+obs space:
+  name: Aircraft
+  obsdatain:
+    engine:
+      type: H5File
+      obsfile: Data/ufo/testinput_tier_1/aircraft_obs_2018041500_m.nc4
+  obsdataout:
+    engine:
+      type: H5File
+      obsfile: Data/aircraft_obs_2018041500_m_out_preprocess_mpi.nc4
+    write multiple files: false
+  simulated variables: [airTemperature]
+  observed variables: [airTemperature]
+obs filters:
+- filter: Gaussian Thinning
+  horizontal_mesh:   1111.949266 #km = 10 deg at equator
+  action:
+    name: reduce obs space

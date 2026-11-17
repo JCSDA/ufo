@@ -56,7 +56,7 @@ class RunPreProcess : public oops::Application {
 
     ioda::ObsSpace obsdb(params.obsSpace.value().toConfiguration(), this->getComm(),
                          util::TimeWindow(params.timeWindow.value()),
-                         this->getComm());
+                         oops::mpi::myself());
 
     ioda::ObsDataVector<float> obserr_(obsdb, obsdb.obsvariables(), "ObsError");
     ioda::ObsDataVector<int> qcflags_(obsdb, obsdb.obsvariables());

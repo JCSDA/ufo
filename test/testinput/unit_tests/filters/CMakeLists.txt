@@ -1319,6 +1319,25 @@ ufo_add_test( NAME    preprocess
               LABELS  filters
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 
+# Multi-task preprocessing must write one file at the configured name (no MPI-rank
+# suffix), independent of the number of tasks.
+ufo_add_test( NAME    preprocess_mpi
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/ufo_preprocess.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/preprocess_mpi.yaml"
+              MPI     4
+              LIBS    ufo
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
+ufo_add_test( NAME    preprocess_mpi_output
+              ECBUILD
+              COMMAND ${CMAKE_COMMAND}
+              ARGS    -E sha256sum Data/aircraft_obs_2018041500_m_out_preprocess_mpi.nc4
+              TEST_DEPENDS ufo_preprocess_mpi
+              LABELS  filters
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+
 ufo_add_test( NAME    geovals_writer
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
