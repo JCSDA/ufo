@@ -130,97 +130,145 @@ void Gaussian_Thinning::applyFilter(const std::vector<bool> & apply,
     isThinned = identifyThinnedObservationsMedian(
                               validObsIds, obsAccessor, splitter, obs, options_.minNumObsPerBin);
   } else if (options_.selectMean) {
+    // One filter Variable only (channels allowed; nvars expands them). Compute every
+    // component's mean/error before any DerivedObsValue put_db so later obsAccessor reads are not
+    // poisoned by a partial Derived product.
+    // Note: other code that defines DerivedObsValue before this filter must overwrite all
+    // channels of the filter variable.
     ASSERT_MSG(filtervars.size() == 1,
       "filtervars must contain only one variable to calculate the mean.");
-    const size_t filterVarIndex = 0;
-    const std::string varname = filtervars.variable(filterVarIndex).variable();
-    // Gather obs from all MPI ranks
-    const std::vector<float> globalObs = obsAccessor.getFloatVariableFromObsSpace("ObsValue",
-                              varname);
-    // Gather Error variables from all ranks if specified
-    std::vector<float> thinnedSystematicErrorStandardDeviation;
-    std::vector<float> thinnedRandomErrorStandardDeviation;
-    std::vector<float> totalErrorStandardDeviation;
+    const size_t nFilterVars = filtervars.nvars();
+    ASSERT_MSG(nFilterVars >= 1,
+      "filtervars must expand to at least one component to calculate the mean.");
+    std::vector<std::string> varnames(nFilterVars);
+    std::vector<std::vector<float>> localMeans(nFilterVars);
+    std::vector<std::vector<float>> localErrors(nFilterVars);
+
     if (options_.calculateUncertainty.value()) {
       if (options_.randomErrorStandardDeviationVariable.value()) {
-        std::vector<float> globalRandomErrorStandardDeviation =
-            obsAccessor.getFloatVariableFromObsSpace(
-                options_.randomErrorStandardDeviationVariable.value()->group(),
-                options_.randomErrorStandardDeviationVariable.value()->variable());
-
-        // set default value for error in case only one observation in the bin.
-        thinnedRandomErrorStandardDeviation = globalRandomErrorStandardDeviation;
-
-        // reduce the grouped random error standard deviation as these values are
-        // independently and identically distributed.
-        isThinned = identifyThinnedObservationsMean(
-            validObsIds, obsAccessor, splitter, globalRandomErrorStandardDeviation,
-            distancesToBinCenter, priorities, MeanThinningType::RANDOMERROR,
-            thinnedRandomErrorStandardDeviation);
+        ASSERT_MSG(
+            options_.randomErrorStandardDeviationVariable.value()->size()
+                == filtervars[0].size()
+            && options_.randomErrorStandardDeviationVariable.value()->channels()
+                == filtervars[0].channels(),
+            "Gaussian Thinning: random error standard deviation variable "
+            "must have the same size and channels as the filter variable");
       }
       if (options_.systematicErrorStandardDeviationVariable.value()) {
-        // set the systematic error to a non-missing element of the group
-        std::vector<float> globalSystematicErrorStandardDeviation =
-            obsAccessor.getFloatVariableFromObsSpace(
-                options_.systematicErrorStandardDeviationVariable.value()->group(),
-                options_.systematicErrorStandardDeviationVariable.value()->variable());
-
-        // set default value for error in case only one observation in the bin.
-        thinnedSystematicErrorStandardDeviation = globalSystematicErrorStandardDeviation;
-
-        isThinned = identifyThinnedObservationsMean(
-            validObsIds, obsAccessor, splitter, globalSystematicErrorStandardDeviation,
-            distancesToBinCenter, priorities, MeanThinningType::SYSTEMATICERROR,
-            thinnedSystematicErrorStandardDeviation);
+        ASSERT_MSG(
+            options_.systematicErrorStandardDeviationVariable.value()->size()
+                == filtervars[0].size()
+            && options_.systematicErrorStandardDeviationVariable.value()->channels()
+                == filtervars[0].channels(),
+            "Gaussian Thinning: systematic error standard deviation variable "
+            "must have the same size and channels as the filter variable");
       }
     }
-    // Define mean vector, identical to the global obs values, intended to be overwritten.
-    // In the case of a single observation in a bin, this ensures the mean is still returned.
-    std::vector<float> mean = globalObs;
-    //  Different version of identifyThinnedObservations(), which takes additional inputs:
-    //  @ObsValue of the filter variable, option specifying minimum number of obs there
-    //  must be in a bin to accept a super-ob (the mean value of obs),
-    //  and vector of means.
-    isThinned = identifyThinnedObservationsMean(
-        validObsIds, obsAccessor, splitter, globalObs,
-        distancesToBinCenter, priorities, MeanThinningType::MEAN, mean);
-    // Create a local mean vector the size of the obs space on the current MPI rank
-    std::vector<float> localObs;
-    obsdb_.get_db("ObsValue", varname, localObs);
-    std::vector<float> localMean = localObs;
 
-    // Loop over obs on current MPI rank, assigning mean values to local mean vector
-    for (size_t localObsId = 0; localObsId < obsdb_.nlocs(); localObsId++) {
-      if (apply[localObsId]) {
-        const size_t globalObsId =
-            obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(localObsId);
-        localMean[localObsId] = mean[globalObsId];
-        if (options_.calculateUncertainty.value()) {
-          // If the systematic or random variance is present, add it to the total variance.
-          float variance = 0.f;
-          if ((thinnedRandomErrorStandardDeviation.size() > 0)
-           && (thinnedRandomErrorStandardDeviation[globalObsId] != util::missingValue<float>())) {
-            variance += std::pow(thinnedRandomErrorStandardDeviation[globalObsId], 2);
-          }
-          if ((thinnedSystematicErrorStandardDeviation.size() > 0) &&
-              (thinnedSystematicErrorStandardDeviation[globalObsId]
-                  != util::missingValue<float>())) {
-            variance += std::pow(thinnedSystematicErrorStandardDeviation[globalObsId], 2);
-          }
-          if (variance < std::numeric_limits<float>::min()) {
-            totalErrorStandardDeviation.emplace_back(util::missingValue<float>());
-          } else {
-            totalErrorStandardDeviation.emplace_back(std::sqrt(variance));
+    // Phase 1: gather/mean/redistribute for all components.
+    for (size_t jv = 0; jv < nFilterVars; ++jv) {
+      varnames[jv] = filtervars.variable(jv).variable();
+      // Gather obs from all MPI ranks
+      const std::vector<float> globalObs =
+          obsAccessor.getFloatVariableFromObsSpace("ObsValue", varnames[jv]);
+      // Gather Error variables from all ranks if specified
+      std::vector<float> thinnedSystematicErrorStandardDeviation;
+      std::vector<float> thinnedRandomErrorStandardDeviation;
+      if (options_.calculateUncertainty.value()) {
+        if (options_.randomErrorStandardDeviationVariable.value()) {
+          std::vector<float> globalRandomErrorStandardDeviation =
+            obsAccessor.getFloatVariableFromObsSpace(
+                options_.randomErrorStandardDeviationVariable.value()->group(),
+                options_.randomErrorStandardDeviationVariable.value()->variable(jv));
+
+          // set default value for error in case only one observation in the bin.
+          thinnedRandomErrorStandardDeviation = globalRandomErrorStandardDeviation;
+
+          // reduce the grouped random error standard deviation as these values are
+          // independently and identically distributed.
+          // Discard keep-mask; shared survivor selection uses ObsValue MEAN below.
+          (void)identifyThinnedObservationsMean(
+              validObsIds, obsAccessor, splitter, globalRandomErrorStandardDeviation,
+              distancesToBinCenter, priorities, MeanThinningType::RANDOMERROR,
+              thinnedRandomErrorStandardDeviation);
+        }
+        if (options_.systematicErrorStandardDeviationVariable.value()) {
+          // set the systematic error to a non-missing element of the group
+          std::vector<float> globalSystematicErrorStandardDeviation =
+            obsAccessor.getFloatVariableFromObsSpace(
+                options_.systematicErrorStandardDeviationVariable.value()->group(),
+                options_.systematicErrorStandardDeviationVariable.value()->variable(jv));
+
+          // set default value for error in case only one observation in the bin.
+          thinnedSystematicErrorStandardDeviation = globalSystematicErrorStandardDeviation;
+
+          (void)identifyThinnedObservationsMean(
+              validObsIds, obsAccessor, splitter, globalSystematicErrorStandardDeviation,
+              distancesToBinCenter, priorities, MeanThinningType::SYSTEMATICERROR,
+              thinnedSystematicErrorStandardDeviation);
+        }
+      }
+
+      // Define mean vector, identical to the global obs values, intended to be overwritten.
+      // In the case of a single observation in a bin, this ensures the mean is still returned.
+      std::vector<float> mean = globalObs;
+      //  Different version of identifyThinnedObservations(), which takes additional inputs:
+      //  @ObsValue of the filter variable, option specifying minimum number of obs there
+      //  must be in a bin to accept a super-ob (the mean value of obs),
+      //  and vector of means.
+      std::vector<bool> isThinnedThisVar = identifyThinnedObservationsMean(
+          validObsIds, obsAccessor, splitter, globalObs,
+          distancesToBinCenter, priorities, MeanThinningType::MEAN, mean);
+      // Take shared keep-mask (geometry/priority / min_num_obs_per_bin) from the first
+      // filter variable.
+      if (jv == 0) {
+        isThinned = std::move(isThinnedThisVar);
+      }
+
+      // Create a local mean vector the size of the obs space on the current MPI rank
+      std::vector<float> localObs;
+      obsdb_.get_db("ObsValue", varnames[jv], localObs);
+      localMeans[jv] = localObs;
+      if (options_.calculateUncertainty.value()) {
+        localErrors[jv].assign(obsdb_.nlocs(), util::missingValue<float>());
+      }
+
+      // Loop over obs on current MPI rank, assigning mean values to local mean vector
+      for (size_t localObsId = 0; localObsId < obsdb_.nlocs(); localObsId++) {
+        if (apply[localObsId]) {
+          const size_t globalObsId =
+              obsdb_.distribution()->globalUniqueConsecutiveLocationIndex(localObsId);
+          localMeans[jv][localObsId] = mean[globalObsId];
+          if (options_.calculateUncertainty.value()) {
+            // If the systematic or random variance is present, add it to the total variance.
+            float variance = 0.f;
+            if ((thinnedRandomErrorStandardDeviation.size() > 0)
+             && (thinnedRandomErrorStandardDeviation[globalObsId]
+                    != util::missingValue<float>())) {
+              variance += std::pow(thinnedRandomErrorStandardDeviation[globalObsId], 2);
+            }
+            if ((thinnedSystematicErrorStandardDeviation.size() > 0) &&
+                (thinnedSystematicErrorStandardDeviation[globalObsId]
+                    != util::missingValue<float>())) {
+              variance += std::pow(thinnedSystematicErrorStandardDeviation[globalObsId], 2);
+            }
+            if (variance >= std::numeric_limits<float>::min()) {
+              localErrors[jv][localObsId] = std::sqrt(variance);
+            }
           }
         }
       }
     }
-    // Assign the calculated local mean to the derived obs value of the filter variable.
-    obsdb_.put_db("DerivedObsValue", varname, localMean,
-                  filtervars.variable(filterVarIndex).dimList());
-    if (totalErrorStandardDeviation.size() > 0) {
-      obsdb_.put_db("DerivedObsError", varname, totalErrorStandardDeviation,
-                    filtervars.variable(filterVarIndex).dimList());
+
+    // Phase 2: assign calculated local mean vectors to the derived obs value of the filter
+    // variable, and channels when applicable.
+    for (size_t jv = 0; jv < nFilterVars; ++jv) {
+      obsdb_.put_db("DerivedObsValue", varnames[jv], localMeans[jv],
+                    filtervars.variable(jv).dimList());
+      if (!localErrors[jv].empty()) {
+        obsdb_.put_db("DerivedObsError", varnames[jv], localErrors[jv],
+                      filtervars.variable(jv).dimList());
+      }
     }
   } else {  // default function, thinning obs according to distance_norm:
     isThinned = identifyThinnedObservations(
