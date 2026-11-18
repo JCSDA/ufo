@@ -125,6 +125,15 @@ ufo_add_test( NAME    variabletransforms_pstar
               LABELS  unit_tests variabletransforms
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+ufo_add_test( NAME    variabletransforms_adjustedheight_surfacewindscaling
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/variabletransforms_adjustedheight_surfacewindscaling.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  unit_tests variabletransforms
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
 ufo_add_test( NAME    variabletransforms_QFEtoQNH
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x

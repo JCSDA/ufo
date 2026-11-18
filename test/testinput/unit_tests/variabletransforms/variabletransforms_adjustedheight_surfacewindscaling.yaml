@@ -1,0 +1,56 @@
+# Tests of the AdjustedHeightCoordinate and SurfaceWindScalingHeight transforms with a nonzero model
+# surface height. Model heights (geopotential_height and height_above_mean_sea_level_at_surface)
+# are above mean sea level. The model surface is at 1000 m (0 m at the first location), the lowest
+# model level 60 m above it, and the 10 m wind ratio is 0.8.
+#
+#   station   height   adjustedHeight   scaling   case
+#      0          5          5            0.4     sea level, 5 m above the surface
+#   1000       1005       1005            0.4     5 m above the surface
+#   1000       1010       1010            0.8     10 m above the surface
+#   1000       1035       1035            0.9     between 10 m and the lowest model level
+#   1000       1060       1060            1.0     at the lowest model level
+#   1000       1100       1100            1.0     above the lowest model level
+#   1000        995        995            0.0     below the model surface
+#    900        905       1005            0.4     5 m above a station 100 m below the model surface
+#    900       1395       1445            1.0     495 m above the station (f = 0.5)
+#    900       2900       2900            1.0     2000 m above the station (f = 1)
+#   1000       1005     missing         missing   model surface height missing
+#
+# SurfaceWindScalingHeight is applied to DerivedVariables/adjustedHeight (its default), as in the
+# usual setup when the two transforms are used together.
+
+time window:
+  begin: 2021-12-11T21:00:00Z
+  end: 2021-12-12T03:00:00Z
+
+observations:
+- obs space:
+    name: Surface winds
+    obsdatain:
+      engine:
+        type: H5File
+        obsfile: Data/ufo/testinput_tier_1/sfcwind_height_obs.nc4
+    simulated variables: [windEastward]
+  geovals:
+    filename: Data/ufo/testinput_tier_1/sfcwind_height_geovals.nc4
+
+  obs filters:
+  - filter: Variable Transforms
+    Transform: AdjustedHeightCoordinate
+    SkipWhenNoObs: false
+
+  - filter: Variable Transforms
+    Transform: SurfaceWindScalingHeight
+    SkipWhenNoObs: false
+
+  compareVariables:
+  - test:
+      name: DerivedVariables/adjustedHeight
+    reference:
+      name: TestReference/adjustedHeight
+    absTol: 1.0e-3
+  - test:
+      name: DerivedVariables/SurfaceWindScalingHeight
+    reference:
+      name: TestReference/SurfaceWindScalingHeight
+    absTol: 1.0e-5

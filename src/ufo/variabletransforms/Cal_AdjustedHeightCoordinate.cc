@@ -98,11 +98,20 @@ namespace ufo {
                            oops::Variable{"height_above_mean_sea_level_at_surface"},
                            iloc);
 
-      // Subtract off the scaled station elevation
-      // When f is zero (near the station) subtract off the station elevation
-      // When f is one  (far above the station) subtract off the surface height
-      obsHeightNew[iloc] = obsHeight[iloc] - factor        * surfaceGeometricHeight[0] +
-                                            (factor - 1.0) * stationElevation[iloc];
+      // Set to missing if the model surface height is not available
+      if (surfaceGeometricHeight[0] == missing) {
+        obsHeightNew[iloc] = missing;
+        continue;
+      }
+
+      // Shift the observation height by the difference between the model surface height and the
+      // station elevation, scaled by (1 - f). Near the station (f = 0) the observation keeps its
+      // height above the station, measured from the model surface. Far above the station (f = 1)
+      // the reported height is kept. The result is above mean sea level, consistent with model
+      // heights such as geopotential_height. It is the GSI height above the model surface plus the
+      // model surface height.
+      obsHeightNew[iloc] = obsHeight[iloc] +
+                           (1.0 - factor) * (surfaceGeometricHeight[0] - stationElevation[iloc]);
     }
 
     // Add the output to the ObsSpace

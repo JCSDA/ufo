@@ -40,6 +40,9 @@ class Cal_SurfaceWindScalingHeightParameters: public VariableTransformParameters
   * \details  Within the Variable Transforms filter, apply the transform "SurfaceWindScaling"
   *  in order to calculate the the surface wind scaling for height- and pressure-based coordinates.
   * The formulations are taken from GSI and added to UFO to aid in replicating GSI behavior.
+  * The observation height (e.g. DerivedVariables/adjustedHeight) is above mean sea level, as are
+  * the model heights (geopotential_height); both are converted to heights above the model surface
+  * (height_above_mean_sea_level_at_surface) for the GSI formulation.
   */
 
   class Cal_SurfaceWindScalingHeight : public TransformBase {

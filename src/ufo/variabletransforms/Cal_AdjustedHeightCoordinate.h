@@ -25,6 +25,12 @@ namespace ufo {
   *
   * \details  Within the Variable Transforms filter, apply the transform "AdjustedHeightCoordinate"
   *  in order to calculate the the the new height coordinate taking station elevation into account.
+  *
+  *  The input height (MetaData/height) and station elevation (MetaData/stationElevation) are above
+  *  mean sea level. The output (DerivedVariables/adjustedHeight) is also above mean sea level:
+  *  height + (1 - f) * (model surface height - station elevation), where f goes from 0 at the
+  *  station to 1 at 1000 m above it. Near the station the observation keeps its height above the
+  *  station, measured from the model surface; far above it the reported height is used.
   */
 
   class Cal_AdjustedHeightCoordinate : public TransformBase {

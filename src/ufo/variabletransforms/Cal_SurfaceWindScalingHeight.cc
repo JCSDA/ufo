@@ -39,6 +39,7 @@ namespace ufo {
     // List of GeoVaLs this transform will need access to
     gvals_ += Variable("GeoVaLs/geopotential_height");
     gvals_ += Variable("GeoVaLs/ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m");
+    gvals_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
     oops::Log::trace() << "Cal_SurfaceWindScalingHeight::Constructor done" << std::endl;
   }
 
@@ -85,26 +86,39 @@ namespace ufo {
       gvals->getAtLocation(windReductionFactorAt10m, oops::Variable{
         "ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m"}, iloc);
       gvals->getAtLocation(geopotentialHeight, oops::Variable{"geopotential_height"}, iloc);
+      gvals->getAtLocation(surfaceGeometricHeight,
+                           oops::Variable{"height_above_mean_sea_level_at_surface"}, iloc);
 
       // For values above lowest model level the scaling factor is 1
       surfaceWindScalingHeight[iloc] = 1.0;
 
       // Set to missing if observation is not present
       if (heightVariable[iloc] == missing) {
+        surfaceWindScalingHeight[iloc] = missing;
         continue;
       }
 
-      // Compute the wind scaling factor for height coordinate
-      if (heightVariable[iloc] <= geopotentialHeight[nlevs-1]) {
+      // Set to missing if the model surface height is not available
+      if (surfaceGeometricHeight[0] == missing) {
+        surfaceWindScalingHeight[iloc] = missing;
+        continue;
+      }
+
+      // Compute the wind scaling factor for height coordinate. The observation height and the
+      // model heights are above mean sea level; GSI's rules use heights above the model surface.
+      const double obsHeightAboveSurface = heightVariable[iloc] - surfaceGeometricHeight[0];
+      const double lowestLevelAboveSurface = geopotentialHeight[nlevs-1] -
+                                             surfaceGeometricHeight[0];
+      if (obsHeightAboveSurface <= lowestLevelAboveSurface) {
         surfaceWindScalingHeight[iloc] = windReductionFactorAt10m[0];
 
-        if (heightVariable[iloc] < 10.0) {
+        if (obsHeightAboveSurface < 10.0) {
           surfaceWindScalingHeight[iloc] = windReductionFactorAt10m[0] *
-                                           std::max(heightVariable[iloc], 0.0) / 10.0;
-        } else if (heightVariable[iloc] > 10.0) {
+                                           std::max(obsHeightAboveSurface, 0.0) / 10.0;
+        } else if (obsHeightAboveSurface > 10.0) {
           surfaceWindScalingHeight[iloc] = 1.0 + (windReductionFactorAt10m[0] - 1.0) *
-                                           (geopotentialHeight[nlevs-1] - heightVariable[iloc]) /
-                                           (geopotentialHeight[nlevs-1] - 10.0);
+                                           (lowestLevelAboveSurface - obsHeightAboveSurface) /
+                                           (lowestLevelAboveSurface - 10.0);
         }
       }
     }
