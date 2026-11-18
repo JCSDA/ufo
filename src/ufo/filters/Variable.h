@@ -36,6 +36,7 @@ class Variable: public util::Printable {
   Variable(const Variable &, const std::string &);
   ~Variable();
 
+  /// Compare name, group, channel selection and channel-slice provenance, but not options.
   bool operator==(const Variable &) const;
   bool operator!=(const Variable &) const;
 
@@ -53,10 +54,11 @@ class Variable: public util::Printable {
 
   /// Return the dimension list suitable for use as the dimList argument of ObsSpace::put_db.
   /// Returns {"Location"} for non-channel variables and {"Location", "Channel"} for
-  /// channel-indexed variables.
+  /// channel-indexed variables, including primitives selected with operator[].
+  /// A numeric suffix alone does not imply a Channel dimension.
   std::vector<std::string> dimList() const {
-    return channels_.empty() ? std::vector<std::string>{"Location"}
-                             : std::vector<std::string>{"Location", "Channel"};
+    return channels_.empty() && !isChannelSlice_ ? std::vector<std::string>{"Location"}
+                                               : std::vector<std::string>{"Location", "Channel"};
   }
 
   oops::Variables toOopsVariables() const;
@@ -68,6 +70,8 @@ class Variable: public util::Printable {
   std::string varname_;
   std::string grpname_;
   std::vector<int> channels_;
+  // Storage provenance only: a primitive keeps its suffixed name and empty channel list.
+  bool isChannelSlice_ = false;
   eckit::LocalConfiguration options_;
 };
 

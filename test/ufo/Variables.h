@@ -40,13 +40,69 @@ void testVariable() {
     // compare the two
     EXPECT(var.size() == refvars.size());
     EXPECT(var.group() == refgroup);
+    const std::vector<std::string> expectedDims =
+        var.channels().empty() ? std::vector<std::string>{"Location"}
+                               : std::vector<std::string>{"Location", "Channel"};
+    EXPECT(var.dimList() == expectedDims);
     for (std::size_t jvar = 0; jvar < var.size(); ++jvar) {
       EXPECT(var.variable(jvar) == refvars[jvar]);
+      EXPECT(var[jvar].dimList() == expectedDims);
     }
     // test the fullName() method
     const std::string refFullName = conf[jj].getString("reference full name");
     EXPECT_EQUAL(var.fullName(), refFullName);
   }
+}
+
+// -----------------------------------------------------------------------------
+void testDimensionProvenance() {
+  const std::vector<std::string> locationDims{"Location"};
+  const std::vector<std::string> channelDims{"Location", "Channel"};
+  const Variable parent("ObsValue/brightnessTemperature", std::vector<int>{3, 5});
+  const Variable primitive = parent[1];
+  EXPECT(parent.dimList() == channelDims);
+  EXPECT_EQUAL(primitive.variable(), "brightnessTemperature_5");
+  EXPECT_EQUAL(primitive.variable(0), "brightnessTemperature_5");
+  EXPECT_EQUAL(primitive.size(), 1);
+  EXPECT(primitive.channels().empty());
+  EXPECT(primitive.dimList() == channelDims);
+  EXPECT_EQUAL(primitive.toOopsObsVariables()[0], "brightnessTemperature_5");
+  EXPECT_EQUAL(primitive.toOopsObsVariables().size(), 1);
+
+  const Variable copied(primitive);
+  Variable assigned("MetaData/latitude");
+  assigned = primitive;
+  const Variable regrouped(primitive, "DiagnosticFlags");
+  EXPECT(copied.dimList() == channelDims);
+  EXPECT(assigned.dimList() == channelDims);
+  EXPECT(regrouped.dimList() == channelDims);
+  EXPECT_EQUAL(regrouped.fullName(), "DiagnosticFlags/brightnessTemperature_5");
+  EXPECT_EQUAL(primitive[0].variable(), "brightnessTemperature_5");
+  EXPECT(primitive[0].dimList() == channelDims);
+  EXPECT(regrouped[0].dimList() == channelDims);
+
+  const Variable literal("ObsValue/brightnessTemperature_5");
+  EXPECT(literal.dimList() == locationDims);
+  EXPECT(literal[0].dimList() == locationDims);
+  EXPECT(primitive != literal);
+  assigned = literal;
+  EXPECT(assigned.dimList() == locationDims);
+
+  const Variable noChannels("ObsValue/temperature", std::vector<int>{});
+  EXPECT(noChannels.dimList() == locationDims);
+  EXPECT(noChannels[0].dimList() == locationDims);
+  const Variable oneChannel("ObsValue/brightnessTemperature", std::vector<int>{5});
+  EXPECT(oneChannel[0].dimList() == channelDims);
+
+  const ufo::Variables mixed(std::vector<Variable>{literal, parent});
+  EXPECT(mixed.variable(0).dimList() == locationDims);
+  EXPECT(mixed.variable(1).dimList() == channelDims);
+  EXPECT(mixed.variable(2).dimList() == channelDims);
+  EXPECT_EQUAL(mixed.variable(1).variable(), "brightnessTemperature_3");
+  EXPECT_EQUAL(mixed.variable(2).variable(), "brightnessTemperature_5");
+  const ufo::Variables regroupedVars(mixed, "DiagnosticFlags");
+  EXPECT(regroupedVars.variable(0).dimList() == locationDims);
+  EXPECT(regroupedVars.variable(2).dimList() == channelDims);
 }
 
 // -----------------------------------------------------------------------------
@@ -178,6 +234,21 @@ void testCompare() {
   vars5 += var3;
   EXPECT(vars5 != vars3);
   EXPECT(vars5 == vars1);
+
+  EXPECT(var1[1] == var5[1]);
+  EXPECT(var1[1] != var4[1]);
+  EXPECT(Variable(var4[1], var1.group()) == var1[1]);
+  EXPECT(var1[1][0] == var1[1]);
+
+  const Variable literal("MetaData/var1_3");
+  EXPECT(var1[1] != literal);
+  EXPECT(!(literal == var1[1]));
+
+  const ufo::Variables primitiveVars(std::vector<Variable>{var1[0], var1[1]});
+  const ufo::Variables reorderedVars(std::vector<Variable>{var5[1], var5[0]});
+  const ufo::Variables literalVars(std::vector<Variable>{var1[0], literal});
+  EXPECT(primitiveVars == reorderedVars);
+  EXPECT(primitiveVars != literalVars);
 }
 
 // -----------------------------------------------------------------------------
@@ -232,6 +303,9 @@ class Variables : public oops::Test {
 
     ts.emplace_back(CASE("ufo/Variables/testVariable")
       { testVariable(); });
+
+    ts.emplace_back(CASE("ufo/Variables/testDimensionProvenance")
+      { testDimensionProvenance(); });
 
     ts.emplace_back(CASE("ufo/Variables/testConstructor")
       { testConstructor(); });

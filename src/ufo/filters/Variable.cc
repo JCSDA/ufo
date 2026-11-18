@@ -71,7 +71,7 @@ Variable::Variable(const std::string & fullname, const std::vector<int> & channe
 
 Variable::Variable(const Variable & var, const std::string & group)
   : varname_(var.varname_), grpname_(group), channels_(var.channels_),
-    options_(var.options_) {
+    isChannelSlice_(var.isChannelSlice_), options_(var.options_) {
   oops::Log::trace() << "ufo::Variable constructor with "<< group << "/" << var.varname_
                      << std::endl;
 }
@@ -85,14 +85,13 @@ Variable::~Variable() {
 
 bool Variable::operator==(const Variable & other) const {
   return ((varname_ == other.varname_) && (grpname_ == other.grpname_) &&
-          (channels_ == other.channels_));
+          (channels_ == other.channels_) && (isChannelSlice_ == other.isChannelSlice_));
 }
 
 // -----------------------------------------------------------------------------
 
 bool Variable::operator!=(const Variable & other) const {
-  return ((varname_ != other.varname_) || (grpname_ != other.grpname_) ||
-          (channels_ != other.channels_));
+  return !(*this == other);
 }
 
 // -----------------------------------------------------------------------------
@@ -113,7 +112,9 @@ Variable Variable::operator[](const size_t jch) const {
   if (grpname_ != "")        var += grpname_ + "/";
   var += varname_;
   if (channels_.size() > 0)  var += "_" + std::to_string(channels_[jch]);
-  return Variable(var, options_);
+  Variable primitive(var, options_);
+  primitive.isChannelSlice_ = isChannelSlice_ || !channels_.empty();
+  return primitive;
 }
 
 
