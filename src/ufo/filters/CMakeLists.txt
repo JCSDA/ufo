@@ -303,6 +303,8 @@ set ( filters_files
       obsfunctions/ObsErrorBoundMW.h
       obsfunctions/ObsErrorSatSpecHumidity.cc
       obsfunctions/ObsErrorSatSpecHumidity.h
+      obsfunctions/ObsErrorFactorDensity.cc
+      obsfunctions/ObsErrorFactorDensity.h
       obsfunctions/ObsErrorFactorDuplicateCheck.cc
       obsfunctions/ObsErrorFactorDuplicateCheck.h
       obsfunctions/ObsErrorFactorPressureCheck.cc

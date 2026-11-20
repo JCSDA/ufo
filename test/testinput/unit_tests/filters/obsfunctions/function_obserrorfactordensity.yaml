@@ -1,0 +1,203 @@
+# Test of ObsFunction/ObsErrorFactorDensity on a hand-built set of observations.
+#
+# With a horizontal mesh of 100 km the counting cylinder has a radius of 100/sqrt(pi) = 56.4 km,
+# and with a vertical mesh of 800 m it extends 400 m above and below each observation. At the
+# equator 0.1 degrees of longitude is 11.1 km. The density threshold is 2, so the expected factor
+# is sqrt(max(1, count/2)).
+#
+#   longitude  height  time   notes                                   count  factor
+#   0.0        1000    0:10   cluster                                 4      sqrt(2)
+#   0.1        1000    0:10   cluster                                 4      sqrt(2)
+#   0.2        1000    0:10   cluster (61 km from 0.75)               4      sqrt(2)
+#   0.3        1000    0:10   cluster, plus 0.75 (50 km away)         5      sqrt(2.5)
+#   0.15       1500    0:10   500 m above the cluster                 1      1
+#   0.05       1000    1:10   next time interval                      1      1
+#   0.25       1000    0:10   rejected, so neither counted nor scaled 0      1
+#   0.12       missing 0:10   no vertical coordinate                  0      1
+#   0.75       1000    0:10   counts itself and 0.3                   2      1
+#   179.95     1000    0:10   three observations across the dateline  3      sqrt(1.5)
+#   -179.95    1000    0:10                                           3      sqrt(1.5)
+#   179.85     1000    0:10                                           3      sqrt(1.5)
+#
+# Three observations at latitude 10 check that, like the window, the time intervals include their
+# end: the observation at the end of the window (6:00) is in the same interval as those at 5:30.
+#
+#   longitude  height  time   notes                                   count  factor
+#   0.0        1000    5:30                                           3      sqrt(1.5)
+#   0.1        1000    5:30                                           3      sqrt(1.5)
+#   0.2        1000    6:00   end of the window                       3      sqrt(1.5)
+
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+
+observations:
+- obs space:
+    name: Aircraft
+    simulated variables: [windEastward]
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 10]
+        lons: [0.0, 0.1, 0.2, 0.3, 0.15, 0.05, 0.25, 0.12, 0.75, 179.95, -179.95, 179.85,
+               0.0, 0.1, 0.2]
+        dateTimes: [600, 600, 600, 600, 600, 4200, 600, 600, 600, 600, 600, 600,
+                    19800, 19800, 21600]
+        epoch: "seconds since 2018-04-14T21:00:00Z"
+        obs errors: [1.0]
+        obs values: [10.0]
+
+  obs filters:
+  # vertical coordinate
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/height
+      type: float
+      value: 1000.0
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: 0.149
+      maxvalue: 0.151
+    assignments:
+    - name: MetaData/height
+      type: float
+      value: 1500.0
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: 0.119
+      maxvalue: 0.121
+    assignments:
+    - name: MetaData/height
+      type: float
+      value: missing
+
+  # rejected observation
+  - filter: RejectList
+    where:
+    - variable: MetaData/longitude
+      minvalue: 0.249
+      maxvalue: 0.251
+
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/densityFactor
+      type: float
+      function:
+        name: ObsFunction/ObsErrorFactorDensity
+        options:
+          variable: windEastward
+          horizontal mesh: 100.
+          vertical coordinate: MetaData/height
+          vertical mesh: 800.
+          time mesh: PT1H
+          density threshold: 2.
+
+  # expected factors
+  - filter: Variable Assignment
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.0
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: -0.001
+      maxvalue: 0.001
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.4142136
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: 0.099
+      maxvalue: 0.101
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.4142136
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: 0.199
+      maxvalue: 0.201
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.4142136
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: 0.299
+      maxvalue: 0.301
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.5811388
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      minvalue: 179.0
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.2247449
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/longitude
+      maxvalue: -179.0
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.2247449
+  - filter: Variable Assignment
+    where:
+    - variable: MetaData/latitude
+      minvalue: 9.0
+    assignments:
+    - name: TestReference/densityFactor
+      type: float
+      value: 1.2247449
+
+  compareVariables:
+  - test:
+      name: MetaData/densityFactor
+    reference:
+      name: TestReference/densityFactor
+    absTol: 1.0e-5
+
+- obs space:
+    name: Time mesh must be positive
+    simulated variables: [windEastward]
+    obsdatain:
+      engine:
+        type: GenList
+        lats: [0, 0]
+        lons: [0.0, 0.1]
+        dateTimes: [600, 600]
+        epoch: "seconds since 2018-04-14T21:00:00Z"
+        obs errors: [1.0]
+        obs values: [10.0]
+
+  obs filters:
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/height
+      type: float
+      value: 1000.0
+  - filter: Variable Assignment
+    assignments:
+    - name: MetaData/densityFactor
+      type: float
+      function:
+        name: ObsFunction/ObsErrorFactorDensity
+        options:
+          variable: windEastward
+          horizontal mesh: 100.
+          vertical coordinate: MetaData/height
+          vertical mesh: 800.
+          time mesh: PT0S
+          density threshold: 2.
+  expectExceptionWithMessage: "ObsErrorFactorDensity: time mesh must be positive"

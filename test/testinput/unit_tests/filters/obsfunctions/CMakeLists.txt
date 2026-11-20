@@ -631,6 +631,24 @@ ufo_add_test( NAME    function_obserrorfactorconv
               LABELS  filters obsfunctions
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
 #
+ufo_add_test( NAME    function_obserrorfactordensity
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorfactordensity.yaml"
+              MPI     1
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
+ufo_add_test( NAME    function_obserrorfactordensity_2pe
+              ECBUILD
+              COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFilters.x
+              ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/function_obserrorfactordensity.yaml"
+              MPI     2
+              LIBS    ufo
+              LABELS  filters obsfunctions
+              WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../../ )
+#
 ufo_add_test( NAME    function_obserrorfactorpressurecheck
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsFunction.x
