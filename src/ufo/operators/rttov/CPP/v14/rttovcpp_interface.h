@@ -40,6 +40,18 @@ namespace ufo {
 
 namespace ufo {
 
+/// Hydrometeor variable that has an RTTOV Jacobian, paired with its RTTOV item id.
+struct RttovHydrometeor {
+  std::string varName;
+  rttov::itemIdType itemId;
+};
+
+/// Returns the hydrometeors in \p hydrometeorVars that have RTTOV Jacobians
+/// (cloud fraction and unrecognized names are skipped). Empty if \p useHydrometeors is false.
+std::vector<RttovHydrometeor> rttovcpp_activeHydrometeors(
+                        const bool useHydrometeors,
+                        const std::vector<std::string> & hydrometeorVars);
+
 void rttovcpp_interface(const GeoVaLs &, const ioda::ObsSpace & odb_,
                         rttov::RttovSafe & aRttov_,
                         const bool useHydrometeors,
@@ -51,7 +63,8 @@ void rttovcpp_interface(const GeoVaLs &, const ioda::ObsSpace & odb_,
 
 void rttovcpp_setYdiag(const GeoVaLs &, rttov::RttovSafe & aRttov_,
                       ObsDiagnostics & d,
-                      const std::vector<int> channels_, std::size_t & nlevels);
+                      const std::vector<int> channels_, std::size_t & nlevels,
+                      const bool useHydrometeors, const std::vector<std::string> &);
 
 // -----------------------------------------------------------------------------
 

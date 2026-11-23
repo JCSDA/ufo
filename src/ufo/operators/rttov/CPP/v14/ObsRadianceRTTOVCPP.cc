@@ -72,12 +72,13 @@ ObsRadianceRTTOVCPP::ObsRadianceRTTOVCPP(const ioda::ObsSpace & odb,
   // get optical depth coef file name from yaml
   const std::string CoefPath = parameters.CoefPath;
   const std::string SensorID = parameters.SensorID;
-  CoefFileName = CoefPath + "rtcoef_" + SensorID + ".dat";
+  const std::string sep = (!CoefPath.empty() && CoefPath.back() == '/') ? "" : "/";
+  CoefFileName = CoefPath + sep + "rtcoef_" + SensorID + ".dat";
   oops::Log::trace() << "RTTOV Coef file: " << CoefFileName << std::endl;
 
   // Define the full path to the hydrotable file
   if (useHydrometeors_) {
-    HydrotableName = CoefPath + "rttov_hydrotable_" + SensorID + ".dat";
+    HydrotableName = CoefPath + sep + "rttov_hydrotable_" + SensorID + ".dat";
     oops::Log::trace() << "RTTOV Hydrotable file: " << HydrotableName << std::endl;
   } else {
     HydrotableName = "";
@@ -103,7 +104,8 @@ void ObsRadianceRTTOVCPP::simulateObs(const GeoVaLs & geovals, ioda::ObsVector &
   ufo::rttovcpp_interface(geovals, odb_, aRttov_, useHydrometeors_, hydrometeorVars_,
                           CoefFileName, HydrotableName, channels_,
                           nlevels, skip_profile);
-  ufo::rttovcpp_setYdiag(geovals, aRttov_, d, channels_, nlevels);
+  ufo::rttovcpp_setYdiag(geovals, aRttov_, d, channels_, nlevels, useHydrometeors_,
+                         hydrometeorVars_);
 
 // ------------------------------------------------------------------------
 // Obtain calculated brightness temperature for all profiles/channels

@@ -207,7 +207,7 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
         // is looked up by name below rather than by its position in a list
         std::map<std::string, std::vector<std::vector<double>>> hydro3d;
 
-     // Create a zero-filled vector for positions where a hydrometeor is omitted
+        // Create a zero-filled vector for positions where a hydrometeor is omitted
         const std::vector<double> zero_level(nprofiles, 0.0);
 
         for (const std::string & name : {clwName, ciwName, rainName,
@@ -386,6 +386,9 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
 
   for (size_t p = 0; p < nprofiles; p++) skip_profile.push_back(false);
 
+  const std::vector<RttovHydrometeor> hydros =
+      rttovcpp_activeHydrometeors(useHydrometeors, hydrometeorVars);
+
   for (size_t p = 0; p < nprofiles; p++) {
     for (size_t c = 0; c < nchannels; c++) {
       var_k = aRttov_.getTK(p, c);               // T Jacobian for a single profile/channel
@@ -397,6 +400,14 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
               skip_profile[p] = true;
           }
       }
+
+      // Hydrometeor Jacobians (all-sky only) for a single profile/channel
+      for (const RttovHydrometeor & hydro : hydros) {
+        var_k = aRttov_.getItemK(hydro.itemId, p, c);
+        for (size_t l = 0; l < var_k.size(); ++l) {
+          if (std::isnan(var_k[l])) {skip_profile[p] = true;}
+        }
+      }
     }
   }
 
@@ -406,6 +417,29 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
   }
 
   oops::Log::trace() << "rttovcpp_interface done" << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+
+std::vector<RttovHydrometeor> rttovcpp_activeHydrometeors(
+                        const bool useHydrometeors,
+                        const std::vector<std::string> & hydrometeorVars) {
+  // JEDI hydrometeor variable names with RTTOV Jacobians
+  static const std::map<std::string, rttov::itemIdType> hydroItemIds = {
+    {"mixing_ratio_of_cloud_liquid_water", rttov::MW_CLW},
+    {"mixing_ratio_of_cloud_ice",          rttov::MW_CIW},
+    {"mixing_ratio_of_rain",               rttov::MW_RAIN},
+    {"mixing_ratio_of_snow",               rttov::MW_SNOW},
+    {"mixing_ratio_of_graupel",            rttov::MW_GRAUPEL}
+  };
+
+  std::vector<RttovHydrometeor> active;
+  if (!useHydrometeors) return active;
+  for (const std::string & varName : hydrometeorVars) {
+    const auto it = hydroItemIds.find(varName);
+    if (it != hydroItemIds.end()) active.push_back({varName, it->second});
+  }
+  return active;
 }
 
 // -----------------------------------------------------------------------------
@@ -430,7 +464,9 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
   void rttovcpp_setYdiag(const GeoVaLs & geovals, rttov::RttovSafe & aRttov_,
                         ObsDiagnostics & d,
                         const std::vector<int> channels_,
-                        std::size_t & nlevels) {
+                        std::size_t & nlevels,
+                        const bool useHydrometeors,
+                        const std::vector<std::string> & hydrometeorVars) {
     std::size_t nprofiles = geovals.nlocs();
     std::size_t nchannels = aRttov_.getNchannels();
     // handle ydiag
@@ -442,11 +478,22 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
       "brightness_temperature_assuming_clear_sky",
     };
     // default 3d variables
-    const std::vector<std::string> ydiag_varnames_3d{
+    std::vector<std::string> ydiag_varnames_3d{
       "transmittances_of_atmosphere_layer",
       "brightness_temperature_jacobian_air_temperature",
       "brightness_temperature_jacobian_water_vapor_mixing_ratio_wrt_dry_air",
     };
+
+    // Add hydrometeor Jacobians if useHydrometeors is enabled
+    std::map<std::string, rttov::itemIdType> hydroDiagItemIds;
+    for (const RttovHydrometeor & hydro :
+         rttovcpp_activeHydrometeors(useHydrometeors, hydrometeorVars)) {
+      const std::string diagName = "brightness_temperature_jacobian_" + hydro.varName +
+                                   "_wrt_dry_air";
+      ydiag_varnames_3d.push_back(diagName);
+      hydroDiagItemIds[diagName] = hydro.itemId;
+    }
+
     // combine 2d and 3d variables to ydiag_varnames
     std::vector<std::string> ydiag_varnames = ydiag_varnames_2d;
     ydiag_varnames.insert(ydiag_varnames.end(),
@@ -531,6 +578,13 @@ void rttovcpp_interface(const GeoVaLs & geovals, const ioda::ObsSpace & odb_,
                   res = aRttov_.getItemK(rttov::Q, p, ich);
                   std::vector<double> subprof(res.begin(), res.end());
                   ydiag.putProfile(subprof, this_var[0], p);
+              // HYDROMETEOR JACOBIANS
+              } else if (hydroDiagItemIds.count(varname)) {
+                res = aRttov_.getItemK(hydroDiagItemIds.at(varname), p, ich);
+                std::vector<double> subprof(res.begin(), res.end());
+                ydiag.putProfile(subprof, this_var[0], p);
+              } else {
+                oops::Log::warning() << "Unknown ydiag variable name: " << varname << std::endl;
               }
             }
           }

@@ -36,14 +36,23 @@ ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
   useHydrometeors_ = parameters.useHydrometeors.value();
   hydrometeorVars_ = parameters.hydrometeors.value();
 
-  // Increment fields to be requested from getvalues and stored in geovals
-  const std::vector<std::string> vv{
+  // 1. Always push the base clear-sky variables
+  const std::vector<std::string> vv_clr{
      "air_temperature",
      "water_vapor_mixing_ratio_wrt_moist_air"
   };
 
-  for (size_t jvar = 0; jvar < vv.size(); ++jvar) {
-     varin_.push_back(vv[jvar]);  // set private data member varin_
+  for (const auto& var : vv_clr) {
+    varin_.push_back(var);
+  }
+
+  // 2. Conditionally push the extra variables if all-sky is enabled
+  //    (cloud fraction is an RTTOV input only, not an increment variable)
+  if (useHydrometeors_) {
+    for (const auto& var : hydrometeorVars_) {
+      if (var == "cloud_area_fraction_in_atmosphere_layer") continue;
+      varin_.push_back(var);
+    }
   }
 
   // get channels from observations
@@ -53,8 +62,9 @@ ObsRadianceRTTOVCPPTLAD::ObsRadianceRTTOVCPPTLAD(const ioda::ObsSpace & odb,
   // get optical depth coef file name from yaml
   const std::string CoefPath = parameters.CoefPath;
   const std::string SensorID = parameters.SensorID;
-  CoefFileName = CoefPath + "rtcoef_" + SensorID + ".dat";
-  HydrotableName = CoefPath + "rttov_hydrotable_" + SensorID + ".dat";
+  const std::string sep = (!CoefPath.empty() && CoefPath.back() == '/') ? "" : "/";
+  CoefFileName = CoefPath + sep + "rtcoef_" + SensorID + ".dat";
+  HydrotableName = CoefPath + sep + "rttov_hydrotable_" + SensorID + ".dat";
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD created." << std::endl;
 }
@@ -72,7 +82,8 @@ void ObsRadianceRTTOVCPPTLAD::setTrajectory(const GeoVaLs & geovals, ObsDiagnost
   ufo::rttovcpp_interface(geovals, obsspace(), aRttov_, useHydrometeors_, hydrometeorVars_,
                           CoefFileName, HydrotableName, channels_,
                           nlevels, skip_profile);
-  ufo::rttovcpp_setYdiag(geovals, aRttov_, d, channels_, nlevels);
+  ufo::rttovcpp_setYdiag(geovals, aRttov_, d, channels_, nlevels, useHydrometeors_,
+                          hydrometeorVars_);
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::setTrajectory done" << std::endl;
 }
@@ -101,6 +112,19 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
+  // Retrieve hydrometeor increments in kg/kg
+  const std::vector<RttovHydrometeor> hydros =
+      rttovcpp_activeHydrometeors(useHydrometeors_, hydrometeorVars_);
+  std::vector<std::vector<std::vector<double>>> dHydro;  // [nhydro][nlevels][nprofiles]
+  for (const RttovHydrometeor & hydro : hydros) {
+    std::vector<std::vector<double>> singleVarData;
+    for (std::size_t i = 0; i < nlevels; ++i) {
+      dx.getAtLevel(tmpvar2d, oops::Variable{hydro.varName}, i);
+      singleVarData.push_back(tmpvar2d);
+    }
+    dHydro.push_back(singleVarData);
+  }
+
 //-------------------------------------------
   ASSERT(dx.nlocs() == dy.nlocs());
   ASSERT(nchannels == dy.nvars());
@@ -118,6 +142,12 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
       var_k = aRttov_.getItemK(rttov::Q, p, c);   // Q Jacobian
       for (size_t l = 0; l < nlevels; l++)
           dy[p*nchannels+c] += var_k[l]*dQ[l][p];
+
+      for (size_t v = 0; v < hydros.size(); v++) {   // Hydrometeor Jacobians
+        var_k = aRttov_.getItemK(hydros[v].itemId, p, c);
+        for (size_t l = 0; l < nlevels; l++)
+            dy[p*nchannels+c] += var_k[l]*dHydro[v][l][p];
+      }
     }
   }
 
@@ -147,6 +177,12 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
       dQ.push_back(tmpvar2d);  // push one level Q into 3D Q
   }
 
+  // Hydrometeor adjoint accumulators [nhydro][nlevels][nprofiles]
+  const std::vector<RttovHydrometeor> hydros =
+      rttovcpp_activeHydrometeors(useHydrometeors_, hydrometeorVars_);
+  std::vector<std::vector<std::vector<double>>> dHydro(hydros.size(),
+      std::vector<std::vector<double>>(nlevels, std::vector<double>(nprofiles, 0.0)));
+
 //-------------------------------------------
   ASSERT(dx.nlocs() == dy.nlocs());
 
@@ -157,23 +193,24 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
   for (size_t p = 0; p < nprofiles; p++) {
     if (skip_profile[p]) continue;
     for (size_t c = 0; c < nchannels; c++) {
+      double dy_val = dy[p*nchannels+c];
+
+      if (dy_val == missing) continue;
+
       var_k = aRttov_.getTK(p, c);               // T Jacobian, nlevels
-      for (size_t l = 0; l < nlevels; ++l) {
-        if (dy[p*nchannels+c] != missing) {
-            dT[l][p] += dy[p*nchannels+c] * var_k[l];
-        }
-      }
+      for (size_t l = 0; l < nlevels; ++l) dT[l][p] += var_k[l] * dy_val;
 
       var_k = aRttov_.getItemK(rttov::Q, p, c);  // Q Jacobian, nlevels
-      for (size_t l = 0; l < nlevels; l++) {
-        if (dy[p*nchannels+c] != missing) {
-            dQ[l][p] += dy[p*nchannels+c] * var_k[l];
-        }
+      for (size_t l = 0; l < nlevels; l++) dQ[l][p] += var_k[l] * dy_val;
+
+      for (size_t v = 0; v < hydros.size(); v++) {  // Hydrometeor Jacobians, nlevels
+        var_k = aRttov_.getItemK(hydros[v].itemId, p, c);
+        for (size_t l = 0; l < nlevels; l++) dHydro[v][l][p] += var_k[l] * dy_val;
       }
     }
   }
 
-  // Put temperature increment in kg/kg
+  // Put temperature increment in K
   for (std::size_t l = 0; l < nlevels; ++l) {
       for (size_t p = 0; p < nprofiles; p++) {
           tmpvar2d[p] = dT[l][p];
@@ -188,6 +225,15 @@ void ObsRadianceRTTOVCPPTLAD::simulateObsTL(const GeoVaLs & dx, ioda::ObsVector 
       }
       dx.putAtLevel(tmpvar2d, oops::Variable{
           "water_vapor_mixing_ratio_wrt_moist_air"}, l);  // put one level Q
+  }
+
+  // Put hydrometeor increments in kg/kg
+  for (std::size_t v = 0; v < hydros.size(); ++v) {
+    for (std::size_t l = 0; l < nlevels; ++l) {
+      dx.getAtLevel(tmpvar2d, oops::Variable{hydros[v].varName}, l);
+      for (std::size_t p = 0; p < nprofiles; ++p) tmpvar2d[p] += dHydro[v][l][p];
+      dx.putAtLevel(tmpvar2d, oops::Variable{hydros[v].varName}, l);
+    }
   }
 
   oops::Log::trace() << "ObsRadianceRTTOVCPPTLAD::simulateObsAD done" << std::endl;
