@@ -121,7 +121,7 @@ character(len=maxvarlen), dimension(10), parameter :: more_hydrometeors = &
  if (self%conf%sfc_wind_geovars == "vector") then
    call add_varin([var_sfc_wspeed, var_sfc_wdir])
  else if (self%conf%sfc_wind_geovars == "uv") then
-   call add_varin([var_sfc_u, var_sfc_v])
+   call add_varin([var_sfc_u10, var_sfc_v10])
  end if
 
  ! 2g. Hydrometeors for the in-FOV (Thompson) cloud fraction or effective radius

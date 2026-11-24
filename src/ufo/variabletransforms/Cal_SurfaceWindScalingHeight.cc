@@ -38,7 +38,7 @@ namespace ufo {
     oops::Log::trace() << "Cal_SurfaceWindScalingHeight::Constructor start" << std::endl;
     // List of GeoVaLs this transform will need access to
     gvals_ += Variable("GeoVaLs/geopotential_height");
-    gvals_ += Variable("GeoVaLs/ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m");
+    gvals_ += Variable("GeoVaLs/ratio_of_wind_at_10m_to_wind_at_surface_adjacent_layer");
     gvals_ += Variable("GeoVaLs/height_above_mean_sea_level_at_surface");
     oops::Log::trace() << "Cal_SurfaceWindScalingHeight::Constructor done" << std::endl;
   }
@@ -84,7 +84,7 @@ namespace ufo {
     for (int iloc = 0; iloc < nlocs; ++iloc) {
       // Get the GeoVaLs at this location
       gvals->getAtLocation(windReductionFactorAt10m, oops::Variable{
-        "ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m"}, iloc);
+        "ratio_of_wind_at_10m_to_wind_at_surface_adjacent_layer"}, iloc);
       gvals->getAtLocation(geopotentialHeight, oops::Variable{"geopotential_height"}, iloc);
       gvals->getAtLocation(surfaceGeometricHeight,
                            oops::Variable{"height_above_mean_sea_level_at_surface"}, iloc);

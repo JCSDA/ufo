@@ -30,7 +30,7 @@ ObsRadianceOASIM::ObsRadianceOASIM(const ioda::ObsSpace & odb, const Parameters_
   : ObsOperatorBase(odb), keyOper_(0), odb_(odb), varin_(), parameters_(params)
 {
   const std::vector<std::string> vvin{"air_pressure_at_surface",
-                                      "wind_speed_at_surface",
+                                      "wind_speed_at_10m",
                                       "ozone_thickness",
                                       "water_vapor",
                                       "relative_humidity",

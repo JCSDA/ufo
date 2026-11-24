@@ -463,6 +463,8 @@ logical, save :: message_flag = .true.
 
  ! select between two surface wind geovals options
  ! valid options: vector [default], uv
+ !   vector: wind_speed_at_10m and wind_to_direction_at_10m
+ !   uv:     eastward_wind_at_10m and northward_wind_at_10m
  conf%sfc_wind_geovars = "vector"
  if (f_confOper%get("SurfaceWindGeoVars", str)) conf%sfc_wind_geovars = str
  if (ufo_vars_getindex(ValidSurfaceWindGeoVars, conf%sfc_wind_geovars) < 1) then
@@ -1974,14 +1976,14 @@ real(kind_real), allocatable :: ObsTb(:,:)
 
   if (ufo_vars_getindex(geovals%variables, var_sfc_wspeed) > 0 .and. &
       ufo_vars_getindex(geovals%variables, var_sfc_wdir) > 0) then
-    ! Directly use model-provided wind speed and direction
+    ! Directly use model-provided 10 m wind speed and wind-to direction
     sfc(1:n_Profiles)%Wind_Speed     = sfc_geoval(var_sfc_wspeed)
     sfc(1:n_Profiles)%Wind_Direction = sfc_geoval(var_sfc_wdir)
-  else if (ufo_vars_getindex(geovals%variables, var_sfc_u) > 0 .and. &
-      ufo_vars_getindex(geovals%variables, var_sfc_v) > 0) then
-    ! Convert 2d wind components to speed and direction
-    u = sfc_geoval(var_sfc_u)
-    v = sfc_geoval(var_sfc_v)
+  else if (ufo_vars_getindex(geovals%variables, var_sfc_u10) > 0 .and. &
+      ufo_vars_getindex(geovals%variables, var_sfc_v10) > 0) then
+    ! Convert 10 m wind components to speed and wind-to direction
+    u = sfc_geoval(var_sfc_u10)
+    v = sfc_geoval(var_sfc_v10)
     sfc(1:n_Profiles)%Wind_Speed = sqrt(u**2 + v**2)
     do k1 = 1, n_Profiles
       sfc(k1)%Wind_Direction = uv_to_wdir(u(k1), v(k1))
@@ -2172,9 +2174,11 @@ end subroutine ufo_crtm_get_var_name
 
 !> \brief Determines the wind direction from U and V components
 !!
-!! \details **uv_to_wdir** Calculates the wind direction, as measured clockwise
-!! from north, similar to an azimuth angle.  Takes the eastward and northward
-!! wind component magnitudes, respectively, as arguments.
+!! \details **uv_to_wdir** Calculates the direction the wind blows toward, as
+!! measured clockwise from north, similar to an azimuth angle (CRTM's
+!! Wind_Direction convention; the same quantity as wind_to_direction_at_10m).
+!! Takes the eastward and northward wind component magnitudes, respectively,
+!! as arguments.
 !! Due to the azimuthal convention used here, the inverse equations are:
 !! u = w * sin(wdir * deg2rad)
 !! v = w * cos(wdir * deg2rad)

@@ -39,7 +39,7 @@ geovals test:
     - skin_temperature_at_surface_where_snow
     - soil_temperature
     - volume_fraction_of_condensed_water_in_soil
-    - wind_speed_at_surface
+    - wind_speed_at_10m
     - soil_type
     - air_temperature
     - air_pressure

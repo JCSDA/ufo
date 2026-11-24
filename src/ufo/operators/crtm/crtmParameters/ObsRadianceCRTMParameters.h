@@ -126,7 +126,9 @@ namespace ufo
    public:
     /// Absorbers
     oops::RequiredParameter<std::vector<std::string> > Absorbers{"Absorbers", this};
-    /// SurfaceWindGeoVars
+    /// SurfaceWindGeoVars: which 10 m surface wind GeoVaLs to read. "vector" reads
+    /// wind_speed_at_10m and wind_to_direction_at_10m; "uv" reads eastward_wind_at_10m and
+    /// northward_wind_at_10m.
     oops::Parameter<std::string> SurfaceWindGeoVars{"SurfaceWindGeoVars",
           "vector", this};
     /// CO2 Absorber method & unit conversion to PPMV
