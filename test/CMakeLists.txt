@@ -718,6 +718,14 @@ endif()
 # Files for RTTOV tests
 #####################################################################
 if( ${rttov_FOUND} )
+  if(rttov_VERSION VERSION_GREATER_EQUAL 14.0)
+    # Exercises both non-linear and linear RTTOV code paths with empty input batches.
+    ecbuild_add_executable( TARGET  test_RTTOVEmptyInput.x
+                            SOURCES mains/TestRTTOVEmptyInput.cc
+                            LIBS    ufo
+                           )
+  endif()
+
   # Determine file extension based on RTTOV version
   if(rttov_VERSION VERSION_GREATER_EQUAL 14.0)
     set(RTTOV_COEF_EXT "nc")

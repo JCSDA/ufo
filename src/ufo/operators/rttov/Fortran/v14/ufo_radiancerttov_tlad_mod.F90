@@ -172,13 +172,15 @@ contains
     character(*), parameter                      :: routine_name = "ufo_radiancerttov_tlad_settraj"
     character(len=800)                           :: message
     type(rttov_chanprof), allocatable            :: chanprof(:)
+    type(rttov_chanprof), allocatable            :: compact_chanprof(:)
+    type(rttov_profile), allocatable             :: compact_profiles(:)
     type(ufo_geoval), pointer                    :: geoval_temp
     type(rttov_hofxdiags)                        :: hofxdiags_methods
 
     integer(kind=jpim)                           :: errorstatus ! Return error status of RTTOV subroutine calls
 
     integer                                      :: iprof_rttov, iprof, ichan, ichan_sim, jchan, ilev, localchan
-    integer                                      :: nprof_sim, nprof_max_sim, nchan_total
+    integer                                      :: nprof_sim, nprof_max_sim, nchan_total, nprof_valid
     integer                                      :: nchan_sim, ivar, qc_flag
     integer(int64)                               :: ii, pp
     integer                                      :: prof_start, prof_end
@@ -288,10 +290,14 @@ contains
     prof_start = 1
     prof_end = self % nprofiles
     nchan_total = 0
+    self % nchan_total = 0
     allocate(self % skipping_profile(self % nprofiles * self % RTprof_k % nchan_inst))
     self % skipping_profile = .false.
 
     RTTOV_loop : do while (prof_start <= prof_end)
+      nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
+      nchan_sim = nprof_sim * size(self%channels)
+
       ! Check qc flags if requested and skip if no active channels
       ! note prof_by_prof is set to true if UseQCFlagsToSkipHofX is true
       if (present(qcf_p) .and. allocated(self % qc_passed)) then
@@ -321,18 +327,16 @@ contains
       ! Zero all k code variables.  These arrays are of size prof_end-prof_start
       call self % RTprof_K % zero_k(self % conf, reset_profiles_k=.false.)
 
-      ! Reduce number of simulated profiles/channel if at end of the of profiles to be processed
-      nprof_sim = min(nprof_sim, prof_end - prof_start + 1)
-      nchan_sim = nprof_sim * size(self%channels)
-
       ! allocate and initialise local chanprof structure
       allocate(chanprof ( nchan_sim ))
+      allocate(compact_chanprof(nchan_sim), compact_profiles(nprof_sim))
       chanprof(:) % prof = 0
       chanprof(:) % chan = 0
 
       ! index for simulated channel
       ichan_sim = 0_jpim
       nchan_sim = 0_jpim
+      nprof_valid = 0
 
       !allocate list used to store 'good' profiles
       !initialise to -1, so no bad profile is given an emissivity
@@ -362,16 +366,27 @@ contains
             do ichan = 1, self % RTprof_K % nchan_inst
               if ((sfc_emiss(ichan,iprof) > 1.0) .or. (sfc_emiss(ichan,iprof) < 0.0)) then
                 errorstatus = errorstatus_fatal
+                write(message,"(2A,I0,A,ES14.6)") trim(routine_name), &
+                  ": invalid supplied emissivity for profile ", iprof, ": ", sfc_emiss(ichan,iprof)
+                call oops_log%trace(message)
+                exit
               end if
             end do
           end if
 
+          if (errorstatus /= errorstatus_success) cycle
+
+          nprof_valid = nprof_valid + 1
+          ! Borrow profile pointers; only the temporary outer array is deallocated.
+          compact_profiles(nprof_valid) = self % RTprof_K % profiles(iprof)
           prof_list(iprof_rttov,1) = iprof_rttov ! chunk index
           prof_list(iprof_rttov,2) = iprof       ! all-obs index
           do ichan = 1, self % RTprof_K % nchan_inst
             ichan_sim = ichan_sim + 1_jpim
-            chanprof(ichan_sim) % prof = iprof_rttov ! this refers to the slice of the RTprofile array passed to RTTOV
+            chanprof(ichan_sim) % prof = iprof_rttov ! original batch-local index for UFO postprocessing
             chanprof(ichan_sim) % chan = self % coefindex(ichan)
+            compact_chanprof(ichan_sim) % prof = nprof_valid
+            compact_chanprof(ichan_sim) % chan = self % coefindex(ichan)
             self % RTprof_K % chanprof(nchan_total + ichan_sim) % prof = iprof ! this refers to the index of the profile from the geoval
             self % RTprof_K % chanprof(nchan_total + ichan_sim) % chan = self % coefindex(ichan)
           end do
@@ -384,6 +399,16 @@ contains
         end if
 
       end do
+
+      ! Empty chunks have no sensor_index or Jacobians to process.
+      if (nchan_sim == 0) then
+        write(message,"(2A,I0,A,I0)") trim(routine_name), ": no valid profiles in chunk ", &
+          prof_start, " -- ", prof_start + nprof_sim - 1
+        call oops_log%trace(message)
+        deallocate(prof_list, chanprof, compact_chanprof, compact_profiles)
+        prof_start = prof_start + nprof_sim
+        cycle RTTOV_loop
+      end if
 
       ! Set surface emissivity
       if (allocated(sfc_emiss)) then
@@ -430,8 +455,8 @@ contains
         call rttov_k( errorstatus,                                                      &
                       self % conf % rttov_opts,                                         &
                       self % conf % rttov_coef_array(sensor_index),                     &
-                      chanprof(1:nchan_sim),                                            &
-                      self % RTProf_K % profiles(prof_start:prof_start + nprof_sim -1), &
+                      compact_chanprof(1:nchan_sim),                                    &
+                      compact_profiles(1:nprof_valid),                                  &
                       self % RTProf_K % profiles_k(nchan_total+1:nchan_total+nchan_sim),&
                       self % RTProf_K % emissivity,                                     &
                       self % RTProf_K % emissivity_k,                                   &
@@ -442,7 +467,7 @@ contains
 
         if (self % conf % read_Cmatrix) then
           jacobian_needed_rr = .true.
-          call self % reconradop % hofx_jac_calc(self % RTprof_K, self % conf, chanprof(1:nchan_sim), prof_start, jacobian_needed_rr)
+          call self % reconradop % hofx_jac_calc(self % RTProf_K, self % conf, chanprof(1:nchan_sim), prof_start, jacobian_needed_rr)
         end if
 
         if(self % conf % SatRad_compatibility) then
@@ -542,7 +567,7 @@ contains
       prof_start = prof_start + nprof_sim
 
       self % nchan_total = nchan_total
-      deallocate (chanprof)
+      deallocate(chanprof, compact_chanprof, compact_profiles)
     end do RTTOV_loop
 
     !    end do Sensor_Loop

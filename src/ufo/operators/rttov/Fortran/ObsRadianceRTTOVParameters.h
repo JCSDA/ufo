@@ -112,6 +112,8 @@ class RTTOVObsOptionsParameters : public oops::Parameters {
 
   /// Check the rttov profile using the rttov check profile routine and flag if the check is failed.
   /// This check makes sure the values read from the geovals are within certain bounds.
+  /// Rejected profiles are omitted from direct and TL/AD calculations, including entirely
+  /// empty batches.
   oops::Parameter<bool> RTTOVProfileCheckInput{"RTTOV_profile_checkinput", true, this};
 
   /// Use RTTOV-Scatt interface to simulate microwave radiances affected by cloud and precipitation.

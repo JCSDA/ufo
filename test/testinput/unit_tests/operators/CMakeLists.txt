@@ -2096,6 +2096,27 @@ endif(ENABLE_RTTOVCPP_TESTS)
               LABELS  rttov ${RTTOV_VERSION_LABEL} operators
               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
 #
+# The empty-chunk and sparse-profile fixes are only in the RTTOV v14 interface.
+    if( rttov_VERSION VERSION_GREATER_EQUAL "14.0" )
+      ufo_add_test( NAME    linopr_atms_rttov_bad_data
+                ECBUILD
+                COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperatorTLAD.x
+                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_bad_data${RTTOV_VERSION_SUFFIX}.yaml"
+                MPI     1
+                LIBS    ufo
+                LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+#
+      ufo_add_test( NAME    opr_atms_rttov_empty_input
+                ECBUILD
+                COMMAND ${CMAKE_BINARY_DIR}/bin/test_RTTOVEmptyInput.x
+                ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/atms_rttov_empty_input${RTTOV_VERSION_SUFFIX}.yaml"
+                MPI     1
+                LIBS    ufo
+                LABELS  rttov ${RTTOV_VERSION_LABEL} operators
+                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../../ )
+    endif()
+#
     ufo_add_test( NAME    opr_atms_rttov_ops
               ECBUILD
               COMMAND ${CMAKE_BINARY_DIR}/bin/test_ObsOperator.x
