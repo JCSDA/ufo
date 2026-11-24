@@ -1,0 +1,46 @@
+time window:
+  begin: 2009-11-30T03:00:00Z
+  end: 2009-11-30T09:00:00Z
+  bound to include: begin  # consistency with test data from "ncdiag"
+
+# Active-sensor K-matrix path: requesting a reflectivity Jacobian in the obs diagnostics
+# makes CRTM run CRTM_K_Matrix (rts_K allocated per layer) instead of CRTM_Forward.
+# One location per geoval layer (7 profiles x 21 layers); no obsgrouping or extended ObsSpace.
+obs space:
+  name: cpr_cloudsat
+  obsdatain:
+    engine:
+      type: H5File
+      obsfile: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_obs_layer_2009113003.nc4
+  simulated variables: [ReflectivityAttenuated]
+  channels: &channels 1
+obs operator:
+  name: CRTM
+  Absorbers: [H2O,O3,CO2]
+  Clouds: [Water, Rain, Snow]
+  Cloud_Fraction: 1.0
+  SurfaceWindGeoVars: uv
+  obs options:
+    Sensor_ID: cpr_cloudsat
+    EndianType: little_endian
+    CoefficientPath:  Data/
+    NC_CoefficientPath:  Data/
+    # The following papers discuss the DDA CloudCoeff
+    # 10.1109/TGRS.2023.3330067 & 10.1029/2022JD036957
+    CloudCoeff_File: CloudCoeff_DDA_Moradi_2022.nc4
+    CloudCoeff_Format: netCDF
+    Cloud_Model: CRTM
+    AerosolCoeff_File: AerosolCoeff.nc4
+    AerosolCoeff_Format: netCDF
+    Aerosol_Model: CRTM
+geovals:
+  filename: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_geoval_layer_2009113003.nc4
+obs diagnostics:
+  variables:
+  - radar_reflectivity_attenuated_jacobian_mass_content_of_cloud_liquid_water_in_atmosphere_layer
+  - radar_reflectivity_attenuated_jacobian_mass_content_of_rain_in_atmosphere_layer
+  - radar_reflectivity_attenuated_jacobian_mass_content_of_snow_in_atmosphere_layer
+  channels: *channels
+reference obs diagnostics:
+  filename: Data/ufo/testinput_tier_1/instruments/radiance/cpr_cloudsat_obsdiag_layer_2009113003.nc4
+tolerance: 1.e-4

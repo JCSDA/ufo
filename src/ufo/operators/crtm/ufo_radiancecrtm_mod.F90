@@ -375,6 +375,9 @@ integer, allocatable :: zeroCloudInCRTM0(:)
       ! No SensorData: CRTM reads it only from the forward sfc, never from sfc_K
       call CRTM_Surface_Create( sfc_K, 0)
 
+      ! Active sensors: the K-matrix input is set per layer (Reflectivity*)
+      if (SC(isc)%Is_Active_Sensor .and. n_Layers > 0) call CRTM_RTSolution_Create(rts_K, n_Layers)
+
       ! Zero the K-matrix OUTPUT structures
       ! (atm_K is already zeroed by CRTM_Atmosphere_Create)
       ! -----------------------------------

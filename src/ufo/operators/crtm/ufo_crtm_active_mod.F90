@@ -121,7 +121,7 @@ modelLayer = modelLayer + 1 ! convert from 0 index to 1
 call ufo_crtm_passive_diag( &
     rts, rts_K, atm, atm_K, sfc_K, conf, isensor, Options, channels, geovals, &
     obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, &
-    hofxdiags, err_stat)
+    hofxdiags, err_stat, is_active_sensor=.true.)
 
 ! ----------------------------------------------
 do jvar = 1, hofxdiags%nvar

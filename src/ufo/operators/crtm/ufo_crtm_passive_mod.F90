@@ -87,7 +87,7 @@ end subroutine ufo_crtm_passive_sim
 subroutine ufo_crtm_passive_diag( &
   rts, rts_K, atm, atm_K, sfc_K, conf, isensor, Options, channels, geovals, &
   obss, nvars, nlocs, n_Profiles, n_Layers, xstr_diags, ystr_diags, ch_diags, &
-  hofxdiags, err_stat)
+  hofxdiags, err_stat, is_active_sensor)
 use fckit_mpi_module,   only: fckit_mpi_comm
 use fckit_log_module,   only: fckit_log
 
@@ -110,6 +110,7 @@ character(len=MAXVARLEN), dimension(:), intent(in) :: &
 integer, intent(in) :: ch_diags(:)
 integer, intent(in) :: isensor
 integer, intent(out) :: err_stat
+logical, intent(in), optional :: is_active_sensor
 
 ! Local Variables
 character(max_string) :: err_msg
@@ -121,6 +122,7 @@ real(kind_real) :: Wfunc(n_Layers)
 real(kind_real) :: conv_albedo
 ! gmi_gpm channels 10-13 use the second-feedhorn geometry (MetaData/sensorZenithAngle1)
 logical :: gmi_hf
+logical :: active
 ! sensor zenith angle (and its gmi_gpm channel 10-13 version), read on first use
 real(kind_real), allocatable :: zenith(:), zenith_hf(:)
 
@@ -130,6 +132,8 @@ missing = missing_value(missing)
 ! Put simulated diagnostics into hofxdiags
 
 err_stat = 0
+active = .false.
+if (present(is_active_sensor)) active = is_active_sensor
 ! ----------------------------------------------
 do jvar = 1, hofxdiags%nvar
    if (len(trim(hofxdiags%variables(jvar))) < 1) cycle
@@ -362,6 +366,10 @@ do jvar = 1, hofxdiags%nvar
             err_stat = 1
       end select
 #endif
+   else if (active .and. (ystr_diags(jvar) == var_rad_refl .or. &
+                          ystr_diags(jvar) == var_rad_refl_att)) then
+      ! reflectivity jacobians: filled by ufo_crtm_active_diag
+      continue
    else
       err_msg = "ufo_crtm_passive_diag: ObsDiagnostic is unsupported, " // &
                 hofxdiags%variables(jvar)

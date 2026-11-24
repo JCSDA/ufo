@@ -248,6 +248,10 @@ integer, allocatable :: zeroCloudInCRTM0(:)
    end if
 
    if (self%n_Layers > 0) call CRTM_RTSolution_Create(rts, self%n_Layers )
+   ! Active sensors: the K-matrix input is set per layer (Reflectivity*)
+   if (SC(isc)%Is_Active_Sensor .and. self%n_Layers > 0) then
+      call CRTM_RTSolution_Create(rts_K, self%n_Layers)
+   end if
 
    ! Create the input FORWARD structure (sfc)
    ! ----------------------------------------
