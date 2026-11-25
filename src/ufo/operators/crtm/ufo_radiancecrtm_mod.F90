@@ -21,6 +21,7 @@ module ufo_radiancecrtm_mod
  use ufo_geovals_mod, only: ufo_geovals, ufo_geoval, ufo_geovals_get_var, ufo_geovals_nlevs
  use ufo_vars_mod
  use ufo_crtm_utils_mod
+ use ufo_hofxdiags_parse_mod, only: ufo_parse_hofxdiags
  use ufo_crtm_passive_mod
  use ufo_crtm_active_mod
 
@@ -189,7 +190,7 @@ character(max_string) :: err_msg
 integer        :: err_stat
 integer        :: isc  ! this sensor's entry in CRTM's SpcCoeff table (SC)
 integer        :: n
-integer :: jvar, jprofile, jlevel, jchannel
+integer :: jprofile, jlevel, jchannel
 type(fckit_mpi_comm)  :: f_comm
 
 integer :: n_Profiles, n_Layers, n_Channels
@@ -214,11 +215,9 @@ type(CRTM_ChannelInfo_type) :: chinfo_gmi(2)  ! gmi channels 1-9 and 10-13
 integer :: n_lo                               ! number of gmi channels 1-9
 
 ! Used to parse hofxdiags
-character(len=MAXVARLEN) :: varstr
 character(len=MAXVARLEN), dimension(hofxdiags%nvar) :: &
                           ystr_diags, xstr_diags
-character(10), parameter :: jacobianstr = "_jacobian_"
-integer :: str_pos(4), ch_diags(hofxdiags%nvar)
+integer :: ch_diags(hofxdiags%nvar)
 logical :: jacobian_needed
 
 ! set a local boolean variable for whether we are in vis or ultraviolet channels
@@ -240,40 +239,9 @@ integer, allocatable :: zeroCloudInCRTM0(:)
 
  call ufo_crtm_init_radiance(self%conf, chinfo, self%channels, PROGRAM_NAME, f_comm)
 
- !! Parse hofxdiags%variables into independent/dependent variables and channel
- !! assumed formats:
- !!   jacobian var -->     <ystr>_jacobian_<xstr>_<chstr>
- !!   non-jacobian var --> <ystr>_<chstr>
-
- jacobian_needed = .false.
- ch_diags = -9999
- do jvar = 1, hofxdiags%nvar
-   varstr = hofxdiags%variables(jvar)
-   str_pos(4) = len_trim(varstr)
-   if (str_pos(4) < 1) cycle
-   str_pos(3) = index(varstr,"_",back=.true.)        !final "_" before channel
-   read(varstr(str_pos(3)+1:str_pos(4)),*, err=999) ch_diags(jvar)
-999 str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
-   if (str_pos(1) == 0) then
-     err_msg = "ufo_radiancecrtm_simobs: _jacobian_ must be preceded by dependent " // &
-               "variable in config: " // hofxdiags%variables(jvar)
-     call abor1_ftn(err_msg)
-   else if (str_pos(1) > 0) then
-     !Diagnostic is a Jacobian member (dy/dx)
-     ystr_diags(jvar) = varstr(1:str_pos(1))
-     str_pos(2) = str_pos(1) + len(jacobianstr) + 1 !begin xstr_diags
-     jacobian_needed = .true.
-     str_pos(4) = str_pos(3) - str_pos(2)
-     xstr_diags(jvar)(1:str_pos(4)) = varstr(str_pos(2):str_pos(3)-1)
-     xstr_diags(jvar)(str_pos(4)+1:) = ""
-   else !null
-     !Diagnostic is a dependent variable (y)
-     xstr_diags(jvar) = ""
-     ystr_diags(jvar)(1:str_pos(3)-1) = varstr(1:str_pos(3)-1)
-     ystr_diags(jvar)(str_pos(3):) = ""
-     if (ch_diags(jvar) < 0) ystr_diags(jvar) = varstr
-   end if
- end do
+ ! Split hofxdiags%variables into dependent/independent variable and channel
+ call ufo_parse_hofxdiags(hofxdiags, ystr_diags, xstr_diags, ch_diags, jacobian_needed, &
+                          "ufo_radiancecrtm_simobs")
 
  ! Loop over sensors (one per operator in practice)
  ! ----------------------------------------------------------------------------

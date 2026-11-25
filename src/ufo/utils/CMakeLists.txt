@@ -77,6 +77,7 @@ set ( utils_files
       vert_interp.F90
       thermo_utils.F90
       ufo_ghg_utils_mod.F90
+      ufo_hofxdiags_parse_mod.F90
 )
 
 if( ${gsw_FOUND} )

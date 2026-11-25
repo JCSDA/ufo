@@ -45,6 +45,7 @@ module ufo_radiancerttov_utils_mod
        uwiremis_atlas_id, camel_atlas_id, camel_clim_atlas_id, telsem2_atlas_id, cnrm_mw_atlas_id
 
   use ufo_geovals_mod, only : ufo_geovals, ufo_geoval, ufo_geovals_get_var
+  use ufo_hofxdiags_parse_mod, only : ufo_parse_hofxdiags
   use ufo_utils_mod, only : Ops_SatRad_Qsplit, Ops_Qsat, Ops_QsatWat, getindex, upper2lower
   use ufo_constants_mod, only : zero, half, one, deg2rad, min_q, min_clw, min_ciw, m_to_km, &
                                 g_to_kg, pa_to_hpa, RTTOV_ToA
@@ -2542,59 +2543,25 @@ contains
     deallocate(od_level, wfunc, tstore, bt_overcast)
   end subroutine ufo_rttov_populate_hofxdiags
 
+  !> Split hofxdiags%variables into ystr_diags, xstr_diags and ch_diags
+  !> (see ufo_parse_hofxdiags)
   subroutine ufo_rttov_parse_hofxdiags(self, hofxdiags, jacobian_needed)
     implicit none
 
     class(rttov_hofxdiags), intent(inout)  :: self
     type(ufo_geovals),      intent(in)     :: hofxdiags    !non-h(x) diagnostics
     logical,                intent(out)    :: jacobian_needed
-    character(10), parameter  :: jacobianstr = "_jacobian_"
-
-    integer                   :: str_pos(4)
-    character(len=MAXVARLEN)  :: varstr
-    integer                   :: jvar
-    character(len=max_string) :: err_msg
 
     jacobian_needed = .false.
 
-     if(hofxdiags%nvar > 0) then
-       if (.not. allocated(self % ystr_diags)) allocate (self % ystr_diags(hofxdiags%nvar))
-       if (.not. allocated(self % xstr_diags)) allocate (self % xstr_diags(hofxdiags%nvar))
-       if (.not. allocated(self % ch_diags)) allocate (self % ch_diags(hofxdiags%nvar))
+    if (hofxdiags%nvar > 0) then
+      if (.not. allocated(self % ystr_diags)) allocate (self % ystr_diags(hofxdiags%nvar))
+      if (.not. allocated(self % xstr_diags)) allocate (self % xstr_diags(hofxdiags%nvar))
+      if (.not. allocated(self % ch_diags)) allocate (self % ch_diags(hofxdiags%nvar))
 
-       self % ch_diags = -9999
-
-       do jvar = 1, hofxdiags%nvar
-         varstr = hofxdiags%variables(jvar)
-
-         str_pos(4) = len_trim(varstr)
-         if (str_pos(4) < 1) cycle
-         str_pos(3) = index(varstr,"_",back=.true.)        !final "_" before channel
-         read(varstr(str_pos(3)+1:str_pos(4)),*, err=999) self % ch_diags(jvar)
-999      str_pos(1) = index(varstr,jacobianstr) - 1        !position before jacobianstr
-         if (str_pos(1) == 0) then
-           err_msg = "parse_hofxdiags: _jacobian_ must be preceded by dependent variable in config: " // &
-                     trim(hofxdiags%variables(jvar))
-           call abor1_ftn(err_msg)
-         else if (str_pos(1) > 0) then
-           !Diagnostic is a Jacobian member (dy/dx)
-           self % ystr_diags(jvar) = varstr(1:str_pos(1))
-           str_pos(2) = str_pos(1) + len(jacobianstr) + 1 !begin self % xstr_diags
-           jacobian_needed = .true.
-           str_pos(4) = str_pos(3) - str_pos(2)
-           self % xstr_diags(jvar)(1:str_pos(4)) = varstr(str_pos(2):str_pos(3)-1)
-           self % xstr_diags(jvar)(str_pos(4)+1:) = ""
-         else !null
-           !Diagnostic is a dependent variable (y)
-           self % xstr_diags(jvar) = ""
-           if (self % ch_diags(jvar) < 0) then
-             self % ystr_diags(jvar) = varstr
-           else
-             self % ystr_diags(jvar)(:) = varstr(1:str_pos(3)-1)
-           end if
-         end if
-       end do
-     end if
+      call ufo_parse_hofxdiags(hofxdiags, self % ystr_diags, self % xstr_diags, self % ch_diags, &
+                               jacobian_needed, "ufo_rttov_parse_hofxdiags")
+    end if
 
   end subroutine ufo_rttov_parse_hofxdiags
 
