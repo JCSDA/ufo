@@ -1,0 +1,61 @@
+# TimeOperLinInterp must interpolate linearly in time between the model states bracketing each
+# observation. GeoVaLs are filled as oops::GetValues fills them by default (nearest state in time),
+# from states every windowSub whose values change in time, so H(x) differs from either state.
+time window:
+  begin: 2018-04-14T21:00:00Z
+  end: 2018-04-15T03:00:00Z
+  bound to include: end
+
+obs space:
+  name: Radiosonde
+  simulated variables: [airTemperature]
+  obsdatain:
+    engine:
+      type: GenList
+      lats: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+      lons: [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]
+      # 21:45, 23:00, 00:00, 01:30, 02:15, 03:00
+      dateTimes: [-8100, -3600, 0, 5400, 8100, 10800]
+      epoch: "seconds since 2018-04-15T00:00:00Z"
+      obs errors: [1.0]
+
+obs operator:
+  name: TimeOperLinInterp
+  windowSub: PT3H
+  obs operator:
+    name: Identity
+    observation alias file: ../resources/namemap/test_name_map.yaml
+
+# air_temperature of state k at obs i is 280 + 10 i + 4 k
+state times: ["2018-04-14T21:00:00Z", "2018-04-15T00:00:00Z", "2018-04-15T03:00:00Z"]
+state values:
+- values: [280.0, 290.0, 300.0, 310.0, 320.0, 330.0]
+- values: [284.0, 294.0, 304.0, 314.0, 324.0, 334.0]
+- values: [288.0, 298.0, 308.0, 318.0, 328.0, 338.0]
+
+# Two paths per obs, at the states before and after it. 21:00 is outside the window
+# (bound to include: end), so that path is moved one second inside.
+reference path times:
+- "2018-04-14T21:00:01Z"
+- "2018-04-15T00:00:00Z"
+- "2018-04-14T21:00:01Z"
+- "2018-04-15T00:00:00Z"
+- "2018-04-15T00:00:00Z"
+- "2018-04-15T00:00:00Z"
+- "2018-04-15T00:00:00Z"
+- "2018-04-15T03:00:00Z"
+- "2018-04-15T00:00:00Z"
+- "2018-04-15T03:00:00Z"
+- "2018-04-15T03:00:00Z"
+- "2018-04-15T03:00:00Z"
+
+# w = weight of the earlier state = 1 - (t - t_before) / windowSub
+# obs 0 (21:45, w=3/4): 0.75*280 + 0.25*284 = 281
+# obs 1 (23:00, w=1/3): (290 + 2*294) / 3   = 292.6666667
+# obs 2 (00:00, w=1):   304
+# obs 3 (01:30, w=1/2): 0.5*314 + 0.5*318   = 316
+# obs 4 (02:15, w=1/4): 0.25*324 + 0.75*328 = 327
+# obs 5 (03:00, w=1):   338
+# Nearest-state values (what a no-op returns): 280, 294, 304, 314, 328, 338
+reference hofx: [281.0, 292.6666667, 304.0, 316.0, 327.0, 338.0]
+tolerance: 1.0e-5
