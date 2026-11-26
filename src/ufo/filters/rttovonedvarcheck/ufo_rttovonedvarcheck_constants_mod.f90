@@ -16,7 +16,7 @@ private
 !-----------------------------------------------------------------------------
 ! 1. miscellaneous definitions
 !-----------------------------------------------------------------------------
-integer, parameter, public :: max_string = 200 !< maximum string length
+integer, parameter, public :: max_string = 400 !< maximum string length
 
 ! RTTOV values for surface land, sea and seaice
 integer, parameter, public :: &
